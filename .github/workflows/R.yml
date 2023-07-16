@@ -1,0 +1,237 @@
+name: R
+
+on:
+  push:
+    branches-ignore: [gh-pages]
+    paths:
+      - ".github/workflows/R.yml"
+      - "r/**"
+      - 'c/Make*'
+      - 'c/*.mk'
+      - 'c/*.[ch]p?p?'
+  pull_request:
+    branches-ignore:  [gh-pages]
+    paths:
+      - ".github/workflows/R.yml"
+      - "r/**"
+      - 'c/Make*'
+      - 'c/*.mk'
+      - 'c/*.[ch]p?p?'
+  # Manual run
+  workflow_dispatch:
+
+env:
+  R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+  _R_CHECK_FORCE_SUGGESTS_: false
+  _R_CHECK_CRAN_INCOMING_REMOTE_: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  R-CMD-check:
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ${{ matrix.os }}
+    name: Check ${{ matrix.os }} (${{ matrix.r }})
+    strategy:
+      # When set to true, GitHub cancels all in-progress jobs if any matrix job fails.
+      fail-fast: true
+      matrix:
+        os: [ windows-latest, macOS-latest, ubuntu-22.04 ]
+        r: [ release ]
+        include:
+          - { os: ubuntu-20.04, r: '3.6' }
+          # Use 3.6 to trigger usage of RTools35
+          - { os: windows-latest, r: '3.6' }
+          # Use 4.1 to check with rtools40's older compiler
+          - { os: windows-latest, r: '4.1' }
+          # Use latest ubuntu to make it easier to install dependencies
+          - { os: ubuntu-latest, r: 'devel', http-user-agent: 'release' }
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Disable autocrlf
+        if: runner.os == 'Windows'
+        run: git config --global core.autocrlf false
+
+      - uses: actions/checkout@v4
+
+      - name: Fix permissions
+        run: chmod u+x r/cleanup
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.r }}
+          http-user-agent: ${{ matrix.http-user-agent }}
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::remotes, any::rcmdcheck, any::spelling
+          needs: check
+          working-directory: r
+
+      - name: Check (CRAN)
+        env:
+          NOT_CRAN: false
+        run: |
+          remotes::install_github("multi-objective/mooplot/r", upgrade=FALSE)
+          options(crayon.enabled = TRUE)
+          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check", timeout = 360)
+        shell: Rscript {0}
+        working-directory: r
+
+      - name: Check (NOT CRAN)
+        if: success()
+        env:
+          NOT_CRAN: true
+        run: |
+          options(crayon.enabled = TRUE)
+          rcmdcheck::rcmdcheck(args = c("--no-manual", "--run-donttest", "--run-dontrun", "--timings"), error_on = "warning", check_dir = "check", timeout = 360)
+        shell: Rscript {0}
+        working-directory: r
+
+      - name: Show testthat output
+        if: failure()
+        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
+        shell: bash
+        working-directory: r
+
+      - name: Install package
+        run: |
+          remotes::install_local(".", force = TRUE, upgrade = "never", build_manual = TRUE, build_vignettes = TRUE)
+        shell: Rscript {0}
+        working-directory: r
+
+      - name: Upload check results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-${{ runner.os }}-r${{ matrix.r }}
+          path: r/check
+
+  rchk:
+    if: false # Skip until https://github.com/r-lib/actions/issues/783
+    needs: R-CMD-check
+    runs-on: ubuntu-latest
+    container:
+      image: rhub/ubuntu-rchk
+      options: --user=root
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/run-rchk@v2
+        with:
+          setup-only: true
+
+      - run: ls -R /home/docker/R-svn/bin
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck, local::., any::eaf
+          working-directory: r
+
+      - uses: r-lib/actions/run-rchk@v2
+        with:
+          run-only: true
+
+  coverage:
+    needs: R-CMD-check
+    name: Coverage ${{ matrix.os }} (${{ matrix.r }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        r: [release]
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+          r-version: ${{ matrix.r }}
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::covr any::xml2
+          needs: coverage
+          working-directory: r
+
+      - name: Test coverage
+        env:
+          NOT_CRAN: false
+        run: |
+          cov <- covr::package_coverage(type="all", quiet=FALSE, commentDonttest = FALSE, commentDontrun = FALSE, flags="R")
+          covr::to_cobertura(cov, filename = "coverage.xml")
+        shell: Rscript {0}
+        working-directory: r
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
+          verbose: true
+          flags: R
+          token: ${{secrets.CODECOV_TOKEN}}
+          directory: r
+
+  pkgdown:
+    needs: R-CMD-check
+    if: contains('
+        refs/heads/master
+        refs/heads/main
+      ', github.ref) && github.event_name == 'push'
+    name: pkgdown ${{ matrix.os }} (${{ matrix.r }})
+    permissions:
+      contents: write # github-pages-deploy-action
+    concurrency: web # Recommended if you intend to make multiple deployments in quick succession.
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        r: [release]
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.r }}
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::pkgdown, local::.
+          needs: website
+          working-directory: r
+
+      - name: Build website
+        run: |
+          pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE, run_dont_run = TRUE)
+        shell: Rscript {0}
+        working-directory: r
+
+      - name: Deploy 🚀
+        if: success() && runner.os == 'Linux' && github.event_name == 'push'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: r/docs # The folder the action should deploy.
+          target-folder: r
+          single-commit: true
+          clean: true
