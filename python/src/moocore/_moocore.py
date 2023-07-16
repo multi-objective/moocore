@@ -1,0 +1,1332 @@
+from __future__ import annotations
+
+import os
+from io import StringIO
+import numpy as np
+from numpy.typing import ArrayLike  # For type hints
+
+import lzma
+import shutil
+import tempfile
+
+from importlib.resources import files
+
+from ._utils import (
+    unique_nosort,
+    np2d_to_double_array,
+    np1d_to_double_array,
+    np1d_to_int_array,
+    atleast_1d_of_length_n,
+)
+
+## The CFFI library is used to create C bindings.
+from ._libmoocore import lib, ffi
+
+
+class ReadDatasetsError(Exception):
+    """Custom exception class for an error returned by the :func:`read_datasets()` function.
+
+    Parameters
+    ----------
+    error_code : int
+        Error code returned by c:func:`read_datasets()` C function, which maps to a string.
+
+    """
+
+    _error_strings = [
+        "NO_ERROR",
+        "READ_INPUT_FILE_EMPTY",
+        "READ_INPUT_WRONG_INITIAL_DIM",
+        "ERROR_FOPEN",
+        "ERROR_CONVERSION",
+        "ERROR_COLUMNS",
+    ]
+
+    def __init__(self, error_code):
+        self.error = error_code
+        self.message = self._error_strings[abs(error_code)]
+        super().__init__(self.message)
+
+
+def read_datasets(filename):
+    """Read an input dataset file, parsing the file and returning a numpy array.
+
+    Parameters
+    ----------
+    filename : file, str, pathlib.Path
+        Filename of the dataset file. Each row of the table appears as one line of the file. Datasets are separated by an empty line.
+        If it does not contain an absolute path, the file name is relative to the current working directory.
+        If the filename has extension `'.xz'`, it is decompressed to a temporary file before reading it.
+
+    Returns
+    -------
+    numpy.ndarray
+        An array containing a representation of the data in the file.
+        The first :math:`n-1` columns contain the numerical data for each of the objectives.
+        The last column contains an identifier for which set the data is relevant to.
+
+    Examples
+    --------
+    >>> filename = moocore.get_dataset_path("input1.dat")
+    >>> moocore.read_datasets(filename)  # doctest: +ELLIPSIS
+    array([[ 8.07559653,  2.40702554,  1.        ],
+           [ 8.66094446,  3.64050144,  1.        ],
+           [ 0.20816431,  4.62275469,  1.        ],
+           ...
+           [ 4.92599726,  2.70492519, 10.        ],
+           [ 1.22234394,  5.68950311, 10.        ],
+           [ 7.99466959,  2.81122537, 10.        ],
+           [ 2.12700289,  2.43114174, 10.        ]])
+
+    The numpy array represents this data:
+
+    +-------------+-------------+------------+
+    | Objective 1 | Objective 2 | Set Number |
+    +-------------+-------------+------------+
+    | 8.07559653  | 2.40702554  | 1.0        |
+    +-------------+-------------+------------+
+    | 8.66094446  | 3.64050144  | 1.0        |
+    +-------------+-------------+------------+
+    | etc.        | etc.        | etc.       |
+    +-------------+-------------+------------+
+
+    It is also possible to read data from a string:
+
+    >>> from io import StringIO
+    >>> fh = StringIO("0.5 0.5\\n\\n1 0\\n0 1\\n\\n0.5 0.5")
+    >>> moocore.read_datasets(fh)
+    array([[0.5, 0.5, 1. ],
+           [1. , 0. , 2. ],
+           [0. , 1. , 2. ],
+           [0.5, 0.5, 3. ]])
+
+    """  # noqa: D301
+    if isinstance(filename, os.PathLike):
+        filename = os.fspath(filename)
+    elif isinstance(filename, StringIO):
+        with tempfile.NamedTemporaryFile(mode="wt", delete=False) as fdst:
+            shutil.copyfileobj(filename, fdst)
+        # FIXME: Avoid recursion
+        return read_datasets(fdst.name)
+    else:
+        filename = os.path.expanduser(filename)
+
+    if not os.path.isfile(filename):
+        raise FileNotFoundError(f"file '{filename}' not found")
+
+    if filename.endswith(".xz"):
+        with lzma.open(filename, "rb") as fsrc:
+            with tempfile.NamedTemporaryFile(delete=False) as fdst:
+                shutil.copyfileobj(fsrc, fdst)
+        filename = fdst.name
+    else:
+        fdst = None
+
+    # Encode filename to a binary string
+    filename = filename.encode("utf-8")
+    # Create return pointers for function
+    data_p = ffi.new("double **")
+    ncols_p = ffi.new("int *")
+    datasize_p = ffi.new("int *")
+    err_code = lib.read_datasets(filename, data_p, ncols_p, datasize_p)
+    if fdst:
+        os.remove(fdst.name)
+    if err_code != 0:
+        raise ReadDatasetsError(err_code)
+
+    # Create buffer with the correct array size in bytes
+    data_buf = ffi.buffer(data_p[0], datasize_p[0])
+    # Convert 1d numpy array to 2d array with (n obj... , sets) columns
+    return np.frombuffer(data_buf).reshape((-1, ncols_p[0]))
+
+
+def _parse_maximise(maximise, nobj):
+    # Converts maximise array or single bool to ndarray format
+    return atleast_1d_of_length_n(maximise, nobj).astype(bool)
+
+
+def _unary_refset_common(data, ref, maximise):
+    # Convert to numpy.array in case the user provides a list.  We use
+    # np.asfarray to convert it to floating-point, otherwise if a user inputs
+    # something like ref = np.array([10, 10]) then numpy would interpret it as
+    # an int array.
+    data = np.asfarray(data)
+    ref = np.atleast_2d(np.asfarray(ref))
+    nobj = data.shape[1]
+    if nobj != ref.shape[1]:
+        raise ValueError(
+            f"data and ref need to have the same number of columns ({nobj} != {ref.shape[1]})"
+        )
+    maximise = _parse_maximise(maximise, nobj)
+    data_p, npoints, nobj = np2d_to_double_array(data)
+    ref_p, ref_size = np1d_to_double_array(ref)
+    maximise_p = ffi.from_buffer("bool []", maximise)
+    return data_p, nobj, npoints, ref_p, ref_size, maximise_p
+
+
+def igd(data, ref, maximise=False):
+    """Inverted Generational Distance (IGD and IGD+) and Averaged Hausdorff Distance.
+
+    Functions to compute the inverted generational distance (IGD and IGD+) and the
+    averaged Hausdorff distance between nondominated sets of points.
+
+    TODO: Copy documentation from: https://mlopez-ibanez.github.io/eaf/reference/igd.html
+
+    Parameters
+    ----------
+    data : numpy.ndarray
+        Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
+        If the array is created from the :func:`read_datasets` function, remove the last (set) column.
+
+    ref : numpy.ndarray or list
+        Reference point set as a numpy array or list. Must have same number of columns as the dataset.
+
+    maximise : bool or or list of bool
+        Whether the objectives must be maximised instead of minimised.
+        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
+        Also accepts a 1d numpy array with value 0/1 for each objective.
+
+    p : float, default 1
+        Hausdorff distance parameter. Must be larger than 0.
+
+    Returns
+    -------
+    float
+        A single numerical value
+
+    Examples
+    --------
+    >>> dat = np.array([[3.5, 5.5], [3.6, 4.1], [4.1, 3.2], [5.5, 1.5]])
+    >>> ref = np.array([[1, 6], [2, 5], [3, 4], [4, 3], [5, 2], [6, 1]])
+    >>> moocore.igd(dat, ref=ref)
+    1.0627908666722465
+
+    >>> moocore.igd_plus(dat, ref=ref)
+    0.9855036468106652
+
+    >>> moocore.avg_hausdorff_dist(dat, ref)
+    1.0627908666722465
+
+    """
+    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
+        data, ref, maximise
+    )
+    return lib.IGD(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
+
+
+def igd_plus(data, ref, maximise=False):
+    """Calculate IGD+ indicator.
+
+    See :func:`igd`
+    """
+    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
+        data, ref, maximise
+    )
+    return lib.IGD_plus(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
+
+
+def avg_hausdorff_dist(data, ref, maximise=False, p=1):
+    """Calculate average Hausdorff distance.
+
+    See :func:`igd`
+    """
+    if p <= 0:
+        raise ValueError("'p' must be larger than zero")
+
+    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
+        data, ref, maximise
+    )
+    p = ffi.cast("unsigned int", p)
+    return lib.avg_Hausdorff_dist(
+        data_p, nobj, npoints, ref_p, ref_size, maximise_p, p
+    )
+
+
+def epsilon_additive(data, ref, maximise=False):
+    """Compute the epsilon metric, either additive or multiplicative.
+
+    `data` and `reference` must all be larger than 0 for `epsilon_mult`.
+
+    Parameters
+    ----------
+    data : numpy.ndarray
+        Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
+        If the array is created from the :func:`read_datasets` function, remove the last (set) column
+    ref : numpy.ndarray or list
+        Reference point set as a numpy array or list. Must have same number of columns as a single point in the \
+        dataset
+    maximise : bool or list of bool
+        Whether the objectives must be maximised instead of minimised. \
+        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
+        Also accepts a 1d numpy array with value 0/1 for each objective
+
+    Returns
+    -------
+    float
+        A single numerical value
+
+    Examples
+    --------
+    >>> dat = np.array([[3.5,5.5], [3.6,4.1], [4.1,3.2], [5.5,1.5]])
+    >>> ref = np.array([[1, 6], [2,5], [3,4], [4,3], [5,2], [6,1]])
+    >>> moocore.epsilon_additive(dat, ref = ref)
+    2.5
+
+    >>> moocore.epsilon_mult(dat, ref = ref)
+    3.5
+
+    """
+    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
+        data, ref, maximise
+    )
+    return lib.epsilon_additive(
+        data_p, nobj, npoints, ref_p, ref_size, maximise_p
+    )
+
+
+def epsilon_mult(data, ref, maximise=False):
+    """Multiplicative epsilon metric.
+
+    See :func:`epsilon_additive`
+
+    """
+    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
+        data, ref, maximise
+    )
+    return lib.epsilon_mult(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
+
+
+# FIXME: TODO maximise option
+def hypervolume(data: ArrayLike, ref) -> float:
+    r"""Hypervolume indicator.
+
+    Compute the hypervolume metric with respect to a given reference point
+    assuming minimization of all objectives. For 2D and 3D, the algorithm used
+    :footcite:p:`FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec` has :math:`O(n
+    \log n)` complexity. For 4D or higher, the algorithm
+    :footcite:p:`FonPaqLop06:hypervolume` has :math:`O(n^{d-2} \log n)` time
+    and linear space complexity in the worst-case, but experimental results
+    show that the pruning techniques used may reduce the time complexity even
+    further.
+
+    Parameters
+    ----------
+    data : ArrayLike
+        Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
+        If the array is created from the :func:`read_datasets()` function, remove the last column.
+    ref : ArrayLike or list
+        Reference point set as a numpy array or list. Must be same length as a single point in the dataset.
+
+    Returns
+    -------
+    float
+         A single numerical value, the hypervolume indicator.
+
+    References
+    ----------
+    .. footbibliography::
+
+    Examples
+    --------
+    >>> dat = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
+    >>> moocore.hypervolume(dat, ref=[10, 10])
+    38.0
+
+    Select Set 1 of dataset, and remove set number column
+
+    >>> filename = moocore.get_dataset_path("input1.dat")
+    >>> dat = moocore.read_datasets(filename)
+    >>> set1 = dat[dat[:, 2] == 1, :2]
+
+    This set contains dominated points so remove them
+
+    >>> set1 = moocore.filter_dominated(set1)
+    >>> moocore.hypervolume(set1, ref=[10, 10])
+    90.46272764755885
+
+    """
+    # Convert to numpy.array in case the user provides a list.  We use
+    # np.asfarray to convert it to floating-point, otherwise if a user inputs
+    # something like ref = np.array([10, 10]) then numpy would interpret it as
+    # an int array.
+    data = np.asfarray(data)
+    nobj = data.shape[1]
+    ref = atleast_1d_of_length_n(np.asfarray(ref), nobj)
+    if nobj != ref.shape[0]:
+        raise ValueError(
+            f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
+        )
+
+    data_p, npoints, nobj = np2d_to_double_array(data)
+    ref_buf = ffi.from_buffer("double []", ref)
+    hv = lib.fpli_hv(data_p, nobj, npoints, ref_buf)
+    return hv
+
+
+def is_nondominated(data, maximise=False, keep_weakly: bool = False):
+    """Identify dominated points according to Pareto optimality.
+
+    Parameters
+    ----------
+    data : numpy array
+        Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
+        If the array is created from the :func:`read_datasets()` function, remove the last column.
+    maximise : single bool, or list of booleans
+        Whether the objectives must be maximised instead of minimised.
+        Either a single boolean value that applies to all objectives or a list of boolean values, with one value per objective.
+        Also accepts a 1D numpy array with value 0/1 for each objective.
+    keep_weakly: bool
+        If ``False``, return ``False`` for any duplicates of nondominated points.
+
+    Returns
+    -------
+    bool array
+        :func:`is_nondominated` returns a boolean list of the same length as the number of rows of data,\
+        where ``True`` means that the point is not dominated by any other point.
+
+        :func:`filter_dominated` returns a numpy array with only mutually nondominated points.
+
+    Examples
+    --------
+    >>> S = np.array([[1,1], [0,1], [1,0], [1,0]])
+    >>> moocore.is_nondominated(S)
+    array([False,  True, False,  True])
+
+    >>> moocore.is_nondominated(S, maximise = True)
+    array([ True, False, False, False])
+
+    >>> moocore.filter_dominated(S)
+    array([[0, 1],
+           [1, 0]])
+
+    >>> moocore.filter_dominated(S, keep_weakly = True)
+    array([[0, 1],
+           [1, 0],
+           [1, 0]])
+
+    """
+    data = np.asfarray(data)
+    nrows, nobj = data.shape
+    maximise = _parse_maximise(maximise, nobj)
+    data_p, npoints, nobj = np2d_to_double_array(data)
+    maximise_p = ffi.from_buffer("bool []", maximise)
+    keep_weakly = ffi.cast("bool", bool(keep_weakly))
+    nondom = lib.is_nondominated(
+        data_p, nobj, npoints, maximise_p, keep_weakly
+    )
+    nondom = ffi.buffer(nondom, nrows)
+    return np.frombuffer(nondom, dtype=bool)
+
+
+def filter_dominated(data, maximise=False, keep_weakly=False):
+    """Remove dominated points according to Pareto optimality.
+
+    See: :func:`is_nondominated` for details
+    """
+    return data[is_nondominated(data, maximise, keep_weakly), :]
+
+
+def filter_dominated_within_sets(data, maximise=False, keep_weakly=False):
+    """Given a dataset with multiple sets (last column gives the set index), filter dominated points within each set.
+
+    Executes the :func:`filter_dominated` function within each set in a dataset \
+    and returns back a dataset. This is roughly equivalent to partitioning 'data' according to the last column,
+    filtering dominated solutions within each partition, and joining back the result.
+
+    Parameters
+    ----------
+    data : numpy array
+        Numpy array of numerical values and set numbers, containing multiple sets. For example the output \
+         of the :func:`read_datasets` function
+    maximise : single bool, or list of booleans
+        Whether the objectives must be maximised instead of minimised. \
+        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
+        Also accepts a 1D numpy array with values 0 or 1 for each objective
+    keep_weakly: bool
+        If False, return False for any duplicates of nondominated points.
+
+    Returns
+    -------
+    numpy array
+        A numpy array where each set only contains nondominated points with respect to the set  (last column is the set index).
+        Points from one set can still dominated points from another set.
+
+    Examples
+    --------
+    >>> filename = moocore.get_dataset_path("input1.dat")
+    >>> x = moocore.read_datasets(filename)
+    >>> pf_per_set = moocore.filter_dominated_within_sets(x)
+    >>> len(pf_per_set)
+    42
+    >>> pf = moocore.filter_dominated(x[:, :-1])
+    >>> len(pf)
+    6
+    >>> pf
+    array([[0.20816431, 4.62275469],
+           [0.22997367, 1.11772205],
+           [0.58799475, 0.73891181],
+           [1.54506255, 0.38303122],
+           [0.17470556, 8.89066343],
+           [8.57911868, 0.35169752]])
+
+    See Also
+    --------
+    With a single dataset, use :func:`filter_dominated`
+
+    """
+    data = np.asfarray(data)
+    ncols = data.shape[1]
+    if ncols < 3:
+        raise ValueError(
+            "'data' must have at least 3 columns (2 objectives + set column)"
+        )
+    uniq_sets, uniq_index = np.unique(data[:, -1], return_index=True)
+    # FIXME: Is there a more efficient way to do this that just creates views and not copies?
+    x_split = np.vsplit(data[:, :-1], uniq_index[1:])
+    is_nondom = np.concatenate(
+        [
+            is_nondominated(g, maximise=maximise, keep_weakly=keep_weakly)
+            for g in x_split
+        ],
+        dtype=bool,
+        casting="no",
+    )
+    return data[is_nondom, :]
+
+
+def pareto_rank(data, maximise=False):
+    r"""Ranks points according to Pareto-optimality, which is also called nondominated sorting.
+
+    Ranks points according to Pareto-optimality, which is also called nondominated sorting :footcite:p:`Deb02nsga2`.
+
+    `pareto_rank` is meant to be used like :func:`numpy.argsort`, but it assigns
+    indexes according to Pareto dominance. Duplicated points are kept on the
+    same front. With 2 columns, the code uses the :math:`O(n \log n)` algorithm
+    by :footcite:t:`Jen03`.
+
+    Parameters
+    ----------
+    data : numpy array
+        Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
+        If the array is created from the :func:`read_datasets()` function, remove the last column.
+    maximise : single bool, or list of booleans
+        Whether the objectives must be maximised instead of minimised.
+        Either a single boolean value that applies to all objectives or a list of boolean values, with one value per objective.
+        Also accepts a 1d numpy array with value 0/1 for each objective.
+
+    Returns
+    -------
+    numpy array
+        An integer vector of the same length as the number of rows of `data`, where each value gives the Pareto rank of each point (lower is better).
+
+    References
+    ----------
+    .. footbibliography::
+
+    Examples
+    --------
+    >>> filename = moocore.get_dataset_path("input1.dat")
+    >>> x = moocore.read_datasets(filename)[:, :2]
+    >>> ranks = moocore.pareto_rank(x)
+    >>> ranks
+    array([ 5,  9,  1, 12,  1,  4,  8,  2,  4,  1,  9,  5,  6,  5, 12,  5,  5,
+            6,  8,  4,  9, 13,  9, 10,  6, 11,  7,  3,  8,  4, 11,  8,  3,  6,
+            3,  8,  2,  3, 10,  1, 12,  7,  8, 11, 14,  4,  7,  4,  1, 10, 10,
+            1,  3, 14,  2,  7,  8,  7,  7, 11,  5, 14,  7,  9, 13, 14,  5,  9,
+            6,  2, 13, 11,  4,  9, 10,  7,  8,  7,  7, 10,  6,  3,  4,  5,  8,
+            4,  9,  4,  3, 11,  2,  3, 13,  2,  3, 10,  5,  3,  6,  3],
+          dtype=int32)
+
+
+    We can now sort the points according to their Pareto rank:
+
+    >>> x[ranks.argsort(), :]  # doctest: +ELLIPSIS
+    array([[0.20816431, 4.62275469],
+           [1.54506255, 0.38303122],
+           [0.22997367, 1.11772205],
+           [0.17470556, 8.89066343],
+           [0.58799475, 0.73891181],
+           [8.57911868, 0.35169752],
+           [0.2901393 , 8.32259412],
+           [6.78498493, 0.56380796],
+           ...
+           [9.73057875, 6.15847562],
+           [8.17231096, 9.76977853],
+           [9.69531949, 7.22212523],
+           [9.30608102, 7.69433246],
+           [8.75833731, 8.98886885]])
+
+
+    Or split the original set into a list of nondominated sets ordered by Pareto rank:
+
+    >>> paretos = [x.compress((g == ranks), axis=0) for g in np.unique(ranks)]
+    >>> len(paretos)
+    14
+
+    The first element is the set of points not dominated by anything else:
+
+    >>> np.array_equal(paretos[0], moocore.filter_dominated(x))
+    True
+
+    """
+    data = np.asfarray(data)
+    nrows, nobj = data.shape
+    maximise = _parse_maximise(maximise, nobj)
+    if maximise.any():
+        # FIXME: Do this in C.
+        data = data.copy()
+        data[:, maximise] = -data[:, maximise]
+    data_p, npoints, nobj = np2d_to_double_array(data)
+    ranks = lib.pareto_rank(data_p, nobj, npoints)
+    ranks = ffi.buffer(ranks, nrows * ffi.sizeof("int"))
+    ranks = np.frombuffer(ranks, dtype=np.intc())
+    assert len(ranks) == nrows
+    return ranks
+
+
+# def filter_dominated_sets(dataset, maximise=False, keep_weakly=False):
+#     """Filter dominated sets for multiple sets
+
+#     Executes the :func:`filter_dominated` function for every set in a dataset \
+#     and returns back a dataset, preserving set
+
+#     Examples
+#     --------
+#     >>> dataset = moocore.read_datasets("./doc/data/input1.dat")
+#     >>> subset = moocore.subset(dataset, range = [3,5])
+#     >>> moocore.filter_dominated_sets(subset)
+#     array([[2.60764118, 6.31309852, 3.        ],
+#            [3.22509709, 6.1522834 , 3.        ],
+#            [0.37731545, 9.02211752, 3.        ],
+#            [4.61023932, 2.29231998, 3.        ],
+#            [0.2901393 , 8.32259412, 4.        ],
+#            [1.54506255, 0.38303122, 4.        ],
+#            [4.43498452, 4.13150648, 5.        ],
+#            [9.78758589, 1.41238277, 5.        ],
+#            [7.85344142, 3.02219054, 5.        ],
+#            [0.9017068 , 7.49376946, 5.        ],
+#            [0.17470556, 8.89066343, 5.        ]])
+
+#     The above returns sets 3,4,5 with dominated points within each set removed.
+
+#     See Also
+#     --------
+#     This function for data without set numbers - :func:`filter_dominated`
+#     """
+#     # FIXME: it will be faster to stack filter_set, then do:
+#     # dataset[filter_set, :]
+#     # to filter in one go.
+#     new_sets = []
+#     for set in np.unique(dataset[:, -1]):
+#         set_data = dataset[dataset[:, -1] == set, :-1]
+#         filter_set = filter_dominated(set_data, maximise, keep_weakly)
+#         set_nums = np.full(filter_set.shape[0], set).reshape(-1, 1)
+#         new_set = np.hstack((filter_set, set_nums))
+#         new_sets.append(new_set)
+#     return np.vstack(new_sets)
+
+
+def normalise(
+    data: np.ndarray,
+    to_range=[0.0, 1.0],
+    lower=np.nan,
+    upper=np.nan,
+    maximise=False,
+):
+    """Normalise points per coordinate to a range, e.g., `to_range = [1,2]`, where the minimum value will correspond to 1 and the maximum to 2.
+
+    Parameters
+    ----------
+    data : numpy.ndarray
+        Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
+        See :func:`normalise_sets` to normalise data that includes set numbers (Multiple sets)
+
+    to_range : numpy array or list of 2 points
+        Normalise values to this range. If the objective is maximised, it is normalised to `(to_range[1], to_range[0])` instead.
+
+    upper, lower: list or np array
+        Bounds on the values. If :data:`numpy.nan`, the maximum and minimum values of each coordinate are used.
+
+    maximise : single bool, or list of booleans
+        Whether the objectives must be maximised instead of minimised. \
+        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
+        Also accepts a 1D numpy array with values 0 or 1 for each objective
+
+    Returns
+    -------
+    numpy array
+        Returns the data normalised as requested.
+
+    Examples
+    --------
+    >>> dat = np.array([[3.5,5.5], [3.6,4.1], [4.1,3.2], [5.5,1.5]])
+    >>> moocore.normalise(dat)
+    array([[0.   , 1.   ],
+           [0.05 , 0.65 ],
+           [0.3  , 0.425],
+           [1.   , 0.   ]])
+
+    >>> moocore.normalise(dat, to_range = [1,2], lower = [3.5, 3.5], upper = 5.5)
+    array([[1.  , 2.  ],
+           [1.05, 1.3 ],
+           [1.3 , 0.85],
+           [2.  , 0.  ]])
+
+    """
+    # Normalise modifies the data, so we need to create a copy.
+    data = np.asfarray(data).copy()
+    npoints, nobj = data.shape
+    if nobj == 1:
+        raise ValueError("'data' must have at least two columns")
+    to_range = np.asfarray(to_range)
+    if to_range.shape[0] != 2:
+        raise ValueError("'to_range' must have length 2")
+    lower = atleast_1d_of_length_n(np.asfarray(lower), nobj)
+    upper = atleast_1d_of_length_n(np.asfarray(upper), nobj)
+    if np.any(np.isnan(lower)):
+        lower = np.where(np.isnan(lower), data.min(axis=0), lower)
+    if np.any(np.isnan(upper)):
+        upper = np.where(np.isnan(upper), data.max(axis=0), upper)
+
+    maximise = _parse_maximise(maximise, data.shape[1])
+    data_p, npoints, nobj = np2d_to_double_array(data)
+    maximise_p = ffi.from_buffer("bool []", maximise)
+    lbound_p = ffi.from_buffer("double []", lower)
+    ubound_p = ffi.from_buffer("double []", upper)
+    lib.agree_normalise(
+        data_p,
+        nobj,
+        npoints,
+        maximise_p,
+        to_range[0],
+        to_range[1],
+        lbound_p,
+        ubound_p,
+    )
+    data_buf = ffi.buffer(
+        data_p, ffi.sizeof("double") * data.shape[0] * data.shape[1]
+    )
+    data = np.frombuffer(data_buf).reshape(data.shape)
+    return data
+
+
+# def normalise_sets(dataset, range=[0, 1], lower="na", upper="na", maximise=False):
+#     """Normalise dataset with multiple sets
+
+#     Executes the :func:`normalise` function for every set in a dataset (Performs normalise on every set seperately)
+
+#     Examples
+#     --------
+#     >>> dataset = moocore.read_datasets("./doc/data/input1.dat")
+#     >>> subset = moocore.subset(dataset, range = [4,5])
+#     >>> moocore.normalise_sets(subset)
+#     array([[1.        , 0.38191742, 4.        ],
+#            [0.70069111, 0.5114669 , 4.        ],
+#            [0.12957487, 0.29411141, 4.        ],
+#            [0.28059067, 0.53580626, 4.        ],
+#            [0.32210885, 0.21797067, 4.        ],
+#            [0.39161668, 0.92106178, 4.        ],
+#            [0.        , 1.        , 4.        ],
+#            [0.62293227, 0.11315216, 4.        ],
+#            [0.76936124, 0.58159784, 4.        ],
+#            [0.12957384, 0.        , 4.        ],
+#            [0.82581672, 0.66566917, 5.        ],
+#            [0.44318444, 0.35888982, 5.        ],
+#            [0.80036477, 0.23242446, 5.        ],
+#            [0.88550836, 0.51482968, 5.        ],
+#            [0.89293026, 1.        , 5.        ],
+#            [1.        , 0.        , 5.        ],
+#            [0.79879657, 0.21247419, 5.        ],
+#            [0.07562783, 0.80266586, 5.        ],
+#            [0.        , 0.98703813, 5.        ],
+#            [0.6229605 , 0.8613516 , 5.        ]])
+
+#     See Also
+#     --------
+#     This function for data without set numbers - :func:`normalise`
+#     """
+#     for set in np.unique(dataset[:, -1]):
+#         setdata = dataset[dataset[:, -1] == set, :-1]
+#         dataset[dataset[:, -1] == set, :-1] = normalise(
+#             setdata, to_range=range, lower=np.nan, upper=np.nan, maximise=False
+#         )
+#     return dataset
+
+
+def eaf(data, percentiles=[]):
+    """Empirical attainment function (EAF) calculation.
+
+    Calculate EAF in 2D or 3D from the input dataset.
+
+    Parameters
+    ----------
+    data : numpy array
+        Numpy array of numerical values and set numbers, containing multiple sets. For example the output \
+         of the :func:`read_datasets` function
+    percentiles : list
+        A list of percentiles to calculate. If empty, all possible percentiles are calculated. Note the maximum (FIXME??)
+
+    Returns
+    -------
+    numpy array
+        Returns a numpy array containing the EAF data points, with the same number of columns as the input argument, \
+        but a different number of rows. The last column represents the EAF percentile for that data point
+
+    Examples
+    --------
+    >>> filename = moocore.get_dataset_path("input1.dat")
+    >>> x = moocore.read_datasets(filename)
+    >>> moocore.eaf(x)                                         # doctest: +ELLIPSIS
+    array([[  0.17470556,   8.89066343,  10.        ],
+           [  0.20816431,   4.62275469,  10.        ],
+           [  0.22997367,   1.11772205,  10.        ],
+           [  0.58799475,   0.73891181,  10.        ],
+           [  1.54506255,   0.38303122,  10.        ],
+           [  8.57911868,   0.35169752,  10.        ],
+           [  0.20816431,   8.89066343,  20.        ],
+           [  0.2901393 ,   8.32259412,  20.        ],
+           ...
+           [  9.78758589,   2.8124162 ,  90.        ],
+           [  1.13096306,   9.72645436, 100.        ],
+           [  2.71891214,   8.84691923, 100.        ],
+           [  3.34035397,   7.49376946, 100.        ],
+           [  4.43498452,   6.94327481, 100.        ],
+           [  4.96525837,   6.20957074, 100.        ],
+           [  7.92511295,   3.92669598, 100.        ]])
+
+    """
+    data = np.asfarray(data)
+    ncols = data.shape[1]
+    if ncols < 3:
+        raise ValueError(
+            "'data' must have at least 3 columns (2 objectives + set column)"
+        )
+    if ncols > 4:
+        raise NotImplementedError(
+            "Only 2D or 3D datasets are currently supported for computing the EAF"
+        )
+
+    _, cumsizes = np.unique(data[:, -1], return_counts=True)
+    nsets = len(cumsizes)
+    cumsizes = np.cumsum(cumsizes)
+    cumsizes_p, ncumsizes = np1d_to_int_array(cumsizes)
+    percentiles = np.atleast_1d(percentiles)
+    if len(percentiles) == 0:
+        percentiles = np.arange(1.0, nsets + 1) * (100.0 / nsets)
+    else:
+        percentiles = np.unique(np.asfarray(percentiles))
+    percentile_p, npercentiles = np1d_to_double_array(percentiles)
+
+    # Get C pointers + matrix size for calling CFFI generated extension module
+    data_p, npoints, nobj = np2d_to_double_array(data[:, :-1])
+    eaf_npoints = ffi.new("int *")
+    eaf_data_p = lib.eaf_compute_matrix(
+        eaf_npoints,
+        data_p,
+        nobj,
+        cumsizes_p,
+        ncumsizes,
+        percentile_p,
+        npercentiles,
+    )
+    eaf_npoints = eaf_npoints[0]
+    eaf_buf = ffi.buffer(
+        eaf_data_p, ffi.sizeof("double") * eaf_npoints * ncols
+    )
+    return np.frombuffer(eaf_buf).reshape((eaf_npoints, -1))
+
+
+def vorobT(data, reference):
+    """Compute Vorob'ev threshold and expectation.
+
+    Parameters
+    ----------
+    data : numpy array
+        Numpy array of numerical values and set numbers, containing multiple sets. For example the output \
+         of the :func:`read_datasets` function
+    reference : numpy array or list
+        Reference point set as a numpy array or list. Must be same length as a single point in the \
+        dataset
+
+    Returns
+    -------
+    dict
+        A dictionary with elements `threshold`, `VE`, and `avg_hyp` (average hypervolume).
+
+    See Also
+    --------
+    vorobDev : Compute Vorob'ev deviation.
+
+    Notes
+    -----
+    For more background, see :footcite:t:`BinGinRou2015gaupar,Molchanov2005theory,CheGinBecMol2013moda`.
+
+    References
+    ----------
+    .. footbibliography::
+
+    Examples
+    --------
+    >>> filename = moocore.get_dataset_path("CPFs.txt")
+    >>> CPFs = moocore.read_datasets(filename)
+    >>> res = moocore.vorobT(CPFs, reference = (2, 200))
+    >>> res['threshold']
+    44.140625
+    >>> res['avg_hyp']
+    8943.333191728081
+
+    """
+    data = np.asfarray(data)
+    ncols = data.shape[1]
+    if ncols < 3:
+        raise ValueError(
+            "'data' must have at least 3 columns (2 objectives + set column)"
+        )
+    nobj = ncols - 1
+    sets = data[:, -1]
+    uniq_sets = np.unique(sets)
+    avg_hyp = np.mean(
+        [hypervolume(data[sets == k, :-1], ref=reference) for k in uniq_sets]
+    )
+    prev_hyp = diff = np.inf  # hypervolume of quantile at previous step
+    a = 0
+    b = 100
+    while diff != 0:
+        c = (a + b) / 2.0
+        eaf_res = eaf(data, percentiles=c)[:, :nobj]
+        tmp = hypervolume(eaf_res, ref=reference)
+        if tmp > avg_hyp:
+            a = c
+        else:
+            b = c
+        diff = prev_hyp - tmp
+        prev_hyp = tmp
+
+    return dict(threshold=c, VE=eaf_res, avg_hyp=avg_hyp)
+
+
+def vorobDev(x, reference, VE=None):
+    r"""Compute Vorob'ev deviation.
+
+    Parameters
+    ----------
+    x : numpy array
+       Numpy array of numerical values and set numbers, containing multiple sets.
+       For example the output of the :func:`read_datasets` function.
+    reference : numpy array or list
+       Reference point set as a numpy array or list. Must be same length as a single point in the dataset.
+    VE : numpy array, optional
+       Vorob'ev expectation, e.g., as returned by :func:`vorobT`.
+       If not provided, it is calculated as `vorobT(x, reference)`.
+
+    Returns
+    -------
+    float
+        Vorob'ev deviation.
+
+    See Also
+    --------
+    vorobT : Compute Vorob'ev threshold and expectation.
+
+    Notes
+    -----
+    For more background, see :footcite:t:`BinGinRou2015gaupar,Molchanov2005theory,CheGinBecMol2013moda`.
+
+    References
+    ----------
+    .. footbibliography::
+
+    Examples
+    --------
+    >>> filename = moocore.get_dataset_path("CPFs.txt")
+    >>> CPFs = moocore.read_datasets(filename)
+    >>> VD = moocore.vorobDev(CPFs, reference=(2, 200))
+    >>> VD
+    3017.1298940232646
+
+    """
+    if VE is None:
+        VE = vorobT(x, reference)["VE"]
+
+    x = np.asfarray(x)
+    ncols = x.shape[1]
+    if ncols < 3:
+        raise ValueError(
+            "'x' must have at least 3 columns (2 objectives + set column)"
+        )
+
+    # Hypervolume of the symmetric difference between A and B:
+    # 2 * H(AUB) - H(A) - H(B)
+    H2 = hypervolume(VE, ref=reference)
+    uniq_sets, uniq_index = np.unique(x[:, -1], return_index=True)
+    x_split = np.vsplit(x[:, :-1], uniq_index[1:])
+    H1 = np.fromiter(
+        (hypervolume(g, ref=reference) for g in x_split),
+        dtype=float,
+        count=len(x_split),
+    ).mean()
+    VD = (
+        np.fromiter(
+            (
+                hypervolume(np.row_stack((g, VE)), ref=reference)
+                for g in x_split
+            ),
+            dtype=float,
+            count=len(x_split),
+        ).mean()
+        * 2.0
+    )
+    return VD - H1 - H2
+
+
+def eafdiff(x, y, intervals=None, maximise=False, rectangles=False):
+    """Compute empirical attainment function differences.
+
+    Calculate the differences between the empirical attainment functions of two
+    data sets.
+
+    Parameters
+    ----------
+    x, y : ArrayLike
+       Numpy matrices corresponding to the input data of left and right sides,
+       respectively. Each data frame has at least three columns, the third one
+       being the set of each point. See also :func:`read_datasets`.
+
+    intervals : int
+       The absolute range of the differences :math:`[0, 1]` is partitioned into the number of intervals provided.
+
+    maximise : bool or list of bool
+        Whether the objectives must be maximised instead of minimised.
+        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
+        Also accepts a 1D numpy array with value 0/1 for each objective.
+
+    rectangles : bool
+       If `True`, the output is in the form of rectangles of the same color.
+
+
+    Returns
+    -------
+    nd.array :
+       With `rectangle=False`, a matrix with three columns, The first two columns describe the points where there
+       is a transition in the value of the EAF differences.  With
+       `rectangle=True`, a matrix with five columns, where the first 4 columns give the
+       coordinates of two corners of each rectangle. In both
+       cases, the last column gives the difference in terms of sets in `x` minus
+       sets in `y` that attain each point (i.e., negative values are differences
+       in favour `y`).
+
+    See Also
+    --------
+    read_datasets:
+    mooplot.eafdiffplot:
+
+    Examples
+    --------
+    >>> from io import StringIO
+    >>> A1 = moocore.read_datasets(
+    ...     StringIO('''
+    ... 3 2
+    ... 2 3
+    ...
+    ... 2.5 1
+    ... 1 2
+    ...
+    ... 1 2''')
+    ... )
+    >>> A2 = moocore.read_datasets(
+    ...     StringIO('''
+    ... 4 2.5
+    ... 3 3
+    ... 2.5 3.5
+    ...
+    ... 3 3
+    ... 2.5 3.5
+    ...
+    ... 2 1''')
+    ... )
+    >>> moocore.eafdiff(A1, A2)
+    array([[ 1. ,  2. ,  2. ],
+           [ 2. ,  1. , -1. ],
+           [ 2.5,  1. ,  0. ],
+           [ 2. ,  2. ,  1. ],
+           [ 2. ,  3. ,  2. ],
+           [ 3. ,  2. ,  2. ],
+           [ 2.5,  3.5,  0. ],
+           [ 3. ,  3. ,  0. ],
+           [ 4. ,  2.5,  1. ]])
+    >>> moocore.eafdiff(A1, A2, rectangles=True)
+    array([[ 2. ,  1. ,  2.5,  2. , -1. ],
+           [ 1. ,  2. ,  2. ,  inf,  2. ],
+           [ 2.5,  1. ,  inf,  2. ,  0. ],
+           [ 2. ,  2. ,  3. ,  3. ,  1. ],
+           [ 2. ,  3.5,  2.5,  inf,  2. ],
+           [ 2. ,  3. ,  3. ,  3.5,  2. ],
+           [ 3. ,  2.5,  4. ,  3. ,  2. ],
+           [ 3. ,  2. ,  inf,  2.5,  2. ],
+           [ 4. ,  2.5,  inf,  3. ,  1. ]])
+
+    """
+    x = np.asfarray(x)
+    y = np.asfarray(y)
+    assert (
+        x.shape[1] == y.shape[1]
+    ), "'x' and 'y' must have the same number of columns"
+    nobj = x.shape[1] - 1
+    assert nobj == 2
+    maximise = _parse_maximise(maximise, nobj=nobj)
+    # The C code expects points within a set to be contiguous.
+    x = x[x[:, -1].argsort(), :]
+    y = y[y[:, -1].argsort(), :]
+    _, cumsizes_x = np.unique(x[:, -1], return_counts=True)
+    _, cumsizes_y = np.unique(y[:, -1], return_counts=True)
+    cumsizes_x = np.cumsum(cumsizes_x)
+    cumsizes_y = np.cumsum(cumsizes_y)
+    cumsizes = np.concatenate((cumsizes_x, cumsizes_x[-1] + cumsizes_y))
+    nsets = len(cumsizes)
+
+    data = np.row_stack((x[:, :-1], y[:, :-1]))
+    if maximise.any():
+        data[:, maximise] = -data[:, maximise]
+
+    if intervals is None:
+        intervals = int(nsets / 2.0)
+    else:
+        assert isinstance(intervals, int)
+        intervals = min(intervals, int(nsets / 2.0))
+
+    data_p, _, nobj_int = np2d_to_double_array(data)
+    cumsizes_p, nsets = np1d_to_int_array(cumsizes)
+    eaf_npoints = ffi.new("int *")
+    intervals = ffi.cast("int", intervals)
+
+    if rectangles:
+        eaf_data = lib.eafdiff_compute_rectangles(
+            eaf_npoints, data_p, nobj_int, cumsizes_p, nsets, intervals
+        )
+        ncols = 2 * nobj + 1  # 2x2D points + color
+    else:
+        eaf_data = lib.eafdiff_compute_matrix(
+            eaf_npoints, data_p, nobj_int, cumsizes_p, nsets, intervals
+        )
+        ncols = nobj + 1  # 2D points + color
+
+    eaf_npoints = eaf_npoints[0]
+    eaf_data = ffi.buffer(eaf_data, ffi.sizeof("double") * eaf_npoints * ncols)
+    eaf_data = np.frombuffer(eaf_data).reshape((eaf_npoints, -1))
+    # FIXME: We should remove duplicated rows in C code.
+    eaf_data = unique_nosort(eaf_data, axis=0)
+    # FIXME: Check that we do not generate duplicated nor overlapping
+    # rectangles with different colors. That would be a bug.
+
+    if maximise.any():
+        if rectangles:
+            maximise = np.concatenate((maximise, maximise))
+        maximise = np.flatnonzero(
+            maximise
+        )  # Using bool directly misses the color column.
+        eaf_data[:, maximise] = -eaf_data[:, maximise]
+
+    return eaf_data
+
+
+# def get_diff_eaf(x, y, intervals=None, debug=False):
+
+#     if np.min(x[:, -1]) != 1 or np.min(y[:, -1]) != 1:
+#         raise ValueError("x and y should contain set numbers starting from 1")
+#     ycopy = np.copy(
+#         y
+#     )  # Do hard copy so that the matrix is not corrupted. This could be optimised
+#     ycopy[:, -1] = ycopy[:, -1] + np.max(
+#         x[:, -1]
+#     )  # Make Y sets start from end of X sets
+
+#     data = np.vstack((x, ycopy))  # Combine X and Y datasets to one matrix
+#     nsets = len(np.unique(data[:, -1]))
+#     if intervals is None:
+#         intervals = nsets / 2.0
+#     else:
+#         intervals = min(intervals, nsets / 2.0)
+#     intervals = int(intervals)
+
+#     data = np.ascontiguousarray(
+#         np.asfarray(data)
+#     )  # C function requires contiguous data
+#     num_data_columns = data.shape[1]
+#     data_p, npoints, ncols = np2d_to_double_array(data)
+#     eaf_npoints = ffi.new("int *", 0)
+#     sizeof_eaf = ffi.new("int *", 0)
+#     nsets = ffi.cast("int", nsets)  # Get num of sets from data
+#     intervals = ffi.cast("int", intervals)
+#     debug = ffi.cast("bool", debug)
+#     eaf_diff_data = lib.compute_eafdiff_(
+#         data_p, ncols, npoints, nsets, intervals, eaf_npoints, sizeof_eaf, debug
+#     )
+
+#     eaf_buf = ffi.buffer(eaf_diff_data, sizeof_eaf[0])
+#     eaf_arr = np.frombuffer(eaf_buf)
+#     # The C code gets diff EAF in Column Major order so I return it in column major order than transpose to fix into row major order
+#     return np.reshape(eaf_arr, (num_data_columns, -1)).T
+
+# def whv_hype(data, reference, ideal, maximise = False,
+#              dist = dict(type = "uniform"), nsamples = 1e5, seed = None):
+#     '''Approximation of the (weighted) hypervolume by Monte-Carlo sampling (2D only)
+
+#     Return an estimation of the hypervolume of the space dominated by the input
+#     data following the procedure described by AugBadBroZit2009gecco. A weight
+#     distribution describing user preferences may be specified.
+
+#     Parameters
+#     ----------
+#     data : numpy.ndarray
+#         Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
+#         If the array is created from the :func:`read_datasets` function, remove the last (set) column.
+
+#     reference : numpy.ndarray or list
+#         Reference point as a numpy array or list. Must have same length as the number of columns of the dataset.
+
+#     ideal : numpy.ndarray or list
+#         Ideal point as a numpy array or list. Must have same length as the number of columns of the dataset.
+
+#     maximise : bool or or list of bool
+#         Whether the objectives must be maximised instead of minimised.
+#         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
+#         Also accepts a 1D numpy array with values 0 or 1 for each objective.
+
+#     dist : dict
+#         Weight distribution. See Details.
+
+#     nsamples : int
+#         Number of samples for Monte-Carlo sampling.
+
+#     seed : int or numpy.random.Generator
+#         Either an integer to seed the NumPy random generator or a RNG of type `numpy.random.Generator`.
+
+#     Details
+#     -------
+#     The current implementation only supports 2 objectives.
+
+#     A weight distribution  AugBadBroZit2009gecco can be provided via the `dist` argument. The ones currently supported are:
+#      * `dict(type="uniform")` corresponds to the default hypervolume (unweighted).
+#      * `dict(type="point")` describes a goal in the objective space, where `mu` gives the coordinates of the goal. The resulting weight distribution is a multivariate normal distribution centred at the goal.
+#      * `dict(type="exponential")` describes an exponential distribution with rate parameter `1/mu`, i.e., \eqn{\lambda = \frac{1}{\mu}}.
+
+#     Returns
+#     -------
+#     float:
+#         A single numerical value, the weighted hypervolume.
+
+#     See Also
+#     --------
+#     :func:`read_datasets`, :func:`hypervolume`
+
+#     Examples
+#     --------
+#     >>> moocore.whv_hype(np.full((1,2), 2), reference = 4, ideal = 1)
+
+#     '''
+#     # whv_hype (matrix(2, ncol=2), reference = 4, ideal = 1)
+
+#     # whv_hype (matrix(c(3,1), ncol=2), reference = 4, ideal = 1)
+
+#     # whv_hype (matrix(2, ncol=2), reference = 4, ideal = 1,
+#     #           dist = list(type="exponential", mu=0.2))
+
+#     # whv_hype (matrix(c(3,1), ncol=2), reference = 4, ideal = 1,
+#     #           dist = list(type="exponential", mu=0.2))
+
+#     # whv_hype (matrix(2, ncol=2), reference = 4, ideal = 1,
+#     #           dist = list(type="point", mu=c(1,1)))
+
+#     # whv_hype (matrix(c(3,1), ncol=2), reference = 4, ideal = 1,
+#     #           dist = list(type="point", mu=c(1,1)))
+
+#     # Convert to numpy.array in case the user provides a list.  We use
+#     # np.asfarray to convert it to floating-point, otherwise if a user inputs
+#     # something like ref = np.array([10, 10]) then numpy would interpret it as
+#     # an int array.
+#     data = np.asfarray(data)
+#     nobj = data.shape[1]
+#     if nobj != 2:
+#         raise NotImplementedError("Only 2D datasets are currently supported")
+
+#     reference = np.atleast_1d_of_length_n(np.asfarray(reference), nobj)
+#     ideal = np.atleast_1d_of_length_n(np.asfarray(ideal), nobj)
+#     if nobj != reference.shape[0]:
+#         raise ValueError(
+#             f"data and reference need to have the same number of objectives ({nobj} != {reference.shape[0]})"
+#         )
+#     if nobj != ideal.shape[0]:
+#         raise ValueError(
+#             f"data and ideal need to have the same number of objectives ({nobj} != {ideal.shape[0]})"
+#         )
+
+#     maximise = _parse_maximise(maximise, nobj)
+#     data[:, maximise] = -data[:, maximise]
+#     reference[maximise] = -reference[maximise]
+#     ideal[maximise] = -ideal[maximise]
+
+#     if type(seed) != int:
+#         seed = rng.integers(low, 4294967295)
+
+#     data_p, npoints, nobj = np2d_to_double_array(data)
+#     reference = ffi.from_buffer("double []", reference)
+#     ideal = ffi.from_buffer("double []", ideal)
+#     seed = ffi.cast("unsigned long", seed)
+#     nsamples = ffi.cast("size_t", nsamples)
+
+#     if dist["type"] == "uniform":
+#         dist_p = lib.hype_dist_unif_new(seed)
+#     elif dist["type"] == "exponential":
+#         dist_p = lib.hype_dist_exp_new(ffi.cast("double", dist["mu"]), seed)
+#     elif dist["type"] == "exponential":
+#         mu = np.atleast_1d_of_length_n(np.asfarray(dist["mu"]), nobj)
+#         mu, _ = np1d_to_double_array(mu)
+#         dist_p = lib.hype_dist_guassian_new(mu, seed)
+#     else:
+#         raise ValueError("Unknown value of dist['type] = {dist['type]}")
+
+#     hv = lib.whv_hype_estimate(data_p, npoints, ideal, reference,
+#                                dist_p, nsamples);
+#     lib.hype_dist_free(dist_p)
+#     return hv
+
+
+def get_dataset_path(filename: str) -> str:
+    """Return path to dataset within the package.
+
+    Parameters
+    ----------
+    filename :
+        Name of the dataset.
+
+    Returns
+    -------
+    Full path to the dataset.
+
+    """
+    return files("moocore.data").joinpath(filename)
+
+
+def groupby(x, groups, axis=0):
+    """Split an array into groups.
+
+    See https://github.com/numpy/numpy/issues/7265
+
+    Parameters
+    ----------
+    x : ndarray
+        Array to be divided into sub-arrays.
+    groups : 1-D array
+        A list or ndarray of length equal to the selected `axis`. The values are used as-is to determine the groups and do not need to be sorted.
+    axis : int, optional
+        The axis along which to split, default is 0.
+
+    Yields
+    ------
+    sub-array : ndarray
+        Sub-arrays of `x`.
+
+    """
+    index = unique_nosort(groups)
+    for g in index:
+        yield (g, x.compress((g == groups), axis=axis))

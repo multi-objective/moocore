@@ -1,0 +1,32 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: end-of-file-fixer
+        exclude: '.*test-doctest.+\.R'
+      - id: trailing-whitespace
+      - id: check-yaml
+      - id: check-merge-conflict
+        args: [ --assume-in-merge ]
+
+  - repo: https://github.com/tox-dev/tox-ini-fmt
+    rev: "1.3.1"
+    hooks:
+      - id: tox-ini-fmt
+  - repo: https://github.com/tox-dev/pyproject-fmt
+    rev: "1.7.0"
+    hooks:
+      - id: pyproject-fmt
+        additional_dependencies: ["tox>=4.12.1"]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.3.7
+    hooks:
+      # Run the formatter.
+      - id: ruff-format
+        types_or: [ python, pyi, jupyter ]
+      # Run the linter.
+      - id: ruff
+        args: [ --fix, --exit-non-zero-on-fix ]
+        types_or: [ python, pyi, jupyter ]
+        require_serial: true

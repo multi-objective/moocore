@@ -1,0 +1,39 @@
+template:
+  bootstrap: 5
+  bootswatch: cosmo
+
+development:
+  mode: unreleased
+  destination: devel
+  version_label: light
+  version_tooltip: "Github version"
+
+navbar:
+  bg: dark
+  structure:
+    right: [search, cran, github]
+  components:
+    cran:
+      icon: fab fa-r-project
+      href: https://cloud.r-project.org/package=moocore
+
+reference:
+  - title: Main
+    contents: moocore-package
+  - title: Computing the Empirical Attainment Function
+    contents:
+      - has_concept("eaf")
+  - title: Pareto dominance
+    contents: has_concept("dominance")
+  - title: Multi-objective performance assessment metrics
+    contents: has_concept("metrics")
+  - title: Datasets
+    contents: has_keyword("datasets")
+  - title: Other useful functions
+    contents:
+      - read_datasets
+      - write_datasets
+      - normalise
+      - rbind_datasets
+      - transform_maximise
+      - as_double_matrix
