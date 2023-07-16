@@ -1,0 +1,3 @@
+CRT=-ucrt
+include Makevars.win
+OBJECTS = $(SOURCES:.c=.o)

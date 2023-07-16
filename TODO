@@ -1,0 +1,11 @@
+ - [ ] Merge eaf README
+ - [ ] Merge hypervolume/trunk README
+ - [ ] Merge hypervolume/Makefile README
+ - [ ] pre-commit for R: https://lorenzwalthert.github.io/precommit/articles/ci.html
+ - [X] create moocore R package
+ - [X] create moocore Python package
+ - [X] Setup github actions
+ - [X] Rewrite regtest.pl in python.
+ - [X] move eaftools/eaf code here.
+ - [x] move hypervolume/trunk code here.
+ - [x] move hypervolume testsuite here.

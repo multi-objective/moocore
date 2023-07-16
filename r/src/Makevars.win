@@ -1,0 +1,6 @@
+# 							-*- mode: makefile -*-
+# Do not put GCC specific flags here. Put them instead in CFLAGS and
+# CXXFLAGS in ~/.R/Makevars
+EXEEXT=.exe
+include Makevars
+OBJECTS = $(SOURCES:.c=.o)

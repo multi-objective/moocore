@@ -1,0 +1,14 @@
+*.o
+autom4te.cache/
+config.log
+config.status
+dominatedsets
+eaf
+epsilon
+igd
+ndsort
+nondominated
+Makevars
+Makevars.win
+git_version
+Hypervolume_MEX.mex

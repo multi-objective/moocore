@@ -1,0 +1,20 @@
+bibentry(
+  bibtype = "incollection",
+  header = "To cite package 'eaf' in publications, please use",
+  title = "Exploratory Analysis of Stochastic Local Search Algorithms in Biobjective Optimization",
+  author = c(person("Manuel", "López-Ibáñez"),
+             person("Luis", "Paquete"),
+             person("Thomas", "Stützle")),
+  year = 2010,
+  doi = "10.1007/978-3-642-02538-9_9",
+  booktitle =    "Experimental Methods for the Analysis of Optimization Algorithms",
+  publisher = "Springer, Berlin, Germany",
+  editor = "Thomas Bartz-Beielstein  and  Marco Chiarandini  and  Luís Paquete  and  Mike Preuss",
+  pages = "209--222",
+  textVersion=
+    paste0("Manuel López-Ibáñez, Luís Paquete, and Thomas Stützle. ",
+           "Exploratory Analysis of Stochastic Local Search Algorithms in Biobjective Optimization. ",
+           "In T. Bartz-Beielstein, M. Chiarandini, L. Paquete, and M. Preuss, editors, ",
+           "Experimental Methods for the Analysis of Optimization Algorithms, pages 209–222. Springer, Berlin, Germany, 2010.",
+           "\ndoi: 10.1007/978-3-642-02538-9_9")
+)

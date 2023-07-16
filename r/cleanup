@@ -1,0 +1,7 @@
+#!/bin/sh
+rm -f  config.* confdefs.h tests/testthat/*.pdf \
+       src/*.o src/*.so src/symbols.rds \
+       inst/doc/*.blg inst/doc/*.bbl *-Ex.R
+
+rm -rf autom4te.cache
+find . -name '*.orig' -o -name '.Rhistory' | xargs rm -f

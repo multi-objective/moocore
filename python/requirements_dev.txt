@@ -1,0 +1,25 @@
+numpy >= 1.22.3
+
+pre-commit >= 3.3.2
+ruff >= 0.1.4 # Sync with .pre-commit-config.yaml
+setuptools >= 65.5.1
+cffi >= 1.15.1
+
+tox >= 4.6.2 # Sync with tox.ini
+pytest >= 7  # Sync with tox.ini
+pytest-cov >= 4.1.0
+virtualenv >= 20
+build
+
+sphinx >= 6.0
+pydata_sphinx_theme
+jupyter
+ipykernel
+kaleido
+myst-nb
+sphinxcontrib-napoleon
+sphinxcontrib-bibtex
+sphinx-copybutton
+sphinx-design
+jupyterlab
+ipywidgets

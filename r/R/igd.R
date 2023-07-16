@@ -1,0 +1,155 @@
+#' Inverted Generational Distance (IGD and IGD+) and Averaged Hausdorff Distance
+#'
+#' Functions to compute the inverted generational distance (IGD and IGD+) and
+#' the averaged Hausdorff distance between nondominated sets of points.
+#'
+#' @inheritParams epsilon
+#'
+#' @return  (`numeric(1)`) A single numerical value.
+#'
+#' @author Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
+#'
+#' @details
+#'
+#' The generational distance (GD) of a set \eqn{A} is defined as the distance
+#' between each point \eqn{a \in A} and the closest point \eqn{r} in a
+#' reference set \eqn{R}, averaged over the size of \eqn{A}. Formally,
+#'
+#' \deqn{GD_p(A,R) = \left(\frac{1}{|A|}\sum_{a\in A}\min_{r\in R} d(a,r)^p\right)^{\frac{1}{p}} }{GD(A,R) = (1/|A|) * ( sum_{a in A} min_{r in R} d(a,r)^p )^(1/p)}
+#' where the distance in our implementation is the Euclidean distance:
+#' \deqn{d(a,r) = \sqrt{\sum_{k=1}^M (a_k - r_k)^2} }{d(a,r) = sqrt( sum_{k=1}^M (a_k - r_k)^2)}
+#'
+#' The inverted generational distance (IGD) is calculated as \eqn{IGD_p(A,R) = GD_p(R,A)}.
+#'
+#' The modified inverted generational distanced (IGD+) was proposed by
+#' \citet{IshMasTanNoj2015igd} to ensure that IGD+ is weakly Pareto compliant,
+#' similarly to [epsilon_additive()] or [epsilon_mult()]. It modifies the
+#' distance measure as:
+#'
+#' \deqn{d^+(r,a) = \sqrt{\sum_{k=1}^M (\max\{r_k - a_k, 0\})^2}}{d^+(r,a) = sqrt(sum_{k=1}^M (max {r_k - a_k, 0 })^2)}
+#'
+#' The average Hausdorff distance (\eqn{\Delta_p}) was proposed by
+#' \citet{SchEsqLarCoe2012tec} and it is calculated as:
+#'
+#' \deqn{\Delta_p(A,R) = \max\{ IGD_p(A,R), IGD_p(R,A) \}}
+#'
+#' IGDX \citep{ZhoZhaJin2009igdx} is the application of IGD to decision vectors
+#' instead of objective vectors to measure closeness and diversity in decision
+#' space. One can use the functions `igd()` or `igd_plus()` (recommended)
+#' directly, just passing the decision vectors as `data`.
+#'
+#'
+#' There are different formulations of the GD and IGD metrics in the literature
+#' that differ on the value of \eqn{p}, on the distance metric used and on
+#' whether the term \eqn{|A|^{-1}} is inside (as above) or outside the exponent
+#' \eqn{1/p}.  GD was first proposed by \citet{VelLam1998gp} with \eqn{p=2} and
+#' the term \eqn{|A|^{-1}} outside the exponent. IGD seems to have been
+#' mentioned first by \citet{CoeSie2004igd}, however, some people also used the
+#' name D-metric for the same concept with \eqn{p=1} and later papers have
+#' often used IGD/GD with \eqn{p=1}. \citet{SchEsqLarCoe2012tec} proposed to
+#' place the term \eqn{|A|^{-1}} inside the exponent, as in the formulation
+#' shown above.  This has a significant effect for GD and less so for IGD given
+#' a constant reference set. IGD+ also follows this formulation.  We refer to
+#' \citet{IshMasTanNoj2015igd} and \citet{BezLopStu2017emo} for a more detailed
+#' historical perspective and a comparison of the various variants.
+#'
+#' Following \citet{IshMasTanNoj2015igd}, we always use \eqn{p=1} in our
+#' implementation of IGD and IGD+ because (1) it is the setting most used in
+#' recent works; (2) it makes irrelevant whether the term \eqn{|A|^{-1}} is
+#' inside or outside the exponent \eqn{1/p}; and (3) the meaning of IGD becomes
+#' the average Euclidean distance from each reference point to its nearest
+#' objective vector). It is also slightly faster to compute.
+#'
+#' GD should never be used directly to compare the quality of approximations to
+#' a Pareto front, as it often contradicts Pareto optimality (it is not weakly
+#' Pareto-compliant). We recommend IGD+ instead of IGD, since the latter
+#' contradicts Pareto optimality in some cases (see examples below) whereas
+#' IGD+ is weakly Pareto-compliant, but we implement IGD here because it is
+#' still popular due to historical reasons.
+#'
+#' The average Hausdorff distance (\eqn{\Delta_p(A,R)}) is also not weakly
+#' Pareto-compliant, as shown in the examples below.
+#'
+#' @references
+#'
+#' \insertAllCited{}
+#'
+#' @doctest
+#  This is already test in test-igd.R
+#' @omit
+#' # Example 4 from Ishibuchi et al. (2015)
+#' ref <- matrix(c(10,0,6,1,2,2,1,6,0,10), ncol=2, byrow=TRUE)
+#' A <- matrix(c(4,2,3,3,2,4), ncol=2, byrow=TRUE)
+#' B <- matrix(c(8,2,4,4,2,8), ncol=2, byrow=TRUE)
+#' if (requireNamespace("graphics", quietly = TRUE)) {
+#'    plot(ref, xlab=expression(f[1]), ylab=expression(f[2]),
+#'         panel.first=grid(nx=NULL), pch=23, bg="gray", cex=1.5)
+#'    points(A, pch=1, cex=1.5)
+#'    points(B, pch=19, cex=1.5)
+#'    legend("topright", legend=c("Reference", "A", "B"), pch=c(23,1,19),
+#'           pt.bg="gray", bg="white", bty = "n", pt.cex=1.5, cex=1.2)
+#' }
+#' cat("A is better than B in terms of Pareto optimality,\n however, IGD(A)=",
+#'     igd(A, ref), "> IGD(B)=", igd(B, ref),
+#'     "and AvgHausdorff(A)=", avg_hausdorff_dist(A, ref),
+#'     "> AvgHausdorff(A)=", avg_hausdorff_dist(B, ref),
+#'     ", which both contradict Pareto optimality.\nBy contrast, IGD+(A)=",
+#'     igd_plus(A, ref), "< IGD+(B)=", igd_plus(B, ref), ", which is correct.\n")
+#' @resume
+#' # A less trivial example.
+#' extdata_path <- system.file(package="moocore","extdata")
+#' path.A1 <- file.path(extdata_path, "ALG_1_dat.xz")
+#' path.A2 <- file.path(extdata_path, "ALG_2_dat.xz")
+#' A1 <- read_datasets(path.A1)[,1:2]
+#' A2 <- read_datasets(path.A2)[,1:2]
+#' ref <- filter_dominated(rbind(A1, A2))
+#' @expect equal(91888189)
+#' igd(A1, ref)
+#' @expect equal(11351992)
+#' igd(A2, ref)
+#'
+#' # IGD+ (Pareto compliant)
+#' @expect equal(82695357)
+#' igd_plus(A1, ref)
+#' @expect equal(10698269.3)
+#' igd_plus(A2, ref)
+#'
+#' # Average Haussdorff distance
+#' @expect equal(268547627)
+#' avg_hausdorff_dist(A1, ref)
+#' @expect equal(352613092)
+#' avg_hausdorff_dist(A2, ref)
+#' @rdname igd
+#' @concept metrics
+#' @aliases IGDX
+#' @export
+igd <- function(data, reference, maximise = FALSE)
+  unary_common(data = data, reference = reference, maximise = maximise,
+    fun = igd_C)
+
+#' @rdname igd
+#' @concept metrics
+#' @export
+igd_plus <- function(data, reference, maximise = FALSE)
+  unary_common(data = data, reference = reference, maximise = maximise,
+    fun = igd_plus_C)
+
+#' @rdname igd
+#' @param p (`integer(1)`) Hausdorff distance parameter (default: `1L`).
+#' @concept metrics
+#' @export
+avg_hausdorff_dist <- function(data, reference, maximise = FALSE, p = 1L)
+{
+  data <- as_double_matrix(data)
+  nobjs <- ncol(data)
+  if (is.null(reference))
+    stop("reference cannot be NULL")
+  reference <- as_double_matrix(reference)
+  if (ncol(reference) != nobjs)
+    stop("data and reference must have the same number of columns")
+  .Call(avg_hausdorff_dist_C,
+    t(data),
+    t(reference),
+    as.logical(rep_len(maximise, nobjs)),
+    as.integer(p))
+}
