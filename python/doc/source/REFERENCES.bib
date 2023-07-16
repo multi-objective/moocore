@@ -1,0 +1,420 @@
+% References should come from https://iridia-ulb.github.io/references/
+
+@incollection{AugBadBroZit2009gecco,
+  author       = {Anne Auger and Johannes Bader and Dimo Brockhoff and Eckart
+                  Zitzler},
+  title        = {Articulating User Preferences in Many-Objective Problems by
+                  Sampling the Weighted Hypervolume},
+  booktitle    = {Proceedings of the Genetic and Evolutionary Computation
+                  Conference, GECCO 2009},
+  publisher    = {ACM Press},
+  year         = 2009,
+  editor       = {Franz Rothlauf},
+  pages        = {555--562},
+  address      = {New York, NY}
+}
+
+@article{BeuFonLopPaqVah09:tec,
+  author = { Nicola Beume  and  Carlos M. Fonseca  and  Manuel L{\'o}pez-Ib{\'a}ñez  and  Lu{\'i}s Paquete  and  Jan Vahrenhold },
+  title = {On the complexity of computing the hypervolume
+                  indicator},
+  journal = {IEEE Transactions on Evolutionary Computation},
+  year = 2009,
+  volume = 13,
+  number = 5,
+  pages = {1075--1082},
+  doi = {10.1109/TEVC.2009.2015575},
+}
+
+
+@incollection{BezLopStu2017emo,
+  editor = {Heike Trautmann and G{\"{u}}nter Rudolph and Kathrin Klamroth
+                  and Oliver Sch{\"{u}}tze and Margaret M. Wiecek and Yaochu
+                  Jin and Christian Grimme},
+  year = 2017,
+  series = {Lecture Notes in Computer Science},
+  address = {Cham, Switzerland},
+  publisher = {Springer International Publishing},
+  booktitle = {Evolutionary Multi-criterion Optimization, EMO 2017},
+  author = { Leonardo C. T. Bezerra  and  Manuel L{\'o}pez-Ib{\'a}ñez  and  Thomas St{\"u}tzle },
+  title = {An Empirical Assessment of the Properties of Inverted
+                  Generational Distance Indicators on Multi- and Many-objective
+                  Optimization},
+  pages = {31--45},
+  doi = {10.1007/978-3-319-54157-0_3}
+}
+
+@article{BinGinRou2015gaupar,
+  title = {Quantifying uncertainty on {P}areto fronts with {G}aussian
+                  process conditional simulations},
+  volume = 243,
+  doi = {10.1016/j.ejor.2014.07.032},
+  abstract = {Multi-objective optimization algorithms aim at finding
+                  Pareto-optimal solutions. Recovering Pareto fronts or Pareto
+                  sets from a limited number of function evaluations are
+                  challenging problems. A popular approach in the case of
+                  expensive-to-evaluate functions is to appeal to
+                  metamodels. Kriging has been shown efficient as a base for
+                  sequential multi-objective optimization, notably through
+                  infill sampling criteria balancing exploitation and
+                  exploration such as the Expected Hypervolume
+                  Improvement. Here we consider Kriging metamodels not only for
+                  selecting new points, but as a tool for estimating the whole
+                  Pareto front and quantifying how much uncertainty remains on
+                  it at any stage of Kriging-based multi-objective optimization
+                  algorithms. Our approach relies on the Gaussian process
+                  interpretation of Kriging, and bases upon conditional
+                  simulations. Using concepts from random set theory, we
+                  propose to adapt the Vorob'ev expectation and deviation to
+                  capture the variability of the set of non-dominated
+                  points. Numerical experiments illustrate the potential of the
+                  proposed workflow, and it is shown on examples how Gaussian
+                  process simulations and the estimated Vorob'ev deviation can
+                  be used to monitor the ability of Kriging-based
+                  multi-objective optimization algorithms to accurately learn
+                  the Pareto front.},
+  number = 2,
+  journal = {European Journal of Operational Research},
+  author = {Binois, M. and Ginsbourger, D. and Roustant, O.},
+  year = 2015,
+  keywords = {Attainment function, Expected Hypervolume Improvement,
+                  Kriging, Multi-objective optimization, Vorob'ev expectation},
+  pages = {386--394}
+}
+
+@phdthesis{ChiarandiniPhD,
+  author = { Marco Chiarandini },
+  title = {Stochastic Local Search Methods for Highly
+                  Constrained Combinatorial Optimisation Problems},
+  school = {FB Informatik, TU Darmstadt, Germany},
+  year = 2005
+}
+
+@incollection{CoeSie2004igd,
+  publisher = {Springer, Heidelberg, Germany},
+  volume = 2972,
+  series = {Lecture Notes in Artificial Intelligence},
+  booktitle = {Proceedings of MICAI},
+  editor = {Monroy, Ra{\'u}l and Arroyo-Figueroa, Gustavo and Sucar, Luis
+                  Enrique and Sossa, Humberto},
+  author = { Carlos A. {Coello Coello}  and Reyes-Sierra, Margarita},
+  title = {A Study of the Parallelization of a Coevolutionary
+                  Multi-objective Evolutionary Algorithm},
+  year = 2004,
+  pages = {688--697},
+  keywords = {IGD},
+  annote = {Introduces Inverted Generational Distance (IGD)}
+}
+
+@article{Deb02nsga2,
+  author = { Kalyanmoy Deb  and A. Pratap and S. Agarwal and T. Meyarivan},
+  title = {A fast and elitist multi-objective genetic
+                  algorithm: {NSGA-II}},
+  journal = {IEEE Transactions on Evolutionary Computation},
+  year = 2002,
+  volume = 6,
+  number = 2,
+  pages = {182--197},
+  doi = {10.1109/4235.996017}
+}
+
+@article{DiaLop2020ejor,
+  author =       { Juan Esteban Diaz and Manuel L{\'o}pez-Ib{\'a}ñez },
+  title =        {Incorporating Decision-Maker's Preferences into the Automatic
+                  Configuration of Bi-Objective Optimisation Algorithms},
+  journal =      {European Journal of Operational Research},
+  year =         2021,
+  volume =       289,
+  number =       3,
+  pages =        {1209--1222},
+  doi =          {10.1016/j.ejor.2020.07.059},
+  abstract =     {Automatic configuration (AC) methods are increasingly used to
+                  tune and design optimisation algorithms for problems with
+                  multiple objectives. Most AC methods use unary quality
+                  indicators, which assign a single scalar value to an
+                  approximation to the Pareto front, to compare the performance
+                  of different optimisers. These quality indicators, however,
+                  imply preferences beyond Pareto-optimality that may differ
+                  from those of the decision maker (DM). Although it is
+                  possible to incorporate DM's preferences into quality
+                  indicators, e.g., by means of the weighted hypervolume
+                  indicator (HV$^w$), expressing preferences in terms of weight
+                  function is not always intuitive nor an easy task for a DM,
+                  in particular, when comparing the stochastic outcomes of
+                  several algorithm configurations. A more visual approach to
+                  compare such outcomes is the visualisation of their empirical
+                  attainment functions (EAFs) differences. This paper proposes
+                  using such visualisations as a way of eliciting information
+                  about regions of the objective space that are preferred by
+                  the DM. We present a method to convert the information about
+                  EAF differences into a HV$^w$ that will assign higher quality
+                  values to approximation fronts that result in EAF differences
+                  preferred by the DM. We show that the resulting HV$^w$ may be
+                  used by an AC method to guide the configuration of
+                  multi-objective optimisers according to the preferences of
+                  the DM. We evaluate the proposed approach on a well-known
+                  benchmark problem. Finally, we apply our approach to
+                  re-configuring, according to different DM's preferences, a
+                  multi-objective optimiser tackling a real-world production
+                  planning problem arising in the manufacturing industry.},
+  supplement =   {https://doi.org/10.5281/zenodo.3749288}
+}
+
+@article{DubLopStu2011amai,
+  author = { J{\'e}r{\'e}mie Dubois-Lacoste  and  Manuel L{\'o}pez-Ib{\'a}{\~n}ez  and  Thomas St{\"u}tzle },
+  title = {Improving the Anytime Behavior of Two-Phase Local
+                  Search},
+  journal = {Annals of Mathematics and Artificial Intelligence},
+  year = 2011,
+  volume = 61,
+  number = 2,
+  pages = {125--154},
+  doi = {10.1007/s10472-011-9235-0},
+  alias = {DubLopStu2010amai}
+}
+
+
+
+@incollection{FonGueLopPaq2011emo,
+  address = { Heidelberg },
+  publisher = {Springer},
+  year = 2011,
+  series = {Lecture Notes in Computer Science},
+  volume = 6576,
+  editor = { Takahashi, R. H. C.  and others},
+  booktitle = { Evolutionary Multi-criterion Optimization, EMO 2011},
+  author = { Carlos M. Fonseca  and  Andreia P. Guerreiro  and  Manuel L{\'o}pez-Ib{\'a}{\~n}ez  and  Lu{\'i}s Paquete },
+  title = {On the Computation of the Empirical Attainment Function},
+  doi = {10.1007/978-3-642-19893-9_8},
+  pages = {106--120},
+  abstract = {The attainment function provides a description of the
+                  location of the distribution of a random non-dominated point
+                  set. This function can be estimated from experimental data
+                  via its empirical counterpart, the empirical attainment
+                  function (EAF). However, computation of the EAF in more than
+                  two dimensions is a non-trivial task. In this article, the
+                  problem of computing the empirical attainment function is
+                  formalised, and upper and lower bounds on the corresponding
+                  number of output points are presented. In addition, efficient
+                  algorithms for the two and three-dimensional cases are
+                  proposed, and their time complexities are related to lower
+                  bounds derived for each case.}
+}
+
+@incollection{FonPaqLop06:hypervolume,
+  address = {Piscataway, NJ},
+  publisher = {IEEE Press},
+  month = jul,
+  year = 2006,
+  booktitle = {Proceedings of the 2006 Congress on Evolutionary
+                  Computation (CEC 2006)},
+  key = {IEEE CEC},
+  author = { Carlos M. Fonseca  and  Lu{\'i}s Paquete  and  Manuel L{\'o}pez-Ib{\'a}ñez },
+  title = {An improved dimension-sweep
+                  algorithm for the hypervolume indicator},
+  pages = {1157--1163},
+  doi = {10.1109/CEC.2006.1688440},
+  pdf = {FonPaqLop06-hypervolume.pdf},
+}
+
+@incollection{GruFon2009:emaa,
+  editor = { Thomas Bartz-Beielstein  and  Marco Chiarandini  and  Lu{\'i}s Paquete  and  Mike Preuss },
+  year = 2010,
+  address = {Berlin, Germany},
+  publisher = {Springer},
+  booktitle = {Experimental Methods for the Analysis of
+                  Optimization Algorithms},
+  author = { Viviane {Grunert da Fonseca}  and  Carlos M. Fonseca },
+  title = {The Attainment-Function Approach to Stochastic
+                  Multiobjective Optimizer Assessment and Comparison},
+  pages = {103--130}
+}
+
+@incollection{Grunert01,
+  year = 2001,
+  series = {Lecture Notes in Computer Science},
+  volume = 1993,
+  publisher = {Springer, Heidelberg, Germany},
+  editor = { Eckart Zitzler  and  Kalyanmoy Deb  and  Lothar Thiele  and  Carlos A. {Coello Coello}  and  David Corne },
+  booktitle = {Evolutionary Multi-criterion Optimization, EMO 2001},
+  author = { Viviane {Grunert da Fonseca}  and  Carlos M. Fonseca  and  Andreia O. Hall },
+  key = {Fonseca et al., 2001},
+  title = {Inferential Performance Assessment of Stochastic Optimisers
+                  and the Attainment Function},
+  pages = {213--225},
+  alias = {Fonseca01},
+  doi = {10.1007/3-540-44719-9_15},
+  annote = {Proposed looking at anytime behavior as a multi-objective
+                  problem},
+  keywords = {EAF}
+}
+
+@incollection{IshMasTanNoj2015igd,
+  editor = { Ant{\'o}nio Gaspar{-}Cunha  and Carlos Henggeler Antunes and  Carlos A. {Coello Coello} },
+  volume = 9018,
+  year = 2015,
+  series = {Lecture Notes in Computer Science},
+  publisher = {Springer, Heidelberg, Germany},
+  booktitle = {Evolutionary Multi-criterion Optimization, EMO 2015 Part {I}},
+  author = { Ishibuchi, Hisao  and Masuda, Hiroyuki and Tanigaki, Yuki and
+                  Nojima, Yusuke},
+  title = {Modified Distance Calculation in Generational Distance and
+                  Inverted Generational Distance},
+  pages = {110--125}
+}
+
+@article{Jen03,
+  title = {Reducing the run-time complexity of multiobjective
+                  {EA}s: The {NSGA-II} and other algorithms},
+  author = {M. T. Jensen},
+  journal = {IEEE Transactions on Evolutionary Computation},
+  volume = 7,
+  number = 5,
+  pages = {503--515},
+  year = 2003
+}
+
+
+
+@article{JohAraMcGSch1991,
+  author = {David S. Johnson and Cecilia R. Aragon and  Lyle A. McGeoch  and Catherine Schevon},
+  title = {Optimization by Simulated Annealing: An Experimental
+                  Evaluation: Part {II}, Graph Coloring and Number Partitioning},
+  journal = {Operations Research},
+  year = 1991,
+  volume = 39,
+  number = 3,
+  pages = {378--406}
+}
+
+
+@incollection{CheGinBecMol2013moda,
+  address = { Heidelberg, Germany},
+  publisher = {Springer International Publishing},
+  booktitle = {mODa 10--Advances in Model-Oriented Design and Analysis},
+  year = 2013,
+  editor = {Ucinski, Dariusz and Atkinson, Anthony C.  and Patan, Maciej},
+  author = {Chevalier, Cl{\'e}ment and Ginsbourger, David and Bect,
+                  Julien and Molchanov, Ilya},
+  title = {Estimating and Quantifying Uncertainties on Level Sets Using
+                  the {Vorob}'ev Expectation and Deviation with {Gaussian}
+                  Process Models},
+  pages = {35--43},
+  abstract = {Several methods based on Kriging have recently been proposed
+                  for calculating a probability of failure involving
+                  costly-to-evaluate functions. A closely related problem is to
+                  estimate the set of inputs leading to a response exceeding a
+                  given threshold. Now, estimating such a level set---and not
+                  solely its volume---and quantifying uncertainties on it are
+                  not straightforward. Here we use notions from random set
+                  theory to obtain an estimate of the level set, together with
+                  a quantification of estimation uncertainty. We give explicit
+                  formulae in the Gaussian process set-up and provide a
+                  consistency result. We then illustrate how space-filling
+                  versus adaptive design strategies may sequentially reduce
+                  level set estimation uncertainty.},
+  doi = {10.1007/978-3-319-00218-7_5}
+}
+
+
+@incollection{LopPaqStu09emaa,
+  editor = { Thomas Bartz-Beielstein  and  Marco Chiarandini  and  Lu{\'i}s Paquete  and  Mike Preuss },
+  year = 2010,
+  address = {Berlin, Germany},
+  publisher = {Springer},
+  booktitle = {Experimental Methods for the Analysis of
+                  Optimization Algorithms},
+  author = { Manuel L{\'o}pez-Ib{\'a}ñez  and  Lu{\'i}s Paquete  and  Thomas St{\"u}tzle },
+  title = {Exploratory Analysis of Stochastic Local Search
+                  Algorithms in Biobjective Optimization},
+  pages = {209--222},
+  doi = {10.1007/978-3-642-02538-9_9},
+  abstract = {This chapter introduces two Perl programs that
+                  implement graphical tools for exploring the
+                  performance of stochastic local search algorithms
+                  for biobjective optimization problems. These tools
+                  are based on the concept of the empirical attainment
+                  function (EAF), which describes the probabilistic
+                  distribution of the outcomes obtained by a
+                  stochastic algorithm in the objective space. In
+                  particular, we consider the visualization of
+                  attainment surfaces and differences between the
+                  first-order EAFs of the outcomes of two
+                  algorithms. This visualization allows us to identify
+                  certain algorithmic behaviors in a graphical way.
+                  We explain the use of these visualization tools and
+                  illustrate them with examples arising from
+                  practice.}
+}
+
+@phdthesis{LopezIbanezPhD,
+  author = { Manuel L{\'o}pez-Ib{\'a}ñez },
+  title = {Operational Optimisation of Water Distribution
+                  Networks},
+  school = {School of Engineering and the Built Environment},
+  year = 2009,
+  address = {Edinburgh Napier University, UK},
+  url = {http://researchrepository.napier.ac.uk/id/eprint/3044}
+}
+
+@book{Molchanov2005theory,
+  author = {Molchanov, Ilya},
+  title = {Theory of Random Sets},
+  publisher = {Springer},
+  year = 2005,
+  keywords = {Vorob'ev expectation}
+}
+
+@article{SchEsqLarCoe2012tec,
+  author = { Oliver Sch{\"u}tze  and X. Esquivel and A. Lara and  Carlos A. {Coello Coello} },
+  journal = {IEEE Transactions on Evolutionary Computation},
+  title = {Using the Averaged {Hausdorff} Distance as a Performance
+                  Measure in Evolutionary Multiobjective Optimization},
+  year = 2012,
+  volume = 16,
+  number = 4,
+  pages = {504--522}
+}
+
+@inproceedings{VelLam1998gp,
+  year = 1998,
+  publisher = {Stanford University Bookstore},
+  address = {Stanford University, California},
+  month = jul,
+  editor = {John R. Koza},
+  booktitle = {Late Breaking Papers at the Genetic Programming 1998
+                  Conference},
+  alias = {Veldhuizen98a},
+  key = {Van Veldhuizen and Lamont, 1998a},
+  title = {Evolutionary Computation and Convergence to a
+                  {P}areto Front},
+  author = { David A. {Van Veldhuizen}  and  Gary B. Lamont },
+  pages = {221--228},
+  keywords = {generational distance}
+}
+
+@article{ZhoZhaJin2009igdx,
+  author = "Zhou, A. and  Zhang, Qingfu  and  Yaochu Jin ",
+  title = {Approximating the set of {Pareto}-optimal solutions in both
+                  the decision and objective spaces by an estimation of
+                  distribution algorithm},
+  journal = {IEEE Transactions on Evolutionary Computation},
+  year = 2009,
+  volume = 13,
+  number = 5,
+  pages = {1167--1189},
+  doi = {10.1109/TEVC.2009.2021467},
+  keywords = {multi-modal, IGDX}
+}
+
+@article{ZitThiLauFon2003:tec,
+  author = { Eckart Zitzler  and  Lothar Thiele  and  Marco Laumanns  and  Carlos M. Fonseca  and Viviane {Grunert da Fonseca}},
+  title = {Performance Assessment of Multiobjective Optimizers:
+                  an Analysis and Review},
+  journal = {IEEE Transactions on Evolutionary Computation},
+  year = 2003,
+  volume = 7,
+  number = 2,
+    pages = {117--132},
+  alias = {perfassess}
+}

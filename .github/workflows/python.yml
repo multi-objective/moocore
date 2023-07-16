@@ -1,0 +1,267 @@
+name: Python
+
+on:
+  push:
+    branches-ignore: [gh-pages]
+    paths:
+      - ".github/workflows/python.yml"
+      - "python/**"
+      - 'c/configure*'
+      - 'c/Make*'
+      - 'c/*.mk'
+      - 'c/*.[ch]p?p?'
+  pull_request:
+    branches-ignore: [gh-pages]
+    paths:
+      - ".github/workflows/python.yml"
+      - "python/**"
+      - 'c/configure*'
+      - 'c/Make*'
+      - 'c/*.mk'
+      - 'c/*.[ch]p?p?'
+  # Manual run
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Linter 🧹
+        uses: chartboost/ruff-action@v1
+        with:
+          src: "./python"
+          version: 0.3.5
+
+  run-tests:
+    timeout-minutes: 15
+    needs: lint-ruff
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    name: Test ${{ matrix.os }} (${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # When set to true, GitHub cancels all in-progress jobs if any matrix job fails.
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        # This must be kept in sync with pyproject.toml and mooplot
+        python-version: ['3.10', '3.11', '3.12']
+        include:
+          - os: windows-latest
+            python-version: '3.10'
+          - os: macos-latest
+            python-version: '3.10'
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install tox tox-gh-actions
+
+      - name: Run tox
+        run: tox
+        working-directory: python
+
+  build-package:
+    timeout-minutes: 10
+    needs: run-tests
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on:  ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install --upgrade build
+
+      - name: Build the packages
+        run: python3 -m build
+        working-directory: python
+
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}-${{ matrix.python-version }}
+          path: python/dist/
+
+  build-doc:
+    timeout-minutes: 10
+    needs: build-package
+    permissions:
+      contents: write
+    concurrency: web # Recommended if you intend to make multiple deployments in quick succession.
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on:  ubuntu-latest
+    steps:
+      - name: Checkout sources 🛎️
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Ensure Pip and Build
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install --upgrade build
+
+      - name: Build the package
+        run: python3 -m build
+        working-directory: python
+
+      - name: install the package
+        run: python3 -m pip install .
+        working-directory: python
+
+      - name: install the doc build requirements
+        run: |
+          python3 -m pip install -r requirements_dev.txt
+        working-directory: python
+
+      - name: Build the docs 🔧
+        run: |
+          make -C doc clean
+          tox -e docs
+          make -C doc html
+        working-directory: python
+
+      - name: Deploy 🚀
+        if: success() && runner.os == 'Linux' && github.event_name == 'push'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: python/doc/_build/html/ # The folder the action should deploy.
+          target-folder: python
+          single-commit: true
+          clean: true
+
+  coverage:
+    timeout-minutes: 15
+    needs: build-package
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    name: Coverage ${{ matrix.os }} (${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    env:
+      CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
+    strategy:
+      # When set to true, GitHub cancels all in-progress jobs if any matrix job fails.
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ['3.10']
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install tox tox-gh-actions
+        working-directory: python
+
+      - name: Run coverage using tox
+        run: tox -e cov
+        working-directory: python
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
+          verbose: true
+          flags: python
+          token: ${{secrets.CODECOV_TOKEN}}
+          directory: python
+
+  wheels:
+    name: Build wheels on ${{ matrix.os }}
+    needs: coverage
+    runs-on: ${{ matrix.os }}
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-latest, macos-latest]
+        python-version: ['3.10']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        name: Install Python
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set up QEMU
+        if: runner.os == 'Linux'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.16.5
+        with:
+          package-dir: python
+          output-dir: wheelhouse
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}-${{ matrix.python-version }}
+          path: wheelhouse/*.whl
+
+  upload:
+    name: Store wheels
+    needs: wheels
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: wheelhouse
+          pattern: wheels-*
+          merge-multiple: true
+
+      - name: List wheels
+        run: ls -l wheelhouse/*.whl
+
+      - name: Upload wheels
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git checkout --orphan new-wheels
+          git rm -rf .
+          mv wheelhouse/*.whl .
+          git add *.whl
+          git commit --allow-empty -m "Store wheels"
+          git branch -D wheels
+          git branch -m wheels
+          git push --force origin wheels
+        shell: bash {0}

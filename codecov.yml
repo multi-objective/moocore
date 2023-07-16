@@ -1,0 +1,40 @@
+fixes:
+  - "src/moocore/libmoocore/::" # Python package symlink
+  - "src/moocore/::" # R package symlink
+  - ".tox/coverage/lib/*/site-packages/::python/src/"
+
+comment:
+  layout: "header, diff, flags, components"  # show component info in the PR comment
+
+flag_management:
+  default_rules: # the rules that will be followed for any flag added, generally
+    carryforward: true
+
+component_management:
+  default_rules:  # default rules that will be inherited by all components
+    statuses:
+      - type: project # in this case every component that doesn't have a status defined will have a project type one
+        target: auto
+        branches:
+          - "!main"
+  individual_components:
+    - component_id: tests  # this is an identifier that should not be changed
+      name: tests  # this is a display name, and can be changed freely
+      paths:
+        - python/tests/**
+      statuses:
+        - type: project
+          target: 100%
+          informational: false
+        - type: patch
+
+    - component_id: src
+      name: src
+      paths:
+        - python/src/**
+      statuses:
+        - type: project
+          target: auto
+          threshold: 1%
+          informational: true
+        - type: patch

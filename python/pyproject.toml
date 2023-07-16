@@ -1,0 +1,106 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+  "cffi>=1.15.1",
+  "setuptools>=42",
+  "wheel",
+]
+
+[project]
+name = "moocore"
+version = "0.0.9999"
+description = "Core Algorithms for Multi-Objective Optimization"
+readme = "README.md"
+keywords = [
+  'math',
+  'Mathematics',
+  'Multi-criteria Decision-Making',
+  'operations research',
+  'Optimization',
+]
+authors = [
+  { name = "Manuel López-Ibáñez", email = "manuel.lopez-ibanez@manchester.ac.uk" },
+  { name = "Fergus Rooney", email = "fergus.rooney@outlook.com" },
+]
+requires-python = ">=3.10"
+classifiers = [
+  'Intended Audience :: Science/Research',
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "cffi>=1.15.1",
+  "numpy>=1.22.3",
+]
+[project.urls]
+Documentation = "https://multi-objective.github.io/moocore/"
+Homepage = "https://multi-objective.github.io/moocore/"
+Source = "https://github.com/multi-objective/moocore/"
+Tracker = "https://github.com/multi-objective/moocore/issues"
+
+[tool.setuptools]
+zip-safe = false
+package-dir = {"" = "src"}
+
+# FIXME: This doesn't work.
+# [tool.setuptools.packages.find]
+# where = ["src"]
+
+[tool.cibuildwheel]
+skip = ["pp*", # Disable building PyPy wheels on all platforms
+        "*-musllinux_aarch64", "cp38-musllinux_x86_64",
+        "*-win32", "*-manylinux_i686" # Skip 32-bit builds
+]
+build-verbosity = 2
+# Change import-mode to ensure we test against installed package, not local project
+test-requires = "pytest"
+test-command = "pytest -v {project}/python/tests --import-mode=importlib --doctest-modules"
+# skip tests on cp38-macosx_x86_64 because of https://github.com/catboost/catboost/issues/2371
+# skip tests on emulated architectures, as they are very slow
+# skip tests on *-macosx_arm64 , as cibuildwheel does not support tests on arm64 (yet)
+# skip tests on *-musllinux*" since llvmlite and numba do not provide musllinux wheels
+test-skip = "cp38-macosx_x86_64 *-*linux_{aarch64,ppc64le,s390x} *-macosx_arm64 *-musllinux*"
+
+[tool.cibuildwheel.linux]
+archs = ["x86_64", "aarch64"]
+# Use abi3audit to catch issues with Limited API wheels
+repair-wheel-command = [
+  "auditwheel repair -w {dest_dir} {wheel}",
+#  "pipx run abi3audit --verbose --strict --report {wheel}",
+]
+
+[tool.cibuildwheel.windows]
+archs = ["AMD64"]
+# Use delvewheel on windows
+before-build = "pip install delvewheel"
+repair-wheel-command = [
+  "delvewheel repair -w {dest_dir} {wheel}",
+#  "pipx run abi3audit --verbose --strict --report {wheel}",
+]
+
+[tool.cibuildwheel.macos]
+archs = ["x86_64", "universal2", "arm64"]
+repair-wheel-command = [
+  "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}",
+#  "pipx run abi3audit --verbose --strict --report {wheel}",
+]
+
+[tool.ruff]
+# Set the maximum line length to 79.
+line-length = 79
+
+[tool.ruff.lint]
+extend-select = [
+   "D",   # pydocstyle
+]
+ignore = [
+  "D203", # one-blank-line-before-class
+  "D213", # multi-line-summary-second-line
+
+]
+[tool.ruff.format]
+docstring-code-format = true
