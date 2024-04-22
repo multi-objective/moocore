@@ -18,15 +18,12 @@ navbar:
       href: https://cloud.r-project.org/package=moocore
 
 reference:
-  - title: Main
-    contents: moocore-package
-  - title: Computing the Empirical Attainment Function
-    contents:
-      - has_concept("eaf")
   - title: Pareto dominance
     contents: has_concept("dominance")
   - title: Multi-objective performance assessment metrics
     contents: has_concept("metrics")
+  - title: Computing the Empirical Attainment Function
+    contents: has_concept("eaf")
   - title: Datasets
     contents: has_keyword("datasets")
   - title: Other useful functions

@@ -4,12 +4,9 @@
 \name{moocore-package}
 \alias{moocore}
 \alias{moocore-package}
-\title{SHORT DESCRIPTION}
+\title{moocore: Core Mathematical Functions for Multi-Objective Optimization}
 \description{
-LONG DESCRIPTION
-}
-\examples{
-# TODO
+Fast implementation of mathematical operations and performance metrics for multi-objective optimization.
 }
 \seealso{
 Useful links:
@@ -23,7 +20,4 @@ Useful links:
 \strong{Maintainer}: Manuel López-Ibáñez \email{manuel.lopez-ibanez@manchester.ac.uk} (\href{https://orcid.org/0000-0001-9974-1295}{ORCID})
 
 }
-\concept{empirical attainment function}
-\concept{multivariate}
-\concept{optimize}
 \keyword{internal}

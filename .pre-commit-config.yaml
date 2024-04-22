@@ -2,8 +2,6 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
-      - id: end-of-file-fixer
-        exclude: '.*test-doctest.+\.R'
       - id: trailing-whitespace
       - id: check-yaml
       - id: check-merge-conflict

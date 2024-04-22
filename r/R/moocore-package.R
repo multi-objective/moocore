@@ -1,21 +1,13 @@
-#' SHORT DESCRIPTION
-#'
-#' LONG DESCRIPTION
-#'
+#' @keywords internal
+"_PACKAGE"
+
+## usethis namespace: start
 #' @importFrom matrixStats colRanges
 #' @importFrom Rdpack reprompt
 #' @importFrom utils modifyList write.table tail
-#'
 #' @useDynLib moocore, .registration = TRUE
-#'
-#' @examples
-#' # TODO
-#' @keywords internal
-#' @concept multivariate
-#' @concept optimize
-#' @concept empirical attainment function
-"_PACKAGE"
-
+## usethis namespace: end
+NULL
 
 #' Results of Hybrid GA on Vanzyl and Richmond water networks
 #'
