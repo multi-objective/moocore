@@ -37,8 +37,8 @@ dependencies = [
   "numpy>=1.22.3",
 ]
 [project.urls]
-Documentation = "https://multi-objective.github.io/moocore/"
-Homepage = "https://multi-objective.github.io/moocore/"
+Documentation = "https://multi-objective.github.io/moocore/python"
+Homepage = "https://multi-objective.github.io/moocore/python"
 Source = "https://github.com/multi-objective/moocore/"
 Tracker = "https://github.com/multi-objective/moocore/issues"
 
@@ -104,3 +104,6 @@ ignore = [
 ]
 [tool.ruff.format]
 docstring-code-format = true
+
+[tool.pytest.ini_options]
+doctest_optionflags = "NUMBER"
