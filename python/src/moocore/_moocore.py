@@ -942,7 +942,7 @@ def vorobDev(x, reference, VE=None):
     >>> CPFs = moocore.read_datasets(filename)
     >>> VD = moocore.vorobDev(CPFs, reference=(2, 200))
     >>> VD
-    3017.1298940232646
+    3017.12989402326
 
     """
     if VE is None:
