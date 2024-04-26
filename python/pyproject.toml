@@ -58,7 +58,7 @@ skip = ["pp*", # Disable building PyPy wheels on all platforms
 build-verbosity = 2
 # Change import-mode to ensure we test against installed package, not local project
 test-requires = "pytest"
-test-command = "pytest -v {project}/python/tests --import-mode=importlib --doctest-modules"
+test-command = "pytest -v --doctest-modules --doctest-continue-on-failure --import-mode=importlib {package}/tests"
 # skip tests on cp38-macosx_x86_64 because of https://github.com/catboost/catboost/issues/2371
 # skip tests on emulated architectures, as they are very slow
 # skip tests on *-macosx_arm64 , as cibuildwheel does not support tests on arm64 (yet)
