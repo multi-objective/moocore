@@ -32,26 +32,8 @@ def test_read_datasets_data(test_datapath):
             testdata, check_data
         ), f"read_datasets does not produce expected array for file {testpath}"
 
-    # These files are under src/moocore/data/
     test_names = [
         "input1.dat",
-    ]
-    expected_names = [
-        "dat1_read_datasets.txt",
-    ]
-    expected_shapes = [
-        (100, 3),
-    ]
-
-    for test, expected_name, expected_shape in zip(
-        test_names, expected_names, expected_shapes
-    ):
-        check_testdata(
-            moocore.get_dataset_path(test), expected_name, expected_shape
-        )
-
-    # These files are under tests/test_data/
-    test_names = [
         "spherical-250-10-3d.txt",
         "uniform-250-10-3d.txt",
         "wrots_l10w100_dat",
@@ -59,13 +41,21 @@ def test_read_datasets_data(test_datapath):
         "ALG_1_dat.xz",
     ]
     expected_names = [
+        "dat1_read_datasets.txt",
         "spherical_read_datasets.txt",
         "uniform_read_datasets.txt",
         "wrots_l10_read_datasets.txt",
         "wrots_l100_read_datasets.txt",
         "ALG_1_dat_read_datasets.txt",
     ]
-    expected_shapes = [(2500, 4), (2500, 4), (3262, 3), (888, 3), (23260, 3)]
+    expected_shapes = [
+        (100, 3),
+        (2500, 4),
+        (2500, 4),
+        (3262, 3),
+        (888, 3),
+        (23260, 3),
+    ]
 
     for test, expected_name, expected_shape in zip(
         test_names, expected_names, expected_shapes
@@ -254,10 +244,7 @@ def test_eaf(test_datapath):
         # "ALG_1_dat_get_eaf.txt"
     ]
     for test_name, expected_eaf_name in zip(test_names, expected_eaf_names):
-        if test_name == "input1.dat":
-            filename = moocore.get_dataset_path(test_name)
-        else:
-            filename = test_datapath(test_name)
+        filename = test_datapath(test_name)
         dataset = moocore.read_datasets(filename)
         eaf_test = moocore.eaf(dataset)
         eaf_pct_test = moocore.eaf(dataset, percentiles=[0, 50, 100])
