@@ -1,6 +1,10 @@
 #' Compute (total) weighted hypervolume given a set of rectangles
 #'
-#' Calculates the hypervolume weighted by a set of rectangles (with zero weight outside the rectangles). The function [total_whv_rect()] calculates the total weighted hypervolume as [hypervolume()]` + scalefactor * abs(prod(reference - ideal)) * whv_rect()`. The details of the computation are given by \citet{DiaLop2020ejor}.
+#' Calculates the hypervolume weighted by a set of rectangles (with zero weight
+#' outside the rectangles). The function [total_whv_rect()] calculates the
+#' total weighted hypervolume as [hypervolume()]` + scalefactor *
+#' abs(prod(reference - ideal)) * whv_rect()`. The details of the computation
+#' are given by \citet{DiaLop2020ejor}.
 #'
 #' @template arg_data
 #'
@@ -17,7 +21,7 @@
 #'
 #' @return  A single numerical value.
 #'
-#' @seealso    [read_datasets()], [eafdiff()], [choose_eafdiff()], [whv_hype()]
+#' @seealso [read_datasets()], [eafdiff()], [choose_eafdiff()], [whv_hype()]
 #'
 #' @examples
 #' rectangles <- as.matrix(read.table(header=FALSE, text='
@@ -82,7 +86,7 @@ whv_rect <- function(data, rectangles, reference, maximise = FALSE)
 #' total_whv_rect (matrix(c(2, 1), ncol=2), rectangles, reference = 6, ideal = c(1,1))
 #' total_whv_rect (matrix(c(1, 2), ncol=2), rectangles, reference = 6, ideal = c(1,1))
 #'
-#'@rdname whv_rect
+#' @rdname whv_rect
 #'
 #' @concept metrics
 #' @export

@@ -48,7 +48,7 @@ class ReadDatasetsError(Exception):
         super().__init__(self.message)
 
 
-def read_datasets(filename):
+def read_datasets(filename, /):
     """Read an input dataset file, parsing the file and returning a numpy array.
 
     Parameters
@@ -164,7 +164,7 @@ def _unary_refset_common(data, ref, maximise):
     return data_p, nobj, npoints, ref_p, ref_size, maximise_p
 
 
-def igd(data, ref, maximise=False):
+def igd(data, /, ref, *, maximise=False) -> float:
     """Inverted Generational Distance (IGD and IGD+) and Averaged Hausdorff Distance.
 
     Functions to compute the inverted generational distance (IGD and IGD+) and the
@@ -214,7 +214,7 @@ def igd(data, ref, maximise=False):
     return lib.IGD(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
 
 
-def igd_plus(data, ref, maximise=False):
+def igd_plus(data, /, ref, *, maximise=False) -> float:
     """Calculate IGD+ indicator.
 
     See :func:`igd`
@@ -225,7 +225,7 @@ def igd_plus(data, ref, maximise=False):
     return lib.IGD_plus(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
 
 
-def avg_hausdorff_dist(data, ref, maximise=False, p=1):
+def avg_hausdorff_dist(data, /, ref, *, maximise=False, p: float = 1) -> float:
     """Calculate average Hausdorff distance.
 
     See :func:`igd`
@@ -242,7 +242,7 @@ def avg_hausdorff_dist(data, ref, maximise=False, p=1):
     )
 
 
-def epsilon_additive(data, ref, maximise=False):
+def epsilon_additive(data, /, ref, *, maximise=False) -> float:
     """Compute the epsilon metric, either additive or multiplicative.
 
     `data` and `reference` must all be larger than 0 for `epsilon_mult`.
@@ -284,7 +284,7 @@ def epsilon_additive(data, ref, maximise=False):
     )
 
 
-def epsilon_mult(data, ref, maximise=False):
+def epsilon_mult(data, /, ref, *, maximise=False) -> float:
     """Multiplicative epsilon metric.
 
     See :func:`epsilon_additive`
@@ -297,7 +297,7 @@ def epsilon_mult(data, ref, maximise=False):
 
 
 # FIXME: TODO maximise option
-def hypervolume(data: ArrayLike, ref) -> float:
+def hypervolume(data: ArrayLike, /, ref) -> float:
     r"""Hypervolume indicator.
 
     Compute the hypervolume metric with respect to a given reference point
@@ -381,25 +381,25 @@ def is_nondominated(data, maximise=False, keep_weakly: bool = False):
     Returns
     -------
     bool array
-        :func:`is_nondominated` returns a boolean list of the same length as the number of rows of data,\
+        :func:`is_nondominated` returns a boolean list of the same length as the number of rows of data,
         where ``True`` means that the point is not dominated by any other point.
 
         :func:`filter_dominated` returns a numpy array with only mutually nondominated points.
 
     Examples
     --------
-    >>> S = np.array([[1,1], [0,1], [1,0], [1,0]])
+    >>> S = np.array([[1, 1], [0, 1], [1, 0], [1, 0]])
     >>> moocore.is_nondominated(S)
     array([False,  True, False,  True])
 
-    >>> moocore.is_nondominated(S, maximise = True)
+    >>> moocore.is_nondominated(S, maximise=True)
     array([ True, False, False, False])
 
     >>> moocore.filter_dominated(S)
     array([[0, 1],
            [1, 0]])
 
-    >>> moocore.filter_dominated(S, keep_weakly = True)
+    >>> moocore.filter_dominated(S, keep_weakly=True)
     array([[0, 1],
            [1, 0],
            [1, 0]])
@@ -418,7 +418,7 @@ def is_nondominated(data, maximise=False, keep_weakly: bool = False):
     return np.frombuffer(nondom, dtype=bool)
 
 
-def filter_dominated(data, maximise=False, keep_weakly=False):
+def filter_dominated(data, /, *, maximise=False, keep_weakly=False):
     """Remove dominated points according to Pareto optimality.
 
     See: :func:`is_nondominated` for details
@@ -426,7 +426,9 @@ def filter_dominated(data, maximise=False, keep_weakly=False):
     return data[is_nondominated(data, maximise, keep_weakly), :]
 
 
-def filter_dominated_within_sets(data, maximise=False, keep_weakly=False):
+def filter_dominated_within_sets(
+    data, /, *, maximise=False, keep_weakly=False
+):
     """Given a dataset with multiple sets (last column gives the set index), filter dominated points within each set.
 
     Executes the :func:`filter_dominated` function within each set in a dataset \
@@ -494,7 +496,7 @@ def filter_dominated_within_sets(data, maximise=False, keep_weakly=False):
     return data[is_nondom, :]
 
 
-def pareto_rank(data, maximise=False):
+def pareto_rank(data, /, *, maximise=False):
     r"""Ranks points according to Pareto-optimality, which is also called nondominated sorting.
 
     Ranks points according to Pareto-optimality, which is also called nondominated sorting :footcite:p:`Deb02nsga2`.
@@ -628,12 +630,14 @@ def pareto_rank(data, maximise=False):
 
 def normalise(
     data: np.ndarray,
+    /,
     to_range=[0.0, 1.0],
+    *,
     lower=np.nan,
     upper=np.nan,
     maximise=False,
 ):
-    """Normalise points per coordinate to a range, e.g., `to_range = [1,2]`, where the minimum value will correspond to 1 and the maximum to 2.
+    """Normalise points per coordinate to a range, e.g., ``to_range = [1,2]``, where the minimum value will correspond to 1 and the maximum to 2.
 
     Parameters
     ----------
@@ -753,10 +757,8 @@ def normalise(
 #     return dataset
 
 
-def eaf(data, percentiles=[]):
-    """Empirical attainment function (EAF) calculation.
-
-    Calculate EAF in 2D or 3D from the input dataset.
+def eaf(data, /, percentiles=[]):
+    """Compute the Empirical attainment function (EAF) in 2D or 3D.
 
     Parameters
     ----------
@@ -836,7 +838,7 @@ def eaf(data, percentiles=[]):
     return np.frombuffer(eaf_buf).reshape((eaf_npoints, -1))
 
 
-def vorobT(data, reference):
+def vorobT(data, /, reference):
     """Compute Vorob'ev threshold and expectation.
 
     Parameters
@@ -905,7 +907,7 @@ def vorobT(data, reference):
     return dict(threshold=c, VE=eaf_res, avg_hyp=avg_hyp)
 
 
-def vorobDev(x, reference, VE=None):
+def vorobDev(x, /, reference, *, VE=None) -> float:
     r"""Compute Vorob'ev deviation.
 
     Parameters
@@ -979,8 +981,8 @@ def vorobDev(x, reference, VE=None):
     return VD - H1 - H2
 
 
-def eafdiff(x, y, intervals=None, maximise=False, rectangles=False):
-    """Compute empirical attainment function differences.
+def eafdiff(x, y, /, *, intervals=None, maximise=False, rectangles=False):
+    """Compute empirical attainment function (EAF) differences.
 
     Calculate the differences between the empirical attainment functions of two
     data sets.
@@ -1291,7 +1293,7 @@ def eafdiff(x, y, intervals=None, maximise=False, rectangles=False):
 #     return hv
 
 
-def get_dataset_path(filename: str) -> str:
+def get_dataset_path(filename: str, /) -> str:
     """Return path to dataset within the package.
 
     Parameters
@@ -1307,7 +1309,7 @@ def get_dataset_path(filename: str) -> str:
     return files("moocore.data").joinpath(filename)
 
 
-def groupby(x, groups, axis=0):
+def groupby(x, groups, /, *, axis=0):
     """Split an array into groups.
 
     See https://github.com/numpy/numpy/issues/7265

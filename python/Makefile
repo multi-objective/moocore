@@ -1,3 +1,5 @@
+# This file should be almost identical to
+# https://github.com/multi-objective/mooplot/blob/main/python/Makefile
 .PHONY : install build test doc clean docdeps pre-commit
 
 install: build
