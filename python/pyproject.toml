@@ -12,11 +12,11 @@ version = "0.0.9999"
 description = "Core Algorithms for Multi-Objective Optimization"
 readme = "README.md"
 keywords = [
-  'math',
-  'Mathematics',
-  'Multi-criteria Decision-Making',
-  'operations research',
-  'Optimization',
+  "math",
+  "Mathematics",
+  "Multi-criteria Decision-Making",
+  "operations research",
+  "Optimization",
 ]
 authors = [
   { name = "Manuel López-Ibáñez", email = "manuel.lopez-ibanez@manchester.ac.uk" },
@@ -24,7 +24,7 @@ authors = [
 ]
 requires-python = ">=3.10"
 classifiers = [
-  'Intended Audience :: Science/Research',
+  "Intended Audience :: Science/Research",
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
@@ -36,24 +36,26 @@ dependencies = [
   "cffi>=1.15.1",
   "numpy>=1.22.3",
 ]
-[project.urls]
-Documentation = "https://multi-objective.github.io/moocore/python"
-Homepage = "https://multi-objective.github.io/moocore/python"
-Source = "https://github.com/multi-objective/moocore/"
-Tracker = "https://github.com/multi-objective/moocore/issues"
+urls.Documentation = "https://multi-objective.github.io/moocore/python"
+urls.Homepage = "https://multi-objective.github.io/moocore/python"
+urls.Source = "https://github.com/multi-objective/moocore/"
+urls.Tracker = "https://github.com/multi-objective/moocore/issues"
 
 [tool.setuptools]
 zip-safe = false
-package-dir = {"" = "src"}
+package-dir = { "" = "src" }
 
 # FIXME: This doesn't work.
 # [tool.setuptools.packages.find]
 # where = ["src"]
 
 [tool.cibuildwheel]
-skip = ["pp*", # Disable building PyPy wheels on all platforms
-        "*-musllinux_aarch64", "cp38-musllinux_x86_64",
-        "*-win32", "*-manylinux_i686" # Skip 32-bit builds
+skip = [
+  "pp*",                   # Disable building PyPy wheels on all platforms
+  "*-musllinux_aarch64",
+  "cp38-musllinux_x86_64",
+  "*-win32",
+  "*-manylinux_i686",      # Skip 32-bit builds
 ]
 build-verbosity = 2
 # Change import-mode to ensure we test against installed package, not local project
@@ -66,44 +68,49 @@ test-command = "pytest -v --doctest-modules --doctest-continue-on-failure --impo
 test-skip = "cp38-macosx_x86_64 *-*linux_{aarch64,ppc64le,s390x} *-macosx_arm64 *-musllinux*"
 
 [tool.cibuildwheel.linux]
-archs = ["x86_64", "aarch64"]
+archs = [
+  "x86_64",
+  "aarch64",
+]
 # Use abi3audit to catch issues with Limited API wheels
 repair-wheel-command = [
   "auditwheel repair -w {dest_dir} {wheel}",
-#  "pipx run abi3audit --verbose --strict --report {wheel}",
+  #  "pipx run abi3audit --verbose --strict --report {wheel}",
 ]
 
 [tool.cibuildwheel.windows]
-archs = ["AMD64"]
+archs = [
+  "AMD64",
+]
 # Use delvewheel on windows
 before-build = "pip install delvewheel"
 repair-wheel-command = [
   "delvewheel repair -w {dest_dir} {wheel}",
-#  "pipx run abi3audit --verbose --strict --report {wheel}",
+  #  "pipx run abi3audit --verbose --strict --report {wheel}",
 ]
 
 [tool.cibuildwheel.macos]
-archs = ["x86_64", "universal2", "arm64"]
+archs = [
+  "x86_64",
+  "universal2",
+  "arm64",
+]
 repair-wheel-command = [
   "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}",
-#  "pipx run abi3audit --verbose --strict --report {wheel}",
+  #  "pipx run abi3audit --verbose --strict --report {wheel}",
 ]
 
 [tool.ruff]
 # Set the maximum line length to 79.
 line-length = 79
-
-[tool.ruff.lint]
-extend-select = [
-   "D",   # pydocstyle
+format.docstring-code-format = true
+lint.extend-select = [
+  "D", # pydocstyle
 ]
-ignore = [
+lint.ignore = [
   "D203", # one-blank-line-before-class
   "D213", # multi-line-summary-second-line
-
 ]
-[tool.ruff.format]
-docstring-code-format = true
 
 [tool.pytest.ini_options]
 doctest_optionflags = "NUMBER"
