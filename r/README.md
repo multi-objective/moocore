@@ -8,8 +8,8 @@
 [![coverage][r-coverage-badge]][r-coverage-link]
 <!-- badges: end -->
 
-[ [**Homepage**](r-moocore-homepage) ]
-[ [**GitHub**](r-moocore-github) ]
+[ [**Homepage**][r-moocore-homepage] ]
+[ [**GitHub**][r-moocore-github] ]
 
 **Maintainer:** [Manuel López-Ibáñez](https://lopez-ibanez.eu)
 

@@ -6,8 +6,8 @@
 [![coverage][py-coverage-badge]][py-coverage-link]
 <!-- badges: end -->
 
-[ [**Homepage**](py-moocore-homepage) ]
-[ [**GitHub**](py-moocore-github) ]
+[ [**Homepage**][py-moocore-homepage] ]
+[ [**GitHub**][py-moocore-github] ]
 
 
 **Contributors:**
