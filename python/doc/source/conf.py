@@ -111,7 +111,7 @@ html_theme_options = {
     #    "navigation_depth": 2,
     "show_prev_next": True,
     "use_edit_page_button": True,
-    "github_url": "https://github.com/multi-objective/{project}",
+    "github_url": f"https://github.com/multi-objective/{project}",
     # Add light/dark mode and documentation version switcher:
     # "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"],
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
