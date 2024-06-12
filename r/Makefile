@@ -5,7 +5,6 @@ REALVERSION=$(PACKAGEVERSION)$(REVNUM)
 BINDIR=$(CURDIR)/..
 INSTALL_FLAGS="--with-keep.source"
 PACKAGEDIR=$(CURDIR)
-RHUB_COMMON_ARGS= path='$(BINDIR)/$(PACKAGE)_$(PACKAGEVERSION).tar.gz', env_vars = c('_R_CHECK_FORCE_SUGGESTS_'='false', R_DEFAULT_SAVE_VERSION='2', R_DEFAULT_SERIALIZE_VERSION='2')
 Reval=R --slave -e
 
 define Rsed
@@ -86,16 +85,9 @@ pdf:
 submit:
 	@echo 'Edit cran-comments.md and run devtools::release() in R'
 
-remotecran: releasebuild
-	$(Reval) "rhub::check_for_cran($(RHUB_COMMON_ARGS), show_status = TRUE)"
-
-macbuild: releasebuild
-	$(Reval) "rhub::check(platform='macos-highsierra-release-cran', $(RHUB_COMMON_ARGS))"
-
 winbuild: releasebuild
 	$(Reval) "devtools::check_win_release()"
 	$(Reval) "devtools::check_win_devel()"
-	$(Reval) "rhub::check_on_windows($(RHUB_COMMON_ARGS))"
 
 covr:
 	$(Reval) "Sys.setenv(NOT_CRAN='true');covr::report(covr::package_coverage(type='all', quiet=FALSE), browse=TRUE)"
