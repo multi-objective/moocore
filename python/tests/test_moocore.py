@@ -69,19 +69,19 @@ def test_read_datasets_badname():
         moocore.read_datasets("nonexistent_file.txt")
 
     assert str(expt.value) == "file 'nonexistent_file.txt' not found"
-    assert expt.type == FileNotFoundError
+    assert expt.type is FileNotFoundError
 
 
 def test_read_datasets_errorcode(test_datapath):
     """Checks that an exception is raised when `read_datasets()` returns an error code, as well as checking specific error types from the `ReadDatasetsError` type."""
     with pytest.raises(Exception) as expt:
         moocore.read_datasets(test_datapath("empty"))
-    assert expt.type == moocore.ReadDatasetsError
+    assert expt.type is moocore.ReadDatasetsError
     assert expt.value.message == "READ_INPUT_FILE_EMPTY"
 
     with pytest.raises(Exception) as expt:
         moocore.read_datasets(test_datapath("column_error.dat"))
-    assert expt.type == moocore.ReadDatasetsError
+    assert expt.type is moocore.ReadDatasetsError
     assert expt.value.message == "ERROR_COLUMNS"
 
 
@@ -112,7 +112,7 @@ def test_hv_wrong_ref(test_datapath):
     X = moocore.read_datasets(filename)
     with pytest.raises(Exception) as expt:
         moocore.hypervolume(X[X[:, 2] == 1, :2], ref=np.array([10, 10, 10]))
-    assert expt.type == ValueError
+    assert expt.type is ValueError
 
 
 def test_igd():
