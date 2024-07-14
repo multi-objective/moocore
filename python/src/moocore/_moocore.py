@@ -148,11 +148,11 @@ def _parse_maximise(maximise, nobj):
 
 def _unary_refset_common(data, ref, maximise):
     # Convert to numpy.array in case the user provides a list.  We use
-    # np.asfarray to convert it to floating-point, otherwise if a user inputs
+    # np.asarray(dtype=float) to convert it to floating-point, otherwise if a user inputs
     # something like ref = np.array([10, 10]) then numpy would interpret it as
     # an int array.
-    data = np.asfarray(data)
-    ref = np.atleast_2d(np.asfarray(ref))
+    data = np.asarray(data, dtype=float)
+    ref = np.atleast_2d(np.asarray(ref, dtype=float))
     nobj = data.shape[1]
     if nobj != ref.shape[1]:
         raise ValueError(
@@ -357,9 +357,9 @@ def hypervolume(data: ArrayLike, /, ref) -> float:
     # np.asfarray to convert it to floating-point, otherwise if a user inputs
     # something like ref = np.array([10, 10]) then numpy would interpret it as
     # an int array.
-    data = np.asfarray(data)
+    data = np.asarray(data, dtype=float)
     nobj = data.shape[1]
-    ref = atleast_1d_of_length_n(np.asfarray(ref), nobj)
+    ref = atleast_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
     if nobj != ref.shape[0]:
         raise ValueError(
             f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
@@ -413,7 +413,7 @@ def is_nondominated(data, maximise=False, keep_weakly: bool = False):
            [1, 0]])
 
     """
-    data = np.asfarray(data)
+    data = np.asarray(data, dtype=float)
     nrows, nobj = data.shape
     maximise = _parse_maximise(maximise, nobj)
     data_p, npoints, nobj = np2d_to_double_array(data)
@@ -484,7 +484,7 @@ def filter_dominated_within_sets(
     With a single dataset, use :func:`filter_dominated`
 
     """
-    data = np.asfarray(data)
+    data = np.asarray(data, dtype=float)
     ncols = data.shape[1]
     if ncols < 3:
         raise ValueError(
@@ -579,7 +579,7 @@ def pareto_rank(data, /, *, maximise=False):
     True
 
     """
-    data = np.asfarray(data)
+    data = np.asarray(data, dtype=float)
     nrows, nobj = data.shape
     maximise = _parse_maximise(maximise, nobj)
     if maximise.any():
@@ -686,15 +686,15 @@ def normalise(
 
     """
     # Normalise modifies the data, so we need to create a copy.
-    data = np.asfarray(data).copy()
+    data = np.asarray(data, dtype=float).copy()
     npoints, nobj = data.shape
     if nobj == 1:
         raise ValueError("'data' must have at least two columns")
-    to_range = np.asfarray(to_range)
+    to_range = np.asarray(to_range, dtype=float)
     if to_range.shape[0] != 2:
         raise ValueError("'to_range' must have length 2")
-    lower = atleast_1d_of_length_n(np.asfarray(lower), nobj)
-    upper = atleast_1d_of_length_n(np.asfarray(upper), nobj)
+    lower = atleast_1d_of_length_n(np.asarray(lower, dtype=float), nobj)
+    upper = atleast_1d_of_length_n(np.asarray(upper, dtype=float), nobj)
     if np.any(np.isnan(lower)):
         lower = np.where(np.isnan(lower), data.min(axis=0), lower)
     if np.any(np.isnan(upper)):
@@ -805,7 +805,7 @@ def eaf(data, /, percentiles=[]):
            [  7.92511295,   3.92669598, 100.        ]])
 
     """
-    data = np.asfarray(data)
+    data = np.asarray(data, dtype=float)
     ncols = data.shape[1]
     if ncols < 3:
         raise ValueError(
@@ -824,7 +824,7 @@ def eaf(data, /, percentiles=[]):
     if len(percentiles) == 0:
         percentiles = np.arange(1.0, nsets + 1) * (100.0 / nsets)
     else:
-        percentiles = np.unique(np.asfarray(percentiles))
+        percentiles = np.unique(np.asarray(percentiles, dtype=float))
     percentile_p, npercentiles = np1d_to_double_array(percentiles)
 
     # Get C pointers + matrix size for calling CFFI generated extension module
@@ -886,7 +886,7 @@ def vorobT(data, /, reference):
     8943.333191728081
 
     """
-    data = np.asfarray(data)
+    data = np.asarray(data, dtype=float)
     ncols = data.shape[1]
     if ncols < 3:
         raise ValueError(
@@ -957,7 +957,7 @@ def vorobDev(x, /, reference, *, VE=None) -> float:
     if VE is None:
         VE = vorobT(x, reference)["VE"]
 
-    x = np.asfarray(x)
+    x = np.asarray(x, dtype=float)
     ncols = x.shape[1]
     if ncols < 3:
         raise ValueError(
@@ -1075,8 +1075,8 @@ def eafdiff(x, y, /, *, intervals=None, maximise=False, rectangles=False):
            [ 4. ,  2.5,  inf,  3. ,  1. ]])
 
     """
-    x = np.asfarray(x)
-    y = np.asfarray(y)
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
     assert (
         x.shape[1] == y.shape[1]
     ), "'x' and 'y' must have the same number of columns"
@@ -1158,7 +1158,7 @@ def eafdiff(x, y, /, *, intervals=None, maximise=False, rectangles=False):
 #     intervals = int(intervals)
 
 #     data = np.ascontiguousarray(
-#         np.asfarray(data)
+#         np.asarray(data, dtype=float)
 #     )  # C function requires contiguous data
 #     num_data_columns = data.shape[1]
 #     data_p, npoints, ncols = np2d_to_double_array(data)
@@ -1286,13 +1286,15 @@ def whv_hype(
     # Convert to numpy.array in case the user provides a list.  We use
     # np.asfarray to convert it to floating-point, otherwise if a user inputs
     # something like [10, 10] then numpy would interpret it as an int array.
-    data = np.asfarray(data)
+    data = np.asarray(data, dtype=float)
     nobj = data.shape[1]
     if nobj != 2:
         raise NotImplementedError("Only 2D datasets are currently supported")
 
-    reference = atleast_1d_of_length_n(np.asfarray(reference), nobj)
-    ideal = atleast_1d_of_length_n(np.asfarray(ideal), nobj)
+    reference = atleast_1d_of_length_n(
+        np.asarray(reference, dtype=float), nobj
+    )
+    ideal = atleast_1d_of_length_n(np.asarray(ideal, dtype=float), nobj)
 
     maximise = _parse_maximise(maximise, nobj)
     data[:, maximise] = -data[:, maximise]
@@ -1319,7 +1321,7 @@ def whv_hype(
             data_p, npoints, ideal, reference, nsamples, seed, mu
         )
     elif dist == "point":
-        mu = atleast_1d_of_length_n(np.asfarray(mu), nobj)
+        mu = atleast_1d_of_length_n(np.asarray(mu, dtype=float), nobj)
         mu, _ = np1d_to_double_array(mu)
         hv = lib.whv_hype_gaus(
             data_p, npoints, ideal, reference, nsamples, seed, mu
