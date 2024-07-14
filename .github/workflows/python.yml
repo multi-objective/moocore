@@ -19,6 +19,9 @@ on:
       - 'c/*.[ch]p?p?'
   # Manual run
   workflow_dispatch:
+  release:
+    types:
+      - published
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -102,7 +105,7 @@ jobs:
       - name: Publish artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-${{ matrix.os }}-${{ matrix.python-version }}
+          name: moocore-dist-${{ matrix.os }}-${{ matrix.python-version }}
           path: python/dist/
 
   build-doc:
@@ -229,8 +232,30 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.os }}-${{ matrix.python-version }}
+          name: moocore-wheels-${{ matrix.os }}-${{ matrix.python-version }}
           path: wheelhouse/*.whl
+
+  upload_pypi:
+    name: Publish Python 🐍 distribution 📦 to PyPI
+    needs: [wheels, build-package]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    if: github.event_name == 'release' && github.event.action == 'published'
+    # or, alternatively, upload to PyPI on every tag starting with 'v' (remove on: release above to use this)
+    # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          # unpacks all moocore artifacts into dist/
+          pattern: moocore-*
+          path: dist
+          merge-multiple: true
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # To test: repository-url: https://test.pypi.org/legacy/
 
   upload:
     name: Store wheels
@@ -244,7 +269,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: wheelhouse
-          pattern: wheels-*
+          pattern: moocore-wheels-*
           merge-multiple: true
 
       - name: List wheels
