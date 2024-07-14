@@ -78,7 +78,7 @@ jobs:
         uses: r-lib/actions/check-r-package@v2
         with:
           args: 'c("--no-manual", "--as-cran")'
-        working-directory: r
+          working-directory: r
 
       - name: Check (NOT CRAN)
         env:
@@ -86,7 +86,7 @@ jobs:
         uses: r-lib/actions/check-r-package@v2
         with:
           args: 'c("--no-manual", "--run-donttest", "--run-dontrun", "--timings")'
-        working-directory: r
+          working-directory: r
 
       - name: Show testthat output
         if: failure()
