@@ -547,27 +547,7 @@ def pareto_rank(data, /, *, maximise=False):
             4,  9,  4,  3, 11,  2,  3, 13,  2,  3, 10,  5,  3,  6,  3],
           dtype=int32)
 
-
-    We can now sort the points according to their Pareto rank:
-
-    >>> x[ranks.argsort(), :]  # doctest: +ELLIPSIS
-    array([[0.20816431, 4.62275469],
-           [1.54506255, 0.38303122],
-           [0.22997367, 1.11772205],
-           [0.17470556, 8.89066343],
-           [0.58799475, 0.73891181],
-           [8.57911868, 0.35169752],
-           [0.2901393 , 8.32259412],
-           [6.78498493, 0.56380796],
-           ...
-           [9.73057875, 6.15847562],
-           [8.17231096, 9.76977853],
-           [9.69531949, 7.22212523],
-           [9.30608102, 7.69433246],
-           [8.75833731, 8.98886885]])
-
-
-    Or split the original set into a list of nondominated sets ordered by Pareto rank:
+    We can now split the original set into a list of nondominated sets ordered by Pareto rank:
 
     >>> paretos = [x.compress((g == ranks), axis=0) for g in np.unique(ranks)]
     >>> len(paretos)
@@ -912,7 +892,7 @@ def vorobT(data, /, reference):
         diff = prev_hyp - tmp
         prev_hyp = tmp
 
-    return dict(threshold=c, VE=eaf_res, avg_hyp=avg_hyp)
+    return dict(threshold=c, VE=eaf_res, avg_hyp=float(avg_hyp))
 
 
 def vorobDev(x, /, reference, *, VE=None) -> float:
@@ -976,16 +956,13 @@ def vorobDev(x, /, reference, *, VE=None) -> float:
     ).mean()
     VD = (
         np.fromiter(
-            (
-                hypervolume(np.row_stack((g, VE)), ref=reference)
-                for g in x_split
-            ),
+            (hypervolume(np.vstack((g, VE)), ref=reference) for g in x_split),
             dtype=float,
             count=len(x_split),
         ).mean()
         * 2.0
     )
-    return VD - H1 - H2
+    return float(VD - H1 - H2)
 
 
 def eafdiff(x, y, /, *, intervals=None, maximise=False, rectangles=False):
@@ -1093,7 +1070,7 @@ def eafdiff(x, y, /, *, intervals=None, maximise=False, rectangles=False):
     cumsizes = np.concatenate((cumsizes_x, cumsizes_x[-1] + cumsizes_y))
     nsets = len(cumsizes)
 
-    data = np.row_stack((x[:, :-1], y[:, :-1]))
+    data = np.vstack((x[:, :-1], y[:, :-1]))
     if maximise.any():
         data[:, maximise] = -data[:, maximise]
 
