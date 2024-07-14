@@ -386,7 +386,7 @@ def hypervolume(data: ArrayLike, /, ref: ArrayLike) -> float:
 
 
 def is_nondominated(
-    data: ArrayLike, /, *, maximise=False, keep_weakly: bool = False
+    data: ArrayLike, maximise=False, keep_weakly: bool = False
 ):
     """Identify dominated points according to Pareto optimality.
 
