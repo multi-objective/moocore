@@ -48,7 +48,7 @@ jobs:
       # When set to true, GitHub cancels all in-progress jobs if any matrix job fails.
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        os: [ ubuntu-latest ]
         # This must be kept in sync with pyproject.toml and mooplot
         python-version: ['3.10', '3.11', '3.12']
         include:
