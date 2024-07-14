@@ -72,24 +72,20 @@ jobs:
           needs: check
           working-directory: r
 
-      - name: Check (CRAN)
+      - name: Check (as CRAN)
         env:
           NOT_CRAN: false
-        run: |
-          remotes::install_github("multi-objective/mooplot/r", upgrade=FALSE)
-          options(crayon.enabled = TRUE)
-          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check", timeout = 360)
-        shell: Rscript {0}
+        uses: r-lib/actions/check-r-package@v2
+        with:
+          args: 'c("--no-manual", "--as-cran")'
         working-directory: r
 
       - name: Check (NOT CRAN)
-        if: success()
         env:
           NOT_CRAN: true
-        run: |
-          options(crayon.enabled = TRUE)
-          rcmdcheck::rcmdcheck(args = c("--no-manual", "--run-donttest", "--run-dontrun", "--timings"), error_on = "warning", check_dir = "check", timeout = 360)
-        shell: Rscript {0}
+        uses: r-lib/actions/check-r-package@v2
+        with:
+          args: 'c("--no-manual", "--run-donttest", "--run-dontrun", "--timings")'
         working-directory: r
 
       - name: Show testthat output
