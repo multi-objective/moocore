@@ -109,6 +109,7 @@ jobs:
           path: python/dist/*.tar.gz
 
   build-doc:
+    name: Build documentation
     timeout-minutes: 10
     needs: build_sdist
     permissions:
@@ -161,7 +162,7 @@ jobs:
 
   coverage:
     timeout-minutes: 15
-    needs: build_sdist
+    needs: build-doc
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
     name: Coverage ${{ matrix.os }} (${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}

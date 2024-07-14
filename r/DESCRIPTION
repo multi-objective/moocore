@@ -4,7 +4,10 @@ Title: Core Mathematical Functions for Multi-Objective Optimization
 Version: 0.0.9000
 Authors@R: c(person("Manuel", "López-Ibáñez", role = c("aut", "cre"),
                     email = "manuel.lopez-ibanez@manchester.ac.uk",
-                    comment = c(ORCID = "0000-0001-9974-1295")))
+                    comment = c(ORCID = "0000-0001-9974-1295")),
+             person("Carlos", "Fonseca", role = c("aut")),
+             person("Luís", "Paquete", role = "aut"),
+             person("Mickaël", "Binois", role = "ctb"))
 Description: Fast implementation of mathematical operations and performance metrics for multi-objective optimization.
 Depends: R (>= 4.0)
 Imports:
@@ -17,7 +20,7 @@ Suggests:
     doctest
 License: LGPL (>= 2)
 BugReports: https://github.com/multi-objective/moocore/issues
-URL: https://multi-objective.github.io/moocore/r/, https://github.com/multi-objective/moocore/r/
+URL: https://multi-objective.github.io/moocore/r/, https://github.com/multi-objective/moocore/tree/main/r
 LazyLoad: true
 LazyData: true
 Encoding: UTF-8

@@ -12,13 +12,9 @@ Fast implementation of mathematical operations and performance metrics for multi
 Useful links:
 \itemize{
   \item \url{https://multi-objective.github.io/moocore/r/}
-  \item \url{https://github.com/multi-objective/moocore/r/}
+  \item \url{https://github.com/multi-objective/moocore/tree/main/r}
   \item Report bugs at \url{https://github.com/multi-objective/moocore/issues}
 }
-
-}
-\author{
-\strong{Maintainer}: Manuel López-Ibáñez \email{manuel.lopez-ibanez@manchester.ac.uk} (\href{https://orcid.org/0000-0001-9974-1295}{ORCID})
 
 }
 \keyword{internal}

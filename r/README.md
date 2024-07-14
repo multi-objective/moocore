@@ -68,7 +68,7 @@ The first step before installing the **moocore** package is to [install R](https
     ```
 
  2. [Download the **moocore** package from CRAN](https://cran.r-project.org/package=moocore) (you may also need to download and install
-    first the [package modeltools](https://cran.r-project.org/package=modeltools)), and invoke at the command-line:
+    first the [package matrixStats](https://cran.r-project.org/package=matrixStats)), and invoke at the command-line:
 
     ```bash
         R CMD INSTALL <package>
@@ -92,7 +92,7 @@ be installed and working.
 
 If you wish to be notified of bugfixes and new versions, please subscribe to the [low-volume emo-list](https://lists.dei.uc.pt/mailman/listinfo/emo-list), where announcements will be made.
 
-[ [Download **moocore** package from CRAN](https://cran.r-project.org/package=moocore) ]  [ [Documentation](https://mlopez-ibanez.github.io/moocore/) ]  [ [Development version (GitHub)](https://github.com/MLopez-Ibanez/moocore) ]
+[ [Download **moocore** package from CRAN](https://cran.r-project.org/package=moocore) ]  [ [Documentation](https://multi-objective.github.io/moocore/) ]  [ [Development version (GitHub)](https://github.com/multi-objective/moocore) ]
 
 
 GitHub (Development version)
@@ -165,6 +165,6 @@ this work so I can mention them to my funding agent and tenure committee.
 [r-build-badge]: https://github.com/multi-objective/moocore/workflows/R/badge.svg
 [r-build-link]: https://github.com/multi-objective/moocore/actions/workflows/R.yaml
 [r-coverage-badge]: https://codecov.io/gh/multi-objective/moocore/branch/main/graph/badge.svg?flag=R
-[r-coverage-link]: https://codecov.io/gh/multi-objective/moocore/tree/main/r
+[r-coverage-link]: https://app.codecov.io/gh/multi-objective/moocore/tree/main/r
 [r-moocore-github]: https://github.com/multi-objective/moocore/tree/main/r#readme
 [r-moocore-homepage]: https://multi-objective.github.io/moocore/r/
