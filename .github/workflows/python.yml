@@ -48,7 +48,7 @@ jobs:
       # When set to true, GitHub cancels all in-progress jobs if any matrix job fails.
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest ]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
         # This must be kept in sync with pyproject.toml and mooplot
         python-version: ['3.10', '3.11', '3.12']
         include:
@@ -74,7 +74,7 @@ jobs:
         run: tox
         working-directory: python
 
-  build-package:
+  build_sdist:
     timeout-minutes: 10
     needs: run-tests
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
@@ -82,7 +82,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10"]
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest]
 
     steps:
       - name: Checkout sources
@@ -106,11 +106,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: moocore-dist-${{ matrix.os }}-${{ matrix.python-version }}
-          path: python/dist/
+          path: python/dist/*.tar.gz
 
   build-doc:
     timeout-minutes: 10
-    needs: build-package
+    needs: build_sdist
     permissions:
       contents: write
     concurrency: web # Recommended if you intend to make multiple deployments in quick succession.
@@ -161,7 +161,7 @@ jobs:
 
   coverage:
     timeout-minutes: 15
-    needs: build-package
+    needs: build_sdist
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
     name: Coverage ${{ matrix.os }} (${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
@@ -207,7 +207,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-latest, macos-13, macos-14]
+        os: [ubuntu-22.04, windows-latest, macos-latest]
         python-version: ['3.10']
 
     steps:
@@ -237,9 +237,11 @@ jobs:
 
   upload_pypi:
     name: Publish Python 🐍 distribution 📦 to PyPI
-    needs: [wheels, build-package]
+    needs: [wheels, build_sdist]
     runs-on: ubuntu-latest
-    environment: pypi
+    environment:
+      name: pypi
+      url: https://pypi.org/p/moocore
     permissions:
       id-token: write
     if: github.event_name == 'release' && github.event.action == 'published'
@@ -254,7 +256,8 @@ jobs:
           merge-multiple: true
 
       - uses: pypa/gh-action-pypi-publish@release/v1
-        # with:
+        with:
+          verbose: true
         # To test: repository-url: https://test.pypi.org/legacy/
 
   upload:
