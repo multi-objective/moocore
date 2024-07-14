@@ -63,7 +63,8 @@ napoleon_use_rtype = False
 napoleon_include_init_with_doc = True
 napoleon_use_param = True
 napoleon_type_aliases = {
-    "array_like": ":term:`array_like`",
+    "numpy.typing.ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
+    "ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
 }
 
 bibtex_bibfiles = ["REFERENCES.bib"]
@@ -78,9 +79,10 @@ typehints_document_rtype = True
 typehints_use_rtype = False
 typehints_defaults = "comma"
 autodoc_type_aliases = {
-    "ArrayLike": "ArrayLike",
+    "ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
 }
 
+# nitpicky = True
 
 # FIXME: This is not working!
 logger = sphinx.util.logging.getLogger("sphinx.ext.autodoc")

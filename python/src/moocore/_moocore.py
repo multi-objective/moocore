@@ -49,19 +49,19 @@ class ReadDatasetsError(Exception):
         super().__init__(self.message)
 
 
-def read_datasets(filename, /):
+def read_datasets(filename: str | os.PathLike | StringIO, /) -> np.ndarray:
     """Read an input dataset file, parsing the file and returning a numpy array.
 
     Parameters
     ----------
-    filename : file, str, pathlib.Path
-        Filename of the dataset file. Each row of the table appears as one line of the file. Datasets are separated by an empty line.
-        If it does not contain an absolute path, the file name is relative to the current working directory.
-        If the filename has extension `'.xz'`, it is decompressed to a temporary file before reading it.
+    filename:
+        Filename of the dataset file or :class:`~io.StringIO` directly containing the file contents.
+        If it does not contain an absolute path, the filename is relative to the current working directory.
+        If the filename has extension ``.xz``, it is decompressed to a temporary file before reading it.
+        Each line of the file corresponds to one point of one dataset. Different datasets are separated by an empty line.
 
     Returns
     -------
-    numpy.ndarray
         An array containing a representation of the data in the file.
         The first :math:`n-1` columns contain the numerical data for each of the objectives.
         The last column contains an identifier for which set the data is relevant to.
@@ -170,6 +170,10 @@ def igd(data, /, ref, *, maximise=False) -> float:
 
     .. seealso:: For details about parameters, return value and examples, see :func:`igd_plus`.  For details of the calculation, see :ref:`igd_hausdorf`.
 
+    Returns
+    -------
+        A single numerical value
+
     """
     data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
         data, ref, maximise
@@ -232,6 +236,10 @@ def avg_hausdorff_dist(data, /, ref, *, maximise=False, p: float = 1) -> float: 
     p :
         Hausdorff distance parameter. Must be larger than 0.
 
+    Returns
+    -------
+        A single numerical value
+
     """
     if p <= 0:
         raise ValueError("'p' must be larger than zero")
@@ -245,7 +253,9 @@ def avg_hausdorff_dist(data, /, ref, *, maximise=False, p: float = 1) -> float: 
     )
 
 
-def epsilon_additive(data, /, ref, *, maximise=False) -> float:
+def epsilon_additive(
+    data: ArrayLike, /, ref: ArrayLike, *, maximise: bool | list[bool] = False
+) -> float:
     """Additive epsilon metric.
 
     `data` and `reference` must all be larger than 0 for :func:`epsilon_mult`.
@@ -254,13 +264,13 @@ def epsilon_additive(data, /, ref, *, maximise=False) -> float:
 
     Parameters
     ----------
-    data : numpy.ndarray
+    data :
         Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
         If the array is created from the :func:`read_datasets` function, remove the last (set) column
-    ref : numpy.ndarray or list
+    ref :
         Reference point set as a numpy array or list. Must have same number of columns as a single point in the \
         dataset
-    maximise : bool or list of bool
+    maximise :
         Whether the objectives must be maximised instead of minimised. \
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
         Also accepts a 1d numpy array with value 0/1 for each objective
@@ -291,7 +301,11 @@ def epsilon_additive(data, /, ref, *, maximise=False) -> float:
 def epsilon_mult(data, /, ref, *, maximise=False) -> float:
     """Multiplicative epsilon metric.
 
-    .. seealso:: For details about parameters, return value and examples, see :func:`epsilon_add`.  For details of the calculation, see :ref:`epsilon_metric`.
+    .. seealso:: For details about parameters, return value and examples, see :func:`epsilon_additive`.  For details of the calculation, see :ref:`epsilon_metric`.
+
+    Returns
+    -------
+        A single numerical value
 
     """
     data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
@@ -301,7 +315,7 @@ def epsilon_mult(data, /, ref, *, maximise=False) -> float:
 
 
 # FIXME: TODO maximise option
-def hypervolume(data: ArrayLike, /, ref) -> float:
+def hypervolume(data: ArrayLike, /, ref: ArrayLike) -> float:
     r"""Hypervolume indicator.
 
     Compute the hypervolume metric with respect to a given reference point
@@ -318,7 +332,7 @@ def hypervolume(data: ArrayLike, /, ref) -> float:
     data :
         Numpy array of numerical values, where each row gives the coordinates of a point.
         If the array is created from the :func:`read_datasets` function, remove the last column.
-    ref : ArrayLike or list
+    ref :
         Reference point as a 1D vector. Must be same length as a single point in the `data`.
 
     Returns
@@ -371,19 +385,21 @@ def hypervolume(data: ArrayLike, /, ref) -> float:
     return hv
 
 
-def is_nondominated(data, maximise=False, keep_weakly: bool = False):
+def is_nondominated(
+    data: ArrayLike, /, *, maximise=False, keep_weakly: bool = False
+):
     """Identify dominated points according to Pareto optimality.
 
     Parameters
     ----------
-    data : numpy array
-        Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
+    data :
+        Array of numerical values, where each row gives the coordinates of a point in objective space.
         If the array is created from the :func:`read_datasets()` function, remove the last column.
     maximise : single bool, or list of booleans
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of boolean values, with one value per objective.
         Also accepts a 1D numpy array with value 0/1 for each objective.
-    keep_weakly: bool
+    keep_weakly:
         If ``False``, return ``False`` for any duplicates of nondominated points.
 
     Returns
@@ -426,16 +442,16 @@ def is_nondominated(data, maximise=False, keep_weakly: bool = False):
     return np.frombuffer(nondom, dtype=bool)
 
 
-def filter_dominated(data, /, *, maximise=False, keep_weakly=False):
+def filter_dominated(data, /, *, maximise=False, keep_weakly: bool = False):
     """Remove dominated points according to Pareto optimality.
 
-    See: :func:`is_nondominated` for details
+    See: :func:`is_nondominated` for details.
     """
     return data[is_nondominated(data, maximise, keep_weakly), :]
 
 
 def filter_dominated_within_sets(
-    data, /, *, maximise=False, keep_weakly=False
+    data, /, *, maximise=False, keep_weakly: bool = False
 ):
     """Given a dataset with multiple sets (last column gives the set index), filter dominated points within each set.
 
@@ -452,7 +468,7 @@ def filter_dominated_within_sets(
         Whether the objectives must be maximised instead of minimised. \
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
         Also accepts a 1D numpy array with values 0 or 1 for each objective
-    keep_weakly: bool
+    keep_weakly:
         If False, return False for any duplicates of nondominated points.
 
     Returns
@@ -504,19 +520,21 @@ def filter_dominated_within_sets(
     return data[is_nondom, :]
 
 
-def pareto_rank(data, /, *, maximise=False):
-    r"""Ranks points according to Pareto-optimality, which is also called nondominated sorting.
+def pareto_rank(data: ArrayLike, /, *, maximise=False):
+    r"""Rank points according to Pareto-optimality (nondominated sorting).
 
-    Ranks points according to Pareto-optimality, which is also called nondominated sorting :footcite:p:`Deb02nsga2`.
+    The function :func:`pareto_rank` is meant to be used like
+    :func:`numpy.argsort`, but it assigns indexes according to Pareto
+    dominance. Duplicated points are kept on the same front. The resulting
+    ranking can be used to partition points into different lists or arrays,
+    each of them being mutually nondominated :footcite:p:`Deb02nsga2`.
 
-    `pareto_rank` is meant to be used like :func:`numpy.argsort`, but it assigns
-    indexes according to Pareto dominance. Duplicated points are kept on the
-    same front. With 2 columns, the code uses the :math:`O(n \log n)` algorithm
-    by :footcite:t:`Jen03`.
+    With 2 columns, the code uses the :math:`O(n \log n)` algorithm by
+    :footcite:t:`Jen03`.
 
     Parameters
     ----------
-    data : numpy array
+    data :
         Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
         If the array is created from the :func:`read_datasets()` function, remove the last column.
     maximise : single bool, or list of booleans
