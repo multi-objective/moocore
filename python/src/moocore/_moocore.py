@@ -4,6 +4,7 @@ import os
 from io import StringIO
 import numpy as np
 from numpy.typing import ArrayLike  # For type hints
+from typing import Literal
 
 import lzma
 import shutil
@@ -165,12 +166,23 @@ def _unary_refset_common(data, ref, maximise):
 
 
 def igd(data, /, ref, *, maximise=False) -> float:
-    """Inverted Generational Distance (IGD and IGD+) and Averaged Hausdorff Distance.
+    """Inverted Generational Distance (IGD).
 
-    Functions to compute the inverted generational distance (IGD and IGD+) and the
-    averaged Hausdorff distance between nondominated sets of points.
+    .. seealso:: For details about parameters, return value and examples, see :func:`igd_plus`.  For details of the calculation, see :ref:`igd_hausdorf`.
 
-    TODO: Copy documentation from: https://mlopez-ibanez.github.io/eaf/reference/igd.html
+    """
+    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
+        data, ref, maximise
+    )
+    return lib.IGD(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
+
+
+def igd_plus(data, /, ref, *, maximise=False) -> float:
+    """Modified IGD (IGD+).
+
+    IGD+ is a Pareto-compliant version of :func:`igd`.
+
+    .. seealso:: For details of the calculation, see :ref:`igd_hausdorf`.
 
     Parameters
     ----------
@@ -186,12 +198,8 @@ def igd(data, /, ref, *, maximise=False) -> float:
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
         Also accepts a 1d numpy array with value 0/1 for each objective.
 
-    p : float, default 1
-        Hausdorff distance parameter. Must be larger than 0.
-
     Returns
     -------
-    float
         A single numerical value
 
     Examples
@@ -207,28 +215,23 @@ def igd(data, /, ref, *, maximise=False) -> float:
     >>> moocore.avg_hausdorff_dist(dat, ref)
     1.0627908666722465
 
-    """
-    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
-        data, ref, maximise
-    )
-    return lib.IGD(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
-
-
-def igd_plus(data, /, ref, *, maximise=False) -> float:
-    """Calculate IGD+ indicator.
-
-    See :func:`igd`
-    """
+    """  # noqa: D401
     data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
         data, ref, maximise
     )
     return lib.IGD_plus(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
 
 
-def avg_hausdorff_dist(data, /, ref, *, maximise=False, p: float = 1) -> float:
-    """Calculate average Hausdorff distance.
+def avg_hausdorff_dist(data, /, ref, *, maximise=False, p: float = 1) -> float:  # noqa: D417
+    """Average Hausdorff distance.
 
-    See :func:`igd`
+    .. seealso:: For details about parameters, return value and examples, see :func:`igd_plus`.  For details of the calculation, see :ref:`igd_hausdorf`.
+
+    Parameters
+    ----------
+    p :
+        Hausdorff distance parameter. Must be larger than 0.
+
     """
     if p <= 0:
         raise ValueError("'p' must be larger than zero")
@@ -243,9 +246,11 @@ def avg_hausdorff_dist(data, /, ref, *, maximise=False, p: float = 1) -> float:
 
 
 def epsilon_additive(data, /, ref, *, maximise=False) -> float:
-    """Compute the epsilon metric, either additive or multiplicative.
+    """Additive epsilon metric.
 
-    `data` and `reference` must all be larger than 0 for `epsilon_mult`.
+    `data` and `reference` must all be larger than 0 for :func:`epsilon_mult`.
+
+    .. seealso:: For details of the calculation, see :ref:`epsilon_metric`.
 
     Parameters
     ----------
@@ -262,7 +267,6 @@ def epsilon_additive(data, /, ref, *, maximise=False) -> float:
 
     Returns
     -------
-    float
         A single numerical value
 
     Examples
@@ -287,7 +291,7 @@ def epsilon_additive(data, /, ref, *, maximise=False) -> float:
 def epsilon_mult(data, /, ref, *, maximise=False) -> float:
     """Multiplicative epsilon metric.
 
-    See :func:`epsilon_additive`
+    .. seealso:: For details about parameters, return value and examples, see :func:`epsilon_add`.  For details of the calculation, see :ref:`epsilon_metric`.
 
     """
     data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
@@ -311,7 +315,7 @@ def hypervolume(data: ArrayLike, /, ref) -> float:
 
     Parameters
     ----------
-    data : ArrayLike
+    data :
         Numpy array of numerical values, where each row gives the coordinates of a point.
         If the array is created from the :func:`read_datasets` function, remove the last column.
     ref : ArrayLike or list
@@ -319,8 +323,7 @@ def hypervolume(data: ArrayLike, /, ref) -> float:
 
     Returns
     -------
-    float
-         A single numerical value, the hypervolume indicator.
+        A single numerical value, the hypervolume indicator
 
     References
     ----------
@@ -338,7 +341,12 @@ def hypervolume(data: ArrayLike, /, ref) -> float:
     >>> dat = moocore.read_datasets(filename)
     >>> set1 = dat[dat[:, 2] == 1, :2]
 
-    This set contains dominated points so remove them
+    Dominated points are ignored, so this:
+
+    >>> moocore.hypervolume(set1, ref=[10, 10])
+    90.46272764755885
+
+    gives the same value as this:
 
     >>> set1 = moocore.filter_dominated(set1)
     >>> moocore.hypervolume(set1, ref=[10, 10])
@@ -923,7 +931,6 @@ def vorobDev(x, /, reference, *, VE=None) -> float:
 
     Returns
     -------
-    float
         Vorob'ev deviation.
 
     See Also
@@ -1177,11 +1184,11 @@ def whv_hype(
     reference,
     ideal,
     maximise=False,
-    nsamples=1e5,
-    dist="uniform",
+    nsamples: int = 1e5,
+    dist: Literal["uniform", "point", "exponential"] = "uniform",
     seed=None,
     mu=None,
-):
+) -> float:
     r"""Approximation of the (weighted) hypervolume by Monte-Carlo sampling (2D only).
 
     Return an estimation of the hypervolume of the space dominated by the input
@@ -1208,26 +1215,27 @@ def whv_hype(
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
         Also accepts a 1D numpy array with values 0 or 1 for each objective.
 
-    nsamples : int
+    nsamples :
         Number of samples for Monte-Carlo sampling.
 
-    dist : {'uniform', 'point', 'exponential'}, optional
+    dist :
       Weight distribution :footcite:p:`AugBadBroZit2009gecco`. The ones currently supported are:
 
        - ``uniform``:  corresponds to the default hypervolume (unweighted).
        - ``point`` : describes a goal in the objective space, where `mu` gives the coordinates of the goal. The resulting weight distribution is a multivariate normal distribution centred at the goal.
-       - ``exponential`` : describes an exponential distribution with rate parameter `1/mu`, i.e., :math:`\lambda = \frac{1}{\mu}`.
+       - ``exponential`` : describes an exponential distribution with rate parameter ``1/mu``, i.e., :math:`\lambda = \frac{1}{\mu}`.
 
     seed : int or numpy.random.Generator
         Either an integer to seed the NumPy random number generator or a random number generator.
 
     mu : float or 1D numpy.array
-       Parameter of `dist`. See above for details.
+       Parameter of ``dist``. See above for details.
+
 
     Returns
     -------
-    float:
-        A single numerical value, the weighted hypervolume.
+       A single numerical value, the weighted hypervolume
+
 
     See Also
     --------
@@ -1332,7 +1340,7 @@ def get_dataset_path(filename: str, /) -> str:
 
     Returns
     -------
-    Full path to the dataset.
+        Full path to the dataset
 
     """
     return files("moocore.data").joinpath(filename)

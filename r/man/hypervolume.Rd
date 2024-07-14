@@ -25,9 +25,16 @@ Computes the hypervolume metric with respect to a given reference point
 assuming minimization of all objectives.
 }
 \details{
-The algorithm has \eqn{O(n^{d-2} \log n)} time and linear space
-complexity in the worst-case, but experimental results show that the
-pruning techniques used may reduce the time complexity even further.
+\if{html}{\out{<div class="sourceCode">}}\preformatted{Compute the hypervolume metric with respect to a given reference point
+}\if{html}{\out{</div>}}
+
+assuming minimization of all objectives. For 2D and 3D, the algorithm used
+\citep{FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec} has \eqn{O(n
+ \log n)} complexity. For 4D or higher, the algorithm
+\citep{FonPaqLop06:hypervolume} has \eqn{O(n^{d-2} \log n)} time
+and linear space complexity in the worst-case, but experimental results
+show that the pruning techniques used may reduce the time complexity even
+further.
 }
 \examples{
 
@@ -39,9 +46,7 @@ hypervolume(SPEA2minstoptimeRichmond[, 1:2], reference = c(250, 0),
 
 }
 \references{
-\insertRef{FonPaqLop06:hypervolume}{moocore}
-
-\insertRef{BeuFonLopPaqVah09:tec}{moocore}
+\insertAllCited{}
 }
 \author{
 Manuel \enc{López-Ibáñez}{Lopez-Ibanez}

@@ -11,17 +11,20 @@
 #'
 #' @return  A single numerical value.
 #'
-#' @details The algorithm has \eqn{O(n^{d-2} \log n)} time and linear space
-#'   complexity in the worst-case, but experimental results show that the
-#'   pruning techniques used may reduce the time complexity even further.
+#' @details     Compute the hypervolume metric with respect to a given reference point
+#'  assuming minimization of all objectives. For 2D and 3D, the algorithm used
+#'  \citep{FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec} has \eqn{O(n
+#'  \log n)} complexity. For 4D or higher, the algorithm
+#'  \citep{FonPaqLop06:hypervolume} has \eqn{O(n^{d-2} \log n)} time
+#'  and linear space complexity in the worst-case, but experimental results
+#'  show that the pruning techniques used may reduce the time complexity even
+#'  further.
 #'
 #' @author Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
 #'
 #' @references
 #'
-#' \insertRef{FonPaqLop06:hypervolume}{moocore}
-#'
-#' \insertRef{BeuFonLopPaqVah09:tec}{moocore}
+#' \insertAllCited{}
 #'
 #' @examples
 #'

@@ -58,7 +58,7 @@
 #' recent works; (2) it makes irrelevant whether the term \eqn{|A|^{-1}} is
 #' inside or outside the exponent \eqn{1/p}; and (3) the meaning of IGD becomes
 #' the average Euclidean distance from each reference point to its nearest
-#' objective vector). It is also slightly faster to compute.
+#' objective vector. It is also slightly faster to compute.
 #'
 #' GD should never be used directly to compare the quality of approximations to
 #' a Pareto front, as it often contradicts Pareto optimality (it is not weakly

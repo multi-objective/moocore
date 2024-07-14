@@ -31,8 +31,9 @@ html_js_files = [
 extensions = [
     "sphinx_design",  # grid directive
     "sphinx.ext.autosummary",  # Create neat summary tables for modules/classes/methods etc
-    "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",  # Core Sphinx library for auto html doc generation from docstrings
+    "sphinx.ext.napoleon",
+    "sphinx_autodoc_typehints",
     "sphinx.ext.intersphinx",  # Link to other project's documentation (see mapping below)
     "sphinx.ext.viewcode",  # Add a link to the Python source code for classes, functions etc.
     "sphinx_copybutton",  # A small sphinx extension to add a "copy" button to code blocks.
@@ -72,7 +73,10 @@ bibtex_default_style = "unsrt"
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = True
 
-autodoc_typehints = "description"
+autodoc_typehints = "none"  # Conflicts with sphinx_autodoc_typehints
+typehints_document_rtype = True
+typehints_use_rtype = False
+typehints_defaults = "comma"
 autodoc_type_aliases = {
     "ArrayLike": "ArrayLike",
 }
