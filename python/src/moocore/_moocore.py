@@ -635,19 +635,19 @@ def pareto_rank(data: ArrayLike, /, *, maximise=False):
 
 
 def normalise(
-    data: np.ndarray,
+    data: ArrayLike,
     /,
     to_range=[0.0, 1.0],
     *,
     lower=np.nan,
     upper=np.nan,
     maximise=False,
-):
+) -> np.ndarray:
     """Normalise points per coordinate to a range, e.g., ``to_range = [1,2]``, where the minimum value will correspond to 1 and the maximum to 2.
 
     Parameters
     ----------
-    data : numpy.ndarray
+    data :
         Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
         See :func:`normalise_sets` to normalise data that includes set numbers (Multiple sets)
 
@@ -664,7 +664,6 @@ def normalise(
 
     Returns
     -------
-    numpy array
         Returns the data normalised as requested.
 
     Examples
@@ -844,15 +843,15 @@ def eaf(data, /, percentiles=[]):
     return np.frombuffer(eaf_buf).reshape((eaf_npoints, -1))
 
 
-def vorobT(data, /, reference):
+def vorobT(data: ArrayLike, /, reference: ArrayLike):
     """Compute Vorob'ev threshold and expectation.
 
     Parameters
     ----------
-    data : numpy array
+    data :
         Numpy array of numerical values and set numbers, containing multiple sets. For example the output \
          of the :func:`read_datasets` function
-    reference : numpy array or list
+    reference :
         Reference point set as a numpy array or list. Must be same length as a single point in the \
         dataset
 
@@ -913,19 +912,21 @@ def vorobT(data, /, reference):
     return dict(threshold=c, VE=eaf_res, avg_hyp=float(avg_hyp))
 
 
-def vorobDev(x, /, reference, *, VE=None) -> float:
+def vorobDev(
+    x: ArrayLike, /, reference: ArrayLike, *, VE: ArrayLike = None
+) -> float:
     r"""Compute Vorob'ev deviation.
 
     Parameters
     ----------
-    x : numpy array
+    x :
        Numpy array of numerical values and set numbers, containing multiple sets.
        For example the output of the :func:`read_datasets` function.
-    reference : numpy array or list
+    reference : ArrayLike
        Reference point set as a numpy array or list. Must be same length as a single point in the dataset.
-    VE : numpy array, optional
+    VE :
        Vorob'ev expectation, e.g., as returned by :func:`vorobT`.
-       If not provided, it is calculated as `vorobT(x, reference)`.
+       If not provided, it is calculated as ``vorobT(x, reference)``.
 
     Returns
     -------
@@ -983,7 +984,9 @@ def vorobDev(x, /, reference, *, VE=None) -> float:
     return float(VD - H1 - H2)
 
 
-def eafdiff(x, y, /, *, intervals=None, maximise=False, rectangles=False):
+def eafdiff(
+    x, y, /, *, intervals=None, maximise=False, rectangles: bool = False
+):
     """Compute empirical attainment function (EAF) differences.
 
     Calculate the differences between the empirical attainment functions of two

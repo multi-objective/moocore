@@ -45,7 +45,7 @@ normalise <- function(data, to_range = c(1, 2), lower = NA, upper = NA, maximise
   maximise <- rep_len(as.logical(maximise), nobjs)
 
   if (length(to_range) != 2L)
-    stop("to_range must be a vector of length 2")
+    stop("'to_range' must be a vector of length 2")
 
   data <- t.default(data)
   .Call(normalise_C,
