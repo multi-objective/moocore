@@ -8,7 +8,7 @@ on:
       - "r/**"
       - 'c/Make*'
       - 'c/*.mk'
-      - 'c/*.[ch]p?p?'
+      - 'c/**/*.[ch]p?p?'
   pull_request:
     branches-ignore:  [gh-pages]
     paths:
@@ -16,7 +16,7 @@ on:
       - "r/**"
       - 'c/Make*'
       - 'c/*.mk'
-      - 'c/*.[ch]p?p?'
+      - 'c/**/*.[ch]p?p?'
   # Manual run
   workflow_dispatch:
 
