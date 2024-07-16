@@ -20,6 +20,7 @@ nondom_init (size_t size)
    and return the number of nondominated points.
 
 */
+/* FIXME: 2D dimension-sweep. */
 static inline int
 find_nondominated_set_ (const double *points, int dim, int size,
                         const signed char *minmax, const signed char agree,

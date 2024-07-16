@@ -841,6 +841,44 @@ filter(dlnode_t *list, int d, int n)
     return n;
 }
 
+static int compare_x_asc_y_asc (const void *p1, const void *p2)
+{
+    const double x1 = **(const double **)p1;
+    const double x2 = **(const double **)p2;
+    const double y1 = *(*(const double **)p1 + 1);
+    const double y2 = *(*(const double **)p2 + 1);
+    return (x1 < x2) ? -1 : ((x1 > x2) ? 1 :
+                             ((y1 < y2) ? -1 : ((y1 > y2) ? 1 : 0)));
+}
+
+double hv2d(const double *data, int n, const double *ref)
+{
+    const double **p = malloc (n * sizeof(double *));
+
+    for (int k = 0; k < n; k++)
+        p[k] = data + 2 * k;
+
+    qsort(p, n, sizeof(*p), &compare_x_asc_y_asc);
+
+    double hyperv = 0;
+    double prev_j = ref[1];
+    int j = 0;
+    do {
+        /* Filter everything that may be above the ref point. */
+        while (j < n && p[j][1] >= prev_j)
+            j++;
+        if (j == n || p[j][0] >= ref[0])
+            break; /* No other point dominates ref. */
+        // We found one point that dominates ref.
+        hyperv += (ref[0] - p[j][0]) * (prev_j - p[j][1]);
+        prev_j = p[j][1];
+        j++;
+    } while (j < n && p[j][0] < ref[0]);
+
+    free(p);
+    return hyperv;
+}
+
 static void
 shift_reference(double *data, size_t d, size_t n, const double *ref)
 {
@@ -851,12 +889,12 @@ shift_reference(double *data, size_t d, size_t n, const double *ref)
 
 double fpli_hv_shift(double *data, int d, int n, const double *ref)
 {
-    double hyperv;
-
     if (n == 0) return 0.0;
+    if (d == 2) return hv2d(data, n, ref);
+
     // Shift the data so that the reference point is at zero [0,..., 0]
     shift_reference(data, d, n, ref);
-
+    double hyperv;
     avl_tree_t *tree = avl_alloc_tree ((avl_compare_t) compare_tree_asc,
                                        (avl_freeitem_t) NULL);
     dlnode_t *list = setup_cdllist(data, d, n);
@@ -1042,9 +1080,9 @@ hv_recursive_ref(avl_tree_t *tree, dlnode_t *list,
     else if (dim == 2) {
         return fpli_hv3d_ref(tree, list, c, ref);
     }
-    /* FIXME: This is only interesting for measuring the effect of stopping the
-     recursion, we should have a dedicated hv2d function with the O(n * log *
-     n) case */
+    /* This is only interesting for measuring the effect of stopping the
+       recursion, but this code is currently unused because we have a dedicated
+       hv2d function that is already O(n * log n). */
     else if (dim == 1) {
         const dlnode_t *p1 = list->next[1];
         double hypera = p1->x[0];
@@ -1098,14 +1136,14 @@ filter_ref(dlnode_t *list, int d, int n, const double *ref)
 
 double fpli_hv(const double *data, int d, int n, const double *ref)
 {
-    double hyperv;
-
     if (n == 0) return 0.0;
+    if (d == 2) return hv2d(data, n, ref);
 
-    avl_tree_t *tree = avl_alloc_tree ((avl_compare_t) compare_tree_asc,
+    avl_tree_t *tree = avl_alloc_tree((avl_compare_t) compare_tree_asc,
                                        (avl_freeitem_t) NULL);
     dlnode_t *list = setup_cdllist(data, d, n);
 
+    double hyperv;
     n = filter_ref(list, d, n, ref);
     if (n == 0) {
         /* Returning here would leak memory.  */

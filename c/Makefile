@@ -119,7 +119,7 @@ eafexe=$(BINDIR)/eaf$(EXE)
 hvexe=$(BINDIR)/hv$(EXE)
 
 
-.PHONY : all clean dist default check test eaf hv
+.PHONY : all clean dist default test time eaf hv
 
 default: $(igd) $(epsilon) $(dominatedsets) $(nondominated) $(ndsort) $(eafexe) $(hvexe)
 
@@ -189,38 +189,38 @@ clean:
 	@$(RM) $(OBJS) $(HV_OBJS)
 
 TESTSUITE:="../testsuite"
-check: clean
-	@if ! test -d $(TESTSUITE); then  		    	         \
-	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
-	fi
-	$(MAKE) all DEBUG=1 SANITIZERS=""
-	$(MAKE) check-eaf
-	$(MAKE) check-hv
-
-check-eaf:
-	$(MAKE) eaf DEBUG=1 SANITIZERS=""
-	$(call ECHO,---> Checking $(eafexe) for errors (DEBUG=1) <--- )
-	@cd $(TESTSUITE)/eaf && ../regtest.py $(eafexe) && cd $(PWD)
-
-check-hv:
-	$(MAKE) $(hvexe) DEBUG=1 SANITIZERS=""
-	$(call ECHO,---> Checking $(hvexe) for errors (DEBUG=1) <--- )
-	@cd $(TESTSUITE)/hv && ../regtest.py $(hvexe) && cd $(PWD)
-
 test: clean
 	@if ! test -d $(TESTSUITE); then  		    	         \
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
-	$(MAKE) all DEBUG=0 SANITIZERS=""
+	$(MAKE) all DEBUG=1 SANITIZERS=""
 	$(MAKE) test-eaf
 	$(MAKE) test-hv
 
 test-eaf:
+	$(MAKE) eaf DEBUG=1 SANITIZERS=""
+	$(call ECHO,---> Testing $(eafexe) for errors (DEBUG=1) <--- )
+	@cd $(TESTSUITE)/eaf && ../regtest.py $(eafexe) && cd $(PWD)
+
+test-hv:
+	$(MAKE) $(hvexe) DEBUG=1 SANITIZERS=""
+	$(call ECHO,---> Testing $(hvexe) for errors (DEBUG=1) <--- )
+	@cd $(TESTSUITE)/hv && ../regtest.py $(hvexe) && cd $(PWD)
+
+time: clean
+	@if ! test -d $(TESTSUITE); then  		    	         \
+	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
+	fi
+	$(MAKE) all DEBUG=0 SANITIZERS=""
+	$(MAKE) time-eaf
+	$(MAKE) time-hv
+
+time-eaf:
 	$(MAKE) eaf DEBUG=0 SANITIZERS=""
 	$(call ECHO,---> Testing $(eafexe) for speed (DEBUG=0) <--- )
 	@cd $(TESTSUITE)/eaf && ../regtest.py $(eafexe) && cd $(PWD)
 
-test-hv:
+time-hv:
 	$(MAKE) $(hvexe) DEBUG=0 SANITIZERS=""
 	$(call ECHO,---> Testing $(hvexe) for speed (DEBUG=0) <--- )
 	@cd $(TESTSUITE)/hv && ../regtest.py $(hvexe) && cd $(PWD)
