@@ -388,13 +388,15 @@ def hypervolume(data: ArrayLike, /, ref: ArrayLike) -> float:
 def is_nondominated(
     data: ArrayLike, maximise=False, keep_weakly: bool = False
 ):
-    """Identify dominated points according to Pareto optimality.
+    r"""Identify dominated points according to Pareto optimality.
+
+    For two dimensions, the algorithm has complexity :math:`O(n \log n)`.
 
     Parameters
     ----------
     data :
         Array of numerical values, where each row gives the coordinates of a point in objective space.
-        If the array is created from the :func:`read_datasets()` function, remove the last column.
+        If the array is created by the :func:`read_datasets()` function, remove the last column.
     maximise : single bool, or list of booleans
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of boolean values, with one value per objective.
@@ -405,16 +407,21 @@ def is_nondominated(
     Returns
     -------
     bool array
-        :func:`is_nondominated` returns a boolean list of the same length as the number of rows of data,
+        Returns a boolean array of the same length as the number of rows of data,
         where ``True`` means that the point is not dominated by any other point.
 
-        :func:`filter_dominated` returns a numpy array with only mutually nondominated points.
+    See Also
+    --------
+    filter_dominated : to filter out dominated points.
+
+    pareto_rank : to rank points according to Pareto dominance.
+
 
     Examples
     --------
     >>> S = np.array([[1, 1], [0, 1], [1, 0], [1, 0]])
     >>> moocore.is_nondominated(S)
-    array([False,  True, False,  True])
+    array([False,  True,  True, False])
 
     >>> moocore.is_nondominated(S, maximise=True)
     array([ True, False, False, False])
@@ -497,7 +504,7 @@ def filter_dominated_within_sets(
 
     See Also
     --------
-    With a single dataset, use :func:`filter_dominated`
+    filter_dominated : to be used with a single dataset.
 
     """
     data = np.asarray(data, dtype=float)
@@ -529,7 +536,7 @@ def pareto_rank(data: ArrayLike, /, *, maximise=False):
     ranking can be used to partition points into different lists or arrays,
     each of them being mutually nondominated :footcite:p:`Deb02nsga2`.
 
-    With 2 columns, the code uses the :math:`O(n \log n)` algorithm by
+    With 2 dimensions, the code uses the :math:`O(n \log n)` algorithm by
     :footcite:t:`Jen03`.
 
     Parameters
@@ -985,8 +992,8 @@ def vorobDev(
 
 
 def eafdiff(
-    x, y, /, *, intervals=None, maximise=False, rectangles: bool = False
-):
+    x, y, /, *, intervals: int = None, maximise=False, rectangles: bool = False
+) -> np.ndarray:
     """Compute empirical attainment function (EAF) differences.
 
     Calculate the differences between the empirical attainment functions of two
@@ -999,7 +1006,7 @@ def eafdiff(
        respectively. Each data frame has at least three columns, the third one
        being the set of each point. See also :func:`read_datasets`.
 
-    intervals : int
+    intervals :
        The absolute range of the differences :math:`[0, 1]` is partitioned into the number of intervals provided.
 
     maximise : bool or list of bool
@@ -1007,25 +1014,24 @@ def eafdiff(
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
         Also accepts a 1D numpy array with value 0/1 for each objective.
 
-    rectangles : bool
-       If `True`, the output is in the form of rectangles of the same color.
+    rectangles :
+       If ``True``, the output is in the form of rectangles of the same color.
 
 
     Returns
     -------
-    nd.array :
-       With `rectangle=False`, a matrix with three columns, The first two columns describe the points where there
+       With ``rectangle=False``, a matrix with three columns, The first two columns describe the points where there
        is a transition in the value of the EAF differences.  With
-       `rectangle=True`, a matrix with five columns, where the first 4 columns give the
+       ``rectangle=True``, a matrix with five columns, where the first 4 columns give the
        coordinates of two corners of each rectangle. In both
-       cases, the last column gives the difference in terms of sets in `x` minus
-       sets in `y` that attain each point (i.e., negative values are differences
-       in favour `y`).
+       cases, the last column gives the difference in terms of sets in ``x`` minus
+       sets in ``y`` that attain each point (i.e., negative values are differences
+       in favour ``y``).
 
     See Also
     --------
-    read_datasets:
-    mooplot.eafdiffplot:
+    moocore.read_datasets, mooplot.eafdiffplot
+
 
     Examples
     --------
@@ -1237,7 +1243,7 @@ def whv_hype(
 
     See Also
     --------
-    :func:`read_datasets`, :func:`hypervolume`
+    read_datasets, hypervolume
 
     References
     ----------
@@ -1357,7 +1363,7 @@ def groupby(x, groups, /, *, axis: int = 0):
         Array to be divided into sub-arrays.
     groups : 1-D array
         A list or ndarray of length equal to the selected `axis`. The values are used as-is to determine the groups and do not need to be sorted.
-    axis : int, optional
+    axis :
         The axis along which to split, default is 0.
 
     Yields

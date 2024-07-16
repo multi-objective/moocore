@@ -24,7 +24,7 @@ from ._moocore import (
 
 from importlib.metadata import version as _metadata_version
 
-__version__ = _metadata_version(__package__ or __name__)
+__version__ = _metadata_version("moocore")
 # Remove symbols imported for internal use
 del _metadata_version
 

@@ -5,6 +5,7 @@ Dominance relation
 
 Dominance relations
 -------------------
+
 .. autosummary::
    :toctree: generated/
 

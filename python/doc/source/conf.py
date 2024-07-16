@@ -61,7 +61,7 @@ napoleon_numpy_docstring = True
 napoleon_preprocess_types = True
 napoleon_use_rtype = False
 napoleon_include_init_with_doc = True
-napoleon_use_param = True
+napoleon_use_param = False
 napoleon_type_aliases = {
     "numpy.typing.ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
     "ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
@@ -78,6 +78,7 @@ autodoc_typehints = "none"  # Conflicts with sphinx_autodoc_typehints
 typehints_document_rtype = True
 typehints_use_rtype = False
 typehints_defaults = "comma"
+always_use_bars_union = True
 autodoc_type_aliases = {
     "ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
 }
@@ -187,4 +188,5 @@ intersphinx_mapping = {
     "sphinx-gallery": ("https://sphinx-gallery.github.io/stable/", None),
     "nx-guides": ("https://networkx.org/nx-guides/", None),
     "sympy": ("https://docs.sympy.org/latest/", None),
+    "mooplot": ("https://multi-objective.github.io/mooplot/python/", None),
 }
