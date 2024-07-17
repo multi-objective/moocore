@@ -2,8 +2,8 @@
 =============================================================
 
 <!-- badges: start -->
-[![CRAN Status](https://www.r-pkg.org/badges/version-last-release/moocore)](https://cran.r-project.org/package=moocore)
-[![CRAN Downloads](https://cranlogs.r-pkg.org/badges/grand-total/moocore)](https://CRAN.R-project.org/package=moocore)
+[![CRAN Status](https://www.r-pkg.org/badges/version-last-release/moocore)][r-moocore-cran]
+[![CRAN Downloads](https://cranlogs.r-pkg.org/badges/grand-total/moocore)][r-moocore-cran]
 [![R build status][r-build-badge]][r-build-link]
 [![coverage][r-coverage-badge]][r-coverage-link]
 <!-- badges: end -->
@@ -24,24 +24,17 @@
 Introduction
 ============
 
-The empirical attainment function (EAF) describes the probabilistic
+The goal of **moocore** is to collect fast implementations of core mathematical functions and algorithms for multi-objective optimization. These functions include:
+
+ * Identifying and filtering dominated vectors.
+ * Quality metrics such as (weighted) hypervolume, epsilon, IGD, etc.
+ * Computation of the Empirical Attainment Function. The empirical attainment function (EAF) describes the probabilistic
 distribution of the outcomes obtained by a stochastic algorithm in the
-objective space. This [R](https://www.R-project.org/) package implements plots
-of summary attainment surfaces and differences between the first-order
-EAFs. These plots may be used for exploring the performance of stochastic local
-search algorithms for biobjective optimization problems and help in identifying
-certain algorithmic behaviors in a graphical way.
-
-The corresponding [book chapter](#LopPaqStu09emaa) [1] explains the use of
-these visualization tools and illustrates them with examples arising from
-practice.
-
-In addition, the package provides functions for computing several quality metrics, such as hypervolume, IGD, IGD+, and epsilon.
+objective space.
 
 **Keywords**: empirical attainment function, summary attainment surfaces, EAF
 differences, multi-objective optimization, bi-objective optimization,
-performance measures, performance assessment, graphical analysis,
-visualization.
+performance measures, performance assessment
 
 **Relevant literature:**
 
@@ -67,7 +60,7 @@ The first step before installing the **moocore** package is to [install R](https
         install.packages("moocore")
     ```
 
- 2. [Download the **moocore** package from CRAN](https://cran.r-project.org/package=moocore) (you may also need to download and install
+ 2. [Download the **moocore** package from CRAN][r-moocore-cran] (you may also need to download and install
     first the [package matrixStats](https://cran.r-project.org/package=matrixStats)), and invoke at the command-line:
 
     ```bash
@@ -77,22 +70,11 @@ The first step before installing the **moocore** package is to [install R](https
 
 Search the [R documentation](https://cran.r-project.org/faqs.html) if you need more help to install an R package on your system.
 
-The code for computing the EAF is available as a C program, and it does not require installing R or any R packages.  Just [download the package source
-code](https://cran.r-project.org/package=moocore), uncompress it, and look for the
-directory `src/eaf`. The C code can be used to implement your own visualizations
-instead of the visualizations provided by the **moocore** package. Compiled executables for computing the EAF can be found under `system.file(package="moocore", "bin")`. Other useful
-executable programs can be found there.
-
-The `moocore` package also contains two Perl scripts that may allow you to generate
-standard plots without any R knowledge. See `inst/scripts/eafplot/` and
-`inst/scripts/eafdiff/` in the package source code. The scripts use the **moocore**
-package internally to generate the plots, and, hence, the **moocore** package must
-be installed and working.
-
+Compiled command-line executables for various purposes can be found under `system.file(package="moocore", "bin")`.
 
 If you wish to be notified of bugfixes and new versions, please subscribe to the [low-volume emo-list](https://lists.dei.uc.pt/mailman/listinfo/emo-list), where announcements will be made.
 
-[ [Download **moocore** package from CRAN](https://cran.r-project.org/package=moocore) ]  [ [Documentation](https://multi-objective.github.io/moocore/) ]  [ [Development version (GitHub)](https://github.com/multi-objective/moocore) ]
+[ [Download **moocore** package from CRAN][r-moocore-cran] ]  [ [Documentation][r-moocore-homepage] ]  [ [Development version (GitHub)][r-moocore-github] ]
 
 
 GitHub (Development version)
@@ -116,17 +98,6 @@ Once the **moocore** package is installed, the following R commands will give mo
     ?read_datasets
 ```
 
-In addition, the source code contains the following under `src/`:
- * `src/eaf` : This C program computes the empirical attainment function in 2
-   or 3 dimensions. It is NOT required by the other programs, but it is
-   provided as a useful command-line utility. This version is based on the
-   original code written by Carlos M. Fonseca available at
-   http://www.tik.ee.ethz.ch/pisa/. A more recent version is available at [Prof. Fonseca's website](https://eden.dei.uc.pt/~cmfonsec/software.html).
- * `src/mo-tools` : Several tools for working with multi-objective data.
-
-For more information, consult the `README` files at each subdirectory.
-
-
 Python
 ------
 
@@ -136,8 +107,7 @@ There is also a Python `moocore` package: https://multi-objective.github.io/mooc
 License
 --------
 
-This software is Copyright (C) 2011-2021 Carlos M. Fonseca, Luís Paquete, Thomas
-Stützle, Manuel López-Ibáñez and Marco Chiarandini.
+This software is Copyright (C) 2024 Manuel López-Ibáñez, Carlos M. Fonseca, Luís Paquete, Mickaël Binois.
 
 This program is free software (software libre); you can redistribute it and/or
 modify it under the terms of the GNU General Public License as published by the
@@ -168,3 +138,4 @@ this work so I can mention them to my funding agent and tenure committee.
 [r-coverage-link]: https://app.codecov.io/gh/multi-objective/moocore/tree/main/r
 [r-moocore-github]: https://github.com/multi-objective/moocore/tree/main/r#readme
 [r-moocore-homepage]: https://multi-objective.github.io/moocore/r/
+[r-moocore-cran]: https://cran.r-project.org/package=moocore

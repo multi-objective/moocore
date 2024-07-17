@@ -17,4 +17,19 @@ Useful links:
 }
 
 }
+\author{
+\strong{Maintainer}: Manuel López-Ibáñez \email{manuel.lopez-ibanez@manchester.ac.uk} (\href{https://orcid.org/0000-0001-9974-1295}{ORCID})
+
+Authors:
+\itemize{
+  \item Carlos Fonseca
+  \item Luís Paquete
+}
+
+Other contributors:
+\itemize{
+  \item Mickaël Binois [contributor]
+}
+
+}
 \keyword{internal}

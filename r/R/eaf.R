@@ -88,7 +88,8 @@ eaf <- function (x, sets, percentiles = NULL, maximise = FALSE, groups = NULL)
 #'
 #' @param x (`list()`) List of `data.frames` or matrices. The names of the list
 #'   give the percentiles of the attainment surfaces.  This is the format
-#'   returned by [eaf_as_list()] and [mooplot::eafplot()].
+#'   returned by [eaf_as_list()].
+# FIXME: and [mooplot::eafplot()].
 #'
 #' @return A `data.frame` with as many columns as objectives and an additional column `percentiles`.
 #'

@@ -39,7 +39,7 @@ This function calculates the differences between the EAFs of two
 data sets.
 }
 \seealso{
-\code{\link[=read_datasets]{read_datasets()}}, \code{\link[mooplot:eafdiffplot]{mooplot::eafdiffplot()}}
+\code{\link[=read_datasets]{read_datasets()}}
 }
 \concept{eaf}
 \examples{

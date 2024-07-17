@@ -1,10 +1,19 @@
 Dear CRAN maintainers,
 
-I would like to submit a new version of the 'eaf' package to CRAN.
+I would like to submit a new package to CRAN called 'moocore'.
 
-This fixes a -Wuse-after-free warning reported by Prof Brian Ripley.
+This package (together with another one in preparation called 'mooplot') will
+replace the current package 'eaf' (https://CRAN.R-project.org/package=eaf) by
+splitting its functionality into a light-weight core package that requires
+compilation (moocore) and a heavier pure R package for visualization (mooplot).
 
-Regarding this NOTE:
+Once the package is in CRAN, I will start the process of convincing all users
+of 'eaf' to switch to 'moocore'. I also hope to convince the authors of
+packages that over time have copied pieces of 'eaf' into their packages to
+avoid pulling all its dependencies to switch to 'moocore'.
+
+Since the C code is a slightly updated version of the one in 'eaf', you may get
+this NOTE:
 
 * checking compiled code ... NOTE
 File ‘eaf/libs/eaf.so’:
@@ -14,7 +23,12 @@ File ‘eaf/libs/eaf.so’:
     Object: ‘eaf/io.o’
 Flavors: r-release-macos-x86_64, r-oldrel-macos-x86_64
 
-The same user-code is compiled for all operating systems. There is no conditional code depending on OS. This NOTE only happens for MacOS. My conclusion is that the C-library used by Clang in MacOS seems to pull stderr/stdout into user code even if the user does not use stderr/stdout. I do not know what I can do to avoid this. There are no uses of stderr/stdout in my code when compiled as an R package.
+The same user-code is compiled for all operating systems. There is no
+conditional code depending on OS. This NOTE only happens for MacOS. My
+conclusion is that the C-library used by Clang in MacOS seems to pull
+stderr/stdout into user code even if the user does not use stderr/stdout. I do
+not know what I can do to avoid this. There are no uses of stderr/stdout in my
+code when compiled as an R package.
 
 The other NOTE:
 
@@ -26,9 +40,12 @@ Result: NOTE
      extdata 1.7Mb
 Flavors: r-devel-windows-x86_64-new-UL, r-release-windows-ix86+x86_64, r-oldrel-windows-ix86+x86_64
 
-The package installs some optional command-line tools. For some reason unknown to me, these executables are larger in Windows than in other OSs. They are built from the same source code.
+The package installs some optional command-line tools. For some reason unknown
+to me, these executables are larger in Windows than in other OSs. They are
+built from the same source code.
 
-GNU make is a SystemRequirements because of the Makefiles used to build the various pieces of code under src/.
+GNU make is a SystemRequirements because of the Makefiles used to build the
+various pieces of code under src/.
 
 Thanks in advance,
 

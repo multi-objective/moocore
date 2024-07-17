@@ -26,7 +26,8 @@
 #'   column gives the difference in terms of sets in `x` minus sets in `y` that
 #'   attain each point (i.e., negative values are differences in favour `y`).
 #'
-#' @seealso    [read_datasets()], [mooplot::eafdiffplot()]
+#' @seealso    [read_datasets()]
+# , [mooplot::eafdiffplot()]
 #'
 #' @doctest
 #' A1 <- read_datasets(text='

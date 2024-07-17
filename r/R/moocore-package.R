@@ -76,47 +76,6 @@ NULL
 #' @keywords datasets
 "SPEA2relativeVanzyl"
 
-#' Metaheuristics for solving the Graph Vertex Coloring Problem
-#'
-#'  Two metaheuristic algorithms, TabuCol \citep{HerWer1987tabucol} and
-#'  simulated annealing \citep{JohAraMcGSch1991}, to find a good
-#'  approximation of the chromatic number of two random graphs. The data
-#'  here has the only goal of providing an example of use of [mooplot::eafplot()] for
-#'  comparing algorithm performance with respect to both time and quality
-#'  when modelled as two objectives in trade off.
-#'
-#' @format
-#'  A data frame with 3133 observations on the following 6 variables.
-#'  \describe{
-#'    \item{`alg`}{a factor with levels `SAKempeFI` and `TSinN1`}
-#'    \item{`inst`}{a factor with levels `DSJC500.5` and
-#'      `DSJC500.9`. Instances are taken from the DIMACS repository.}
-#'    \item{`run`}{a numeric vector indicating the run to
-#'  which the observation belong. }
-#'    \item{`best`}{a numeric vector indicating the best solution in
-#'  number of colors found in the corresponding run up to that time.}
-#'    \item{`time`}{a numeric vector indicating the time since the
-#'  beginning of the run for each observation. A rescaling is applied.}
-#'    \item{`titer`}{a numeric vector indicating iteration number
-#'  corresponding to the observations.}
-#'  }
-#'
-#'@details
-#'  Each algorithm was run 10 times per graph registering the time and
-#'  iteration number at which a new best solution was found. A time limit
-#'  corresponding to 500*10^5 total iterations of TabuCol was imposed. The
-#'  time was then normalized on a scale from 0 to 1 to make it instance
-#'  independent.
-#'
-#'@source \insertRef{ChiarandiniPhD}{moocore} (page 138)
-#'
-#'@references
-#' \insertAllCited{}
-#'
-#'@examples
-#' data(gcp2x2)
-#' @keywords datasets
-"gcp2x2"
 
 #' Conditional Pareto fronts obtained from Gaussian processes simulations.
 #'
