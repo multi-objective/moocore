@@ -120,7 +120,7 @@ static double stop_virtual_time, stop_real_time;
  *  to get the amount of time used by the backtracking routine.
  */
 
-void Timer_start()
+void Timer_start(void)
 {
     gettimeofday (&tp, NULL );
     real_time =   TIMER_WALLTIME(tp);
