@@ -110,50 +110,53 @@ endif
 EXE_CFLAGS += $(OPT_CFLAGS) $(WARN_CFLAGS) \
 	-DDEBUG=$(DEBUG) -DVERSION='"$(VERSION)"' -DMARCH='"$(gcc-guess-march)"'
 
-igd = $(BINDIR)/igd$(EXE)
-epsilon = $(BINDIR)/epsilon$(EXE)
-dominatedsets = $(BINDIR)/dominatedsets$(EXE)
-nondominated = $(BINDIR)/nondominated$(EXE)
-ndsort = $(BINDIR)/ndsort$(EXE)
+igdexe = $(BINDIR)/igd$(EXE)
+epsilonexe = $(BINDIR)/epsilon$(EXE)
+dominatedsetsexe = $(BINDIR)/dominatedsets$(EXE)
+nondominatedexe = $(BINDIR)/nondominated$(EXE)
+ndsortexe = $(BINDIR)/ndsort$(EXE)
 eafexe=$(BINDIR)/eaf$(EXE)
 hvexe=$(BINDIR)/hv$(EXE)
 
 
-.PHONY : all clean dist default test time eaf hv
+.PHONY : all clean dist default test time eaf hv nondominated
 
-default: $(igd) $(epsilon) $(dominatedsets) $(nondominated) $(ndsort) $(eafexe) $(hvexe)
+default: $(igdexe) $(epsilonexe) $(dominatedsetsexe) $(nondominatedexe) $(ndsortexe) $(eafexe) $(hvexe)
 
+igd: $(igdexe)
+epsilon: $(epsilonexe)
+dominatedsets: $(dominatedsetsexe)
+nondominated: $(nondominatedexe)
+ndsort: $(ndsortexe)
 eaf: $(eafexe)
-
 hv: $(hvexe)
 
 include libhv.mk
 
-$(igd): OBJS=igd.o io.o cmdline.o
-$(igd): HEADERS=igd.h nondominated.h cmdline.h
+$(igdexe): OBJS=igd.o io.o cmdline.o
+$(igdexe): HEADERS=igd.h nondominated.h cmdline.h
 
-$(epsilon): OBJS=epsilon.o io.o cmdline.o
-$(epsilon): HEADERS=epsilon.h nondominated.h cmdline.h
+$(epsilonexe): OBJS=epsilon.o io.o cmdline.o
+$(epsilonexe): HEADERS=epsilon.h nondominated.h cmdline.h
 
-$(dominatedsets): OBJS=dominatedsets.o io.o cmdline.o
-$(dominatedsets): HEADERS=nondominated.h cmdline.h
+$(dominatedsetsexe): OBJS=dominatedsets.o io.o cmdline.o
+$(dominatedsetsexe): HEADERS=nondominated.h cmdline.h
 
-$(nondominated): OBJS=nondominated.o io.o cmdline.o
-$(nondominated): HEADERS= epsilon.h nondominated.h cmdline.h
+$(nondominatedexe): OBJS=nondominated.o io.o cmdline.o
+$(nondominatedexe): HEADERS= epsilon.h nondominated.h cmdline.h
 
 $(eafexe): OBJS=eaf.o io.o eaf_main.o eaf3d.o avl.o cmdline.o
 $(eafexe): HEADERS=eaf.h
 
-$(ndsort): OBJS=ndsort.o pareto.o io.o hv_contrib.c $(LIBHV_OBJS) cmdline.o
-$(ndsort): HEADERS=nondominated.h cmdline.h
-
+$(ndsortexe): OBJS=ndsort.o pareto.o io.o hv_contrib.c $(LIBHV_OBJS) cmdline.o
+$(ndsortexe): HEADERS=nondominated.h cmdline.h
 
 $(hvexe): OBJS=main-hv.o io.o timer.o cmdline.o $(LIBHV_OBJS)
 $(hvexe): HEADERS=hv.h timer.h
 
 io.o: io_priv.h io.h
 
-$(igd) $(epsilon) $(nondominated) $(dominatedsets) $(ndsort) $(eafexe) $(hvexe): $(OBJS) $(HEADERS)
+$(igdexe) $(epsilonexe) $(nondominatedexe) $(dominatedsetsexe) $(ndsortexe) $(eafexe) $(hvexe): $(OBJS) $(HEADERS)
 	$(call MKDIR, $(BINDIR)/)
 	$(call ECHO,--> Building $@ version $(VERSION) <---)
 	$(QUIET_LINK)$(CC) -o $@  $(OBJS) $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS)
@@ -164,26 +167,10 @@ clean:
 	@-$(RM) config.status config.log
 	@-$(RM) Hypervolume_MEX.mex
 
-	$(call ECHO,---> Removing $(igd) <---)
-	@$(RM) $(igd)
-
-	$(call ECHO,---> Removing $(epsilon) <---)
-	@$(RM) $(epsilon)
-
-	$(call ECHO,---> Removing $(dominatedsets) <---)
-	@$(RM) $(dominatedsets)
-
-	$(call ECHO,---> Removing $(nondominated) <---)
-	@$(RM) $(nondominated)
-
-	$(call ECHO,---> Removing $(ndsort) <---)
-	@$(RM) $(ndsort)
-
-	$(call ECHO,---> Removing $(eafexe) <---)
-	@$(RM) $(eafexe)
-
-	$(call ECHO,---> Removing $(hvexe) <---)
-	@$(RM) $(hvexe)
+	@for exe in $(igdexe) $(epsilonexe) $(dominatedsetsexe) $(nondominatedexe) $(ndsortexe) $(eafexe) $(hvexe); do \
+		echo "---> Removing $$exe <---"; \
+		$(RM) $$exe; \
+	done
 
 	$(call ECHO,---> Removing object files: $(OBJS) <---)
 	@$(RM) $(OBJS) $(HV_OBJS)
@@ -194,8 +181,12 @@ test: clean
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
 	$(MAKE) all DEBUG=1 SANITIZERS=""
-	$(MAKE) test-eaf
-	$(MAKE) test-hv
+	$(MAKE) test-nondominated test-eaf test-hv
+
+test-nondominated:
+	$(MAKE) $(nondominatedexe) DEBUG=1 SANITIZERS=""
+	$(call ECHO,---> Testing $(nondominatedexe) for errors (DEBUG=1) <--- )
+	@cd $(TESTSUITE)/nondominated && ../regtest.py $(nondominatedexe) && cd $(PWD)
 
 test-eaf:
 	$(MAKE) eaf DEBUG=1 SANITIZERS=""
@@ -212,8 +203,12 @@ time: clean
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
 	$(MAKE) all DEBUG=0 SANITIZERS=""
-	$(MAKE) time-eaf
-	$(MAKE) time-hv
+	$(MAKE) test-nondominated test-eaf test-hv
+
+time-nondominated:
+	$(MAKE) $(nondominatedexe) DEBUG=0 SANITIZERS=""
+	$(call ECHO,---> Testing $(nondominatedexe) for speed (DEBUG=0) <--- )
+	@cd $(TESTSUITE)/nondominated && ../regtest.py $(nondominatedexe) && cd $(PWD)
 
 time-eaf:
 	$(MAKE) eaf DEBUG=0 SANITIZERS=""
