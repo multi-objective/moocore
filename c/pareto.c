@@ -37,7 +37,7 @@ point_2d_front_cmp (const void * a, const void * b)
    EAs: The NSGA-II and other algorithms. IEEE Transactions on
    Evolutionary Computation, 7(5):503–515, 2003.
 
-   FIXME: Could we avoid creating a copy of the points?
+   FIXME: Could we avoid creating a copy of the points? Yes, see find_nondominated_set_2d_()
 */
 static int *
 pareto_rank_2D (const double *points, int size)
