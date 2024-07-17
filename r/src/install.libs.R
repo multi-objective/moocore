@@ -1,4 +1,4 @@
-execs <- c(file.path("moocore", c("epsilon","igd","dominatedsets","nondominated","ndsort", "eaf")))
+execs <- c("hv", "epsilon","igd","dominatedsets","nondominated","ndsort", "eaf")
 
 if (WINDOWS) execs <- paste0(execs, ".exe")
 if (any(file.exists(execs))) {

@@ -15,4 +15,10 @@ revdep/checks
 revdep/library
 src/*.o
 src/*.so
-
+src/dominatedsets
+src/eaf
+src/epsilon
+src/hv
+src/igd
+src/ndsort
+src/nondominated

@@ -16,9 +16,9 @@ all: exes $(SHLIB)
 $(SHLIB): $(OBJECTS)
 
 exes:
-	$(MAKE) -C libmoocore all march=none CC="$(CC)" CFLAGS="$(CFLAGS) $(LTO)" OPT_CFLAGS="" WARN_CFLAGS="" DEBUG=$(DEBUG) EXE=$(EXEEXT) BINDIR=./
+	$(MAKE) -C libmoocore all march=none CC="$(CC)" CFLAGS="$(CFLAGS) $(LTO)" OPT_CFLAGS="" WARN_CFLAGS="" DEBUG=$(DEBUG) EXE=$(EXEEXT) BINDIR=$(PWD)
 	@-$(RM) libmoocore/*.o
 
 clean:
 	@-$(RM) *.o *.so *.dll
-	$(MAKE) -C libmoocore clean EXE=$(EXEEXT) BINDIR=./
+	$(MAKE) -C libmoocore clean EXE=$(EXEEXT) BINDIR=$(PWD)
