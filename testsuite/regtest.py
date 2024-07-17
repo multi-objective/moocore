@@ -4,6 +4,7 @@ import subprocess
 import sys
 import glob
 import time
+import tempfile
 from joblib import Parallel, delayed
 
 
@@ -65,12 +66,15 @@ def main():
             print(test, "is not a test file")
             sys.exit(1)
 
-    dir_out = "./out/"
-    os.makedirs(dir_out, exist_ok=True)
     ntotal = len(tests)
+    dir_out = tempfile.TemporaryDirectory()
+    # print(dir_out)
+    # os.makedirs(dir_out, exist_ok=True)
     ok = Parallel(n_jobs=-2)(
-        delayed(run_test)(test, dir_out=dir_out, program=program) for test in tests
+        delayed(run_test)(test, dir_out=dir_out.name, program=program) for test in tests
     )
+    dir_out.cleanup()
+
     npassed = sum(ok)
     nfailed = ntotal - npassed
     print("\n === regression test summary ===\n")
