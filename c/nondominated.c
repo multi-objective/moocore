@@ -208,8 +208,7 @@ data_bounds (double **minimum, double **maximum,
 static inline bool
 any_less_than (const double *a, const double *b, int dim)
 {
-    int d;
-    for (d = 0; d < dim; d++)
+    for (int d = 0; d < dim; d++)
         if (a[d] < b[d])
             return true;
 
@@ -377,8 +376,7 @@ print_file_info (FILE *stream, const char *filename,
     /* Print some info about input files.  */
     fprintf (stream, "# file: %s\n", filename);
     fprintf (stream, "# objectives (%d): ", dim);
-    int n;
-    for (n = 0; n < dim; n++) {
+    for (int n = 0; n < dim; n++) {
         fprintf (stream, "%c", (minmax[n] < 0) ? '-'
                  : ((minmax[n] > 0) ? '+' : 'i'));
     }
@@ -393,16 +391,13 @@ print_output_header (FILE *stream, const char *filename,
                      const double *lbound, const double *ubound,
                      const bool *logarithm)
 {
-    int n;
-
     print_file_info (stream, filename, dim, minmax);
-
     fprintf (stream, "# agree: %s\n", (agree < 0) ? "min"
              : ((agree > 0) ? "max" : "no"));
 
     if (logarithm) {
         fprintf (stream, "# logarithm: ");
-        for (n = 0; n < dim; n++) {
+        for (int n = 0; n < dim; n++) {
             fprintf (stream, "%c", logarithm[n] ? '1' : '0');
         }
         fprintf (stream, "\n");
@@ -427,17 +422,13 @@ print_input_info (FILE *stream, const char *filename,
                   const signed char *minmax,
                   const double *minimum, const double *maximum)
 {
-    int n;
-
     print_file_info (stream, filename, dim, minmax);
-
     fprintf (stream, "# sets: %d\n", nruns);
     fprintf (stream, "# sizes: %d", cumsizes[0]);
-    for (n = 1; n < nruns; n++)
+    for (int n = 1; n < nruns; n++)
         fprintf (stream, ", %d", cumsizes[n] - cumsizes[n - 1]);
     fprintf (stream, "\n");
     fprintf (stream, "# points: %d\n", cumsizes[nruns - 1]);
-
     fprintf (stream, "# minimum:");
     vector_fprintf (stream, minimum, dim);
     fprintf (stream, "\n");

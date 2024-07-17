@@ -13,19 +13,119 @@ nondom_init (size_t size)
     return nondom;
 }
 
+static inline const double *
+force_agree_minimize (const double *points, int dim, int size,
+                      const signed char *minmax, const signed char agree _no_warn_unused)
+{
+    eaf_assert(agree != AGREE_MINIMISE);
+
+    bool no_copy = true;
+    for (int d = 0; d < dim; d++) {
+        if (minmax[d] > 0) {
+            no_copy = false;
+            break;
+        }
+    }
+    if (no_copy)
+        return points;
+
+    double *pnew = malloc(dim * size * sizeof(double));
+    memcpy(pnew, points, dim * size * sizeof(double));
+
+    for (int d = 0; d < dim; d++) {
+        eaf_assert(minmax[d] != 0);
+        if (minmax[d] > 0)
+            for (int k = 0; k < size; k++)
+                pnew[k * dim + d] = -pnew[k * dim + d];
+    }
+    return pnew;
+}
+
+static inline int compare_x_asc_y_asc (const void *p1, const void *p2)
+{
+    const double x1 = **(const double **)p1;
+    const double x2 = **(const double **)p2;
+    const double y1 = *(*(const double **)p1 + 1);
+    const double y2 = *(*(const double **)p2 + 1);
+    return (x1 < x2) ? -1 : ((x1 > x2) ? 1 :
+                             ((y1 < y2) ? -1 : ((y1 > y2) ? 1 : 0)));
+}
+
 /* When find_dominated_p == true, then stop as soon as one dominated point is
    found and return its position.
 
-   When find_dominated_p == true, store which points are nondominated in nondom
+   When find_dominated_p == false, store which points are nondominated in nondom
    and return the number of nondominated points.
 
 */
-/* FIXME: 2D dimension-sweep. */
+static inline int
+find_nondominated_set_2d_(const double *points, int size,
+                          const signed char *minmax, const signed char agree,
+                          bool *nondom, bool find_dominated_p, bool keep_weakly)
+{
+    if (size < 2)
+        return size;
+
+    // FIXME: We should do this before reaching this function and remove minmax
+    // and agree from this function.
+    const double *pp = force_agree_minimize (points, 2, size, minmax, agree);
+
+    const double **p = malloc (size * sizeof(double *));
+    for (int k = 0; k < size; k++)
+        p[k] = pp + 2 * k;
+
+    qsort(p, size, sizeof(*p), &compare_x_asc_y_asc);
+    int n_dominated = 0, k = 0, j = 1;
+    do {
+        while (j < size && p[j][1] >= p[k][1]) {
+            if (!keep_weakly || p[j][0] != p[k][0] || p[j][1] != p[k][1]) {
+                if (find_dominated_p) {
+                    // In this context, it means "position of the first dominated solution found".
+                    n_dominated = (p[j] - pp) / 2;
+                    goto early_end;
+                }
+                nondom[j] = false;
+                n_dominated++;
+            }
+            j++;
+        }
+        k = j;
+        j++;
+    } while (j < size);
+
+    if (find_dominated_p) {
+        // In this context, it means "no dominated solution found".
+        n_dominated = -1;
+        goto early_end;
+    }
+
+    bool * nondom_new = malloc(size * sizeof(bool));
+    for (k = 0; k < size; k++)
+        nondom_new[(p[k] - pp) / 2] = nondom[k];
+    memcpy(nondom, nondom_new, size * sizeof(bool));
+    free (nondom_new);
+early_end:
+    free(p);
+    if (pp != points)
+        free((void*)pp);
+    return n_dominated;
+}
+
+/* When find_dominated_p == true, then stop as soon as one dominated point is
+   found and return its position.
+
+   When find_dominated_p == false, store which points are nondominated in nondom
+   and return the number of nondominated points.
+
+*/
 static inline int
 find_nondominated_set_ (const double *points, int dim, int size,
                         const signed char *minmax, const signed char agree,
                         bool *nondom, bool find_dominated_p, bool keep_weakly)
 {
+    if (dim == 2)
+        return find_nondominated_set_2d_(points, size, minmax, agree,
+                                       nondom, find_dominated_p, keep_weakly);
     int j, k, d;
 
     for (k = 0; k < size - 1; k++) {
@@ -67,7 +167,7 @@ find_nondominated_set_ (const double *points, int dim, int size,
                 }
             }
 
-            // k is removed if it is weakly dominated by j (unless remove_weakly).
+            // k is removed if it is weakly dominated by j (unless keep_weakly == FALSE).
             nondom[k] = !j_leq_k || (keep_weakly && k_leq_j);
             // j is removed if it is dominated by k.
             nondom[j] = (!k_leq_j || j_leq_k);
