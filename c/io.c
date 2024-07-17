@@ -174,9 +174,7 @@ write_sets_filtered (FILE *outfile, const double *data, int ncols,
                      const int *cumsizes, int nruns, const bool *write_p)
 {
     int size = 0;
-    int set = 0;
-
-    for (set = 0; set < nruns; set++) {
+    for (int set = 0; set < nruns; set++) {
         for (; size < cumsizes[set]; size++) {
             if (write_p[size]) {
                 vector_fprintf (outfile, &data[ncols * size], ncols);
