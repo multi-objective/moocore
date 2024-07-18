@@ -2,8 +2,8 @@
 =============================================================
 
 <!-- badges: start -->
-[![PyPI - Version](https://img.shields.io/pypi/v/moocore?color=blue)][py-moocore-pypi]
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/moocore)][py-moocore-pypi]
+[![PyPI - Version](https://img.shields.io/pypi/v/moocore)][py-moocore-pypi]
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/moocore?color=blue)][py-moocore-pypi]
 [![Python build status][py-build-badge]][py-build-link]
 [![coverage][py-coverage-badge]][py-coverage-link]
 <!-- badges: end -->
@@ -14,13 +14,25 @@
 
 **Contributors:**
     [Manuel López-Ibáñez](https://lopez-ibanez.eu),
+    Fergus Rooney.
 
 ---------------------------------------
 
 Introduction
 ============
 
-TODO
+The goal of **moocore** is to collect fast implementations of core mathematical functions and algorithms for multi-objective optimization. These functions include:
+
+ * Identifying and filtering dominated vectors.
+ * Quality metrics such as (weighted) hypervolume, epsilon, IGD, etc.
+ * Computation of the Empirical Attainment Function. The empirical attainment function (EAF) describes the probabilistic
+distribution of the outcomes obtained by a stochastic algorithm in the
+objective space.
+
+**Keywords**: empirical attainment function, summary attainment surfaces, EAF
+differences, multi-objective optimization, bi-objective optimization,
+performance measures, performance assessment
+
 
 R package
 ---------

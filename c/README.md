@@ -1,5 +1,5 @@
-MOOCORE: Core Mathematical Functions for Multi-Objective Optimization
-==============================================
+moocore: Core Mathematical Functions for Multi-Objective Optimization
+=====================================================================
 <!-- badges: start -->
 [![C build
 status](https://github.com/multi-objective/moocore/workflows/C/badge.svg)](https://github.com/multi-objective/moocore/actions/workflows/C.yaml)
@@ -9,15 +9,19 @@ status](https://github.com/multi-objective/moocore/workflows/Python/badge.svg)](
 status](https://github.com/multi-objective/moocore/workflows/R/badge.svg)](https://github.com/multi-objective/moocore/actions/workflows/R.yaml)
 <!-- badges: end -->
 
-[ [**GitHub**](https://multi-objective.github.io/moocore) ] [ [**R package**](https://multi-objective.github.io/moocore/r/) ] [ [**Python package**](https://multi-objective.github.io/moocore/python/) ]
+[ [**GitHub**](https://github.com/multi-objective/moocore) ] [ [**R package**](https://multi-objective.github.io/moocore/r/) ] [ [**Python package**](https://multi-objective.github.io/moocore/python/) ]
 
 **Contributors:**
     [Manuel López-Ibáñez](https://lopez-ibanez.eu),
+    [Carlos M. Fonseca](https://eden.dei.uc.pt/~cmfonsec/),
+    [Luís Paquete](https://eden.dei.uc.pt/~paquete/),
+    Andreia P. Guerreiro.
+
 
 Summary
 -------
 
-This is the C library and associated command-line tools of the [`moocore`](https://github.com/multi-objective/moocore** projects. This README describes just this component.
+This is the C library and associated command-line tools of the [`moocore`](https://github.com/multi-objective/moocore) project. This README describes just this component.
 
 **TODO: complete the rest of this README**
 
@@ -61,9 +65,3 @@ See the output of
   -------
 
 See LICENSE file or contact the author.
-
-
-  Contact
-  -------
-
-Manuel Lopez-Ibanez <manuel.lopez-ibanez@ulb.ac.be>

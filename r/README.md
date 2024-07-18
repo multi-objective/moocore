@@ -2,7 +2,8 @@
 =============================================================
 
 <!-- badges: start -->
-[![CRAN Status](https://www.r-pkg.org/badges/version-last-release/moocore)][r-moocore-cran]
+[![CRAN version](https://www.r-pkg.org/badges/version-last-release/moocore)][r-moocore-cran]
+[![CRAN Status](https://www.r-pkg.org/badges/version-last-release/moocore)](https://cran.r-project.org/web/checks/check_results_moocore.html)
 [![CRAN Downloads](https://cranlogs.r-pkg.org/badges/grand-total/moocore)][r-moocore-cran]
 [![R build status][r-build-badge]][r-build-link]
 [![coverage][r-coverage-badge]][r-coverage-link]
