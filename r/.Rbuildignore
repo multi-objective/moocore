@@ -30,3 +30,8 @@ cran-comments.md
 ^CRAN-RELEASE$
 ^CRAN-SUBMISSION$
 ^codecov.yml
+^do.R$
+^.Rbuildignore.backup$
+^.Rbuildignore.cran$
+
+

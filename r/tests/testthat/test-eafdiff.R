@@ -39,6 +39,6 @@ test_that("eafdiff2d", {
   test_eafdiff("wrots_l10w100_dat", "wrots_l100w10_dat", maximise = c(TRUE, FALSE))
   test_eafdiff("wrots_l10w100_dat", "wrots_l100w10_dat", maximise = c(FALSE, TRUE))
   test_eafdiff("wrots_l10w100_dat", "wrots_l100w10_dat", maximise = c(TRUE, TRUE))
-  test_eafdiff("tpls", "rest")
+  test_eafdiff("tpls.xz", "rest.xz")
   test_eafdiff("ALG_1_dat.xz", "ALG_2_dat.xz")
 })

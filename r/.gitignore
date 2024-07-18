@@ -1,5 +1,6 @@
 *.a
 *.o
+.Rbuildignore.backup
 .RData
 .Rhistory
 .Rproj.user

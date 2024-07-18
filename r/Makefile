@@ -38,7 +38,7 @@ install: build
 	cd $(BINDIR) && R CMD INSTALL $(INSTALL_FLAGS) $(PACKAGE)_$(PACKAGEVERSION).tar.gz
 
 setup:
-	Rscript -e 'if(!require(devtools)) install.packages("devtools"); devtools::install_deps(upgrade="never")'
+	Rscript -e 'if(!require(devtools)) install.packages(c("devtools", "xfun")); devtools::install_deps(upgrade="never")'
 
 gendoc: $(PACKAGEDIR)/man/$(PACKAGE)-package.Rd
 
@@ -59,13 +59,20 @@ closeversion:
 
 releasebuild: clean
 	@$(MAKE) gendoc
+	cp .Rbuildignore .Rbuildignore.backup
+	cat .Rbuildignore.cran >> .Rbuildignore
 	cd $(BINDIR) &&	R CMD build $(PACKAGEDIR) && tar -atvf $(PACKAGE)_$(PACKAGEVERSION).tar.gz
+	mv .Rbuildignore.backup .Rbuildignore
+	Rscript --vanilla do.R info "$(BINDIR)/$(PACKAGE)_$(PACKAGEVERSION).tar.gz"
 
-releasecheck: cran
+releasecheck:
 	$(Reval) 'urlchecker::url_check()'
-	$(MAKE) winbuild # $(MAKE) macbuild # rhub is broken
+	$(MAKE) releasebuild
+	$(MAKE) cran_
+	$(MAKE) winbuild_ # $(MAKE) macbuild # rhub is broken
 
 cran : build
+cran cran_:
 	cd $(BINDIR) && _R_CHECK_FORCE_SUGGESTS_=false _R_OPTIONS_STRINGS_AS_FACTORS_=false R CMD check --as-cran $(PACKAGE)_$(PACKAGEVERSION).tar.gz
 
 check: build
@@ -82,10 +89,12 @@ pdf:
 	$(RM) $(BINDIR)/$(PACKAGE).pdf
 	cd $(BINDIR) && R CMD Rd2pdf --no-preview --batch --output=$(PACKAGE).pdf $(PACKAGEDIR)
 
-submit:
-	@echo 'Edit cran-comments.md and run devtools::release() in R'
+submit: releasebuild
+	Rscript --vanilla do.R submit "$(BINDIR)/$(PACKAGE)_$(PACKAGEVERSION).tar.gz"
+
 
 winbuild: releasebuild
+winbuild winbuild_:
 	$(Reval) "devtools::check_win_release()"
 	$(Reval) "devtools::check_win_devel()"
 
