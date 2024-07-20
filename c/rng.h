@@ -40,4 +40,3 @@ void rng_bivariate_normal_fill(rng_state * rng,
                                double mu1, double mu2,
                                double sigma1, double sigma2, double rho,
                                double *out, int n);
-

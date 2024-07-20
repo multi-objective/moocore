@@ -82,5 +82,3 @@ as_integer <- function(x)
   }
   as.integer(x)
 }
-
-

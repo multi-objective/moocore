@@ -110,5 +110,3 @@ unary_common <- function(data, reference, maximise, fn)
     stop("data and reference must have the same number of columns")
   fn(t(data), t(reference), as.logical(rep_len(maximise, nobjs)))
 }
-
-
