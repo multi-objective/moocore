@@ -4,26 +4,25 @@
 \alias{normalise}
 \title{Normalise points}
 \usage{
-normalise(data, to_range = c(1, 2), lower = NA, upper = NA, maximise = FALSE)
+normalise(x, to_range = c(1, 2), lower = NA, upper = NA, maximise = FALSE)
 }
 \arguments{
-\item{data}{(\code{matrix} | \code{data.frame}) \cr Matrix or data frame of numerical
+\item{x}{\code{matrix()}|\code{data.frame()}\cr Matrix or data frame of numerical
 values, where each row gives the coordinates of a point.}
 
-\item{to_range}{Normalise values to this range. If the objective is
+\item{to_range}{\code{numerical(2)}\cr Normalise values to this range. If the objective is
 maximised, it is normalised to \code{c(to_range[1], to_range[0])}
 instead.}
 
-\item{lower, upper}{Bounds on the values. If NA, the maximum and minimum
+\item{lower, upper}{\code{numerical()}\cr Bounds on the values. If \code{NA}, the maximum and minimum
 values of each coordinate are used.}
 
-\item{maximise}{(\code{logical()} | \code{logical(1)}) \cr Whether the objectives must be
-maximised instead of minimised. Either a single logical value that applies
-to all objectives or a vector of logical values, with one value per
-objective.}
+\item{maximise}{\code{logical()}\cr Whether the objectives must be maximised
+instead of minimised. Either a single logical value that applies to all
+objectives or a vector of logical values, with one value per objective.}
 }
 \value{
-A numerical matrix
+\code{matrix()}\cr A numerical matrix
 }
 \description{
 Normalise points per coordinate to a range, e.g., \code{c(1,2)}, where the

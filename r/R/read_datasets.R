@@ -6,21 +6,21 @@
 #' adds an additional column `set` to indicate to which set each row
 #' belongs.
 #'
-#' @param file (`character()`)\cr Filename that contains the data.  Each row
+#' @param file `character()`\cr Filename that contains the data.  Each row
 #'   of the table appears as one line of the file.  If it does not contain an
 #'   \emph{absolute} path, the file name is \emph{relative} to the current
 #'   working directory, [base::getwd()].  Tilde-expansion is
 #'   performed where supported.  Files compressed with `xz` are supported.
 #'
-#' @param col_names (`character()`)\cr Vector of optional names for the variables.  The
+#' @param col_names `character()`\cr Vector of optional names for the variables.  The
 #'   default is to use \samp{"V"} followed by the column number.
 #'
-#' @param text (`character()`)\cr If `file` is not supplied and this is,
+#' @param text `character()`\cr If `file` is not supplied and this is,
 #'   then data are read from the value of `text` via a text connection.
 #'   Notice that a literal string can be used to include (small) data sets
 #'   within R code.
 #'
-#' @return  (`matrix()`) A numerical matrix of the
+#' @return  `matrix()`\cr A numerical matrix of the
 #'  data in the file. An extra column `set` is added to indicate to
 #'  which set each row belongs.
 #'
@@ -75,11 +75,14 @@ read_datasets <- function(file, col_names, text)
 #'
 #' Write data sets to a file in the same format as [read_datasets()].
 #'
-#' @template arg_datasets
+#' @param x `matrix`|`data.frame()`\cr Dataset with at least three
+#'   columns, the last one is the set of each point. See also
+#'   [read_datasets()].
 #'
 #' @param file Either a character string naming a file or a connection open for
 #'   writing. `""` indicates output to the console.
 #'
+#' @return No return value, called for side effects
 #'@seealso [utils::write.table()], [read_datasets()]
 #'
 #'@examples

@@ -4,37 +4,30 @@
 \alias{hypervolume}
 \title{Hypervolume metric}
 \usage{
-hypervolume(data, reference, maximise = FALSE)
+hypervolume(x, reference, maximise = FALSE)
 }
 \arguments{
-\item{data}{(\code{matrix} | \code{data.frame}) \cr Matrix or data frame of numerical
+\item{x}{\code{matrix()}|\code{data.frame()}\cr Matrix or data frame of numerical
 values, where each row gives the coordinates of a point.}
 
-\item{reference}{(\code{numeric()}) \cr Reference point as a vector of numerical values.}
+\item{reference}{\code{numeric()}\cr Reference point as a vector of numerical
+values.}
 
-\item{maximise}{(\code{logical()} | \code{logical(1)}) \cr Whether the objectives must be
-maximised instead of minimised. Either a single logical value that applies
-to all objectives or a vector of logical values, with one value per
-objective.}
+\item{maximise}{\code{logical()}\cr Whether the objectives must be maximised
+instead of minimised. Either a single logical value that applies to all
+objectives or a vector of logical values, with one value per objective.}
 }
 \value{
-A single numerical value.
+\code{numeric(1)}\cr A single numerical value.
 }
 \description{
-Computes the hypervolume metric with respect to a given reference point
-assuming minimization of all objectives.
-}
-\details{
-\if{html}{\out{<div class="sourceCode">}}\preformatted{Compute the hypervolume metric with respect to a given reference point
-}\if{html}{\out{</div>}}
-
+Compute the hypervolume metric with respect to a given reference point
 assuming minimization of all objectives. For 2D and 3D, the algorithm used
-\citep{FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec} has \eqn{O(n
- \log n)} complexity. For 4D or higher, the algorithm
-\citep{FonPaqLop06:hypervolume} has \eqn{O(n^{d-2} \log n)} time
-and linear space complexity in the worst-case, but experimental results
-show that the pruning techniques used may reduce the time complexity even
-further.
+\citep{FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec} has \eqn{O(n \log n)}
+complexity. For 4D or higher, the algorithm \citep{FonPaqLop06:hypervolume}
+has \eqn{O(n^{d-2} \log n)} time and linear space complexity in the
+worst-case, but experimental results show that the pruning techniques used
+may reduce the time complexity even further.
 }
 \examples{
 

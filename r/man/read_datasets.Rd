@@ -7,22 +7,22 @@
 read_datasets(file, col_names, text)
 }
 \arguments{
-\item{file}{(\code{character()})\cr Filename that contains the data.  Each row
+\item{file}{\code{character()}\cr Filename that contains the data.  Each row
 of the table appears as one line of the file.  If it does not contain an
 \emph{absolute} path, the file name is \emph{relative} to the current
 working directory, \code{\link[base:getwd]{base::getwd()}}.  Tilde-expansion is
 performed where supported.  Files compressed with \code{xz} are supported.}
 
-\item{col_names}{(\code{character()})\cr Vector of optional names for the variables.  The
+\item{col_names}{\code{character()}\cr Vector of optional names for the variables.  The
 default is to use \samp{"V"} followed by the column number.}
 
-\item{text}{(\code{character()})\cr If \code{file} is not supplied and this is,
+\item{text}{\code{character()}\cr If \code{file} is not supplied and this is,
 then data are read from the value of \code{text} via a text connection.
 Notice that a literal string can be used to include (small) data sets
 within R code.}
 }
 \value{
-(\code{matrix()}) A numerical matrix of the
+\code{matrix()}\cr A numerical matrix of the
 data in the file. An extra column \code{set} is added to indicate to
 which set each row belongs.
 }

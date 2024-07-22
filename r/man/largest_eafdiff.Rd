@@ -7,22 +7,24 @@
 largest_eafdiff(x, maximise = FALSE, intervals = 5L, reference, ideal = NULL)
 }
 \arguments{
-\item{x}{(\code{list()}) A list of matrices with at least 3 columns.}
+\item{x}{\code{list()}\cr A list of matrices or data frames with at least 3 columns (last column indicates the set).}
 
-\item{maximise}{(\code{logical()} | \code{logical(1)}) \cr Whether the objectives must be
-maximised instead of minimised. Either a single logical value that applies
-to all objectives or a vector of logical values, with one value per
-objective.}
+\item{maximise}{\code{logical()}\cr Whether the objectives must be maximised
+instead of minimised. Either a single logical value that applies to all
+objectives or a vector of logical values, with one value per objective.}
 
-\item{intervals}{(\code{integer(1)}) \cr The absolute range of the differences
+\item{intervals}{\code{integer(1)}\cr The absolute range of the differences
 \eqn{[0, 1]} is partitioned into the number of intervals provided.}
 
-\item{reference}{(\code{numeric()}) \cr Reference point as a vector of numerical values.}
+\item{reference}{\code{numeric()}\cr Reference point as a vector of numerical
+values.}
 
-\item{ideal}{(\code{numeric()}) \cr Ideal point as a vector of numerical values. If \code{NULL}, it is calculated as minimum (or maximum if maximising that objective) of each objective in \code{data}.}
+\item{ideal}{\code{numeric()}\cr Ideal point as a vector of numerical values.  If
+\code{NULL}, it is calculated as minimum (or maximum if maximising that
+objective) of each objective in the input data.}
 }
 \value{
-(\code{list()}) A list with two components \code{pair} and \code{value}.
+\code{list()}\cr A list with two components \code{pair} and \code{value}.
 }
 \description{
 Given a list of datasets, return the indexes of the pair with the largest

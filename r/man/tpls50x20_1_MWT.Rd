@@ -3,7 +3,8 @@
 \docType{data}
 \name{tpls50x20_1_MWT}
 \alias{tpls50x20_1_MWT}
-\title{Various strategies of Two-Phase Local Search applied to the Permutation Flowshop Problem with Makespan and Weighted Tardiness objectives.}
+\title{Various strategies of Two-Phase Local Search applied to the Permutation
+Flowshop Problem with Makespan and Weighted Tardiness objectives.}
 \format{
 A data frame with 1511 observations of  4 variables:
 \describe{
@@ -20,7 +21,8 @@ A data frame with 1511 observations of  4 variables:
 tpls50x20_1_MWT
 }
 \description{
-Various strategies of Two-Phase Local Search applied to the Permutation Flowshop Problem with Makespan and Weighted Tardiness objectives.
+Various strategies of Two-Phase Local Search applied to the Permutation
+Flowshop Problem with Makespan and Weighted Tardiness objectives.
 }
 \examples{
 data(tpls50x20_1_MWT)

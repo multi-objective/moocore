@@ -2,13 +2,12 @@
 #'
 #' Computes the epsilon metric, either additive or multiplicative.
 #'
-#' @template arg_data
+#' @inheritParams is_nondominated
 #'
-#' @template arg_refset
+#' @param reference `matrix`|`data.frame`\cr Reference set as a matrix or
+#'   data.frame of numerical values.
 #'
-#' @template arg_maximise
-#'
-#' @return  A single numerical value.
+#' @return  `numeric(1)`\cr A single numerical value.
 #'
 #' @name epsilon
 #'
@@ -89,15 +88,15 @@ NULL
 #' @expect equal(1.023755)
 #' epsilon_mult(A2, ref)
 #' @export
-epsilon_additive <- function(data, reference, maximise = FALSE)
-  unary_common(data = data, reference = reference, maximise = maximise,
+epsilon_additive <- function(x, reference, maximise = FALSE)
+  unary_common(data = x, reference = reference, maximise = maximise,
     fn = function(DATA, REFERENCE, MAXIMISE) .Call(epsilon_add_C, DATA, REFERENCE, MAXIMISE))
 
 #' @rdname epsilon
 #' @concept metrics
 #' @export
-epsilon_mult <- function(data, reference, maximise = FALSE)
-  unary_common(data = data, reference = reference, maximise = maximise,
+epsilon_mult <- function(x, reference, maximise = FALSE)
+  unary_common(data = x, reference = reference, maximise = maximise,
     fn = function(DATA, REFERENCE, MAXIMISE) .Call(epsilon_mul_C, DATA, REFERENCE, MAXIMISE))
 
 unary_common <- function(data, reference, maximise, fn)

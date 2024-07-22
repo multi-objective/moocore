@@ -2,28 +2,36 @@
 % Please edit documentation in R/eafdiff.R
 \name{compute_eafdiff_call}
 \alias{compute_eafdiff_call}
-\title{Same as \code{\link[=eafdiff]{eafdiff()}} but performs no checks and does not transform the input or
-the output. This function should be used by other packages that want to
+\title{Same as \code{\link[=eafdiff]{eafdiff()}} but performs no checks and does not transform the input
+or the output. This function should be used by other packages that want to
 avoid redundant checks and transformations.}
 \usage{
 compute_eafdiff_call(x, y, cumsizes_x, cumsizes_y, intervals, ret)
 }
 \arguments{
-\item{x, y}{Data frames corresponding to the input data of
+\item{x, y}{\code{matrix}|\code{data.frame()}\cr Data frames corresponding to the input data of
 left and right sides, respectively. Each data frame has at least three
-columns, the third one being the set of each point. See also
+columns, the last one is the set of each point. See also
 \code{\link[=read_datasets]{read_datasets()}}.}
 
-\item{cumsizes_x, cumsizes_y}{Cumulative size of the different sets of points in \code{x}.}
+\item{cumsizes_x, cumsizes_y}{Cumulative size of the different sets of points in \code{x} and \code{y}.}
 
-\item{intervals}{(\code{integer(1)}) \cr The absolute range of the differences
+\item{intervals}{\code{integer(1)}\cr The absolute range of the differences
 \eqn{[0, 1]} is partitioned into the number of intervals provided.}
 
 \item{ret}{(\code{"points"|"rectangles"|"polygons"})\cr The format of the returned EAF differences.}
 }
+\value{
+With \code{rectangle=FALSE}, a \code{data.frame} containing points where there
+is a transition in the value of the EAF differences.  With
+\code{rectangle=TRUE}, a \code{matrix} where the first 4 columns give the
+coordinates of two corners of each rectangle. In both cases, the last
+column gives the difference in terms of sets in \code{x} minus sets in \code{y} that
+attain each point (i.e., negative values are differences in favour \code{y}).
+}
 \description{
-Same as \code{\link[=eafdiff]{eafdiff()}} but performs no checks and does not transform the input or
-the output. This function should be used by other packages that want to
+Same as \code{\link[=eafdiff]{eafdiff()}} but performs no checks and does not transform the input
+or the output. This function should be used by other packages that want to
 avoid redundant checks and transformations.
 }
 \seealso{

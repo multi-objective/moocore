@@ -7,12 +7,12 @@
 attsurf2df(x)
 }
 \arguments{
-\item{x}{(\code{list()}) List of \code{data.frames} or matrices. The names of the list
+\item{x}{\code{list()}\cr List of \code{data.frames} or matrices. The names of the list
 give the percentiles of the attainment surfaces.  This is the format
 returned by \code{\link[=eaf_as_list]{eaf_as_list()}}.}
 }
 \value{
-A \code{data.frame} with as many columns as objectives and an additional column \code{percentiles}.
+\code{data.frame()}\cr Data frame with as many columns as objectives and an additional column \code{percentiles}.
 }
 \description{
 Convert a list of attainment surfaces to a single EAF \code{data.frame}.
@@ -24,12 +24,15 @@ attsurfs <- eaf_as_list(eaf(SPEA2relativeRichmond, percentiles = c(0,50,100)))
 str(attsurfs)
 eaf_df <- attsurf2df(attsurfs)
 str(eaf_df)
-# attsurfs <- eafplot (SPEA2relativeRichmond, percentiles = c(0,50,100),
-#                      xlab = expression(C[E]), ylab = "Total switches",
-#                      lty=0, pch=21, xlim = c(90, 140), ylim = c(0, 25))
-# attsurfs <- attsurf2df(attsurfs)
-# text(attsurfs[,1:2], labels = attsurfs[,3], adj = c(1.5,1.5))
-
+if (require("mooplot", quietly=TRUE)) {
+   attsurfs <- eafplot(SPEA2relativeRichmond, percentiles = c(0,50,100),
+                       xlab = expression(C[E]), ylab = "Total switches",
+                       lty=0, pch=21, xlim = c(90, 140), ylim = c(0, 25))
+   if (requireNamespace("graphics", quietly = TRUE)) {
+      graphics::text(attsurfs[,1:2], labels = attsurfs[,3], adj = c(1.5,1.5))
+   }
+   attsurfs <- attsurf2df(attsurfs)
+}
 }
 \seealso{
 \code{\link[=eaf_as_list]{eaf_as_list()}}

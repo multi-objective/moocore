@@ -4,7 +4,7 @@
 test_that("Doctest: vorobT", {
   # Created from @doctest for `vorobT`
   # Source file: R/vorob.R
-  # Source line: 20
+  # Source line: 16
   data(CPFs)
   res <- vorobT(CPFs, reference = c(2, 200))
   expect_equal(res$threshold, 44.140625)

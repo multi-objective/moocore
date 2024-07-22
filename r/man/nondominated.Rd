@@ -6,26 +6,25 @@
 \alias{pareto_rank}
 \title{Identify, remove and rank dominated points according to Pareto optimality}
 \usage{
-is_nondominated(data, maximise = FALSE, keep_weakly = FALSE)
+is_nondominated(x, maximise = FALSE, keep_weakly = FALSE)
 
-filter_dominated(data, maximise = FALSE, keep_weakly = FALSE)
+filter_dominated(x, maximise = FALSE, keep_weakly = FALSE)
 
-pareto_rank(data, maximise = FALSE)
+pareto_rank(x, maximise = FALSE)
 }
 \arguments{
-\item{data}{(\code{matrix} | \code{data.frame}) \cr Matrix or data frame of numerical
+\item{x}{\code{matrix()}|\code{data.frame()}\cr Matrix or data frame of numerical
 values, where each row gives the coordinates of a point.}
 
-\item{maximise}{(\code{logical()} | \code{logical(1)}) \cr Whether the objectives must be
-maximised instead of minimised. Either a single logical value that applies
-to all objectives or a vector of logical values, with one value per
-objective.}
+\item{maximise}{\code{logical()}\cr Whether the objectives must be maximised
+instead of minimised. Either a single logical value that applies to all
+objectives or a vector of logical values, with one value per objective.}
 
 \item{keep_weakly}{If \code{FALSE}, return \code{FALSE} for any duplicates
 of nondominated points.}
 }
 \value{
-\code{is_nondominated} returns a logical vector of the same length
+\code{\link[=is_nondominated]{is_nondominated()}} returns a logical vector of the same length
 as the number of rows of \code{data}, where \code{TRUE} means that the
 point is not dominated by any other point.
 

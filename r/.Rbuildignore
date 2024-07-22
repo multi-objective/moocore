@@ -24,13 +24,14 @@ TAGS
 ^docs$
 ^eaf-Ex.R
 ^git_version
+^inst/.+\.svn
+^inst/.+~
 ^man-roxygen
 ^pkgdown
+^src/libmoocore/Hypervolume_MEX.c
 ^svn_version
 ^testing
 ^v2
 ^web
 ^windows$
 cran-comments.md
-inst/.+\.svn
-inst/.+~

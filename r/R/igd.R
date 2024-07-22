@@ -3,9 +3,7 @@
 #' Functions to compute the inverted generational distance (IGD and IGD+) and
 #' the averaged Hausdorff distance between nondominated sets of points.
 #'
-#' @inheritParams epsilon
-#'
-#' @return  (`numeric(1)`) A single numerical value.
+#' @inherit epsilon params return
 #'
 #' @author Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
 #'
@@ -123,21 +121,21 @@
 #' @concept metrics
 #' @aliases IGDX
 #' @export
-igd <- function(data, reference, maximise = FALSE)
-  unary_common(data = data, reference = reference, maximise = maximise,
+igd <- function(x, reference, maximise = FALSE)
+  unary_common(data = x, reference = reference, maximise = maximise,
     fn = function(DATA, REFERENCE, MAXIMISE) .Call(igd_C, DATA, REFERENCE, MAXIMISE))
 
 #' @rdname igd
 #' @concept metrics
 #' @export
-igd_plus <- function(data, reference, maximise = FALSE)
-  unary_common(data = data, reference = reference, maximise = maximise,
+igd_plus <- function(x, reference, maximise = FALSE)
+  unary_common(data = x, reference = reference, maximise = maximise,
     fn = function(DATA, REFERENCE, MAXIMISE) .Call(igd_plus_C, DATA, REFERENCE, MAXIMISE))
 
 #' @rdname igd
-#' @param p (`integer(1)`) Hausdorff distance parameter (default: `1L`).
+#' @param p `integer(1)`\cr Hausdorff distance parameter (default: `1L`).
 #' @concept metrics
 #' @export
-avg_hausdorff_dist <- function(data, reference, maximise = FALSE, p = 1L)
-  unary_common(data = data, reference = reference, maximise = maximise,
+avg_hausdorff_dist <- function(x, reference, maximise = FALSE, p = 1L)
+  unary_common(data = x, reference = reference, maximise = maximise,
     fn = function(DATA, REFERENCE, MAXIMISE) .Call(avg_hausdorff_dist_C, DATA, REFERENCE, MAXIMISE, as.integer(p)))

@@ -1,24 +1,17 @@
 #' Hypervolume metric
 #'
-#' Computes the hypervolume metric with respect to a given reference point
-#' assuming minimization of all objectives.
+#' Compute the hypervolume metric with respect to a given reference point
+#' assuming minimization of all objectives. For 2D and 3D, the algorithm used
+#' \citep{FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec} has \eqn{O(n \log n)}
+#' complexity. For 4D or higher, the algorithm \citep{FonPaqLop06:hypervolume}
+#' has \eqn{O(n^{d-2} \log n)} time and linear space complexity in the
+#' worst-case, but experimental results show that the pruning techniques used
+#' may reduce the time complexity even further.
 #'
-#' @template arg_data
+#' @inherit epsilon params return
 #'
-#' @template arg_refpoint
-#'
-#' @template arg_maximise
-#'
-#' @return  A single numerical value.
-#'
-#' @details     Compute the hypervolume metric with respect to a given reference point
-#'  assuming minimization of all objectives. For 2D and 3D, the algorithm used
-#'  \citep{FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec} has \eqn{O(n
-#'  \log n)} complexity. For 4D or higher, the algorithm
-#'  \citep{FonPaqLop06:hypervolume} has \eqn{O(n^{d-2} \log n)} time
-#'  and linear space complexity in the worst-case, but experimental results
-#'  show that the pruning techniques used may reduce the time complexity even
-#'  further.
+#' @param reference `numeric()`\cr Reference point as a vector of numerical
+#'   values.
 #'
 #' @author Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
 #'
@@ -36,15 +29,15 @@
 #'
 #' @export
 #' @concept metrics
-hypervolume <- function(data, reference, maximise = FALSE)
+hypervolume <- function(x, reference, maximise = FALSE)
 {
-  data <- as_double_matrix(data)
-  nobjs <- ncol(data)
+  x <- as_double_matrix(x)
+  nobjs <- ncol(x)
   if (is.null(reference)) stop("reference cannot be NULL")
   if (length(reference) == 1L) reference <- rep_len(reference, nobjs)
 
   if (any(maximise)) {
-    data <- transform_maximise(data, maximise)
+    x <- transform_maximise(x, maximise)
     if (length(maximise) == 1L) {
       reference <- -reference
     } else {
@@ -52,7 +45,7 @@ hypervolume <- function(data, reference, maximise = FALSE)
     }
   }
   .Call(hypervolume_C,
-    t(data),
+    t(x),
     as.double(reference))
 }
 
@@ -66,7 +59,7 @@ hypervolume <- function(data, reference, maximise = FALSE)
 #'
 #' @inheritParams hypervolume
 #'
-#' @return (`numeric()`) A numerical vector
+#' @return `numeric()`\cr A numerical vector
 #'
 #' @author Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
 #'
@@ -94,15 +87,15 @@ hypervolume <- function(data, reference, maximise = FALSE)
 #'
 #' @export
 #' @concept metrics
-hv_contributions <- function(data, reference, maximise = FALSE)
+hv_contributions <- function(x, reference, maximise = FALSE)
 {
-  data <- as_double_matrix(data)
-  nobjs <- ncol(data)
+  x <- as_double_matrix(x)
+  nobjs <- ncol(x)
   if (is.null(reference)) stop("reference cannot be NULL")
   if (length(reference) == 1L) reference <- rep_len(reference, nobjs)
 
   if (any(maximise)) {
-    data <- transform_maximise(data, maximise)
+    x <- transform_maximise(x, maximise)
     if (length(maximise) == 1L) {
       reference <- -reference
     } else {
@@ -110,6 +103,6 @@ hv_contributions <- function(data, reference, maximise = FALSE)
     }
   }
   .Call(hv_contributions_C,
-    t(data),
+    t(x),
     as.double(reference))
 }

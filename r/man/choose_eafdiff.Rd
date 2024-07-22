@@ -7,15 +7,15 @@
 choose_eafdiff(x, left = stop("'left' must be either TRUE or FALSE"))
 }
 \arguments{
-\item{x}{(\code{matrix()}) Matrix of rectangles representing EAF differences
+\item{x}{\code{matrix()}\cr Matrix of rectangles representing EAF differences
 returned by \code{\link[=eafdiff]{eafdiff()}} with \code{rectangles=TRUE}.}
 
-\item{left}{(\code{logical(1)}) With \code{left=TRUE} return the rectangles with
+\item{left}{\code{logical(1)}\cr With \code{left=TRUE} return the rectangles with
 positive differences, otherwise return those with negative differences but
 differences are converted to positive.}
 }
 \value{
-\code{matrix} where the first 4 columns give the coordinates of two
+\code{matrix()} where the first 4 columns give the coordinates of two
 corners of each rectangle and the last column. In both cases, the last
 column gives the positive differences in favor of the chosen side.
 }

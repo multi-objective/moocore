@@ -21,5 +21,6 @@ network.
 \examples{
 data(HybridGA)
 data(SPEA2relativeRichmond)
+
 }
 \keyword{datasets}

@@ -1,7 +1,14 @@
 #' Combine datasets `x` and `y` by row taking care of making all sets unique.
 #'
-#' @param x,y Datasets.
-#' @return A dataset.
+#' @param x,y `matrix`|`data.frame()`\cr Each dataset has at least three
+#'   columns, the last one is the set of each point. See also
+#'   [read_datasets()].
+#'
+#' @return `matrix()|`data.frame()`\cr A dataset.
+#' @examples
+#' x <- data.frame(f1 = 5:10, f2 = 10:5, set = 1:6)
+#' y <- data.frame(f1 = 15:20, f2 = 20:15, set = 1:6)
+#' rbind_datasets(x,y)
 #' @export
 rbind_datasets <- function(x, y)
 {

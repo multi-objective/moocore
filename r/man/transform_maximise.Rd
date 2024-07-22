@@ -7,12 +7,12 @@
 transform_maximise(x, maximise)
 }
 \arguments{
-\item{x}{(\code{data.frame()}|\code{matrix()}) A numerical matrix or \code{data.frame}.}
+\item{x}{\code{matrix()}|\code{data.frame()}\cr Matrix or data frame of numerical
+values, where each row gives the coordinates of a point.}
 
-\item{maximise}{(\code{logical()} | \code{logical(1)}) \cr Whether the objectives must be
-maximised instead of minimised. Either a single logical value that applies
-to all objectives or a vector of logical values, with one value per
-objective.}
+\item{maximise}{\code{logical()}\cr Whether the objectives must be maximised
+instead of minimised. Either a single logical value that applies to all
+objectives or a vector of logical values, with one value per objective.}
 }
 \value{
 \code{x} transformed such that every column where \code{maximise} is \code{TRUE} is multiplied by \code{-1}.

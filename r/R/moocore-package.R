@@ -42,9 +42,11 @@ NULL
 #' data(HybridGA)
 #' data(SPEA2minstoptimeRichmond)
 #' SPEA2minstoptimeRichmond[,2] <- SPEA2minstoptimeRichmond[,2] / 60
-#' # eafplot (SPEA2minstoptimeRichmond, xlab = expression(C[E]),
-#' #          ylab = "Minimum idle time (minutes)", maximise = c(FALSE, TRUE),
-#' #          las = 1, log = "y", legend.pos = "bottomright")
+#' if (require("mooplot", quietly=TRUE)) {
+#'     eafplot(SPEA2minstoptimeRichmond, xlab = expression(C[E]),
+#'             ylab = "Minimum idle time (minutes)", maximise = c(FALSE, TRUE),
+#'             las = 1, log = "y", legend.pos = "bottomright")
+#' }
 #' @keywords datasets
 "SPEA2minstoptimeRichmond"
 
@@ -57,22 +59,21 @@ NULL
 #' @source \insertRef{LopezIbanezPhD}{moocore}
 #'
 #'@examples
-#'data(HybridGA)
-#'data(SPEA2relativeRichmond)
+#' data(HybridGA)
+#' data(SPEA2relativeRichmond)
+#'
 #' @keywords datasets
 "SPEA2relativeRichmond"
 
 #'Results of SPEA2 with relative time-controlled triggers on Vanzyl's
 #'water network.
 #'
-#' @format
-#'  A data frame as produced by [read_datasets()].
-#'
-#'@source \insertRef{LopezIbanezPhD}{moocore}
+#' @inherit SPEA2relativeRichmond format source
 #'
 #'@examples
-#'data(HybridGA)
-#'data(SPEA2relativeVanzyl)
+#' data(HybridGA)
+#' data(SPEA2relativeVanzyl)
+#'
 #' @keywords datasets
 "SPEA2relativeVanzyl"
 
@@ -94,7 +95,6 @@ NULL
 #'  }
 #'
 #'@source
-#'
 #' \insertRef{BinGinRou2015gaupar}{moocore}
 #'
 #'@examples
@@ -103,7 +103,8 @@ NULL
 #'@keywords datasets
 "CPFs"
 
-#' Various strategies of Two-Phase Local Search applied to the Permutation Flowshop Problem with Makespan and Weighted Tardiness objectives.
+#' Various strategies of Two-Phase Local Search applied to the Permutation
+#' Flowshop Problem with Makespan and Weighted Tardiness objectives.
 #'
 #' @format
 #'  A data frame with 1511 observations of  4 variables:

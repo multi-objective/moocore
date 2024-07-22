@@ -7,28 +7,27 @@
 \alias{avg_hausdorff_dist}
 \title{Inverted Generational Distance (IGD and IGD+) and Averaged Hausdorff Distance}
 \usage{
-igd(data, reference, maximise = FALSE)
+igd(x, reference, maximise = FALSE)
 
-igd_plus(data, reference, maximise = FALSE)
+igd_plus(x, reference, maximise = FALSE)
 
-avg_hausdorff_dist(data, reference, maximise = FALSE, p = 1L)
+avg_hausdorff_dist(x, reference, maximise = FALSE, p = 1L)
 }
 \arguments{
-\item{data}{(\code{matrix} | \code{data.frame}) \cr Matrix or data frame of numerical
+\item{x}{\code{matrix()}|\code{data.frame()}\cr Matrix or data frame of numerical
 values, where each row gives the coordinates of a point.}
 
-\item{reference}{(\code{matrix} | \code{data.frame}) \cr Reference set as a matrix or
+\item{reference}{\code{matrix}|\code{data.frame}\cr Reference set as a matrix or
 data.frame of numerical values.}
 
-\item{maximise}{(\code{logical()} | \code{logical(1)}) \cr Whether the objectives must be
-maximised instead of minimised. Either a single logical value that applies
-to all objectives or a vector of logical values, with one value per
-objective.}
+\item{maximise}{\code{logical()}\cr Whether the objectives must be maximised
+instead of minimised. Either a single logical value that applies to all
+objectives or a vector of logical values, with one value per objective.}
 
-\item{p}{(\code{integer(1)}) Hausdorff distance parameter (default: \code{1L}).}
+\item{p}{\code{integer(1)}\cr Hausdorff distance parameter (default: \code{1L}).}
 }
 \value{
-(\code{numeric(1)}) A single numerical value.
+\code{numeric(1)}\cr A single numerical value.
 }
 \description{
 Functions to compute the inverted generational distance (IGD and IGD+) and

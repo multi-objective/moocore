@@ -3,17 +3,17 @@
 #' Calculate the differences between the empirical attainment functions of two
 #' data sets.
 #'
-#' @param x,y Data frames corresponding to the input data of
+#' @param x,y `matrix`|`data.frame()`\cr Data frames corresponding to the input data of
 #'   left and right sides, respectively. Each data frame has at least three
-#'   columns, the third one being the set of each point. See also
+#'   columns, the last one is the set of each point. See also
 #'   [read_datasets()].
 #'
-#' @param intervals (`integer(1)`) \cr The absolute range of the differences
+#' @param intervals `integer(1)`\cr The absolute range of the differences
 #'   \eqn{[0, 1]} is partitioned into the number of intervals provided.
 #'
-#' @template arg_maximise
+#' @inheritParams is_nondominated
 #'
-#' @param rectangles If TRUE, the output is in the form of rectangles of the same color.
+#' @param rectangles `logical(1)`\cr If TRUE, the output is in the form of rectangles of the same color.
 #'
 #' @details
 #'   This function calculates the differences between the EAFs of two
@@ -129,13 +129,13 @@ eafdiff <- function(x, y, intervals = NULL, maximise = FALSE, rectangles = FALSE
   DIFF
 }
 
-#' Same as [eafdiff()] but performs no checks and does not transform the input or
-#' the output. This function should be used by other packages that want to
+#' Same as [eafdiff()] but performs no checks and does not transform the input
+#' or the output. This function should be used by other packages that want to
 #' avoid redundant checks and transformations.
 #'
 #' @seealso [as_double_matrix()] [transform_maximise()]
-#' @inheritParams eafdiff
-#' @param cumsizes_x,cumsizes_y Cumulative size of the different sets of points in `x`.
+#' @inherit eafdiff title params return
+#' @param cumsizes_x,cumsizes_y Cumulative size of the different sets of points in `x` and `y`.
 #' @param ret (`"points"|"rectangles"|"polygons"`)\cr The format of the returned EAF differences.
 #' @concept eaf
 #' @export

@@ -6,7 +6,7 @@
 \title{Results of SPEA2 with relative time-controlled triggers on Vanzyl's
 water network.}
 \format{
-A data frame as produced by \code{\link[=read_datasets]{read_datasets()}}.
+An object of class \code{data.frame} with 107 rows and 3 columns.
 }
 \source{
 \insertRef{LopezIbanezPhD}{moocore}
@@ -21,5 +21,6 @@ water network.
 \examples{
 data(HybridGA)
 data(SPEA2relativeVanzyl)
+
 }
 \keyword{datasets}

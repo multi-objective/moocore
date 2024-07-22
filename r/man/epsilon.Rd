@@ -6,24 +6,23 @@
 \alias{epsilon_mult}
 \title{Epsilon metric}
 \usage{
-epsilon_additive(data, reference, maximise = FALSE)
+epsilon_additive(x, reference, maximise = FALSE)
 
-epsilon_mult(data, reference, maximise = FALSE)
+epsilon_mult(x, reference, maximise = FALSE)
 }
 \arguments{
-\item{data}{(\code{matrix} | \code{data.frame}) \cr Matrix or data frame of numerical
+\item{x}{\code{matrix()}|\code{data.frame()}\cr Matrix or data frame of numerical
 values, where each row gives the coordinates of a point.}
 
-\item{reference}{(\code{matrix} | \code{data.frame}) \cr Reference set as a matrix or
+\item{reference}{\code{matrix}|\code{data.frame}\cr Reference set as a matrix or
 data.frame of numerical values.}
 
-\item{maximise}{(\code{logical()} | \code{logical(1)}) \cr Whether the objectives must be
-maximised instead of minimised. Either a single logical value that applies
-to all objectives or a vector of logical values, with one value per
-objective.}
+\item{maximise}{\code{logical()}\cr Whether the objectives must be maximised
+instead of minimised. Either a single logical value that applies to all
+objectives or a vector of logical values, with one value per objective.}
 }
 \value{
-A single numerical value.
+\code{numeric(1)}\cr A single numerical value.
 }
 \description{
 Computes the epsilon metric, either additive or multiplicative.

@@ -9,10 +9,10 @@ used to convert the list into a single data frame.}
 eaf_as_list(eaf)
 }
 \arguments{
-\item{eaf}{(\code{data.frame()}|\code{matrix()}) Data frame or matrix that represents the EAF.}
+\item{eaf}{\code{data.frame()}|\code{matrix()}\cr Data frame or matrix that represents the EAF.}
 }
 \value{
-(\code{list()}) A list of data frames. Each \code{data.frame} represents one attainment surface.
+\code{list()}\cr A list of data frames. Each \code{data.frame} represents one attainment surface.
 }
 \description{
 Convert an EAF data frame to a list of data frames, where each element

@@ -7,11 +7,18 @@
 rbind_datasets(x, y)
 }
 \arguments{
-\item{x, y}{Datasets.}
+\item{x, y}{\code{matrix}|\code{data.frame()}\cr Each dataset has at least three
+columns, the last one is the set of each point. See also
+\code{\link[=read_datasets]{read_datasets()}}.}
 }
 \value{
-A dataset.
+\verb{matrix()|}data.frame()`\cr A dataset.
 }
 \description{
 Combine datasets \code{x} and \code{y} by row taking care of making all sets unique.
+}
+\examples{
+x <- data.frame(f1 = 5:10, f2 = 10:5, set = 1:6)
+y <- data.frame(f1 = 15:20, f2 = 20:15, set = 1:6)
+rbind_datasets(x,y)
 }

@@ -7,7 +7,7 @@
 as_double_matrix(x)
 }
 \arguments{
-\item{x}{(\code{data.frame()}|\code{matrix()})\cr A numerical data frame or matrix with at least 1 row and 2 columns.}
+\item{x}{\code{data.frame()}|\code{matrix()}\cr A numerical data frame or matrix with at least 1 row and 2 columns.}
 }
 \value{
 \code{x} is coerced to a numerical \code{matrix()}.

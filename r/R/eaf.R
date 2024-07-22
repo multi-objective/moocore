@@ -3,18 +3,22 @@
 #' This function computes the EAF given a set of 2D or 3D points and a vector `set`
 #' that indicates to which set each point belongs.
 #'
-#' @template arg_x_data
+#' @param x `matrix`|`data.frame`\cr Matrix or data frame of numerical
+#'   values, where each row gives the coordinates of a point. If `sets` is
+#'   missing, the last column of `x` gives the sets.
 #'
-#' @template arg_sets
+#' @param sets `integer()`\cr A vector that indicates the set of each point in `x`. If
+#'   missing, the last column of `x` is used instead.
 #'
-#' @template arg_percentiles
+#' @param percentiles `numeric()`\cr Vector indicating which percentiles are computed.
+#' `NULL` computes all.
 #'
-#' @template arg_maximise
+#' @inheritParams is_nondominated
 #'
-#' @param groups Indicates that the EAF must be computed separately for data
+#' @param groups `factor()`\cr Indicates that the EAF must be computed separately for data
 #'   belonging to different groups.
 #'
-#' @return A data frame (`data.frame`) containing the exact representation of
+#' @return `data.frame()`\cr A data frame containing the exact representation of
 #'   EAF. The last column gives the percentile that corresponds to each
 #'   point. If groups is not `NULL`, then an additional column indicates to
 #'   which group the point belongs.
@@ -50,9 +54,10 @@
 #' # Compute only median separately for each group
 #' z <- eaf(x[,1:3], sets = x[,4], groups = x[,5], percentiles = 50)
 #' str(z)
-#' # library(plotly)
-#' # plot_ly(z, x = ~X1, y = ~X2, z = ~X3, color = ~groups,
-#' #         colors = c('#BF382A', '#0C4B8E')) %>% add_markers()
+#' if (require("plotly", quietly=TRUE)) {
+#'    plot_ly(z, x = ~X1, y = ~X2, z = ~X3, color = ~groups,
+#'            colors = c('#BF382A', '#0C4B8E')) |> add_markers()
+#' }
 #' @concept eaf
 #' @export
 eaf <- function (x, sets, percentiles = NULL, maximise = FALSE, groups = NULL)
@@ -86,12 +91,12 @@ eaf <- function (x, sets, percentiles = NULL, maximise = FALSE, groups = NULL)
 
 #' Convert a list of attainment surfaces to a single EAF `data.frame`.
 #'
-#' @param x (`list()`) List of `data.frames` or matrices. The names of the list
+#' @param x `list()`\cr List of `data.frames` or matrices. The names of the list
 #'   give the percentiles of the attainment surfaces.  This is the format
 #'   returned by [eaf_as_list()].
 # FIXME: and [mooplot::eafplot()].
 #'
-#' @return A `data.frame` with as many columns as objectives and an additional column `percentiles`.
+#' @return `data.frame()`\cr Data frame with as many columns as objectives and an additional column `percentiles`.
 #'
 #' @seealso [eaf_as_list()]
 #' @examples
@@ -101,12 +106,15 @@ eaf <- function (x, sets, percentiles = NULL, maximise = FALSE, groups = NULL)
 #' str(attsurfs)
 #' eaf_df <- attsurf2df(attsurfs)
 #' str(eaf_df)
-#' # attsurfs <- eafplot (SPEA2relativeRichmond, percentiles = c(0,50,100),
-#' #                      xlab = expression(C[E]), ylab = "Total switches",
-#' #                      lty=0, pch=21, xlim = c(90, 140), ylim = c(0, 25))
-#' # attsurfs <- attsurf2df(attsurfs)
-#' # text(attsurfs[,1:2], labels = attsurfs[,3], adj = c(1.5,1.5))
-#'
+#' if (require("mooplot", quietly=TRUE)) {
+#'    attsurfs <- eafplot(SPEA2relativeRichmond, percentiles = c(0,50,100),
+#'                        xlab = expression(C[E]), ylab = "Total switches",
+#'                        lty=0, pch=21, xlim = c(90, 140), ylim = c(0, 25))
+#'    if (requireNamespace("graphics", quietly = TRUE)) {
+#'       graphics::text(attsurfs[,1:2], labels = attsurfs[,3], adj = c(1.5,1.5))
+#'    }
+#'    attsurfs <- attsurf2df(attsurfs)
+#' }
 #' @concept eaf
 #' @export
 attsurf2df <- function(x)
@@ -147,8 +155,8 @@ compute_1_eaf <- function(x, sets, percentiles, maximise)
 #' avoid redundant checks and transformations.
 #'
 #' @seealso [as_double_matrix()] [transform_maximise()]
-#' @inheritParams eaf
-#' @param cumsizes Cumulative size of the different sets of points in `x`.
+#' @inherit eaf title params return
+#' @param cumsizes `integer()`\cr Cumulative size of the different sets of points in `x`.
 #' @concept eaf
 #' @export
 compute_eaf_call <- function(x, cumsizes, percentiles)
@@ -161,9 +169,9 @@ compute_eaf_call <- function(x, cumsizes, percentiles)
 #' of the list is one attainment surface. The function [attsurf2df()] can be
 #' used to convert the list into a single data frame.
 #'
-#' @param eaf (`data.frame()`|`matrix()`) Data frame or matrix that represents the EAF.
+#' @param eaf `data.frame()`|`matrix()`\cr Data frame or matrix that represents the EAF.
 #'
-#' @return (`list()`) A list of data frames. Each `data.frame` represents one attainment surface.
+#' @return `list()`\cr A list of data frames. Each `data.frame` represents one attainment surface.
 #'
 #' @seealso [eaf()] [attsurf2df()]
 #'

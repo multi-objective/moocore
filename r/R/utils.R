@@ -20,9 +20,7 @@ unique_counts <- function(x) as.vector(table(x))
 
 #' Transform matrix according to maximise parameter
 #'
-#' @param x (`data.frame()`|`matrix()`) A numerical matrix or `data.frame`.
-#'
-#' @template arg_maximise
+#' @inheritParams is_nondominated
 #'
 #' @return `x` transformed such that every column where `maximise` is `TRUE` is multiplied by `-1`.
 #'
@@ -52,7 +50,7 @@ transform_maximise <- function(x, maximise)
 
 #' Convert input to a matrix with `"double"` storage mode ([base::storage.mode()]).
 #'
-#' @param x (`data.frame()`|`matrix()`)\cr A numerical data frame or matrix with at least 1 row and 2 columns.
+#' @param x `data.frame()`|`matrix()`\cr A numerical data frame or matrix with at least 1 row and 2 columns.
 #' @return `x` is coerced to a numerical `matrix()`.
 #' @export
 as_double_matrix <- function(x)

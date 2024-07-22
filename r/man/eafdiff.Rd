@@ -7,20 +7,19 @@
 eafdiff(x, y, intervals = NULL, maximise = FALSE, rectangles = FALSE)
 }
 \arguments{
-\item{x, y}{Data frames corresponding to the input data of
+\item{x, y}{\code{matrix}|\code{data.frame()}\cr Data frames corresponding to the input data of
 left and right sides, respectively. Each data frame has at least three
-columns, the third one being the set of each point. See also
+columns, the last one is the set of each point. See also
 \code{\link[=read_datasets]{read_datasets()}}.}
 
-\item{intervals}{(\code{integer(1)}) \cr The absolute range of the differences
+\item{intervals}{\code{integer(1)}\cr The absolute range of the differences
 \eqn{[0, 1]} is partitioned into the number of intervals provided.}
 
-\item{maximise}{(\code{logical()} | \code{logical(1)}) \cr Whether the objectives must be
-maximised instead of minimised. Either a single logical value that applies
-to all objectives or a vector of logical values, with one value per
-objective.}
+\item{maximise}{\code{logical()}\cr Whether the objectives must be maximised
+instead of minimised. Either a single logical value that applies to all
+objectives or a vector of logical values, with one value per objective.}
 
-\item{rectangles}{If TRUE, the output is in the form of rectangles of the same color.}
+\item{rectangles}{\code{logical(1)}\cr If TRUE, the output is in the form of rectangles of the same color.}
 }
 \value{
 With \code{rectangle=FALSE}, a \code{data.frame} containing points where there

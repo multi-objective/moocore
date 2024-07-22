@@ -10,21 +10,21 @@ vorobT(x, sets, reference, maximise = FALSE)
 vorobDev(x, sets, reference, VE = NULL, maximise = FALSE)
 }
 \arguments{
-\item{x}{Either a matrix of data values, or a data frame, or a list of data
-frames of exactly three columns.  The third column gives the set (run,
-sample, ...) identifier.}
+\item{x}{\code{matrix}|\code{data.frame}\cr Matrix or data frame of numerical
+values, where each row gives the coordinates of a point. If \code{sets} is
+missing, the last column of \code{x} gives the sets.}
 
-\item{sets}{A vector that indicates the set of each point in \code{x}. If
+\item{sets}{\code{integer()}\cr A vector that indicates the set of each point in \code{x}. If
 missing, the last column of \code{x} is used instead.}
 
-\item{reference}{(\code{numeric()}) \cr Reference point as a vector of numerical values.}
+\item{reference}{\code{numeric()}\cr Reference point as a vector of numerical
+values.}
 
-\item{maximise}{(\code{logical()} | \code{logical(1)}) \cr Whether the objectives must be
-maximised instead of minimised. Either a single logical value that applies
-to all objectives or a vector of logical values, with one value per
-objective.}
+\item{maximise}{\code{logical()}\cr Whether the objectives must be maximised
+instead of minimised. Either a single logical value that applies to all
+objectives or a vector of logical values, with one value per objective.}
 
-\item{VE}{Vorob'ev expectation, e.g., as returned by \code{\link[=vorobT]{vorobT()}}.}
+\item{VE}{\code{matrix()}\cr Vorob'ev expectation, e.g., as returned by \code{\link[=vorobT]{vorobT()}}.}
 }
 \value{
 \code{vorobT} returns a list with elements \code{threshold},
@@ -56,19 +56,21 @@ data(CPFs)
 res <- vorobT(CPFs, reference = c(2, 200))
 res$threshold
 res$avg_hyp
-## Display Vorob'ev expectation and attainment function
-# First style
-# eafplot(CPFs[,1:2], sets = CPFs[,3], percentiles = c(0, 25, 50, 75, 100, res$threshold),
-#         main = substitute(paste("Empirical attainment function, ",beta,"* = ", a, "\%"),
-#                           list(a = formatC(res$threshold, digits = 2, format = "f"))))
-#
-# # Second style
-# eafplot(CPFs[,1:2], sets = CPFs[,3], percentiles = c(0, 20, 40, 60, 80, 100),
-#         col = gray(seq(0.8, 0.1, length.out = 6)^0.5), type = "area",
-#         legend.pos = "bottomleft", extra.points = res$VE, extra.col = "cyan",
-#         extra.legend = "VE", extra.lty = "solid", extra.pch = NA, extra.lwd = 2,
-#         main = substitute(paste("Empirical attainment function, ",beta,"* = ", a, "\%"),
-#                           list(a = formatC(res$threshold, digits = 2, format = "f"))))
+\donttest{
+# Display Vorob'ev expectation and attainment function
+if (require("mooplot", quietly=TRUE)) {
+   # First style
+   eafplot(CPFs[,1:2], sets = CPFs[,3], percentiles = c(0, 25, 50, 75, 100, res$threshold),
+           main = substitute(paste("Empirical attainment function, ",beta,"* = ", a, "\%"),
+                             list(a = formatC(res$threshold, digits = 2, format = "f"))))
+   # Second style
+   eafplot(CPFs[,1:2], sets = CPFs[,3], percentiles = c(0, 20, 40, 60, 80, 100),
+           col = gray(seq(0.8, 0.1, length.out = 6)^0.5), type = "area",
+           legend.pos = "bottomleft", extra.points = res$VE, extra.col = "cyan",
+           extra.legend = "VE", extra.lty = "solid", extra.pch = NA, extra.lwd = 2,
+           main = substitute(paste("Empirical attainment function, ",beta,"* = ", a, "\%"),
+                             list(a = formatC(res$threshold, digits = 2, format = "f"))))
+}}
 # Now print Vorob'ev deviation
 VD <- vorobDev(CPFs, VE = res$VE, reference = c(2, 200))
 VD

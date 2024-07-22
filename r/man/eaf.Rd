@@ -7,26 +7,25 @@
 eaf(x, sets, percentiles = NULL, maximise = FALSE, groups = NULL)
 }
 \arguments{
-\item{x}{(\code{matrix} | \code{data.frame}) \cr Matrix or data frame of numerical
+\item{x}{\code{matrix}|\code{data.frame}\cr Matrix or data frame of numerical
 values, where each row gives the coordinates of a point. If \code{sets} is
 missing, the last column of \code{x} gives the sets.}
 
-\item{sets}{A vector that indicates the set of each point in \code{x}. If
+\item{sets}{\code{integer()}\cr A vector that indicates the set of each point in \code{x}. If
 missing, the last column of \code{x} is used instead.}
 
-\item{percentiles}{(\code{numeric()}) Vector indicating which percentiles are computed.
+\item{percentiles}{\code{numeric()}\cr Vector indicating which percentiles are computed.
 \code{NULL} computes all.}
 
-\item{maximise}{(\code{logical()} | \code{logical(1)}) \cr Whether the objectives must be
-maximised instead of minimised. Either a single logical value that applies
-to all objectives or a vector of logical values, with one value per
-objective.}
+\item{maximise}{\code{logical()}\cr Whether the objectives must be maximised
+instead of minimised. Either a single logical value that applies to all
+objectives or a vector of logical values, with one value per objective.}
 
-\item{groups}{Indicates that the EAF must be computed separately for data
+\item{groups}{\code{factor()}\cr Indicates that the EAF must be computed separately for data
 belonging to different groups.}
 }
 \value{
-A data frame (\code{data.frame}) containing the exact representation of
+\code{data.frame()}\cr A data frame containing the exact representation of
 EAF. The last column gives the percentile that corresponds to each
 point. If groups is not \code{NULL}, then an additional column indicates to
 which group the point belongs.
@@ -57,9 +56,10 @@ x <- rbind(data.frame(x, groups = "spherical"),
 # Compute only median separately for each group
 z <- eaf(x[,1:3], sets = x[,4], groups = x[,5], percentiles = 50)
 str(z)
-# library(plotly)
-# plot_ly(z, x = ~X1, y = ~X2, z = ~X3, color = ~groups,
-#         colors = c('#BF382A', '#0C4B8E')) \%>\% add_markers()
+if (require("plotly", quietly=TRUE)) {
+   plot_ly(z, x = ~X1, y = ~X2, z = ~X3, color = ~groups,
+           colors = c('#BF382A', '#0C4B8E')) |> add_markers()
+}
 }
 \references{
 \insertRef{Grunert01}{moocore}

@@ -4,21 +4,21 @@
 \alias{hv_contributions}
 \title{Hypervolume contribution of a set of points}
 \usage{
-hv_contributions(data, reference, maximise = FALSE)
+hv_contributions(x, reference, maximise = FALSE)
 }
 \arguments{
-\item{data}{(\code{matrix} | \code{data.frame}) \cr Matrix or data frame of numerical
+\item{x}{\code{matrix()}|\code{data.frame()}\cr Matrix or data frame of numerical
 values, where each row gives the coordinates of a point.}
 
-\item{reference}{(\code{numeric()}) \cr Reference point as a vector of numerical values.}
+\item{reference}{\code{numeric()}\cr Reference point as a vector of numerical
+values.}
 
-\item{maximise}{(\code{logical()} | \code{logical(1)}) \cr Whether the objectives must be
-maximised instead of minimised. Either a single logical value that applies
-to all objectives or a vector of logical values, with one value per
-objective.}
+\item{maximise}{\code{logical()}\cr Whether the objectives must be maximised
+instead of minimised. Either a single logical value that applies to all
+objectives or a vector of logical values, with one value per objective.}
 }
 \value{
-(\code{numeric()}) A numerical vector
+\code{numeric()}\cr A numerical vector
 }
 \description{
 Computes the hypervolume contribution of each point given a set of points

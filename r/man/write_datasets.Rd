@@ -7,11 +7,15 @@
 write_datasets(x, file = "")
 }
 \arguments{
-\item{x}{(\code{matrix} | \code{data.frame}) \cr Matrix or data frame that represents multiple data sets of multi-dimensional points. Each row represent one point.
-The last column is the set index.}
+\item{x}{\code{matrix}|\code{data.frame()}\cr Dataset with at least three
+columns, the last one is the set of each point. See also
+\code{\link[=read_datasets]{read_datasets()}}.}
 
 \item{file}{Either a character string naming a file or a connection open for
 writing. \code{""} indicates output to the console.}
+}
+\value{
+No return value, called for side effects
 }
 \description{
 Write data sets to a file in the same format as \code{\link[=read_datasets]{read_datasets()}}.

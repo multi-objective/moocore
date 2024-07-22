@@ -3,19 +3,16 @@
 #' Given a list of datasets, return the indexes of the pair with the largest
 #' EAF differences according to the method proposed by \citet{DiaLop2020ejor}.
 #'
+#' @inheritParams eafdiff
+#' @param x `list()`\cr A list of matrices or data frames with at least 3 columns (last column indicates the set).
 #'
-#' @param x (`list()`) A list of matrices with at least 3 columns.
+#' @inheritParams hypervolume
 #'
-#' @template arg_maximise
+#' @param ideal `numeric()`\cr Ideal point as a vector of numerical values.  If
+#'   `NULL`, it is calculated as minimum (or maximum if maximising that
+#'   objective) of each objective in the input data.
 #'
-#' @param intervals (`integer(1)`) \cr The absolute range of the differences
-#'   \eqn{[0, 1]} is partitioned into the number of intervals provided.
-#'
-#' @template arg_refpoint
-#'
-#' @template arg_ideal_null
-#'
-#' @return  (`list()`) A list with two components `pair` and `value`.
+#' @return  `list()`\cr A list with two components `pair` and `value`.
 #'
 #'@examples
 #' # FIXME: This example is too large, we need a smaller one.
@@ -77,14 +74,14 @@ largest_eafdiff <- function(x, maximise = FALSE, intervals = 5L, reference,
 
 #' Interactively choose according to empirical attainment function differences
 #'
-#' @param x (`matrix()`) Matrix of rectangles representing EAF differences
+#' @param x `matrix()`\cr Matrix of rectangles representing EAF differences
 #'   returned by [eafdiff()] with `rectangles=TRUE`.
 #'
-#' @param left (`logical(1)`) With `left=TRUE` return the rectangles with
+#' @param left `logical(1)`\cr With `left=TRUE` return the rectangles with
 #'   positive differences, otherwise return those with negative differences but
 #'   differences are converted to positive.
 #'
-#' @return `matrix` where the first 4 columns give the coordinates of two
+#' @return `matrix()` where the first 4 columns give the coordinates of two
 #'   corners of each rectangle and the last column. In both cases, the last
 #'   column gives the positive differences in favor of the chosen side.
 #'
