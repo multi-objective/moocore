@@ -69,6 +69,7 @@ if (requireNamespace("graphics", quietly = TRUE)) {
 }
 
 ranks <- pareto_rank(set)
+str(ranks)
 if (requireNamespace("graphics", quietly = TRUE)) {
    colors <- colorRampPalette(c("red","yellow","springgreen","royalblue"))(max(ranks))
    plot(set, col = colors[ranks], type = "p", pch = 20)

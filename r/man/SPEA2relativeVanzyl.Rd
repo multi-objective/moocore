@@ -19,8 +19,7 @@ Results of SPEA2 with relative time-controlled triggers on Vanzyl's
 water network.
 }
 \examples{
-data(HybridGA)
 data(SPEA2relativeVanzyl)
-
+str(SPEA2relativeVanzyl)
 }
 \keyword{datasets}

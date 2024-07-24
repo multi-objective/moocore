@@ -19,8 +19,7 @@ Results of SPEA2 with relative time-controlled triggers on Richmond water
 network.
 }
 \examples{
-data(HybridGA)
 data(SPEA2relativeRichmond)
-
+str(SPEA2relativeRichmond)
 }
 \keyword{datasets}

@@ -56,10 +56,6 @@ x <- rbind(data.frame(x, groups = "spherical"),
 # Compute only median separately for each group
 z <- eaf(x[,1:3], sets = x[,4], groups = x[,5], percentiles = 50)
 str(z)
-if (require("plotly", quietly=TRUE)) {
-   plot_ly(z, x = ~X1, y = ~X2, z = ~X3, color = ~groups,
-           colors = c('#BF382A', '#0C4B8E')) |> add_markers()
-}
 }
 \references{
 \insertRef{Grunert01}{moocore}

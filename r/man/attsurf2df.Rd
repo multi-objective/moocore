@@ -24,15 +24,6 @@ attsurfs <- eaf_as_list(eaf(SPEA2relativeRichmond, percentiles = c(0,50,100)))
 str(attsurfs)
 eaf_df <- attsurf2df(attsurfs)
 str(eaf_df)
-if (require("mooplot", quietly=TRUE)) {
-   attsurfs <- eafplot(SPEA2relativeRichmond, percentiles = c(0,50,100),
-                       xlab = expression(C[E]), ylab = "Total switches",
-                       lty=0, pch=21, xlim = c(90, 140), ylim = c(0, 25))
-   if (requireNamespace("graphics", quietly = TRUE)) {
-      graphics::text(attsurfs[,1:2], labels = attsurfs[,3], adj = c(1.5,1.5))
-   }
-   attsurfs <- attsurf2df(attsurfs)
-}
 }
 \seealso{
 \code{\link[=eaf_as_list]{eaf_as_list()}}

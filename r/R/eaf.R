@@ -54,10 +54,6 @@
 #' # Compute only median separately for each group
 #' z <- eaf(x[,1:3], sets = x[,4], groups = x[,5], percentiles = 50)
 #' str(z)
-#' if (require("plotly", quietly=TRUE)) {
-#'    plot_ly(z, x = ~X1, y = ~X2, z = ~X3, color = ~groups,
-#'            colors = c('#BF382A', '#0C4B8E')) |> add_markers()
-#' }
 #' @concept eaf
 #' @export
 eaf <- function (x, sets, percentiles = NULL, maximise = FALSE, groups = NULL)
@@ -106,15 +102,6 @@ eaf <- function (x, sets, percentiles = NULL, maximise = FALSE, groups = NULL)
 #' str(attsurfs)
 #' eaf_df <- attsurf2df(attsurfs)
 #' str(eaf_df)
-#' if (require("mooplot", quietly=TRUE)) {
-#'    attsurfs <- eafplot(SPEA2relativeRichmond, percentiles = c(0,50,100),
-#'                        xlab = expression(C[E]), ylab = "Total switches",
-#'                        lty=0, pch=21, xlim = c(90, 140), ylim = c(0, 25))
-#'    if (requireNamespace("graphics", quietly = TRUE)) {
-#'       graphics::text(attsurfs[,1:2], labels = attsurfs[,3], adj = c(1.5,1.5))
-#'    }
-#'    attsurfs <- attsurf2df(attsurfs)
-#' }
 #' @concept eaf
 #' @export
 attsurf2df <- function(x)
