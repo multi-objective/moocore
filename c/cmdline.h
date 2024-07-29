@@ -26,10 +26,12 @@ extern char *program_invocation_short_name;
 
 static void version(void)
 {
-    printf("%s version " VERSION
 #ifdef MARCH
-           " (optimised for "MARCH")"
+#define OPTIMISED_FOR_STR " (optimised for "MARCH")"
+#else
+#define OPTIMISED_FOR_STR ""
 #endif
+    printf("%s version " VERSION OPTIMISED_FOR_STR
            "\n\n", program_invocation_short_name);
     printf(
 "Copyright (C) " CMDLINE_COPYRIGHT_YEARS "\n" CMDLINE_AUTHORS "\n"
