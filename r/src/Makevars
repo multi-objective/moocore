@@ -10,6 +10,7 @@ SOURCES = $(MOOCORE_SRC_FILES:%=libmoocore/%) init.c  Rmoocore.c
 OBJECTS = $(SOURCES:.c=.o)
 
 .PHONY: all clean exes
+.NOTPARALLEL:
 
 all: exes $(SHLIB)
 
