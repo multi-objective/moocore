@@ -3,7 +3,7 @@
 
 <!-- badges: start -->
 [![CRAN version](https://www.r-pkg.org/badges/version-last-release/moocore)][r-moocore-cran]
-[![CRAN Status](https://www.r-pkg.org/badges/version-last-release/moocore)][r-moocore-cran]
+[![CRAN Status](https://badges.cranchecks.info/worst/moocore.svg)][r-moocore-cran-results]
 [![CRAN Downloads](https://cranlogs.r-pkg.org/badges/grand-total/moocore)][r-moocore-cran]
 [![R build status][r-build-badge]][r-build-link]
 [![coverage][r-coverage-badge]][r-coverage-link]
@@ -86,7 +86,7 @@ following commands within the R console:
 
 ```R
     R> install.packages("devtools")
-    R> devtools::install_github("multi-objective/moocore")
+    R> devtools::install_github("multi-objective/moocore/r")
 ```
 
 Usage
@@ -140,3 +140,4 @@ this work so I can mention them to my funding agent and tenure committee.
 [r-moocore-github]: https://github.com/multi-objective/moocore/tree/main/r#readme
 [r-moocore-homepage]: https://multi-objective.github.io/moocore/r/
 [r-moocore-cran]: https://cran.r-project.org/package=moocore
+[r-moocore-cran-results]: https://cran.r-project.org/web/checks/check_results_moocore.html

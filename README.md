@@ -3,8 +3,12 @@
 
 [ [**C library**][c-moocore-homepage] ] [ [GitHub][c-moocore-github] ] [![Build status][c-build-badge]][c-build-link]
 
-[ [**R package**][r-moocore-homepage] ] [ [GitHub][r-moocore-github] ] [![Build status][r-build-badge]][r-build-link] [![Code Coverage][r-coverage-badge]][r-coverage-link] [![CRAN version](https://www.r-pkg.org/badges/version-last-release/moocore)][r-moocore-cran]
-[![CRAN Status](https://www.r-pkg.org/badges/version-last-release/moocore)](https://cran.r-project.org/web/checks/check_results_moocore.html)
+[ [**R package**][r-moocore-homepage] ]
+[ [GitHub][r-moocore-github] ]
+[![Build status][r-build-badge]][r-build-link]
+[![Code Coverage][r-coverage-badge]][r-coverage-link]
+[![CRAN version](https://www.r-pkg.org/badges/version-last-release/moocore)][r-moocore-cran]
+[![CRAN Status](https://badges.cranchecks.info/worst/moocore.svg)][r-moocore-cran-results]
 [![CRAN Downloads](https://cranlogs.r-pkg.org/badges/grand-total/moocore)][r-moocore-cran]
 
 [ [**Python package**][py-moocore-homepage] ] [ [GitHub][py-moocore-github] ] [![Build status][py-build-badge]][py-build-link] [![Code Coverage][py-coverage-badge]][py-coverage-link] [![PyPI - Version](https://img.shields.io/pypi/v/moocore)][py-moocore-pypi] [![PyPI - Downloads](https://img.shields.io/pypi/dm/moocore?color=blue)][py-moocore-pypi]
@@ -53,5 +57,6 @@ Each component is documented in the `README.md` file found under each folder.
 [r-coverage-badge]: https://codecov.io/gh/multi-objective/moocore/branch/main/graph/badge.svg?flag=R
 [r-coverage-link]: https://app.codecov.io/gh/multi-objective/moocore/tree/main/r
 [r-moocore-cran]: https://cran.r-project.org/package=moocore
+[r-moocore-cran-results]: https://cran.r-project.org/web/checks/check_results_moocore.html
 [r-moocore-github]: https://github.com/multi-objective/moocore/tree/main/r#readme
 [r-moocore-homepage]: https://multi-objective.github.io/moocore/r/
