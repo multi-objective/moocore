@@ -1,7 +1,7 @@
 Package: moocore
 Type: Package
 Title: Core Mathematical Functions for Multi-Objective Optimization
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(person("Manuel", "López-Ibáñez", role = c("aut", "cre"),
                     email = "manuel.lopez-ibanez@manchester.ac.uk",
                     comment = c(ORCID = "0000-0001-9974-1295")),
@@ -15,7 +15,7 @@ Authors@R: c(person("Manuel", "López-Ibáñez", role = c("aut", "cre"),
              person("Jean-Sebastien", "Roy", role = "cph", comment = "mt19937 library"),
              person("Makoto", "Matsumoto", role = "cph", comment = "mt19937 library"),
              person("Takuji", "Nishimura", role = "cph", comment = "mt19937 library"))
-Description: Fast implementation of mathematical operations and performance metrics for multi-objective optimization, including filtering and ranking of dominated vectors according to Pareto optimality, computation of the empirical attainment function, V.G. da Fonseca, C.M. Fonseca, A.O. Hall (2001) <doi:10.1007/3-540-44719-9_15>, hypervolume metric, C.M. Fonseca, L. Paquete, M. López-Ibáñez (2006) <doi:10.1109/CEC.2006.1688440>), epsilon indicator, inverted generational distance, and  Vorob\'ev threshold, expectation and deviation, M. Binois, D. Ginsbourger, O. Roustant (2015) <doi:10.1016/j.ejor.2014.07.032>, among others.
+Description: Fast implementation of mathematical operations and performance metrics for multi-objective optimization, including filtering and ranking of dominated vectors according to Pareto optimality, computation of the empirical attainment function, V.G. da Fonseca, C.M. Fonseca, A.O. Hall (2001) <doi:10.1007/3-540-44719-9_15>, hypervolume metric, C.M. Fonseca, L. Paquete, M. López-Ibáñez (2006) <doi:10.1109/CEC.2006.1688440>), epsilon indicator, inverted generational distance, and  Vorob'ev threshold, expectation and deviation, M. Binois, D. Ginsbourger, O. Roustant (2015) <doi:10.1016/j.ejor.2014.07.032>, among others.
 Depends: R (>= 4.0)
 Imports:
         matrixStats,
