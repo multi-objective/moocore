@@ -107,32 +107,6 @@ jobs:
           name: results-${{ runner.os }}-r${{ matrix.r }}
           path: r/check
 
-  rchk:
-    if: false # Skip until https://github.com/r-lib/actions/issues/783
-    needs: R-CMD-check
-    runs-on: ubuntu-latest
-    container:
-      image: rhub/ubuntu-rchk
-      options: --user=root
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: r-lib/actions/run-rchk@v2
-        with:
-          setup-only: true
-
-      - run: ls -R /home/docker/R-svn/bin
-
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::rcmdcheck, local::., any::eaf
-          working-directory: r
-
-      - uses: r-lib/actions/run-rchk@v2
-        with:
-          run-only: true
-
   coverage:
     needs: R-CMD-check
     name: Coverage ${{ matrix.os }} (${{ matrix.r }})

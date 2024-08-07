@@ -29,6 +29,8 @@ double whv_hype_expo(const double *points, int npoints,
 double whv_hype_gaus(const double *points, int npoints,
                      const double *ideal, const double *ref,
                      int nsamples, uint32_t seed, const double *mu);
+/* whv.h */
+double rect_weighted_hv2d(double *data, int n, double * rectangles, int rectangles_nrow, const double * reference);
 
 /*
 typedef ... hype_sample_dist;

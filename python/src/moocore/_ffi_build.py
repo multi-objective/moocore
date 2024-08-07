@@ -14,6 +14,16 @@ from cffi import FFI
 
 libmoocore_h = "src/moocore/libmoocore.h"
 sources_path = "src/moocore/libmoocore/"
+headers = """
+#include "io.h"
+#include "hv.h"
+#include "igd.h"
+#include "nondominated.h"
+#include "epsilon.h"
+#include "eaf.h"
+#include "whv.h"
+#include "whv_hype.h"
+"""
 sources = [
     "avl.c",
     "eaf.c",
@@ -24,6 +34,7 @@ sources = [
     "pareto.c",
     "mt19937/mt19937.c",
     "rng.c",
+    "whv.c",
     "whv_hype.c",
     "libutil.c",  # For fatal_error()
 ]
@@ -98,15 +109,7 @@ with open(libmoocore_h) as f:
 
 ffibuilder.set_source(
     "moocore._libmoocore",
-    """
-    #include "io.h"
-    #include "hv.h"
-    #include "igd.h"
-    #include "nondominated.h"
-    #include "epsilon.h"
-    #include "eaf.h"
-    #include "whv_hype.h"
-    """,
+    headers,
     sources=sources,
     include_dirs=[libmoocore_path],
     extra_compile_args=extra_compile_args,

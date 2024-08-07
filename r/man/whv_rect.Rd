@@ -35,7 +35,7 @@ objectives or a vector of logical values, with one value per objective.}
 \code{NULL}, it is calculated as minimum (or maximum if maximising that
 objective) of each objective in the input data.}
 
-\item{scalefactor}{\code{numeric(1)}\cr real value within \eqn{(0,1]} that scales
+\item{scalefactor}{\code{numeric(1)}\cr Real value within \eqn{(0,1]} that scales
 the overall weight of the differences. This is parameter psi (\eqn{\psi})
 in \citet{DiaLop2020ejor}.}
 }

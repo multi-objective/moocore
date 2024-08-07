@@ -20,6 +20,8 @@ from ._moocore import (
     vorobDev,
     vorobT,
     whv_hype,
+    whv_rect,
+    total_whv_rect,
 )
 
 from importlib.metadata import version as _metadata_version
@@ -50,4 +52,6 @@ __all__ = [
     "vorobDev",
     "vorobT",
     "whv_hype",
+    "whv_rect",
+    "total_whv_rect",
 ]

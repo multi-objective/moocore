@@ -135,6 +135,8 @@ Hypervolume metric
 
    hypervolume
    whv_hype
+   total_whv_rect
+   whv_rect
 
 
 .. bibliography::

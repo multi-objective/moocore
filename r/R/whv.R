@@ -40,39 +40,29 @@ whv_rect <- function(x, rectangles, reference, maximise = FALSE)
   if (ncol(rectangles) != 5L) stop("rectangles: invalid number of columns")
   if (is.null(reference)) stop("reference cannot be NULL")
   if (length(reference) == 1L) reference <- rep_len(reference, nobjs)
-  # FIXME: This is wrong for maximisation
+  # FIXME: This code does not handle maximisation yet.
   stopifnot(maximise == FALSE)
-  rectangles <- as_double_matrix(rectangles)
-  # FIXME: Do this in C code!
-  rectangles_a <- rectangles[,c(1L,3L), drop=FALSE]
-  rectangles_a[rectangles_a > reference[1L]] <- reference[1L]
-  rectangles_b <- rectangles[,c(2L,4L), drop=FALSE]
-  rectangles_b[rectangles_b > reference[2L]] <- reference[2L]
-  rectangles[,c(1L,3L)] <- rectangles_a
-  rectangles[,c(2L,4L)] <- rectangles_b
-  # Remove empty rectangles maybe created above.
-  rectangles <- rectangles[ (rectangles[,1L] != rectangles[,3L]) & (rectangles[,2L] != rectangles[,4L]),
-                         , drop = FALSE]
-  if (any(maximise)) {
-    x <- transform_maximise(x, maximise)
-    if (length(maximise) == 1L) {
-      reference <- -reference
-      rectangles[,1L:4L] <- -rectangles[,1L:4L, drop = FALSE]
-    } else {
-      reference[maximise] <- -reference[maximise]
-      pos <- as.vector(matrix(1L:4L, nrow=2L)[, maximise, drop=FALSE])
-      rectangles[,pos] <- -rectangles[,pos, drop = FALSE]
-    }
-  }
+  ## if (any(maximise)) {
+  ##   x <- transform_maximise(x, maximise)
+  ##   if (length(maximise) == 1L) {
+  ##     reference <- -reference
+  ##     rectangles[,1L:4L] <- -rectangles[,1L:4L, drop = FALSE]
+  ##   } else {
+  ##     reference[maximise] <- -reference[maximise]
+  ##     pos <- as.vector(matrix(1L:4L, nrow=2L)[, maximise, drop=FALSE])
+  ##     rectangles[,pos] <- -rectangles[,pos, drop = FALSE]
+  ##   }
+  ## }
   .Call(rect_weighted_hv2d_C,
     t(x),
-    t(rectangles))
+    t(rectangles),
+    reference)
 }
 
 
 #' @inheritParams largest_eafdiff
 #'
-#' @param scalefactor `numeric(1)`\cr real value within \eqn{(0,1]} that scales
+#' @param scalefactor `numeric(1)`\cr Real value within \eqn{(0,1]} that scales
 #'   the overall weight of the differences. This is parameter psi (\eqn{\psi})
 #'   in \citet{DiaLop2020ejor}.
 #'

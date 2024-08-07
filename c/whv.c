@@ -25,9 +25,55 @@ static int cmp_rectangles_y_desc (const void *p1, const void *p2)
         : 0;
 }
 
+static double *
+whv_preprocess_rectangles(double * rectangles, int nrow,
+                          const double *reference, int *new_nrow_p)
+{
+    const int ncol = 5;
+    for (int k = 0; k < nrow; k++) {
+        rectangles[k * ncol + 0] = MIN(rectangles[k * ncol + 0], reference[0]);
+        rectangles[k * ncol + 1] = MIN(rectangles[k * ncol + 1], reference[1]);
+        rectangles[k * ncol + 2] = MIN(rectangles[k * ncol + 2], reference[0]);
+        rectangles[k * ncol + 3] = MIN(rectangles[k * ncol + 3], reference[1]);
+    }
+    int * skip = malloc(nrow * sizeof(int));
+    int skip_nrow = 0;
+    for (int k = 0; k < nrow; k++) {
+        if (rectangles[k * ncol + 0] == rectangles[k * ncol + 2]
+            || rectangles[k * ncol + 1] == rectangles[k * ncol + 3])
+            skip[skip_nrow++] = k;
+    }
+
+    if (skip_nrow == 0) {
+        free(skip);
+        *new_nrow_p = nrow;
+        return rectangles;
+    }
+    int new_nrow = nrow - skip_nrow;
+    if (new_nrow == 0) {
+        free(skip);
+        *new_nrow_p = 0;
+        return NULL;
+    }
+    double *dest = malloc(sizeof(double) * 5 * new_nrow);
+    skip[skip_nrow] = nrow;
+    int j = 0, k = 0;
+    for (int s = 0; s <= skip_nrow; s++) {
+        while (k < skip[s]) {
+            for (int c = 0; c < 5; c++)
+                dest[j * ncol + c] = rectangles[k * ncol + c];
+            k++, j++;
+        }
+        k = skip[s] + 1;
+    }
+    free(skip);
+    *new_nrow_p = new_nrow;
+    return dest;
+}
+
 double
-rect_weighted_hv2d(double *data, size_t n, double * rectangles,
-                   size_t rectangles_nrow)
+rect_weighted_hv2d(double *data, int n, double * rectangles,
+                   int rectangles_nrow, const double * reference)
 {
 #define print_point(k, p, r, rect)                                             \
     DEBUG2_PRINT("%d: p[%lu] = (%16.15g, %16.15g)"                                 \
@@ -60,7 +106,13 @@ rect_weighted_hv2d(double *data, size_t n, double * rectangles,
     } while(0)
     // We cannot use %zu for size_t because of MingW compiler.
     DEBUG2_PRINT("n = %lu\trectangles = %lu\n", (unsigned long)n, (unsigned long)rectangles_nrow);
-    if (rectangles_nrow == 0 || n == 0) return 0;
+    if (rectangles_nrow <= 0 || n <= 0) return 0;
+
+    int old_rectangles_nrow = rectangles_nrow;
+    rectangles =
+        whv_preprocess_rectangles(rectangles, old_rectangles_nrow, reference, &rectangles_nrow);
+    if (rectangles_nrow == 0)
+        return 0;
 
     const int nobj = 2;
     qsort (data, n, 2 * sizeof(*data), &cmp_data_y_desc);
@@ -121,6 +173,9 @@ rect_weighted_hv2d(double *data, size_t n, double * rectangles,
         } while (top == p[1] && p[1] >= upper1);
     }
 return_whv:
+    if (old_rectangles_nrow != rectangles_nrow)
+        free (rectangles);
+
     DEBUG2_PRINT("whv: %16.15g\n", whv);
     return whv;
 }

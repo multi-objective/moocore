@@ -9,19 +9,19 @@
 
 #define CHECK_ARG_IS_NUMERIC_VECTOR(A)					\
     if (!Rf_isReal(A) || !Rf_isVector(A))                               \
-	Rf_error("Argument '" #A "' is not a numeric vector");
+        Rf_error("Argument '" #A "' is not a numeric vector");
 
 #define CHECK_ARG_IS_NUMERIC_MATRIX(A)					\
     if (!Rf_isReal(A) || !Rf_isMatrix(A))                               \
-	Rf_error("Argument '" #A "' is not a numeric matrix");
+        Rf_error("Argument '" #A "' is not a numeric matrix");
 
 #define CHECK_ARG_IS_INT_VECTOR(A)					\
     if (!Rf_isInteger(A) || !Rf_isVector(A))                            \
-	Rf_error("Argument '" #A "' is not an integer vector");
+        Rf_error("Argument '" #A "' is not an integer vector");
 
 #define CHECK_ARG_IS_LOGICAL_VECTOR(A)					\
     if (!Rf_isLogical(A) || !Rf_isVector(A))                            \
-	Rf_error("Argument '" #A "' is not a logical vector");
+        Rf_error("Argument '" #A "' is not a logical vector");
 
 /* The C API of R is awfully ugly and unpractical (and poorly
    documented). These wrappers make it a little more bearable. */
@@ -155,4 +155,22 @@ set_colnames(SEXP matrix, const char *const * names, size_t names_len)
 
     UNPROTECT(nprotected);
     return(matrix);
+}
+
+// Function to copy dimnames (column and row names) from one matrix to another
+static inline void
+matrix_copy_dimnames(SEXP dest, const SEXP src)
+{
+    // Ensure both source and target are matrices
+    if (!Rf_isMatrix(src))
+        Rf_error("src must be a matrix.");
+
+    if (!Rf_isMatrix(dest))
+        Rf_error("dest must be a matrix.");
+
+    // Get the dimnames from the source matrix
+    SEXP dimnames = Rf_getAttrib(src, R_DimNamesSymbol);
+
+    // Set the dimnames to the target matrix
+    Rf_setAttrib(dest, R_DimNamesSymbol, dimnames);
 }

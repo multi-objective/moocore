@@ -2,6 +2,20 @@ source("helper-common.R")
 
 withr::with_output_sink("test-whv.Rout", {
 
+test_that("example:whv_rect", {
+rectangles <- as.matrix(read.table(header=FALSE, text='
+ 1.0  3.0  2.0  Inf    1
+ 2.0  3.5  2.5  Inf    2
+ 2.0  3.0  3.0  3.5    3
+'))
+expect_equal(4, whv_rect (matrix(2, ncol=2), rectangles, reference = 6))
+expect_equal(4, whv_rect (matrix(c(2, 1), ncol=2), rectangles, reference = 6))
+expect_equal(7, whv_rect (matrix(c(1, 2), ncol=2), rectangles, reference = 6))
+expect_equal(26, total_whv_rect (matrix(2, ncol=2), rectangles, reference = 6, ideal = c(1,1)))
+expect_equal(30, total_whv_rect (matrix(c(2, 1), ncol=2), rectangles, reference = 6, ideal = c(1,1)))
+expect_equal(37.5, total_whv_rect (matrix(c(1, 2), ncol=2), rectangles, reference = 6, ideal = c(1,1)))
+})
+
 test_that("whv_rect", {
 
   rectangles <- as.matrix(read.table(header=FALSE, text=

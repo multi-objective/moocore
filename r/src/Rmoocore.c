@@ -1,8 +1,7 @@
 #include "Rcommon.h"
 #include "eaf.h"
 
-#define DECLARE_CALL(RET_TYPE, NAME, ...)                                      \
-    extern RET_TYPE NAME(__VA_ARGS__);
+#define DECLARE_CALL(NAME, ...) extern SEXP NAME(__VA_ARGS__);
 #include "init.h"
 #undef DECLARE_CALL
 
@@ -52,8 +51,7 @@ compute_eaf_C(SEXP DATA, SEXP CUMSIZES, SEXP PERCENTILE)
     eaf_t **eaf = compute_eaf_helper(DATA, nobj, cumsizes, nruns, percentile, nlevels);
     int totalpoints = eaf_totalpoints (eaf, nlevels);
 
-    SEXP mat;
-    PROTECT(mat = Rf_allocMatrix(REALSXP, totalpoints, nobj + 1));
+    SEXP mat = PROTECT(Rf_allocMatrix(REALSXP, totalpoints, nobj + 1));
     eaf2matrix_R(REAL(mat), eaf, nobj, totalpoints, percentile, nlevels);
     eaf_free(eaf, nlevels);
     UNPROTECT(1);
@@ -271,8 +269,7 @@ R_read_datasets(SEXP FILENAME)
     const int ntotal = cumsizes[nruns - 1];
 
     /* FIXME: Is this the fastest way to transfer a matrix from C to R ? */
-    SEXP DATA;
-    PROTECT(DATA = Rf_allocMatrix(REALSXP, ntotal, nobj + 1));
+    SEXP DATA = PROTECT(Rf_allocMatrix(REALSXP, ntotal, nobj + 1));
     double *rdata = REAL(DATA);
     matrix_transpose_double (rdata, data, ntotal, nobj);
 
@@ -290,7 +287,7 @@ R_read_datasets(SEXP FILENAME)
 
 #include "nondominated.h"
 
-void
+SEXP
 normalise_C(SEXP DATA, SEXP RANGE, SEXP LBOUND, SEXP UBOUND, SEXP MAXIMISE)
 {
     int nprotected = 0;
@@ -310,6 +307,7 @@ normalise_C(SEXP DATA, SEXP RANGE, SEXP LBOUND, SEXP UBOUND, SEXP MAXIMISE)
                     lbound, ubound);
     free (maximise);
     UNPROTECT(nprotected);
+    return R_NilValue;
 }
 
 SEXP
@@ -356,15 +354,12 @@ pareto_ranking_C(SEXP DATA)
 SEXP
 hypervolume_C(SEXP DATA, SEXP REFERENCE)
 {
-    int nprotected = 0;
     /* We transpose the matrix before calling this function. */
     SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
     SEXP_2_DOUBLE_VECTOR(REFERENCE, reference, reference_len);
     assert (nobj == reference_len);
-    new_real_vector(hv, 1);
-    hv[0] = fpli_hv(data, nobj, npoint, reference);
-    UNPROTECT (nprotected);
-    return Rexp(hv);
+    double hv = fpli_hv(data, nobj, npoint, reference);
+    return Rf_ScalarReal(hv);
 }
 
 SEXP
@@ -383,16 +378,16 @@ hv_contributions_C(SEXP DATA, SEXP REFERENCE)
 #include "whv.h"
 
 SEXP
-rect_weighted_hv2d_C(SEXP DATA, SEXP RECTANGLES)
+rect_weighted_hv2d_C(SEXP DATA, SEXP RECTANGLES, SEXP REFERENCE)
 {
-    int nprotected = 0;
     /* We transpose the matrix before calling this function. */
     SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
-    SEXP_2_DOUBLE_MATRIX(RECTANGLES, rectangles, unused, rectangles_nrow);
-    new_real_vector(hv, 1);
-    hv[0] = rect_weighted_hv2d(data, npoint, rectangles, rectangles_nrow);
-    UNPROTECT (nprotected);
-    return Rexp(hv);
+    SEXP_2_DOUBLE_MATRIX(RECTANGLES, rectangles, ncol, rectangles_nrow);
+    SEXP_2_DOUBLE_VECTOR(REFERENCE, reference, reference_len);
+    eaf_assert(ncol == 5);
+    eaf_assert(reference_len == 2);
+    double hv = rect_weighted_hv2d(data, npoint, rectangles, rectangles_nrow, reference);
+    return Rf_ScalarReal(hv);
 }
 
 #include "whv_hype.h"
@@ -400,7 +395,6 @@ rect_weighted_hv2d_C(SEXP DATA, SEXP RECTANGLES)
 SEXP
 whv_hype_C(SEXP DATA, SEXP IDEAL, SEXP REFERENCE, SEXP NSAMPLES, SEXP DIST, SEXP SEED, SEXP MU)
 {
-    int nprotected = 0;
     SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoints);
     SEXP_2_DOUBLE_VECTOR(IDEAL, ideal, ideal_len);
     SEXP_2_DOUBLE_VECTOR(REFERENCE, reference, reference_len);
@@ -410,20 +404,19 @@ whv_hype_C(SEXP DATA, SEXP IDEAL, SEXP REFERENCE, SEXP NSAMPLES, SEXP DIST, SEXP
     SEXP_2_STRING(DIST, dist_type);
     SEXP_2_UINT32(SEED, seed);
 
-    new_real_vector(hv, 1);
+    double hv;
     if (0 == strcmp(dist_type, "uniform")) {
-        hv[0] = whv_hype_unif(data, npoints, ideal, reference, nsamples, seed);
+        hv = whv_hype_unif(data, npoints, ideal, reference, nsamples, seed);
     } else if (0 == strcmp(dist_type, "exponential")) {
         const double * mu = REAL(MU);
-        hv[0] = whv_hype_expo(data, npoints, ideal, reference, nsamples, seed, mu[0]);
+        hv = whv_hype_expo(data, npoints, ideal, reference, nsamples, seed, mu[0]);
     } else if (0 == strcmp(dist_type, "point")) {
         const double * mu = REAL(MU);
-        hv[0] = whv_hype_gaus(data, npoints, ideal, reference, nsamples, seed, mu);
+        hv = whv_hype_gaus(data, npoints, ideal, reference, nsamples, seed, mu);
     } else {
         Rf_error("unknown 'dist' value: %s", dist_type);
     }
-    UNPROTECT (nprotected);
-    return Rexp(hv);
+    return Rf_ScalarReal(hv);
 }
 
 #include "epsilon.h"
@@ -442,7 +435,6 @@ static inline SEXP
 unary_metric_ref(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE,
                  enum unary_metric_t metric, SEXP EXTRA)
 {
-    int nprotected = 0;
     /* We transpose the matrix before calling this function. */
     SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
     double *ref = REAL(REFERENCE);
@@ -451,23 +443,23 @@ unary_metric_ref(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE,
     SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
     assert (nobj == maximise_len);
 
-    new_real_vector(value, 1);
+    double value;
     switch (metric) {
       case EPSILON_ADD:
-          value[0] = epsilon_additive (data, nobj, npoint, ref, ref_size, maximise);
+          value = epsilon_additive (data, nobj, npoint, ref, ref_size, maximise);
           break;
       case EPSILON_MUL:
-          value[0] = epsilon_mult (data, nobj, npoint, ref, ref_size, maximise);
+          value = epsilon_mult (data, nobj, npoint, ref, ref_size, maximise);
           break;
       case INV_GD:
-          value[0] = IGD (data, nobj, npoint, ref, ref_size, maximise);
+          value = IGD (data, nobj, npoint, ref, ref_size, maximise);
           break;
       case INV_GDPLUS:
-          value[0] = IGD_plus (data, nobj, npoint, ref, ref_size, maximise);
+          value = IGD_plus (data, nobj, npoint, ref, ref_size, maximise);
           break;
       case AVG_HAUSDORFF: {
           SEXP_2_INT(EXTRA, p);
-          value[0] = avg_Hausdorff_dist (data, nobj, npoint, ref, ref_size, maximise, p);
+          value = avg_Hausdorff_dist (data, nobj, npoint, ref, ref_size, maximise, p);
           break;
       }
       default:
@@ -475,8 +467,7 @@ unary_metric_ref(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE,
     }
 
     free (maximise);
-    UNPROTECT (nprotected);
-    return Rexp(value);
+    return Rf_ScalarReal(value);
 }
 
 SEXP
