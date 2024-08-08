@@ -145,7 +145,7 @@ jobs:
         working-directory: r
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v3.1.5
         with:
           fail_ci_if_error: true
           verbose: true
