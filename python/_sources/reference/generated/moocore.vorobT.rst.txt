@@ -1,0 +1,6 @@
+﻿moocore.vorobT
+==============
+
+.. currentmodule:: moocore
+
+.. autofunction:: vorobT

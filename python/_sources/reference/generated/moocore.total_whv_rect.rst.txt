@@ -1,0 +1,6 @@
+﻿moocore.total\_whv\_rect
+========================
+
+.. currentmodule:: moocore
+
+.. autofunction:: total_whv_rect

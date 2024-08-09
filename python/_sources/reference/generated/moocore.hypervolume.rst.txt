@@ -1,0 +1,6 @@
+﻿moocore.hypervolume
+===================
+
+.. currentmodule:: moocore
+
+.. autofunction:: hypervolume
