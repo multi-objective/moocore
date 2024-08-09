@@ -4,6 +4,7 @@ on:
   push:
     branches-ignore: [gh-pages]
     paths:
+      - ".github/workflows/rchk.yml"
       - ".github/workflows/R.yml"
       - "r/**"
       - 'c/Make*'
@@ -12,6 +13,7 @@ on:
   pull_request:
     branches-ignore:  [gh-pages]
     paths:
+      - ".github/workflows/rchk.yml"
       - ".github/workflows/R.yml"
       - "r/**"
       - 'c/Make*'
@@ -202,3 +204,7 @@ jobs:
           target-folder: r
           single-commit: true
           clean: true
+
+  rchk:
+    needs: pkgdown
+    uses: multi-objective/moocore/.github/workflows/rchk.yml@main

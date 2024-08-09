@@ -18,30 +18,10 @@
 name: rchk
 
 on:
-  workflow_run:
-    workflows: ['R']
-    types:
-     - completed
-    branches-ignore: [gh-pages]
-    paths:
-      - ".github/workflows/rchk.yml"
-      - "r/**"
-      - 'c/Make*'
-      - 'c/*.mk'
-      - 'c/**/*.[ch]p?p?'
-
-env:
-  R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
-  _R_CHECK_FORCE_SUGGESTS_: false
-  _R_CHECK_CRAN_INCOMING_REMOTE_: false
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_call:
 
 jobs:
   rchk:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     name: Run rchk
     steps:
