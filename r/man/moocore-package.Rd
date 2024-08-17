@@ -6,7 +6,7 @@
 \alias{moocore-package}
 \title{moocore: Core Mathematical Functions for Multi-Objective Optimization}
 \description{
-Fast implementation of mathematical operations and performance metrics for multi-objective optimization, including filtering and ranking of dominated vectors according to Pareto optimality, computation of the empirical attainment function, V.G. da Fonseca, C.M. Fonseca, A.O. Hall (2001) \doi{10.1007/3-540-44719-9_15}, hypervolume metric, C.M. Fonseca, L. Paquete, M. López-Ibáñez (2006) \doi{10.1109/CEC.2006.1688440}), epsilon indicator, inverted generational distance, and Vorob'ev threshold, expectation and deviation, M. Binois, D. Ginsbourger, O. Roustant (2015) \doi{10.1016/j.ejor.2014.07.032}, among others.
+Fast implementation of mathematical operations and performance metrics for multi-objective optimization, including filtering and ranking of dominated vectors according to Pareto optimality, computation of the empirical attainment function, V.G. da Fonseca, C.M. Fonseca, A.O. Hall (2001) \doi{10.1007/3-540-44719-9_15}, hypervolume metric, C.M. Fonseca, L. Paquete, M. López-Ibáñez (2006) \doi{10.1109/CEC.2006.1688440}, epsilon indicator, inverted generational distance, and Vorob'ev threshold, expectation and deviation, M. Binois, D. Ginsbourger, O. Roustant (2015) \doi{10.1016/j.ejor.2014.07.032}, among others.
 }
 \seealso{
 Useful links:
