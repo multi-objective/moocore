@@ -14,11 +14,11 @@ import moocore
 
 project = "moocore"
 _full_version = moocore.__version__
-release = _full_version.split("+", 1)[0]
-version = ".".join(release.split(".")[:2])
+release = _full_version  # _full_version.split("+", 1)[0]
+version = _full_version  # ".".join(release.split(".")[:2])
 year = date.today().year
 author = "Manuel López-Ibáñez and Fergus Rooney"
-copyright = f"2023-{year}, {author}"
+copyright = f"2024-{year}, {author}"
 html_site_root = f"https://multi-objective.github.io/{project}/python/"
 
 # -- General configuration ---------------------------------------------------

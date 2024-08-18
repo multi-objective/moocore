@@ -387,7 +387,7 @@ def hypervolume(data: ArrayLike, /, ref: ArrayLike) -> float:
 
 def is_nondominated(
     data: ArrayLike, maximise=False, keep_weakly: bool = False
-):
+) -> np.ndarray:
     r"""Identify dominated points according to Pareto optimality.
 
     For two dimensions, the algorithm has complexity :math:`O(n \log n)`.
@@ -406,7 +406,6 @@ def is_nondominated(
 
     Returns
     -------
-    bool array
         Returns a boolean array of the same length as the number of rows of data,
         where ``True`` means that the point is not dominated by any other point.
 
@@ -475,8 +474,8 @@ def filter_dominated_within_sets(
         Whether the objectives must be maximised instead of minimised. \
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
         Also accepts a 1D numpy array with values 0 or 1 for each objective
-    keep_weakly:
-        If False, return False for any duplicates of nondominated points.
+    keep_weakly :
+        If ``False``, return ``False`` for any duplicates of nondominated points.
 
     Returns
     -------
@@ -769,7 +768,7 @@ def normalise(
 #     return dataset
 
 
-def eaf(data, /, percentiles=[]):
+def eaf(data, /, percentiles: list = []):
     """Compute the Empirical attainment function (EAF) in 2D or 3D.
 
     Parameters
@@ -777,8 +776,8 @@ def eaf(data, /, percentiles=[]):
     data : numpy array
         Numpy array of numerical values and set numbers, containing multiple sets. For example the output \
          of the :func:`read_datasets` function
-    percentiles : list
-        A list of percentiles to calculate. If empty, all possible percentiles are calculated. Note the maximum (FIXME??)
+    percentiles :
+        List indicating which percentiles are computed. By default, all possible percentiles are calculated.
 
     Returns
     -------
@@ -790,7 +789,7 @@ def eaf(data, /, percentiles=[]):
     --------
     >>> filename = moocore.get_dataset_path("input1.dat")
     >>> x = moocore.read_datasets(filename)
-    >>> moocore.eaf(x)                                         # doctest: +ELLIPSIS
+    >>> moocore.eaf(x)                                     # doctest: +ELLIPSIS
     array([[  0.17470556,   8.89066343,  10.        ],
            [  0.20816431,   4.62275469,  10.        ],
            [  0.22997367,   1.11772205,  10.        ],
@@ -801,6 +800,35 @@ def eaf(data, /, percentiles=[]):
            [  0.2901393 ,   8.32259412,  20.        ],
            ...
            [  9.78758589,   2.8124162 ,  90.        ],
+           [  1.13096306,   9.72645436, 100.        ],
+           [  2.71891214,   8.84691923, 100.        ],
+           [  3.34035397,   7.49376946, 100.        ],
+           [  4.43498452,   6.94327481, 100.        ],
+           [  4.96525837,   6.20957074, 100.        ],
+           [  7.92511295,   3.92669598, 100.        ]])
+
+    >>> moocore.eaf(x, percentiles = [0, 50, 100])         # doctest: +ELLIPSIS
+    array([[  0.17470556,   8.89066343,   0.        ],
+           [  0.20816431,   4.62275469,   0.        ],
+           [  0.22997367,   1.11772205,   0.        ],
+           [  0.58799475,   0.73891181,   0.        ],
+           [  1.54506255,   0.38303122,   0.        ],
+           [  8.57911868,   0.35169752,   0.        ],
+           [  0.53173087,   9.73244829,  50.        ],
+           [  0.62230271,   9.02211752,  50.        ],
+           [  0.79293574,   8.89066343,  50.        ],
+           [  0.9017068 ,   8.32259412,  50.        ],
+           [  0.97468676,   7.65893644,  50.        ],
+           [  1.06855707,   7.49376946,  50.        ],
+           [  1.54506255,   6.7102429 ,  50.        ],
+           [  1.5964888 ,   5.98825094,  50.        ],
+           [  2.16315952,   4.7394435 ,  50.        ],
+           [  2.85891341,   4.49240941,  50.        ],
+           [  3.34035397,   2.89377444,  50.        ],
+           [  4.61023932,   2.87955367,  50.        ],
+           [  4.96525837,   2.29231998,  50.        ],
+           [  7.04694467,   1.83484358,  50.        ],
+           [  9.7398055 ,   1.00153569,  50.        ],
            [  1.13096306,   9.72645436, 100.        ],
            [  2.71891214,   8.84691923, 100.        ],
            [  3.34035397,   7.49376946, 100.        ],
@@ -850,7 +878,7 @@ def eaf(data, /, percentiles=[]):
     return np.frombuffer(eaf_buf).reshape((eaf_npoints, -1))
 
 
-def vorobT(data: ArrayLike, /, reference: ArrayLike):
+def vorobT(data: ArrayLike, /, reference: ArrayLike) -> dict:
     """Compute Vorob'ev threshold and expectation.
 
     Parameters
@@ -864,7 +892,6 @@ def vorobT(data: ArrayLike, /, reference: ArrayLike):
 
     Returns
     -------
-    dict
         A dictionary with elements `threshold`, `VE`, and `avg_hyp` (average hypervolume).
 
     See Also
