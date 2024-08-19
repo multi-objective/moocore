@@ -60,8 +60,6 @@ jobs:
       - name: Fix permissions
         run: chmod u+x r/cleanup
 
-      - uses: r-lib/actions/setup-pandoc@v2
-
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.r }}
@@ -70,6 +68,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
+          install-pandoc: true
           extra-packages: any::remotes, any::rcmdcheck, any::spelling
           needs: check
           working-directory: r
@@ -124,8 +123,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: r-lib/actions/setup-pandoc@v2
-
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
@@ -133,6 +130,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
+          install-pandoc: true
           extra-packages: any::covr any::xml2
           needs: coverage
           working-directory: r
@@ -182,17 +180,15 @@ jobs:
           r-version: ${{ matrix.r }}
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-pandoc@v2
-
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
+          install-pandoc: true
           extra-packages: any::pkgdown, local::.
           needs: website
           working-directory: r
 
       - name: Build website
-        run: |
-          pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE, run_dont_run = TRUE)
+        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE, run_dont_run = TRUE)
         shell: Rscript {0}
         working-directory: r
 
