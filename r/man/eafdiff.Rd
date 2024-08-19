@@ -64,18 +64,28 @@ A2 <- read_datasets(text='
 ')
 d <- eafdiff(A1, A2)
 str(d)
-
-
-
-
-
-
-
-
-
 d
+
+
+
+
+
+
+
+
 
 d <- eafdiff(A1, A2, rectangles = TRUE)
 str(d)
 d
+
+
+
+
+
+
+
+
+
+
+
 }

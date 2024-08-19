@@ -51,7 +51,10 @@
 #'  2 1
 #' ')
 #' d <- eafdiff(A1, A2)
+#' @omit
 #' str(d)
+#' @expect true(is.matrix(.))
+#' d
 #' @testRaw  expect_equal(d,matrix(byrow=TRUE, ncol=3, scan(quiet = TRUE, text='1.0  2.0    2
 #' @testRaw   2.0  1.0   -1
 #' @testRaw   2.5  1.0    0
@@ -61,23 +64,22 @@
 #' @testRaw   2.5  3.5    0
 #' @testRaw   3.0  3.0    0
 #' @testRaw   4.0  2.5    1')))
-#' @expect true(is.matrix(.))
-#' d
 #'
 #' d <- eafdiff(A1, A2, rectangles = TRUE)
+#' @omit
 #' str(d)
-# @expect value(as.matrix(read.table(header=TRUE, text='
-#       xmin ymin xmax ymax diff
-#       2.0  1.0  2.5  2.0   -1
-#       1.0  2.0  2.0  Inf    2
-#       2.5  1.0  Inf  2.0    0
-#       2.0  2.0  3.0  3.0    1
-#       2.0  3.5  2.5  Inf    2
-#       2.0  3.0  3.0  3.5    2
-#       3.0  2.5  4.0  3.0    2
-#       3.0  2.0  Inf  2.5    2
-#       4.0  2.5  Inf  3.0    1')))
 #' d
+#' @testRaw expect_equal(d, as.matrix(read.table(header=TRUE, text='
+#' @testRaw      xmin ymin xmax ymax diff
+#' @testRaw      2.0  1.0  2.5  2.0   -1
+#' @testRaw      1.0  2.0  2.0  Inf    2
+#' @testRaw      2.5  1.0  Inf  2.0    0
+#' @testRaw      2.0  2.0  3.0  3.0    1
+#' @testRaw      2.0  3.5  2.5  Inf    2
+#' @testRaw      2.0  3.0  3.0  3.5    2
+#' @testRaw      3.0  2.5  4.0  3.0    2
+#' @testRaw      3.0  2.0  Inf  2.5    2
+#' @testRaw      4.0  2.5  Inf  3.0    1')))
 #'@concept eaf
 #'@export
 eafdiff <- function(x, y, intervals = NULL, maximise = FALSE, rectangles = FALSE)
