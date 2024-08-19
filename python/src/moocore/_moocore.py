@@ -181,7 +181,9 @@ def igd(data, /, ref, *, maximise=False) -> float:
     return lib.IGD(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
 
 
-def igd_plus(data, /, ref, *, maximise=False) -> float:
+def igd_plus(
+    data: ArrayLike, /, ref: ArrayLike, *, maximise: bool | list[bool] = False
+) -> float:
     """Modified IGD (IGD+).
 
     IGD+ is a Pareto-compliant version of :func:`igd`.
@@ -190,14 +192,14 @@ def igd_plus(data, /, ref, *, maximise=False) -> float:
 
     Parameters
     ----------
-    data : numpy.ndarray
-        Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
+    data :
+        2D matrix of numerical values, where each row gives the coordinates of a point in objective space.
         If the array is created from the :func:`read_datasets` function, remove the last (set) column.
 
-    ref : numpy.ndarray or list
-        Reference point set as a numpy array or list. Must have same number of columns as the dataset.
+    ref :
+        Reference point (1D vector). Must have same length as the number of column in ``data``.
 
-    maximise : bool or or list of bool
+    maximise :
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
         Also accepts a 1d numpy array with value 0/1 for each objective.
@@ -386,7 +388,9 @@ def hypervolume(data: ArrayLike, /, ref: ArrayLike) -> float:
 
 
 def is_nondominated(
-    data: ArrayLike, maximise=False, keep_weakly: bool = False
+    data: ArrayLike,
+    maximise: bool | list[bool] = False,
+    keep_weakly: bool = False,
 ) -> np.ndarray:
     r"""Identify dominated points according to Pareto optimality.
 
@@ -397,7 +401,7 @@ def is_nondominated(
     data :
         Array of numerical values, where each row gives the coordinates of a point in objective space.
         If the array is created by the :func:`read_datasets()` function, remove the last column.
-    maximise : single bool, or list of booleans
+    maximise :
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of boolean values, with one value per objective.
         Also accepts a 1D numpy array with value 0/1 for each objective.
@@ -421,14 +425,11 @@ def is_nondominated(
     >>> S = np.array([[1, 1], [0, 1], [1, 0], [1, 0]])
     >>> moocore.is_nondominated(S)
     array([False,  True,  True, False])
-
-    >>> moocore.is_nondominated(S, maximise=True)
-    array([ True, False, False, False])
-
     >>> moocore.filter_dominated(S)
     array([[0, 1],
            [1, 0]])
-
+    >>> moocore.is_nondominated(S, keep_weakly=True)
+    array([False,  True,  True,  True])
     >>> moocore.filter_dominated(S, keep_weakly=True)
     array([[0, 1],
            [1, 0],
@@ -448,12 +449,19 @@ def is_nondominated(
     return np.frombuffer(nondom, dtype=bool)
 
 
-def filter_dominated(data, /, *, maximise=False, keep_weakly: bool = False):
+def filter_dominated(
+    data, /, *, maximise=False, keep_weakly: bool = False
+) -> np.ndarray:
     """Remove dominated points according to Pareto optimality.
 
-    See: :func:`is_nondominated` for details.
+    .. seealso:: For details about parameters and examples, see :func:`is_nondominated`.
+
+    Returns
+    -------
+        Returns the rows of ``data`` where :func:`is_nondominated` is ``True``.
+
     """
-    return data[is_nondominated(data, maximise, keep_weakly), :]
+    return data[is_nondominated(data, maximise, keep_weakly)]
 
 
 def filter_dominated_within_sets(
@@ -526,7 +534,9 @@ def filter_dominated_within_sets(
     return data[is_nondom, :]
 
 
-def pareto_rank(data: ArrayLike, /, *, maximise=False):
+def pareto_rank(
+    data: ArrayLike, /, *, maximise: bool | list[bool] = False
+) -> np.ndarray:
     r"""Rank points according to Pareto-optimality (nondominated sorting).
 
     The function :func:`pareto_rank` is meant to be used like
@@ -543,14 +553,13 @@ def pareto_rank(data: ArrayLike, /, *, maximise=False):
     data :
         Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
         If the array is created from the :func:`read_datasets()` function, remove the last column.
-    maximise : single bool, or list of booleans
+    maximise :
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of boolean values, with one value per objective.
         Also accepts a 1d numpy array with value 0/1 for each objective.
 
     Returns
     -------
-    numpy array
         An integer vector of the same length as the number of rows of ``data``, where each value gives the Pareto rank of each point (lower is better).
 
     References
@@ -643,10 +652,10 @@ def pareto_rank(data: ArrayLike, /, *, maximise=False):
 def normalise(
     data: ArrayLike,
     /,
-    to_range=[0.0, 1.0],
+    to_range: ArrayLike = [0.0, 1.0],
     *,
-    lower=np.nan,
-    upper=np.nan,
+    lower: ArrayLike = np.nan,
+    upper: ArrayLike = np.nan,
     maximise=False,
 ) -> np.ndarray:
     """Normalise points per coordinate to a range, e.g., ``to_range = [1,2]``, where the minimum value will correspond to 1 and the maximum to 2.
@@ -657,10 +666,10 @@ def normalise(
         Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
         See :func:`normalise_sets` to normalise data that includes set numbers (Multiple sets)
 
-    to_range : numpy array or list of 2 points
-        Normalise values to this range. If the objective is maximised, it is normalised to `(to_range[1], to_range[0])` instead.
+    to_range :
+        Range composed of two numerical values. Normalise values to this range. If the objective is maximised, it is normalised to ``(to_range[1], to_range[0])`` instead.
 
-    upper, lower: list or np array
+    upper, lower:
         Bounds on the values. If :data:`numpy.nan`, the maximum and minimum values of each coordinate are used.
 
     maximise : single bool, or list of booleans
@@ -1047,9 +1056,9 @@ def eafdiff(
 
     Returns
     -------
-       With ``rectangle=False``, a matrix with three columns, The first two columns describe the points where there
+       With ``rectangles=False``, a matrix with three columns, The first two columns describe the points where there
        is a transition in the value of the EAF differences.  With
-       ``rectangle=True``, a matrix with five columns, where the first 4 columns give the
+       ``rectangles=True``, a matrix with five columns, where the first 4 columns give the
        coordinates of two corners of each rectangle. In both
        cases, the last column gives the difference in terms of sets in ``x`` minus
        sets in ``y`` that attain each point (i.e., negative values are differences
