@@ -10,7 +10,7 @@ vorobT(x, sets, reference, maximise = FALSE)
 vorobDev(x, sets, reference, VE = NULL, maximise = FALSE)
 }
 \arguments{
-\item{x}{\code{matrix}|\code{data.frame}\cr Matrix or data frame of numerical
+\item{x}{\code{matrix()}|\code{data.frame()}\cr Matrix or data frame of numerical
 values, where each row gives the coordinates of a point. If \code{sets} is
 missing, the last column of \code{x} gives the sets.}
 

@@ -3,7 +3,7 @@
 #' This function computes the EAF given a set of 2D or 3D points and a vector `set`
 #' that indicates to which set each point belongs.
 #'
-#' @param x `matrix`|`data.frame`\cr Matrix or data frame of numerical
+#' @param x `matrix()`|`data.frame()`\cr Matrix or data frame of numerical
 #'   values, where each row gives the coordinates of a point. If `sets` is
 #'   missing, the last column of `x` gives the sets.
 #'

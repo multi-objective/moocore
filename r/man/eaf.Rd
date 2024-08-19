@@ -7,7 +7,7 @@
 eaf(x, sets, percentiles = NULL, maximise = FALSE, groups = NULL)
 }
 \arguments{
-\item{x}{\code{matrix}|\code{data.frame}\cr Matrix or data frame of numerical
+\item{x}{\code{matrix()}|\code{data.frame()}\cr Matrix or data frame of numerical
 values, where each row gives the coordinates of a point. If \code{sets} is
 missing, the last column of \code{x} gives the sets.}
 

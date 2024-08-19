@@ -24,7 +24,7 @@ Suggests:
     spelling,
     testthat (>= 3.0.0),
     withr,
-    doctest
+    doctest (>= 0.2.0)
 License: LGPL (>= 2)
 Copyright: file COPYRIGHTS
 BugReports: https://github.com/multi-objective/moocore/issues

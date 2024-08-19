@@ -9,7 +9,7 @@ avoid redundant checks and transformations.}
 compute_eaf_call(x, cumsizes, percentiles)
 }
 \arguments{
-\item{x}{\code{matrix}|\code{data.frame}\cr Matrix or data frame of numerical
+\item{x}{\code{matrix()}|\code{data.frame()}\cr Matrix or data frame of numerical
 values, where each row gives the coordinates of a point. If \code{sets} is
 missing, the last column of \code{x} gives the sets.}
 
