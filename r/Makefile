@@ -21,7 +21,7 @@ endif
 ## Set version information:
 REVNUM = $(shell sh -c 'cat git_version 2> /dev/null')
 
-.PHONY: build check clean install pdf submit cran winbuild help gendoc pkgdown
+.PHONY: build test check clean install pdf submit cran winbuild help gendoc pkgdown
 
 help :
 	@echo 'This makefile has the following targets                  '
@@ -74,6 +74,10 @@ releasecheck:
 cran : build
 cran cran_:
 	cd $(BINDIR) && _R_CHECK_FORCE_SUGGESTS_=false _R_OPTIONS_STRINGS_AS_FACTORS_=false R CMD check --as-cran $(PACKAGE)_$(PACKAGEVERSION).tar.gz
+
+# Using testthat nicer output
+test: clean
+	_R_CHECK_FORCE_SUGGESTS_=false NOT_CRAN=true $(Reval) 'testthat::test_local(stop_on_failure = TRUE)'
 
 check: build
 ifdef TEST
