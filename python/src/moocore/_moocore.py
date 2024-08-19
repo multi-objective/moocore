@@ -49,7 +49,7 @@ class ReadDatasetsError(Exception):
         super().__init__(self.message)
 
 
-def read_datasets(filename: str | os.PathLike | StringIO, /) -> np.ndarray:
+def read_datasets(filename: str | os.PathLike | StringIO) -> np.ndarray:
     """Read an input dataset file, parsing the file and returning a numpy array.
 
     Parameters

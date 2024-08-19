@@ -30,15 +30,15 @@ html_js_files = [
 
 extensions = [
     "sphinx_design",  # grid directive
-    "sphinx.ext.autosummary",  # Create neat summary tables for modules/classes/methods etc
     "sphinx.ext.autodoc",  # Core Sphinx library for auto html doc generation from docstrings
+    "sphinx.ext.viewcode",  # Add a link to the Python source code for classes, functions etc.
+    "sphinx.ext.doctest",
+    "sphinx.ext.intersphinx",  # Link to other project's documentation (see mapping below)
+    "sphinx.ext.extlinks",
     "sphinx.ext.napoleon",
     "sphinx_autodoc_typehints",
-    "sphinx.ext.intersphinx",  # Link to other project's documentation (see mapping below)
-    "sphinx.ext.viewcode",  # Add a link to the Python source code for classes, functions etc.
+    "sphinx.ext.autosummary",  # Create neat summary tables for modules/classes/methods etc
     "sphinx_copybutton",  # A small sphinx extension to add a "copy" button to code blocks.
-    "sphinx.ext.doctest",
-    "sphinx.ext.extlinks",
     "sphinx.ext.mathjax",
     "myst_nb",
     "sphinx.ext.autosectionlabel",
@@ -61,7 +61,7 @@ napoleon_numpy_docstring = True
 napoleon_preprocess_types = True
 napoleon_use_rtype = False
 napoleon_include_init_with_doc = True
-napoleon_use_param = False
+napoleon_use_param = True
 napoleon_type_aliases = {
     "numpy.typing.ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
     "ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
