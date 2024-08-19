@@ -120,21 +120,21 @@ rect_weighted_hv2d(double *data, int n, double * rectangles,
            &cmp_rectangles_y_desc);
 
     double whv = 0.0;
-    size_t r = 0;
+    int r = 0;
     const double *rect;
     // rectangles: Two points per row + color
     double lower0, lower1, upper0, upper1, color;
     get_rectangle(r);
 
     const double *p = data;
-    size_t pk = 0;
+    int pk = 0;
     print_point(pk, p, r, rect);
     double top = upper1;
     // lowest_upper1;
     const double last_top = rectangles[rectangles_nrow * (nobj * 2 + 1) - 2];
     // largest upper0;
     double last_right = -DBL_MAX;
-    for (size_t r = 0; r < rectangles_nrow; r++) {
+    for (r = 0; r < rectangles_nrow; r++) {
         last_right = MAX (last_right, rectangles[r * (nobj * 2 + 1) + 2]);
     }
     // Find first useful point.
