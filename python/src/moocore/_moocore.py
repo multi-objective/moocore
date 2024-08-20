@@ -357,22 +357,25 @@ def hypervolume(
     >>> moocore.hypervolume(dat, ref=[10, 10])
     38.0
 
-    Select Set 1 of dataset, and remove set number column
+    Merge all the sets of a dataset by removing the set number column:
 
     >>> filename = moocore.get_dataset_path("input1.dat")
-    >>> dat = moocore.read_datasets(filename)
-    >>> set1 = dat[dat[:, 2] == 1, :2]
+    >>> dat = moocore.read_datasets(filename)[:, :-1]
+    >>> len(dat)
+    100
 
     Dominated points are ignored, so this:
 
-    >>> moocore.hypervolume(set1, ref=[10, 10])
-    90.46272764755885
+    >>> moocore.hypervolume(dat, ref=[10, 10])
+    93.55331425585321
 
-    gives the same value as this:
+    gives the same hypervolume as this:
 
-    >>> set1 = moocore.filter_dominated(set1)
-    >>> moocore.hypervolume(set1, ref=[10, 10])
-    90.46272764755885
+    >>> dat = moocore.filter_dominated(dat)
+    >>> len(dat)
+    6
+    >>> moocore.hypervolume(dat, ref=[10, 10])
+    93.55331425585321
 
     """
     # Convert to numpy.array in case the user provides a list.  We use
