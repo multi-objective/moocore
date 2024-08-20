@@ -40,7 +40,7 @@ jobs:
       # When set to true, GitHub cancels all in-progress jobs if any matrix job fails.
       fail-fast: true
       matrix:
-        os: [ windows-latest, macOS-latest, ubuntu-22.04 ]
+        os: [ ubuntu-22.04, windows-latest, macos-14 ]
         r: [ release ]
         include:
           # Use 4.0 to check with rtools40's older compiler
@@ -193,7 +193,7 @@ jobs:
         working-directory: r
 
       - name: Deploy 🚀
-        if: success() && runner.os == 'Linux' && github.event_name == 'push'
+        if: success() && runner.os == 'Linux' && github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: r/docs # The folder the action should deploy.

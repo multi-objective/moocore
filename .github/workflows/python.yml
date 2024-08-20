@@ -54,9 +54,8 @@ jobs:
         include:
           - os: windows-latest
             python-version: '3.10'
-          - os: macos-latest
+          - os: macos-14
             python-version: '3.10'
-
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
@@ -152,7 +151,7 @@ jobs:
         working-directory: python
 
       - name: Deploy 🚀
-        if: success() && runner.os == 'Linux' && github.event_name == 'push'
+        if: success() && runner.os == 'Linux' && github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: python/doc/_build/html/ # The folder the action should deploy.
@@ -208,7 +207,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-latest, macos-latest]
+        os: [ ubuntu-22.04, windows-latest, macos-14 ]
         python-version: ['3.10']
 
     steps:
@@ -245,7 +244,7 @@ jobs:
       url: https://pypi.org/p/moocore
     permissions:
       id-token: write
-    if: github.event_name == 'release' && github.event.action == 'published'
+    if: github.event_name == 'release' && github.event.action == 'published' && github.ref == 'refs/heads/main'
     # or, alternatively, upload to PyPI on every tag starting with 'v' (remove on: release above to use this)
     # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
@@ -264,6 +263,7 @@ jobs:
   upload:
     name: Store wheels
     needs: wheels
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
