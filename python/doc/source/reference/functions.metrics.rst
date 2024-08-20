@@ -139,6 +139,12 @@ Hypervolume metric
    whv_rect
 
 
+The hypervolume of a set of multidimensional points :math:`A` with respect to a reference point :math:`\vec{r}` is the volume of the region dominated by the set and bounded by the reference point :cite:p:`ZitThi1998ppsn`.
+
+
+Bibliography
+------------
+
 .. bibliography::
 
 

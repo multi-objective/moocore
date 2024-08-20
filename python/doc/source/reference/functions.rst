@@ -1,8 +1,8 @@
 .. _functions:
 
-*****************************
+******************
 Functions by topic
-*****************************
+******************
 
 In this chapter functions docstrings are presented, grouped by functionality.
 Many docstrings contain example code, which demonstrates basic usage
@@ -18,6 +18,6 @@ indentation.
    :maxdepth: 1
 
    functions.io
-   functions.metrics
    functions.dominance
+   functions.metrics
    functions.eaf
