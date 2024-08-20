@@ -224,6 +224,13 @@ def test_normalise():
         expected_with_bounds,
     )
 
+    # Check that normalise does not modify the original array.
+    A = np.array([[1.0, 2.0], [2.0, 1.0]])
+    A_copy = A.copy()
+    B = moocore.normalise(A)
+    assert np.allclose(A, A_copy)
+    assert np.allclose(B, np.array([[0.0, 1.0], [1.0, 0.0]]))
+
 
 def test_eaf(test_datapath):
     # FIXME ALG_1_dat is creating slightly different percentile values than expected in its EAF output

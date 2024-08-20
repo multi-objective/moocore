@@ -165,7 +165,7 @@ def _unary_refset_common(data, ref, maximise):
     return data_p, nobj, npoints, ref_p, ref_size, maximise_p
 
 
-def igd(data, /, ref, *, maximise=False) -> float:
+def igd(data, /, ref, *, maximise: bool | list[bool] = False) -> float:
     """Inverted Generational Distance (IGD).
 
     .. seealso:: For details about parameters, return value and examples, see :func:`igd_plus`.  For details of the calculation, see :ref:`igd_hausdorf`.
@@ -317,7 +317,9 @@ def epsilon_mult(data, /, ref, *, maximise=False) -> float:
 
 
 # FIXME: TODO maximise option
-def hypervolume(data: ArrayLike, /, ref: ArrayLike) -> float:
+def hypervolume(
+    data: ArrayLike, /, ref: ArrayLike, maximise: bool | list[bool] = False
+) -> float:
     r"""Hypervolume indicator.
 
     Compute the hypervolume metric with respect to a given reference point
@@ -336,6 +338,10 @@ def hypervolume(data: ArrayLike, /, ref: ArrayLike) -> float:
         If the array is created from the :func:`read_datasets` function, remove the last column.
     ref :
         Reference point as a 1D vector. Must be same length as a single point in the ``data``.
+    maximise :
+        Whether the objectives must be maximised instead of minimised. \
+        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
+        Also accepts a 1d numpy array with value 0/1 for each objective
 
     Returns
     -------
@@ -370,16 +376,26 @@ def hypervolume(data: ArrayLike, /, ref: ArrayLike) -> float:
 
     """
     # Convert to numpy.array in case the user provides a list.  We use
-    # np.asfarray to convert it to floating-point, otherwise if a user inputs
+    # np.asarray to convert it to floating-point, otherwise if a user inputs
     # something like ref = np.array([10, 10]) then numpy would interpret it as
     # an int array.
-    data = np.asarray(data, dtype=float)
+    data_ = np.asarray(data, dtype=float)
+    data_copied = id(data_) != id(data)
+    data = data_
     nobj = data.shape[1]
-    ref = atleast_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
+    ref = atleast_1d_of_length_n(np.array(ref, dtype=float), nobj)
     if nobj != ref.shape[0]:
         raise ValueError(
             f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
         )
+
+    maximise = _parse_maximise(maximise, nobj)
+    # FIXME: Do this in C.
+    if maximise.any():
+        if not data_copied:
+            data = data.copy()
+        data[:, maximise] = -data[:, maximise]
+        ref[maximise] = -ref[maximise]
 
     data_p, npoints, nobj = np2d_to_double_array(data)
     ref_buf = ffi.from_buffer("double []", ref)
@@ -697,8 +713,8 @@ def normalise(
            [2.  , 0.  ]])
 
     """
-    # Normalise modifies the data, so we need to create a copy.
-    data = np.asarray(data, dtype=float).copy()
+    # normalise() modifies the data, so we need to create a copy.
+    data = np.array(data, dtype=float)
     npoints, nobj = data.shape
     if nobj == 1:
         raise ValueError("'data' must have at least two columns")
@@ -727,17 +743,15 @@ def normalise(
         lbound_p,
         ubound_p,
     )
-    data_buf = ffi.buffer(
-        data_p, ffi.sizeof("double") * data.shape[0] * data.shape[1]
-    )
-    data = np.frombuffer(data_buf).reshape(data.shape)
+    # We can return data directly because we only changed the data, not the
+    # shape.
     return data
 
 
 # def normalise_sets(dataset, range=[0, 1], lower="na", upper="na", maximise=False):
 #     """Normalise dataset with multiple sets
 
-#     Executes the :func:`normalise` function for every set in a dataset (Performs normalise on every set seperately)
+#     Executes the :func:`normalise` function for every set in a dataset (Performs normalise on every set separately)
 
 #     Examples
 #     --------
