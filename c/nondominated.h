@@ -81,7 +81,7 @@ find_nondominated_set_2d_(const double *points, int size,
             if (!keep_weakly || p[j][0] != p[k][0] || p[j][1] != p[k][1]) {
                 if (find_dominated_p) {
                     // In this context, it means "position of the first dominated solution found".
-                    n_dominated = (p[j] - pp) / 2;
+                    n_dominated = (int)((p[j] - pp) / 2);
                     goto early_end;
                 }
                 nondom[j] = false;

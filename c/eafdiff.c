@@ -15,7 +15,7 @@ eafdiff_compute_rectangles(int *eaf_npoints, double * data, int nobj,
     eaf_free(eaf, nruns);
 
     const int division = nruns / 2;
-    int nrow = vector_int_size(&rects->col);
+    int nrow = (int) vector_int_size(&rects->col);
     // Two points per row + color
     const int ncol = 2 * nobj + 1;
     double *result = malloc(sizeof(double) * nrow * ncol);
@@ -52,7 +52,7 @@ eafdiff_compute_matrix(int *eaf_npoints, double * data, int nobj,
     double *result = malloc(sizeof(double) * nrow * ncol);
     int pos = 0;
     for (int k = 0; k < nruns; k++) {
-        int npoints = eaf[k]->size;
+        int npoints = (int) eaf[k]->size;
         // FIXME: Find the most efficient order of the loop.
         for (int i = 0; i < npoints; i++) {
             for (int j = 0; j < nobj; j++) {

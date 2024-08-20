@@ -121,7 +121,7 @@ static int read_ints (int *levels, char *str)
 
     do {
         cursor = endp;
-        levels[k] = strtol(cursor, &endp, 10);
+        levels[k] = (int) strtol(cursor, &endp, 10);
         if (cursor == endp && (*endp == ',' || *endp == ';')) {
             endp++;
             continue;

@@ -98,7 +98,7 @@ read_reference_set (double **reference_p, const char *filename, int *nobj_p)
 
 static inline char * m_strcat(const char * a, const char * b)
 {
-    int dest_len = strlen(a) + strlen(b) + 1;
+    size_t dest_len = strlen(a) + strlen(b) + 1;
     char *dest = malloc (sizeof(char) * dest_len);
     if (dest == NULL) return NULL;
     strcpy (dest, a);

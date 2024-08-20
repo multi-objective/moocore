@@ -327,7 +327,7 @@ check_nondominated (const char * filename, const double *points,
     bool first_time = true;
     bool dominated_found = false;
     int n, cumsize;
-    int filename_len = MAX(strlen(filename), strlen("filename"));
+    int filename_len = (int) MAX(strlen(filename), strlen("filename"));
     for (n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
         int old_size = cumsizes[n] - cumsize;
         int new_size

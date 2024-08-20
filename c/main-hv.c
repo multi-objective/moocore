@@ -215,8 +215,7 @@ hv_file (const char *filename, double *reference,
     handle_read_data_error (err, filename);
 
     if (filename != stdin_name && suffix) {
-        int outfilename_len = strlen(filename) + strlen(suffix) + 1;
-
+        size_t outfilename_len = strlen(filename) + strlen(suffix) + 1;
         outfilename = malloc (sizeof(char) * outfilename_len);
         strcpy (outfilename, filename);
         strcat (outfilename, suffix);

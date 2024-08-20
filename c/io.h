@@ -43,22 +43,23 @@ int write_sets_filtered (FILE *outfile, const double *data, int ncols,
                          const bool *write_p);
 
 static inline const signed char *
-read_minmax (const char *str, int *nobj)
+read_minmax (const char *str, int *nobj_p)
 {
     signed char * minmax;
-    int i;
+    size_t i;
+    size_t nobj = (size_t) *nobj_p;
 
     if (str == NULL) { /* Default all minimised.  */
-        assert (*nobj > 0);
-        minmax = malloc (sizeof(signed char) * *nobj);
-        for (i = 0; i < *nobj; i++)
+        assert (nobj > 0);
+        minmax = malloc (sizeof(signed char) * nobj);
+        for (i = 0; i < nobj; i++)
             minmax[i] = -1;
         return minmax;
     }
 
-    int len = strlen (str);
+    size_t len = strlen(str);
     bool all_ignored = true;
-    minmax = malloc (sizeof(signed char) * MAX(len, *nobj));
+    minmax = malloc (sizeof(signed char) * MAX(len, nobj));
     for (i = 0; i < len; i++) {
         switch (str[i])
         {
@@ -85,30 +86,31 @@ read_minmax (const char *str, int *nobj)
         exit (EXIT_SUCCESS);
     }
     // FIXME: How to adjust minmax dynamically according to the number of objectives?
-    if (len < *nobj) { // Cycle
-        for (i = 0; i < (*nobj - len); i++) {
+    if (len < nobj) { // Cycle
+        for (i = 0; i < (nobj - len); i++) {
             minmax[len + i] = minmax[i];
         }
     }
-    *nobj = len;
+    *nobj_p = (int) len;
     return minmax;
 }
 
 static inline const bool *
-read_bitvector (const char *str, int *nobj)
+read_bitvector (const char *str, int *nobj_p)
 {
     bool * vec;
-    int i;
+    size_t i;
+    size_t nobj = *nobj_p;
 
     if (str == NULL) { /* Default all false.  */
-        assert (*nobj > 0);
-        vec = malloc (sizeof(bool) * *nobj);
-        for (i = 0; i < *nobj; i++)
+        assert (nobj > 0);
+        vec = malloc (sizeof(bool) * nobj);
+        for (i = 0; i < nobj; i++)
             vec[i] = false;
         return vec;
     }
 
-    int len = strlen (str);
+    size_t len = strlen (str);
     vec = malloc (sizeof(bool) * len);
     for (i = 0; i < len; i++) {
         switch (str[i]) {
@@ -122,7 +124,7 @@ read_bitvector (const char *str, int *nobj)
               return NULL;
         }
     }
-    *nobj = len;
+    *nobj_p = (int) len;
     return vec;
 }
 

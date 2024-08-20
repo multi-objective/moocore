@@ -73,7 +73,7 @@ compute_eafdiff_C(SEXP DATA, SEXP CUMSIZES, SEXP INTERVALS)
 
     int pos = 0;
     for (int k = 0; k < nruns; k++) {
-        int npoints = eaf[k]->size;
+        int npoints = (int) eaf[k]->size;
         DEBUG2(
             int totalsize = npoints * nobj;
             Rprintf ("totalpoints eaf[%d] = %d\n", k, totalsize)
@@ -89,7 +89,7 @@ compute_eafdiff_C(SEXP DATA, SEXP CUMSIZES, SEXP INTERVALS)
     const int nsets1 = nruns / 2;
     pos += (nobj - 1) * totalpoints;
     for (int k = 0; k < nruns; k++) {
-        int npoints = eaf[k]->size;
+        int npoints = (int) eaf[k]->size;
         for (int i = 0; i < npoints; i++) {
             rmat[pos] = eafdiff_percentile(eaf[k], i, nsets1, nruns, intervals);
             pos++;
@@ -137,7 +137,7 @@ compute_eafdiff_rectangles_C(SEXP DATA, SEXP CUMSIZES, SEXP INTERVALS)
     eaf_free(eaf, nruns);
 
     const int division = nruns / 2;
-    int nrow = vector_int_size(&rects->col);
+    int nrow = (int) vector_int_size(&rects->col);
     // Two points per row + color
     new_real_matrix (result, nrow, 2 * nobj + 1);
     const double * p_xy = vector_objective_begin(&rects->xy);
@@ -177,7 +177,7 @@ compute_eafdiff_polygon_C(SEXP DATA, SEXP CUMSIZES, SEXP INTERVALS)
     eaf_free(eaf, nruns);
 
     const int division = nruns / 2;
-    const int ncol = vector_int_size(&p->col);
+    const int ncol = (int) vector_int_size(&p->col);
 
     DEBUG2(Rprintf ("ncol: %d\n", ncol));
 
@@ -189,7 +189,7 @@ compute_eafdiff_polygon_C(SEXP DATA, SEXP CUMSIZES, SEXP INTERVALS)
     const double *p_xy = vector_objective_begin(&p->xy);
     for (int k = 0; k < ncol; k++) {
         // Truncate colors to interval
-        int color = vector_int_at(&p->col, k) * intervals / (double) division;
+        int color = (int) (vector_int_at(&p->col, k) * intervals / (double) division);
         int len = polygon_len (p_xy, nobj);
         p_xy += len * nobj;
         DEBUG2(Rprintf ("color: %d, len = %d\n", color, len));

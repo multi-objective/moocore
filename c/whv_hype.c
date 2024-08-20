@@ -56,7 +56,7 @@ exp_dist_sample(hype_sample_dist * dist, int nsamples)
     const double *range = dist->range;
 
     double * samples = malloc(sizeof(double) * nsamples * nobj);
-    int n = 0.5 * nsamples;
+    int n = (int)(0.5 * nsamples);
     double mu = dist->mu[0];
     rng_state * rng = dist->rng;
     for (int i = 0; i < n; i++) {
