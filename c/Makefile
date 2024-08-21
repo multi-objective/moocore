@@ -39,7 +39,7 @@ VERSION = 0.1.9999$(REVISION)
 # my funding agent and tenure committee.
 #-----------------------------------------------------------------------
 
-S=
+S=1
 ## Quiet / verbose output:
 ifneq ($(findstring $(MAKEFLAGS),s),s)
   ifdef S
@@ -99,7 +99,8 @@ EXE_LDFLAGS=-lm
 include gitversion.mk
 include gcc.mk
 
-MEX?=mkoctfile --mex # mex
+# mex
+MEX?=mkoctfile --mex
 
 ifneq ($(uname_S),Cygwin)
 CPPFLAGS += -D_GNU_SOURCE
@@ -203,7 +204,7 @@ time: clean
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
 	$(MAKE) all DEBUG=0 SANITIZERS=""
-	$(MAKE) test-nondominated test-eaf test-hv
+	$(MAKE) time-nondominated time-eaf time-hv
 
 time-nondominated:
 	$(MAKE) $(nondominatedexe) DEBUG=0 SANITIZERS=""
@@ -226,9 +227,8 @@ all: clean
 %.o : %.c
 	$(QUIET_CC)$(CC) $(CPPFLAGS) $(EXE_CFLAGS) $(CFLAGS) -c -o $@ $<
 
-mex: MEX?=mex
-mex: Hypervolume_MEX.c $(HV_SRCS)
-	$(call ECHO,---> You can use 'make mex MEXFLAGS="-O -std=c99"' to pass flags to mex. Code compiled by MEX is less optimized (slower) than the default 'hv' command-line program <---)
+mex: Hypervolume_MEX.c $(LIBHV_OBJS)
+	$(call ECHO,---> You can use 'make mex MEXFLAGS="-O -std=c99"' to pass flags to mex. Code compiled by mex is less optimized (slower) than the default 'hv' command-line program <---)
 	$(MEX) -v $(MEXFLAGS) -std=c99 $^
 
 DIST_SRC_FILES = $(DIST_OTHER_FILES) $(OBJS:.o=.c) $(HEADERS)
