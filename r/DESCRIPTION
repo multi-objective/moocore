@@ -21,10 +21,11 @@ Imports:
         matrixStats,
         Rdpack
 Suggests:
+    doctest (>= 0.2.0),
+    knitr,
     spelling,
     testthat (>= 3.0.0),
-    withr,
-    doctest (>= 0.2.0)
+    withr
 License: LGPL (>= 2)
 Copyright: file COPYRIGHTS
 BugReports: https://github.com/multi-objective/moocore/issues
@@ -40,3 +41,4 @@ SystemRequirements: GNU make
 RdMacros: Rdpack
 Config/testthat/edition: 3
 Language: en-GB
+Config/Needs/website: rmarkdown

@@ -23,6 +23,7 @@ navbar:
     cran:
       icon: fab fa-r-project
       href: https://cloud.r-project.org/package=moocore
+      aria-label: View on CRAN
 
 reference:
   - title: Pareto dominance

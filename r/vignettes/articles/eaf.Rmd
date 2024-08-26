@@ -1,0 +1,59 @@
+---
+title: "Empirical Attainment Function (EAF)"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(moocore)
+```
+
+The AUC of the EAF and the AOC (Hypervolume)
+--------------------------------------------
+
+The Area-Over-the-Curve (i.e., the hypervolume) of a set of nondominated sets
+is exactly the the Area-Under-the-Curve (AUC) of their corresponding EAF, as
+this example shows.
+
+
+```{r auc}
+library(reshape2)
+library(ggplot2)
+
+extdata_dir <- system.file(package="moocore", "extdata")
+A <- read_datasets(file.path(extdata_dir, "ALG_1_dat.xz"))
+A[,1:2] <- normalise(A[,1:2], to_range = c(0,1))
+
+aoc <- mean(sapply(split.data.frame(A[,1:2], A[,3]), hypervolume, reference = 1))
+eafA <- eaf(A[,1:2], A[,3])
+eafA[,3] <- eafA[,3]/100
+auc <- hypervolume(eafA, reference = c(1,1,0), maximise = c(FALSE,FALSE,TRUE))
+cat("Runs = ", length(unique(A[,3])),
+    "\nAUC of EAF = ", auc,
+    "\nMean AOC = ", aoc, "\n")
+
+runs <- 5:length(unique(A[,3]))
+aocs <- c()
+aucs <- c()
+for (r in runs) {
+  a <- A[A[,3] <= r, ]
+  aoc <- mean(sapply(split.data.frame(a[,1:2], a[,3]), hypervolume, reference = 1))
+  eafa <- eaf(a[,1:2], a[,3])
+  eafa[,3] <- eafa[,3]/100
+  auc <- hypervolume(eafa, reference = c(1,1,0), maximise = c(FALSE,FALSE,TRUE))
+  aocs <- c(aocs, aoc)
+  aucs <- c(aucs, auc)
+}
+
+x <- melt(data.frame(r = runs, aoc = aocs, auc=aucs), id.vars="r")
+```
+
+```{r}
+#| fig.alt = "Plot of EAF AUC versus mean AOC for various numbers of sets."
+ggplot(x, aes(r, value, color=variable, linetype=variable)) + geom_line()
+```
