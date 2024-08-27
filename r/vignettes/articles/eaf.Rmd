@@ -50,10 +50,12 @@ for (r in runs) {
   aucs <- c(aucs, auc)
 }
 
-x <- melt(data.frame(r = runs, aoc = aocs, auc=aucs), id.vars="r")
+x <- melt(data.frame(r = runs, AOC = aocs, AUC=aucs), id.vars="r")
 ```
 
 ```{r}
-#| fig.alt = "Plot of EAF AUC versus mean AOC for various numbers of sets."
-ggplot(x, aes(r, value, color=variable, linetype=variable)) + geom_line()
+#| fig.alt = "Plot of EAF AUC versus mean AOC with increasing number of sets."
+ggplot(x, aes(r, value, color=variable, linetype=variable)) +
+  geom_line(linewidth=1.5) +
+  labs(x = "Number of sets", y = "Value", color = "", linetype="")
 ```
