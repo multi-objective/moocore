@@ -6,6 +6,7 @@ on:
     paths:
       - ".github/workflows/python.yml"
       - "python/**"
+      - "!python/README.md"
       - 'c/Make*'
       - 'c/*.mk'
       - 'c/**/*.[ch]p?p?'
@@ -14,6 +15,7 @@ on:
     paths:
       - ".github/workflows/python.yml"
       - "python/**"
+      - "!python/README.md"
       - 'c/Make*'
       - 'c/*.mk'
       - 'c/**/*.[ch]p?p?'
@@ -223,6 +225,11 @@ jobs:
         uses: docker/setup-qemu-action@v3
         with:
           platforms: all
+
+      - name: Install setuptools<74 explicitly
+        shell: bash
+        run: |
+          python3 -m pip install --upgrade build cffi 'setuptools>=70.1,<74'  # TODO: Remove pin once python-cffi/cffi#117 is solved
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.17

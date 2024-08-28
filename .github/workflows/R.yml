@@ -7,6 +7,7 @@ on:
       - ".github/workflows/rchk.yml"
       - ".github/workflows/R.yml"
       - "r/**"
+      - "!r/README.md"
       - 'c/Make*'
       - 'c/*.mk'
       - 'c/**/*.[ch]p?p?'
@@ -16,6 +17,7 @@ on:
       - ".github/workflows/rchk.yml"
       - ".github/workflows/R.yml"
       - "r/**"
+      - "!r/README.md"
       - 'c/Make*'
       - 'c/*.mk'
       - 'c/**/*.[ch]p?p?'
