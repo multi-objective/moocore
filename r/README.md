@@ -25,13 +25,19 @@
 Introduction
 ============
 
-The goal of **moocore** is to collect fast implementations of core mathematical functions and algorithms for multi-objective optimization. These functions include:
+This webpage documents the `moocore` R package. There is also a [`moocore` Python package](https://multi-objective.github.io/moocore/python)
+
+
+The goal of the [**moocore** project](https://github.com/multi-objective/moocore/) is to collect fast implementations of core mathematical functions and algorithms for multi-objective optimization and make them available to different programming languages via similar interfaces. These functions include:
 
  * Identifying and filtering dominated vectors.
  * Quality metrics such as (weighted) hypervolume, epsilon, IGD, etc.
  * Computation of the Empirical Attainment Function. The empirical attainment function (EAF) describes the probabilistic
 distribution of the outcomes obtained by a stochastic algorithm in the
 objective space.
+
+Most critical functionality is implemented in C, with the R and Python packages providing convenient interfaces to the C code.
+
 
 **Keywords**: empirical attainment function, summary attainment surfaces, EAF
 differences, multi-objective optimization, bi-objective optimization,
@@ -99,11 +105,6 @@ Once the **moocore** package is installed, the following R commands will give mo
     ?read_datasets
 ```
 
-Python
-------
-
-There is also a Python `moocore` package: https://multi-objective.github.io/moocore/python
-
 
 License
 --------
@@ -133,7 +134,7 @@ Moreover, as a personal note, I would appreciate it if you would email
 `manuel.lopez-ibanez@manchester.ac.uk` with citations of papers referencing
 this work so I can mention them to my funding agent and tenure committee.
 
-[r-build-badge]: https://github.com/multi-objective/moocore/workflows/R/badge.svg
+[r-build-badge]: https://github.com/multi-objective/moocore/workflows/R/badge.svg?event=push
 [r-build-link]: https://github.com/multi-objective/moocore/actions/workflows/R.yaml
 [r-coverage-badge]: https://codecov.io/gh/multi-objective/moocore/branch/main/graph/badge.svg?flag=R
 [r-coverage-link]: https://app.codecov.io/gh/multi-objective/moocore/tree/main/r
