@@ -2,7 +2,7 @@
 build-backend = "setuptools.build_meta"
 requires = [
   "cffi>=1.15.1",
-  "setuptools>=42",
+  "setuptools>=70.1,<74", # TODO: Remove pin once python-cffi/cffi#117 is solved
   "wheel",
 ]
 
