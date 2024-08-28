@@ -52,11 +52,11 @@ jobs:
       - run: $CC -v
         shell: bash
 
-      - run: make -C c all DEBUG=1 WARN_FLAGS='-Werror'
+      - run: make -C c all DEBUG=1 WERROR=1
         if: runner.os != 'Windows'
         # FIXME: How to install sanitizers in Windows?
 
-      - run: make -C c all DEBUG=0 WARN_FLAGS='-Werror'
+      - run: make -C c all DEBUG=0 WERROR=1
 
       - name: Functional tests
         run: |
