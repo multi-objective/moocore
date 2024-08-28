@@ -811,7 +811,7 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
 eaf_polygon_t *
 eaf_compute_polygon_old (eaf_t **eaf, int nobj, int nlevels)
 {
-    int _poly_size_check = 0;
+    int _no_warn_unused _poly_size_check = 0;
     eaf_polygon_t * polygon;
 
     int *color;
