@@ -40,8 +40,8 @@ R package
 There is also a `moocore` package for R: https://multi-objective.github.io/moocore/r
 
 
-[py-build-badge]: https://github.com/multi-objective/moocore/workflows/Python/badge.svg?event=push
-[py-build-link]: https://github.com/multi-objective/moocore/actions/workflows/python.yaml
+[py-build-badge]: https://github.com/multi-objective/moocore/workflows/python.yml/badge.svg?event=push
+[py-build-link]: https://github.com/multi-objective/moocore/actions/workflows/python.yml
 [py-coverage-badge]: https://codecov.io/gh/multi-objective/moocore/branch/main/graph/badge.svg?flag=python
 [py-coverage-link]: https://app.codecov.io/gh/multi-objective/moocore/tree/main/python
 [py-moocore-github]: https://github.com/multi-objective/moocore/tree/main/python#readme

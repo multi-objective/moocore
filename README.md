@@ -45,19 +45,19 @@ The repository is composed of:
 
 Each component is documented in the `README.md` file found under each folder.
 
-[c-build-badge]: https://github.com/multi-objective/moocore/workflows/C/badge.svg?event=push
-[c-build-link]: https://github.com/multi-objective/moocore/actions/workflows/C.yaml
+[c-build-badge]: https://github.com/multi-objective/moocore/workflows/C.yml/badge.svg?event=push
+[c-build-link]: https://github.com/multi-objective/moocore/actions/workflows/C.yml
 [c-moocore-github]: https://github.com/multi-objective/moocore/tree/main/c#readme
 [c-moocore-homepage]: https://github.com/multi-objective/moocore/tree/main/c#readme
-[py-build-badge]: https://github.com/multi-objective/moocore/workflows/Python/badge.svg?event=push
-[py-build-link]: https://github.com/multi-objective/moocore/actions/workflows/python.yaml
+[py-build-badge]: https://github.com/multi-objective/moocore/workflows/python.yml/badge.svg?event=push
+[py-build-link]: https://github.com/multi-objective/moocore/actions/workflows/python.yml
 [py-coverage-badge]: https://codecov.io/gh/multi-objective/moocore/branch/main/graph/badge.svg?flag=python
 [py-coverage-link]: https://app.codecov.io/gh/multi-objective/moocore/tree/main/python
 [py-moocore-github]: https://github.com/multi-objective/moocore/tree/main/python#readme
 [py-moocore-homepage]: https://multi-objective.github.io/moocore/python
 [py-moocore-pypi]: https://pypi.org/project/moocore/
-[r-build-badge]: https://github.com/multi-objective/moocore/workflows/R/badge.svg?event=push
-[r-build-link]: https://github.com/multi-objective/moocore/actions/workflows/R.yaml
+[r-build-badge]: https://github.com/multi-objective/moocore/workflows/R.yml/badge.svg?event=push
+[r-build-link]: https://github.com/multi-objective/moocore/actions/workflows/R.yml
 [r-coverage-badge]: https://codecov.io/gh/multi-objective/moocore/branch/main/graph/badge.svg?flag=R
 [r-coverage-link]: https://app.codecov.io/gh/multi-objective/moocore/tree/main/r
 [r-moocore-cran]: https://cran.r-project.org/package=moocore

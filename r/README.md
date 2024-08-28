@@ -134,8 +134,8 @@ Moreover, as a personal note, I would appreciate it if you would email
 `manuel.lopez-ibanez@manchester.ac.uk` with citations of papers referencing
 this work so I can mention them to my funding agent and tenure committee.
 
-[r-build-badge]: https://github.com/multi-objective/moocore/workflows/R/badge.svg?event=push
-[r-build-link]: https://github.com/multi-objective/moocore/actions/workflows/R.yaml
+[r-build-badge]: https://github.com/multi-objective/moocore/workflows/R.yml/badge.svg?event=push
+[r-build-link]: https://github.com/multi-objective/moocore/actions/workflows/R.yml
 [r-coverage-badge]: https://codecov.io/gh/multi-objective/moocore/branch/main/graph/badge.svg?flag=R
 [r-coverage-link]: https://app.codecov.io/gh/multi-objective/moocore/tree/main/r
 [r-moocore-github]: https://github.com/multi-objective/moocore/tree/main/r#readme
