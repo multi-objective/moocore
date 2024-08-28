@@ -33,9 +33,10 @@ jobs:
       matrix:
         # macos-13 is an intel runner, macos-14 is apple silicon
         os: [ubuntu-latest, windows-latest, macos-13, macos-14]
-        # include:
-        #   - os: macOS-latest
-        #     cc: clang
+        cc: [ gcc ]
+        include:
+          - os: macos-latest
+            cc: clang
     env:
       CC: ${{ matrix.cc }}
 
