@@ -621,7 +621,7 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
                 POLY_SIZE_CHECK(); EXPENSIVE_CHECK_POLYGONS();                 \
             } while(0)
 
-    int _poly_size_check = 0;
+    int _no_warn_unused _poly_size_check = 0;
     int nruns = eaf[0]->nruns;
 
     eaf_assert(nruns % 2 == 0);
