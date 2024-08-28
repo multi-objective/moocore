@@ -39,7 +39,7 @@ VERSION = 0.1.9999$(REVISION)
 # my funding agent and tenure committee.
 #-----------------------------------------------------------------------
 
-S=1
+S=
 ## Quiet / verbose output:
 ifneq ($(findstring $(MAKEFLAGS),s),s)
   ifdef S
