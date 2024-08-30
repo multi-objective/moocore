@@ -2,7 +2,7 @@
 
 #  Makefile for moocore
 
-VERSION = 0.1.9999$(REVISION)
+VERSION = 0.1.1$(REVISION)
 
 #-----------------------------------------------------------------------
 
@@ -144,7 +144,7 @@ $(dominatedsetsexe): OBJS=dominatedsets.o io.o cmdline.o
 $(dominatedsetsexe): HEADERS=nondominated.h cmdline.h
 
 $(nondominatedexe): OBJS=nondominated.o io.o cmdline.o
-$(nondominatedexe): HEADERS= epsilon.h nondominated.h cmdline.h
+$(nondominatedexe): HEADERS=common.h cmdline.h nondominated.h
 
 $(eafexe): OBJS=eaf.o io.o eaf_main.o eaf3d.o avl.o cmdline.o
 $(eafexe): HEADERS=eaf.h
