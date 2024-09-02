@@ -25,7 +25,7 @@
 Introduction
 ============
 
-This webpage documents the `moocore` R package. There is also a [`moocore` Python package](https://multi-objective.github.io/moocore/python)
+This webpage documents the `moocore` R package. There is also a [`moocore` Python package](https://multi-objective.github.io/moocore/python/)
 
 
 The goal of the [**moocore** project](https://github.com/multi-objective/moocore/) is to collect fast implementations of core mathematical functions and algorithms for multi-objective optimization and make them available to different programming languages via similar interfaces. These functions include:

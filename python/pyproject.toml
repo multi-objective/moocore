@@ -36,8 +36,8 @@ dependencies = [
   "cffi>=1.15.1",
   "numpy>=1.22.3",
 ]
-urls.Documentation = "https://multi-objective.github.io/moocore/python"
-urls.Homepage = "https://multi-objective.github.io/moocore/python"
+urls.Documentation = "https://multi-objective.github.io/moocore/python/"
+urls.Homepage = "https://multi-objective.github.io/moocore/python/"
 urls.Source = "https://github.com/multi-objective/moocore/"
 urls.Tracker = "https://github.com/multi-objective/moocore/issues"
 
