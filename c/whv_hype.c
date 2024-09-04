@@ -164,6 +164,7 @@ estimate_whv(const double *points, int npoints,
     double whv = 0.0;
     // compute amount of dominators in p for each sample:
     unsigned int * dominated = calloc(nsamples, sizeof(unsigned int));
+    bool * is_dominator = malloc(npoints * sizeof(bool));
     for (int s = 0; s < nsamples; s++) {
         const double *sample = samples + s * nobj;
         // compute amount of dominators in p for each sample:
@@ -177,18 +178,11 @@ estimate_whv(const double *points, int npoints,
                 }
             }
             if (dom) dominated[s]++;
+            is_dominator[j] = dom;
         }
         // sum up alpha values of each dominated sample:
         for (int j = 0; j < npoints; j++) {
-            bool dom = true;
-            const double *p = points + j * nobj;
-            for (int d = 0; d < nobj; d++) {
-                if (sample[d] < p[d]) {
-                    dom = false;
-                    break;
-                }
-            }
-            if (dom) {
+            if (is_dominator[j]) {
                 assert(dominated[s] > 0);
                 whv += 1.0 / dominated[s];
                 //fprintf(stderr, "whv = %g\n", whv);
@@ -196,6 +190,7 @@ estimate_whv(const double *points, int npoints,
         }
     }
     free(dominated);
+    free(is_dominator);
     //free(alpha);
     return whv;
 }
