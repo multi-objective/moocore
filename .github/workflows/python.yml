@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Linter 🧹
+      - name: Linter 🧹 for event_name = ${{ github.event_name }}, action = ${{ github.event.action }}, ref = ${{ github.ref  }}
         uses: chartboost/ruff-action@v1
         with:
           src: "./python"
