@@ -134,6 +134,7 @@ Hypervolume metric
    :toctree: generated/
 
    hypervolume
+   hv_approx
    whv_hype
    total_whv_rect
    whv_rect

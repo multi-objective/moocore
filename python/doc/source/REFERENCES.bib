@@ -82,6 +82,34 @@
   pages = {386--394}
 }
 
+@incollection{CheGinBecMol2013moda,
+  address = { Heidelberg, Germany},
+  publisher = {Springer International Publishing},
+  booktitle = {mODa 10--Advances in Model-Oriented Design and Analysis},
+  year = 2013,
+  editor = {Ucinski, Dariusz and Atkinson, Anthony C.  and Patan, Maciej},
+  author = {Chevalier, Cl{\'e}ment and Ginsbourger, David and Bect,
+                  Julien and Molchanov, Ilya},
+  title = {Estimating and Quantifying Uncertainties on Level Sets Using
+                  the {Vorob}'ev Expectation and Deviation with {Gaussian}
+                  Process Models},
+  pages = {35--43},
+  abstract = {Several methods based on Kriging have recently been proposed
+                  for calculating a probability of failure involving
+                  costly-to-evaluate functions. A closely related problem is to
+                  estimate the set of inputs leading to a response exceeding a
+                  given threshold. Now, estimating such a level set---and not
+                  solely its volume---and quantifying uncertainties on it are
+                  not straightforward. Here we use notions from random set
+                  theory to obtain an estimate of the level set, together with
+                  a quantification of estimation uncertainty. We give explicit
+                  formulae in the Gaussian process set-up and provide a
+                  consistency result. We then illustrate how space-filling
+                  versus adaptive design strategies may sequentially reduce
+                  level set estimation uncertainty.},
+  doi = {10.1007/978-3-319-00218-7_5}
+}
+
 @phdthesis{ChiarandiniPhD,
   author = { Marco Chiarandini },
   title = {Stochastic Local Search Methods for Highly
@@ -117,6 +145,22 @@
   pages = {182--197},
   doi = {10.1109/4235.996017}
 }
+
+@article{DenZha2019approxhv,
+  author       = {Deng, Jingda and Zhang, Qingfu},
+  title        = {Approximating Hypervolume and Hypervolume Contributions Using
+                  Polar Coordinate},
+  journal      = {IEEE Transactions on Evolutionary Computation},
+  year         = 2019,
+  volume       = 23,
+  number       = 5,
+  pages        = {913--918},
+  month        = oct,
+  annote       = {Proposed approximating the hypervolume using scalarizations},
+  doi          = {10.1109/tevc.2019.2895108}
+}
+
+
 
 @article{DiaLop2020ejor,
   author =       { Juan Esteban Diaz and Manuel L{\'o}pez-Ib{\'a}ñez },
@@ -173,8 +217,6 @@
   alias = {DubLopStu2010amai}
 }
 
-
-
 @incollection{FonGueLopPaq2011emo,
   address = { Heidelberg },
   publisher = {Springer},
@@ -230,6 +272,8 @@
   pages = {103--130}
 }
 
+
+
 @incollection{Grunert01,
   year = 2001,
   series = {Lecture Notes in Computer Science},
@@ -249,6 +293,25 @@
   keywords = {EAF}
 }
 
+
+@incollection{IshMasTanNoj2015igd,
+  booktitle = { Evolutionary Multi-criterion Optimization, EMO 2015 Part {I}},
+  address = { Heidelberg, Germany},
+  series = {Lecture Notes in Computer Science},
+  volume = 9018,
+  year = 2015,
+  publisher = {Springer},
+  editor = { Ant{\'o}nio Gaspar{-}Cunha  and Carlos Henggeler Antunes and  Carlos A. {Coello Coello} },
+  author = { Ishibuchi, Hisao  and Masuda, Hiroyuki and Tanigaki, Yuki and
+                  Nojima, Yusuke},
+  title = {Modified Distance Calculation in Generational Distance and
+                  Inverted Generational Distance},
+  pages = {110--125},
+  annote = {Proposed IGD+},
+  keywords = {Performance metrics, multi-objective, IGD, IGD+}
+}
+
+
 @article{Jen03,
   title = {Reducing the run-time complexity of multiobjective
                   {EA}s: The {NSGA-II} and other algorithms},
@@ -260,8 +323,6 @@
   year = 2003
 }
 
-
-
 @article{JohAraMcGSch1991,
   author = {David S. Johnson and Cecilia R. Aragon and  Lyle A. McGeoch  and Catherine Schevon},
   title = {Optimization by Simulated Annealing: An Experimental
@@ -272,36 +333,6 @@
   number = 3,
   pages = {378--406}
 }
-
-
-@incollection{CheGinBecMol2013moda,
-  address = { Heidelberg, Germany},
-  publisher = {Springer International Publishing},
-  booktitle = {mODa 10--Advances in Model-Oriented Design and Analysis},
-  year = 2013,
-  editor = {Ucinski, Dariusz and Atkinson, Anthony C.  and Patan, Maciej},
-  author = {Chevalier, Cl{\'e}ment and Ginsbourger, David and Bect,
-                  Julien and Molchanov, Ilya},
-  title = {Estimating and Quantifying Uncertainties on Level Sets Using
-                  the {Vorob}'ev Expectation and Deviation with {Gaussian}
-                  Process Models},
-  pages = {35--43},
-  abstract = {Several methods based on Kriging have recently been proposed
-                  for calculating a probability of failure involving
-                  costly-to-evaluate functions. A closely related problem is to
-                  estimate the set of inputs leading to a response exceeding a
-                  given threshold. Now, estimating such a level set---and not
-                  solely its volume---and quantifying uncertainties on it are
-                  not straightforward. Here we use notions from random set
-                  theory to obtain an estimate of the level set, together with
-                  a quantification of estimation uncertainty. We give explicit
-                  formulae in the Gaussian process set-up and provide a
-                  consistency result. We then illustrate how space-filling
-                  versus adaptive design strategies may sequentially reduce
-                  level set estimation uncertainty.},
-  doi = {10.1007/978-3-319-00218-7_5}
-}
-
 
 @incollection{LopPaqStu09emaa,
   editor = { Thomas Bartz-Beielstein  and  Marco Chiarandini  and  Lu{\'i}s Paquete  and  Mike Preuss },
@@ -362,49 +393,6 @@
   pages = {504--522}
 }
 
-@article{ZhoZhaJin2009igdx,
-  author = "Zhou, A. and  Zhang, Qingfu  and  Yaochu Jin ",
-  title = {Approximating the set of {Pareto}-optimal solutions in both
-                  the decision and objective spaces by an estimation of
-                  distribution algorithm},
-  journal = {IEEE Transactions on Evolutionary Computation},
-  year = 2009,
-  volume = 13,
-  number = 5,
-  pages = {1167--1189},
-  doi = {10.1109/TEVC.2009.2021467},
-  keywords = {multi-modal, IGDX}
-}
-
-@article{ZitThiLauFon2003:tec,
-  author = { Eckart Zitzler  and  Lothar Thiele  and  Marco Laumanns  and  Carlos M. Fonseca  and Viviane {Grunert da Fonseca}},
-  title = {Performance Assessment of Multiobjective Optimizers:
-                  an Analysis and Review},
-  journal = {IEEE Transactions on Evolutionary Computation},
-  year = 2003,
-  volume = 7,
-  number = 2,
-    pages = {117--132},
-  alias = {perfassess}
-}
-
-@incollection{IshMasTanNoj2015igd,
-  booktitle = { Evolutionary Multi-criterion Optimization, EMO 2015 Part {I}},
-  address = { Heidelberg, Germany},
-  series = {Lecture Notes in Computer Science},
-  volume = 9018,
-  year = 2015,
-  publisher = {Springer},
-  editor = { Ant{\'o}nio Gaspar{-}Cunha  and Carlos Henggeler Antunes and  Carlos A. {Coello Coello} },
-  author = { Ishibuchi, Hisao  and Masuda, Hiroyuki and Tanigaki, Yuki and
-                  Nojima, Yusuke},
-  title = {Modified Distance Calculation in Generational Distance and
-                  Inverted Generational Distance},
-  pages = {110--125},
-  annote = {Proposed IGD+},
-  keywords = {Performance metrics, multi-objective, IGD, IGD+}
-}
-
 @inproceedings{VelLam1998gp,
   year = 1998,
   publisher = {Stanford University Bookstore},
@@ -420,6 +408,20 @@
   author = { David A. {Van Veldhuizen}  and  Gary B. Lamont },
   pages = {221--228},
   keywords = {generational distance}
+}
+
+@article{ZhoZhaJin2009igdx,
+  author = "Zhou, A. and  Zhang, Qingfu  and  Yaochu Jin ",
+  title = {Approximating the set of {Pareto}-optimal solutions in both
+                  the decision and objective spaces by an estimation of
+                  distribution algorithm},
+  journal = {IEEE Transactions on Evolutionary Computation},
+  year = 2009,
+  volume = 13,
+  number = 5,
+  pages = {1167--1189},
+  doi = {10.1109/TEVC.2009.2021467},
+  keywords = {multi-modal, IGDX}
 }
 
 @incollection{ZitThi1998ppsn,
@@ -438,4 +440,16 @@
   annote       = {Proposed hypervolume measure},
   alias        = {Zitzler98},
   doi          = {10.1007/BFb0056872}
+}
+
+@article{ZitThiLauFon2003:tec,
+  author = { Eckart Zitzler  and  Lothar Thiele  and  Marco Laumanns  and  Carlos M. Fonseca  and Viviane {Grunert da Fonseca}},
+  title = {Performance Assessment of Multiobjective Optimizers:
+                  an Analysis and Review},
+  journal = {IEEE Transactions on Evolutionary Computation},
+  year = 2003,
+  volume = 7,
+  number = 2,
+    pages = {117--132},
+  alias = {perfassess}
 }

@@ -6,6 +6,10 @@ import numpy as np
 from numpy.typing import ArrayLike  # For type hints
 from typing import Literal
 
+from math import gamma as gamma_function
+# NOTE: if we ever start using SciPy, we can use
+# from scipy.special import gamma_function
+
 import lzma
 import shutil
 import tempfile
@@ -317,7 +321,6 @@ def epsilon_mult(data, /, ref, *, maximise=False) -> float:
     return lib.epsilon_mult(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
 
 
-# FIXME: TODO maximise option
 def hypervolume(
     data: ArrayLike, /, ref: ArrayLike, maximise: bool | list[bool] = False
 ) -> float:
@@ -403,6 +406,125 @@ def hypervolume(
     ref_buf = ffi.from_buffer("double []", ref)
     hv = lib.fpli_hv(data_p, nobj, npoints, ref_buf)
     return hv
+
+
+def hv_approx(
+    data: ArrayLike,
+    /,
+    ref: ArrayLike,
+    maximise: bool | list[bool] = False,
+    nsamples: int = 100000,
+    seed=None,
+    method: Literal["DZ2019"] = "DZ2019",
+) -> float:
+    r"""Approximate the hypervolume indicator.
+
+    Approximate the value of the hypervolume metric with respect to a given
+    reference point assuming minimization of all objectives. The default
+    ``method="DZ2019`` relies on Monte-Carlo sampling
+    :footcite:p:`DenZha2019approxhv` and, thus, it gets more accurate, but
+    slower, for higher values of ``nsamples``.
+
+    Parameters
+    ----------
+    data :
+        Numpy array of numerical values, where each row gives the coordinates of a point.
+        If the array is created from the :func:`read_datasets` function, remove the last column.
+    ref :
+        Reference point as a 1D vector. Must be same length as a single point in the ``data``.
+    maximise :
+        Whether the objectives must be maximised instead of minimised. \
+        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
+        Also accepts a 1d numpy array with value 0/1 for each objective
+
+    nsamples :
+        Number of samples for Monte-Carlo sampling. Higher values give more accurate approximation of the true hypervolume but require more time.
+
+    seed : int or numpy.random.Generator
+        Either an integer to seed the NumPy random number generator (RNG) or an instance of Numpy-compatible RNG. ``None`` uses the default RNG of Numpy.
+
+    method :
+        Method to approximate the hypervolume.
+
+    Returns
+    -------
+        A single numerical value, the approximate hypervolume indicator
+
+    References
+    ----------
+    .. footbibliography::
+
+    Examples
+    --------
+    >>> dat = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
+    >>> moocore.hv_approx(dat, ref=[10, 10], seed = 42)
+    38.0
+
+    Merge all the sets of a dataset by removing the set number column:
+
+    >>> dat = moocore.get_dataset("input1.dat")[:, :-1]
+
+    Dominated points are ignored, so this:
+
+    >>> moocore.hv_approx(dat, ref=[10, 10], seed = 42)
+    93.34897655910018
+
+    gives the same hypervolume approximation as this:
+
+    >>> dat = moocore.filter_dominated(dat)
+    >>> moocore.hv_approx(dat, ref=[10, 10], seed = 42)
+    93.34897655910018
+
+    The approximation is far from perfect for large sets:
+
+    >>> x = moocore.get_dataset("CPFs.txt")[:,:-1]
+    >>> x = moocore.filter_dominated(-x, maximise = True)
+    >>> x = moocore.normalise(x, to_range = [1,2])
+    >>> reference = 0.9
+    >>> moocore.hypervolume(x, ref = reference, maximise = True)
+    1.0570447464301551
+    >>> moocore.hv_approx(x, ref = reference, maximise = True, seed = 42)
+    1.0563125590974458
+
+    """
+    # Convert to numpy.array in case the user provides a list.  We use
+    # np.asarray to convert it to floating-point, otherwise if a user inputs
+    # something like ref = np.array([10, 10]) then numpy would interpret it as
+    # an int array.
+    data = np.asarray(data, dtype=float)
+    nobj = data.shape[1]
+    ref = atleast_1d_of_length_n(np.array(ref, dtype=float), nobj)
+    if nobj != ref.shape[0]:
+        raise ValueError(
+            f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
+        )
+
+    # FIXME: Do this in C.
+    data = ref - data
+    maximise = _parse_maximise(maximise, nobj)
+    if maximise.any():
+        data *= np.where(maximise, -1, 1)
+
+    if seed is None or isinstance(seed, int):
+        seed = np.random.default_rng(seed)
+
+    # Sample in the positive orthant of the hyper-sphere.
+    W = np.abs(seed.normal(size=(nsamples, nobj)))
+    W /= np.linalg.norm(W, axis=1).reshape(-1, 1)
+
+    expected = []
+    # We could do it without the loop but it will consume lots of memory.
+    #  y / W[:, np.newaxis,:]
+    # FIXME: But we could use np.apply_along_axis()
+    for w in W:
+        # FIXME: max(0, y - ref) is a fancy way to ignore points that do not
+        # strictly dominate ref but carrying those points through all
+        # computations is wasteful. It would be better to remove them earlier.
+        s_w = np.maximum(0, data / w).min(axis=1) ** nobj
+        expected.append(s_w.max())
+
+    c_m = (np.pi ** (nobj / 2)) / ((2**nobj) * gamma_function(nobj / 2 + 1))
+    return float(c_m * np.mean(expected))
 
 
 def is_nondominated(
@@ -1392,7 +1514,7 @@ def whv_hype(
     ref,
     ideal,
     maximise=False,
-    nsamples: int = 1e5,
+    nsamples: int = 100000,
     dist: Literal["uniform", "point", "exponential"] = "uniform",
     seed=None,
     mu=None,
@@ -1424,7 +1546,7 @@ def whv_hype(
         Also accepts a 1D numpy array with values 0 or 1 for each objective.
 
     nsamples :
-        Number of samples for Monte-Carlo sampling.
+        Number of samples for Monte-Carlo sampling. Higher values give more accurate approximation of the true hypervolume but require more time.
 
     dist :
       Weight distribution :footcite:p:`AugBadBroZit2009gecco`. The ones currently supported are:
@@ -1434,7 +1556,7 @@ def whv_hype(
        - ``exponential`` : describes an exponential distribution with rate parameter ``1/mu``, i.e., :math:`\lambda = \frac{1}{\mu}`.
 
     seed : int or numpy.random.Generator
-        Either an integer to seed the NumPy random number generator or a random number generator.
+        Either an integer to seed the NumPy random number generator (RNG) or an instance of Numpy-compatible RNG. ``None`` uses the default RNG of Numpy.
 
     mu : float or 1D numpy.array
        Parameter of ``dist``. See above for details.
