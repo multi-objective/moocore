@@ -261,7 +261,7 @@ def epsilon_additive(
 ) -> float:
     """Additive epsilon metric.
 
-    ``data`` and ``reference`` must all be larger than 0 for :func:`epsilon_mult`.
+    ``data`` and ``ref`` must all be larger than 0 for :func:`epsilon_mult`.
 
     .. seealso:: For details of the calculation, see :ref:`epsilon_metric`.
 
@@ -902,7 +902,7 @@ def eaf(data, /, percentiles: list = []):
     return np.frombuffer(eaf_buf).reshape((eaf_npoints, -1))
 
 
-def vorobT(data: ArrayLike, /, reference: ArrayLike) -> dict:
+def vorobT(data: ArrayLike, /, ref: ArrayLike) -> dict:
     """Compute Vorob'ev threshold and expectation.
 
     Parameters
@@ -910,7 +910,7 @@ def vorobT(data: ArrayLike, /, reference: ArrayLike) -> dict:
     data :
         Numpy array of numerical values and set numbers, containing multiple sets. For example the output \
          of the :func:`read_datasets` function
-    reference :
+    ref :
         Reference point set as a numpy array or list. Must be same length as a single point in the \
         dataset
 
@@ -933,7 +933,7 @@ def vorobT(data: ArrayLike, /, reference: ArrayLike) -> dict:
     Examples
     --------
     >>> CPFs = moocore.get_dataset("CPFs.txt")
-    >>> res = moocore.vorobT(CPFs, reference = (2, 200))
+    >>> res = moocore.vorobT(CPFs, ref = (2, 200))
     >>> res['threshold']
     44.140625
     >>> res['avg_hyp']
@@ -950,7 +950,7 @@ def vorobT(data: ArrayLike, /, reference: ArrayLike) -> dict:
     sets = data[:, -1]
     uniq_sets = np.unique(sets)
     avg_hyp = np.mean(
-        [hypervolume(data[sets == k, :-1], ref=reference) for k in uniq_sets]
+        [hypervolume(data[sets == k, :-1], ref=ref) for k in uniq_sets]
     )
     prev_hyp = diff = np.inf  # hypervolume of quantile at previous step
     a = 0
@@ -958,7 +958,7 @@ def vorobT(data: ArrayLike, /, reference: ArrayLike) -> dict:
     while diff != 0:
         c = (a + b) / 2.0
         eaf_res = eaf(data, percentiles=c)[:, :nobj]
-        tmp = hypervolume(eaf_res, ref=reference)
+        tmp = hypervolume(eaf_res, ref=ref)
         if tmp > avg_hyp:
             a = c
         else:
@@ -970,7 +970,7 @@ def vorobT(data: ArrayLike, /, reference: ArrayLike) -> dict:
 
 
 def vorobDev(
-    x: ArrayLike, /, reference: ArrayLike, *, VE: ArrayLike = None
+    x: ArrayLike, /, ref: ArrayLike, *, VE: ArrayLike = None
 ) -> float:
     r"""Compute Vorob'ev deviation.
 
@@ -979,11 +979,11 @@ def vorobDev(
     x :
        Numpy array of numerical values and set numbers, containing multiple sets.
        For example the output of the :func:`read_datasets` function.
-    reference : ArrayLike
+    ref : ArrayLike
        Reference point set as a numpy array or list. Must be same length as a single point in the dataset.
     VE :
        Vorob'ev expectation, e.g., as returned by :func:`vorobT`.
-       If not provided, it is calculated as ``vorobT(x, reference)``.
+       If not provided, it is calculated as ``vorobT(x, ref)``.
 
     Returns
     -------
@@ -1004,13 +1004,13 @@ def vorobDev(
     Examples
     --------
     >>> CPFs = moocore.get_dataset("CPFs.txt")
-    >>> VD = moocore.vorobDev(CPFs, reference=(2, 200))
+    >>> VD = moocore.vorobDev(CPFs, ref=(2, 200))
     >>> VD
     3017.12989402326
 
     """
     if VE is None:
-        VE = vorobT(x, reference)["VE"]
+        VE = vorobT(x, ref)["VE"]
 
     x = np.asarray(x, dtype=float)
     ncols = x.shape[1]
@@ -1021,17 +1021,17 @@ def vorobDev(
 
     # Hypervolume of the symmetric difference between A and B:
     # 2 * H(AUB) - H(A) - H(B)
-    H2 = hypervolume(VE, ref=reference)
+    H2 = hypervolume(VE, ref=ref)
     uniq_sets, uniq_index = np.unique(x[:, -1], return_index=True)
     x_split = np.vsplit(x[:, :-1], uniq_index[1:])
     H1 = np.fromiter(
-        (hypervolume(g, ref=reference) for g in x_split),
+        (hypervolume(g, ref=ref) for g in x_split),
         dtype=float,
         count=len(x_split),
     ).mean()
     VD = (
         np.fromiter(
-            (hypervolume(np.vstack((g, VE)), ref=reference) for g in x_split),
+            (hypervolume(np.vstack((g, VE)), ref=ref) for g in x_split),
             dtype=float,
             count=len(x_split),
         ).mean()
@@ -1230,7 +1230,7 @@ def eafdiff(
 #     return np.reshape(eaf_arr, (num_data_columns, -1)).T
 
 
-def whv_rect(x, /, rectangles, *, reference, maximise=False) -> float:
+def whv_rect(x, /, rectangles, *, ref, maximise=False) -> float:
     """Compute weighted hypervolume given a set of rectangles.
 
     .. seealso:: For details about parameters, return value and examples, see :func:`total_whv_rect`.
@@ -1256,26 +1256,22 @@ def whv_rect(x, /, rectangles, *, reference, maximise=False) -> float:
             "Invalid number of columns in 'rectangles' (should be 5)"
         )
 
-    reference = atleast_1d_of_length_n(
-        np.asarray(reference, dtype=float), nobj
-    )
+    ref = atleast_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
     x, npoints, _ = np2d_to_double_array(x)
-    reference = ffi.from_buffer("double []", reference)
+    ref = ffi.from_buffer("double []", ref)
     rectangles, rectangles_nrow, _ = np2d_to_double_array(rectangles)
     assert not maximise
     # FIXME: Move to C code.
     # maximise = _parse_maximise(maximise, nobj)
     # if maximise.any():
     #     x[:, maximise] = -x[:, maximise]
-    #     reference[maximise] = -reference[maximise]
+    #     ref[maximise] = -ref[maximise]
     #     if maximise.all():
     #         rectangles[:, :4] = -rectangles[:, :4]
     #     else:
     #         pos = np.flatnonzero(maximise) + [0,2]
     #         rectangles[:, pos] = -rectangles[:, pos]
-    hv = lib.rect_weighted_hv2d(
-        x, npoints, rectangles, rectangles_nrow, reference
-    )
+    hv = lib.rect_weighted_hv2d(x, npoints, rectangles, rectangles_nrow, ref)
     return hv
 
 
@@ -1291,7 +1287,7 @@ def total_whv_rect(
     /,
     rectangles,
     *,
-    reference,
+    ref,
     maximise=False,
     ideal=None,
     scalefactor: float = 0.1,
@@ -1301,7 +1297,7 @@ def total_whv_rect(
     Calculates the hypervolume weighted by a set of rectangles (with zero
     weight outside the rectangles). The function :func:`total_whv_rect()`
     calculates the total weighted hypervolume as :func:`hypervolume()` ``+
-    scalefactor * abs(prod(reference - ideal)) *`` :func:`whv_rect()`. The
+    scalefactor * abs(prod(ref - ideal)) *`` :func:`whv_rect()`. The
     details of the computation are given by :footcite:t:`DiaLop2020ejor`.
 
     .. warning::
@@ -1316,7 +1312,7 @@ def total_whv_rect(
     rectangles :
         Weighted rectangles that will bias the computation of the hypervolume. Maybe generated by :func:`eafdiff()` with  ``rectangles=True`` or by :func:`choose_eafdiff()`.
 
-    reference :
+    ref :
         Reference point as a 1D vector. Must be same length as a single row in  ``x``.
 
     maximise : bool or or list of bool
@@ -1351,17 +1347,17 @@ def total_whv_rect(
     ...         [2.0, 3.0, 3.0, 3.5, 3],
     ...     ]
     ... )
-    >>> whv_rect([[2, 2]], rectangles, reference=6)
+    >>> whv_rect([[2, 2]], rectangles, ref=6)
     4.0
-    >>> whv_rect([[2, 1]], rectangles, reference=6)
+    >>> whv_rect([[2, 1]], rectangles, ref=6)
     4.0
-    >>> whv_rect([[1, 2]], rectangles, reference=6)
+    >>> whv_rect([[1, 2]], rectangles, ref=6)
     7.0
-    >>> total_whv_rect([[2, 2]], rectangles, reference=6, ideal=1)
+    >>> total_whv_rect([[2, 2]], rectangles, ref=6, ideal=1)
     26.0
-    >>> total_whv_rect([[2, 1]], rectangles, reference=6, ideal=1)
+    >>> total_whv_rect([[2, 1]], rectangles, ref=6, ideal=1)
     30.0
-    >>> total_whv_rect([[1, 2]], rectangles, reference=6, ideal=1)
+    >>> total_whv_rect([[1, 2]], rectangles, ref=6, ideal=1)
     37.5
 
     """
@@ -1376,18 +1372,16 @@ def total_whv_rect(
     if scalefactor <= 0 or scalefactor > 1:
         raise ValueError("'scalefactor' must be within (0,1]")
 
-    reference = atleast_1d_of_length_n(
-        np.asarray(reference, dtype=float), nobj
-    )
-    whv = whv_rect(x, rectangles, reference=reference, maximise=maximise)
-    hv = hypervolume(x, reference)  # FIXME: maximise = maximise)
+    ref = atleast_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
+    whv = whv_rect(x, rectangles, ref=ref, maximise=maximise)
+    hv = hypervolume(x, ref=ref)  # FIXME: maximise = maximise)
     if ideal is None:
         # FIXME: Should we include the range of the rectangles here?
         ideal = get_ideal(x, maximise=maximise)
     else:
         ideal = atleast_1d_of_length_n(np.asarray(ideal, dtype=float), nobj)
 
-    beta = scalefactor * abs((reference - ideal).prod())
+    beta = scalefactor * abs((ref - ideal).prod())
     return float(hv + beta * whv)
 
 
@@ -1395,7 +1389,7 @@ def whv_hype(
     data,
     /,
     *,
-    reference,
+    ref,
     ideal,
     maximise=False,
     nsamples: int = 1e5,
@@ -1418,7 +1412,7 @@ def whv_hype(
         Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
         If the array is created from the :func:`read_datasets` function, remove the last (set) column.
 
-    reference : numpy.ndarray or list
+    ref : numpy.ndarray or list
         Reference point as a numpy array or list. Must have same length as the number of columns of the dataset.
 
     ideal : numpy.ndarray or list
@@ -1463,23 +1457,23 @@ def whv_hype(
     --------
     >>> moocore.hypervolume([[2, 2]], ref=4)
     4.0
-    >>> moocore.whv_hype([[2, 2]], reference=4, ideal=1, seed=42)
+    >>> moocore.whv_hype([[2, 2]], ref=4, ideal=1, seed=42)
     3.99807
     >>> moocore.hypervolume([[3, 1]], ref=4)
     3.0
-    >>> moocore.whv_hype([[3, 1]], reference=4, ideal=1, seed=42)
+    >>> moocore.whv_hype([[3, 1]], ref=4, ideal=1, seed=42)
     3.00555
     >>> moocore.whv_hype(
-    ...     [[2, 2]], reference=4, ideal=1, dist="exponential", mu=0.2, seed=42
+    ...     [[2, 2]], ref=4, ideal=1, dist="exponential", mu=0.2, seed=42
     ... )
     1.14624
     >>> moocore.whv_hype(
-    ...     [[3, 1]], reference=4, ideal=1, dist="exponential", mu=0.2, seed=42
+    ...     [[3, 1]], ref=4, ideal=1, dist="exponential", mu=0.2, seed=42
     ... )
     1.66815
     >>> moocore.whv_hype(
     ...     [[2, 2]],
-    ...     reference=4,
+    ...     ref=4,
     ...     ideal=1,
     ...     dist="point",
     ...     mu=[2.9, 0.9],
@@ -1488,7 +1482,7 @@ def whv_hype(
     0.64485
     >>> moocore.whv_hype(
     ...     [[3, 1]],
-    ...     reference=4,
+    ...     ref=4,
     ...     ideal=1,
     ...     dist="point",
     ...     mu=[2.9, 0.9],
@@ -1505,9 +1499,7 @@ def whv_hype(
     if nobj != 2:
         raise NotImplementedError("Only 2D datasets are currently supported")
 
-    reference = atleast_1d_of_length_n(
-        np.asarray(reference, dtype=float), nobj
-    )
+    ref = atleast_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
     ideal = atleast_1d_of_length_n(np.asarray(ideal, dtype=float), nobj)
 
     maximise = _parse_maximise(maximise, nobj)
@@ -1517,36 +1509,30 @@ def whv_hype(
             data = data.copy()
         data[:, maximise] = -data[:, maximise]
         # These are so small that is ok to just copy them.
-        reference = reference.copy()
+        ref = ref.copy()
         ideal = ideal.copy()
-        reference[maximise] = -reference[maximise]
+        ref[maximise] = -ref[maximise]
         ideal[maximise] = -ideal[maximise]
 
     if not isinstance(seed, int):
         seed = np.random.default_rng(seed).integers(2**32 - 2, dtype=np.uint32)
 
     data_p, npoints, nobj = np2d_to_double_array(data)
-    reference = ffi.from_buffer("double []", reference)
+    ref = ffi.from_buffer("double []", ref)
     ideal = ffi.from_buffer("double []", ideal)
     # FIXME: Check ranges.
     seed = ffi.cast("uint32_t", seed)
     nsamples = ffi.cast("int", nsamples)
 
     if dist == "uniform":
-        hv = lib.whv_hype_unif(
-            data_p, npoints, ideal, reference, nsamples, seed
-        )
+        hv = lib.whv_hype_unif(data_p, npoints, ideal, ref, nsamples, seed)
     elif dist == "exponential":
         mu = ffi.cast("double", mu)
-        hv = lib.whv_hype_expo(
-            data_p, npoints, ideal, reference, nsamples, seed, mu
-        )
+        hv = lib.whv_hype_expo(data_p, npoints, ideal, ref, nsamples, seed, mu)
     elif dist == "point":
         mu = atleast_1d_of_length_n(np.asarray(mu, dtype=float), nobj)
         mu, _ = np1d_to_double_array(mu)
-        hv = lib.whv_hype_gaus(
-            data_p, npoints, ideal, reference, nsamples, seed, mu
-        )
+        hv = lib.whv_hype_gaus(data_p, npoints, ideal, ref, nsamples, seed, mu)
     else:
         raise ValueError("Unknown value of dist = {dist}")
 

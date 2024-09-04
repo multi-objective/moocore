@@ -85,34 +85,38 @@ def test_read_datasets_errorcode(test_datapath):
     assert expt.value.message == "ERROR_COLUMNS"
 
 
-def test_hv_output(test_datapath):
-    """Checks the hypervolume calculation produces the correct value."""
-    filename = moocore.get_dataset_path("input1.dat")
-    X = moocore.read_datasets(filename)
-    hv = moocore.hypervolume(X[X[:, 2] == 1, :2], ref=np.array([10, 10]))
-    assert math.isclose(
-        hv, 90.46272765
-    ), "input1.dat hypervolume produces wrong output"
+class TestHypervolume:
+    """Test hypervolume function."""
 
-    hv = moocore.hypervolume(X[X[:, 2] == 1, :2], ref=[10, 10])
-    assert math.isclose(
-        hv, 90.46272765
-    ), "input1.dat hypervolume produces wrong output"
+    input1 = moocore.get_dataset("input1.dat")
 
-    X = moocore.read_datasets(test_datapath("duplicated3.inp"))[:, :-1]
-    hv = moocore.hypervolume(
-        X, ref=[-14324, -14906, -14500, -14654, -14232, -14093]
-    )
-    assert math.isclose(hv, 1.52890128312393e20)
+    def test_hv_output(self, test_datapath):
+        """Checks the hypervolume calculation produces the correct value."""
+        X = self.input1
+        hv = moocore.hypervolume(X[X[:, 2] == 1, :2], ref=np.array([10, 10]))
+        assert math.isclose(
+            hv, 90.46272765
+        ), "input1.dat hypervolume produces wrong output"
 
+        hv = moocore.hypervolume(X[X[:, 2] == 1, :2], ref=[10, 10])
+        assert math.isclose(
+            hv, 90.46272765
+        ), "input1.dat hypervolume produces wrong output"
 
-def test_hv_wrong_ref(test_datapath):
-    """Check that the moocore.hv() functions fails correctly after a ref with the wrong dimensions is input."""
-    filename = moocore.get_dataset_path("input1.dat")
-    X = moocore.read_datasets(filename)
-    with pytest.raises(Exception) as expt:
-        moocore.hypervolume(X[X[:, 2] == 1, :2], ref=np.array([10, 10, 10]))
-    assert expt.type is ValueError
+        X = moocore.read_datasets(test_datapath("duplicated3.inp"))[:, :-1]
+        hv = moocore.hypervolume(
+            X, ref=[-14324, -14906, -14500, -14654, -14232, -14093]
+        )
+        assert math.isclose(hv, 1.52890128312393e20)
+
+    def test_hv_wrong_ref(self, test_datapath):
+        """Check that the moocore.hv() functions fails correctly after a ref with the wrong dimensions is input."""
+        X = self.input1
+        with pytest.raises(Exception) as expt:
+            moocore.hypervolume(
+                X[X[:, 2] == 1, :2], ref=np.array([10, 10, 10])
+            )
+        assert expt.type is ValueError
 
 
 def test_igd():
@@ -130,8 +134,7 @@ def test_igd():
 
 
 def test_is_nondominated(test_datapath):
-    filename = moocore.get_dataset_path("input1.dat")
-    X = moocore.read_datasets(filename)
+    X = moocore.get_dataset("input1.dat")
     subset = X[X[:, 2] == 3, :2]
     dominated = moocore.is_nondominated(subset)
     assert (
