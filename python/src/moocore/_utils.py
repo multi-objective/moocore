@@ -2,6 +2,16 @@ import numpy as np
 from ._libmoocore import ffi
 
 
+def get1_and_is_copied(x, x_):
+    x_copied = id(x) != id(x_)
+    return x, x_copied
+
+
+def asarray_maybe_copy(x, dtype=float):
+    """Convert to numpy array of dtype=float and detect copies."""
+    return get1_and_is_copied(np.asarray(x, dtype=dtype), x)
+
+
 def unique_nosort(array, **kwargs):
     uniq, index = np.unique(array, return_index=True, **kwargs)
     return uniq[index.argsort()]

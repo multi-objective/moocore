@@ -13,6 +13,7 @@ import tempfile
 from importlib.resources import files
 
 from ._utils import (
+    asarray_maybe_copy,
     unique_nosort,
     np2d_to_double_array,
     np1d_to_double_array,
@@ -359,8 +360,7 @@ def hypervolume(
 
     Merge all the sets of a dataset by removing the set number column:
 
-    >>> filename = moocore.get_dataset_path("input1.dat")
-    >>> dat = moocore.read_datasets(filename)[:, :-1]
+    >>> dat = moocore.get_dataset("input1.dat")[:, :-1]
     >>> len(dat)
     100
 
@@ -382,9 +382,7 @@ def hypervolume(
     # np.asarray to convert it to floating-point, otherwise if a user inputs
     # something like ref = np.array([10, 10]) then numpy would interpret it as
     # an int array.
-    data_ = np.asarray(data, dtype=float)
-    data_copied = id(data_) != id(data)
-    data = data_
+    data, data_copied = asarray_maybe_copy(data)
     nobj = data.shape[1]
     ref = atleast_1d_of_length_n(np.array(ref, dtype=float), nobj)
     if nobj != ref.shape[0]:
@@ -398,6 +396,7 @@ def hypervolume(
         if not data_copied:
             data = data.copy()
         data[:, maximise] = -data[:, maximise]
+        ref = ref.copy()
         ref[maximise] = -ref[maximise]
 
     data_p, npoints, nobj = np2d_to_double_array(data)
@@ -512,8 +511,7 @@ def filter_dominated_within_sets(
 
     Examples
     --------
-    >>> filename = moocore.get_dataset_path("input1.dat")
-    >>> x = moocore.read_datasets(filename)
+    >>> x = moocore.get_dataset("input1.dat")
     >>> pf_per_set = moocore.filter_dominated_within_sets(x)
     >>> len(pf_per_set)
     42
@@ -587,8 +585,7 @@ def pareto_rank(
 
     Examples
     --------
-    >>> filename = moocore.get_dataset_path("input1.dat")
-    >>> x = moocore.read_datasets(filename)[:, :2]
+    >>> x = moocore.get_dataset("input1.dat")[:, :2]
     >>> ranks = moocore.pareto_rank(x)
     >>> ranks
     array([ 5,  9,  1, 12,  1,  4,  8,  2,  4,  1,  9,  5,  6,  5, 12,  5,  5,
@@ -611,13 +608,15 @@ def pareto_rank(
     True
 
     """
-    data = np.asarray(data, dtype=float)
+    data, data_copied = asarray_maybe_copy(data)
     nrows, nobj = data.shape
     maximise = _parse_maximise(maximise, nobj)
     if maximise.any():
         # FIXME: Do this in C.
-        data = data.copy()
+        if not data_copied:
+            data = data.copy()
         data[:, maximise] = -data[:, maximise]
+
     data_p, npoints, nobj = np2d_to_double_array(data)
     ranks = lib.pareto_rank(data_p, nobj, npoints)
     ranks = ffi.buffer(ranks, nrows * ffi.sizeof("int"))
@@ -813,8 +812,7 @@ def eaf(data, /, percentiles: list = []):
 
     Examples
     --------
-    >>> filename = moocore.get_dataset_path("input1.dat")
-    >>> x = moocore.read_datasets(filename)
+    >>> x = moocore.get_dataset("input1.dat")
     >>> moocore.eaf(x)                                     # doctest: +ELLIPSIS
     array([[  0.17470556,   8.89066343,  10.        ],
            [  0.20816431,   4.62275469,  10.        ],
@@ -934,8 +932,7 @@ def vorobT(data: ArrayLike, /, reference: ArrayLike) -> dict:
 
     Examples
     --------
-    >>> filename = moocore.get_dataset_path("CPFs.txt")
-    >>> CPFs = moocore.read_datasets(filename)
+    >>> CPFs = moocore.get_dataset("CPFs.txt")
     >>> res = moocore.vorobT(CPFs, reference = (2, 200))
     >>> res['threshold']
     44.140625
@@ -1006,8 +1003,7 @@ def vorobDev(
 
     Examples
     --------
-    >>> filename = moocore.get_dataset_path("CPFs.txt")
-    >>> CPFs = moocore.read_datasets(filename)
+    >>> CPFs = moocore.get_dataset("CPFs.txt")
     >>> VD = moocore.vorobDev(CPFs, reference=(2, 200))
     >>> VD
     3017.12989402326
@@ -1504,7 +1500,7 @@ def whv_hype(
     # Convert to numpy.array in case the user provides a list.  We use
     # np.asfarray to convert it to floating-point, otherwise if a user inputs
     # something like [10, 10] then numpy would interpret it as an int array.
-    data = np.asarray(data, dtype=float)
+    data, data_copied = asarray_maybe_copy(data)
     nobj = data.shape[1]
     if nobj != 2:
         raise NotImplementedError("Only 2D datasets are currently supported")
@@ -1515,11 +1511,18 @@ def whv_hype(
     ideal = atleast_1d_of_length_n(np.asarray(ideal, dtype=float), nobj)
 
     maximise = _parse_maximise(maximise, nobj)
-    data[:, maximise] = -data[:, maximise]
-    reference[maximise] = -reference[maximise]
-    ideal[maximise] = -ideal[maximise]
+    # FIXME: Do this in C.
+    if maximise.any():
+        if not data_copied:
+            data = data.copy()
+        data[:, maximise] = -data[:, maximise]
+        # These are so small that is ok to just copy them.
+        reference = reference.copy()
+        ideal = ideal.copy()
+        reference[maximise] = -reference[maximise]
+        ideal[maximise] = -ideal[maximise]
 
-    if seed is None:
+    if not isinstance(seed, int):
         seed = np.random.default_rng(seed).integers(2**32 - 2, dtype=np.uint32)
 
     data_p, npoints, nobj = np2d_to_double_array(data)
@@ -1564,6 +1567,24 @@ def get_dataset_path(filename: str, /) -> str:
 
     """
     return files("moocore.data").joinpath(filename)
+
+
+def get_dataset(filename: str, /) -> np.ndarray:
+    """Return path to dataset within the package.
+
+    Parameters
+    ----------
+    filename :
+        Name of the dataset.
+
+    Returns
+    -------
+        An array containing a representation of the data in the file.
+        The first :math:`n-1` columns contain the numerical data for each of the objectives.
+        The last column contains an identifier for which set the data is relevant to.
+
+    """
+    return read_datasets(files("moocore.data").joinpath(filename))
 
 
 def groupby(x, groups, /, *, axis: int = 0):
