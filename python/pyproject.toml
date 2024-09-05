@@ -60,7 +60,9 @@ skip = [
 build-verbosity = 2
 # Change import-mode to ensure we test against installed package, not local project
 test-requires = "pytest"
-test-command = "pytest -v --doctest-modules --doctest-continue-on-failure --import-mode=importlib {package}/tests"
+test-command = [
+  "pytest --doctest-modules --doctest-continue-on-failure {package}/tests {package}/src/moocore/_moocore.py",
+]
 # skip tests on cp38-macosx_x86_64 because of https://github.com/catboost/catboost/issues/2371
 # skip tests on emulated architectures, as they are very slow
 # skip tests on *-macosx_arm64 , as cibuildwheel does not support tests on arm64 (yet)
@@ -114,3 +116,6 @@ lint.ignore = [
 
 [tool.pytest.ini_options]
 doctest_optionflags = "NUMBER"
+addopts = [
+  "--import-mode=importlib",
+]
