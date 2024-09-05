@@ -109,7 +109,7 @@ jobs:
       - name: Publish artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: moocore-dist-${{ matrix.os }}-${{ matrix.python-version }}
+          name: moocore-wheels-${{ matrix.os }}-${{ matrix.python-version }}
           path: python/dist/*.tar.gz
 
   build-doc:
@@ -215,6 +215,7 @@ jobs:
         # macos-13 is an intel runner, macos-14 is apple silicon
         os: [ubuntu-latest, windows-latest, macos-14]
         python-version: ['3.10']
+        CIBW_ARCHS_MACOS: ['auto universal2']
         include:
           - os: macos-13
             python-version: '3.10'
@@ -224,6 +225,7 @@ jobs:
             # provider offers this. Notably, an arm64 runner can also test the
             # x86_64 part of the wheel, through Rosetta emulation.
             CIBW_TEST_SKIP: '*-macosx_universal2:arm64'
+            CIBW_ARCHS_MACOS: 'auto'
 
     steps:
       - uses: actions/checkout@v4
@@ -242,15 +244,18 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.17
         env:
-          CIBW_ARCHS_MACOS: auto universal2
+          CIBW_ARCHS_MACOS: ${{ matrix.CIBW_ARCHS_MACOS }}
           CIBW_TEST_SKIP: ${{ matrix.CIBW_TEST_SKIP }}
         with:
           package-dir: python
           output-dir: wheelhouse
 
+      - name: List wheels
+        run: ls wheelhouse/*.whl
+
       - uses: actions/upload-artifact@v4
         with:
-          name: moocore-wheels-${{ matrix.os }}-${{ matrix.python-version }}
+          name: moocore-wheels-${{ matrix.os }}-${{ matrix.python-version }}-${{ strategy.job-index }}
           path: wheelhouse/*.whl
 
   upload_pypi:
@@ -269,9 +274,12 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           # unpacks all moocore artifacts into dist/
-          pattern: moocore-*
+          pattern: moocore-wheels-*
           path: dist
           merge-multiple: true
+
+      - name: Display structure of downloaded files
+        run: ls -R dist
 
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
