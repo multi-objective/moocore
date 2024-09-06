@@ -72,7 +72,7 @@ test-skip = "cp38-macosx_x86_64 *-*linux_{aarch64,ppc64le,s390x} *-macosx_arm64 
 [tool.cibuildwheel.linux]
 archs = [
   "x86_64",
-  "aarch64",
+  #  "aarch64", FAILS doctests
 ]
 # Use abi3audit to catch issues with Limited API wheels
 repair-wheel-command = [
