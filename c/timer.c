@@ -66,9 +66,10 @@ FILETIME_to_timeval (struct timeval *tv, FILETIME *ft)
     int64_t fulltime = ((((int64_t) ft->dwHighDateTime) << 32)
                         | ((int64_t) ft->dwLowDateTime));
     fulltime /= 10LL; /* 100-ns -> us */
-    tv->tv_sec  = fulltime / 1000000L;
-    tv->tv_usec = fulltime % 1000000L;
+    tv->tv_sec  = (__typeof__(tv->tv_sec)) fulltime / 1000000L;
+    tv->tv_usec = (__typeof__(tv->tv_sec)) fulltime % 1000000L;
 }
+
 static int __cdecl
 getrusage(int who, struct rusage *r_usage)
 {
@@ -135,9 +136,8 @@ void Timer_start(void)
  */
 double Timer_elapsed_virtual (void)
 {
-    double timer_tmp_time;
     getrusage (RUSAGE_SELF, &res);
-    timer_tmp_time = TIMER_CPUTIME(res) - virtual_time;
+    double timer_tmp_time = TIMER_CPUTIME(res) - virtual_time;
 
 #if DEBUG >= 4
     if (timer_tmp_time  < 0.0) {
@@ -189,10 +189,8 @@ void Timer_stop(void)
 
 void Timer_continue(void)
 {
-    double timer_tmp_time;
-
     gettimeofday( &tp, NULL );
-    timer_tmp_time = TIMER_WALLTIME(tp) - stop_real_time;
+    double timer_tmp_time = TIMER_WALLTIME(tp) - stop_real_time;
 
 #if DEBUG >= 2
     if (timer_tmp_time  < 0.0) {
