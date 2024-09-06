@@ -45,7 +45,7 @@ static void avl_rebalance(avl_tree_t *, avl_node_t *);
 #define NODE_DEPTH(n)  ((n) ? (n)->depth : 0)
 #define L_DEPTH(n)     (NODE_DEPTH((n)->left))
 #define R_DEPTH(n)     (NODE_DEPTH((n)->right))
-#define CALC_DEPTH(n)  ((L_DEPTH(n)>R_DEPTH(n)?L_DEPTH(n):R_DEPTH(n)) + 1)
+#define CALC_DEPTH(n)  (unsigned char)((L_DEPTH(n)>R_DEPTH(n)?L_DEPTH(n):R_DEPTH(n)) + 1)
 #endif
 
 #ifndef AVL_DEPTH

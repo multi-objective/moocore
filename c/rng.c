@@ -78,7 +78,7 @@ rng_standard_normal(rng_state *rng)
         r >>= 8;
         int sign = r & 0x1;
         uint64_t rabs = (r >> 1) & 0x000fffffffffffff;
-        double x = rabs * wi_double[idx];
+        double x = (double) rabs * wi_double[idx];
         if (sign & 0x1)
             x = -x;
         if (rabs < ki_double[idx])

@@ -84,17 +84,17 @@ gd_common (int dim, const signed char *minmax,
             if (dist < min_dist) min_dist = dist;
         }
         // Here we calculate the actual Euclidean distance.
-        min_dist = sqrtl(min_dist);
+        min_dist = (double) sqrtl(min_dist);
 
-        gd += (p == 1) ? min_dist : powl (min_dist, p);
+        gd += (p == 1) ? min_dist : (double) powl(min_dist, p);
     }
 
     if (p == 1)
         return gd / (double) size_a;
     else if (psize)
-        return powl (gd / (double) size_a, 1.0 / p);
+        return (double) powl(gd / (double) size_a, 1.0 / p);
     else
-        return powl (gd, 1.0 / p) / (double) size_a;
+        return (double) powl(gd, 1.0 / p) / (double) size_a;
 }
 
 static inline double

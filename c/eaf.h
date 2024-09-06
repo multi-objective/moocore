@@ -106,7 +106,7 @@ static inline int eaf_totalpoints (eaf_t **eaf, int n)
 {
     int totalpoints = 0;
     for (int k = 0; k < n; k++)
-        totalpoints += eaf[k]->size;
+        totalpoints += (int) eaf[k]->size;
     return totalpoints;
 }
 

@@ -45,8 +45,8 @@ read_objective_t_data (const char *filename, objective_t **data_p,
         datasize = 0;
     } else {
         ntotal = nobjs * cumsizes[nsets - 1];
-        sizessize = ((nsets - 1) / DATA_INC + 1) * DATA_INC;
-        datasize  = ((ntotal - 1) / DATA_INC + 1) * DATA_INC;
+        sizessize = (int) ((nsets - 1) / DATA_INC + 1) * DATA_INC;
+        datasize  = (int) ((ntotal - 1) / DATA_INC + 1) * DATA_INC;
     }
 
     /* if size is equal to zero, this is equivalent to free().

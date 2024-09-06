@@ -128,7 +128,7 @@ eaf_store_point_help (eaf_t * eaf, int nobj,
     if (eaf->size == eaf->maxsize) {
         eaf_assert (eaf->size < INT_MAX / 2);
         //size_t old_maxsize = eaf->maxsize;
-        eaf->maxsize = (size_t) (eaf->maxsize * (1.0 + 1.0 / pow(2, eaf->nreallocs / 4.0)));
+        eaf->maxsize = (size_t) ((double) eaf->maxsize * (1.0 + 1.0 / pow(2, eaf->nreallocs / 4.0)));
         eaf->maxsize += 100; // At least we increase it by 100 points
         /* fprintf(stderr,"maxsize (%d): %ld -> %ld\n", eaf->nreallocs, */
         /*         old_maxsize, eaf->maxsize); */

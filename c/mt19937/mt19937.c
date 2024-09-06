@@ -28,7 +28,19 @@ static void init_genrand(mt19937_state *state, uint32_t s) {
      * only MSBs of the array mt[].
      * 2002/01/09 modified by Makoto Matsumoto
      */
+      /* This code triggers conversions between uint32_t and unsigned long,
+         which various compilers warn about. */
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wconversion"
+#if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wimplicit-int-conversion"
+#endif
     mt[mti] = (1812433253UL * (mt[mti - 1] ^ (mt[mti - 1] >> 30)) + mti);
+#  pragma GCC diagnostic push
+#if defined(__clang__)
+#  pragma clang diagnostic pop
+#endif
     /* for > 32 bit machines */
     mt[mti] &= 0xffffffffUL;
   }
