@@ -1,6 +1,6 @@
 # This file should be almost identical to
 # https://github.com/multi-objective/mooplot/blob/main/python/Makefile
-.PHONY : install build test doc clean docdeps pre-commit
+.PHONY : install build test docs fastdocs clean docdeps pre-commit
 
 install: build
 	python3 -m pip install -e . --disable-pip-version-check
@@ -21,12 +21,15 @@ docdeps:
 show:
 	$(MAKE) -C doc show
 
-doc:
+docs:
 	$(MAKE) -C doc clean html
+
+fastdocs:
+	$(MAKE) -C doc clean html-noplot
 
 clean:
 	$(MAKE) -C doc clean
 	$(MAKE) -C src/moocore/libmoocore/ clean
 	find . -name '__pycache__' | xargs $(RM) -r
-	$(RM) -rf .pytest_cache .tox build src/*.egg-info/ doc/source/reference/generated
+	$(RM) -rf .pytest_cache .tox build src/*.egg-info/ doc/source/reference/generated doc/source/auto_examples
 	$(RM) -f .coverage coverage.xml c_coverage.xml dist/*

@@ -36,6 +36,7 @@ dependencies = [
   "cffi>=1.15.1",
   "numpy>=1.22.3",
 ]
+
 urls.Documentation = "https://multi-objective.github.io/moocore/python/"
 urls.Homepage = "https://multi-objective.github.io/moocore/python/"
 urls.Source = "https://github.com/multi-objective/moocore/"
@@ -112,6 +113,13 @@ lint.extend-select = [
 lint.ignore = [
   "D203", # one-blank-line-before-class
   "D213", # multi-line-summary-second-line
+]
+
+lint.per-file-ignores."*examples*/*.py" = [
+  "D205", # 1 blank line required between summary line and description
+  "D400", # First line should end with a period
+  "D415", #  First line should end with a period, question mark, or exclamation point
+  "E402", # Module level import not at top of file
 ]
 
 [tool.pytest.ini_options]

@@ -1,9 +1,9 @@
+setuptools>=70.1,<74 # Sync with .pre-commit-config.yaml
+cffi >= 1.15.1
 numpy >= 1.22.3
 
 pre-commit >= 3.3.2
-ruff >= 0.1.4 # Sync with .pre-commit-config.yaml
-setuptools >= 65.5.1
-cffi >= 1.15.1
+ruff >= 0.1.4
 
 tox >= 4.6.2 # Sync with tox.ini
 pytest >= 7  # Sync with tox.ini
@@ -16,7 +16,7 @@ pydata_sphinx_theme
 jupyter
 ipykernel
 kaleido
-myst-nb
+sphinx-gallery
 sphinxcontrib-napoleon
 sphinxcontrib-bibtex
 sphinx-autodoc-typehints
@@ -24,3 +24,7 @@ sphinx-copybutton
 sphinx-design
 jupyterlab
 ipywidgets
+
+# Gallery examples
+pandas
+seaborn
