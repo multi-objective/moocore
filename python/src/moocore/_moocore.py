@@ -523,8 +523,8 @@ def hv_approx(
         # FIXME: max(0, y - ref) is a fancy way to ignore points that do not
         # strictly dominate ref but carrying those points through all
         # computations is wasteful. It would be better to remove them earlier.
-        s_w = np.maximum(0, data / w).min(axis=1) ** nobj
-        expected.append(s_w.max())
+        s_w = np.maximum(0, data / w).min(axis=1)
+        expected.append(s_w.max() ** nobj)
 
     c_m = (np.pi ** (nobj / 2)) / ((2**nobj) * gamma_function(nobj / 2 + 1))
     return float(c_m * np.mean(expected))
