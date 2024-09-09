@@ -155,7 +155,7 @@ Scalarized Hypervolume (DZ2019)
 :cite:t:`DenZha2019approxhv` proposed to approximate the hypervolume:
 
 .. math::
-   \widehat{HV}_r(A) = \frac{\pi^\frac{m}{2}}{2^m \Gamma(\frac{m}{2} + 1)}\frac{1}{n}\sum_{i=1}^n (\max_{y \in A} s(w^{(i)}, y))^m
+   \widehat{HV}_r(A) = \frac{\pi^\frac{m}{2}}{2^m \Gamma(\frac{m}{2} + 1)}\frac{1}{n}\sum_{i=1}^n \max_{y \in A} s(w^{(i)}, y)^m
 
 where :math:`m` is the number of objectives, :math:`n` is the number of weights :math:`w^{(i)}` sampled, :math:`\Gamma` is the gamma function :func:`math.gamma()`, i.e., the analytical continuation of the factorial function, and :math:`s(w, y) = \min_{k=1}^m (r_k - y_k)/w_k`. The weights :math:`w^{(i)}, i=1\ldots n`  are sampled from the unit normal vector such that each weight :math:`w = \frac{|x|}{\|x\|_2}` where each component of :math:`x` is independently sampled from the standard normal distribution.
 
