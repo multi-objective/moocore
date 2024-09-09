@@ -1,3 +1,4 @@
+=====================
 Unary quality metrics
 =====================
 
@@ -7,7 +8,7 @@ Unary quality metrics
 .. _igd_hausdorf:
 
 Inverted Generational Distance (IGD and IGD+) and Averaged Hausdorff Distance
------------------------------------------------------------------------------
+=============================================================================
 
 .. autosummary::
    :toctree: generated/
@@ -90,7 +91,7 @@ Pareto-compliant, as shown in the examples in :func:`igd_plus`.
 .. _epsilon_metric:
 
 Epsilon metric
---------------
+==============
 
 .. autosummary::
    :toctree: generated/
@@ -106,10 +107,10 @@ is defined as :cite:p:`ZitThiLauFon2003:tec`
 
 where :math:`a` and :math:`b` are objective vectors and, in the case of
 minimization of objective :math:`i`, :math:`epsilon(a_i,b_i)` is computed as
-:math:`a_i/b_i` for the multiplicative variant (respectively, :math:`a_i - b_i`
+:math:`a_i/b_i` for the multiplicative variant (respectively, :math:`a_i = b_i`
 for the additive variant), whereas in the case of maximization of objective
 :math:`i`, :math:`epsilon(a_i,b_i) = b_i/a_i` for the multiplicative variant
-(respectively, :math:`b_i - a_i` for the additive variant). This allows
+(respectively, :math:`b_i = a_i` for the additive variant). This allows
 computing a single value for problems where some objectives are to be
 maximized while others are to be minimized. Moreover, a lower value
 corresponds to a better approximation set, independently of the type of
@@ -128,7 +129,7 @@ Computation of the epsilon indicator requires :math:`O(n \cdot |A| \cdot
 
 
 Hypervolume metric
-------------------
+==================
 
 .. autosummary::
    :toctree: generated/
@@ -142,9 +143,27 @@ Hypervolume metric
 
 The hypervolume of a set of multidimensional points :math:`A` with respect to a reference point :math:`\vec{r}` is the volume of the region dominated by the set and bounded by the reference point :cite:p:`ZitThi1998ppsn`.
 
+Approximating the hypervolume metric
+====================================
+
+Computing the hypervolume can be time consuming, thus several approaches have been proposed in the literature to approximate its value via Monte-Carlo sampling. These methods are implemented in :func:`whv_hype()` and :func:`hv_approx()`.
+
+
+Scalarized Hypervolume (DZ2019)
+-------------------------------
+
+:cite:t:`DenZha2019approxhv` proposed to approximate the hypervolume:
+
+.. math::
+   \widehat{HV}_r(A) = \frac{\pi^\frac{m}{2}}{2^m \Gamma(\frac{m}{2} + 1)}\frac{1}{n}\sum_{i=1}^n (\max_{y \in A} s(w^{(i)}, y))^m
+
+where :math:`m` is the number of objectives, :math:`n` is the number of weights :math:`w^{(i)}` sampled, :math:`\Gamma` is the gamma function :func:`math.gamma()`, i.e., the analytical continuation of the factorial function, and :math:`s(w, y) = \min_{k=1}^m (r_k - y_k)/w_k`. The weights :math:`w^{(i)}, i=1\ldots n`  are sampled from the unit normal vector such that each weight :math:`w = \frac{|x|}{\|x\|_2}` where each component of :math:`x` is independently sampled from the standard normal distribution.
+
+
+
 
 Bibliography
-------------
+============
 
 .. bibliography::
 
