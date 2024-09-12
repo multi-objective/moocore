@@ -10,13 +10,12 @@ SOURCES = $(MOOCORE_SRC_FILES:%=libmoocore/%) init.c  Rmoocore.c
 OBJECTS = $(SOURCES:.c=.o)
 
 .PHONY: all clean exes
-.NOTPARALLEL:
 
 all: exes $(SHLIB)
 
 $(SHLIB): $(OBJECTS)
 
-exes:
+exes: $(SHLIB)
 	$(MAKE) -C libmoocore all march=none CC="$(CC)" CFLAGS="$(CFLAGS) $(LTO)" OPT_CFLAGS="" WARN_CFLAGS="" DEBUG=$(DEBUG) EXE=$(EXEEXT) BINDIR=$(PWD)
 	@-$(RM) libmoocore/*.o
 
