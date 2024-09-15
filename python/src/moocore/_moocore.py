@@ -23,6 +23,7 @@ from ._utils import (
     np1d_to_double_array,
     np1d_to_int_array,
     atleast_1d_of_length_n,
+    is_integer_value,
 )
 
 ## The CFFI library is used to create C bindings.
@@ -421,7 +422,7 @@ def hv_approx(
 
     Approximate the value of the hypervolume metric with respect to a given
     reference point assuming minimization of all objectives. The default
-    ``method="DZ2019`` relies on Monte-Carlo sampling
+    ``method="DZ2019"`` relies on Monte-Carlo sampling
     :footcite:p:`DenZha2019approxhv` and, thus, it gets more accurate, but
     slower, for higher values of ``nsamples``.
 
@@ -456,24 +457,26 @@ def hv_approx(
 
     Examples
     --------
-    >>> dat = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
-    >>> moocore.hv_approx(dat, ref=[10, 10], seed = 42)
+    >>> x = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
+    >>> moocore.hv_approx(x, ref=[10, 10], seed = 42)
+    37.95471
+    >>> moocore.hypervolume(x, ref=[10, 10])
     38.0
 
     Merge all the sets of a dataset by removing the set number column:
 
-    >>> dat = moocore.get_dataset("input1.dat")[:, :-1]
+    >>> x = moocore.get_dataset("input1.dat")[:, :-1]
 
     Dominated points are ignored, so this:
 
-    >>> moocore.hv_approx(dat, ref=[10, 10], seed = 42)
-    93.34897655910018
+    >>> moocore.hv_approx(x, ref=10, seed = 42)
+    93.348976559100
 
     gives the same hypervolume approximation as this:
 
-    >>> dat = moocore.filter_dominated(dat)
-    >>> moocore.hv_approx(dat, ref=[10, 10], seed = 42)
-    93.34897655910018
+    >>> x = moocore.filter_dominated(x)
+    >>> moocore.hv_approx(x, ref=10, seed = 42)
+    93.348976559100
 
     The approximation is far from perfect for large sets:
 
@@ -484,7 +487,7 @@ def hv_approx(
     >>> moocore.hypervolume(x, ref = reference, maximise = True)
     1.0570447464301551
     >>> moocore.hv_approx(x, ref = reference, maximise = True, seed = 42)
-    1.0563125590974458
+    1.056312559097445
 
     .. minigallery:: moocore.hv_approx
        :add-heading:
@@ -502,32 +505,36 @@ def hv_approx(
             f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
         )
 
+    if not is_integer_value(nsamples):
+        raise ValueError(f"nsamples must be an integer value: {nsamples}")
+
     # FIXME: Do this in C.
     data = ref - data
     maximise = _parse_maximise(maximise, nobj)
     if maximise.any():
         data *= np.where(maximise, -1, 1)
 
-    if seed is None or isinstance(seed, int):
+    if seed is None or is_integer_value(seed):
         seed = np.random.default_rng(seed)
 
-    # Sample in the positive orthant of the hyper-sphere.
-    W = np.abs(seed.normal(size=(nsamples, nobj)))
-    W /= np.linalg.norm(W, axis=1).reshape(-1, 1)
-
-    expected = []
+    expected = np.empty(nsamples)
     # We could do it without the loop but it will consume lots of memory.
     #  y / W[:, np.newaxis,:]
     # FIXME: But we could use np.apply_along_axis()
-    for w in W:
+    for k in range(nsamples):
+        # Sample in the positive orthant of the hyper-sphere.
+        w = np.abs(seed.normal(size=nobj))
+        w /= np.linalg.norm(w)
         # FIXME: max(0, y - ref) is a fancy way to ignore points that do not
         # strictly dominate ref but carrying those points through all
         # computations is wasteful. It would be better to remove them earlier.
         s_w = np.maximum(0, data / w).min(axis=1)
-        expected.append(s_w.max() ** nobj)
+        expected[k] = s_w.max()
+        # Running mean.
 
+    expected = (expected**nobj).mean()
     c_m = (np.pi ** (nobj / 2)) / ((2**nobj) * gamma_function(nobj / 2 + 1))
-    return float(c_m * np.mean(expected))
+    return float(c_m * expected)
 
 
 def is_nondominated(
@@ -1278,7 +1285,7 @@ def eafdiff(
     if intervals is None:
         intervals = int(nsets / 2.0)
     else:
-        assert isinstance(intervals, int)
+        assert is_integer_value(intervals)
         intervals = min(intervals, int(nsets / 2.0))
 
     data_p, _, nobj_int = np2d_to_double_array(data)
@@ -1639,7 +1646,7 @@ def whv_hype(
         ref[maximise] = -ref[maximise]
         ideal[maximise] = -ideal[maximise]
 
-    if not isinstance(seed, int):
+    if not is_integer_value(seed):
         seed = np.random.default_rng(seed).integers(2**32 - 2, dtype=np.uint32)
 
     data_p, npoints, nobj = np2d_to_double_array(data)

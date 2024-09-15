@@ -48,3 +48,15 @@ def atleast_1d_of_length_n(x, n):
     raise ValueError(
         f"1D array must have length {n} but it has length {x.shape[0]}"
     )
+
+
+def is_integer_value(n):
+    if isinstance(n, int):
+        return True
+    if n is None:
+        return False
+    # FIXME: When we bump to Python 3.12, we can use float().is_integer()
+    try:
+        return int(n) == n
+    except ValueError:
+        return False
