@@ -38,7 +38,7 @@ hypervolume <- function(x, reference, maximise = FALSE)
 
   if (any(maximise)) {
     x <- transform_maximise(x, maximise)
-    if (length(maximise) == 1L) {
+    if (all(maximise)) {
       reference <- -reference
     } else {
       reference[maximise] <- -reference[maximise]
@@ -96,7 +96,7 @@ hv_contributions <- function(x, reference, maximise = FALSE)
 
   if (any(maximise)) {
     x <- transform_maximise(x, maximise)
-    if (length(maximise) == 1L) {
+    if (all(maximise)) {
       reference <- -reference
     } else {
       reference[maximise] <- -reference[maximise]

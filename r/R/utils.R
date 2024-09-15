@@ -37,12 +37,10 @@ unique_counts <- function(x) as.vector(table(x))
 transform_maximise <- function(x, maximise)
 {
   if (any(maximise)) {
-    if (length(maximise) == 1L)
+    if (all(maximise))
       return(-x)
     if (length(maximise) != ncol(x))
       stop("length of maximise must be either 1 or ncol(x)")
-    if (all(maximise))
-      return(-x)
     x[,maximise] <- -x[,maximise, drop=FALSE]
   }
   x

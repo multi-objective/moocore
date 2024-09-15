@@ -163,16 +163,17 @@ whv_hype <- function(x, reference, ideal, maximise = FALSE,
   if (nobjs != 2L) stop("sorry: only 2 objectives supported")
 
   if (any(maximise)) {
-    if (length(maximise) == 1L) {
+    if (all(maximise)) {
       x <- -x
       reference <- -reference
       ideal <- -ideal
     } else if (length(maximise) != nobjs) {
       stop("length of maximise must be either 1 or ncol(x)")
+    } else {
+      x[,maximise] <- -x[,maximise]
+      reference[maximise] <- -reference[maximise]
+      ideal[maximise] <- -ideal[maximise]
     }
-    x[,maximise] <- -x[,maximise]
-    reference[maximise] <- -reference[maximise]
-    ideal[maximise] <- -ideal[maximise]
   }
 
   seed <- if (is.null(seed)) get_seed() else as_integer(seed)

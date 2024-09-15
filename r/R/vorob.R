@@ -44,7 +44,7 @@ vorobT <- function(x, sets, reference, maximise = FALSE)
 
   if (any(maximise)) {
     x <- transform_maximise(x, maximise)
-    if (length(maximise) == 1L) {
+    if (all(maximise)) {
       reference <- -reference
     } else {
       reference[maximise] <- -reference[maximise]
@@ -66,8 +66,7 @@ vorobT <- function(x, sets, reference, maximise = FALSE)
     diff <- prev_hyp - tmp
     prev_hyp <- tmp
   }
-  if (any(maximise))
-    VE <- transform_maximise(VE, maximise)
+  VE <- transform_maximise(VE, maximise)
   list(threshold = c, VE = VE, avg_hyp = avg_hyp)
 }
 
@@ -94,7 +93,7 @@ vorobDev <- function(x, sets, reference, VE = NULL, maximise = FALSE)
   if (any(maximise)) {
     x <- transform_maximise(x, maximise)
     VE <- transform_maximise(VE, maximise)
-    if (length(maximise) == 1L) {
+    if (all(maximise)) {
       reference <- -reference
     } else {
       reference[maximise] <- -reference[maximise]

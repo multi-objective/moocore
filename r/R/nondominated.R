@@ -90,7 +90,6 @@ filter_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 pareto_rank <- function(x, maximise = FALSE)
 {
   x <- as_double_matrix(x)
-  if (any(maximise))
-    x <- transform_maximise(x, maximise)
+  x <- transform_maximise(x, maximise)
   .Call(pareto_ranking_C, t(x))
 }

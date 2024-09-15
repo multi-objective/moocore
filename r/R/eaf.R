@@ -65,8 +65,7 @@ eaf <- function (x, sets, percentiles = NULL, maximise = FALSE, groups = NULL)
 
   x <- as_double_matrix(x)
   maximise <- as.logical(maximise)
-  if (any(maximise))
-    x <- transform_maximise(x, maximise)
+  x <- transform_maximise(x, maximise)
 
   if (!is.null(percentiles)) {
     # FIXME: We should handle only integral levels inside the C code.
