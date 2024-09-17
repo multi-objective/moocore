@@ -49,7 +49,7 @@ jobs:
           # Use 4.0 to check with rtools40's older compiler
           - { os: windows-latest, r: '4.0' }
           # Use latest ubuntu to make it easier to install dependencies
-          - { os: ubuntu-latest, r: 'devel', http-user-agent: 'release' }
+          - { os: ubuntu-24.04, r: 'devel', http-user-agent: 'release' }
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
@@ -86,15 +86,18 @@ jobs:
           working-directory: r
 
       - name: Stricter CFLAGS
+        if: matrix.os == 'ubuntu-24.04'
         run: |
           mkdir -p ~/.R
-          echo 'CFLAGS=-g -O2  -Wall -Wstrict-prototypes -pedantic -Wunused-result -fstack-protector-strong -DUSE_TYPE_CHECKING_STRICT  -D_FORTIFY_SOURCE=3 -DSTRICT_R_HEADERS=1' > ~/.R/Makevars
+          echo 'CFLAGS=-g -O2  -Wall -Wstrict-prototypes -pedantic -fstack-protector-strong -DUSE_TYPE_CHECKING_STRICT  -D_FORTIFY_SOURCE=3 -DSTRICT_R_HEADERS=1 -Werror' > ~/.R/Makevars
         shell: bash
         working-directory: r
 
-      - name: Check (as CRAN) with stricter CFLAGS
+      - name: Check (as CRAN) with stricter CFLAGS and GCC 14
+        if: matrix.os == 'ubuntu-24.04'
         env:
           NOT_CRAN: false
+          CC: gcc-14
         uses: r-lib/actions/check-r-package@v2
         with:
           args: 'c("--no-manual", "--as-cran")'
