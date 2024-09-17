@@ -508,29 +508,29 @@ def hv_approx(
     if not is_integer_value(nsamples):
         raise ValueError(f"nsamples must be an integer value: {nsamples}")
 
+    if seed is None or is_integer_value(seed):
+        seed = np.random.default_rng(seed)
+
     # FIXME: Do this in C.
     data = ref - data
     maximise = _parse_maximise(maximise, nobj)
     if maximise.any():
         data *= np.where(maximise, -1, 1)
 
-    if seed is None or is_integer_value(seed):
-        seed = np.random.default_rng(seed)
+    # Equivalent to max(0, y - ref), i.e., ignore points that do not strictly
+    # dominate ref.
+    data = data[(data > 0).all(axis=1), :]
 
     expected = np.empty(nsamples)
     # We could do it without the loop but it will consume lots of memory.
     #  y / W[:, np.newaxis,:]
-    # FIXME: But we could use np.apply_along_axis()
+    # or we could use np.apply_along_axis()
     for k in range(nsamples):
         # Sample in the positive orthant of the hyper-sphere.
         w = np.abs(seed.normal(size=nobj))
         w /= np.linalg.norm(w)
-        # FIXME: max(0, y - ref) is a fancy way to ignore points that do not
-        # strictly dominate ref but carrying those points through all
-        # computations is wasteful. It would be better to remove them earlier.
-        s_w = np.maximum(0, data / w).min(axis=1)
+        s_w = (data / w).min(axis=1)
         expected[k] = s_w.max()
-        # Running mean.
 
     expected = (expected**nobj).mean()
     c_m = (np.pi ** (nobj / 2)) / ((2**nobj) * gamma_function(nobj / 2 + 1))
@@ -600,7 +600,7 @@ def is_nondominated(
 
 
 def filter_dominated(
-    data, /, *, maximise=False, keep_weakly: bool = False
+    data, /, *, maximise: bool | list[bool] = False, keep_weakly: bool = False
 ) -> np.ndarray:
     """Remove dominated points according to Pareto optimality.
 
@@ -615,7 +615,7 @@ def filter_dominated(
 
 
 def filter_dominated_within_sets(
-    data, /, *, maximise=False, keep_weakly: bool = False
+    data, /, *, maximise: bool | list[bool] = False, keep_weakly: bool = False
 ):
     """Given a dataset with multiple sets (last column gives the set index), filter dominated points within each set.
 
@@ -1702,7 +1702,7 @@ def get_dataset(filename: str, /) -> np.ndarray:
         The last column contains an identifier for which set the data is relevant to.
 
     """
-    return read_datasets(files("moocore.data").joinpath(filename))
+    return read_datasets(get_dataset_path(filename))
 
 
 def groupby(x, groups, /, *, axis: int = 0):
