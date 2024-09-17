@@ -77,20 +77,27 @@ jobs:
           needs: check
           working-directory: r
 
-      - name: Check (as CRAN)
-        env:
-          NOT_CRAN: false
-        uses: r-lib/actions/check-r-package@v2
-        with:
-          args: 'c("--no-manual", "--as-cran")'
-          working-directory: r
-
       - name: Check (NOT CRAN)
         env:
           NOT_CRAN: true
         uses: r-lib/actions/check-r-package@v2
         with:
           args: 'c("--no-manual", "--run-donttest", "--run-dontrun", "--timings")'
+          working-directory: r
+
+      - name: Stricter CFLAGS
+        run: |
+          mkdir -p ~/.R
+          echo 'CFLAGS=-g -O2  -Wall -Wstrict-prototypes -pedantic -Wunused-result -fstack-protector-strong -DUSE_TYPE_CHECKING_STRICT  -D_FORTIFY_SOURCE=3 -DSTRICT_R_HEADERS=1' > ~/.R/Makevars
+        shell: bash
+        working-directory: r
+
+      - name: Check (as CRAN) with stricter CFLAGS
+        env:
+          NOT_CRAN: false
+        uses: r-lib/actions/check-r-package@v2
+        with:
+          args: 'c("--no-manual", "--as-cran")'
           working-directory: r
 
       - name: Show testthat output
