@@ -126,7 +126,8 @@ enum objs_agree_t { AGREE_MINIMISE = -1, AGREE_NONE = 0, AGREE_MAXIMISE = 1 };
 static inline signed char *
 minmax_from_bool(int nobj, const bool * maximise)
 {
-    signed char * minmax = malloc(sizeof(signed char) * (size_t) nobj);
+    // unsigned int to fix -Walloc-larger-than= warning.
+    signed char * minmax = malloc(sizeof(signed char) * (unsigned int) nobj);
     for (int k = 0; k < nobj; k++) {
         minmax[k] = (maximise[k]) ? AGREE_MAXIMISE : AGREE_MINIMISE;
     }
