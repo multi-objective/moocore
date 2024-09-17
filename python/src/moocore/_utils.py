@@ -60,3 +60,5 @@ def is_integer_value(n):
         return int(n) == n
     except ValueError:
         return False
+    except TypeError:
+        return False
