@@ -33,6 +33,7 @@ URL: https://multi-objective.github.io/moocore/r/, https://github.com/multi-obje
 LazyLoad: true
 LazyData: true
 Encoding: UTF-8
+UseLTO: true
 RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE,
               roclets = c("collate", "rd", "namespace",
