@@ -669,7 +669,7 @@ def filter_dominated_within_sets(
         raise ValueError(
             "'data' must have at least 3 columns (2 objectives + set column)"
         )
-    uniq_sets, uniq_index = np.unique(data[:, -1], return_index=True)
+    _, uniq_index = np.unique(data[:, -1], return_index=True)
     # FIXME: Is there a more efficient way to do this that just creates views and not copies?
     x_split = np.vsplit(data[:, :-1], uniq_index[1:])
     is_nondom = np.concatenate(
@@ -1154,7 +1154,7 @@ def vorobDev(
     # Hypervolume of the symmetric difference between A and B:
     # 2 * H(AUB) - H(A) - H(B)
     H2 = hypervolume(VE, ref=ref)
-    uniq_sets, uniq_index = np.unique(x[:, -1], return_index=True)
+    _, uniq_index = np.unique(x[:, -1], return_index=True)
     x_split = np.vsplit(x[:, :-1], uniq_index[1:])
     H1 = np.fromiter(
         (hypervolume(g, ref=ref) for g in x_split),
@@ -1727,4 +1727,4 @@ def groupby(x, groups, /, *, axis: int = 0):
     """
     index = unique_nosort(groups)
     for g in index:
-        yield (g, x.compress((g == groups), axis=axis))
+        yield (g, x.compress(g == groups, axis=axis))
