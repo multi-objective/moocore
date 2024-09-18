@@ -2,8 +2,7 @@
 
 #  Makefile for moocore
 
-VERSION = 0.1.2
-#VERSION = 0.1.2$(REVISION)
+VERSION = 0.1.2$(REVISION)
 
 #-----------------------------------------------------------------------
 

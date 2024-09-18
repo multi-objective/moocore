@@ -8,7 +8,7 @@ requires = [
 
 [project]
 name = "moocore"
-version = "0.1.2"
+version = "0.1.3dev0"
 description = "Core Algorithms for Multi-Objective Optimization"
 readme = "README.md"
 keywords = [
