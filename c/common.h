@@ -4,13 +4,26 @@
 #ifdef R_PACKAGE
 #define R_NO_REMAP
 #include <R.h>
+#include "gcc_attribs.h"
 #define fatal_error(...) Rf_error(__VA_ARGS__)
 #define assert(EXP)                                                       \
-    do { if (!(EXP)) { Rf_error("error: assertion failed: '%s' at %s:%d", \
+    do { if (unlikely(!(EXP))) { Rf_error("error: assertion failed: '%s' at %s:%d", \
                                 #EXP, __FILE__, __LINE__);}} while(0)
 #define errprintf Rf_error
 #define warnprintf Rf_warning
-#include "gcc_attribs.h"
+static inline void *
+moocore_malloc(size_t nmemb, size_t size, const char *err_prefix, const char * err_msg)
+{
+    // FIXME: Check multiplication overflow.
+    // https://github.com/bminor/glibc/blob/e64a1e81aadf6c401174ac9471ced0f0125c2912/malloc/malloc.c#L3709
+    // https://github.com/libressl/openbsd/blob/master/src/lib/libc/stdlib/reallocarray.c
+    void * p = malloc(nmemb * size);
+    if (unlikely(!p)) {
+        Rf_error("%s: %s = malloc (%llu * %llu) failed", err_prefix, err_msg,
+                 (unsigned long long) nmemb, (unsigned long long) size);
+    }
+    return p;
+}
 #else
 #include <stdarg.h>
 #include <stdio.h>
@@ -21,7 +34,26 @@
 void fatal_error(const char * format,...) __attribute__ ((format(printf, 1, 2))) __noreturn _no_warn_unused;
 void errprintf(const char * format,...) __attribute__ ((format(printf, 1, 2)));
 void warnprintf(const char *format,...)  __attribute__ ((format(printf, 1, 2)));
+static inline void *
+moocore_malloc(size_t nmemb, size_t size, const char *err_prefix, const char * err_msg)
+{
+    // FIXME: Check multiplication overflow.
+    // https://github.com/bminor/glibc/blob/e64a1e81aadf6c401174ac9471ced0f0125c2912/malloc/malloc.c#L3709
+    // https://github.com/libressl/openbsd/blob/master/src/lib/libc/stdlib/reallocarray.c
+    void * p = malloc(nmemb * size);
+    if (unlikely(!p)) {
+        char buffer[1024] = "";
+        snprintf(buffer, 1024,  "%s: %s", err_prefix, err_msg);
+        perror (buffer);
+        exit(EXIT_FAILURE);
+    }
+    return p;
+}
 #endif
+#define EAF_MALLOC(WHAT, NMEMB, TYPE)                                          \
+    do {                                                                       \
+        WHAT = moocore_malloc(NMEMB, sizeof(TYPE), __FILE__, #WHAT);           \
+    } while (0)
 #include <stdbool.h>
 
 #define eaf_assert(X) assert(X)
