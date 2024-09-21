@@ -6,6 +6,7 @@
 [![CRAN Status](https://badges.cranchecks.info/worst/moocore.svg)][r-moocore-cran-results]
 [![CRAN Downloads](https://cranlogs.r-pkg.org/badges/grand-total/moocore)][r-moocore-cran]
 [![R build status][r-build-badge]][r-build-link]
+[![moocore status badge](https://multi-objective.r-universe.dev/badges/moocore)](https://multi-objective.r-universe.dev/moocore)
 [![coverage][r-coverage-badge]][r-coverage-link]
 <!-- badges: end -->
 
@@ -88,11 +89,10 @@ GitHub (Development version)
 ----------------------------
 
 If you wish to try the development version, you can install it by executing the
-following commands within the R console:
+following command within the R console:
 
-```R
-    R> install.packages("devtools")
-    R> devtools::install_github("multi-objective/moocore/r")
+```r
+install.packages('moocore', repos = c('https://multi-objective.r-universe.dev', 'https://cloud.r-project.org'))
 ```
 
 Usage
