@@ -6,8 +6,9 @@
 [![CRAN Status](https://badges.cranchecks.info/worst/moocore.svg)][r-moocore-cran-results]
 [![CRAN Downloads](https://cranlogs.r-pkg.org/badges/grand-total/moocore)][r-moocore-cran]
 [![R build status][r-build-badge]][r-build-link]
-[![moocore status badge](https://multi-objective.r-universe.dev/badges/moocore)](https://multi-objective.r-universe.dev/moocore)
 [![coverage][r-coverage-badge]][r-coverage-link]
+[![r-universe version](https://multi-objective.r-universe.dev/badges/moocore)](https://multi-objective.r-universe.dev/moocore)
+[![r-universe build status](https://github.com/r-universe/multi-objective/actions/workflows/build.yml/badge.svg)](https://github.com/r-universe/multi-objective/actions/workflows/build.yml)
 <!-- badges: end -->
 
 [ [**Homepage**][r-moocore-homepage] ]
