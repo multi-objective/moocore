@@ -135,8 +135,6 @@ Hypervolume metric
    :toctree: generated/
 
    hypervolume
-   hv_approx
-   whv_hype
    total_whv_rect
    whv_rect
 
@@ -145,6 +143,12 @@ The hypervolume of a set of multidimensional points :math:`A` with respect to a 
 
 Approximating the hypervolume metric
 ====================================
+
+.. autosummary::
+   :toctree: generated/
+
+   hv_approx
+   whv_hype
 
 Computing the hypervolume can be time consuming, thus several approaches have been proposed in the literature to approximate its value via Monte-Carlo sampling. These methods are implemented in :func:`whv_hype()` and :func:`hv_approx()`.
 
