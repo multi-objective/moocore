@@ -135,6 +135,7 @@ Hypervolume metric
    :toctree: generated/
 
    hypervolume
+   Hypervolume
    total_whv_rect
    whv_rect
 

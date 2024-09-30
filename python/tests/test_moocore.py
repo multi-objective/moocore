@@ -93,15 +93,28 @@ class TestHypervolume:
     def test_hv_output(self, test_datapath):
         """Checks the hypervolume calculation produces the correct value."""
         X = self.input1
-        hv = moocore.hypervolume(X[X[:, 2] == 1, :2], ref=np.array([10, 10]))
+        dat = X[X[:, 2] == 1, :2]
+        hv = moocore.hypervolume(dat, ref=np.array([10, 10]))
         assert math.isclose(
             hv, 90.46272765
         ), "input1.dat hypervolume produces wrong output"
 
-        hv = moocore.hypervolume(X[X[:, 2] == 1, :2], ref=[10, 10])
+        hv_ind = moocore.Hypervolume(ref=[10, 10])
+        hv = hv_ind(dat)
         assert math.isclose(
             hv, 90.46272765
+        ), "input1.dat Hypervolume(ref = [10,10]) produces wrong output"
+
+        dat = X[X[:, 2] == 2, :2]
+        hv = moocore.hypervolume(dat, ref=[10, 10])
+        assert math.isclose(
+            hv, 53.969708954
         ), "input1.dat hypervolume produces wrong output"
+
+        hv = hv_ind(dat)
+        assert math.isclose(
+            hv, 53.969708954
+        ), "input1.dat Hypervolume(ref = [10,10]) produces wrong output"
 
         X = moocore.read_datasets(test_datapath("duplicated3.inp"))[:, :-1]
         hv = moocore.hypervolume(

@@ -346,11 +346,16 @@ def hypervolume(
     maximise :
         Whether the objectives must be maximised instead of minimised. \
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
-        Also accepts a 1d numpy array with value 0/1 for each objective
+        Also accepts a 1D numpy array with value 0/1 for each objective
 
     Returns
     -------
         A single numerical value, the hypervolume indicator
+
+    See Also
+    --------
+    Hypervolume : object-oriented interface.
+
 
     References
     ----------
@@ -361,6 +366,12 @@ def hypervolume(
     >>> dat = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
     >>> moocore.hypervolume(dat, ref=[10, 10])
     38.0
+
+    Default is minimization, we can easily assume maximization.
+
+    >>> dat = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
+    >>> moocore.hypervolume(dat, ref=0, maximise=True)
+    39.0
 
     Merge all the sets of a dataset by removing the set number column:
 
@@ -407,6 +418,60 @@ def hypervolume(
     ref_buf = ffi.from_buffer("double []", ref)
     hv = lib.fpli_hv(data_p, nobj, npoints, ref_buf)
     return hv
+
+
+class Hypervolume:
+    """Object-oriented interface for the hypervolume indicator.
+
+    .. seealso:: For details about parameters, return value and examples, see :func:`hypervolume`.
+
+    Examples
+    --------
+    Default is minimization, we can easily assume maximization.
+
+    >>> hv_ind = moocore.Hypervolume(ref=0, maximise=True)
+    >>> hv_ind([[5, 5], [4, 6], [2, 7], [7, 4]])
+    39.0
+
+    >>> hv_ind([[5, 5], [4, 6], [7, 4]])
+    37.0
+
+    """
+
+    def __init__(
+        self, ref: ArrayLike, maximise: bool | list[bool] = False
+    ) -> None:
+        r"""Initialize hypervolume object.
+
+        Parameters
+        ----------
+        ref :
+           Reference point as a 1D vector. Must be same length as a single point in the ``data``.
+        maximise :
+           Whether the objectives must be maximised instead of minimised. \
+           Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
+           Also accepts a 1D numpy array with value 0/1 for each objective
+
+
+        """
+        self._ref = np.array(ref, dtype=float)
+        self._maximise = np.array(maximise, dtype=bool)
+
+    def __call__(self, data: ArrayLike) -> float:
+        r"""Compute hypervolume indicator.
+
+        Parameters
+        ----------
+        data :
+            Numpy array of numerical values, where each row gives the coordinates of a point.
+            If the array is created from the :func:`read_datasets` function, remove the last column.
+
+        Returns
+        -------
+           A single numerical value, the hypervolume indicator
+
+        """
+        return hypervolume(data, ref=self._ref, maximise=self._maximise)
 
 
 def hv_approx(
@@ -1153,17 +1218,18 @@ def vorobDev(
 
     # Hypervolume of the symmetric difference between A and B:
     # 2 * H(AUB) - H(A) - H(B)
-    H2 = hypervolume(VE, ref=ref)
+    hv_ind = Hypervolume(ref=ref)
+    H2 = hv_ind(VE)
     _, uniq_index = np.unique(x[:, -1], return_index=True)
     x_split = np.vsplit(x[:, :-1], uniq_index[1:])
     H1 = np.fromiter(
-        (hypervolume(g, ref=ref) for g in x_split),
+        (hv_ind(g) for g in x_split),
         dtype=float,
         count=len(x_split),
     ).mean()
     VD = (
         np.fromiter(
-            (hypervolume(np.vstack((g, VE)), ref=ref) for g in x_split),
+            (hv_ind(np.vstack((g, VE))) for g in x_split),
             dtype=float,
             count=len(x_split),
         ).mean()
