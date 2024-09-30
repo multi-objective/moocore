@@ -425,6 +425,15 @@ class Hypervolume:
 
     .. seealso:: For details about parameters, return value and examples, see :func:`hypervolume`.
 
+    Parameters
+    ----------
+    ref :
+       Reference point as a 1D vector. Must be same length as a single point in the ``data``.
+    maximise :
+       Whether the objectives must be maximised instead of minimised. \
+       Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
+       Also accepts a 1D numpy array with value 0/1 for each objective
+
     Examples
     --------
     Default is minimization, we can easily assume maximization.
@@ -441,19 +450,6 @@ class Hypervolume:
     def __init__(
         self, ref: ArrayLike, maximise: bool | list[bool] = False
     ) -> None:
-        r"""Initialize hypervolume object.
-
-        Parameters
-        ----------
-        ref :
-           Reference point as a 1D vector. Must be same length as a single point in the ``data``.
-        maximise :
-           Whether the objectives must be maximised instead of minimised. \
-           Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
-           Also accepts a 1D numpy array with value 0/1 for each objective
-
-
-        """
         self._ref = np.array(ref, dtype=float)
         self._maximise = np.array(maximise, dtype=bool)
 

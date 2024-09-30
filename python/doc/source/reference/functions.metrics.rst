@@ -133,6 +133,7 @@ Hypervolume metric
 
 .. autosummary::
    :toctree: generated/
+   :template: base.rst
 
    hypervolume
    Hypervolume
