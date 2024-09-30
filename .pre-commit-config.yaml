@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/lorenzwalthert/precommit
-    rev: v0.4.3
+    rev: v0.4.3.9001
     hooks:
       - id: parsable-R
       - id: no-browser-statement
@@ -25,17 +25,17 @@ repos:
         exclude: '(\.Rd|python/doc/source/reference/.*|test-doctest-.*)'
 
   - repo: https://github.com/tox-dev/tox-ini-fmt
-    rev: "1.3.1"
+    rev: "1.4.1"
     hooks:
       - id: tox-ini-fmt
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: "2.2.1"
+    rev: "2.2.4"
     hooks:
       - id: pyproject-fmt
         additional_dependencies: ["tox>=4.12.1"]
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.5.5
+    rev: v0.6.8
     hooks:
       # Run the formatter.
       - id: ruff-format
