@@ -322,6 +322,13 @@ def epsilon_mult(data, /, ref, *, maximise=False) -> float:
     return lib.epsilon_mult(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
 
 
+def _hypervolume(data: ArrayLike, ref: ArrayLike):
+    data_p, npoints, nobj = np2d_to_double_array(data)
+    ref_buf = ffi.from_buffer("double []", ref)
+    hv = lib.fpli_hv(data_p, nobj, npoints, ref_buf)
+    return hv
+
+
 def hypervolume(
     data: ArrayLike, /, ref: ArrayLike, maximise: bool | list[bool] = False
 ) -> float:
@@ -414,10 +421,7 @@ def hypervolume(
         ref = ref.copy()
         ref[maximise] = -ref[maximise]
 
-    data_p, npoints, nobj = np2d_to_double_array(data)
-    ref_buf = ffi.from_buffer("double []", ref)
-    hv = lib.fpli_hv(data_p, nobj, npoints, ref_buf)
-    return hv
+    return _hypervolume(data, ref)
 
 
 class Hypervolume:
@@ -450,8 +454,24 @@ class Hypervolume:
     def __init__(
         self, ref: ArrayLike, maximise: bool | list[bool] = False
     ) -> None:
-        self._ref = np.array(ref, dtype=float)
-        self._maximise = np.array(maximise, dtype=bool)
+        self._ref = np.array(ref, dtype=float, ndmin=1)
+        self._maximise = np.array(maximise, dtype=bool, ndmin=1)
+        n = len(self._maximise)
+        if n == 1:
+            n = len(self._ref)
+            if n > 1:
+                self._maximise = np.full((n), self._maximise[0])
+
+        elif len(self._ref) == 1:
+            self._ref = np.full((n), self._ref[0])
+        elif n != len(self._ref):
+            raise ValueError(
+                f"ref and maximise need to have the same length ({len(self._ref)} != {n})"
+            )
+
+        if self._maximise.any():
+            self._ref[self._maximise] = -self._ref[self._maximise]
+        self._nobj = n
 
     def __call__(self, data: ArrayLike) -> float:
         r"""Compute hypervolume indicator.
@@ -467,7 +487,27 @@ class Hypervolume:
            A single numerical value, the hypervolume indicator
 
         """
-        return hypervolume(data, ref=self._ref, maximise=self._maximise)
+        data, data_copied = asarray_maybe_copy(data)
+        nobj = self._nobj
+        ref = self._ref
+        maximise = self._maximise
+
+        if nobj == 1:
+            nobj = data.shape[1]
+            ref = np.full((nobj), ref[0])
+            maximise = np.full((nobj), maximise[0])
+        elif nobj != data.shape[1]:
+            raise ValueError(
+                f"data and ref need to have the same number of objectives ({data.shape[1]} != {nobj})"
+            )
+
+        # FIXME: Do this in C.
+        if maximise.any():
+            if not data_copied:
+                data = data.copy()
+            data[:, maximise] = -data[:, maximise]
+
+        return _hypervolume(data, ref)
 
 
 def hv_approx(
