@@ -1,0 +1,6 @@
+﻿moocore.hv\_approx
+==================
+
+.. currentmodule:: moocore
+
+.. autofunction:: hv_approx

@@ -1,0 +1,6 @@
+﻿moocore.epsilon\_additive
+=========================
+
+.. currentmodule:: moocore
+
+.. autofunction:: epsilon_additive
