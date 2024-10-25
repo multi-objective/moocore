@@ -19,6 +19,7 @@ from importlib.resources import files
 from ._utils import (
     asarray_maybe_copy,
     unique_nosort,
+    groupby,
     np2d_to_double_array,
     np1d_to_double_array,
     np1d_to_int_array,
@@ -770,14 +771,15 @@ def filter_dominated_within_sets(
         raise ValueError(
             "'data' must have at least 3 columns (2 objectives + set column)"
         )
-    _, uniq_index = np.unique(data[:, -1], return_index=True)
-    # FIXME: Is there a more efficient way to do this that just creates views and not copies?
-    x_split = np.vsplit(data[:, :-1], uniq_index[1:])
+
     is_nondom = np.concatenate(
-        [
-            is_nondominated(g, maximise=maximise, keep_weakly=keep_weakly)
-            for g in x_split
-        ],
+        apply_within_sets(
+            data[:, :-1],
+            data[:, -1],
+            is_nondominated,
+            maximise=maximise,
+            keep_weakly=keep_weakly,
+        ),
         dtype=bool,
         casting="no",
     )
@@ -949,7 +951,8 @@ def normalise(
 
     """
     # normalise() modifies the data, so we need to create a copy.
-    data = np.array(data, dtype=float)
+    # order='C' is needed for np2d_to_double_array()
+    data = np.array(data, dtype=float, order="C")
     npoints, nobj = data.shape
     if nobj == 1:
         raise ValueError("'data' must have at least two columns")
@@ -978,8 +981,7 @@ def normalise(
         lbound_p,
         ubound_p,
     )
-    # We can return data directly because we only changed the data, not the
-    # shape.
+    # We can return data directly because we only changed the data, not the shape.
     return data
 
 
@@ -1181,9 +1183,8 @@ def vorobT(data: ArrayLike, /, ref: ArrayLike) -> dict:
         )
     nobj = ncols - 1
     sets = data[:, -1]
-    uniq_sets = np.unique(sets)
     avg_hyp = np.mean(
-        [hypervolume(data[sets == k, :-1], ref=ref) for k in uniq_sets]
+        apply_within_sets(data[:, :-1], sets, hypervolume, ref=ref)
     )
     prev_hyp = diff = np.inf  # hypervolume of quantile at previous step
     a = 0
@@ -1256,20 +1257,11 @@ def vorobDev(
     # 2 * H(AUB) - H(A) - H(B)
     hv_ind = Hypervolume(ref=ref)
     H2 = hv_ind(VE)
-    _, uniq_index = np.unique(x[:, -1], return_index=True)
-    x_split = np.vsplit(x[:, :-1], uniq_index[1:])
-    H1 = np.fromiter(
-        (hv_ind(g) for g in x_split),
-        dtype=float,
-        count=len(x_split),
-    ).mean()
-    VD = (
-        np.fromiter(
-            (hv_ind(np.vstack((g, VE))) for g in x_split),
-            dtype=float,
-            count=len(x_split),
-        ).mean()
-        * 2.0
+    sets = x[:, -1]
+    x = x[:, :-1]
+    H1 = np.mean(apply_within_sets(x, sets, hv_ind))
+    VD = 2 * np.mean(
+        apply_within_sets(x, sets, lambda g: hv_ind(np.vstack((g, VE))))
     )
     return float(VD - H1 - H2)
 
@@ -1807,26 +1799,27 @@ def get_dataset(filename: str, /) -> np.ndarray:
     return read_datasets(get_dataset_path(filename))
 
 
-def groupby(x, groups, /, *, axis: int = 0):
-    """Split an array into groups.
+def apply_within_sets(x: ArrayLike, sets: ArrayLike, func, **kwargs):
+    """Split ``x`` by row according to ``sets`` and apply ``fun`` to each row.
 
     See https://github.com/numpy/numpy/issues/7265
 
     Parameters
     ----------
-    x : ndarray
-        Array to be divided into sub-arrays.
-    groups : 1-D array
-        A list or ndarray of length equal to the selected `axis`. The values are used as-is to determine the groups and do not need to be sorted.
-    axis :
-        The axis along which to split, default is 0.
+    x :
+        2D array to be divided into sub-arrays.
+    sets :
+        A list or 1D array of length equal to the number of rows of ``x``. The values are used as-is to determine the groups and do not need to be sorted.
+    func :
+        A function that can take a 2D array as input.
+    kwargs :
+        Additional keyword arguments to ``func``.
 
-    Yields
-    ------
-    sub-array : ndarray
-        Sub-arrays of `x`.
+    Returns
+    -------
+        An array.
 
     """
-    index = unique_nosort(groups)
-    for g in index:
-        yield (g, x.compress(g == groups, axis=axis))
+    x = np.asarray(x)
+    sets = np.asarray(sets)
+    return [func(g, **kwargs) for g in groupby(x, sets)]

@@ -1,6 +1,7 @@
 # ruff: noqa: D104
 from ._moocore import (
     ReadDatasetsError,
+    apply_within_sets,
     avg_hausdorff_dist,
     eaf,
     eafdiff,
@@ -10,7 +11,6 @@ from ._moocore import (
     filter_dominated_within_sets,
     get_dataset,
     get_dataset_path,
-    groupby,
     hypervolume,
     Hypervolume,
     hv_approx,
@@ -36,6 +36,7 @@ del _metadata_version
 
 __all__ = [
     "ReadDatasetsError",
+    "apply_within_sets",
     "avg_hausdorff_dist",
     "eaf",
     "eafdiff",
@@ -45,7 +46,6 @@ __all__ = [
     "filter_dominated_within_sets",
     "get_dataset",
     "get_dataset_path",
-    "groupby",
     "hypervolume",
     "Hypervolume",
     "hv_approx",
