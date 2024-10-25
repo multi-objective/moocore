@@ -50,6 +50,6 @@ hv
 
 
 # %%
-# Note that :func:`moocore.apply_within_sets()` processes each group in order, even if the elements of the same group are not contiguous. That is, if processes the groups like :meth:`pandas.Series.unique` and not like :class:`set` or :func:`numpy.unique()`.
+# Note that :func:`moocore.apply_within_sets()` processes each group in order, even if the elements of the same group are not contiguous. That is, it processes the groups like :meth:`pandas.Series.unique` and not like :class:`set` or :func:`numpy.unique()`.
 
 df["algo"].unique()
