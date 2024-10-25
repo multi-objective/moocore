@@ -18,3 +18,6 @@ Transform data
    :toctree: generated/
 
    normalise
+   apply_within_sets
+
+
