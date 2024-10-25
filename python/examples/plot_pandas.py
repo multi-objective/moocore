@@ -28,7 +28,7 @@ df[obj_cols] = moocore.normalise(df[obj_cols], to_range=[1, 2])
 df
 
 # %%
-# Now we calculate the hypervolume for each algo using :func:`pandas.core.groupby.DataFrameGroupBy.apply()`.
+# Now we calculate the hypervolume for each algo using :meth:`pandas.core.groupby.DataFrameGroupBy.apply`.
 
 ref = 2.1
 
@@ -50,6 +50,6 @@ hv
 
 
 # %%
-# Note that :func:`moocore.apply_within_sets()` processes each group in order, even if the elements of the same group are not contiguous. That is, if processes the groups like :func:`pandas.Series.unique()` and not like :func:`set()` or :func:numpy.unique()`.
+# Note that :func:`moocore.apply_within_sets()` processes each group in order, even if the elements of the same group are not contiguous. That is, if processes the groups like :meth:`pandas.Series.unique` and not like :class:`set` or :func:`numpy.unique()`.
 
 df["algo"].unique()
