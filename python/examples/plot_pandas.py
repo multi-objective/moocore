@@ -1,7 +1,7 @@
 """Using moocore with Pandas
 ==========================
 
-This example shows how to use ``moocore`` functions with ``pandas`` (https://pandas.pydata.org/).
+This example shows how to use ``moocore`` functions with Pandas (https://pandas.pydata.org/).
 
 """
 
@@ -9,7 +9,7 @@ import pandas as pd
 import moocore
 
 # %%
-# First, we create a toy Pandas DataFrame.
+# First, we create a toy Pandas :class:`~pandas.DataFrame`.
 
 df = pd.DataFrame(
     dict(
@@ -29,7 +29,7 @@ df[obj_cols] = moocore.normalise(df[obj_cols], to_range=[1, 2])
 df
 
 # %%
-# Now we calculate the hypervolume for each algo using :meth:`pandas.core.groupby.DataFrameGroupBy.apply`.
+# Now we calculate the hypervolume for each ``algo`` using :meth:`~pandas.DataFrame.groupby` and :meth:`~pandas.core.groupby.DataFrameGroupBy.apply`.
 
 ref = 2.1
 hv = (
@@ -50,7 +50,10 @@ hv
 
 
 # %%
-# Note that :func:`moocore.apply_within_sets()` processes each group in order, even if the elements of the same group are not contiguous. That is, it processes the groups like :meth:`pandas.Series.unique` and not like :class:`set` or :func:`numpy.unique()`.
+# Note that :func:`moocore.apply_within_sets()` processes each group in
+# order, even if the elements of the same group are not contiguous. That is, it
+# processes the groups like :meth:`pandas.Series.unique` and not like
+# :class:`set` or :func:`numpy.unique()`.
 
 df["algo"].unique()
 
@@ -69,7 +72,7 @@ df = pd.DataFrame(
 df
 
 # %%
-# We can still use :meth:`pandas.DataFrame.groupby` but we may need to reset and clean-up the index.
+# We can still use :meth:`~pandas.DataFrame.groupby` but we may need to reset and clean-up the index.
 
 df.groupby(["algo", "run"]).apply(
     moocore.filter_dominated, include_groups=False

@@ -225,7 +225,7 @@ sphinx_gallery_conf = {
     # To exclude everything, use: '.*'
     "exclude_implicit_doc": {r"pyplot\.show"},
     "show_memory": False,
-    # "reference_url": {"mooplot": None},
+    "reference_url": {project: None},
     # "subsection_order": SubSectionTitleOrder("../examples"),
     # "within_subsection_order": SKExampleTitleSortKey,
     # "binder": {
