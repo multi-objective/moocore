@@ -4,8 +4,8 @@
 What's new
 **********
 
-Version 0.1.3
--------------
+Version 0.1.3 (28/10/2024)
+--------------------------
 
 - :class:`Hypervolume`: Object-oriented API for hypervolume indicator.
 - :func:`apply_within_sets()`: Utility function to apply operations to individual datasets.
