@@ -701,6 +701,90 @@ def is_nondominated(
     return np.frombuffer(nondom, dtype=bool)
 
 
+def is_nondominated_within_sets(
+    data: ArrayLike,
+    /,
+    sets: ArrayLike,
+    *,
+    maximise: bool | list[bool] = False,
+    keep_weakly: bool = False,
+) -> np.ndarray:
+    r"""Identify dominated points according to Pareto optimality within each set.
+
+    Executes the :func:`is_nondominated` function within each set in a dataset \
+    and returns back a 1D array of booleans.
+
+    Parameters
+    ----------
+    data :
+        Array of numerical values, where each row gives the coordinates of a point in objective space.
+        If the array is created by the :func:`read_datasets()` function, remove the last column.
+    sets :
+        1D vector or list of values that define the sets to which each row of ``data`` belongs.
+    maximise :
+        Whether the objectives must be maximised instead of minimised.
+        Either a single boolean value that applies to all objectives or a list of boolean values, with one value per objective.
+        Also accepts a 1D numpy array with value 0/1 for each objective.
+    keep_weakly:
+        If ``False``, return ``False`` for any duplicates of nondominated points.
+
+    Returns
+    -------
+        Returns a boolean array of the same length as the number of rows of data,
+        where ``True`` means that the point is not dominated by any other point.
+
+    See Also
+    --------
+    filter_dominated_within_sets : to filter out dominated points.
+
+    Examples
+    --------
+    >>> x = moocore.get_dataset("input1.dat")
+    >>> nondom_per_set = moocore.is_nondominated_within_sets(x[:, :-1], x[:, -1])
+    >>> len(nondom_per_set)
+    100
+    >>> nondom_per_set                                     # doctest: +ELLIPSIS
+    array([False, False,  True, False,  True, False, False, False, False,
+            True, False,  True,  True,  True, False,  True,  True,  True,
+           False,  True, False, False, False, False,  True, False,  True,
+           ...
+            True,  True,  True, False,  True, False,  True,  True, False,
+            True, False, False,  True,  True, False, False, False, False,
+           False])
+    >>> x[nondom_per_set, :]                               # doctest: +ELLIPSIS
+    array([[ 0.20816431,  4.62275469,  1.        ],
+           [ 0.22997367,  1.11772205,  1.        ],
+           [ 0.58799475,  0.73891181,  1.        ],
+           [ 1.5964888 ,  5.98825094,  2.        ],
+           [ 5.2812367 ,  3.47800969,  2.        ],
+           [ 2.16315952,  4.7394435 ,  2.        ],
+           ...
+           [ 0.6510164 ,  9.42381213,  9.        ],
+           [ 1.30291449,  4.50417698,  9.        ],
+           [ 0.62230271,  3.56945324, 10.        ],
+           [ 0.86723965,  1.58599089, 10.        ],
+           [ 6.43135537,  1.00153569, 10.        ]])
+
+    """
+    data = np.asarray(data, dtype=float)
+    ncols = data.shape[1]
+    if ncols < 2:
+        raise ValueError("'data' must have at least 2 columns (2 objectives)")
+
+    is_nondom = np.concatenate(
+        apply_within_sets(
+            data,
+            sets,
+            is_nondominated,
+            maximise=maximise,
+            keep_weakly=keep_weakly,
+        ),
+        dtype=bool,
+        casting="no",
+    )
+    return is_nondom
+
+
 def filter_dominated(
     data, /, *, maximise: bool | list[bool] = False, keep_weakly: bool = False
 ) -> np.ndarray:
@@ -717,20 +801,23 @@ def filter_dominated(
 
 
 def filter_dominated_within_sets(
-    data, /, *, maximise: bool | list[bool] = False, keep_weakly: bool = False
-):
+    data: ArrayLike,
+    /,
+    *,
+    maximise: bool | list[bool] = False,
+    keep_weakly: bool = False,
+) -> np.ndarray:
     """Given a dataset with multiple sets (last column gives the set index), filter dominated points within each set.
 
     Executes the :func:`filter_dominated` function within each set in a dataset \
-    and returns back a dataset. This is roughly equivalent to partitioning 'data' according to the last column,
+    and returns back a dataset. This is roughly equivalent to partitioning ``data`` according to the last column,
     filtering dominated solutions within each partition, and joining back the result.
 
     Parameters
     ----------
-    data : numpy array
-        Numpy array of numerical values and set numbers, containing multiple sets. For example the output \
-         of the :func:`read_datasets` function
-    maximise : single bool, or list of booleans
+    data :
+        Numpy array of numerical values and set numbers, containing multiple datasets. For example the output of the :func:`read_datasets` function.
+    maximise :
         Whether the objectives must be maximised instead of minimised. \
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
         Also accepts a 1D numpy array with values 0 or 1 for each objective
@@ -739,8 +826,7 @@ def filter_dominated_within_sets(
 
     Returns
     -------
-    numpy array
-        A numpy array where each set only contains nondominated points with respect to the set  (last column is the set index).
+        A numpy array where each set only contains nondominated points with respect to the set (last column is the set index).
         Points from one set can still dominated points from another set.
 
     Examples
@@ -749,6 +835,19 @@ def filter_dominated_within_sets(
     >>> pf_per_set = moocore.filter_dominated_within_sets(x)
     >>> len(pf_per_set)
     42
+    >>> pf_per_set                                     # doctest: +ELLIPSIS
+    array([[ 0.20816431,  4.62275469,  1.        ],
+           [ 0.22997367,  1.11772205,  1.        ],
+           [ 0.58799475,  0.73891181,  1.        ],
+           [ 1.5964888 ,  5.98825094,  2.        ],
+           [ 5.2812367 ,  3.47800969,  2.        ],
+           [ 2.16315952,  4.7394435 ,  2.        ],
+           ...
+           [ 0.6510164 ,  9.42381213,  9.        ],
+           [ 1.30291449,  4.50417698,  9.        ],
+           [ 0.62230271,  3.56945324, 10.        ],
+           [ 0.86723965,  1.58599089, 10.        ],
+           [ 6.43135537,  1.00153569, 10.        ]])
     >>> pf = moocore.filter_dominated(x[:, :-1])
     >>> len(pf)
     6
@@ -762,26 +861,21 @@ def filter_dominated_within_sets(
 
     See Also
     --------
+    read_datasets : read datasets from a file.
     filter_dominated : to be used with a single dataset.
 
     """
     data = np.asarray(data, dtype=float)
-    ncols = data.shape[1]
-    if ncols < 3:
+    if data.shape[1] < 3:
         raise ValueError(
             "'data' must have at least 3 columns (2 objectives + set column)"
         )
 
-    is_nondom = np.concatenate(
-        apply_within_sets(
-            data[:, :-1],
-            data[:, -1],
-            is_nondominated,
-            maximise=maximise,
-            keep_weakly=keep_weakly,
-        ),
-        dtype=bool,
-        casting="no",
+    is_nondom = is_nondominated_within_sets(
+        data[:, :-1],
+        sets=data[:, -1],
+        maximise=maximise,
+        keep_weakly=keep_weakly,
     )
     return data[is_nondom, :]
 
@@ -1822,4 +1916,9 @@ def apply_within_sets(x: ArrayLike, sets: ArrayLike, func, **kwargs):
     """
     x = np.asarray(x)
     sets = np.asarray(sets)
+    if x.shape[0] != sets.shape[0]:
+        raise ValueError(
+            f"'x' and 'sets' must have the same length ({x.shape[0]} != {sets.shape[0]})"
+        )
+
     return [func(g, **kwargs) for g in groupby(x, sets)]
