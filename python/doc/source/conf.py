@@ -55,6 +55,12 @@ extensions = [
     "matplotlib.sphinxext.plot_directive",
 ]
 
+# https://sphinx-copybutton.readthedocs.io/en/latest/use.html
+copybutton_exclude = ".linenos, .gp, .go"
+copybutton_only_copy_prompt_lines = True
+copybutton_remove_prompts = True
+copybutton_copy_empty_lines = False
+
 # -----------------------------------------------------------------------------
 # Autosummary
 # -----------------------------------------------------------------------------

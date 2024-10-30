@@ -37,7 +37,7 @@ class ReadDatasetsError(Exception):
     Parameters
     ----------
     error_code : int
-        Error code returned by c:func:`read_datasets()` C function, which maps to a string.
+        Error code returned by ``read_datasets()`` C function.
 
     """
 
@@ -62,7 +62,7 @@ def read_datasets(filename: str | os.PathLike | StringIO) -> np.ndarray:
     Parameters
     ----------
     filename:
-        Filename of the dataset file or :class:`~io.StringIO` directly containing the file contents.
+        Filename of the dataset file or :class:`io.StringIO` directly containing the file contents.
         If it does not contain an absolute path, the filename is relative to the current working directory.
         If the filename has extension ``.xz``, it is decompressed to a temporary file before reading it.
         Each line of the file corresponds to one point of one dataset. Different datasets are separated by an empty line.
@@ -91,14 +91,18 @@ def read_datasets(filename: str | os.PathLike | StringIO) -> np.ndarray:
     +-------------+-------------+------------+
     | Objective 1 | Objective 2 | Set Number |
     +-------------+-------------+------------+
-    | 8.07559653  | 2.40702554  | 1.0        |
+    | 8.07559653  | 2.40702554  | 1.         |
     +-------------+-------------+------------+
-    | 8.66094446  | 3.64050144  | 1.0        |
+    | 8.66094446  | 3.64050144  | 1.         |
     +-------------+-------------+------------+
-    | etc.        | etc.        | etc.       |
+    | ...         | ...         | ...        |
+    +-------------+-------------+------------+
+    | 7.99466959  | 2.81122537  | 10.        |
+    +-------------+-------------+------------+
+    | 2.12700289  | 2.43114174  | 10.        |
     +-------------+-------------+------------+
 
-    It is also possible to read data from a string:
+    It is also possible to read datasets from a string:
 
     >>> from io import StringIO
     >>> fh = StringIO("0.5 0.5\\n\\n1 0\\n0 1\\n\\n0.5 0.5")
@@ -172,7 +176,9 @@ def _unary_refset_common(data, ref, maximise):
     return data_p, nobj, npoints, ref_p, ref_size, maximise_p
 
 
-def igd(data, /, ref, *, maximise: bool | list[bool] = False) -> float:
+def igd(
+    data: ArrayLike, /, ref: ArrayLike, *, maximise: bool | list[bool] = False
+) -> float:
     """Inverted Generational Distance (IGD).
 
     .. seealso:: For details about parameters, return value and examples, see :func:`igd_plus`.  For details of the calculation, see :ref:`igd_hausdorf`.
@@ -209,7 +215,7 @@ def igd_plus(
     maximise :
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
-        Also accepts a 1d numpy array with value 0/1 for each objective.
+        Also accepts a 1D numpy array with value 0/1 for each objective.
 
     Returns
     -------
@@ -221,10 +227,8 @@ def igd_plus(
     >>> ref = np.array([[1, 6], [2, 5], [3, 4], [4, 3], [5, 2], [6, 1]])
     >>> moocore.igd(dat, ref=ref)
     1.0627908666722465
-
     >>> moocore.igd_plus(dat, ref=ref)
     0.9855036468106652
-
     >>> moocore.avg_hausdorff_dist(dat, ref)
     1.0627908666722465
 
@@ -294,7 +298,6 @@ def epsilon_additive(
     >>> ref = np.array([[1, 6], [2,5], [3,4], [4,3], [5,2], [6,1]])
     >>> moocore.epsilon_additive(dat, ref = ref)
     2.5
-
     >>> moocore.epsilon_mult(dat, ref = ref)
     3.5
 
@@ -446,7 +449,6 @@ class Hypervolume:
     >>> hv_ind = moocore.Hypervolume(ref=0, maximise=True)
     >>> hv_ind([[5, 5], [4, 6], [2, 7], [7, 4]])
     39.0
-
     >>> hv_ind([[5, 5], [4, 6], [7, 4]])
     37.0
 
