@@ -1,7 +1,6 @@
 # ruff: noqa: D100, D101, D102, D103
 import pytest
 import moocore
-import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose
 
 pd = pytest.importorskip("pandas")
@@ -80,7 +79,5 @@ def test_example_pandas():
     is_nondom = moocore.is_nondominated_within_sets(df[obj_cols], sets=sets)
     assert_array_equal(
         is_nondom,
-        np.array(
-            [True, True, False, True, False, True, True, True, True, True]
-        ),
+        [True, True, True, True, True, True, False, True, False, True],
     )

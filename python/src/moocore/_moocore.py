@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import os
 from io import StringIO
-import numpy as np
+from collections.abc import Callable
 from numpy.typing import ArrayLike  # For type hints
-from typing import Literal
+from typing import Literal, Any
 
 from math import gamma as gamma_function
 # NOTE: if we ever start using SciPy, we can use
@@ -13,13 +13,13 @@ from math import gamma as gamma_function
 import lzma
 import shutil
 import tempfile
-
 from importlib.resources import files
+
+import numpy as np
 
 from ._utils import (
     asarray_maybe_copy,
     unique_nosort,
-    groupby,
     np2d_to_double_array,
     np1d_to_double_array,
     np1d_to_int_array,
@@ -711,8 +711,10 @@ def is_nondominated_within_sets(
 ) -> np.ndarray:
     r"""Identify dominated points according to Pareto optimality within each set.
 
-    Executes the :func:`is_nondominated` function within each set in a dataset \
-    and returns back a 1D array of booleans.
+    Executes the :func:`is_nondominated` function within each set in a dataset
+    \ and returns back a 1D array of booleans. This is equivalent to
+    ``apply_within_sets(data, sets, is_nondominated, ...)`` but slightly
+    faster.
 
     Parameters
     ----------
@@ -735,15 +737,21 @@ def is_nondominated_within_sets(
 
     See Also
     --------
-    filter_dominated_within_sets : to filter out dominated points.
+    filter_dominated_within_sets : filter out dominated points.
+    apply_within_sets : a more general way to apply any function to each set.
 
     Examples
     --------
+    >>> x = np.array([[1, 2, 1], [1, 3, 1], [2, 1, 1], [2, 2, 2]])
+    >>> moocore.is_nondominated_within_sets(x[:, :-1], x[:, -1])
+    array([ True, False,  True,  True])
     >>> x = moocore.get_dataset("input1.dat")
-    >>> nondom_per_set = moocore.is_nondominated_within_sets(x[:, :-1], x[:, -1])
+    >>> nondom_per_set = moocore.is_nondominated_within_sets(
+    ...     x[:, :-1], x[:, -1]
+    ... )
     >>> len(nondom_per_set)
     100
-    >>> nondom_per_set                                     # doctest: +ELLIPSIS
+    >>> nondom_per_set  # doctest: +ELLIPSIS
     array([False, False,  True, False,  True, False, False, False, False,
             True, False,  True,  True,  True, False,  True,  True,  True,
            False,  True, False, False, False, False,  True, False,  True,
@@ -751,7 +759,7 @@ def is_nondominated_within_sets(
             True,  True,  True, False,  True, False,  True,  True, False,
             True, False, False,  True,  True, False, False, False, False,
            False])
-    >>> x[nondom_per_set, :]                               # doctest: +ELLIPSIS
+    >>> x[nondom_per_set, :]  # doctest: +ELLIPSIS
     array([[ 0.20816431,  4.62275469,  1.        ],
            [ 0.22997367,  1.11772205,  1.        ],
            [ 0.58799475,  0.73891181,  1.        ],
@@ -771,18 +779,22 @@ def is_nondominated_within_sets(
     if ncols < 2:
         raise ValueError("'data' must have at least 2 columns (2 objectives)")
 
-    is_nondom = np.concatenate(
-        apply_within_sets(
-            data,
-            sets,
-            is_nondominated,
-            maximise=maximise,
-            keep_weakly=keep_weakly,
-        ),
-        dtype=bool,
-        casting="no",
+    # FIXME: How can we make this faster?
+    _, idx, inv = np.unique(sets, return_index=True, return_inverse=True)
+    # Remember the original position of each element of each set.
+    idx = [np.flatnonzero(inv == i) for i in idx.argsort()]
+    data = np.concatenate(
+        [
+            is_nondominated(
+                data.take(g_idx, axis=0),
+                maximise=maximise,
+                keep_weakly=keep_weakly,
+            )
+            for g_idx in idx
+        ]
     )
-    return is_nondom
+    idx = np.concatenate(idx).argsort()
+    return data.take(idx, axis=0)
 
 
 def filter_dominated(
@@ -822,12 +834,12 @@ def filter_dominated_within_sets(
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
         Also accepts a 1D numpy array with values 0 or 1 for each objective
     keep_weakly :
-        If ``False``, return ``False`` for any duplicates of nondominated points.
+        If ``False``, do not delete duplicates of nondominated points.
 
     Returns
     -------
         A numpy array where each set only contains nondominated points with respect to the set (last column is the set index).
-        Points from one set can still dominated points from another set.
+        Points from one set can still dominate points from another set.
 
     Examples
     --------
@@ -1893,10 +1905,10 @@ def get_dataset(filename: str, /) -> np.ndarray:
     return read_datasets(get_dataset_path(filename))
 
 
-def apply_within_sets(x: ArrayLike, sets: ArrayLike, func, **kwargs):
-    """Split ``x`` by row according to ``sets`` and apply ``fun`` to each row.
-
-    See https://github.com/numpy/numpy/issues/7265
+def apply_within_sets(
+    x: ArrayLike, sets: ArrayLike, func: Callable[..., Any], **kwargs
+) -> np.ndarray:
+    """Split ``x`` by row according to ``sets`` and apply ``func`` to each sub-array.
 
     Parameters
     ----------
@@ -1905,20 +1917,91 @@ def apply_within_sets(x: ArrayLike, sets: ArrayLike, func, **kwargs):
     sets :
         A list or 1D array of length equal to the number of rows of ``x``. The values are used as-is to determine the groups and do not need to be sorted.
     func :
-        A function that can take a 2D array as input.
+        A function that can take a 2D array as input. This function may return (1) a 2D array with the same number of rows as the input,
+        (2) a 1D array as long as the number of input rows,
+        (3) a scalar value,  or
+        (4) a 2D array with a single row.
+
     kwargs :
         Additional keyword arguments to ``func``.
 
     Returns
     -------
-        An array.
+        An array whose shape depends on the output of ``func``. See Examples below.
+
+    See Also
+    --------
+    is_nondominated_within_sets, filter_dominated_within_sets
+
+    Examples
+    --------
+    >>> sets = np.array([3, 1, 2, 4, 2, 3, 1])
+    >>> x = np.arange(len(sets) * 2).reshape(-1, 2)
+    >>> x = np.hstack((x, sets.reshape(-1, 1)))
+
+    If ``func`` returns an array with the same number of rows as the input (case 1),
+    then the output is ordered in exactly the same way as the input.
+
+    >>> moocore.apply_within_sets(x, sets, lambda x: x)
+    array([[ 0,  1,  3],
+           [ 2,  3,  1],
+           [ 4,  5,  2],
+           [ 6,  7,  4],
+           [ 8,  9,  2],
+           [10, 11,  3],
+           [12, 13,  1]])
+
+    This is also the behavior if ``func`` returns a 1D array with one value per input row (case 2).
+
+    >>> moocore.apply_within_sets(x, sets, lambda x: x.sum(axis=1))
+    array([ 4,  6, 11, 17, 19, 24, 26])
+
+    If ``func`` returns a single scalar (case 3) or a 2D array with a single row (case 4),
+    then the order of the output is the order of the unique values as found in
+    ``sets``, without sorting the unique values, which is what
+    :meth:`pandas.Series.unique` returns and NOT what :func:`numpy.unique`
+    returns.
+
+    >>> moocore.apply_within_sets(x, sets, lambda x: x.max())
+    array([11, 13,  9,  7])
+
+    >>> moocore.apply_within_sets(x, sets, lambda x: [x.max(axis=0)])
+    array([[10, 11,  3],
+           [12, 13,  1],
+           [ 8,  9,  2],
+           [ 6,  7,  4]])
+
+    In the previous example, ``func`` returns a 2D array with a single row. The
+    following will produce an error because it returns a 1D array, which is
+    interpreted as case 2, but the number of values does not match the number
+    of input rows.
+
+    >>> moocore.apply_within_sets(
+    ...     x, sets, lambda x: x.max(axis=0)
+    ... )  # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+        ...
+    ValueError: `func` returned an array of length 3 but the input has length 2 for rows [0 5]
 
     """
     x = np.asarray(x)
-    sets = np.asarray(sets)
-    if x.shape[0] != sets.shape[0]:
-        raise ValueError(
-            f"'x' and 'sets' must have the same length ({x.shape[0]} != {sets.shape[0]})"
-        )
+    _, idx, inv = np.unique(sets, return_index=True, return_inverse=True)
+    # Remember the original position of each element of each set.
+    idx = [np.flatnonzero(inv == i) for i in idx.argsort()]
+    res = []
+    shorter = False
+    for g_idx in idx:
+        z = func(x.take(g_idx, axis=0), **kwargs)
+        z = np.atleast_1d(z)
+        if len(z) != len(g_idx):
+            if len(z) != 1:
+                raise ValueError(
+                    f"`func` returned an array of length {len(z)} but the input has length {len(g_idx)} for rows {g_idx}"
+                )
+            shorter = True
+        res.append(z)
 
-    return [func(g, **kwargs) for g in groupby(x, sets)]
+    res = np.concatenate(res)
+    if not shorter:
+        res = res.take(np.concatenate(idx).argsort(), axis=0)
+    return res

@@ -97,5 +97,3 @@ is_nondom
 # And use the boolean vector above to filter rows:
 #
 df[is_nondom]
-
-# %%

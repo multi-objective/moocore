@@ -13,33 +13,13 @@ def asarray_maybe_copy(x, dtype=float):
 
 
 def unique_nosort(array, **kwargs):
-    uniq, index = np.unique(array, return_index=True, **kwargs)
-    return uniq[index.argsort()]
-
-
-def groupby(x, groups, /, *, axis: int = 0):
-    """Split an array into groups.
+    """Return unique values without sorting them.
 
     See https://github.com/numpy/numpy/issues/7265
 
-    Parameters
-    ----------
-    x : ndarray
-        Array to be divided into sub-arrays.
-    groups : 1-D array
-        A ndarray of length equal to the selected `axis`. The values are used as-is to determine the groups and do not need to be sorted.
-    axis :
-        The axis along which to split, default is 0.
-
-    Yields
-    ------
-    sub-array : ndarray
-        Sub-arrays of `x`.
-
     """
-    index = unique_nosort(groups)
-    for g in index:
-        yield x.compress(g == groups, axis=axis)
+    uniq, index = np.unique(array, return_index=True, **kwargs)
+    return uniq[index.argsort()]
 
 
 def np2d_to_double_array(x):
