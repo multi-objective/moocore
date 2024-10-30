@@ -4,8 +4,8 @@
 What's new
 **********
 
-Version 0.1.4
--------------
+Version 0.1.4 (30/10/2024)
+--------------------------
 
 - Improved example :ref:`sphx_glr_auto_examples_plot_pandas.py` to work in Pandas version >= 2.
 - Changed behavior of :func:`~moocore.apply_within_sets`. The previous behavior could lead to subtle bugs.
