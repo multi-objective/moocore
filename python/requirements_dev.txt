@@ -26,5 +26,5 @@ jupyterlab
 ipywidgets
 
 # Gallery examples
-pandas
+pandas >=2.0.0
 seaborn

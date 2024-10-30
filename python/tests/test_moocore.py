@@ -1,6 +1,7 @@
 # ruff: noqa: D100, D101, D102, D103
 import pytest
 import numpy as np
+from numpy.testing import assert_array_equal, assert_allclose
 import math
 
 import moocore
@@ -28,9 +29,11 @@ def test_read_datasets_data(test_datapath):
                 test_datapath(f"expected_output/read_datasets/{expected_name}")
             )
 
-        assert np.allclose(
-            testdata, check_data
-        ), f"read_datasets does not produce expected array for file {testpath}"
+        assert_allclose(
+            testdata,
+            check_data,
+            err_msg=f"read_datasets does not produce expected array for file {testpath}",
+        )
 
     test_names = [
         "input1.dat",
@@ -153,7 +156,7 @@ def test_is_nondominated(test_datapath):
     assert (
         dominated
         == [False, False, False, False, True, False, True, True, False, True]
-    ).all
+    ).all()
     T = np.array(
         [[1, 0, 1], [1, 1, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0], [1, 1, 1]]
     )
@@ -162,8 +165,8 @@ def test_is_nondominated(test_datapath):
     non_dominated_weak = T[moocore.is_nondominated(T, keep_weakly=True)]
     expct_nondom_weak = np.array([[1, 0, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0]])
 
-    assert np.array_equal(non_dominated_weak, expct_nondom_weak)
-    assert np.array_equal(
+    assert_array_equal(non_dominated_weak, expct_nondom_weak)
+    assert_array_equal(
         moocore.filter_dominated(T, keep_weakly=True), expct_nondom_weak
     )
 
@@ -183,16 +186,16 @@ def test_is_nondominated(test_datapath):
     expected_x_nondom = np.array(
         [[0, 0, 1, 2], [10, 20, 0, 0], [20, 10, 0, 0]]
     )
-    assert np.array_equal(x_nondom, expected_x_nondom)
-    assert np.array_equal(
+    assert_array_equal(x_nondom, expected_x_nondom)
+    assert_array_equal(
         moocore.filter_dominated(x, maximise=True), expected_x_nondom
     )
     minmax = np.array([1, 2, 2, 1, 5, 6, 7, 5]).reshape((-1, 2))
-    assert np.array_equal(
+    assert_array_equal(
         moocore.filter_dominated(minmax, maximise=[True, False]),
         np.array([[2, 1], [7, 5]]),
     )
-    assert np.array_equal(
+    assert_array_equal(
         moocore.filter_dominated(minmax, maximise=[False, True]),
         np.array([[1, 2], [5, 6]]),
     )
@@ -222,8 +225,8 @@ def test_normalise():
     # With default to_range = [0,1] - all columns should have their values normalised to same value
     expected_outcome = np.tile(np.linspace(0, 1, num=6).reshape(6, -1), 3)
 
-    assert np.allclose(moocore.normalise(A), expected_outcome)
-    assert np.allclose(
+    assert_allclose(moocore.normalise(A), expected_outcome)
+    assert_allclose(
         moocore.normalise(A, to_range=[0, 10]), 10 * expected_outcome
     )
     expected_with_bounds = np.transpose(
@@ -235,7 +238,7 @@ def test_normalise():
             ]
         )
     )
-    assert np.allclose(
+    assert_allclose(
         moocore.normalise(A, upper=[25, 25, 25], lower=[0, 0, 0]),
         expected_with_bounds,
     )
@@ -244,8 +247,8 @@ def test_normalise():
     A = np.array([[1.0, 2.0], [2.0, 1.0]])
     A_copy = A.copy()
     B = moocore.normalise(A)
-    assert np.allclose(A, A_copy)
-    assert np.allclose(B, np.array([[0.0, 1.0], [1.0, 0.0]]))
+    assert_allclose(A, A_copy)
+    assert_allclose(B, np.array([[0.0, 1.0], [1.0, 0.0]]))
 
 
 def test_eaf(test_datapath):
@@ -280,12 +283,16 @@ def test_eaf(test_datapath):
         assert (
             eaf_test.shape == expected_eaf_result.shape
         ), f"Shapes of {test_name} and {expected_eaf_name} do not match"
-        assert np.allclose(
-            eaf_test, expected_eaf_result
-        ), f"{expected_eaf_name} test failed"
-        assert np.allclose(
-            eaf_pct_test, expected_eaf_pct_result
-        ), f"pct_{expected_eaf_name} test failed"
+        assert_allclose(
+            eaf_test,
+            expected_eaf_result,
+            err_msg=f"{expected_eaf_name} test failed",
+        )
+        assert_allclose(
+            eaf_pct_test,
+            expected_eaf_pct_result,
+            err_msg=f"pct_{expected_eaf_name} test failed",
+        )
 
 
 # def test_eafdiff(test_datapath):
