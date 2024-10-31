@@ -39,13 +39,14 @@ def run_test(test, program, dir_out):
     runcmd(command)
     elapsed_time = time.time() - start_time
 
-    if runcmd(f"{diff} -iEBwq -- {outfile} {expfile} 1> /dev/null  2>&1") == 0:
+    if runcmd(f"{diff} -iEBwq -- {expfile} {outfile} 1> /dev/null  2>&1") == 0:
         print(f"passed  {elapsed_time:6.2f}")
         os.remove(outfile)
         return True
     else:
         print(f"FAILED! {elapsed_time:6.2f}")
-        print(subprocess.getoutput(f"{diff} -uiEBw -- {outfile} {expfile}"))
+        print(f"{diff} -uiEBw -- {expfile} {outfile}")
+        print(subprocess.getoutput(f"{diff} -uiEBw -- {expfile} {outfile}"))
         return False
 
 
