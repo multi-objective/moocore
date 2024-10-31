@@ -26,27 +26,28 @@
 /* The C API of R is awfully ugly and unpractical (and poorly
    documented). These wrappers make it a little more bearable. */
 
+#define PROTECT_PLUS(WHAT) PROTECT(WHAT); nprotected++
+
 #define Rexp(VAR) Rexp_##VAR
 
-#define new_real_matrix(VAR, DIM1, DIM2)                                 \
-    SEXP Rexp_##VAR; double *VAR;                                        \
-    PROTECT(Rexp_##VAR = Rf_allocMatrix(REALSXP, (DIM1), (DIM2)));       \
-    nprotected++; VAR = REAL(Rexp_##VAR)
+#define new_real_matrix(VAR, DIM1, DIM2)                                       \
+    SEXP Rexp_##VAR;                                                           \
+    PROTECT_PLUS(Rexp_##VAR = Rf_allocMatrix(REALSXP, (DIM1), (DIM2)));        \
+    double *VAR = REAL(Rexp_##VAR)
 
-#define new_real_vector(VAR, DIM)                                        \
-    SEXP Rexp_##VAR; double *VAR;                                        \
-    PROTECT(Rexp_##VAR = Rf_allocVector(REALSXP, (DIM)));                \
-    nprotected++; VAR = REAL(Rexp_##VAR)
+#define new_real_vector(VAR, DIM)                                             \
+    SEXP Rexp_##VAR;                                                          \
+    PROTECT_PLUS(Rexp_##VAR = Rf_allocVector(REALSXP, (DIM)));                \
+    double *VAR = REAL(Rexp_##VAR)
 
-#define new_int_vector(VAR, DIM)                                           \
-    SEXP Rexp_##VAR; int *VAR;                                             \
-    PROTECT(Rexp_##VAR = Rf_allocVector(INTSXP, (DIM)));                   \
-    nprotected++; VAR = INTEGER(Rexp_##VAR)
+#define new_int_vector(VAR, DIM)                                               \
+    SEXP Rexp_##VAR;                                                           \
+    PROTECT_PLUS(Rexp_##VAR = Rf_allocVector(INTSXP, (DIM)));                  \
+    int *VAR = INTEGER(Rexp_##VAR)
 
 #define new_string_vector(VAR, DIM)                                            \
     SEXP Rexp_##VAR; int Rexp_##VAR##_len = 0;                                 \
-    PROTECT(Rexp_##VAR = Rf_allocVector(STRSXP, (DIM)));                       \
-    nprotected++
+    PROTECT_PLUS(Rexp_##VAR = Rf_allocVector(STRSXP, (DIM)))
 
 #define string_vector_push_back(VAR, ELEMENT)                                  \
     SET_STRING_ELT(Rexp_##VAR, Rexp_##VAR##_len, Rf_mkChar(ELEMENT));          \
@@ -54,13 +55,12 @@
 
 #define new_list(LISTVAR, LENGTH)                                              \
     SEXP Rexp_##LISTVAR; int Rexp_##LISTVAR##_len = 0;                         \
-    PROTECT(Rexp_##LISTVAR = Rf_allocVector(VECSXP, (LENGTH)));                \
-    ++nprotected
+    PROTECT_PLUS(Rexp_##LISTVAR = Rf_allocVector(VECSXP, (LENGTH)))
 
 #define new_logical_vector(VAR, DIM)                                           \
-    SEXP Rexp_##VAR; int *VAR;                                                 \
-    PROTECT(Rexp_##VAR = Rf_allocVector(LGLSXP, (DIM)));                       \
-    nprotected++; VAR = LOGICAL(Rexp_##VAR)
+    SEXP Rexp_##VAR;                                                           \
+    PROTECT_PLUS(Rexp_##VAR = Rf_allocVector(LGLSXP, (DIM)));                  \
+    int *VAR = LOGICAL(Rexp_##VAR)
 
 #define list_len(VAR) Rexp_##VAR##_len
 
@@ -73,6 +73,7 @@
 
 #define set_attribute(VAR, ATTRIBUTE, VALUE)                                   \
     Rf_setAttrib(Rexp_##VAR, Rf_install(ATTRIBUTE), Rexp_##VALUE)
+
 
 /*
  * Unpack an integer vector stored in SEXP S.
@@ -139,16 +140,15 @@ bool_2_logical_vector(int *dst, const bool *src, size_t n)
 static inline SEXP
 set_colnames(SEXP matrix, const char *const * names, size_t names_len)
 {
-    int nprotected=0;
-    SEXP dimnames = Rf_getAttrib(matrix, R_DimNamesSymbol);
-    if (dimnames == R_NilValue) {
-        PROTECT(dimnames = Rf_allocVector(VECSXP, 2));
-        nprotected++;
-    }
-
+    int nprotected = 0;
     new_string_vector (colnames, names_len);
     for (size_t k = 0; k < names_len; k++) {
         string_vector_push_back (colnames, names[k]);
+    }
+
+    SEXP dimnames = PROTECT_PLUS(Rf_getAttrib(matrix, R_DimNamesSymbol));
+    if (dimnames == R_NilValue) {
+        PROTECT_PLUS(dimnames = Rf_allocVector(VECSXP, 2));
     }
     SET_VECTOR_ELT(dimnames, 1, Rexp(colnames));
     Rf_setAttrib(matrix, R_DimNamesSymbol, dimnames);
@@ -161,6 +161,7 @@ set_colnames(SEXP matrix, const char *const * names, size_t names_len)
 static inline void
 matrix_copy_dimnames(SEXP dest, const SEXP src)
 {
+    int nprotected = 0;
     // Ensure both source and target are matrices
     if (!Rf_isMatrix(src))
         Rf_error("src must be a matrix.");
@@ -169,8 +170,9 @@ matrix_copy_dimnames(SEXP dest, const SEXP src)
         Rf_error("dest must be a matrix.");
 
     // Get the dimnames from the source matrix
-    SEXP dimnames = Rf_getAttrib(src, R_DimNamesSymbol);
+    SEXP dimnames = PROTECT_PLUS(Rf_getAttrib(src, R_DimNamesSymbol));
 
     // Set the dimnames to the target matrix
     Rf_setAttrib(dest, R_DimNamesSymbol, dimnames);
+    UNPROTECT(nprotected);
 }

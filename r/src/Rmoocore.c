@@ -96,7 +96,7 @@ compute_eafdiff_C(SEXP DATA, SEXP CUMSIZES, SEXP INTERVALS)
         }
     }
     eaf_free(eaf, nruns);
-    UNPROTECT (1);
+    UNPROTECT(1);
     return mat;
 }
 
