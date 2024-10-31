@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
 
     /* Default minmax if not set yet.  */
     if (minmax == NULL)
-        minmax = read_minmax (NULL, &dim);
+        minmax = minmax_minimise(dim);
 
     if (verbose_flag) {
         printf ("# file: %s\n", filename);

@@ -128,7 +128,7 @@ do_file (const char *filename, double *reference, int reference_size,
     /* Default minmax if not set yet.  */
     bool free_minmax = false;
     if (minmax == NULL) {
-        minmax = read_minmax (NULL, &nobj);
+        minmax = minmax_minimise(nobj);
         free_minmax = true;
     }
 
@@ -148,7 +148,7 @@ do_file (const char *filename, double *reference, int reference_size,
                                    &data[nobj * cumsize], cumsizes[n] - cumsize,
                                    reference, reference_size);
         //        time_elapsed = Timer_elapsed_virtual ();
-        fprintf (outfile, "%-16.15g\n", epsilon);
+        fprintf (outfile, indicator_printf_format "\n", epsilon);
         if ((additive_flag && epsilon < 0)
             || (!additive_flag && epsilon < 1)) {
             errprintf ("%s: some points are not  dominated by the reference set",

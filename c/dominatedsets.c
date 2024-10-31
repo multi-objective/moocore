@@ -403,15 +403,14 @@ int main(int argc, char *argv[])
 
     /* Default minmax if not set yet.  */
     if (minmax == NULL)
-        minmax = read_minmax (NULL, &dim);
+        minmax = minmax_minimise(dim);
 
     /* Print filename substitutions.  */
     for (k = 0; k < numfiles; k++) {
         char buffer[32];
-        char *p;
         snprintf(buffer, 32, "f%d", k + 1);
         buffer[31] = '\0';
-        p = malloc (sizeof(char) * (strlen(buffer) + 1));
+        char *p = malloc (sizeof(char) * (strlen(buffer) + 1));
         strncpy (p, buffer, 32);
         printf ("# %s: %s\n", p, filenames[k]);
         filenames[k] = p;

@@ -66,7 +66,7 @@
 #include "igd.h"
 #include "nondominated.h"
 
-#define CMDLINE_COPYRIGHT_YEARS "2016"
+#define CMDLINE_COPYRIGHT_YEARS "2016-2024"
 #define CMDLINE_AUTHORS "Manuel Lopez-Ibanez  <manuel.lopez-ibanez@manchester.ac.uk>\n" \
     "Leonardo C. T. Bezerra <leo.tbezerra@gmail.com>\n"
 #include "cmdline.h"
@@ -148,7 +148,7 @@ do_file (const char *filename, double *reference, int reference_size,
     /* Default minmax if not set yet.  */
     bool free_minmax = false;
     if (minmax == NULL) {
-        minmax = read_minmax (NULL, &nobj);
+        minmax = minmax_minimise(nobj);
         free_minmax = true;
     }
 
@@ -199,10 +199,10 @@ do_file (const char *filename, double *reference, int reference_size,
 #define print_value_if(IF, VALUE)                                              \
         do {                                                                   \
             if (IF) {                                                          \
-                fprintf (outfile, "%s%-16.15g", sep, VALUE);                   \
+                fprintf (outfile, "%s" indicator_printf_format, sep, VALUE);   \
                 sep = "\t";                                                    \
             }                                                                  \
-        } while(0)
+        } while (0)
 
         print_value_if(gd,
                        GD_minmax (nobj, minmax,

@@ -66,7 +66,7 @@ static int compare_y_desc (const void *p1, const void *p2)
 static void
 point2d_printf(FILE *stream, const objective_t x, const objective_t y)
 {
-    fprintf(stream, point_printf_format "\t" point_printf_format, x, y);
+    fprintf(stream, point_printf_format point_printf_sep point_printf_format, x, y);
 }
 
 static void
@@ -74,7 +74,7 @@ point_printf(FILE *stream, const objective_t *p, int nobj)
 {
     point2d_printf(stream, p[0], p[1]);
     for (int k = 2; k < nobj; k++)
-        fprintf (stream, "\t" point_printf_format, p[k]);
+        fprintf (stream, point_printf_sep point_printf_format, p[k]);
 }
 
 eaf_t * eaf_create (int nobj, int nruns, int npoints)
@@ -181,10 +181,10 @@ eaf_print_line (FILE *coord_file, FILE *indic_file, FILE *diff_file,
         fprintf (indic_file, "%d",
                  bit_array_get(attained, 0) ? (count1++,1) : 0);
         for (k = 1; k < nruns/2; k++)
-            fprintf (indic_file, "\t%d",
+            fprintf (indic_file, " %d",
                      bit_array_get(attained, k) ? (count1++,1) : 0);
         for (k = nruns/2; k < nruns; k++)
-            fprintf (indic_file, "\t%d",
+            fprintf (indic_file, " %d",
                      bit_array_get(attained, k) ? (count2++,1) : 0);
 
         fprintf (indic_file, (indic_file == diff_file) ? "\t" : "\n");
@@ -193,7 +193,7 @@ eaf_print_line (FILE *coord_file, FILE *indic_file, FILE *diff_file,
     }
 
     if (diff_file)
-        fprintf (diff_file,"%d\t%d\n", count1, count2);
+        fprintf (diff_file,"%d %d\n", count1, count2);
 }
 
 /* Print one attainment surface of the EAF.  */

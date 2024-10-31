@@ -1137,6 +1137,7 @@ double fpli_hv(const double *data, int d, int n, const double *ref)
 {
     if (n == 0) return 0.0;
     if (d == 2) return hv2d(data, n, ref);
+    ASSUME(d > 2);
 
     avl_tree_t *tree = avl_alloc_tree((avl_compare_t) compare_tree_asc,
                                        (avl_freeitem_t) NULL);

@@ -128,6 +128,7 @@ read_datasets(const char * filename, double **data_p, int *ncols_p, int *datasiz
 void
 vector_fprintf (FILE *stream, const double * vector, int size)
 {
+    ASSUME(size > 0);
     fprintf (stream, point_printf_format, vector[0]);
     for (int k = 1; k < size; k++)
         fprintf (stream, point_printf_sep "" point_printf_format, vector[k]);
@@ -142,6 +143,7 @@ vector_printf (const double *vector, int size)
 void
 vector_int_fprintf (FILE *stream, const int * vector, int size)
 {
+    ASSUME(size > 0);
     for (int k = 0; k < size; k++)
         fprintf (stream, "%d ", vector[k]);
 }
@@ -157,9 +159,9 @@ write_sets (FILE *outfile, const double *data, int ncols,
             const int *cumsizes, int nruns)
 {
     int size = 0;
-    int set = 0;
-
-    for (set = 0; set < nruns; set++) {
+    ASSUME(nruns > 0);
+    for (int set = 0; set < nruns; set++) {
+        ASSUME(cumsizes[set] >= 0);
         for (; size < cumsizes[set]; size++) {
             vector_fprintf (outfile, &data[ncols * size], ncols);
             fprintf (outfile, "\n");
@@ -174,7 +176,9 @@ write_sets_filtered (FILE *outfile, const double *data, int ncols,
                      const int *cumsizes, int nruns, const bool *write_p)
 {
     int size = 0;
+    ASSUME(nruns > 0);
     for (int set = 0; set < nruns; set++) {
+        ASSUME(cumsizes[set] >= 0);
         for (; size < cumsizes[set]; size++) {
             if (write_p[size]) {
                 vector_fprintf (outfile, &data[ncols * size], ncols);

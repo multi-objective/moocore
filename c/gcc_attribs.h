@@ -1,5 +1,6 @@
 #ifndef GCC_ATTRIBUTES
 #define GCC_ATTRIBUTES
+#include <assert.h>
 
 /* FIXME: does this handle C++? */
 #ifndef __pure_func
@@ -82,4 +83,28 @@
 # define unlikely(x)	(x)
 #endif
 
+
+// C++ standard attribute
+#ifdef __has_cpp_attribute
+#  if __has_cpp_attribute(assume) >= 202207L
+#    define INTERNAL_ASSUME(...) [[assume(__VA_ARGS__)]]
+#  endif
 #endif
+#ifndef INTERNAL_ASSUME
+#  if defined(__clang__)
+#    define INTERNAL_ASSUME(...) __builtin_assume(__VA_ARGS__)
+#  elif defined(_MSC_VER)
+#    define INTERNAL_ASSUME(...) __assume(__VA_ARGS__)
+#  elif defined(__GNUC__)
+#    if __GNUC__ >= 13
+#      define INTERNAL_ASSUME(...) __attribute__((__assume__(__VA_ARGS__)))
+#    endif
+#  endif
+#endif
+#ifndef INTERNAL_ASSUME
+#  define INTERNAL_ASSUME(...)
+#endif
+
+#define ASSUME(...) do { assert(__VA_ARGS__); INTERNAL_ASSUME(__VA_ARGS__); } while(0)
+
+#endif /* GCC_ATTRIBUTES */

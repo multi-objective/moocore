@@ -83,6 +83,7 @@ OPTION_VERSION_STR
 OPTION_QUIET_STR
 "     --no-check      do not check nondominance of sets (faster but unsafe);\n"
 OPTION_OBJ_STR
+" -m, --maximise      all objectives must be maximised;\n"
 " -u, --upper-bound POINT defines an upper bound to check, e.g. \"10 5 30\";\n"
 " -l, --lower-bound POINT defines a lower bound to check;\n"
 " -U, --union         consider each file as a whole approximation set,      \n"
@@ -443,7 +444,7 @@ process_file (const char *filename,
               double lrange, double urange,
               double *lbound, double *ubound,
               double **minimum_p, double **maximum_p,
-              bool check_minimum, bool check_maximum,
+              bool check_minimum, bool check_maximum, bool maximise_flag,
               const bool *logarithm)
 {
     bool *nondom = NULL;
@@ -451,7 +452,6 @@ process_file (const char *filename,
     bool logarithm_flag = false;
 
     double *points = NULL;
-    int d;
     int dim = *dim_p;
     int *cumsizes = NULL;
     int nsets = 0;
@@ -468,7 +468,7 @@ process_file (const char *filename,
     /* Default minmax if not set yet.  */
     bool free_minmax = false;
     if (minmax == NULL) {
-        minmax = read_minmax (NULL, &dim);
+        minmax = maximise_flag ? minmax_maximise(dim) : minmax_minimise(dim);
         free_minmax = true;
     }
 
@@ -514,7 +514,7 @@ process_file (const char *filename,
         memcpy (log_lbound, lbound, sizeof(double) * dim);
         memcpy (log_ubound, ubound, sizeof(double) * dim);
 
-        for (d = 0; d < dim; d++) {
+        for (int d = 0; d < dim; d++) {
             if (!logarithm[d]) continue;
             log_lbound[d] = log10(lbound[d]);
             log_ubound[d] = log10(ubound[d]);
@@ -602,6 +602,7 @@ int main(int argc, char *argv[])
     double *upper_bound = NULL;
 
     const signed char *minmax = NULL;
+    bool maximise_flag = false;
     const bool *logarithm = NULL;
     int dim = 0;
 
@@ -617,6 +618,8 @@ int main(int argc, char *argv[])
         {"force-bounds",no_argument,      NULL, 'b'},
         {"obj",        required_argument, NULL, 'o'},
         {"agree",      required_argument, NULL, 'a'},
+        {"maximise",   no_argument,       NULL, 'm'},
+        {"maximize",   no_argument,       NULL, 'm'},
         {"normalise",  required_argument, NULL, 'n'},
         {"upper-bound",required_argument, NULL, 'u'},
         {"lower-bound",required_argument, NULL, 'l'},
@@ -682,6 +685,10 @@ int main(int argc, char *argv[])
                            optarg);
                 exit (EXIT_FAILURE);
             }
+            break;
+
+        case 'm': // --maximise
+            maximise_flag = true;
             break;
 
         case 'n': // --normalise
@@ -751,7 +758,7 @@ int main(int argc, char *argv[])
                           lower_bound, upper_bound,
                           &minimum, &maximum,
                           /*check_minimum=*/true, /*check_maximum=*/true,
-                          logarithm);
+                          maximise_flag, logarithm);
         free(minimum);
         free(maximum);
         free((void*)minmax);
@@ -774,7 +781,7 @@ int main(int argc, char *argv[])
                           lower_bound, upper_bound,
                           &minimum, &maximum,
                           /*check_minimum=*/true, /*check_maximum=*/true,
-                          logarithm))
+                          maximise_flag, logarithm))
             dominated_found = true;
         k = 1;
     }
@@ -789,7 +796,7 @@ int main(int argc, char *argv[])
                           (upper_bound) ? upper_bound : maximum,
                           &tmp_minimum, &tmp_maximum,
                           lower_bound != NULL, upper_bound != NULL,
-                          logarithm))
+                          maximise_flag, logarithm))
             dominated_found = true;
 
         /* If the bounds were given, the real minimum and maximum

@@ -5,9 +5,10 @@
 
 static const char stdin_name[] = "<stdin>";
 
-// FIXME: Should this be %-16.15g ?
-#define point_printf_format "% 17.16g"
-#define point_printf_sep    "\t"
+// Worst case is -1.23456789012345e-308
+#define point_printf_format "%-22.15g"
+#define point_printf_sep    " "
+#define indicator_printf_format "%-22.15g"
 
 /* Error codes for read_data.  */
 enum ERROR_READ_DATA { READ_INPUT_FILE_EMPTY = -1,
@@ -42,25 +43,39 @@ int write_sets_filtered (FILE *outfile, const double *data, int ncols,
                          const int *cumsizes, int nruns,
                          const bool *write_p);
 
+
+static inline const signed char *
+default_minmax(int nobj, signed char default_value)
+{
+    ASSUME(nobj > 0);
+    ASSUME(default_value == AGREE_MINIMISE || default_value == AGREE_MAXIMISE);
+    signed char * minmax = malloc (sizeof(signed char) * nobj);
+    for (int i = 0; i < nobj; i++)
+        minmax[i] = default_value;
+    return minmax;
+}
+
+static inline const signed char *
+minmax_minimise(int nobj)
+{
+    return default_minmax(nobj, AGREE_MINIMISE);
+}
+
+static inline const signed char *
+minmax_maximise(int nobj)
+{
+    return default_minmax(nobj, AGREE_MAXIMISE);
+}
+
 static inline const signed char *
 read_minmax (const char *str, int *nobj_p)
 {
-    signed char * minmax;
-    size_t i;
-    size_t nobj = (size_t) *nobj_p;
-
-    if (str == NULL) { /* Default all minimised.  */
-        assert (nobj > 0);
-        minmax = malloc (sizeof(signed char) * nobj);
-        for (i = 0; i < nobj; i++)
-            minmax[i] = -1;
-        return minmax;
-    }
-
+    assert (str != NULL);
     size_t len = strlen(str);
     bool all_ignored = true;
-    minmax = malloc (sizeof(signed char) * MAX(len, nobj));
-    for (i = 0; i < len; i++) {
+    size_t nobj = (size_t) *nobj_p;
+    signed char * minmax = malloc (sizeof(signed char) * MAX(len, nobj));
+    for (size_t i = 0; i < len; i++) {
         switch (str[i])
         {
         case '+':
@@ -87,7 +102,7 @@ read_minmax (const char *str, int *nobj_p)
     }
     // FIXME: How to adjust minmax dynamically according to the number of objectives?
     if (len < nobj) { // Cycle
-        for (i = 0; i < (nobj - len); i++) {
+        for (size_t i = 0; i < (nobj - len); i++) {
             minmax[len + i] = minmax[i];
         }
     }

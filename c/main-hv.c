@@ -286,7 +286,7 @@ hv_file (const char *filename, double *reference,
 
         double time_elapsed = Timer_elapsed_virtual ();
 
-        fprintf (outfile, "%-17.15g\n", volume);
+        fprintf (outfile, indicator_printf_format "\n", volume);
         if (verbose_flag >= 2)
             fprintf (outfile, "# Time: %f seconds\n", time_elapsed);
     }

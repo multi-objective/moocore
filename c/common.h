@@ -28,7 +28,6 @@ moocore_malloc(size_t nmemb, size_t size, const char *err_prefix, const char * e
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include "gcc_attribs.h"
 #define Rprintf(...) printf(__VA_ARGS__)
 void fatal_error(const char * format,...) __attribute__ ((format(printf, 1, 2))) __noreturn _no_warn_unused;

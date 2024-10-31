@@ -1,7 +1,6 @@
 #ifndef CMDLINE_H
 #define CMDLINE_H
 
-#include <stdbool.h>
 #include "io.h"
 
 #ifndef CMDLINE_COPYRIGHT_YEARS
@@ -21,6 +20,8 @@
     "                     or maximised (+). By default all are minimised;       \n"
 #define OPTION_QUIET_STR \
     " -q, --quiet          print as little as possible                           \n"
+
+#include <stdbool.h>
 
 extern char *program_invocation_short_name;
 
