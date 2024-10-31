@@ -1,6 +1,5 @@
 #ifndef GCC_ATTRIBUTES
 #define GCC_ATTRIBUTES
-#include <assert.h>
 
 /* FIXME: does this handle C++? */
 #ifndef __pure_func
