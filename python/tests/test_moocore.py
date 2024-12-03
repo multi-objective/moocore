@@ -161,7 +161,9 @@ def test_is_nondominated(test_datapath):
         [[1, 0, 1], [1, 1, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0], [1, 1, 1]]
     )
     non_dominated = T[moocore.is_nondominated(T)]
-    assert (non_dominated == np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]])).all()
+    assert_array_equal(
+        non_dominated, np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]])
+    )
     non_dominated_weak = T[moocore.is_nondominated(T, keep_weakly=True)]
     expct_nondom_weak = np.array([[1, 0, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0]])
 
