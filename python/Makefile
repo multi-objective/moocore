@@ -9,6 +9,7 @@ build:
 	python3 -m build
 
 test:
+	$(MAKE) -C src/moocore/libmoocore/ clean
 	tox
 
 pre-commit:
