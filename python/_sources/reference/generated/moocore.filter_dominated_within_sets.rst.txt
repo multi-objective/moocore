@@ -1,0 +1,6 @@
+﻿moocore.filter\_dominated\_within\_sets
+=======================================
+
+.. currentmodule:: moocore
+
+.. autofunction:: filter_dominated_within_sets

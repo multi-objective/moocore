@@ -1,0 +1,6 @@
+﻿moocore.epsilon\_mult
+=====================
+
+.. currentmodule:: moocore
+
+.. autofunction:: epsilon_mult

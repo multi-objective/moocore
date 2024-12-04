@@ -1,0 +1,10 @@
+﻿hypervolume
+===========
+
+.. currentmodule:: moocore
+
+.. autofunction:: hypervolume
+
+.. minigallery:: moocore.hypervolume
+   :add-heading: Gallery examples
+   :heading-level: -

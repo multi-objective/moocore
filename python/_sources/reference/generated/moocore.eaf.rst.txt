@@ -1,0 +1,6 @@
+﻿moocore.eaf
+===========
+
+.. currentmodule:: moocore
+
+.. autofunction:: eaf
