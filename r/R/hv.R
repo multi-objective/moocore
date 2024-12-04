@@ -3,10 +3,15 @@
 #' Compute the hypervolume metric with respect to a given reference point
 #' assuming minimization of all objectives. For 2D and 3D, the algorithm used
 #' \citep{FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec} has \eqn{O(n \log n)}
-#' complexity. For 4D or higher, the algorithm \citep{FonPaqLop06:hypervolume}
+#' complexity. For 4D or higher, it uses a recursive algorithm that has the 3D
+#' algorithm as a base case algorithm \citep{FonPaqLop06:hypervolume}, which
 #' has \eqn{O(n^{d-2} \log n)} time and linear space complexity in the
 #' worst-case, but experimental results show that the pruning techniques used
-#' may reduce the time complexity even further.
+#' may reduce the time complexity even further.  Andreia P. Guerreiro improved
+#' the integration of the 3D case with the recursive algorithm, which leads to
+#' significant reduction of computation time. She has also enhanced the
+#' numerical stability of the algorithm by avoiding floating-point comparisons
+#' of partial hypervolumes.
 #'
 #' @inherit epsilon params return
 #'
