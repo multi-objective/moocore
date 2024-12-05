@@ -155,10 +155,8 @@ Approximating the hypervolume metric
 Computing the hypervolume can be time consuming, thus several approaches have been proposed in the literature to approximate its value via Monte-Carlo sampling. These methods are implemented in :func:`whv_hype()` and :func:`hv_approx()`.
 
 
-Scalarized Hypervolume (DZ2019)
--------------------------------
-
-:cite:t:`DenZha2019approxhv` proposed to approximate the hypervolume:
+The default option ``method="DZ2019"`` of :func:`hv_approx()` implements the
+method proposed by :cite:t:`DenZha2019approxhv` to approximate the hypervolume:
 
 .. math::
    \widehat{HV}_r(A) = \frac{\pi^\frac{m}{2}}{2^m \Gamma(\frac{m}{2} + 1)}\frac{1}{n}\sum_{i=1}^n \max_{y \in A} s(w^{(i)}, y)^m
