@@ -22,6 +22,7 @@ component_management:
       name: tests  # this is a display name, and can be changed freely
       paths:
         - python/tests/**
+        - python/examples/**
       statuses:
         - type: project
           target: 100%
