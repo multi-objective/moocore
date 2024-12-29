@@ -1,0 +1,6 @@
+﻿moocore.apply\_within\_sets
+===========================
+
+.. currentmodule:: moocore
+
+.. autofunction:: apply_within_sets

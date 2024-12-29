@@ -1,0 +1,6 @@
+﻿moocore.filter\_dominated
+=========================
+
+.. currentmodule:: moocore
+
+.. autofunction:: filter_dominated

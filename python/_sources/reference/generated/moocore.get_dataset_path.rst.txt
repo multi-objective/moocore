@@ -1,0 +1,6 @@
+﻿moocore.get\_dataset\_path
+==========================
+
+.. currentmodule:: moocore
+
+.. autofunction:: get_dataset_path
