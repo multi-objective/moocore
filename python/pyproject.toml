@@ -109,7 +109,10 @@ repair-wheel-command = [
 line-length = 79
 format.docstring-code-format = true
 lint.extend-select = [
-  "D", # pydocstyle
+  "D",    # pydocstyle
+  "D402", # no-signature
+  "D415", # ends-in-punctuation
+  "D417", # undocumented-param
 ]
 lint.ignore = [
   "D203", # one-blank-line-before-class
@@ -122,6 +125,7 @@ lint.per-file-ignores."*examples*/*.py" = [
   "D415", #  First line should end with a period, question mark, or exclamation point
   "E402", # Module level import not at top of file
 ]
+lint.pydocstyle.convention = "numpy"
 
 [tool.pytest.ini_options]
 doctest_optionflags = "NUMBER"
