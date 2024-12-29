@@ -281,11 +281,11 @@ def epsilon_additive(
         Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
         If the array is created from the :func:`read_datasets` function, remove the last (set) column
     ref :
-        Reference point set as a numpy array or list. Must have same number of columns as a single point in the \
+        Reference point set as a numpy array or list. Must have same number of columns as a single point in the
         dataset
     maximise :
-        Whether the objectives must be maximised instead of minimised. \
-        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
+        Whether the objectives must be maximised instead of minimised.
+        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
         Also accepts a 1d numpy array with value 0/1 for each objective
 
     Returns
@@ -294,11 +294,11 @@ def epsilon_additive(
 
     Examples
     --------
-    >>> dat = np.array([[3.5,5.5], [3.6,4.1], [4.1,3.2], [5.5,1.5]])
-    >>> ref = np.array([[1, 6], [2,5], [3,4], [4,3], [5,2], [6,1]])
-    >>> moocore.epsilon_additive(dat, ref = ref)
+    >>> dat = np.array([[3.5, 5.5], [3.6, 4.1], [4.1, 3.2], [5.5, 1.5]])
+    >>> ref = np.array([[1, 6], [2, 5], [3, 4], [4, 3], [5, 2], [6, 1]])
+    >>> moocore.epsilon_additive(dat, ref=ref)
     2.5
-    >>> moocore.epsilon_mult(dat, ref = ref)
+    >>> moocore.epsilon_mult(dat, ref=ref)
     3.5
 
     """
@@ -359,8 +359,8 @@ def hypervolume(
     ref :
         Reference point as a 1D vector. Must be same length as a single point in the ``data``.
     maximise :
-        Whether the objectives must be maximised instead of minimised. \
-        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
+        Whether the objectives must be maximised instead of minimised.
+        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
         Also accepts a 1D numpy array with value 0/1 for each objective
 
     Returns
@@ -442,8 +442,8 @@ class Hypervolume:
     ref :
        Reference point as a 1D vector. Must be same length as a single point in the ``data``.
     maximise :
-       Whether the objectives must be maximised instead of minimised. \
-       Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
+       Whether the objectives must be maximised instead of minimised.
+       Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
        Also accepts a 1D numpy array with value 0/1 for each objective
 
     Examples
@@ -542,8 +542,8 @@ def hv_approx(
     ref :
         Reference point as a 1D vector. Must be same length as a single point in the ``data``.
     maximise :
-        Whether the objectives must be maximised instead of minimised. \
-        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
+        Whether the objectives must be maximised instead of minimised.
+        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
         Also accepts a 1d numpy array with value 0/1 for each objective
 
     nsamples :
@@ -566,7 +566,7 @@ def hv_approx(
     Examples
     --------
     >>> x = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
-    >>> moocore.hv_approx(x, ref=[10, 10], seed = 42)
+    >>> moocore.hv_approx(x, ref=[10, 10], seed=42)
     37.95471
     >>> moocore.hypervolume(x, ref=[10, 10])
     38.0
@@ -577,24 +577,24 @@ def hv_approx(
 
     Dominated points are ignored, so this:
 
-    >>> moocore.hv_approx(x, ref=10, seed = 42)
+    >>> moocore.hv_approx(x, ref=10, seed=42)
     93.348976559100
 
     gives the same hypervolume approximation as this:
 
     >>> x = moocore.filter_dominated(x)
-    >>> moocore.hv_approx(x, ref=10, seed = 42)
+    >>> moocore.hv_approx(x, ref=10, seed=42)
     93.348976559100
 
     The approximation is far from perfect for large sets:
 
-    >>> x = moocore.get_dataset("CPFs.txt")[:,:-1]
-    >>> x = moocore.filter_dominated(-x, maximise = True)
-    >>> x = moocore.normalise(x, to_range = [1,2])
+    >>> x = moocore.get_dataset("CPFs.txt")[:, :-1]
+    >>> x = moocore.filter_dominated(-x, maximise=True)
+    >>> x = moocore.normalise(x, to_range=[1, 2])
     >>> reference = 0.9
-    >>> moocore.hypervolume(x, ref = reference, maximise = True)
+    >>> moocore.hypervolume(x, ref=reference, maximise=True)
     1.0570447464301551
-    >>> moocore.hv_approx(x, ref = reference, maximise = True, seed = 42)
+    >>> moocore.hv_approx(x, ref=reference, maximise=True, seed=42)
     1.056312559097445
 
     .. minigallery:: moocore.hv_approx
@@ -718,7 +718,7 @@ def is_nondominated_within_sets(
     r"""Identify dominated points according to Pareto optimality within each set.
 
     Executes the :func:`is_nondominated` function within each set in a dataset
-    \ and returns back a 1D array of booleans. This is equivalent to
+    and returns back a 1D array of booleans. This is equivalent to
     ``apply_within_sets(data, sets, is_nondominated, ...)`` but slightly
     faster.
 
@@ -827,7 +827,7 @@ def filter_dominated_within_sets(
 ) -> np.ndarray:
     """Given a dataset with multiple sets (last column gives the set index), filter dominated points within each set.
 
-    Executes the :func:`filter_dominated` function within each set in a dataset \
+    Executes the :func:`filter_dominated` function within each set in a dataset
     and returns back a dataset. This is roughly equivalent to partitioning ``data`` according to the last column,
     filtering dominated solutions within each partition, and joining back the result.
 
@@ -836,8 +836,8 @@ def filter_dominated_within_sets(
     data :
         Numpy array of numerical values and set numbers, containing multiple datasets. For example the output of the :func:`read_datasets` function.
     maximise :
-        Whether the objectives must be maximised instead of minimised. \
-        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
+        Whether the objectives must be maximised instead of minimised.
+        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
         Also accepts a 1D numpy array with values 0 or 1 for each objective
     keep_weakly :
         If ``False``, do not delete duplicates of nondominated points.
@@ -853,7 +853,7 @@ def filter_dominated_within_sets(
     >>> pf_per_set = moocore.filter_dominated_within_sets(x)
     >>> len(pf_per_set)
     42
-    >>> pf_per_set                                     # doctest: +ELLIPSIS
+    >>> pf_per_set  # doctest: +ELLIPSIS
     array([[ 0.20816431,  4.62275469,  1.        ],
            [ 0.22997367,  1.11772205,  1.        ],
            [ 0.58799475,  0.73891181,  1.        ],
@@ -975,7 +975,7 @@ def pareto_rank(
 # def filter_dominated_sets(dataset, maximise=False, keep_weakly=False):
 #     """Filter dominated sets for multiple sets
 
-#     Executes the :func:`filter_dominated` function for every set in a dataset \
+#     Executes the :func:`filter_dominated` function for every set in a dataset
 #     and returns back a dataset, preserving set
 
 #     Examples
@@ -1038,8 +1038,8 @@ def normalise(
         Bounds on the values. If :data:`numpy.nan`, the maximum and minimum values of each coordinate are used.
 
     maximise : single bool, or list of booleans
-        Whether the objectives must be maximised instead of minimised. \
-        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
+        Whether the objectives must be maximised instead of minimised.
+        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
         Also accepts a 1D numpy array with values 0 or 1 for each objective
 
     Returns
@@ -1048,14 +1048,14 @@ def normalise(
 
     Examples
     --------
-    >>> dat = np.array([[3.5,5.5], [3.6,4.1], [4.1,3.2], [5.5,1.5]])
+    >>> dat = np.array([[3.5, 5.5], [3.6, 4.1], [4.1, 3.2], [5.5, 1.5]])
     >>> moocore.normalise(dat)
     array([[0.   , 1.   ],
            [0.05 , 0.65 ],
            [0.3  , 0.425],
            [1.   , 0.   ]])
 
-    >>> moocore.normalise(dat, to_range = [1,2], lower = [3.5, 3.5], upper = 5.5)
+    >>> moocore.normalise(dat, to_range=[1, 2], lower=[3.5, 3.5], upper=5.5)
     array([[1.  , 2.  ],
            [1.05, 1.3 ],
            [1.3 , 0.85],
@@ -1140,27 +1140,25 @@ def normalise(
 #     return dataset
 
 
-def eaf(data, /, percentiles: list = []):
+def eaf(data: ArrayLike, /, percentiles: list = []):
     """Compute the Empirical attainment function (EAF) in 2D or 3D.
 
     Parameters
     ----------
-    data : numpy array
-        Numpy array of numerical values and set numbers, containing multiple sets. For example the output \
-         of the :func:`read_datasets` function
+    data :
+        Numpy array of numerical values and set numbers, containing multiple sets. For example the output of the :func:`read_datasets` function
     percentiles :
         List indicating which percentiles are computed. By default, all possible percentiles are calculated.
 
     Returns
     -------
     numpy array
-        Returns a numpy array containing the EAF data points, with the same number of columns as the input argument, \
-        but a different number of rows. The last column represents the EAF percentile for that data point
+        Returns a numpy array containing the EAF data points, with the same number of columns as the input argument, but a different number of rows. The last column represents the EAF percentile for that data point
 
     Examples
     --------
     >>> x = moocore.get_dataset("input1.dat")
-    >>> moocore.eaf(x)                                     # doctest: +ELLIPSIS
+    >>> moocore.eaf(x)  # doctest: +ELLIPSIS
     array([[  0.17470556,   8.89066343,  10.        ],
            [  0.20816431,   4.62275469,  10.        ],
            [  0.22997367,   1.11772205,  10.        ],
@@ -1178,7 +1176,7 @@ def eaf(data, /, percentiles: list = []):
            [  4.96525837,   6.20957074, 100.        ],
            [  7.92511295,   3.92669598, 100.        ]])
 
-    >>> moocore.eaf(x, percentiles = [0, 50, 100])         # doctest: +ELLIPSIS
+    >>> moocore.eaf(x, percentiles=[0, 50, 100])  # doctest: +ELLIPSIS
     array([[  0.17470556,   8.89066343,   0.        ],
            [  0.20816431,   4.62275469,   0.        ],
            [  0.22997367,   1.11772205,   0.        ],
@@ -1255,11 +1253,9 @@ def vorobT(data: ArrayLike, /, ref: ArrayLike) -> dict:
     Parameters
     ----------
     data :
-        Numpy array of numerical values and set numbers, containing multiple sets. For example the output \
-         of the :func:`read_datasets` function
+        Numpy array of numerical values and set numbers, containing multiple sets. For example the output of the :func:`read_datasets` function
     ref :
-        Reference point set as a numpy array or list. Must be same length as a single point in the \
-        dataset
+        Reference point set as a numpy array or list. Must be same length as a single point in the dataset
 
     Returns
     -------
@@ -1280,10 +1276,10 @@ def vorobT(data: ArrayLike, /, ref: ArrayLike) -> dict:
     Examples
     --------
     >>> CPFs = moocore.get_dataset("CPFs.txt")
-    >>> res = moocore.vorobT(CPFs, ref = (2, 200))
-    >>> res['threshold']
+    >>> res = moocore.vorobT(CPFs, ref=(2, 200))
+    >>> res["threshold"]
     44.140625
-    >>> res['avg_hyp']
+    >>> res["avg_hyp"]
     8943.333191728081
 
     """
