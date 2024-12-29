@@ -128,13 +128,14 @@ html_theme = "pydata_sphinx_theme"
 # else:
 #     switcher_version = f"{version}"
 
+
 html_theme_options = {
+    "github_url": f"https://github.com/multi-objective/{project}",
     "collapse_navigation": True,
     "header_links_before_dropdown": 6,
     #    "navigation_depth": 2,
     "show_prev_next": True,
     "use_edit_page_button": True,
-    "github_url": f"https://github.com/multi-objective/{project}/python",
     # Add light/dark mode and documentation version switcher:
     # "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"],
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
@@ -167,7 +168,7 @@ html_context = {
     "github_user": "multi-objective",
     "github_repo": project,
     "github_version": "main",
-    "doc_path": "doc",
+    "doc_path": "python/doc/source",
 }
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
