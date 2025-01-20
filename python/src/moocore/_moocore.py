@@ -876,6 +876,23 @@ def filter_dominated_within_sets(
            [1.54506255, 0.38303122],
            [0.17470556, 8.89066343],
            [8.57911868, 0.35169752]])
+    >>> moocore.filter_dominated_within_sets(
+    ...     x[(x[:, 2] >= 3) & (x[:, 2] <= 5), :]
+    ... )
+    array([[2.60764118, 6.31309852, 3.        ],
+           [3.22509709, 6.1522834 , 3.        ],
+           [0.37731545, 9.02211752, 3.        ],
+           [4.61023932, 2.29231998, 3.        ],
+           [0.2901393 , 8.32259412, 4.        ],
+           [1.54506255, 0.38303122, 4.        ],
+           [4.43498452, 4.13150648, 5.        ],
+           [9.78758589, 1.41238277, 5.        ],
+           [7.85344142, 3.02219054, 5.        ],
+           [0.9017068 , 7.49376946, 5.        ],
+           [0.17470556, 8.89066343, 5.        ]])
+
+    The above returns sets 3,4,5 with dominated points within each set removed.
+
 
     See Also
     --------
@@ -970,48 +987,6 @@ def pareto_rank(
     ranks = np.frombuffer(ranks, dtype=np.intc())
     assert len(ranks) == nrows
     return ranks
-
-
-# def filter_dominated_sets(dataset, maximise=False, keep_weakly=False):
-#     """Filter dominated sets for multiple sets
-
-#     Executes the :func:`filter_dominated` function for every set in a dataset
-#     and returns back a dataset, preserving set
-
-#     Examples
-#     --------
-#     >>> dataset = moocore.read_datasets("./doc/data/input1.dat")
-#     >>> subset = moocore.subset(dataset, range = [3,5])
-#     >>> moocore.filter_dominated_sets(subset)
-#     array([[2.60764118, 6.31309852, 3.        ],
-#            [3.22509709, 6.1522834 , 3.        ],
-#            [0.37731545, 9.02211752, 3.        ],
-#            [4.61023932, 2.29231998, 3.        ],
-#            [0.2901393 , 8.32259412, 4.        ],
-#            [1.54506255, 0.38303122, 4.        ],
-#            [4.43498452, 4.13150648, 5.        ],
-#            [9.78758589, 1.41238277, 5.        ],
-#            [7.85344142, 3.02219054, 5.        ],
-#            [0.9017068 , 7.49376946, 5.        ],
-#            [0.17470556, 8.89066343, 5.        ]])
-
-#     The above returns sets 3,4,5 with dominated points within each set removed.
-
-#     See Also
-#     --------
-#     This function for data without set numbers - :func:`filter_dominated`
-#     """
-#     # FIXME: it will be faster to stack filter_set, then do:
-#     # dataset[filter_set, :]
-#     # to filter in one go.
-#     new_sets = []
-#     for set in np.unique(dataset[:, -1]):
-#         set_data = dataset[dataset[:, -1] == set, :-1]
-#         filter_set = filter_dominated(set_data, maximise, keep_weakly)
-#         set_nums = np.full(filter_set.shape[0], set).reshape(-1, 1)
-#         new_set = np.hstack((filter_set, set_nums))
-#         new_sets.append(new_set)
-#     return np.vstack(new_sets)
 
 
 def normalise(
