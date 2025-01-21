@@ -162,11 +162,12 @@ write_sets (FILE *outfile, const double *data, int ncols,
     ASSUME(nruns > 0);
     for (int set = 0; set < nruns; set++) {
         ASSUME(cumsizes[set] >= 0);
+        if (set > 0)
+            fprintf (outfile, "\n");
         for (; size < cumsizes[set]; size++) {
             vector_fprintf (outfile, &data[ncols * size], ncols);
             fprintf (outfile, "\n");
         }
-        fprintf (outfile, "\n");
     }
     return 0;
 }
@@ -179,13 +180,14 @@ write_sets_filtered (FILE *outfile, const double *data, int ncols,
     ASSUME(nruns > 0);
     for (int set = 0; set < nruns; set++) {
         ASSUME(cumsizes[set] >= 0);
+        if (set > 0)
+            fprintf (outfile, "\n");
         for (; size < cumsizes[set]; size++) {
             if (write_p[size]) {
                 vector_fprintf (outfile, &data[ncols * size], ncols);
                 fprintf (outfile, "\n");
             }
         }
-        fprintf (outfile, "\n");
     }
     return 0;
 }
