@@ -559,9 +559,10 @@ process_file (const char *filename,
                 exit(EXIT_FAILURE);
             }
         }
-        print_output_header (outfile, filename, dim, minmax, agree,
-                             lrange, urange, lbound, ubound,
-                             logarithm);
+        if (verbose_flag)
+            print_output_header (outfile, filename, dim, minmax, agree,
+                                 lrange, urange, lbound, ubound,
+                                 logarithm);
 
         if (filter_flag && dominated_found)
             write_sets_filtered (outfile, points, dim, cumsizes, nsets, nondom);
