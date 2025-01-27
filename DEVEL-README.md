@@ -8,13 +8,13 @@ How to release
     - r/DESCRIPTION: Remove .900 and set to `${PACKAGEVERSION}`.
     - python/pyproject.toml: Remove `.dev[0-9]`.
 
+1. Update dates and version number in `python/doc/source/whatsnew/index.rst`
+
 1. `git ci -a -m "Prepare to release v${PACKAGEVERSION}"`
 
 1. Submit to CRAN.
 
 1. Once accepted, `make closeversion`
-
-1. Update dates and version number in `python/doc/source/whatsnew/index.rst`
 
 1. Publish a release in github to automatically submit to PyPi.
 
