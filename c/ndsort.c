@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 //    bool keep_uevs_flag = false;
 
     /* see the man page for getopt_long for an explanation of these fields */
-    static struct option long_options[] = {
+    static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
         {"version",    no_argument,       NULL, 'V'},
         {"verbose",    no_argument,       NULL, 'v'},

@@ -318,7 +318,7 @@ int main(int argc, char *argv[])
 
     int k, n, j;
     /* see the man page for getopt_long for an explanation of these fields */
-    static struct option long_options[] = {
+    static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
         {"version",    no_argument,       NULL, 'V'},
         {"verbose",    no_argument,       NULL, 'v'},

@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
            IGD_opt, GD_p_opt, IGD_p_opt, IGD_plus_opt, hausdorff_opt};
 
     /* see the man page for getopt_long for an explanation of these fields */
-    static struct option long_options[] = {
+    static const struct option long_options[] = {
         {"gd",   no_argument,       NULL, GD_opt},
         {"igd",   no_argument,       NULL, IGD_opt},
         {"gd-p",   no_argument,       NULL, GD_p_opt},
