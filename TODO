@@ -1,7 +1,8 @@
+ - [ ] Replace AVL code
  - [ ] Merge eaf README
  - [ ] Merge hypervolume/trunk README
  - [ ] Merge hypervolume/Makefile README
- - [ ] pre-commit for R: https://lorenzwalthert.github.io/precommit/articles/ci.html
+ - [X] pre-commit for R: https://lorenzwalthert.github.io/precommit/articles/ci.html
  - [X] create moocore R package
  - [X] create moocore Python package
  - [X] Setup github actions
