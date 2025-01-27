@@ -83,22 +83,23 @@ static void usage(void)
 "Options:\n"
 " -h, --help           give  this summary and exit.                          \n"
 "     --version        print version number and exit.                        \n"
-" -v, --verbose        print some information (time, number of points, etc.) \n"
-" -q, --quiet          print as little as possible                           \n"
-" -a, --additive       epsilon additive value %s                             \n"
-" -m, --multiplicative epsilon multiplicative value %s                       \n"
+" -v, --verbose        print some information (time, number of points, etc.).\n"
+" -q, --quiet          print as little as possible.                          \n"
+" -a, --additive       epsilon additive value %s.                       \n"
+" -m, --multiplicative epsilon multiplicative value %s.                 \n"
 " -r, --reference FILE file that contains the reference set                  \n"
-" -o, --obj [+|-]...   specify whether each objective should be              \n"
-"                      minimised (-) or maximised (+) (default all minimised)\n"
-" -s, --suffix=STRING Create an output file for each input file by appending\n"
-"                     this suffix. This is ignored when reading from stdin. \n"
-"                     If missing, output is sent to stdout.                 \n"
+"     --maximise       all objectives must be maximised; \n"
+" -o, --obj [+|-]...   specify whether each objective should be minimised (-)\n"
+"                      or maximised (+) (default all minimised).             \n"
+" -s, --suffix=STRING  Create an output file for each input file by appending\n"
+"                      this suffix. This is ignored when reading from stdin. \n"
+"                      If missing, output is sent to stdout.                 \n"
 "\n", str_is_default(additive_flag), str_is_default(!additive_flag));
 }
 
 static void
 do_file (const char *filename, double *reference, int reference_size,
-         int *nobj_p, const signed char * minmax)
+         int *nobj_p, const signed char * minmax, bool maximise_flag)
 {
     double *data = NULL;
     int *cumsizes = NULL;
@@ -128,16 +129,14 @@ do_file (const char *filename, double *reference, int reference_size,
     /* Default minmax if not set yet.  */
     bool free_minmax = false;
     if (minmax == NULL) {
-        minmax = minmax_minimise(nobj);
+        minmax = maximise_flag ? minmax_maximise(nobj) : minmax_minimise(nobj);
         free_minmax = true;
     }
 
     if (verbose_flag)
         printf("# file: %s\n", filename);
 
-    int cumsize;
-    int n;
-    for (n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
+    for (int n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
         // double time_elapsed = 0;
         //Timer_start ();
         double epsilon = (additive_flag)
@@ -176,16 +175,20 @@ int main(int argc, char *argv[])
 {
     double *reference = NULL;
     int reference_size = 0;
-    int nobj = 0;
     const signed char *minmax = NULL;
+    bool maximise_flag = false;
+    int nobj = 0;
+
     /* see the man page for getopt_long for an explanation of these fields */
-    static struct option long_options[] = {
+    static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
         {"version",    no_argument,       NULL, 'V'},
         {"verbose",    no_argument,       NULL, 'v'},
         {"quiet",      no_argument,       NULL, 'q'},
         {"additive",   no_argument,       NULL, 'a'},
         {"multiplicative",   no_argument, NULL, 'm'},
+        {"maximise",   no_argument,       NULL, 'M'},
+        {"maximize",   no_argument,       NULL, 'M'},
         {"reference",  required_argument, NULL, 'r'},
         {"suffix",     required_argument, NULL, 's'},
         {"obj",        required_argument, NULL, 'o'},
@@ -208,7 +211,13 @@ int main(int argc, char *argv[])
             additive_flag = false;
             break;
 
+        case 'M': // --maximise
+            maximise_flag = true;
+            break;
+
         case 'o': // --obj
+            if (minmax != NULL)
+                free((void *) minmax);
             minmax = read_minmax (optarg, &nobj);
             if (minmax == NULL) {
                 fprintf(stderr, "%s: invalid argument '%s' for -o, --obj\n",
@@ -266,9 +275,9 @@ int main(int argc, char *argv[])
 
     int numfiles = argc - optind;
     if (numfiles < 1) {/* Read stdin.  */
-        do_file (NULL, reference, reference_size, &nobj, minmax);
+        do_file (NULL, reference, reference_size, &nobj, minmax, maximise_flag);
     } else if (numfiles == 1) {
-        do_file (argv[optind], reference, reference_size, &nobj, minmax);
+        do_file (argv[optind], reference, reference_size, &nobj, minmax, maximise_flag);
     } else {
         int k;
         /* FIXME: Calculate the nondominated front among all input
@@ -293,7 +302,7 @@ int main(int argc, char *argv[])
         }
 #endif
         for (k = 0; k < numfiles; k++)
-            do_file (argv[optind + k], reference, reference_size, &nobj, minmax);
+            do_file (argv[optind + k], reference, reference_size, &nobj, minmax, maximise_flag);
     }
 
     return EXIT_SUCCESS;
