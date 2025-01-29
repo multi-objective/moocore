@@ -521,6 +521,15 @@ static int compare_tree_asc(const void *p1, const void *p2)
 }
 
 /*
+static int compare_tree_asc_y( const void *p1, const void *p2)
+{
+    const double x1 = *((const double *)p1+1);
+    const double x2 = *((const double *)p2+1);
+    return (x1 < x2) ? -1 : ((x1 > x2) ? 1 : 0;
+}
+*/
+
+/*
  * Setup circular double-linked list in each dimension
  */
 
@@ -612,6 +621,12 @@ static void reinsert (dlnode_t *nodep, int dim, double * bound)
     }
 }
 
+
+static inline double *node_point(const avl_node_t *node)
+{
+    return (double*) node->item;
+}
+
 static double
 fpli_hv3d(avl_tree_t *tree, dlnode_t *list, int c)
 {
@@ -639,11 +654,11 @@ fpli_hv3d(avl_tree_t *tree, dlnode_t *list, int c)
             avl_node_t *tnode;
             double nxt_ip0;
             if (avl_search_closest(tree, pp->x, &tnode) <= 0) {
-                nxt_ip0 = ((double *)(tnode->item))[0];
+                nxt_ip0 = node_point(tnode)[0];
                 tnode = tnode->prev;
             } else {
                 nxt_ip0 = (tnode->next != NULL)
-                    ? ((double *)(tnode->next->item))[0]
+                    ? node_point(tnode->next)[0]
                     : 0;
             }
 
@@ -651,15 +666,15 @@ fpli_hv3d(avl_tree_t *tree, dlnode_t *list, int c)
 
                 avl_insert_after(tree, tnode, pp->tnode);
                 if (tnode != NULL) {
-                    const double *prv_ip = (double *)(tnode->item);
+                    const double *prv_ip = node_point(tnode);
 
                     if (prv_ip[0] > pp->x[0]) {
                         tnode = pp->tnode->prev;
                         /* cur_ip = point dominated by pp with
                            highest [0]-coordinate */
-                        const double * cur_ip = (double *)(tnode->item);
+                        const double * cur_ip = node_point(tnode);
                         while (tnode->prev) {
-                            prv_ip = (double *)(tnode->prev->item);
+                            prv_ip = node_point(tnode->prev);
                             hypera -= (prv_ip[1] - cur_ip[1]) * (nxt_ip0 - cur_ip[0]);
                             if (prv_ip[0] < pp->x[0])
                                 break; /* prv is not dominated by pp */
@@ -744,6 +759,7 @@ hv_recursive(avl_tree_t *tree, dlnode_t *list,
                 * (p1->x[dim] - p1->prev[dim]->x[dim]);
             p1->vol[dim] = hyperv;
         } else {
+            ASSUME(c == 1);
             p1->area[0] = 1;
             for (int i = 1; i <= dim; i++)
                 p1->area[i] = p1->area[i-1] *  -p1->x[i-1];
@@ -771,9 +787,9 @@ hv_recursive(avl_tree_t *tree, dlnode_t *list,
     else if (dim == 2) {
         return fpli_hv3d(tree, list, c);
     }
-    /* FIXME: This is only interesting for measuring the effect of stopping the
-     recursion, we should have a dedicated hv2d function with the O(n * log *
-     n) case */
+    /* This is only interesting for measuring the effect of stopping the
+       recursion, but this code is currently unused because we have a dedicated
+       hv2d function that is already O(n * log n). */
     else if (dim == 1) {
         const dlnode_t *p1 = list->next[1];
         double hypera = p1->x[0];
@@ -948,11 +964,11 @@ fpli_hv3d_ref(avl_tree_t *tree, dlnode_t *list, int c, const double *ref)
             avl_node_t *tnode;
             const double *nxt_ip;
             if (avl_search_closest(tree, pp->x, &tnode) <= 0) {
-                nxt_ip = (double *)(tnode->item);
+                nxt_ip = node_point(tnode);
                 tnode = tnode->prev;
             } else {
                 nxt_ip = (tnode->next != NULL)
-                    ? (double *)(tnode->next->item)
+                    ? node_point(tnode->next)
                     : ref;
             }
 
@@ -960,15 +976,15 @@ fpli_hv3d_ref(avl_tree_t *tree, dlnode_t *list, int c, const double *ref)
                 const double *prv_ip;
                 avl_insert_after(tree, tnode, pp->tnode);
                 if (tnode != NULL) {
-                    prv_ip = (double *)(tnode->item);
+                    prv_ip = node_point(tnode);
 
                     if (prv_ip[0] > pp->x[0]) {
                         tnode = pp->tnode->prev;
                         /* cur_ip = point dominated by pp with
                            highest [0]-coordinate */
-                        const double * cur_ip = (double *)(tnode->item);
+                        const double * cur_ip = node_point(tnode);
                         while (tnode->prev) {
-                            prv_ip = (double *)(tnode->prev->item);
+                            prv_ip = node_point(tnode->prev);
                             hypera -= (prv_ip[1] - cur_ip[1]) * (nxt_ip[0] - cur_ip[0]);
                             if (prv_ip[0] < pp->x[0])
                                 break; /* prv is not dominated by pp */
@@ -1052,6 +1068,7 @@ hv_recursive_ref(avl_tree_t *tree, dlnode_t *list,
                 * (p1->x[dim] - p1->prev[dim]->x[dim]);
             p1->vol[dim] = hyperv;
         } else {
+            ASSUME(c == 1);
             p1->area[0] = 1;
             for (int i = 1; i <= dim; i++)
                 p1->area[i] = p1->area[i-1] * (ref[i-1] - p1->x[i-1]);
