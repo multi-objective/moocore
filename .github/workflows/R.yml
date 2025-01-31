@@ -128,7 +128,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-22.04]
         r: [release]
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -153,19 +153,25 @@ jobs:
         env:
           NOT_CRAN: false
         run: |
-          cov <- covr::package_coverage(type="all", quiet=FALSE, commentDonttest = FALSE, commentDontrun = FALSE, flags="R")
-          covr::to_cobertura(cov, filename = "coverage.xml")
+          coverage <- covr::package_coverage(type="all", quiet=FALSE, clean = FALSE,
+                           commentDonttest = FALSE, commentDontrun = FALSE, flags="R",
+                           install_path = file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package"))
+          print(coverage)
+          covr::to_cobertura(coverage)
+          list.files("../", pattern="*.xml", recursive=TRUE)
         shell: Rscript {0}
         working-directory: r
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3.1.5
+        uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true
+          file: ./r/cobertura.xml
           verbose: true
           flags: R
+          plugin: noop
+          disable_search: true
           token: ${{secrets.CODECOV_TOKEN}}
-          directory: r
 
   pkgdown:
     needs: R-CMD-check
