@@ -82,7 +82,7 @@ BINDIR?=../bin
 BINDIR:=$(abspath $(BINDIR))
 
 ## Define source files
-SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c hv_contrib.c hv.c pareto.c whv.c whv_hype.c \
+SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c hv_contrib.c hv.c hv4d.c pareto.c whv.c whv_hype.c \
 	eaf.c eafdiff.c eaf_main.c eaf3d.c avl.c cmdline.c libutil.c main-hv.c timer.c \
 	rng.c mt19937/mt19937.c
 HEADERS = io.h io_priv.h common.h gcc_attribs.h igd.h epsilon.h nondominated.h hv.h cmdline.h whv.h whv_hype.h \
@@ -152,7 +152,7 @@ $(eafexe): HEADERS=eaf.h
 $(ndsortexe): OBJS=ndsort.o pareto.o io.o hv_contrib.c $(LIBHV_OBJS) cmdline.o
 $(ndsortexe): HEADERS=nondominated.h cmdline.h
 
-$(hvexe): OBJS=main-hv.o io.o timer.o cmdline.o $(LIBHV_OBJS)
+$(hvexe): OBJS=main-hv.o io.o timer.o cmdline.o $(LIBHV_OBJS) hv4d.o
 $(hvexe): HEADERS=hv.h timer.h
 
 io.o: io_priv.h io.h

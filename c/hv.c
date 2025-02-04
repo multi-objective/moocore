@@ -552,6 +552,7 @@ setup_cdllist(const double *data, dimension_t d, int *size, const double *ref)
     ASSUME(d > STOP_DIMENSION);
     dimension_t d_stop = d - STOP_DIMENSION;
     int n = *size;
+    ASSUME(n > 1);
     dlnode_t *head  = malloc ((n+1) * sizeof(dlnode_t));
     head->x = NULL; /* head contains no data */
     head->ignore = 0;  /* should never get used */
@@ -1079,6 +1080,8 @@ hv_recursive_ref(avl_tree_t *tree, dlnode_t *list,
                     "manuel.lopez-ibanez@manchester.ac.uk\n", __FILE__, __LINE__);
 }
 
+double hv4d(const double *data, int n, const double *ref);
+
 double fpli_hv(const double *data, int d, int n, const double *ref)
 {
     if (n == 0) return 0.0;
@@ -1086,8 +1089,6 @@ double fpli_hv(const double *data, int d, int n, const double *ref)
     ASSUME(d < 256);
     ASSUME(d > 2);
     dimension_t dim = (dimension_t) d;
-    avl_tree_t *tree = avl_alloc_tree((avl_compare_t) compare_tree_asc,
-                                       (avl_freeitem_t) NULL);
     dlnode_t *list = setup_cdllist(data, dim, &n, ref);
     double hyperv;
     if (n == 0) {
@@ -1098,15 +1099,19 @@ double fpli_hv(const double *data, int d, int n, const double *ref)
         hyperv = 1;
         for (dimension_t i = 0; i < dim; i++)
             hyperv *= ref[i] - p->x[i];
+    } else if (d == 4) {
+        hyperv = hv4d(data, n, ref);
     } else {
+        avl_tree_t *tree = avl_alloc_tree((avl_compare_t) compare_tree_asc,
+                                          (avl_freeitem_t) NULL);
         double *bound = malloc (dim * sizeof(double));
         for (dimension_t i = 0; i < dim; i++) bound[i] = -DBL_MAX;
 	hyperv = hv_recursive_ref(tree, list, dim - 1, n, ref, bound);
         free (bound);
+        free (tree);  /* The nodes are freed by free_cdllist ().  */
     }
     /* Clean up.  */
     free_cdllist (list);
-    free (tree);  /* The nodes are freed by free_cdllist ().  */
 
     return hyperv;
 }
