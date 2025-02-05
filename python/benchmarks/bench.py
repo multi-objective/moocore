@@ -93,9 +93,11 @@ class Bench:
             grid=True,
             ylabel="CPU time (seconds)",
             style="o-",
-            title=f"{title} for {self.name} ({self.cpu_model})",
+            title="",
             logy=True,
         )
+        plt.title(f"({self.cpu_model})", fontsize=10)
+        plt.suptitle(f"{title} for {self.name}", fontsize=12)
         plt.savefig(f"{file_prefix}_bench-{self.name}-time.png")
 
         reltimes = {}
@@ -113,6 +115,8 @@ class Bench:
             grid=True,
             ylabel="Time relative to moocore",
             style="o-",
-            title=f"{title} for {self.name} ({self.cpu_model})",
+            title="",
         )
+        plt.title(f"({self.cpu_model})", fontsize=10)
+        plt.suptitle(f"{title} for {self.name}", fontsize=12)
         plt.savefig(f"{file_prefix}_bench-{self.name}-reltime.png")
