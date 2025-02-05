@@ -82,7 +82,7 @@ BINDIR?=../bin
 BINDIR:=$(abspath $(BINDIR))
 
 ## Define source files
-SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c hv_contrib.c hv.c pareto.c whv.c whv_hype.c \
+SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c hv_contrib.c hv.c hv3dplus.c pareto.c whv.c whv_hype.c \
 	eaf.c eafdiff.c eaf_main.c eaf3d.c avl.c cmdline.c libutil.c main-hv.c timer.c \
 	rng.c mt19937/mt19937.c
 HEADERS = io.h io_priv.h common.h gcc_attribs.h igd.h epsilon.h nondominated.h hv.h cmdline.h whv.h whv_hype.h \
@@ -148,13 +148,13 @@ $(eafexe): HEADERS=eaf.h
 $(epsilonexe): OBJS=epsilon.o io.o cmdline.o
 $(epsilonexe): HEADERS=epsilon.h nondominated.h cmdline.h
 
-$(hvexe): OBJS=main-hv.o io.o timer.o cmdline.o $(LIBHV_OBJS)
+$(hvexe): OBJS=main-hv.o io.o timer.o cmdline.o $(LIBHV_OBJS) hv3dplus.o
 $(hvexe): HEADERS=hv.h timer.h
 
 $(igdexe): OBJS=igd.o io.o cmdline.o
 $(igdexe): HEADERS=igd.h nondominated.h cmdline.h
 
-$(ndsortexe): OBJS=ndsort.o pareto.o io.o hv_contrib.c $(LIBHV_OBJS) cmdline.o
+$(ndsortexe): OBJS=ndsort.o pareto.o io.o hv_contrib.c $(LIBHV_OBJS) hv3dplus.o  cmdline.o
 $(ndsortexe): HEADERS=nondominated.h cmdline.h
 
 $(nondominatedexe): OBJS=nondominated.o io.o cmdline.o
