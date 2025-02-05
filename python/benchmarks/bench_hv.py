@@ -28,7 +28,7 @@ files = {
     ),
     "DTLZLinearShape.4d": dict(
         file=path_to_data + "DTLZLinearShape.4d.front.1000pts.10",
-        range=(250, 1500, 250),
+        range=(300, 1500, 200),
     ),
 }
 

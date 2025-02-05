@@ -6,7 +6,6 @@
   according to the terms of the GPL. See the copyright notice below.
 
 */
-#define AVL_DEPTH
 
 /*****************************************************************************
 
@@ -43,20 +42,8 @@
  *    0  if a = b
  *    1  if a > b
  */
+// "const void" here is actually "const avl_item_t"
 typedef int (*avl_compare_t)(const void *, const void *);
-
-typedef const double avl_item_t;
-typedef struct avl_node_t {
-	struct avl_node_t *next;
-	struct avl_node_t *prev;
-	struct avl_node_t *parent;
-	struct avl_node_t *left;
-	struct avl_node_t *right;
-        avl_item_t *item;
-#ifdef AVL_DEPTH
-	unsigned char depth;
-#endif
-} avl_node_t;
 
 typedef struct avl_tree_t {
 	avl_node_t *head;
@@ -74,20 +61,14 @@ typedef struct avl_tree_t {
 
 static void avl_rebalance(avl_tree_t *, avl_node_t *);
 
-#ifdef AVL_DEPTH
 #define NODE_DEPTH(n)  ((n) ? (n)->depth : 0)
 #define L_DEPTH(n)     (NODE_DEPTH((n)->left))
 #define R_DEPTH(n)     (NODE_DEPTH((n)->right))
 #define CALC_DEPTH(n)  (unsigned char)((L_DEPTH(n)>R_DEPTH(n)?L_DEPTH(n):R_DEPTH(n)) + 1)
-#endif
 
-static int avl_check_balance(avl_node_t *avlnode) {
-#ifdef AVL_DEPTH
+static int avl_check_balance(const avl_node_t *avlnode) {
 	int d = R_DEPTH(avlnode) - L_DEPTH(avlnode);
 	return d < -1 ? -1 : d > 1 ? 1 : 0;
-#else
-#error No balancing possible.
-#endif
 }
 
 static int
@@ -126,12 +107,7 @@ avl_init_tree(avl_tree_t *rc, avl_compare_t cmp) {
 static void
 avl_clear_node(avl_node_t *newnode) {
 	newnode->left = newnode->right = NULL;
-	#ifdef AVL_COUNT
-	newnode->count = 1;
-	#endif
-	#ifdef AVL_DEPTH
 	newnode->depth = 1;
-	#endif
 }
 
 static avl_node_t *
@@ -294,15 +270,7 @@ avl_rebalance(avl_tree_t *avltree, avl_node_t *avlnode) {
 		switch(avl_check_balance(avlnode)) {
 		case -1:
 			child = avlnode->left;
-			#ifdef AVL_DEPTH
 			if(L_DEPTH(child) >= R_DEPTH(child)) {
-			#else
-			#ifdef AVL_COUNT
-			if(L_COUNT(child) >= R_COUNT(child)) {
-			#else
-			#error No balancing possible.
-			#endif
-			#endif
 				avlnode->left = child->right;
 				if(avlnode->left)
 					avlnode->left->parent = avlnode;
@@ -310,14 +278,8 @@ avl_rebalance(avl_tree_t *avltree, avl_node_t *avlnode) {
 				avlnode->parent = child;
 				*superparent = child;
 				child->parent = parent;
-				#ifdef AVL_COUNT
-				avlnode->count = CALC_COUNT(avlnode);
-				child->count = CALC_COUNT(child);
-				#endif
-				#ifdef AVL_DEPTH
 				avlnode->depth = CALC_DEPTH(avlnode);
 				child->depth = CALC_DEPTH(child);
-				#endif
 			} else {
 				gchild = child->right;
 				avlnode->left = gchild->right;
@@ -334,29 +296,14 @@ avl_rebalance(avl_tree_t *avltree, avl_node_t *avlnode) {
 					gchild->left->parent = gchild;
 				*superparent = gchild;
 				gchild->parent = parent;
-				#ifdef AVL_COUNT
-				avlnode->count = CALC_COUNT(avlnode);
-				child->count = CALC_COUNT(child);
-				gchild->count = CALC_COUNT(gchild);
-				#endif
-				#ifdef AVL_DEPTH
 				avlnode->depth = CALC_DEPTH(avlnode);
 				child->depth = CALC_DEPTH(child);
 				gchild->depth = CALC_DEPTH(gchild);
-				#endif
 			}
 		break;
 		case 1:
 			child = avlnode->right;
-			#ifdef AVL_DEPTH
 			if(R_DEPTH(child) >= L_DEPTH(child)) {
-			#else
-			#ifdef AVL_COUNT
-			if(R_COUNT(child) >= L_COUNT(child)) {
-			#else
-			#error No balancing possible.
-			#endif
-			#endif
 				avlnode->right = child->left;
 				if(avlnode->right)
 					avlnode->right->parent = avlnode;
@@ -364,14 +311,8 @@ avl_rebalance(avl_tree_t *avltree, avl_node_t *avlnode) {
 				avlnode->parent = child;
 				*superparent = child;
 				child->parent = parent;
-				#ifdef AVL_COUNT
-				avlnode->count = CALC_COUNT(avlnode);
-				child->count = CALC_COUNT(child);
-				#endif
-				#ifdef AVL_DEPTH
 				avlnode->depth = CALC_DEPTH(avlnode);
 				child->depth = CALC_DEPTH(child);
-				#endif
 			} else {
 				gchild = child->left;
 				avlnode->right = gchild->left;
@@ -388,25 +329,13 @@ avl_rebalance(avl_tree_t *avltree, avl_node_t *avlnode) {
 					gchild->right->parent = gchild;
 				*superparent = gchild;
 				gchild->parent = parent;
-				#ifdef AVL_COUNT
-				avlnode->count = CALC_COUNT(avlnode);
-				child->count = CALC_COUNT(child);
-				gchild->count = CALC_COUNT(gchild);
-				#endif
-				#ifdef AVL_DEPTH
 				avlnode->depth = CALC_DEPTH(avlnode);
 				child->depth = CALC_DEPTH(child);
 				gchild->depth = CALC_DEPTH(gchild);
-				#endif
 			}
 		break;
 		default:
-			#ifdef AVL_COUNT
-			avlnode->count = CALC_COUNT(avlnode);
-			#endif
-			#ifdef AVL_DEPTH
 			avlnode->depth = CALC_DEPTH(avlnode);
-			#endif
 		}
 		avlnode = parent;
 	}
