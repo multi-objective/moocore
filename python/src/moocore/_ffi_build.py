@@ -27,17 +27,18 @@ headers = """
 sources = [
     "avl.c",
     "eaf.c",
-    "eafdiff.c",
     "eaf3d.c",
+    "eafdiff.c",
     "hv.c",
+    "hv3dplus.c",
     "hv_contrib.c",
     "io.c",
-    "pareto.c",
+    "libutil.c",  # For fatal_error()
     "mt19937/mt19937.c",
+    "pareto.c",
     "rng.c",
     "whv.c",
     "whv_hype.c",
-    "libutil.c",  # For fatal_error()
 ]
 sources = [sources_path + f for f in sources]
 
