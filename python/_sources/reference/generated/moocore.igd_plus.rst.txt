@@ -1,0 +1,6 @@
+﻿moocore.igd\_plus
+=================
+
+.. currentmodule:: moocore
+
+.. autofunction:: igd_plus

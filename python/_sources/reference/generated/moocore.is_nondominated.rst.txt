@@ -1,0 +1,6 @@
+﻿moocore.is\_nondominated
+========================
+
+.. currentmodule:: moocore
+
+.. autofunction:: is_nondominated

@@ -1,0 +1,18 @@
+
+html {
+    --pst-sidebar-secondary: 17rem;
+
+}
+.bd-page-width {
+    max-width: 100rem;
+  }
+
+.intro-card {
+  padding: 30px 10px 20px 10px;
+}
+
+.intro-card .sd-card-img-top {
+  margin: 10px;
+  height: 52px;
+  background: none !important;
+}
