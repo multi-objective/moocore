@@ -42,7 +42,6 @@
 #include "common.h"
 
 typedef struct dlnode {
-    double z[3];                    /* The data vector              */
     const double *x;                    /* The data vector              */
     struct dlnode * closest[2]; // closest[0] == cx, closest[1] == cy
     struct dlnode * cnext[2]; // current next
@@ -492,9 +491,6 @@ static void initSentinels(dlnode_t * list, const double * ref)
     z[0] = -DBL_MAX;
     z[1] = ref[1];
     z[2] = -DBL_MAX;
-    s1->z[0] = z[0];
-    s1->z[1] = z[1];
-    s1->z[2] = z[2];
     s1->x = z;
     s1->closest[0] = s2;
     s1->closest[1] = s1;
@@ -510,9 +506,6 @@ static void initSentinels(dlnode_t * list, const double * ref)
     z[0] = ref[0];
     z[1] = -DBL_MAX;
     z[2] = -DBL_MAX;
-    s2->z[0] = z[0];
-    s2->z[1] = z[1];
-    s2->z[2] = z[2];
     s2->x = z;
     s2->closest[0] = s2;
     s2->closest[1] = s1;
@@ -525,14 +518,11 @@ static void initSentinels(dlnode_t * list, const double * ref)
     s2->dom = false;
 
 
-    // ???? It was INT_MAX
     z += 3;
+    // ???? It was INT_MAX
     z[0] = -DBL_MAX;
     z[1] = -DBL_MAX;
     z[2] = ref[2];
-    s3->z[0] = z[0];
-    s3->z[1] = z[1];
-    s3->z[2] = z[2];
     s3->x = z;
     s3->closest[0] = s2;
     s3->closest[1] = s1;
@@ -564,7 +554,7 @@ static void removeFromz(dlnode_t * old)
 /* ---------------------------------- Sort ---------------------------------------*/
 
 static int
-compare_point3d(const void * p1, const void * p2)
+compare_point3d(const void * restrict p1, const void * restrict p2)
 {
     const double *x1 = *((const double **)p1);
     const double *x2 = *((const double **)p2);
@@ -580,7 +570,7 @@ compare_point3d(const void * p1, const void * p2)
 typedef unsigned int dimension_t;
 
 static bool
-strongly_dominates(const double * x, const double * ref, dimension_t dim)
+strongly_dominates(const double * restrict x, const double * restrict ref, dimension_t dim)
 {
     ASSUME(dim >= 2);
     for (dimension_t i = 0; i < dim; i++)
@@ -590,19 +580,11 @@ strongly_dominates(const double * x, const double * ref, dimension_t dim)
 }
 
 
-static void check_point(dlnode_t *p) {
-    assert(p->x[0] == p->z[0]);
-    assert(p->x[1] == p->z[1]);
-    assert(p->x[2] == p->z[2]);
-}
 static void print_x(dlnode_t * p)
 {
     assert(p != NULL);
-    const double * z = p->z;
-    fprintf(stderr, "z: %g %g %g\n", z[0], z[1], z[2]);
     const double * x = p->x;
     fprintf(stderr, "x: %g %g %g\n", x[0], x[1], x[2]);
-    check_point(p);
 }
 
 static void preprocessing(dlnode_t * list, int n);
@@ -611,7 +593,7 @@ static void preprocessing(dlnode_t * list, int n);
  * Setup circular double-linked list in each dimension
  */
 static dlnode_t *
-setup_cdllist(const double * data, int n, const double *ref)
+setup_cdllist(const double * restrict data, int n, const double * restrict ref)
 {
     ASSUME(n > 1);
     const dimension_t d = 3;
@@ -645,10 +627,7 @@ setup_cdllist(const double * data, int n, const double *ref)
     for (int i = 0; i < n; i++) {
         /* FIXME: This creates yet another copy of the data. */
         dlnode_t * p = list3 + i;
-        for (dimension_t j = 0; j < d; j++)
-            p->z[j] = scratchd[i][j];
         p->x = scratchd[i];
-//        p->x = p->z;
         // clearPoint:
         assert(list->next == list + 1);
         p->closest[0] = list + 1;
@@ -666,11 +645,6 @@ setup_cdllist(const double * data, int n, const double *ref)
     q = list->prev;
     (list3 + n - 1)->next = q;
     q->prev = list3 + n - 1;
-
-    for (int i=0; i < n; i++) {
-        dlnode_t * p = list3 + i;
-        check_point(p);
-    }
     preprocessing(list, n);
     return list;
 }
@@ -689,7 +663,7 @@ static void free_cdllist(dlnode_t * list)
 /* ---------------------------------- Preprocessing ---------------------------------------*/
 
 
-static int compare_tree_asc_y( const void *p1, const void *p2)
+static int compare_tree_asc_y( const void * restrict p1, const void * restrict p2)
 {
     const double x1= *((const double *)p1+1);
     const double x2= *((const double *)p2+1);
@@ -790,7 +764,6 @@ static double compute_area3d_simple(const double * px, dlnode_t * q)
 static double hv3dplus(dlnode_t * list)
 {
     // restartList:
-    check_point(list);
     list->next->cnext[1] = list; //link sentinels sentinels ((-inf ref[1] -inf) and (ref[0] -inf -inf))
     list->cnext[0] = list->next;
     double area = 0;
