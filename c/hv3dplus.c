@@ -197,37 +197,6 @@ static avl_tree_t *avl_alloc_tree(avl_compare_t cmp, avl_freeitem_t freeitem) {
 	return avl_init_tree(malloc(sizeof(avl_tree_t)), cmp, freeitem);
 }
 
-static void avl_clear_tree(avl_tree_t *avltree) {
-	avltree->top = avltree->head = avltree->tail = NULL;
-}
-
-static void avl_free_nodes(avl_tree_t *avltree) {
-	avl_node_t *node, *next;
-	avl_freeitem_t freeitem;
-
-	freeitem = avltree->freeitem;
-
-	for(node = avltree->head; node; node = next) {
-		next = node->next;
-		if(freeitem)
-			freeitem(node->item);
-		free(node);
-	}
-
-	avl_clear_tree(avltree);
-}
-
-/*
- * avl_free_tree:
- * Free all memory used by this tree.  If freeitem is not NULL, then
- * it is assumed to be a destructor for the items referenced in the avl_
- * tree, and they are deleted as well.
- */
-static void avl_free_tree(avl_tree_t *avltree) {
-	avl_free_nodes(avltree);
-	free(avltree);
-}
-
 static void avl_clear_node(avl_node_t *newnode) {
 	newnode->left = newnode->right = NULL;
 	#ifdef AVL_COUNT
@@ -357,18 +326,6 @@ static void avl_unlink_node(avl_tree_t *avltree, avl_node_t *avlnode) {
 	}
 
 	avl_rebalance(avltree, balnode);
-}
-
-static void *avl_delete_node(avl_tree_t *avltree, avl_node_t *avlnode) {
-	void *item = NULL;
-	if(avlnode) {
-		item = avlnode->item;
-		avl_unlink_node(avltree, avlnode);
-		if(avltree->freeitem)
-			avltree->freeitem(item);
-		free(avlnode);
-	}
-	return item;
 }
 
 /*
@@ -648,6 +605,7 @@ static void print_x(dlnode_t * p)
     check_point(p);
 }
 
+static void preprocessing(dlnode_t * list, int n);
 
 /*
  * Setup circular double-linked list in each dimension
@@ -713,6 +671,7 @@ setup_cdllist(const double * data, int n, const double *ref)
         dlnode_t * p = list3 + i;
         check_point(p);
     }
+    preprocessing(list, n);
     return list;
 }
 
@@ -752,23 +711,24 @@ static inline const double *node_point(const avl_node_t *node)
 }
 
 
-static avl_node_t * new_avl_node (dlnode_t * p)
+static avl_node_t * new_avl_node (dlnode_t * p, avl_node_t * node)
 {
-    avl_node_t * node = malloc(sizeof(avl_node_t));
     node->dlnode = p;
     node->item = p->x;
     return node;
 }
-static void preprocessing(dlnode_t * list)
+
+static void preprocessing(dlnode_t * list, int n)
 {
     avl_tree_t * tree = avl_alloc_tree ((avl_compare_t) compare_tree_asc_y, NULL);
+    avl_node_t * tnodes = malloc((n+3)* sizeof(avl_node_t));
     dlnode_t * p = list;
-    avl_node_t * node = new_avl_node(p);
-    avl_insert_top(tree, node);
+    avl_node_t * nodeaux = new_avl_node(p, tnodes);
+    avl_insert_top(tree, nodeaux);
     p = p->next;
 
-    avl_node_t * nodeaux = new_avl_node(p);
-    avl_insert_before(tree, node, nodeaux);
+    avl_node_t * node = new_avl_node(p, tnodes + 1);
+    avl_insert_before(tree, nodeaux, node);
     p = p->next;
 
     dlnode_t * stop = list->prev;
@@ -792,16 +752,17 @@ static void preprocessing(dlnode_t * list)
             // ???? What is this loop doing? Should this be > ?
             while (node_point(nodeaux)[0] >= p->x[0]) {
                 nodeaux = nodeaux->next;
-                avl_delete_node(tree, nodeaux->prev);
+                avl_unlink_node(tree, nodeaux->prev);
             }
-            node = new_avl_node(p);
+            node = new_avl_node(p, node + 1);
             avl_insert_before(tree, nodeaux, node);
             p->closest[0] = node->prev->dlnode;
             p->closest[1] = node->next->dlnode;
         }
         p = p->next;
     }
-    avl_free_tree(tree);
+    free(tnodes);
+    free(tree);
 }
 
 
@@ -871,7 +832,6 @@ static double hv3dplus(dlnode_t * list)
 double hv3d_plus(const double *data, int n, const double *ref)
 {
     dlnode_t * list = setup_cdllist(data, n, ref);
-    preprocessing(list);
     double hv = hv3dplus(list);
     free_cdllist(list);
     return hv;
