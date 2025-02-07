@@ -42,16 +42,12 @@
 #include "common.h"
 
 typedef struct dlnode {
-  double z[3];                    /* The data vector              */
-  const double *x;                    /* The data vector              */
-  struct dlnode * closest[2]; // closest[0] == cx, closest[1] == cy
-  struct dlnode * cnext[2]; //current next
-
-  struct dlnode * next[3]; //keeps the points sorted according to coordinates 2,3 and 4
-                           // (in the case of 2 and 3, only the points swept by 4 are kept)
-  struct dlnode *prev[3]; //keeps the points sorted according to coordinates 2 and 3 (except the sentinel 3)
-
-  int ndomr;    //number of dominators
+    const double *x;                    /* The data vector              */
+    struct dlnode * closest[2]; // closest[0] == cx, closest[1] == cy
+    struct dlnode * cnext[2]; // current next
+    struct dlnode * next; //keeps the points sorted according to coordinate 3
+    struct dlnode * prev; //keeps the points sorted according to coordinate 3 (except the sentinel 3)
+    bool dom;    // is this point dominated?
 } dlnode_t;
 
 /*-----------------------------------------------------------------------------
@@ -199,37 +195,6 @@ static avl_tree_t *avl_alloc_tree(avl_compare_t cmp, avl_freeitem_t freeitem) {
 	return avl_init_tree(malloc(sizeof(avl_tree_t)), cmp, freeitem);
 }
 
-static void avl_clear_tree(avl_tree_t *avltree) {
-	avltree->top = avltree->head = avltree->tail = NULL;
-}
-
-static void avl_free_nodes(avl_tree_t *avltree) {
-	avl_node_t *node, *next;
-	avl_freeitem_t freeitem;
-
-	freeitem = avltree->freeitem;
-
-	for(node = avltree->head; node; node = next) {
-		next = node->next;
-		if(freeitem)
-			freeitem(node->item);
-		free(node);
-	}
-
-	avl_clear_tree(avltree);
-}
-
-/*
- * avl_free_tree:
- * Free all memory used by this tree.  If freeitem is not NULL, then
- * it is assumed to be a destructor for the items referenced in the avl_
- * tree, and they are deleted as well.
- */
-static void avl_free_tree(avl_tree_t *avltree) {
-	avl_free_nodes(avltree);
-	free(avltree);
-}
-
 static void avl_clear_node(avl_node_t *newnode) {
 	newnode->left = newnode->right = NULL;
 	#ifdef AVL_COUNT
@@ -238,14 +203,6 @@ static void avl_clear_node(avl_node_t *newnode) {
 	#ifdef AVL_DEPTH
 	newnode->depth = 1;
 	#endif
-}
-
-static avl_node_t *avl_init_node(avl_node_t *newnode, void *item) {
-	if(newnode) {
-	  avl_clear_node(newnode);
-	  newnode->item = item;
-	}
-	return newnode;
 }
 
 static avl_node_t *avl_insert_top(avl_tree_t *avltree, avl_node_t *newnode) {
@@ -367,18 +324,6 @@ static void avl_unlink_node(avl_tree_t *avltree, avl_node_t *avlnode) {
 	}
 
 	avl_rebalance(avltree, balnode);
-}
-
-static void *avl_delete_node(avl_tree_t *avltree, avl_node_t *avlnode) {
-	void *item = NULL;
-	if(avlnode) {
-		item = avlnode->item;
-		avl_unlink_node(avltree, avlnode);
-		if(avltree->freeitem)
-			avltree->freeitem(item);
-		free(avlnode);
-	}
-	return item;
 }
 
 /*
@@ -537,54 +482,62 @@ static void avl_rebalance(avl_tree_t *avltree, avl_node_t *avlnode) {
 
 static void initSentinels(dlnode_t * list, const double * ref)
 {
+    /* The list that keeps the points sorted according to the 3rd-coordinate
+       does not really need the 3 sentinels, just one to represent (-inf, -inf,
+       ref[2]).  But we need the other two to maintain a list of nondominated
+       projections in the (x,y)-plane of points that is kept sorted according
+       to the 1st and 2nd coordinates, and for that list we need two sentinels
+       to represent (-inf, ref[1]) and (ref[0], -inf). */
     dlnode_t * s1 = list;
     dlnode_t * s2 = list + 1;
     dlnode_t * s3 = list + 2;
 
-    s1->z[0] = -DBL_MAX;
-    s1->z[1] = ref[1];
-    s1->z[2] = -DBL_MAX;
-    s1->x = s1->z;
+    // Allocate the 3 sentinels of dimension 3.
+    double * z = malloc(3 * 3 * sizeof(double));
+    z[0] = -DBL_MAX;
+    z[1] = ref[1];
+    z[2] = -DBL_MAX;
+    s1->x = z;
     s1->closest[0] = s2;
     s1->closest[1] = s1;
 
-    s1->next[2] = s2;
+    s1->next = s2;
     s1->cnext[1] = NULL;
     s1->cnext[0] = NULL;
 
-    s1->prev[2] = s3;
-    s1->ndomr = 0;
+    s1->prev = s3;
+    s1->dom = false;
 
-
-    s2->z[0] = ref[0];
-    s2->z[1] = -DBL_MAX;
-    s2->z[2] = -DBL_MAX;
-    s2->x = s2->z;
+    z += 3;
+    z[0] = ref[0];
+    z[1] = -DBL_MAX;
+    z[2] = -DBL_MAX;
+    s2->x = z;
     s2->closest[0] = s2;
     s2->closest[1] = s1;
 
-    s2->next[2] = s3;
+    s2->next = s3;
     s2->cnext[1] = NULL;
     s2->cnext[0] = NULL;
 
-    s2->prev[2] = s1;
-    s2->ndomr = 0;
+    s2->prev = s1;
+    s2->dom = false;
 
 
-    // ???? It was INT_MAX
-    s3->z[0] = -DBL_MAX;
-    s3->z[1] = -DBL_MAX;
-    s3->z[2] = ref[2];
-    s3->x = s3->z;
+    z += 3;
+    z[0] = -DBL_MAX;
+    z[1] = -DBL_MAX;
+    z[2] = ref[2];
+    s3->x = z;
     s3->closest[0] = s2;
     s3->closest[1] = s1;
 
-    s3->next[2] = s1;
+    s3->next = s1;
     s3->cnext[1] = NULL;
     s3->cnext[0] = NULL;
 
-    s3->prev[2] = s2;
-    s3->ndomr = 0;
+    s3->prev = s2;
+    s3->dom = false;
 }
 
 
@@ -596,8 +549,8 @@ static void initSentinels(dlnode_t * list, const double * ref)
 
 static void removeFromz(dlnode_t * old)
 {
-    old->prev[2]->next[2] = old->next[2];
-    old->next[2]->prev[2] = old->prev[2];
+    old->prev->next = old->next;
+    old->next->prev = old->prev;
 }
 
 
@@ -606,15 +559,14 @@ static void removeFromz(dlnode_t * old)
 /* ---------------------------------- Sort ---------------------------------------*/
 
 static int
-compare_point3d(const void * p1, const void * p2)
+compare_point3d(const void * restrict p1, const void * restrict p2)
 {
+    const double *x1 = *((const double **)p1);
+    const double *x2 = *((const double **)p2);
     for (int i = 2; i >= 0; i--) {
-        double x1 = (*((const double **)p1))[i];
-        double x2 = (*((const double **)p2))[i];
-
-        if (x1 < x2)
+        if (x1[i] < x2[i])
             return -1;
-        if (x1 > x2)
+        if (x1[i] > x2[i])
             return 1;
     }
     return 0;
@@ -623,7 +575,7 @@ compare_point3d(const void * p1, const void * p2)
 typedef unsigned int dimension_t;
 
 static bool
-strongly_dominates(const double * x, const double * ref, dimension_t dim)
+strongly_dominates(const double * restrict x, const double * restrict ref, dimension_t dim)
 {
     ASSUME(dim >= 2);
     for (dimension_t i = 0; i < dim; i++)
@@ -633,34 +585,23 @@ strongly_dominates(const double * x, const double * ref, dimension_t dim)
 }
 
 
-static void check_point(dlnode_t *p) {
-    assert(p->x[0] == p->z[0]);
-    assert(p->x[1] == p->z[1]);
-    assert(p->x[2] == p->z[2]);
-}
 static void print_x(dlnode_t * p)
 {
     assert(p != NULL);
-    const double * z = p->z;
-    fprintf(stderr, "z: %g %g %g\n", z[0], z[1], z[2]);
     const double * x = p->x;
     fprintf(stderr, "x: %g %g %g\n", x[0], x[1], x[2]);
-    check_point(p);
 }
 
+static void preprocessing(dlnode_t * list, int n);
 
 /*
  * Setup circular double-linked list in each dimension
  */
 static dlnode_t *
-setup_cdllist(const double * data, int n, const double *ref)
+setup_cdllist(const double * restrict data, int n, const double * restrict ref)
 {
     ASSUME(n > 1);
-    dimension_t d = 3;
-
-    dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(dlnode_t));
-    dlnode_t * list3 = list+3;
-    initSentinels(list, ref);
+    const dimension_t d = 3;
 
     const double **scratchd = malloc(n * sizeof(const double*));
     int i, j;
@@ -673,7 +614,11 @@ setup_cdllist(const double * data, int n, const double *ref)
             i++;
         }
     }
-    n = i;
+    n = i; // Update number of points.
+
+    dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(dlnode_t));
+    dlnode_t * list3 = list+3;
+    initSentinels(list, ref);
     if (n == 0) {
         free(scratchd);
         return list;
@@ -681,44 +626,30 @@ setup_cdllist(const double * data, int n, const double *ref)
 
     qsort(scratchd, n, sizeof(const double*), compare_point3d);
 
+    dlnode_t * q = list+1;
+    assert(list->next == list + 1);
+    assert(q->next == list + 2);
     for (int i = 0; i < n; i++) {
-        /* FIXME: This creates yet another copy of the data. */
         dlnode_t * p = list3 + i;
-        for (dimension_t j = 0; j < d; j++)
-            p->z[j] = scratchd[i][j];
         p->x = scratchd[i];
-//        p->x = p->z;
         // clearPoint:
+        assert(list->next == list + 1);
+        p->closest[0] = list + 1;
         p->closest[1] = list;
-        assert(list->next[2] == list + 1);
-        p->closest[0] = list->next[2];
         /* because of printfs */ /* FIXME what does the comment mean????? */
+        p->cnext[0] = list + 1;
         p->cnext[1] = list;
-        p->cnext[0] = list->next[2];
-        assert(list->next[2] == list + 1);
-        p->ndomr = 0;
+        p->dom = false;
+        // Link the list in order.
+        q->next = p;
+        p->prev = q;
+        q = p;
     }
-
     free(scratchd);
-
-    dimension_t d_1 = d - 1;
-    dlnode_t * s = list->next[d_1];
-    assert(s == list + 1);
-    assert(s->next[d_1] == list + 2);
-    s->next[d_1] = list3;
-    list3->prev[d_1] = s;
-    for (i = 0; i < n - 1; i++) {
-        (list3+i)->next[d_1] = list3+i+1;
-        (list3+i+1)->prev[d_1] = list3+i;
-    }
-    s = list->prev[d_1];
-    s->prev[d_1] = list3 + n - 1;
-    (list3 + n - 1)->next[d_1] = s;
-
-    for (int i=0; i < n; i++) {
-        dlnode_t * p = list3 + i;
-        check_point(p);
-    }
+    q = list->prev;
+    (list3 + n - 1)->next = q;
+    q->prev = list3 + n - 1;
+    preprocessing(list, n);
     return list;
 }
 
@@ -726,6 +657,7 @@ setup_cdllist(const double * data, int n, const double *ref)
 
 static void free_cdllist(dlnode_t * list)
 {
+    free((void*) list->x); // Free sentinels.
     free(list);
 }
 
@@ -735,7 +667,7 @@ static void free_cdllist(dlnode_t * list)
 /* ---------------------------------- Preprocessing ---------------------------------------*/
 
 
-static int compare_tree_asc_y( const void *p1, const void *p2)
+static int compare_tree_asc_y( const void * restrict p1, const void * restrict p2)
 {
     const double x1= *((const double *)p1+1);
     const double x2= *((const double *)p2+1);
@@ -757,30 +689,29 @@ static inline const double *node_point(const avl_node_t *node)
 }
 
 
-static avl_node_t * new_avl_node (dlnode_t * p)
+static avl_node_t * new_avl_node(dlnode_t * p, avl_node_t * node)
 {
-    avl_node_t * node = malloc(sizeof(avl_node_t));
     node->dlnode = p;
     node->item = p->x;
     return node;
 }
-static void preprocessing(dlnode_t * list)
+
+static void preprocessing(dlnode_t * list, int n)
 {
     avl_tree_t * tree = avl_alloc_tree ((avl_compare_t) compare_tree_asc_y, NULL);
+    avl_node_t * tnodes = malloc((n+2) * sizeof(avl_node_t));
     dlnode_t * p = list;
-    avl_node_t * node = new_avl_node(p);
-    avl_insert_top(tree, node);
-    p = p->next[2];
+    avl_node_t * nodeaux = new_avl_node(p, tnodes);
+    avl_insert_top(tree, nodeaux);
+    p = p->next;
 
-    avl_node_t * nodeaux = new_avl_node(p);
-    avl_insert_before(tree, node, nodeaux);
-    p = p->next[2];
+    avl_node_t * node = new_avl_node(p, tnodes + 1);
+    avl_insert_before(tree, nodeaux, node);
+    p = p->next;
 
-    dlnode_t * stop = list->prev[2];
+    dlnode_t * stop = list->prev;
     assert(stop == list+2);
     while (p != stop) {
-        node = new_avl_node(p);
-
         if (avl_search_closest(tree, p->x, &nodeaux) == 1)
             nodeaux = nodeaux->next;
 
@@ -790,24 +721,26 @@ static void preprocessing(dlnode_t * list)
         }
 
         const double * prev_x = node_point(nodeaux->prev);
-
+        // FIXME: Do we need to check all coordinates? The points are already sorted!
+        assert(prev_x[1] <= p->x[1]);
+        assert(prev_x[2] <= p->x[2]);
         if (prev_x[0] <= p->x[0] && prev_x[1] <= p->x[1] && prev_x[2] <= p->x[2]) {
-            p->ndomr = 1;
-            free(node);
+            p->dom = true;
         } else {
+            // ???? What is this loop doing? Should this be > ?
             while (node_point(nodeaux)[0] >= p->x[0]) {
-
                 nodeaux = nodeaux->next;
-                avl_delete_node(tree, nodeaux->prev);
+                avl_unlink_node(tree, nodeaux->prev);
             }
-
+            node = new_avl_node(p, node + 1);
             avl_insert_before(tree, nodeaux, node);
             p->closest[0] = node->prev->dlnode;
             p->closest[1] = node->next->dlnode;
         }
-        p = p->next[2];
+        p = p->next;
     }
-    avl_free_tree(tree);
+    free(tnodes);
+    free(tree);
 }
 
 
@@ -817,36 +750,35 @@ static void preprocessing(dlnode_t * list)
 
 
 
-static void restartListy(dlnode_t * list)
-{
-    check_point(list);
-    list->next[2]->cnext[1] = list; //link sentinels sentinels ((-inf ref[1] -inf) and (ref[0] -inf -inf))
-    list->cnext[0] = list->next[2];
-}
-
-static double compute_area3d_simple(const double * p, dlnode_t * q)
+static double compute_area3d_simple(const double * px, dlnode_t * q)
 {
     const unsigned int di = 1, dj = 0;
     dlnode_t * u = q->cnext[1];
-    double area = (q->x[dj] - p[dj]) * (u->x[di] - p[di]);
-    while (p[dj] < u->x[dj]) {
+    double area = (q->x[dj] - px[dj]) * (u->x[di] - px[di]);
+    assert(area > 0);
+    while (px[dj] < u->x[dj]) {
         q = u;
         u = u->cnext[di];
-        area += (q->x[dj] - p[dj]) * (u->x[di] - q->x[di]);
+        assert((q->x[dj] - px[dj]) * (u->x[di] - q->x[di]) > 0);
+        area += (q->x[dj] - px[dj]) * (u->x[di] - q->x[di]);
     }
     return area;
 }
 
 static double hv3dplus(dlnode_t * list)
 {
-    restartListy(list);
+    // restartList:
+    list->next->cnext[1] = list; //link sentinels sentinels ((-inf ref[1] -inf) and (ref[0] -inf -inf))
+    list->cnext[0] = list->next;
     double area = 0;
     double volume = 0;
-    dlnode_t * p = list->next[2]->next[2];
-    dlnode_t * stop = list->prev[2];
+    dlnode_t * p = list->next->next;
+    dlnode_t * stop = list->prev;
     assert(stop == list+2);
     while (p != stop) {
-        if (p->ndomr < 1) {
+        if (p->dom) {
+            removeFromz(p);
+        } else {
             p->cnext[0] = p->closest[0];
             p->cnext[1] = p->closest[1];
 //            fprintf(stderr, "area = %g\n", area);
@@ -857,11 +789,18 @@ static double hv3dplus(dlnode_t * list)
 
             p->cnext[0]->cnext[1] = p;
             p->cnext[1]->cnext[0] = p;
-        } else {
-            removeFromz(p);
         }
-        volume += area * (p->next[2]->x[2] - p->x[2]);
-        p = p->next[2];
+        // FIXME: This assert should work but it fails because p and p->next are duplicated points:
+        // assert((p->next->x[2] - p->x[2]) != 0);
+        /*if (p->next->x[2] - p->x[2] == 0) {
+            assert(p->next != p);
+            print_x(p);
+            print_x(p->next);
+            assert((p->next->x[2] - p->x[2]) != 0);
+            }*/
+        assert(area > 0);
+        volume += area * (p->next->x[2] - p->x[2]);
+        p = p->next;
     }
     return volume;
 
@@ -870,7 +809,6 @@ static double hv3dplus(dlnode_t * list)
 double hv3d_plus(const double * restrict data, int n, const double * restrict ref)
 {
     dlnode_t * list = setup_cdllist(data, n, ref);
-    preprocessing(list);
     double hv = hv3dplus(list);
     free_cdllist(list);
     return hv;
