@@ -692,13 +692,12 @@ setup_cdllist(const double * data, int n, const double *ref)
         p->x = scratchd[i];
 //        p->x = p->z;
         // clearPoint:
-        p->closest[1] = list;
         assert(list->next == list + 1);
         p->closest[0] = list + 1;
+        p->closest[1] = list;
         /* because of printfs */ /* FIXME what does the comment mean????? */
-        p->cnext[1] = list;
         p->cnext[0] = list + 1;
-        assert(list->next == list + 1);
+        p->cnext[1] = list;
         p->dom = false;
         // Link the list in order.
         q->next = p;
@@ -775,8 +774,6 @@ static void preprocessing(dlnode_t * list)
     dlnode_t * stop = list->prev;
     assert(stop == list+2);
     while (p != stop) {
-        node = new_avl_node(p);
-
         if (avl_search_closest(tree, p->x, &nodeaux) == 1)
             nodeaux = nodeaux->next;
 
@@ -786,17 +783,18 @@ static void preprocessing(dlnode_t * list)
         }
 
         const double * prev_x = node_point(nodeaux->prev);
-
+        // FIXME: Do we need to check all coordinates? The points are already sorted!
+        assert(prev_x[1] <= p->x[1]);
+        assert(prev_x[2] <= p->x[2]);
         if (prev_x[0] <= p->x[0] && prev_x[1] <= p->x[1] && prev_x[2] <= p->x[2]) {
             p->dom = true;
-            free(node);
         } else {
+            // ???? What is this loop doing? Should this be > ?
             while (node_point(nodeaux)[0] >= p->x[0]) {
-
                 nodeaux = nodeaux->next;
                 avl_delete_node(tree, nodeaux->prev);
             }
-
+            node = new_avl_node(p);
             avl_insert_before(tree, nodeaux, node);
             p->closest[0] = node->prev->dlnode;
             p->closest[1] = node->next->dlnode;
@@ -818,9 +816,11 @@ static double compute_area3d_simple(const double * px, dlnode_t * q)
     const unsigned int di = 1, dj = 0;
     dlnode_t * u = q->cnext[1];
     double area = (q->x[dj] - px[dj]) * (u->x[di] - px[di]);
+    assert(area > 0);
     while (px[dj] < u->x[dj]) {
         q = u;
         u = u->cnext[di];
+        assert((q->x[dj] - px[dj]) * (u->x[di] - q->x[di]) > 0);
         area += (q->x[dj] - px[dj]) * (u->x[di] - q->x[di]);
     }
     return area;
@@ -852,6 +852,15 @@ static double hv3dplus(dlnode_t * list)
             p->cnext[0]->cnext[1] = p;
             p->cnext[1]->cnext[0] = p;
         }
+        // FIXME: This assert should work but it fails because p and p->next are duplicated points:
+        // assert((p->next->x[2] - p->x[2]) != 0);
+        /*if (p->next->x[2] - p->x[2] == 0) {
+            assert(p->next != p);
+            print_x(p);
+            print_x(p->next);
+            assert((p->next->x[2] - p->x[2]) != 0);
+            }*/
+        assert(area > 0);
         volume += area * (p->next->x[2] - p->x[2]);
         p = p->next;
     }
