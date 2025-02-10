@@ -5,7 +5,7 @@
 
 static const char stdin_name[] = "<stdin>";
 
-// Worst case is -1.23456789012345e-308
+// Longest number is -1.23456789012345e-308
 #define point_printf_format "%-22.15g"
 #define point_printf_sep    " "
 #define indicator_printf_format "%-22.15g"
