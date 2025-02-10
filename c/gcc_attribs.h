@@ -82,6 +82,15 @@
 # define unlikely(x)	(x)
 #endif
 
+#ifdef _MSC_VER
+# define __force_inline__ __forceinline
+#elif defined(__GNUC__) || defined(__clang__)
+# define __force_inline__ __attribute__((always_inline)) inline
+#elif defined(_MS_VER) || defined(WIN32)
+# define __force_inline__ __ForceInline
+#else
+# define __force_inline__ inline
+#endif
 
 // C++ standard attribute
 #ifdef __has_cpp_attribute
@@ -104,6 +113,17 @@
 #  define INTERNAL_ASSUME(...)
 #endif
 
+#include <assert.h>
 #define ASSUME(...) do { assert(__VA_ARGS__); INTERNAL_ASSUME(__VA_ARGS__); } while(0)
+
+#if defined(__GNUC__) || defined(__clang__)
+# define unreachable() __builtin_unreachable()
+#elif defined(_MSC_VER) // MSVC
+# define unreachable() __assume(0)
+#else // ???
+# include <stdlib.h>
+# define unreachable() do { assert(0); abort() } while(0)
+#endif
+
 
 #endif /* GCC_ATTRIBUTES */
