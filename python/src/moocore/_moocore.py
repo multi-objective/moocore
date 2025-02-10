@@ -7,6 +7,7 @@ from numpy.typing import ArrayLike  # For type hints
 from typing import Literal, Any
 
 from math import gamma as gamma_function
+from math import ldexp
 # NOTE: if we ever start using SciPy, we can use
 # from scipy.special import gamma_function
 
@@ -641,7 +642,8 @@ def hv_approx(
         expected[k] = s_w.max()
 
     expected = (expected**nobj).mean()
-    c_m = (np.pi ** (nobj / 2)) / ((2**nobj) * gamma_function(nobj / 2 + 1))
+    # ldexp(x, n) = x * 2^n
+    c_m = (np.pi ** (nobj / 2)) / ldexp(gamma_function(nobj / 2 + 1), nobj)
     return float(c_m * expected)
 
 
