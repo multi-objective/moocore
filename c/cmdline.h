@@ -4,7 +4,7 @@
 #include "io.h"
 
 #ifndef CMDLINE_COPYRIGHT_YEARS
-#define CMDLINE_COPYRIGHT_YEARS "2007-2023"
+#define CMDLINE_COPYRIGHT_YEARS "2007-2025"
 #endif
 
 #ifndef CMDLINE_AUTHORS
@@ -22,6 +22,7 @@
     " -q, --quiet          print as little as possible                           \n"
 
 #include <stdbool.h>
+#include <ctype.h> // for isspace()
 
 extern char *program_invocation_short_name;
 
@@ -54,6 +55,8 @@ handle_read_data_error (int err, const char *filename)
           break;
 
       case READ_INPUT_FILE_EMPTY:
+          if (!filename)
+              filename = stdin_name;
           errprintf ("%s: no input data.", filename);
           exit (EXIT_FAILURE);
 
@@ -95,6 +98,93 @@ read_reference_set (double **reference_p, const char *filename, int *nobj_p)
     *nobj_p = nobj;
     *reference_p = reference;
     return reference_size;
+}
+
+/* TODO: Handle "1 NAN 3", so NAN means use the minimum/maximum for this
+   dimension.  */
+_no_warn_unused static double *
+read_point(char * str, int * nobj)
+{
+    int k = 0, size = 10;
+    double * point = malloc(size * sizeof(double));
+    char * endp = str;
+    char * cursor;
+    do {
+        cursor = endp;
+        if (k == size) {
+            size += 10;
+            point = realloc(point, size * sizeof(double));
+        }
+        point[k] = strtod(cursor, &endp);
+        k++;
+    } while (cursor != endp);
+
+    // not end of string: error
+    while (*cursor != '\0') {
+        if (!isspace(*cursor)) {
+            free (point);
+            return NULL;
+        }
+        cursor++;
+    }
+    // no number: error
+    if (k == 1) {
+        free(point);
+        return NULL;
+    }
+    if (k < size)
+        point = realloc(point, k * sizeof(double));
+    *nobj = k - 1;
+    return point;
+}
+
+#include <math.h> // INFINITY
+
+static void
+data_bounds (double **minimum_p, double **maximum_p,
+             const double *data, int nobj, int rows)
+{
+    ASSUME(nobj > 1);
+    ASSUME(nobj <= 32);
+    int k;
+
+    double * minimum = *minimum_p;
+    if (minimum == NULL) {
+        minimum = malloc (nobj * sizeof(double));
+        for (k = 0; k < nobj; k++)
+            minimum[k] = INFINITY;
+        *minimum_p = minimum;
+    }
+    double * maximum = *maximum_p;
+    if (maximum == NULL) {
+        maximum = malloc (nobj * sizeof(double));
+        for (k = 0; k < nobj; k++)
+            maximum[k] = -INFINITY;
+        *maximum_p = maximum;
+    }
+
+    for (int r = 0, n = 0; r < rows; r++) {
+        for (k = 0; k < nobj; k++, n++) {
+            if (maximum[k] < data[n])
+                maximum[k] = data[n];
+            if (minimum[k] > data[n])
+                minimum[k] = data[n];
+        }
+    }
+}
+
+_no_warn_unused static void
+file_bounds (const char *filename, double **maximum_p, double **minimum_p,
+             int *dim_p)
+{
+    double *data = NULL;
+    int *cumsizes = NULL;
+    int nruns = 0;
+    handle_read_data_error (
+        read_double_data(filename, &data, dim_p, &cumsizes, &nruns), filename);
+    data_bounds(minimum_p, maximum_p, data, *dim_p, cumsizes[nruns - 1]);
+    free (data);
+    free (cumsizes);
 }
 
 static inline char * m_strcat(const char * a, const char * b)

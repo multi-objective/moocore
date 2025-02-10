@@ -47,8 +47,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
-#include <ctype.h> // for isspace()
-
 #include <unistd.h>  // for getopt()
 #include <getopt.h> // for getopt_long()
 
@@ -96,94 +94,6 @@ static void usage(void)
 "\n");
 }
 
-static double *
-read_reference(char * str, int *nobj)
-{
-    char * cursor;
-
-    int k = 0, size = 10;
-
-    double * reference = malloc(size * sizeof(double));
-    char * endp = str;
-
-    do {
-        cursor = endp;
-        if (k == size) {
-            size += 10;
-            reference = realloc(reference, size * sizeof(double));
-        }
-        reference[k] = strtod(cursor, &endp);
-        k++;
-    } while (cursor != endp);
-
-    // not end of string: error
-    while (*cursor != '\0') {
-        if (!isspace(*cursor)) return NULL;
-        cursor++;
-    }
-
-    // no number: error
-    if (k == 1) return NULL;
-
-    *nobj = k - 1;
-    return reference;
-}
-
-static void
-data_bounds (double **minimum, double **maximum,
-            const double *data, int nobj, int rows)
-{
-    int k = 0;
-    int r = 0;
-
-    if (*minimum == NULL) {
-        *minimum = malloc (nobj * sizeof(double));
-        for (k = 0; k < nobj; k++)
-            (*minimum)[k] = data[k];
-        r = 1;
-    }
-
-    if (*maximum == NULL) {
-        *maximum = malloc (nobj * sizeof(double));
-        for (k = 0; k < nobj; k++)
-            (*maximum)[k] = data[k];
-        r = 1;
-    }
-
-    for (; r < rows; r++) {
-        for (int n = 0; n < nobj; n++, k++) {
-            if ((*maximum)[n] < data[k])
-                (*maximum)[n] = data[k];
-            if ((*minimum)[n] > data[k])
-                (*minimum)[n] = data[k];
-        }
-    }
-}
-
-static void
-file_range (const char *filename, double **maximum_p, double **minimum_p,
-            int *dim_p)
-{
-    double *data = NULL;
-    int *cumsizes = NULL;
-    int nruns = 0;
-    int dim = *dim_p;
-    double *maximum = *maximum_p;
-    double *minimum = *minimum_p;
-
-    handle_read_data_error (
-        read_double_data (filename, &data, &dim, &cumsizes, &nruns), filename);
-
-    data_bounds (&minimum, &maximum, data, dim, cumsizes[nruns-1]);
-
-    *dim_p = dim;
-    *maximum_p = maximum;
-    *minimum_p = minimum;
-
-    free (data);
-    free (cumsizes);
-}
-
 /*
    FILENAME: input filename. If NULL, read stdin.
 
@@ -210,9 +120,10 @@ hv_file (const char *filename, double *reference,
     char *outfilename = NULL;
     FILE *outfile = stdout;
 
-    int err = read_double_data (filename, &data, &nobj, &cumsizes, &nruns);
-    if (!filename) filename = stdin_name;
-    handle_read_data_error (err, filename);
+    handle_read_data_error(
+        read_double_data (filename, &data, &nobj, &cumsizes, &nruns), filename);
+    if (!filename)
+        filename = stdin_name;
 
     if (filename != stdin_name && suffix) {
         size_t outfilename_len = strlen(filename) + strlen(suffix) + 1;
@@ -239,10 +150,10 @@ hv_file (const char *filename, double *reference,
     if (needs_minimum) {
         data_bounds (&minimum, &maximum, data, nobj, cumsizes[nruns-1]);
         if (verbose_flag >= 2) {
-            printf ("# minimum:");
+            printf ("# minimum:   ");
             vector_printf (minimum, nobj);
             printf ("\n");
-            printf ("# maximum:");
+            printf ("# maximum:   ");
             vector_printf (maximum, nobj);
             printf ("\n");
         }
@@ -267,7 +178,7 @@ hv_file (const char *filename, double *reference,
     }
 
     if (verbose_flag >= 2) {
-        printf ("# reference:");
+        printf ("# reference: ");
         vector_printf (reference, nobj);
         printf ("\n");
     }
@@ -308,12 +219,7 @@ hv_file (const char *filename, double *reference,
 
 int main(int argc, char *argv[])
 {
-    double *reference = NULL;
-    int nobj = 0;
-    int opt; /* it's actually going to hold a char.  */
-    int longopt_index;
-
-    /* see the man page for getopt_long for an explanation of these fields.  */
+    /* See the man page for getopt_long for an explanation of these fields.  */
     static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
         {"version",    no_argument,       NULL, 'V'},
@@ -328,11 +234,16 @@ int main(int argc, char *argv[])
 
     set_program_invocation_short_name(argv[0]);
 
+    double *reference = NULL;
+    int nobj = 0;
+    int opt; /* it's actually going to hold a char.  */
+    int longopt_index;
+
     while (0 < (opt = getopt_long (argc, argv, "hVvqur:s:S",
                                    long_options, &longopt_index))) {
         switch (opt) {
         case 'r': // --reference
-            reference = read_reference (optarg, &nobj);
+            reference = read_point(optarg, &nobj);
             if (reference == NULL) {
                 errprintf ("invalid reference point '%s'",
                            optarg);
@@ -374,7 +285,7 @@ int main(int argc, char *argv[])
             exit(EXIT_SUCCESS);
 
         default: // should never happen
-            abort();
+            unreachable();
         }
     }
 
@@ -394,7 +305,7 @@ int main(int argc, char *argv[])
             /* Calculate the maximum among all input files to use as
                reference point.  */
             for (k = 0; k < numfiles; k++)
-                file_range (argv[optind + k], &maximum, &minimum, &nobj);
+                file_bounds(argv[optind + k], &maximum, &minimum, &nobj);
 
             if (verbose_flag >= 2) {
                 printf ("# maximum:");

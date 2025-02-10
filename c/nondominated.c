@@ -48,10 +48,10 @@
 #include <string.h>
 #include <ctype.h> // for isspace()
 #include <float.h>
-
 #include <unistd.h>  // for getopt()
 #include <getopt.h> // for getopt_long()
 #include <math.h> // for log10()
+
 #include "nondominated.h"
 #define READ_INPUT_WRONG_INITIAL_DIM_ERRSTR "either -o, --obj, -u, --upper or -l, --lower"
 #include "cmdline.h"
@@ -129,39 +129,6 @@ read_range (char *str, double *lower, double *upper)
     return true;
 }
 
-/* FIXME: Handle "1 NAN 3", so NAN means: use the minimum/maximum for this
-   dimension. */
-static double *
-read_point (char * str, int *nobj)
-{
-    int k = 0, size = 10;
-
-    double * point = malloc (size * sizeof(double));
-    char * endp = str;
-    char * cursor;
-    do {
-        cursor = endp;
-        if (k == size) {
-            size += 10;
-            point = realloc (point, size * sizeof(double));
-        }
-        point[k] = strtod (cursor, &endp);
-        k++;
-    } while (cursor != endp);
-
-    // not end of string: error
-    while (*cursor != '\0') {
-        if (!isspace(*cursor)) return NULL;
-        cursor++;
-    }
-
-    // no number: error
-    if (k == 1) return NULL;
-
-    *nobj = k - 1;
-    return point;
-}
-
 static double *
 robust_read_point (char * str, int *nobj, const char * errmsg)
 {
@@ -173,39 +140,6 @@ robust_read_point (char * str, int *nobj, const char * errmsg)
     return point;
 }
 
-static void
-data_bounds (double **minimum, double **maximum,
-             const double *data, int nobj, int rows)
-{
-    int k, r;
-
-#ifndef INFINITY
-#define INFINITY DBL_MAX
-#endif
-#define NEG_INFINITY -DBL_MAX
-
-    if (*minimum == NULL) {
-        *minimum = malloc (nobj * sizeof(double));
-        for (k = 0; k < nobj; k++)
-            (*minimum)[k] = INFINITY;
-    }
-
-    if (*maximum == NULL) {
-        *maximum = malloc (nobj * sizeof(double));
-        for (k = 0; k < nobj; k++)
-            (*maximum)[k] = NEG_INFINITY;
-    }
-
-    for (k = 0, r = 0; r < rows; r++) {
-        for (int n = 0; n < nobj; n++, k++) {
-            if ((*minimum)[n] > data[k])
-                (*minimum)[n] = data[k];
-            if ((*maximum)[n] < data[k])
-                (*maximum)[n] = data[k];
-        }
-    }
-}
-
 static inline bool
 any_less_than (const double *a, const double *b, int nobj)
 {
@@ -214,27 +148,6 @@ any_less_than (const double *a, const double *b, int nobj)
             return true;
 
     return false;
-}
-
-static void
-file_bounds (const char *filename, double **minimum_p, double **maximum_p,
-             int *nobj_p)
-{
-    double *data = NULL;
-    int *cumsizes = NULL;
-    int nruns = 0;
-    int nobj = *nobj_p;
-
-    int err = read_double_data (filename, &data, &nobj, &cumsizes, &nruns);
-    if (!filename) filename = stdin_name;
-    handle_read_data_error (err, filename);
-
-    data_bounds (minimum_p, maximum_p, data, nobj, cumsizes[nruns - 1]);
-
-    *nobj_p = nobj;
-
-    free (data);
-    free (cumsizes);
 }
 
 static void
