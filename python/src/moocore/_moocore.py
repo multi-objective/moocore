@@ -198,9 +198,9 @@ def igd(
 def igd_plus(
     data: ArrayLike, /, ref: ArrayLike, *, maximise: bool | list[bool] = False
 ) -> float:
-    """Modified IGD (IGD+).
+    r"""Modified IGD (IGD+).
 
-    IGD+ is a Pareto-compliant version of :func:`igd`.
+    IGD+ is a Pareto-compliant version of :func:`igd` proposed by :cite:t:`IshMasTanNoj2015igd`.
 
     .. seealso:: For details of the calculation, see :ref:`igd_hausdorf`.
 
@@ -232,6 +232,26 @@ def igd_plus(
     0.9855036468106652
     >>> moocore.avg_hausdorff_dist(dat, ref)
     1.0627908666722465
+
+    Example 4 by :cite:t:`IshMasTanNoj2015igd` shows a case where IGD gives the
+    wrong answer. In this case A is better than B in terms of Pareto optimality.
+
+    >>> ref = np.array([10, 0, 6, 1, 2, 2, 1, 6, 0, 10]).reshape(-1, 2)
+    >>> A = np.array([4, 2, 3, 3, 2, 4]).reshape(-1, 2)
+    >>> B = np.array([8, 2, 4, 4, 2, 8]).reshape(-1, 2)
+    >>> print(
+    ...     f"IGD(A)={moocore.igd(A, ref)} > IGD(B)={moocore.igd(B, ref)}\n"
+    ...     + f"and AvgHausdorff(A)={moocore.avg_hausdorff_dist(A, ref)} > "
+    ...     + f"AvgHausdorff(B)={moocore.avg_hausdorff_dist(B, ref)},\n"
+    ...     + f"which both contradict Pareto optimality. By contrast, \n"
+    ...     + f"IGD+(A)={moocore.igd_plus(A, ref)} < IGD+(B)={moocore.igd_plus(B, ref)},"
+    ...     + " which is correct."
+    ... )
+    IGD(A)=3.707092031609239 > IGD(B)=2.59148346584763
+    and AvgHausdorff(A)=3.707092031609239 > AvgHausdorff(B)=2.59148346584763,
+    which both contradict Pareto optimality. By contrast,
+    IGD+(A)=1.482842712474619 < IGD+(B)=2.260112615949154, which is correct.
+
 
     """  # noqa: D401
     data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
@@ -535,6 +555,9 @@ def hv_approx(
     :footcite:p:`DenZha2019approxhv` and, thus, it gets more accurate, but
     slower, for higher values of ``nsamples``.
 
+    .. seealso:: For details of the calculation, see :ref:`hv_approximation`.
+
+
     Parameters
     ----------
     data :
@@ -630,7 +653,7 @@ def hv_approx(
     # dominate ref.
     data = data[(data > 0).all(axis=1), :]
 
-    expected = np.empty(nsamples)
+    expected = np.empty(nsamples, dtype=float)
     # We could do it without the loop but it will consume lots of memory.
     #  y / W[:, np.newaxis,:]
     # or we could use np.apply_along_axis()
