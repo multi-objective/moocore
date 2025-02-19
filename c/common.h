@@ -4,11 +4,11 @@
 #ifdef R_PACKAGE
 #define R_NO_REMAP
 #include <R.h>
-#include "gcc_attribs.h"
-#define fatal_error(...) Rf_error(__VA_ARGS__)
 #define assert(EXP)                                                       \
     do { if (unlikely(!(EXP))) { Rf_error("error: assertion failed: '%s' at %s:%d", \
                                 #EXP, __FILE__, __LINE__);}} while(0)
+#include "gcc_attribs.h"
+#define fatal_error(...) Rf_error(__VA_ARGS__)
 #define errprintf Rf_error
 #define warnprintf Rf_warning
 static inline void *

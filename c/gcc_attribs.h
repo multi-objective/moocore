@@ -113,7 +113,10 @@
 #  define INTERNAL_ASSUME(...)
 #endif
 
+/* Allow to redefine assert, for example, for R packages */
+#ifndef assert
 #include <assert.h>
+#endif
 #define ASSUME(...) do { assert(__VA_ARGS__); INTERNAL_ASSUME(__VA_ARGS__); } while(0)
 
 #if defined(__GNUC__) || defined(__clang__)
