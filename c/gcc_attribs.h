@@ -95,37 +95,40 @@
 // C++ standard attribute
 #ifdef __has_cpp_attribute
 #  if __has_cpp_attribute(assume) >= 202207L
-#    define INTERNAL_ASSUME(...) [[assume(__VA_ARGS__)]]
+#    define INTERNAL_ASSUME(EXPR) [[assume(EXPR)]]
 #  endif
 #endif
 #ifndef INTERNAL_ASSUME
 #  if defined(__clang__)
-#    define INTERNAL_ASSUME(...) __builtin_assume(__VA_ARGS__)
+#    define INTERNAL_ASSUME(EXPR) __builtin_assume(EXPR)
 #  elif defined(_MSC_VER)
-#    define INTERNAL_ASSUME(...) __assume(__VA_ARGS__)
+#    define INTERNAL_ASSUME(EXPR) __assume(EXPR)
 #  elif defined(__GNUC__)
 #    if __GNUC__ >= 13
-#      define INTERNAL_ASSUME(...) __attribute__((__assume__(__VA_ARGS__)))
+#      define INTERNAL_ASSUME(EXPR) __attribute__((__assume__(EXPR)))
 #    endif
 #  endif
 #endif
 #ifndef INTERNAL_ASSUME
-#  define INTERNAL_ASSUME(...)
+#  define INTERNAL_ASSUME(EXPR)
 #endif
 
 /* Allow to redefine assert, for example, for R packages */
 #ifndef assert
 #include <assert.h>
 #endif
-#define ASSUME(...) do { assert(__VA_ARGS__); INTERNAL_ASSUME(__VA_ARGS__); } while(0)
+#define ASSUME(EXPR) do { assert(EXPR); INTERNAL_ASSUME(EXPR); } while(0)
 
-#if defined(__GNUC__) || defined(__clang__)
-# define unreachable() __builtin_unreachable()
-#elif defined(_MSC_VER) // MSVC
-# define unreachable() __assume(0)
-#else // ???
-# include <stdlib.h>
-# define unreachable() do { assert(0); abort() } while(0)
+/* unreachable() is sometimes defined by stddef.h */
+#ifndef unreachable
+# if defined(__GNUC__) || defined(__clang__)
+#   define unreachable() __builtin_unreachable()
+# elif defined(_MSC_VER) // MSVC
+#   define unreachable() __assume(0)
+# else
+#   include <stdlib.h>
+#   define unreachable() do { assert(0); abort(); } while(0)
+# endif
 #endif
 
 
