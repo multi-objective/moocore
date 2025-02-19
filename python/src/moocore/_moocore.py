@@ -243,7 +243,7 @@ def igd_plus(
     ...     f"IGD(A)={moocore.igd(A, ref)} > IGD(B)={moocore.igd(B, ref)}\n"
     ...     + f"and AvgHausdorff(A)={moocore.avg_hausdorff_dist(A, ref)} > "
     ...     + f"AvgHausdorff(B)={moocore.avg_hausdorff_dist(B, ref)},\n"
-    ...     + f"which both contradict Pareto optimality. By contrast, \n"
+    ...     + f"which both contradict Pareto optimality. By contrast,\n"
     ...     + f"IGD+(A)={moocore.igd_plus(A, ref)} < IGD+(B)={moocore.igd_plus(B, ref)},"
     ...     + " which is correct."
     ... )
