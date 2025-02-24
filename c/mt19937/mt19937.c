@@ -37,7 +37,7 @@ static void init_genrand(mt19937_state *state, uint32_t s) {
 #  pragma clang diagnostic ignored "-Wimplicit-int-conversion"
 #endif
     mt[mti] = (1812433253UL * (mt[mti - 1] ^ (mt[mti - 1] >> 30)) + mti);
-#  pragma GCC diagnostic push
+#  pragma GCC diagnostic pop
 #if defined(__clang__)
 #  pragma clang diagnostic pop
 #endif
@@ -64,9 +64,18 @@ void mt19937_init_by_array(mt19937_state *state, uint32_t *init_key,
   init_genrand(state, 19650218UL);
   k = (RK_STATE_LEN > key_length ? RK_STATE_LEN : key_length);
   for (; k; k--) {
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wconversion"
+#if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wimplicit-int-conversion"
+#endif
     /* non linear */
-    mt[i] = (mt[i] ^ ((mt[i - 1] ^ (mt[i - 1] >> 30)) * 1664525UL)) +
-            init_key[j] + j;
+    mt[i] = (mt[i] ^ ((mt[i - 1] ^ (mt[i - 1] >> 30)) * 1664525UL)) + init_key[j] + j;
+#  pragma GCC diagnostic pop
+#if defined(__clang__)
+#  pragma clang diagnostic pop
+#endif
     /* for > 32 bit machines */
     mt[i] &= 0xffffffffUL;
     i++;
@@ -80,8 +89,19 @@ void mt19937_init_by_array(mt19937_state *state, uint32_t *init_key,
     }
   }
   for (k = RK_STATE_LEN - 1; k; k--) {
-    mt[i] = (mt[i] ^ ((mt[i - 1] ^ (mt[i - 1] >> 30)) * 1566083941UL)) -
-            i;             /* non linear */
+      /* This code triggers conversions between uint32_t and unsigned long,
+         which various compilers warn about. */
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wconversion"
+#if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wimplicit-int-conversion"
+#endif
+    mt[i] = (mt[i] ^ ((mt[i - 1] ^ (mt[i - 1] >> 30)) * 1566083941UL)) - i; /* non linear */
+#  pragma GCC diagnostic pop
+#if defined(__clang__)
+#  pragma clang diagnostic pop
+#endif
     mt[i] &= 0xffffffffUL; /* for WORDSIZE > 32 machines */
     i++;
     if (i >= RK_STATE_LEN) {
