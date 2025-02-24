@@ -23,6 +23,7 @@ headers = """
 #include "eaf.h"
 #include "whv.h"
 #include "whv_hype.h"
+#include "hvapprox.h"
 """
 sources = [
     "avl.c",
@@ -36,6 +37,7 @@ sources = [
     "rng.c",
     "whv.c",
     "whv_hype.c",
+    "hvapprox.c",
     "libutil.c",  # For fatal_error()
 ]
 sources = [sources_path + f for f in sources]

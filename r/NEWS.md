@@ -1,3 +1,7 @@
+# moocore (development version)
+
+ * New function `hv_approx()`.
+
 # moocore 0.1.2
 
  * Fix more warnings and problems that only show in CRAN.

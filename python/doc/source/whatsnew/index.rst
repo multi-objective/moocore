@@ -4,6 +4,12 @@
 What's new
 **********
 
+Version 0.1.5 (development version)
+-----------------------------------
+
+- New default method in :func:`~moocore.hv_approx()`. Computation is now done in C, so it is much faster.
+
+
 Version 0.1.4 (30/10/2024)
 --------------------------
 

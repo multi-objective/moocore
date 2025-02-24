@@ -82,11 +82,11 @@ BINDIR?=../bin
 BINDIR:=$(abspath $(BINDIR))
 
 ## Define source files
-SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c hv_contrib.c hv.c pareto.c whv.c whv_hype.c \
-	eaf.c eafdiff.c eaf_main.c eaf3d.c avl.c cmdline.c libutil.c main-hv.c timer.c \
+SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c hv_contrib.c hv.c hvapprox.c pareto.c whv.c whv_hype.c \
+	eaf.c eafdiff.c eaf_main.c eaf3d.c avl.c cmdline.c libutil.c main-hv.c main-hvapprox.c timer.c \
 	rng.c mt19937/mt19937.c
-HEADERS = io.h io_priv.h common.h gcc_attribs.h igd.h epsilon.h nondominated.h hv.h cmdline.h whv.h whv_hype.h \
-	eaf.h cvector.h avl.h bit_array.h \
+HEADERS = io.h io_priv.h common.h gcc_attribs.h igd.h epsilon.h nondominated.h hv.h hvapprox.h cmdline.h whv.h whv_hype.h \
+	eaf.h cvector.h avl.h bit_array.h pow_int.h \
 	rng.h ziggurat_constants.h mt19937/mt19937.h
 
 # Relative to root folder.
@@ -118,11 +118,13 @@ nondominatedexe = $(BINDIR)/nondominated$(EXE)
 ndsortexe = $(BINDIR)/ndsort$(EXE)
 eafexe=$(BINDIR)/eaf$(EXE)
 hvexe=$(BINDIR)/hv$(EXE)
+hvapproxexe=$(BINDIR)/hvapprox$(EXE)
 
+allexe=$(igdexe) $(epsilonexe) $(dominatedsetsexe) $(nondominatedexe) $(ndsortexe) $(eafexe) $(hvexe) $(hvapproxexe)
 
 .PHONY : all clean dist default test time eaf hv nondominated
 
-default: $(igdexe) $(epsilonexe) $(dominatedsetsexe) $(nondominatedexe) $(ndsortexe) $(eafexe) $(hvexe)
+default: $(allexe)
 
 igd: $(igdexe)
 epsilon: $(epsilonexe)
@@ -131,6 +133,7 @@ nondominated: $(nondominatedexe)
 ndsort: $(ndsortexe)
 eaf: $(eafexe)
 hv: $(hvexe)
+hvapprox: $(hvapproxexe)
 
 include libhv.mk
 
@@ -155,9 +158,12 @@ $(ndsortexe): HEADERS=nondominated.h cmdline.h
 $(hvexe): OBJS=main-hv.o io.o timer.o cmdline.o $(LIBHV_OBJS)
 $(hvexe): HEADERS=hv.h timer.h
 
+$(hvapproxexe): OBJS=main-hvapprox.o io.o timer.o cmdline.o hvapprox.o rng.o mt19937/mt19937.o
+$(hvapproxexe): HEADERS=hvapprox.h timer.h pow_int.h
+
 io.o: io_priv.h io.h
 
-$(igdexe) $(epsilonexe) $(nondominatedexe) $(dominatedsetsexe) $(ndsortexe) $(eafexe) $(hvexe): $(OBJS) $(HEADERS)
+$(allexe): $(OBJS) $(HEADERS)
 	$(call MKDIR, $(BINDIR)/)
 	$(call ECHO,--> Building $@ version $(VERSION) <---)
 	$(QUIET_LINK)$(CC) -o $@  $(OBJS) $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS)
@@ -167,8 +173,7 @@ $(OBJS): $(HEADERS) common.h gcc_attribs.h
 clean:
 	@-$(RM) config.status config.log
 	@-$(RM) Hypervolume_MEX.mex
-
-	@for exe in $(igdexe) $(epsilonexe) $(dominatedsetsexe) $(nondominatedexe) $(ndsortexe) $(eafexe) $(hvexe); do \
+	@for exe in $(allexe); do \
 		echo "---> Removing $$exe <---"; \
 		$(RM) $$exe; \
 	done
@@ -182,7 +187,7 @@ test: clean
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
 	$(MAKE) all DEBUG=1 SANITIZERS=""
-	$(MAKE) test-nondominated test-eaf test-hv
+	$(MAKE) test-nondominated test-eaf test-hv test-igd
 
 test-nondominated:
 	$(MAKE) $(nondominatedexe) DEBUG=1 SANITIZERS=""
@@ -197,14 +202,19 @@ test-eaf:
 test-hv:
 	$(MAKE) $(hvexe) DEBUG=1 SANITIZERS=""
 	$(call ECHO,---> Testing $(hvexe) for errors (DEBUG=1) <--- )
-	@cd $(TESTSUITE)/hv && ../regtest.py $(hvexe) && cd $(PWD)
+	cd $(TESTSUITE)/hv && ../regtest.py $(hvexe) && cd $(PWD)
+
+test-igd:
+	$(MAKE) $(igdexe) DEBUG=1 SANITIZERS=""
+	$(call ECHO,---> Testing $(igdexe) for errors (DEBUG=1) <--- )
+	cd $(TESTSUITE)/igd && ../regtest.py $(igdexe) && cd $(PWD)
 
 time: clean
 	@if ! test -d $(TESTSUITE); then  		    	         \
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
 	$(MAKE) all DEBUG=0 SANITIZERS=""
-	$(MAKE) time-nondominated time-eaf time-hv
+	$(MAKE) time-nondominated time-eaf time-hv time-igd
 
 time-nondominated:
 	$(MAKE) $(nondominatedexe) DEBUG=0 SANITIZERS=""
@@ -220,6 +230,11 @@ time-hv:
 	$(MAKE) $(hvexe) DEBUG=0 SANITIZERS=""
 	$(call ECHO,---> Testing $(hvexe) for speed (DEBUG=0) <--- )
 	@cd $(TESTSUITE)/hv && ../regtest.py $(hvexe) && cd $(PWD)
+
+time-igd:
+	$(MAKE) $(igdexe) DEBUG=0 SANITIZERS=""
+	$(call ECHO,---> Testing $(igdexe) for speed (DEBUG=0) <--- )
+	@cd $(TESTSUITE)/igd && ../regtest.py $(igdexe) && cd $(PWD)
 
 all: clean
 	$(MAKE) default
