@@ -335,10 +335,6 @@ int main(int argc, char *argv[])
     while (0 < (opt = getopt_long(argc, argv, "hVvqpo:",
                                   long_options, &longopt_index))) {
         switch (opt) {
-        case 'V': // --version
-            version();
-            exit(EXIT_SUCCESS);
-
         case 'q': // --quiet
             verbose_flag = false;
             break;
@@ -356,24 +352,18 @@ int main(int argc, char *argv[])
             break;
 
         case 'o': // --obj
+            if (minmax != NULL)
+                free((void *) minmax);
             minmax = read_minmax (optarg, &dim);
             if (minmax == NULL) {
-                fprintf(stderr, "%s: invalid argument '%s' for -o, --obj\n",
-                        program_invocation_short_name,optarg);
+                errprintf ("invalid argument '%s' for -o, --obj"
+                           ", it should be a sequence of '+' or '-'\n", optarg);
                 exit(EXIT_FAILURE);
             }
             break;
 
-        case '?':
-            // getopt prints an error message right here
-            fprintf(stderr, "Try `%s --help' for more information.\n",
-                    program_invocation_short_name);
-            exit(EXIT_FAILURE);
-        case 'h':
-            usage();
-            exit(EXIT_SUCCESS);
-        default: // should never happen
-            abort();
+        default:
+            default_cmdline_handler(opt);
         }
     }
 

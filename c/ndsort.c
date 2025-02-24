@@ -152,10 +152,6 @@ int main(int argc, char *argv[])
     while (0 < (opt = getopt_long(argc, argv, "hVvqkro:",
                                   long_options, &longopt_index))) {
         switch (opt) {
-        case 'V': // --version
-            version();
-            exit(EXIT_SUCCESS);
-
         case 'q': // --quiet
             verbose_flag = false;
             break;
@@ -183,16 +179,8 @@ int main(int argc, char *argv[])
             }
             break;
 
-        case '?':
-            // getopt prints an error message right here
-            fprintf(stderr, "Try `%s --help' for more information.\n",
-                    program_invocation_short_name);
-            exit(EXIT_FAILURE);
-        case 'h':
-            usage();
-            exit(EXIT_SUCCESS);
-        default: // should never happen
-            abort();
+        default:
+            default_cmdline_handler(opt);
         }
     }
 
@@ -226,9 +214,7 @@ int main(int argc, char *argv[])
 
     int * rank = pareto_rank (points, dim, size);
 
-
     if (only_rank_flag) {
-
         fprint_rank (stdout, rank, size);
 
     } else {

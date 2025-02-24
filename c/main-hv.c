@@ -263,10 +263,6 @@ int main(int argc, char *argv[])
             shift_flag = true;
             break;
 
-        case 'V': // --version
-            version();
-            exit(EXIT_SUCCESS);
-
         case 'q': // --quiet
             verbose_flag = 0;
             break;
@@ -275,17 +271,8 @@ int main(int argc, char *argv[])
             verbose_flag = 2;
             break;
 
-        case '?':
-            // getopt prints an error message right here
-            fprintf (stderr, "Try `%s --help' for more information.\n",
-                     program_invocation_short_name);
-            exit(EXIT_FAILURE);
-        case 'h':
-            usage();
-            exit(EXIT_SUCCESS);
-
-        default: // should never happen
-            unreachable();
+        default:
+            default_cmdline_handler(opt);
         }
     }
 

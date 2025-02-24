@@ -76,7 +76,7 @@ static unsigned int exponent_p = 1;
 static bool gd = false;
 static bool igd = false;
 static bool gdp = false;
-static bool igdp = true;
+static bool igdp = false;
 static bool igdplus = false;
 static bool hausdorff = false;
 
@@ -95,25 +95,22 @@ static void usage(void)
 "Options:\n"
 OPTION_HELP_STR
 OPTION_VERSION_STR
-" -v, --verbose        print some information (time, number of points, etc.) \n"
+" -v, --verbose       print some information (time, number of points, etc.) \n"
 OPTION_QUIET_STR
-"   , --gd             %s report classical GD\n"
-"   , --igd            %s report classical IGD\n"
-"   , --gd-p           %s report GD_p (p=1 by default)\n"
-"   , --igd-p          %s report IGD_p (p=1 by default)\n"
-"   , --igd-plus       %s report IGD+\n"
-"   , --hausdorff      %s report avg Hausdorff distance = max (GD_p, IGD_p)\n"
-" -a, --all            compute everything\n"
-" -p,                  exponent that averages the distances\n"
+"   , --gd            report classical GD\n"
+"   , --igd           report classical IGD\n"
+"   , --gd-p          report GD_p (p=1 by default)\n"
+"   , --igd-p         (default) report IGD_p (p=1 by default)\n"
+"   , --igd-plus      report IGD+\n"
+"   , --hausdorff     report avg Hausdorff distance = max (GD_p, IGD_p)\n"
+" -a, --all           compute everything\n"
+" -p,                 exponent that averages the distances\n"
 " -r, --reference FILE file that contains the reference set                  \n"
 OPTION_OBJ_STR
 " -s, --suffix=STRING Create an output file for each input file by appending\n"
 "                     this suffix. This is ignored when reading from stdin. \n"
 "                     If missing, output is sent to stdout.                 \n"
-"\n",
-str_is_default(gd), str_is_default(igd),
-str_is_default(gdp), str_is_default(igdp),
-str_is_default(igdplus), str_is_default(hausdorff));
+"\n");
 }
 
 static void
@@ -156,34 +153,22 @@ do_file (const char *filename, double *reference, int reference_size,
     if (verbose_flag) {
         printf("# file: %s\n", filename);
         printf("# metrics (Euclidean distance) ");
-        if (gd) {
-            printf("GD");
-            sep = "\t";
-        }
-        if (igd) {
-            printf("%s", sep);
-            printf("IGD");
-            sep = "\t";
-        }
-        if (gdp) {
-            printf("%s", sep);
-            printf("GD_%d", exponent_p);
-            sep = "\t";
-        }
-        if (igdp) {
-            printf("%s", sep);
-            printf("IGD_%d", exponent_p);
-            sep = "\t";
-        }
-        if (igdplus) {
-            printf("%s", sep);
-            printf("IGD+");
-            sep = "\t";
-        }
-        if (hausdorff) {
-            printf("%s", sep);
-            printf("avg_Hausdorff");
-        }
+#define print_value_if(IF, ...)                                                \
+        do {                                                                   \
+            if (IF) {                                                          \
+                fprintf(outfile, "%s", sep);                                   \
+                fprintf(outfile, __VA_ARGS__);                                 \
+                sep = "\t";                                                    \
+            }                                                                  \
+        } while (0)
+
+        print_value_if(gd, "GD");
+        print_value_if(igd, "IGD");
+        print_value_if(gdp, "GD_%d", exponent_p);
+        print_value_if(igdp,"IGD_%d", exponent_p);
+        print_value_if(igdplus, "IGD+");
+        print_value_if(hausdorff, "avg_Hausdorff");
+#undef print_value_if
         printf("\n");
     }
 
@@ -199,7 +184,7 @@ do_file (const char *filename, double *reference, int reference_size,
 #define print_value_if(IF, VALUE)                                              \
         do {                                                                   \
             if (IF) {                                                          \
-                fprintf (outfile, "%s" indicator_printf_format, sep, VALUE);   \
+                fprintf (outfile, "%s" indicator_printf_format, sep, (VALUE)); \
                 sep = "\t";                                                    \
             }                                                                  \
         } while (0)
@@ -228,6 +213,7 @@ do_file (const char *filename, double *reference, int reference_size,
                        avg_Hausdorff_dist_minmax (nobj, minmax,
                                                   points_a, size_a,
                                                   reference, reference_size, exponent_p));
+#undef print_value_if
         //time_elapsed = Timer_elapsed_virtual ();
         fprintf(outfile, "\n");
         /* if (verbose_flag)  */
@@ -251,7 +237,7 @@ int main(int argc, char *argv[])
 {
     double *reference = NULL;
     int reference_size = 0;
-    int nobj = 0;
+    int nobj = 0, tmp_nobj = 0;
     const signed char *minmax = NULL;
 
     enum { GD_opt = 1000,
@@ -325,29 +311,39 @@ int main(int argc, char *argv[])
               break;
 
         case 'o': // --obj
-            minmax = read_minmax (optarg, &nobj);
+            if (minmax != NULL)
+                free((void *) minmax);
+            minmax = read_minmax (optarg, &tmp_nobj);
             if (minmax == NULL) {
-                fprintf(stderr, "%s: invalid argument '%s' for -o, --obj\n",
-                        program_invocation_short_name,optarg);
+                errprintf ("invalid argument '%s' for -o, --obj"
+                           ", it should be a sequence of '+' or '-'\n", optarg);
+                exit(EXIT_FAILURE);
+            }
+            if (nobj == 0) {
+                nobj = tmp_nobj;
+            } else if (tmp_nobj != nobj) {
+                errprintf ("number of objectives in --obj (%d) and reference set (%d) do not match", tmp_nobj, nobj);
                 exit(EXIT_FAILURE);
             }
             break;
 
         case 'r': // --reference
-            reference_size = read_reference_set (&reference, optarg, &nobj);
+            reference_size = read_reference_set(&reference, optarg, &tmp_nobj);
             if (reference == NULL || reference_size <= 0) {
                 errprintf ("invalid reference set '%s", optarg);
-                exit (EXIT_FAILURE);
+                exit(EXIT_FAILURE);
+            }
+            if (nobj == 0) {
+                nobj = tmp_nobj;
+            } else if (tmp_nobj != nobj) {
+                errprintf ("number of objectives in --obj (%d) and reference set (%d) do not match", nobj, tmp_nobj);
+                exit(EXIT_FAILURE);
             }
             break;
 
         case 's': // --suffix
             suffix = optarg;
             break;
-
-        case 'V': // --version
-            version();
-            exit(EXIT_SUCCESS);
 
         case 'q': // --quiet
             verbose_flag = false;
@@ -357,23 +353,23 @@ int main(int argc, char *argv[])
             verbose_flag = true;
             break;
 
-        case '?':
-            // getopt prints an error message right here
-            fprintf(stderr, "Try `%s --help' for more information.\n",
-                    program_invocation_short_name);
-            exit(EXIT_FAILURE);
-        case 'h':
-            usage();
-            exit(EXIT_SUCCESS);
-        default: // should never happen
-            abort();
+        default:
+            default_cmdline_handler(opt);
         }
     }
 
+    if (!gd && !igd && !gdp && !igdp && !igdplus && !hausdorff) {
+        igdp = true; // Default is IGD_p.
+    }
+
+    if (minmax == NULL) {
+        minmax = minmax_minimise(nobj);
+    }
     if (reference == NULL) {
         errprintf ("a reference set must be provided (--reference)");
-        exit (EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
+    reference_size = filter_dominated_set(reference, nobj, reference_size, minmax);
 
     int numfiles = argc - optind;
     if (numfiles < 1) {/* Read stdin.  */
@@ -407,5 +403,7 @@ int main(int argc, char *argv[])
             do_file (argv[optind + k], reference, reference_size, &nobj, minmax);
     }
 
+    free(reference);
+    free((void*)minmax);
     return EXIT_SUCCESS;
 }

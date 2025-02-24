@@ -91,10 +91,8 @@ read_reference_set (double **reference_p, const char *filename, int *nobj_p)
     int err = read_double_data (filename, &reference, &nobj, &cumsizes, &nruns);
     if (!filename) filename = stdin_name;
     handle_read_data_error (err, filename);
-    assert (nruns == 1);
-    reference_size = cumsizes[0];
-
-    free (cumsizes);
+    reference_size = cumsizes[nruns - 1];
+    free(cumsizes);
     *nobj_p = nobj;
     *reference_p = reference;
     return reference_size;
@@ -206,5 +204,26 @@ static inline void set_program_invocation_short_name(char *s)
 {
     if (program_invocation_short_name == NULL || program_invocation_short_name[0] == '\0')
         program_invocation_short_name = s;
+}
+
+static void usage(void);
+
+static inline void default_cmdline_handler(int opt)
+{
+    switch (opt) {
+      case 'V': // --version
+          version();
+          exit(EXIT_SUCCESS);
+      case '?':
+          // getopt prints an error message right here
+          fprintf(stderr, "Try `%s --help' for more information.\n",
+                  program_invocation_short_name);
+          exit(EXIT_FAILURE);
+      case 'h':
+          usage();
+          exit(EXIT_SUCCESS);
+      default:
+          unreachable();
+    }
 }
 #endif

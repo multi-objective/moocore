@@ -285,6 +285,10 @@ get_nondominated_set (double **pareto_set_p,
                       const double *points, int dim, int size,
                       const signed char *minmax)
 {
+    ASSUME(dim >= 1);
+    ASSUME(dim <= 32);
+    ASSUME(size > 0);
+
     bool *nondom  = nondom_init(size);
     int new_size = find_nondominated_set (points, dim, size, minmax, nondom);
 
@@ -300,16 +304,58 @@ get_nondominated_set (double **pareto_set_p,
     }
 
     double *pareto_set = malloc (sizeof (double) * new_size * dim);
-    int n, k;
-    // FIXME: We could use new_size to stop earlier.
-    for (n = 0, k = 0; n < size; n++) {
-        if (!nondom[n]) continue;
-        memcpy(&pareto_set[dim * k], &points[dim * n], sizeof(points[0]) * dim);
-        k++;
+    if (new_size < size) {
+        int n = 0, k = 0;
+        do {
+            while (!nondom[n]) n++;
+            memcpy(pareto_set + dim * k, points + dim * n, sizeof(points[0]) * dim);
+            k++;
+            n++;
+        } while (k < new_size);
+    } else {
+        // Nothing is dominated. Copy everything in one go.
+        memcpy(pareto_set, points, sizeof(points[0]) * dim * size);
     }
-    eaf_assert (k == new_size);
     free (nondom);
     *pareto_set_p = pareto_set;
+    return new_size;
+}
+
+static inline int
+filter_dominated_set (double *points, int dim, int size,
+                      const signed char *minmax)
+{
+    ASSUME(dim >= 1);
+    ASSUME(dim <= 32);
+    ASSUME(size > 0);
+
+    bool *nondom  = nondom_init(size);
+    int new_size = find_nondominated_set (points, dim, size, minmax, nondom);
+
+    DEBUG2 (
+        fprintf (stderr, "# size\tnondom\tdom\n");
+        fprintf (stderr, "  %d\t%d\t%d\n",
+                 size, new_size, size - new_size);
+        );
+
+    if (new_size > size) {/* This can't happen.  */
+        fatal_error ("%s:%d: a bug happened: new_size > old_size!\n",
+                     __FILE__, __LINE__);
+    }
+
+    if (new_size < size) {
+        int k = 0;
+        while (nondom[k]) k++; // Find first dominated.
+        int n = k;
+        while (k < new_size) {
+            do {
+                n++;
+            } while (!nondom[n]); // Find next nondominated.
+            memcpy(points + dim * k, points + dim * n, sizeof(points[0]) * dim);
+            k++;
+        }
+    }
+    free (nondom);
     return new_size;
 }
 

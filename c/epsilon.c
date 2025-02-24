@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
     int reference_size = 0;
     const signed char *minmax = NULL;
     bool maximise_flag = false;
-    int nobj = 0;
+    int nobj = 0, tmp_nobj = 0;
 
     /* see the man page for getopt_long for an explanation of these fields */
     static const struct option long_options[] = {
@@ -218,29 +218,37 @@ int main(int argc, char *argv[])
         case 'o': // --obj
             if (minmax != NULL)
                 free((void *) minmax);
-            minmax = read_minmax (optarg, &nobj);
+            minmax = read_minmax (optarg, &tmp_nobj);
             if (minmax == NULL) {
-                fprintf(stderr, "%s: invalid argument '%s' for -o, --obj\n",
-                        program_invocation_short_name,optarg);
+                errprintf ("invalid argument '%s' for -o, --obj"
+                           ", it should be a sequence of '+' or '-'\n", optarg);
+                exit(EXIT_FAILURE);
+            }
+            if (nobj == 0) {
+                nobj = tmp_nobj;
+            } else if (tmp_nobj != nobj) {
+                errprintf ("number of objectives in --obj (%d) and reference set (%d) do not match", tmp_nobj, nobj);
                 exit(EXIT_FAILURE);
             }
             break;
 
         case 'r': // --reference
-            reference_size = read_reference_set (&reference, optarg, &nobj);
+            reference_size = read_reference_set(&reference, optarg, &tmp_nobj);
             if (reference == NULL || reference_size <= 0) {
                 errprintf ("invalid reference set '%s", optarg);
-                exit (EXIT_FAILURE);
+                exit(EXIT_FAILURE);
+            }
+            if (nobj == 0) {
+                nobj = tmp_nobj;
+            } else if (tmp_nobj != nobj) {
+                errprintf ("number of objectives in --obj (%d) and reference set (%d) do not match", nobj, tmp_nobj);
+                exit(EXIT_FAILURE);
             }
             break;
 
         case 's': // --suffix
             suffix = optarg;
             break;
-
-        case 'V': // --version
-            version();
-            exit(EXIT_SUCCESS);
 
         case 'q': // --quiet
             verbose_flag = false;
@@ -250,16 +258,8 @@ int main(int argc, char *argv[])
             verbose_flag = true;
             break;
 
-        case '?':
-            // getopt prints an error message right here
-            fprintf(stderr, "Try `%s --help' for more information.\n",
-                    program_invocation_short_name);
-            exit(EXIT_FAILURE);
-        case 'h':
-            usage();
-            exit(EXIT_SUCCESS);
-        default: // should never happen
-            abort();
+        default:
+            default_cmdline_handler(opt);
         }
     }
 
@@ -268,10 +268,14 @@ int main(int argc, char *argv[])
                  ? "# Additive epsilon indicator\n"
                  : "# Multiplicative epsilon indicator\n");
 
+    if (minmax == NULL) {
+        minmax = minmax_minimise(nobj);
+    }
     if (reference == NULL) {
         errprintf ("a reference set must be provided (--reference)");
         exit (EXIT_FAILURE);
     }
+    reference_size = filter_dominated_set(reference, nobj, reference_size, minmax);
 
     int numfiles = argc - optind;
     if (numfiles < 1) {/* Read stdin.  */
@@ -305,5 +309,7 @@ int main(int argc, char *argv[])
             do_file (argv[optind + k], reference, reference_size, &nobj, minmax, maximise_flag);
     }
 
+    free(reference);
+    free((void*)minmax);
     return EXIT_SUCCESS;
 }

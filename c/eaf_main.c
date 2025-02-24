@@ -300,22 +300,8 @@ int main(int argc, char *argv[])
             verbose_flag = true;
             break;
 
-        case 'V': // --version
-            version();
-            exit(EXIT_SUCCESS);
-
-        case 'h': // --help
-            usage();
-            exit(EXIT_SUCCESS);
-
-        case '?':
-            // getopt prints an error message right here
-            fprintf(stderr, "Try `%s --help' for more information.\n",
-                    program_invocation_short_name);
-            exit(EXIT_FAILURE);
-
         default:
-            abort ();
+            default_cmdline_handler(option);
         }
     }
 
