@@ -23,6 +23,7 @@ headers = """
 #include "eaf.h"
 #include "whv.h"
 #include "whv_hype.h"
+#include "hvapprox.h"
 """
 sources = [
     "avl.c",
@@ -30,6 +31,7 @@ sources = [
     "eaf3d.c",
     "eafdiff.c",
     "hv.c",
+    "hvapprox.c",
     "hv3dplus.c",
     "hv4d.c",
     "hv_contrib.c",

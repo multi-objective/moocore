@@ -1,4 +1,13 @@
-files <- c("hv", "epsilon","igd","dominatedsets","nondominated","ndsort", "eaf")
+files <- c(
+  "dominatedsets",
+  "eaf",
+  "epsilon",
+  "hv",
+  "hvapprox",
+  "igd",
+  "ndsort",
+  "nondominated"
+)
 
 file_move <- function(from, to) {
   file.copy(from = from, to = to, overwrite = TRUE)

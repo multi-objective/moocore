@@ -6,8 +6,6 @@ from collections.abc import Callable
 from numpy.typing import ArrayLike  # For type hints
 from typing import Literal, Any
 
-from math import gamma as gamma_function
-from math import ldexp
 # NOTE: if we ever start using SciPy, we can use
 # from scipy.special import gamma_function
 
@@ -748,17 +746,19 @@ def hv_approx(
     maximise: bool | list[bool] = False,
     nsamples: int = 100000,
     seed: int | np.random.Generator | None = None,
-    method: Literal["DZ2019"] = "DZ2019",
+    method: Literal["DZ2019-HW", "DZ2019-MC"] = "DZ2019-HW",
 ) -> float:
     r"""Approximate the hypervolume indicator.
 
     Approximate the value of the hypervolume metric with respect to a given
     reference point assuming minimization of all objectives. The default
-    ``method="DZ2019"`` relies on Monte-Carlo sampling
-    :footcite:p:`DenZha2019approxhv` and, thus, it gets more accurate, but
-    slower, for higher values of ``nsamples``.
+    ``method="DZ2019-HW"`` is deterministic and ignores the parameter ``seed``,
+    while ``method="DZ2019-MC"`` relies on Monte-Carlo sampling
+    :footcite:p:`DenZha2019approxhv`.  Both methods tend to get more accurate,
+    for higher values of ``nsamples``, but the increase in accuracy is not
+    monotonic as shown in the example :ref:`sphx_glr_auto_examples_plot_hv_approx.py`.
 
-    .. seealso:: For details of the calculation, see :ref:`hv_approximation`.
+    .. seealso:: For details of the calculation, see the Notes section below.
 
 
     Parameters
@@ -780,13 +780,38 @@ def hv_approx(
         default random number generator (RNG) or an instance of a
         Numpy-compatible RNG. ``None`` uses the equivalent of a random seed
         (see :func:`numpy.random.default_rng`).
-
     method :
         Method to approximate the hypervolume.
 
     Returns
     -------
         A single numerical value, the approximate hypervolume indicator.
+
+    Notes
+    -----
+    This function implements the methods proposed by
+    :cite:t:`DenZha2019approxhv` to approximate the hypervolume:
+
+    .. math::
+       \widehat{HV}_r(A) = \frac{2\pi^\frac{m}{2}}{\Gamma(\frac{m}{2})}\frac{1}{m 2^m}\frac{1}{n}\sum_{i=1}^n \max_{y \in A} s(w^{(i)}, y)^m
+
+    where :math:`m` is the number of objectives, :math:`n` is the number of
+    weights :math:`w^{(i)}` sampled, :math:`\Gamma()` is the gamma function
+    :func:`math.gamma()`, i.e., the analytical continuation of the factorial
+    function, and :math:`s(w, y) = \min_{k=1}^m (r_k - y_k)/w_k`.
+
+    In the default ``method="DZ2019-HW"``, the weights :math:`w^{(i)},
+    i=1\ldots n` are defined using a deterministic low-discrepancy
+    sequence. The weight values depend on their number (``nsamples``), thus
+    increasing the number of weights may not necessarily increase accuracy
+    because the set of weights would be different. In ``method="DZ2019-MC"``,
+    the weights :math:`w^{(i)}, i=1\ldots n` are sampled from the unit normal
+    vector such that each weight :math:`w = \frac{|x|}{\|x\|_2}` where each
+    component of :math:`x` is independently sampled from the standard normal
+    distribution.  The original source code in C++/MATLAB for both methods can
+    be found `here
+    <https://github.com/Ksrma/Hypervolume-Approximation-using-polar-coordinate>`_.
+
 
     References
     ----------
@@ -795,10 +820,12 @@ def hv_approx(
     Examples
     --------
     >>> x = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
-    >>> moocore.hv_approx(x, ref=[10, 10], seed=42)
-    37.95471
     >>> moocore.hypervolume(x, ref=[10, 10])
     38.0
+    >>> moocore.hv_approx(x, ref=[10, 10], seed=42, method="DZ2019-MC")
+    38.01475
+    >>> moocore.hv_approx(x, ref=[10, 10], method="DZ2019-HW")
+    37.99989
 
     Merge all the sets of a dataset by removing the set number column:
 
@@ -806,32 +833,32 @@ def hv_approx(
 
     Dominated points are ignored, so this:
 
-    >>> moocore.hv_approx(x, ref=10, seed=42)
-    93.348976559100
+    >>> moocore.hv_approx(x, ref=10)
+    93.5533
 
     gives the same hypervolume approximation as this:
 
     >>> x = moocore.filter_dominated(x)
-    >>> moocore.hv_approx(x, ref=10, seed=42)
-    93.348976559100
+    >>> moocore.hv_approx(x, ref=10)
+    93.5533
 
-    The approximation is far from perfect for large sets:
+    The approximation is far from perfect for large number of dimensions:
 
-    >>> x = moocore.get_dataset("CPFs.txt")[:, :-1]
+    >>> x = moocore.get_dataset("ran.10pts.9d.10")[:, :-1]
     >>> x = moocore.filter_dominated(-x, maximise=True)
     >>> x = moocore.normalise(x, to_range=[1, 2])
     >>> reference = 0.9
     >>> moocore.hypervolume(x, ref=reference, maximise=True)
-    1.0570447464301551
-    >>> moocore.hv_approx(x, ref=reference, maximise=True, seed=42)
-    1.056312559097445
+    0.483633123747
+    >>> moocore.hv_approx(x, ref=reference, maximise=True)
+    0.4852583123
 
     """
     # Convert to numpy.array in case the user provides a list.  We use
     # np.asarray to convert it to floating-point, otherwise if a user inputs
     # something like ref = np.array([10, 10]) then numpy would interpret it as
     # an int array.
-    data = np.asarray(data, dtype=float)
+    data, data_copied = asarray_maybe_copy(data)
     nobj = data.shape[1]
     ref = atleast_1d_of_length_n(np.array(ref, dtype=float), nobj)
     if nobj != ref.shape[0]:
@@ -839,37 +866,31 @@ def hv_approx(
             f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
         )
 
+    maximise = _parse_maximise(maximise, nobj)
+    maximise = ffi.from_buffer("bool []", maximise)
+    data_p, npoints, nobj = np2d_to_double_array(data)
+    ref = ffi.from_buffer("double []", ref)
+
     if not is_integer_value(nsamples):
         raise ValueError(f"nsamples must be an integer value: {nsamples}")
+    nsamples = ffi.cast("uint_fast32_t", nsamples)
+    if method == "DZ2019-MC":
+        if not is_integer_value(seed):
+            seed = np.random.default_rng(seed).integers(
+                2**32 - 2, dtype=np.uint32
+            )
+        seed = ffi.cast("uint32_t", seed)
+        hv = lib.hv_approx_normal(
+            data_p, nobj, npoints, ref, maximise, nsamples, seed
+        )
+    elif method == "DZ2019-HW":
+        hv = lib.hv_approx_hua_wang(
+            data_p, nobj, npoints, ref, maximise, nsamples
+        )
+    else:
+        raise ValueError("Unknown value of method = {method}")
 
-    if seed is None or is_integer_value(seed):
-        seed = np.random.default_rng(seed)
-
-    # FIXME: Do this in C.
-    data = ref - data
-    maximise = _parse_maximise(maximise, nobj)
-    if maximise.any():
-        data *= np.where(maximise, -1, 1)
-
-    # Equivalent to max(0, y - ref), i.e., ignore points that do not strictly
-    # dominate ref.
-    data = data[(data > 0).all(axis=1), :]
-
-    expected = np.empty(nsamples, dtype=float)
-    # We could do it without the loop but it will consume lots of memory.
-    #  y / W[:, np.newaxis,:]
-    # or we could use np.apply_along_axis()
-    for k in range(nsamples):
-        # Sample in the positive orthant of the hyper-sphere.
-        w = np.abs(seed.normal(size=nobj))
-        w /= np.linalg.norm(w)
-        s_w = (data / w).min(axis=1)
-        expected[k] = s_w.max()
-
-    expected = (expected**nobj).mean()
-    # ldexp(x, n) = x * 2^n
-    c_m = (np.pi ** (nobj / 2)) / ldexp(gamma_function(nobj / 2 + 1), nobj)
-    return float(c_m * expected)
+    return hv
 
 
 def is_nondominated(

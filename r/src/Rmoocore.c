@@ -300,8 +300,8 @@ normalise_C(SEXP DATA, SEXP RANGE, SEXP LBOUND, SEXP UBOUND, SEXP MAXIMISE)
 
     assert(nobj == lbound_len);
     assert(nobj == ubound_len);
-    assert (nobj == maximise_len);
-    assert (range_len == 2);
+    assert(nobj == maximise_len);
+    assert(range_len == 2);
 
     agree_normalise(data, nobj, npoint, maximise, range[0], range[1],
                     lbound, ubound);
@@ -416,6 +416,41 @@ whv_hype_C(SEXP DATA, SEXP IDEAL, SEXP REFERENCE, SEXP NSAMPLES, SEXP DIST, SEXP
     } else {
         Rf_error("unknown 'dist' value: %s", dist_type);
     }
+    return Rf_ScalarReal(hv);
+}
+
+#include "hvapprox.h"
+
+SEXP
+hv_approx_dz2019_mc_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE, SEXP NSAMPLES, SEXP SEED)
+{
+    SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoints);
+    SEXP_2_DOUBLE_VECTOR(REFERENCE, ref, reference_len);
+    SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
+    SEXP_2_INT(NSAMPLES, nsamples);
+    SEXP_2_UINT32(SEED, seed);
+
+    assert(nobj == reference_len);
+    assert(nobj == maximise_len);
+
+    double hv = hv_approx_normal(data, nobj, npoints, ref, maximise, (uint_fast32_t) nsamples, seed);
+    free (maximise);
+    return Rf_ScalarReal(hv);
+}
+
+SEXP
+hv_approx_dz2019_hw_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE, SEXP NSAMPLES)
+{
+    SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoints);
+    SEXP_2_DOUBLE_VECTOR(REFERENCE, ref, reference_len);
+    SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
+    SEXP_2_INT(NSAMPLES, nsamples);
+
+    assert(nobj == reference_len);
+    assert(nobj == maximise_len);
+
+    double hv = hv_approx_hua_wang(data, nobj, npoints, ref, maximise, (uint_fast32_t) nsamples);
+    free (maximise);
     return Rf_ScalarReal(hv);
 }
 

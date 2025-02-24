@@ -83,7 +83,8 @@ hypervolume <- function(x, reference, maximise = FALSE)
 {
   x <- as_double_matrix(x)
   nobjs <- ncol(x)
-  if (is.null(reference)) stop("reference cannot be NULL")
+  if (!is.numeric(reference))
+    stop("a numerical reference vector must be provided")
   if (length(reference) == 1L) reference <- rep_len(reference, nobjs)
 
   if (any(maximise)) {

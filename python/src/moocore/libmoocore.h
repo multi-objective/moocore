@@ -33,6 +33,14 @@ double whv_hype_gaus(const double *points, int npoints,
 /* whv.h */
 double rect_weighted_hv2d(double *data, int n, double * rectangles, int rectangles_nrow, const double * reference);
 
+/* hvapprox.h */
+double hv_approx_hua_wang(const double * data, int nobjs, int npoints,
+                          const double * ref, const bool * maximise,
+                          uint_fast32_t nsamples);
+double hv_approx_normal(const double * data, int nobjs, int npoints,
+                        const double * ref, const bool * maximise,
+                        uint_fast32_t nsamples, uint32_t seed);
+
 /*
 typedef ... hype_sample_dist;
 hype_sample_dist * hype_dist_unif_new(unsigned long seed);

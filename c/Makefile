@@ -93,11 +93,13 @@ SRCS =  avl.c                                                                \
         hv3dplus.c                                                           \
         hv4d.c                                                               \
         hv.c                                                                 \
+        hvapprox.c                                                           \
         hv_contrib.c                                                         \
         igd.c                                                                \
         io.c                                                                 \
         libutil.c                                                            \
         main-hv.c                                                            \
+        main-hvapprox.c                                                      \
         mt19937/mt19937.c                                                    \
         ndsort.c                                                             \
         nondominated.c                                                       \
@@ -118,6 +120,7 @@ HDRS =  avl.h                                                                \
         epsilon.h                                                            \
         gcc_attribs.h                                                        \
         hv.h                                                                 \
+        hvapprox.h                                                           \
         hv_priv.h                                                            \
         igd.h                                                                \
         io.h                                                                 \
@@ -156,13 +159,14 @@ EXE_CFLAGS += $(SANITIZERS) $(OPT_CFLAGS) $(MARCH_FLAGS) $(WARN_CFLAGS) \
 dominatedsetsexe = $(BINDIR)/dominatedsets$(EXE)
 eafexe=$(BINDIR)/eaf$(EXE)
 epsilonexe = $(BINDIR)/epsilon$(EXE)
+hvapproxexe=$(BINDIR)/hvapprox$(EXE)
 hvexe=$(BINDIR)/hv$(EXE)
 igdexe = $(BINDIR)/igd$(EXE)
 ndsortexe = $(BINDIR)/ndsort$(EXE)
 nondominatedexe = $(BINDIR)/nondominated$(EXE)
-allexes=$(dominatedsetsexe) $(eafexe) $(epsilonexe) $(hvexe) $(igdexe) $(ndsortexe) $(nondominatedexe)
+allexes=$(dominatedsetsexe) $(eafexe) $(epsilonexe) $(hvexe) $(hvapproxexe) $(igdexe) $(ndsortexe) $(nondominatedexe)
 
-.PHONY : all clean default dist dominatedsets eaf epsilon hv igd ndsort nondominated test time
+.PHONY : all clean default dist dominatedsets eaf epsilon hv hvapprox igd ndsort nondominated test time
 
 default: $(allexes)
 
@@ -176,19 +180,21 @@ dominatedsets: $(dominatedsetsexe)
 eaf: $(eafexe)
 epsilon: $(epsilonexe)
 hv: $(hvexe)
+hvapprox: $(hvapproxexe)
 igd: $(igdexe)
 ndsort: $(ndsortexe)
 nondominated: $(nondominatedexe)
 
 include libhv.mk
 
-$(dominatedsetsexe): OBJS:=dominatedsets.o
-$(eafexe): OBJS:=eaf.o eaf_main.o eaf3d.o avl.o
-$(epsilonexe): OBJS:=epsilon.o
-$(hvexe): OBJS:=main-hv.o timer.o $(LIBHV_OBJS)
-$(igdexe): OBJS:=igd.o
-$(ndsortexe): OBJS:=ndsort.o pareto.o hv_contrib.o $(LIBHV_OBJS)
-$(nondominatedexe): OBJS:=nondominated.o
+$(dominatedsetsexe): dominatedsets.o
+$(eafexe): eaf.o eaf_main.o eaf3d.o avl.o
+$(epsilonexe): epsilon.o
+$(hvapproxexe): main-hvapprox.o timer.o hvapprox.o rng.o mt19937/mt19937.o
+$(hvexe): main-hv.o timer.o $(LIBHV_OBJS)
+$(igdexe): igd.o
+$(ndsortexe): ndsort.o pareto.o hv_contrib.o $(LIBHV_OBJS)
+$(nondominatedexe): nondominated.o
 
 dominatedsets.o: cmdline.h io.h nondominated.h
 eaf_main.o: cmdline.h io.h eaf.h
@@ -196,6 +202,8 @@ epsilon.o: cmdline.h io.h epsilon.h nondominated.h
 main-hv.o: cmdline.h io.h hv.h timer.h
 ndsort.o: cmdline.h io.h nondominated.h
 nondominated.o : cmdline.h io.h nondominated.h
+main-hvapprox.o: cmdline.h io.h hvapprox.h
+hvapprox.o: hvapprox.h pow_int.h
 timer.o: timer.h
 eaf.o eaf3d.h: eaf.h
 cmdline.o: cmdline.h io.h
@@ -204,10 +212,10 @@ igd.o : cmdline.h io.h igd.h
 avl.o: avl.h
 $(OBJS): common.h gcc_attribs.h
 
-$(allexes): $(OBJS) cmdline.o io.o
+$(allexes): cmdline.o io.o
 	$(call MKDIR, $(BINDIR)/)
 	$(call ECHO,--> Building $@ version $(VERSION) <---)
-	$(QUIET_LINK)$(CC) -o $@ $(OBJS) cmdline.o io.o $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS)
+	$(QUIET_LINK)$(CC) -o $@ $^ $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS)
 
 clean:
 	@-$(RM) config.status config.log

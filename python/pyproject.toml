@@ -72,7 +72,7 @@ package-dir = { "" = "src" }
 
 [tool.setuptools.package-data]
 "*" = [ "*.c", "*.h" ]
-"moocore.data" = [ "*.txt", "*.dat", "*.xz", "*.csv" ]
+"moocore.data" = [ "*.txt", "*.dat", "*.xz", "*.csv", "*.10" ]
 
 [tool.cibuildwheel]
 skip = [

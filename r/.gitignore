@@ -20,6 +20,7 @@ src/dominatedsets
 src/eaf
 src/epsilon
 src/hv
+src/hvapprox
 src/igd
 src/ndsort
 src/nondominated

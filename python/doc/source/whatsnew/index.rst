@@ -15,6 +15,7 @@ Version 0.1.8 (dev)
 - New example :ref:`sphx_glr_auto_examples_plot_eaf.py`.
 - Document EAF and Vorob'ev expectation and deviation in more detail.
 - New online dataset: ``DTLZLinearShape.8d.front.60pts.10`` (see :func:`~moocore.get_dataset`).
+- New default method in :func:`~moocore.hv_approx`. Computation is now done in C, so it is much faster.
 
 
 Version 0.1.7 (04/06/2025)
