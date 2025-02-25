@@ -236,6 +236,7 @@ int main(int argc, char *argv[])
            IGD_opt, GD_p_opt, IGD_p_opt, IGD_plus_opt, hausdorff_opt};
 
     /* see the man page for getopt_long for an explanation of these fields */
+    static const char short_options[] = "hVvqamr:us:o:";
     static const struct option long_options[] = {
         {"gd",   no_argument,       NULL, GD_opt},
         {"igd",   no_argument,       NULL, IGD_opt},
@@ -253,7 +254,6 @@ int main(int argc, char *argv[])
         {"reference",  required_argument, NULL, 'r'},
         {"suffix",     required_argument, NULL, 's'},
         {"obj",        required_argument, NULL, 'o'},
-
         {NULL, 0, NULL, 0} /* marks end of list */
     };
 
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 
     int opt;
     int longopt_index;
-    while (0 < (opt = getopt_long(argc, argv, "hVvqamr:us:o:",
+    while (0 < (opt = getopt_long(argc, argv, short_options,
                                   long_options, &longopt_index))) {
         switch (opt) {
           case 'p':
@@ -303,20 +303,7 @@ int main(int argc, char *argv[])
               break;
 
         case 'o': // --obj
-            if (minmax != NULL)
-                free((void *) minmax);
-            minmax = read_minmax (optarg, &tmp_nobj);
-            if (minmax == NULL) {
-                errprintf ("invalid argument '%s' for -o, --obj"
-                           ", it should be a sequence of '+' or '-'\n", optarg);
-                exit(EXIT_FAILURE);
-            }
-            if (nobj == 0) {
-                nobj = tmp_nobj;
-            } else if (tmp_nobj != nobj) {
-                errprintf ("number of objectives in --obj (%d) and reference set (%d) do not match", tmp_nobj, nobj);
-                exit(EXIT_FAILURE);
-            }
+            minmax = parse_cmdline_minmax(minmax, optarg, &nobj);
             break;
 
         case 'r': // --reference

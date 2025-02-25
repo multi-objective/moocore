@@ -81,16 +81,15 @@ static void usage(void)
 "Calculates the epsilon measure for the Pareto sets given as input\n\n"
 
 "Options:\n"
-" -h, --help           give  this summary and exit.                          \n"
-"     --version        print version number and exit.                        \n"
+OPTION_HELP_STR
+OPTION_VERSION_STR
 " -v, --verbose        print some information (time, number of points, etc.).\n"
-" -q, --quiet          print as little as possible.                          \n"
+OPTION_QUIET_STR
 " -a, --additive       epsilon additive value %s.                       \n"
 " -m, --multiplicative epsilon multiplicative value %s.                 \n"
 " -r, --reference FILE file that contains the reference set                  \n"
-"     --maximise       all objectives must be maximised; \n"
-" -o, --obj [+|-]...   specify whether each objective should be minimised (-)\n"
-"                      or maximised (+) (default all minimised).             \n"
+OPTION_OBJ_STR
+OPTION_MAXIMISE_STR
 " -s, --suffix=STRING  Create an output file for each input file by appending\n"
 "                      this suffix. This is ignored when reading from stdin. \n"
 "                      If missing, output is sent to stdout.                 \n"
@@ -99,7 +98,7 @@ static void usage(void)
 
 static void
 do_file (const char *filename, double *reference, int reference_size,
-         int *nobj_p, const signed char * minmax, bool maximise_flag)
+         int *nobj_p, const signed char * minmax, bool maximise_all_flag)
 {
     double *data = NULL;
     int *cumsizes = NULL;
@@ -129,7 +128,7 @@ do_file (const char *filename, double *reference, int reference_size,
     /* Default minmax if not set yet.  */
     bool free_minmax = false;
     if (minmax == NULL) {
-        minmax = maximise_flag ? minmax_maximise(nobj) : minmax_minimise(nobj);
+        minmax = maximise_all_flag ? minmax_maximise(nobj) : minmax_minimise(nobj);
         free_minmax = true;
     }
 
@@ -176,10 +175,11 @@ int main(int argc, char *argv[])
     double *reference = NULL;
     int reference_size = 0;
     const signed char *minmax = NULL;
-    bool maximise_flag = false;
+    bool maximise_all_flag = false;
     int nobj = 0, tmp_nobj = 0;
 
     /* see the man page for getopt_long for an explanation of these fields */
+    static const char short_options[] = "hVvqamr:us:o:";
     static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
         {"version",    no_argument,       NULL, 'V'},
@@ -192,7 +192,6 @@ int main(int argc, char *argv[])
         {"reference",  required_argument, NULL, 'r'},
         {"suffix",     required_argument, NULL, 's'},
         {"obj",        required_argument, NULL, 'o'},
-
         {NULL, 0, NULL, 0} /* marks end of list */
     };
 
@@ -200,7 +199,7 @@ int main(int argc, char *argv[])
 
     int opt; /* it's actually going to hold a char */
     int longopt_index;
-    while (0 < (opt = getopt_long(argc, argv, "hVvqamr:us:o:",
+    while (0 < (opt = getopt_long(argc, argv, short_options,
                                   long_options, &longopt_index))) {
         switch (opt) {
         case 'a': // --additive
@@ -212,24 +211,11 @@ int main(int argc, char *argv[])
             break;
 
         case 'M': // --maximise
-            maximise_flag = true;
+            maximise_all_flag = true;
             break;
 
         case 'o': // --obj
-            if (minmax != NULL)
-                free((void *) minmax);
-            minmax = read_minmax (optarg, &tmp_nobj);
-            if (minmax == NULL) {
-                errprintf ("invalid argument '%s' for -o, --obj"
-                           ", it should be a sequence of '+' or '-'\n", optarg);
-                exit(EXIT_FAILURE);
-            }
-            if (nobj == 0) {
-                nobj = tmp_nobj;
-            } else if (tmp_nobj != nobj) {
-                errprintf ("number of objectives in --obj (%d) and reference set (%d) do not match", tmp_nobj, nobj);
-                exit(EXIT_FAILURE);
-            }
+            minmax = parse_cmdline_minmax(minmax, optarg, &nobj);
             break;
 
         case 'r': // --reference
@@ -279,9 +265,9 @@ int main(int argc, char *argv[])
 
     int numfiles = argc - optind;
     if (numfiles < 1) {/* Read stdin.  */
-        do_file (NULL, reference, reference_size, &nobj, minmax, maximise_flag);
+        do_file (NULL, reference, reference_size, &nobj, minmax, maximise_all_flag);
     } else if (numfiles == 1) {
-        do_file (argv[optind], reference, reference_size, &nobj, minmax, maximise_flag);
+        do_file (argv[optind], reference, reference_size, &nobj, minmax, maximise_all_flag);
     } else {
         int k;
         /* FIXME: Calculate the nondominated front among all input
@@ -306,7 +292,7 @@ int main(int argc, char *argv[])
         }
 #endif
         for (k = 0; k < numfiles; k++)
-            do_file (argv[optind + k], reference, reference_size, &nobj, minmax, maximise_flag);
+            do_file (argv[optind + k], reference, reference_size, &nobj, minmax, maximise_all_flag);
     }
 
     free(reference);

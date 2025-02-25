@@ -62,8 +62,6 @@ static void usage(void)
 "Options:\n"
 OPTION_HELP_STR
 OPTION_VERSION_STR
-" -h, --help          give  this summary and exit.                          \n"
-"     --version       print version number and exit.                        \n"
 " -v, --verbose       print some information (time, number of points, etc.) \n"
 OPTION_QUIET_STR
 //" -H, --hypervolume   use hypervolume contribution to break ties            \n"
@@ -133,6 +131,7 @@ int main(int argc, char *argv[])
 //    bool keep_uevs_flag = false;
 
     /* see the man page for getopt_long for an explanation of these fields */
+    static const char short_options[] = "hVvqkro:";
     static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
         {"version",    no_argument,       NULL, 'V'},
@@ -149,7 +148,7 @@ int main(int argc, char *argv[])
 
     int opt; /* it's actually going to hold a char */
     int longopt_index;
-    while (0 < (opt = getopt_long(argc, argv, "hVvqkro:",
+    while (0 < (opt = getopt_long(argc, argv, short_options,
                                   long_options, &longopt_index))) {
         switch (opt) {
         case 'q': // --quiet
@@ -171,12 +170,7 @@ int main(int argc, char *argv[])
             break;
 
         case 'o': // --obj
-            minmax = read_minmax (optarg, &dim);
-            if (minmax == NULL) {
-                fprintf(stderr, "%s: invalid argument '%s' for -o, --obj\n",
-                        program_invocation_short_name,optarg);
-                exit(EXIT_FAILURE);
-            }
+            minmax = parse_cmdline_minmax(minmax, optarg, &dim);
             break;
 
         default:

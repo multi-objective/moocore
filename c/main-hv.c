@@ -73,8 +73,8 @@ static void usage(void)
 "With no FILE, or when FILE is -, read standard input.\n\n"
 
 "Options:\n"
-" -h, --help          print this summary and exit.                          \n"
-"     --version       print version number and exit.                        \n"
+OPTION_HELP_STR
+OPTION_VERSION_STR
 " -v, --verbose       print some information (time, maximum, etc).          \n"
 " -q, --quiet         print just the hypervolume (as opposed to --verbose). \n"
 " -u, --union         treat all input sets within a FILE as a single set.   \n"
@@ -220,6 +220,7 @@ hv_file (const char *filename, double *reference,
 int main(int argc, char *argv[])
 {
     /* See the man page for getopt_long for an explanation of these fields.  */
+    static const char short_options[] = "hVvqur:s:S";
     static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
         {"version",    no_argument,       NULL, 'V'},
@@ -236,10 +237,10 @@ int main(int argc, char *argv[])
 
     double *reference = NULL;
     int nobj = 0;
+
     int opt; /* it's actually going to hold a char.  */
     int longopt_index;
-
-    while (0 < (opt = getopt_long (argc, argv, "hVvqur:s:S",
+    while (0 < (opt = getopt_long (argc, argv, short_options,
                                    long_options, &longopt_index))) {
         switch (opt) {
         case 'r': // --reference

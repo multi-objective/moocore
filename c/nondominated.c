@@ -83,7 +83,7 @@ OPTION_VERSION_STR
 OPTION_QUIET_STR
 "     --no-check      do not check nondominance of sets (faster but unsafe);\n"
 OPTION_OBJ_STR
-" -m, --maximise      all objectives must be maximised;\n"
+OPTION_MAXIMISE_STR
 " -u, --upper-bound POINT defines an upper bound to check, e.g. \"10 5 30\";\n"
 " -l, --lower-bound POINT defines a lower bound to check;\n"
 " -U, --union         consider each file as a whole approximation set,      \n"
@@ -357,7 +357,7 @@ process_file (const char *filename,
               double lrange, double urange,
               double *lbound, double *ubound,
               double **minimum_p, double **maximum_p,
-              bool check_minimum, bool check_maximum, bool maximise_flag,
+              bool check_minimum, bool check_maximum, bool maximise_all_flag,
               const bool *logarithm)
 {
     bool *nondom = NULL;
@@ -381,7 +381,7 @@ process_file (const char *filename,
     /* Default minmax if not set yet.  */
     bool free_minmax = false;
     if (minmax == NULL) {
-        minmax = maximise_flag ? minmax_maximise(nobj) : minmax_minimise(nobj);
+        minmax = maximise_all_flag ? minmax_maximise(nobj) : minmax_minimise(nobj);
         free_minmax = true;
     }
 
@@ -516,11 +516,12 @@ int main(int argc, char *argv[])
     double *upper_bound = NULL;
 
     const signed char *minmax = NULL;
-    bool maximise_flag = false;
+    bool maximise_all_flag = false;
     const bool *logarithm = NULL;
     int nobj = 0;
 
     /* see the man page for getopt_long for an explanation of these fields */
+    static const char short_options[] = "hVvqfo:a:n:u:l:Us:b";
     static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
         {"version",    no_argument,       NULL, 'V'},
@@ -531,22 +532,21 @@ int main(int argc, char *argv[])
         {"force-bounds",no_argument,      NULL, 'b'},
         {"obj",        required_argument, NULL, 'o'},
         {"agree",      required_argument, NULL, 'a'},
-        {"maximise",   no_argument,       NULL, 'm'},
-        {"maximize",   no_argument,       NULL, 'm'},
+        {"maximise",   no_argument,       NULL, 'M'},
+        {"maximize",   no_argument,       NULL, 'M'},
         {"normalise",  required_argument, NULL, 'n'},
         {"upper-bound",required_argument, NULL, 'u'},
         {"lower-bound",required_argument, NULL, 'l'},
         {"union",      no_argument,       NULL, 'U'},
         {"suffix",     required_argument, NULL, 's'},
         {"log",        required_argument, NULL, 'L'},
-
         {NULL, 0, NULL, 0} /* marks end of list */
     };
     set_program_invocation_short_name(argv[0]);
 
     int opt; /* it's actually going to hold a char */
     int longopt_index;
-    while (0 < (opt = getopt_long (argc, argv, "hVvqfo:a:n:u:l:Us:b",
+    while (0 < (opt = getopt_long (argc, argv, short_options,
                                    long_options, &longopt_index))) {
         switch (opt) {
         case 'q': // --quiet
@@ -575,14 +575,7 @@ int main(int argc, char *argv[])
             break;
 
         case 'o': // --obj
-            if (minmax != NULL)
-                free((void *) minmax);
-            minmax = read_minmax (optarg, &nobj);
-            if (minmax == NULL) {
-                errprintf ("invalid argument '%s' for -o, --obj"
-                           ", it should be a sequence of '+' or '-'\n", optarg);
-                exit(EXIT_FAILURE);
-            }
+            minmax = parse_cmdline_minmax(minmax, optarg, &nobj);
             break;
 
         case 'a': // --agree
@@ -598,8 +591,8 @@ int main(int argc, char *argv[])
             }
             break;
 
-        case 'm': // --maximise
-            maximise_flag = true;
+        case 'M': // --maximise
+            maximise_all_flag = true;
             break;
 
         case 'n': // --normalise
@@ -660,7 +653,7 @@ int main(int argc, char *argv[])
                           lower_bound, upper_bound,
                           &minimum, &maximum,
                           /*check_minimum=*/true, /*check_maximum=*/true,
-                          maximise_flag, logarithm);
+                          maximise_all_flag, logarithm);
         free(minimum);
         free(maximum);
         free((void*)minmax);
@@ -683,7 +676,7 @@ int main(int argc, char *argv[])
                           lower_bound, upper_bound,
                           &minimum, &maximum,
                           /*check_minimum=*/true, /*check_maximum=*/true,
-                          maximise_flag, logarithm))
+                          maximise_all_flag, logarithm))
             dominated_found = true;
         k = 1;
     }
@@ -698,7 +691,7 @@ int main(int argc, char *argv[])
                           (upper_bound) ? upper_bound : maximum,
                           &tmp_minimum, &tmp_maximum,
                           lower_bound != NULL, upper_bound != NULL,
-                          maximise_flag, logarithm))
+                          maximise_all_flag, logarithm))
             dominated_found = true;
 
         /* If the bounds were given, the real minimum and maximum

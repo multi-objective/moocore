@@ -57,8 +57,8 @@ static void usage(void)
 "With no FILE, or when FILE is -, read standard input.\n\n"
 
 "Options:\n"
-" -h, --help          print this summary and exit                           \n"
-"     --version       print version number (and compilation flags) and exit \n"
+OPTION_HELP_STR
+OPTION_VERSION_STR
 " -v, --verbose       print some information (time, input points, output    \n"
 "                     points, etc) in stderr. Default is --quiet            \n"
 " -o, --output FILE   write output to FILE instead of standard output.      \n"

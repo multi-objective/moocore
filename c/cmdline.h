@@ -12,14 +12,16 @@
 #endif
 
 #define OPTION_HELP_STR \
-    " -h, --help          print this summary and exit;                          \n"
+    " -h, --help          print this summary and exit;\n"
 #define OPTION_VERSION_STR \
-    "     --version       print version number and exit;                        \n"
+    "     --version       print version number (and compilation flags) and exit;\n"
 #define OPTION_OBJ_STR \
     " -o, --obj=[+|-]...  specify whether each objective should be minimised (-)\n" \
-    "                     or maximised (+). By default all are minimised;       \n"
+    "                     or maximised (+). By default all are minimised;\n"
 #define OPTION_QUIET_STR \
-    " -q, --quiet          print as little as possible                           \n"
+    " -q, --quiet         print as little as possible;\n"
+#define OPTION_MAXIMISE_STR \
+    "     --maximise      all objectives must be maximised;\n"
 
 #include <stdbool.h>
 #include <ctype.h> // for isspace()
@@ -206,6 +208,29 @@ static inline void set_program_invocation_short_name(char *s)
         program_invocation_short_name = s;
 }
 
+static inline const signed char *
+parse_cmdline_minmax(const signed char * minmax, const char *optarg, int *nobj_p)
+{
+    int tmp_nobj = 0, nobj = *nobj_p;
+
+    if (minmax != NULL)
+        free((void *) minmax);
+    minmax = read_minmax (optarg, &tmp_nobj);
+    if (minmax == NULL) {
+        errprintf ("invalid argument '%s' for -o, --obj"
+                   ", it should be a sequence of '+' or '-'\n", optarg);
+        exit(EXIT_FAILURE);
+    }
+    if (nobj == 0) {
+        nobj = tmp_nobj;
+    } else if (tmp_nobj != nobj) {
+        errprintf ("number of objectives in --obj (%d) and reference set (%d) do not match", tmp_nobj, nobj);
+        exit(EXIT_FAILURE);
+    }
+    *nobj_p = nobj;
+    return minmax;
+}
+
 static void usage(void);
 
 static inline void default_cmdline_handler(int opt)
@@ -219,7 +244,7 @@ static inline void default_cmdline_handler(int opt)
           fprintf(stderr, "Try `%s --help' for more information.\n",
                   program_invocation_short_name);
           exit(EXIT_FAILURE);
-      case 'h':
+      case 'h': // --help
           usage();
           exit(EXIT_SUCCESS);
       default:

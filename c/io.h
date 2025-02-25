@@ -143,5 +143,17 @@ read_bitvector (const char *str, int *nobj_p)
     return vec;
 }
 
+static inline bool *
+new_bool_maximise(int nobj, bool maximise_all)
+{
+    bool * maximise = malloc(sizeof(bool) * nobj);
+    for (int k = 0; k < nobj; k++) {
+        maximise[k] = maximise_all;
+    }
+    return maximise;
+}
+
+
+
 #endif // R_PACKAGE
 #endif // EAF_INPUT_OUTPUT_H

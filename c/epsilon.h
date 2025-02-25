@@ -79,12 +79,10 @@ epsilon_additive_minmax (int dim, const signed char *minmax,
         for (a = 0; a < size_a; a++) {
             double epsilon_max = -INFINITY;
             for (d = 0; d < dim; d++) {
-                double epsilon_temp;
-                if (minmax[d] < 0)
-                    epsilon_temp = points_a[a * dim + d] - points_b[b * dim + d];
-                else if (minmax[d] > 0)
-                    epsilon_temp = points_b[b * dim + d] - points_a[a * dim + d];
-                else
+                double epsilon_temp = points_a[a * dim + d] - points_b[b * dim + d];
+                if (minmax[d] > 0)
+                    epsilon_temp = -epsilon_temp;
+                else if (minmax[d] == 0)
                     epsilon_temp = 0;
                 epsilon_max = MAX (epsilon_max, epsilon_temp);
             }

@@ -169,5 +169,4 @@ minmax_from_bool(int nobj, const bool * maximise)
     return minmax;
 }
 
-
 #endif 	    /* !LIBMISC_COMMON_H_ */

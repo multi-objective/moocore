@@ -318,6 +318,7 @@ int main(int argc, char *argv[])
 
     int k, n, j;
     /* see the man page for getopt_long for an explanation of these fields */
+    static const char short_options[] = "hVvqpo:";
     static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
         {"version",    no_argument,       NULL, 'V'},
@@ -326,13 +327,14 @@ int main(int argc, char *argv[])
         {"percentages",no_argument,       NULL, 'p'},
         {"no-check",   no_argument,       NULL, 'c'},
         {"obj",        required_argument, NULL, 'o'},
-
         {NULL, 0, NULL, 0} /* marks end of list */
     };
+
     set_program_invocation_short_name(argv[0]);
+
     int opt; /* it's actually going to hold a char */
     int longopt_index;
-    while (0 < (opt = getopt_long(argc, argv, "hVvqpo:",
+    while (0 < (opt = getopt_long(argc, argv, short_options,
                                   long_options, &longopt_index))) {
         switch (opt) {
         case 'q': // --quiet
@@ -352,14 +354,7 @@ int main(int argc, char *argv[])
             break;
 
         case 'o': // --obj
-            if (minmax != NULL)
-                free((void *) minmax);
-            minmax = read_minmax (optarg, &dim);
-            if (minmax == NULL) {
-                errprintf ("invalid argument '%s' for -o, --obj"
-                           ", it should be a sequence of '+' or '-'\n", optarg);
-                exit(EXIT_FAILURE);
-            }
+            minmax = parse_cmdline_minmax(minmax, optarg, &dim);
             break;
 
         default:
