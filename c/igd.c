@@ -149,15 +149,17 @@ do_file (const char *filename, double *reference, int reference_size,
         free_minmax = true;
     }
 
-    const char * sep = "";
+    const char * sep = "\0";
     if (verbose_flag) {
         printf("# file: %s\n", filename);
         printf("# metrics (Euclidean distance) ");
-#define print_value_if(IF, ...)                                                \
+        /* This macro uses ## for comma elision in variadic macros. It should
+           use __VA_OPT__ in the future when more compilers support it:
+           https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html */
+#define print_value_if(IF, WHAT, ...)                                          \
         do {                                                                   \
             if (IF) {                                                          \
-                fprintf(outfile, "%s", sep);                                   \
-                fprintf(outfile, __VA_ARGS__);                                 \
+                fprintf(outfile, "%s" WHAT, sep, ## __VA_ARGS__);              \
                 sep = "\t";                                                    \
             }                                                                  \
         } while (0)
@@ -179,40 +181,23 @@ do_file (const char *filename, double *reference, int reference_size,
         int size_a = cumsizes[n] - cumsize;
         const double *points_a = &data[nobj * cumsize];
         //Timer_start ();
-        sep = "";
+        sep = "\0";
 
-#define print_value_if(IF, VALUE)                                              \
+#define print_value_if(IF, FUN, ...)                                           \
         do {                                                                   \
             if (IF) {                                                          \
-                fprintf (outfile, "%s" indicator_printf_format, sep, (VALUE)); \
+                fprintf (outfile, "%s" indicator_printf_format, sep,           \
+                         FUN(nobj, minmax, points_a, size_a, reference, reference_size, ## __VA_ARGS__)); \
                 sep = "\t";                                                    \
             }                                                                  \
         } while (0)
 
-        print_value_if(gd,
-                       GD_minmax (nobj, minmax,
-                                  points_a, size_a,
-                                  reference, reference_size));
-        print_value_if(igd,
-                       IGD_minmax (nobj, minmax,
-                                   points_a, size_a,
-                                   reference, reference_size));
-        print_value_if(gdp,
-                       GD_p (nobj, minmax,
-                             points_a, size_a,
-                             reference, reference_size, exponent_p));
-        print_value_if(igdp,
-                       IGD_p (nobj, minmax,
-                              points_a, size_a,
-                              reference, reference_size, exponent_p));
-        print_value_if(igdplus,
-                       IGD_plus_minmax (nobj, minmax,
-                                        points_a, size_a,
-                                        reference, reference_size));
-        print_value_if(hausdorff,
-                       avg_Hausdorff_dist_minmax (nobj, minmax,
-                                                  points_a, size_a,
-                                                  reference, reference_size, exponent_p));
+        print_value_if(gd, GD_minmax);
+        print_value_if(igd, IGD_minmax);
+        print_value_if(gdp, GD_p, exponent_p);
+        print_value_if(igdp, IGD_p, exponent_p);
+        print_value_if(igdplus, IGD_plus_minmax);
+        print_value_if(hausdorff, avg_Hausdorff_dist_minmax, exponent_p);
 #undef print_value_if
         //time_elapsed = Timer_elapsed_virtual ();
         fprintf(outfile, "\n");
