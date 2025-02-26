@@ -12,16 +12,15 @@
 #define errprintf Rf_error
 #define warnprintf Rf_warning
 static inline void *
-moocore_malloc(size_t nmemb, size_t size, const char *err_prefix, const char * err_msg)
+moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
 {
     // FIXME: Check multiplication overflow.
     // https://github.com/bminor/glibc/blob/e64a1e81aadf6c401174ac9471ced0f0125c2912/malloc/malloc.c#L3709
     // https://github.com/libressl/openbsd/blob/master/src/lib/libc/stdlib/reallocarray.c
     void * p = malloc(nmemb * size);
-    if (unlikely(!p)) {
-        Rf_error("%s: %s = malloc (%llu * %llu) failed", err_prefix, err_msg,
+    if (unlikely(!p))
+        Rf_error("%s:%d: malloc (%llu * %llu) failed", file, line,
                  (unsigned long long) nmemb, (unsigned long long) size);
-    }
     return p;
 }
 #else
@@ -35,7 +34,7 @@ void fatal_error(const char * format,...) __attribute__ ((format(printf, 1, 2)))
 void errprintf(const char * format,...) __attribute__ ((format(printf, 1, 2)));
 void warnprintf(const char *format,...)  __attribute__ ((format(printf, 1, 2)));
 static inline void *
-moocore_malloc(size_t nmemb, size_t size, const char *err_prefix, const char * err_msg)
+moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
 {
     // FIXME: Check multiplication overflow.
     // https://github.com/bminor/glibc/blob/e64a1e81aadf6c401174ac9471ced0f0125c2912/malloc/malloc.c#L3709
@@ -43,7 +42,8 @@ moocore_malloc(size_t nmemb, size_t size, const char *err_prefix, const char * e
     void * p = malloc(nmemb * size);
     if (unlikely(!p)) {
         char buffer[1024] = "";
-        snprintf(buffer, 1024,  "%s: %s", err_prefix, err_msg);
+        snprintf(buffer, 1024,  "%s:%d: malloc (%llu * %llu) failed", file, line,
+                 (unsigned long long) nmemb, (unsigned long long) size);
         perror (buffer);
         exit(EXIT_FAILURE);
     }
@@ -53,13 +53,8 @@ moocore_malloc(size_t nmemb, size_t size, const char *err_prefix, const char * e
 
 #include <stdbool.h>
 
-#define EAF_MALLOC(WHAT, NMEMB, TYPE)                                          \
-    do {                                                                       \
-        WHAT = moocore_malloc(NMEMB, sizeof(TYPE), __FILE__, #WHAT);           \
-    } while (0)
-
+#define MOOCORE_MALLOC(NMEMB, TYPE) moocore_malloc((NMEMB), sizeof(TYPE), __FILE__, __LINE__)
 #define eaf_assert(X) assert(X)
-
 
 #if __GNUC__ >= 3
 #define __cmp_op_min <
