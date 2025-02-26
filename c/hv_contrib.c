@@ -17,11 +17,10 @@ hv_1point_diffs (double *hvc, double *points, int dim, int size, const double * 
                  const bool * uev)
 {
     bool keep_uevs = uev != NULL;
-
     if (hvc == NULL)
-        hvc = malloc (sizeof(double) * size);
+        hvc = MOOCORE_MALLOC(size, double);
 
-    double * tmp = malloc (sizeof(double) * dim);
+    double * tmp = MOOCORE_MALLOC(dim, double);
     for (int i = 0; i < size; i++) {
         memcpy (tmp, points + i * dim, sizeof(double) * dim);
         memcpy (points + i * dim, ref, sizeof(double) * dim);

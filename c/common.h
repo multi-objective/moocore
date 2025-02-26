@@ -9,57 +9,44 @@
                                 #EXP, __FILE__, __LINE__);}} while(0)
 #include "gcc_attribs.h"
 #define fatal_error(...) Rf_error(__VA_ARGS__)
+#define moocore_perror(...) Rf_error(__VA_ARGS__)
 #define errprintf Rf_error
 #define warnprintf Rf_warning
-static inline void *
-moocore_malloc(size_t nmemb, size_t size, const char *err_prefix, const char * err_msg)
-{
-    // FIXME: Check multiplication overflow.
-    // https://github.com/bminor/glibc/blob/e64a1e81aadf6c401174ac9471ced0f0125c2912/malloc/malloc.c#L3709
-    // https://github.com/libressl/openbsd/blob/master/src/lib/libc/stdlib/reallocarray.c
-    void * p = malloc(nmemb * size);
-    if (unlikely(!p)) {
-        Rf_error("%s: %s = malloc (%llu * %llu) failed", err_prefix, err_msg,
-                 (unsigned long long) nmemb, (unsigned long long) size);
-    }
-    return p;
-}
 #else
 #include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdio.h>
 #include "gcc_attribs.h"
 #define Rprintf(...) printf(__VA_ARGS__)
 void fatal_error(const char * format,...) __attribute__ ((format(printf, 1, 2))) __noreturn _no_warn_unused;
 void errprintf(const char * format,...) __attribute__ ((format(printf, 1, 2)));
 void warnprintf(const char *format,...)  __attribute__ ((format(printf, 1, 2)));
+#define moocore_perror(...) do {                                               \
+        char buffer[1024] = "";                                                \
+        snprintf(buffer, 1024, __VA_ARGS__);                                   \
+        perror(buffer);                                                        \
+        exit(EXIT_FAILURE);                                                    \
+    } while(0)
+#endif
+
+#include <stdbool.h>
+#include <inttypes.h> // For PRIuPTR
 static inline void *
-moocore_malloc(size_t nmemb, size_t size, const char *err_prefix, const char * err_msg)
+moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
 {
     // FIXME: Check multiplication overflow.
     // https://github.com/bminor/glibc/blob/e64a1e81aadf6c401174ac9471ced0f0125c2912/malloc/malloc.c#L3709
     // https://github.com/libressl/openbsd/blob/master/src/lib/libc/stdlib/reallocarray.c
     void * p = malloc(nmemb * size);
-    if (unlikely(!p)) {
-        char buffer[1024] = "";
-        snprintf(buffer, 1024,  "%s: %s", err_prefix, err_msg);
-        perror (buffer);
-        exit(EXIT_FAILURE);
-    }
+    if (unlikely(!p))
+        moocore_perror("%s:%d: malloc (%" PRIuPTR " * %" PRIuPTR ") failed",
+                       file, line, (uintptr_t)nmemb, (uintptr_t)size);
     return p;
 }
-#endif
 
-#include <stdbool.h>
-
-#define EAF_MALLOC(WHAT, NMEMB, TYPE)                                          \
-    do {                                                                       \
-        WHAT = moocore_malloc(NMEMB, sizeof(TYPE), __FILE__, #WHAT);           \
-    } while (0)
-
+#define MOOCORE_MALLOC(NMEMB, TYPE) moocore_malloc((NMEMB), sizeof(TYPE), __FILE__, __LINE__)
 #define eaf_assert(X) assert(X)
-
 
 #if __GNUC__ >= 3
 #define __cmp_op_min <

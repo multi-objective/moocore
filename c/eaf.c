@@ -79,8 +79,7 @@ point_printf(FILE *stream, const objective_t *p, int nobj)
 
 eaf_t * eaf_create (int nobj, int nruns, int npoints)
 {
-    eaf_t *eaf;
-    EAF_MALLOC (eaf, 1, eaf_t);
+    eaf_t *eaf = MOOCORE_MALLOC(1, eaf_t);
     eaf->nruns = nruns;
     eaf->size = 0;
     eaf->nreallocs = 0;
@@ -89,8 +88,8 @@ eaf_t * eaf_create (int nobj, int nruns, int npoints)
     eaf->maxsize = 256 + npoints / (2 * nruns);
     /* fprintf(stderr,"maxsize %ld = %d npoints, %d nruns\n", */
     /*         eaf->maxsize, npoints, nruns); */
-    EAF_MALLOC (eaf->data, nobj * eaf->maxsize, objective_t);
-    eaf->bit_attained = malloc (bit_array_bytesize(nruns) * eaf->maxsize);
+    eaf->data = MOOCORE_MALLOC(nobj * eaf->maxsize, objective_t);
+    eaf->bit_attained = malloc(bit_array_bytesize(nruns) * eaf->maxsize);
     return eaf;
 }
 
@@ -627,10 +626,8 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
     eaf_assert(nruns % 2 == 0);
 
     int max_size = eaf_max_size(eaf, nlevels);
-    int *color;
-    EAF_MALLOC (color, max_size, int);
-    eaf_polygon_t * polygon;
-    EAF_MALLOC(polygon, 1, eaf_polygon_t);
+    int * color = MOOCORE_MALLOC(max_size, int);
+    eaf_polygon_t * polygon = MOOCORE_MALLOC(1, eaf_polygon_t);
     vector_objective_ctor (&polygon->xy, max_size);
     vector_int_ctor (&polygon->col, max_size);
 
@@ -812,16 +809,12 @@ eaf_polygon_t *
 eaf_compute_polygon_old (eaf_t **eaf, int nobj, int nlevels)
 {
     int _no_warn_unused _poly_size_check = 0;
-    eaf_polygon_t * polygon;
-
-    int *color;
     int max_size = eaf_max_size(eaf, nlevels);
     int nruns = eaf[0]->nruns;
-
     eaf_assert(nruns % 2 == 0);
 
-    EAF_MALLOC (color, max_size, int);
-    EAF_MALLOC(polygon, 1, eaf_polygon_t);
+    int * color = MOOCORE_MALLOC(max_size, int);
+    eaf_polygon_t * polygon = MOOCORE_MALLOC(1, eaf_polygon_t);
     vector_objective_ctor (&polygon->xy, max_size);
     vector_int_ctor (&polygon->col, max_size);
 
@@ -996,10 +989,8 @@ eaf_compute_rectangles (eaf_t **eaf, int nobj, int nlevels)
     eaf_assert(nruns % 2 == 0);
 
     int max_size = eaf_max_size(eaf, nlevels);
-    int *color;
-    EAF_MALLOC (color, max_size, int);
-    eaf_polygon_t * regions;
-    EAF_MALLOC(regions, 1, eaf_polygon_t);
+    int * color = MOOCORE_MALLOC(max_size, int);
+    eaf_polygon_t * regions = MOOCORE_MALLOC(1, eaf_polygon_t);
     vector_objective_ctor (&regions->xy, max_size);
     vector_int_ctor (&regions->col, max_size);
 
