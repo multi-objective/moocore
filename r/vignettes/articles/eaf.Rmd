@@ -22,7 +22,7 @@ this example shows.
 
 
 ```{r auc}
-library(reshape2)
+library(tidyr)
 library(ggplot2)
 
 extdata_dir <- system.file(package="moocore", "extdata")
@@ -50,7 +50,7 @@ for (r in runs) {
   aucs <- c(aucs, auc)
 }
 
-x <- melt(data.frame(r = runs, AOC = aocs, AUC=aucs), id.vars="r")
+x <- tibble(r = runs, AOC = aocs, AUC=aucs) %>% pivot_longer(-r, names_to = "variable", values_to = "value")
 ```
 
 ```{r}

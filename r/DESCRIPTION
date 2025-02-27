@@ -42,4 +42,4 @@ SystemRequirements: GNU make
 RdMacros: Rdpack
 Config/testthat/edition: 3
 Language: en-GB
-Config/Needs/website: rmarkdown, reshape2, ggplot2
+Config/Needs/website: rmarkdown, tidyr, ggplot2
