@@ -46,7 +46,7 @@ NAMESPACE $(PACKAGEDIR)/man/$(PACKAGE)-package.Rd: $(PACKAGEDIR)/R/*.R
 	$(Reval) 'pkgbuild::compile_dll();devtools::document()'
 
 pkgdown: gendoc
-	$(Reval) 'pkgdown::build_site(run_dont_run = TRUE)'
+	$(Reval) 'pkgdown::build_site(run_dont_run = TRUE); warnings()'
 
 build:
 	@$(MAKE) gendoc
