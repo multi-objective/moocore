@@ -1,0 +1,6 @@
+﻿moocore.is\_nondominated\_within\_sets
+======================================
+
+.. currentmodule:: moocore
+
+.. autofunction:: is_nondominated_within_sets

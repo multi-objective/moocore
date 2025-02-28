@@ -1,0 +1,6 @@
+﻿moocore.avg\_hausdorff\_dist
+============================
+
+.. currentmodule:: moocore
+
+.. autofunction:: avg_hausdorff_dist
