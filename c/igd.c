@@ -156,6 +156,10 @@ do_file (const char *filename, double *reference, int reference_size,
         /* This macro uses ## for comma elision in variadic macros. It should
            use __VA_OPT__ in the future when more compilers support it:
            https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html */
+#if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#endif
 #define print_value_if(IF, WHAT, ...)                                          \
         do {                                                                   \
             if (IF) {                                                          \
@@ -199,6 +203,9 @@ do_file (const char *filename, double *reference, int reference_size,
         print_value_if(igdplus, IGD_plus_minmax);
         print_value_if(hausdorff, avg_Hausdorff_dist_minmax, exponent_p);
 #undef print_value_if
+#if defined(__clang__)
+#  pragma clang diagnostic pop
+#endif
         //time_elapsed = Timer_elapsed_virtual ();
         fprintf(outfile, "\n");
         /* if (verbose_flag)  */
