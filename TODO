@@ -2,6 +2,7 @@
  - [ ] Merge eaf README
  - [ ] Merge hypervolume/trunk README
  - [ ] Merge hypervolume/Makefile README
+ - [ ] Convert code from https://github.com/fieldsend/multiobjective_data_structures
  - [X] pre-commit for R: https://lorenzwalthert.github.io/precommit/articles/ci.html
  - [X] create moocore R package
  - [X] create moocore Python package
