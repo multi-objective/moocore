@@ -325,7 +325,7 @@ int main(int argc, char *argv[])
     }
 
     if (verbose_flag >= 2)
-        printf("# seed: %u\n# nsamples: %lu\n", seed, nsamples);
+        printf("# seed: " PRIu32 "\n# nsamples: %lu\n", seed, (unsigned long) nsamples);
 
     int numfiles = argc - optind;
     if (numfiles < 1) /* Read stdin.  */

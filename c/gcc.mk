@@ -6,7 +6,7 @@ endif
 WARN_CFLAGS = -pedantic -Wall -Wextra -Wvla  -pedantic -Wconversion -Wno-sign-conversion -Wstrict-prototypes $(WERROR_FLAG)
 SANITIZERS= -fsanitize=undefined -fsanitize=address
 ifeq ($(DEBUG), 0)
-  OPT_CFLAGS ?= -DNDEBUG -O3 -flto
+  OPT_CFLAGS ?= -DNDEBUG -O3 -flto -DDETAILED_EXPERIMENTS
 # Options -funroll-loops -ffast-math -msse -mfpmath=sse improve performance but are not portable.
 # Options -fstandard-precision=fast -ftree-vectorize are not well supported
 # in some versions/architectures.
