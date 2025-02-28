@@ -1,6 +1,13 @@
 #ifndef GCC_ATTRIBUTES
 #define GCC_ATTRIBUTES
 
+/* printf format-specifier for size_t */
+#if defined(_MSC_VER) && (_MSC_VER < 1800)  // MSVC before 2013
+#define PRIsize_t "Iu"
+#else
+#define PRIsize_t "zu"  // Standard C99 format
+#endif
+
 /* FIXME: does this handle C++? */
 #ifndef __pure_func
 # define __pure_func	__attribute__((__pure__))

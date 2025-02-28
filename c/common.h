@@ -19,8 +19,8 @@ moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
     // https://github.com/libressl/openbsd/blob/master/src/lib/libc/stdlib/reallocarray.c
     void * p = malloc(nmemb * size);
     if (unlikely(!p))
-        Rf_error("%s:%d: malloc (%llu * %llu) failed", file, line,
-                 (unsigned long long) nmemb, (unsigned long long) size);
+        Rf_error("%s:%d: malloc (%"PRIsize_t" * %"PRIsize_t") failed",
+                 file, line, nmemb, size);
     return p;
 }
 #else
@@ -42,8 +42,8 @@ moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
     void * p = malloc(nmemb * size);
     if (unlikely(!p)) {
         char buffer[1024] = "";
-        snprintf(buffer, 1024,  "%s:%d: malloc (%llu * %llu) failed", file, line,
-                 (unsigned long long) nmemb, (unsigned long long) size);
+        snprintf(buffer, 1024,  "%s:%d: malloc (%"PRIsize_t" * %"PRIsize_t") failed",
+                 file, line, nmemb, size);
         perror (buffer);
         exit(EXIT_FAILURE);
     }
