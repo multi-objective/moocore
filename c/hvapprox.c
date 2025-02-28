@@ -34,16 +34,17 @@ construct_polar_a(dimension_t dim, uint_fast32_t nsamples)
         61, 67, 67 };
 
     const dimension_t p = primes[dim];
-    DEBUG2_PRINT("construct_polar_a: prime: %u\n", p);
+    DEBUG2_PRINT("construct_polar_a: prime: %u\n", (unsigned int)p);
 
     uint_fast32_t * a = malloc(dim * sizeof(uint_fast32_t));
     a[0] = 1;
-    DEBUG2_PRINT("construct_polar_a: a[%u] = %lu", dim, a[0]);
+    DEBUG2_PRINT("construct_polar_a: a[%u] = %lu",
+                 (unsigned int) dim, (unsigned long) a[0]);
     for (dimension_t k = 1; k < dim; k++) {
         long double temp = 2 * fabsl(cosl(2 * M_PIl * k / p));
         temp = temp - floorl(temp);
         a[k] = STATIC_CAST(uint_fast32_t, llroundl(nsamples * temp));
-        DEBUG2_PRINT(", %lu", a[k]);
+        DEBUG2_PRINT(", %lu", (unsigned long) a[k]);
     }
     DEBUG2_PRINT("\n");
     return a;
@@ -303,7 +304,7 @@ static long double * compute_int_all(dimension_t dm1)
     ASSUME(dm1 >= 1);
     long double * int_all = malloc(dm1 * sizeof(long double));
     dimension_t i;
-    DEBUG2_PRINT("int_all[%u] =", dm1);
+    DEBUG2_PRINT("int_all[%u] =", (unsigned int)dm1);
     for (i = 0; i < dm1; i++) {
         int_all[i] = int_power_of_sin_from_0_to_half_pi[i];
         DEBUG2_PRINT(" %25.18Lg ", int_all[i]);
@@ -322,7 +323,7 @@ static long double * compute_int_all(dimension_t dm1)
     // This should be always one, so why calculate it?
     prod_int_all = sphere_volume(dm1 + 1) / prod_int_all;
     ASSUME(fabsl(prod_int_all - 1.0) <= 1e-15);
-    DEBUG2_PRINT("int_all[%u] =", dm1);
+    DEBUG2_PRINT("int_all[%u] =", (unsigned int)dm1);
     for (i = 0; i < dm1; i++) {
         int_all[i] *= prod_int_all;
         DEBUG2_PRINT(" %22.15Lg ", int_all[i]);
@@ -503,7 +504,8 @@ double hv_approx_normal(const double * data, int nobjs, int npoints,
         expected += pow_uint(max_s_w, dim);
 #ifdef DETAILED_EXPERIMENTS
         if (j+1 >= 10000 && __builtin_popcountl(j+1) == 1)
-            fprintf(stdout, "%lu\t%-22.15g\n", j+1, c_m * (expected/(double)(j+1)));
+            fprintf(stdout, "%lu\t%-22.15g\n", (unsigned int)j+1,
+                    c_m * (expected/(double)(j+1)));
 #endif
     }
     expected /= (double) nsamples;
