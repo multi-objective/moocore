@@ -1,6 +1,6 @@
 # This file should be almost identical to
 # https://github.com/multi-objective/mooplot/blob/main/python/Makefile
-.PHONY : install build test docs fastdocs clean docdeps pre-commit
+.PHONY : install build test doc fastdoc clean docdeps pre-commit
 
 install: build
 	python3 -m pip install -e . --disable-pip-version-check
@@ -22,10 +22,10 @@ docdeps:
 show:
 	$(MAKE) -C doc show
 
-docs:
+doc:
 	$(MAKE) -C doc clean html
 
-fastdocs:
+fastdoc:
 	$(MAKE) -C doc clean html-noplot
 
 clean:
