@@ -39,6 +39,7 @@
 #include <getopt.h> // for getopt_long()
 #include <time.h> // time()
 #include <limits.h> // LONG_MAX
+#include <inttypes.h> // PRIu32
 
 #include "hvapprox.h"
 #include "timer.h"
@@ -325,7 +326,7 @@ int main(int argc, char *argv[])
     }
 
     if (verbose_flag >= 2)
-        printf("# seed: " PRIu32 "\n# nsamples: %lu\n", seed, (unsigned long) nsamples);
+        printf("# seed: %"PRIu32 "\n# nsamples: %lu\n", seed, (unsigned long) nsamples);
 
     int numfiles = argc - optind;
     if (numfiles < 1) /* Read stdin.  */

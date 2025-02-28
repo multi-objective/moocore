@@ -504,7 +504,7 @@ double hv_approx_normal(const double * data, int nobjs, int npoints,
         expected += pow_uint(max_s_w, dim);
 #ifdef DETAILED_EXPERIMENTS
         if (j+1 >= 10000 && __builtin_popcountl(j+1) == 1)
-            fprintf(stdout, "%lu\t%-22.15g\n", (unsigned int)j+1,
+            fprintf(stdout, "%lu\t%-22.15g\n", (unsigned long)j+1,
                     c_m * (expected/(double)(j+1)));
 #endif
     }
