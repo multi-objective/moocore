@@ -133,10 +133,8 @@ static double *
 robust_read_point (char * str, int *nobj, const char * errmsg)
 {
     double * point = read_point(str, nobj);
-    if (point == NULL) {
-        errprintf (errmsg, optarg);
-        exit (EXIT_FAILURE);
-    }
+    if (point == NULL)
+        fatal_error(errmsg, optarg);
     return point;
 }
 
@@ -361,7 +359,6 @@ process_file (const char *filename,
               const bool *logarithm)
 {
     bool *nondom = NULL;
-    bool dominated_found = false;
     bool logarithm_flag = false;
 
     double *points = NULL;
@@ -448,11 +445,12 @@ process_file (const char *filename,
         normalise (points, nobj, cumsizes[nsets - 1], minmax, agree,
                    lrange, urange, lbound, ubound);
 
+    bool dominated_found = false;
     /* Check sets.  */
     if (check_flag || filter_flag)
-        if (check_nondominated (filename, points, nobj, cumsizes, nsets,
-                                minmax, agree, filter_flag ? &nondom : NULL))
-            dominated_found = true;
+        dominated_found =
+            check_nondominated (filename, points, nobj, cumsizes, nsets,
+                                minmax, agree, filter_flag ? &nondom : NULL);
 
     if (verbose_flag >= 2)
         fprintf (stderr, "# nondominated: %s\n",
@@ -467,10 +465,8 @@ process_file (const char *filename,
         if (filename != stdin_name) {
             outfilename = m_strcat(filename, suffix);
             outfile = fopen (outfilename, "w");
-            if (outfile == NULL) {
-                errprintf ("%s: %s\n", outfilename, strerror(errno));
-                exit(EXIT_FAILURE);
-            }
+            if (outfile == NULL)
+                fatal_error("%s: %s\n", outfilename, strerror(errno));
         }
         if (verbose_flag)
             print_output_header (outfile, filename, nobj, minmax, agree,
@@ -584,10 +580,9 @@ int main(int argc, char *argv[])
             else if (!strcmp (optarg, "min"))
                 agree = -1;
             else {
-                errprintf ("invalid argument '%s' for -a, --agree"
-                           ", it should be either \'min\' or \'max\'\n",
-                           optarg);
-                exit (EXIT_FAILURE);
+                fatal_error("invalid argument '%s' for -a, --agree"
+                            ", it should be either \'min\' or \'max\'\n",
+                            optarg);
             }
             break;
 
@@ -598,14 +593,10 @@ int main(int argc, char *argv[])
         case 'n': // --normalise
             normalise_flag = true;
             if (!read_range (optarg, &lower_range, &upper_range)) {
-                errprintf ("invalid range '%s' for -n, --normalise"
-                           ", use for example -n \"1 2\"\n", optarg);
-                exit (EXIT_FAILURE);
-
+                fatal_error("invalid range '%s' for -n, --normalise"
+                            ", use for example -n \"1 2\"\n", optarg);
             } else if (lower_range >= upper_range) {
-                errprintf ("lower range must be smaller than upper range"
-                           " for -n, --normalise\n");
-                exit (EXIT_FAILURE);
+                fatal_error ("lower range must be smaller than upper range for -n, --normalise\n");
             }
             break;
 
@@ -623,10 +614,8 @@ int main(int argc, char *argv[])
 
         case 'L': // --log
             logarithm = read_bitvector (optarg, &nobj);
-            if (logarithm == NULL) {
-                errprintf ("invalid argument to --log '%s'", optarg);
-                exit (EXIT_FAILURE);
-            }
+            if (logarithm == NULL)
+                fatal_error("invalid argument to --log '%s'", optarg);
             break;
 
         default:
@@ -636,17 +625,15 @@ int main(int argc, char *argv[])
 
     if (lower_bound && upper_bound
         && any_less_than (upper_bound, lower_bound, nobj)) {
-        errprintf ("upper bound must be higher than lower bound.");
-        exit (EXIT_FAILURE);
+        fatal_error("upper bound must be higher than lower bound.");
     }
 
     int numfiles = argc - optind;
     double *minimum = NULL;
     double *maximum = NULL;
-    bool dominated_found = false;
 
     if (numfiles <= 1) {/* <= 0 means: No input files: read stdin.  */
-        dominated_found =
+        bool dominated_found =
             process_file ((numfiles == 1) ? argv[optind] : NULL,
                           minmax, &nobj, agree,
                           lower_range, upper_range,
@@ -657,11 +644,11 @@ int main(int argc, char *argv[])
         free(minimum);
         free(maximum);
         free((void*)minmax);
-        return dominated_found;
+        return filter_flag ? EXIT_SUCCESS : dominated_found;
     }
 
     int k;
-
+    bool dominated_found = false;
     if (!lower_bound || !upper_bound) {
         /* Calculate the bounds among all input files.  */
         minimum = NULL, maximum = NULL;
@@ -671,13 +658,13 @@ int main(int argc, char *argv[])
         k = 0;
     } else {
         /* If the bounds were given, initialize minimum and maximum.  */
-        if (process_file (argv[optind], minmax, &nobj, agree,
+        dominated_found =
+            process_file (argv[optind], minmax, &nobj, agree,
                           lower_range, upper_range,
                           lower_bound, upper_bound,
                           &minimum, &maximum,
                           /*check_minimum=*/true, /*check_maximum=*/true,
-                          maximise_all_flag, logarithm))
-            dominated_found = true;
+                          maximise_all_flag, logarithm);
         k = 1;
     }
 
@@ -718,5 +705,5 @@ int main(int argc, char *argv[])
     }
     free(minimum);
     free(maximum);
-    return dominated_found;
+    return filter_flag ? EXIT_SUCCESS : dominated_found;
 }
