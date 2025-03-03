@@ -39,6 +39,9 @@ point_2d_front_cmp (const void * a, const void * b)
 
    FIXME: Could we avoid creating a copy of the points? Yes, see find_nondominated_set_2d_()
 */
+#if DEBUG >= 2
+#include "io.h"
+#endif
 static int *
 pareto_rank_2D (const double *points, int size)
 {
@@ -64,7 +67,7 @@ pareto_rank_2D (const double *points, int size)
         help_i[k] = data[k].i;
     }
     fprintf(stderr, "%s():\n-------------------\n>>INPUT:", __FUNCTION__);
-    //fprintf(stderr, "\nIndex: "); vector_int_fprintf_fmt (stderr, help_i, size, "%4d");
+    fprintf(stderr, "\nIndex: "); vector_int_fprintf(stderr, help_i, size);
     fprintf(stderr, "\n[0]  : "); vector_fprintf (stderr, help_0, size);
     fprintf(stderr, "\n[1]  : "); vector_fprintf (stderr, help_1, size);
 #endif
@@ -72,13 +75,13 @@ pareto_rank_2D (const double *points, int size)
     qsort (data, size, sizeof(struct point_2d_front), point_2d_front_cmp);
 
 #ifdef PARETO_RANK_2D_DEBUG
-    for (k = 0; i < size; k++) {
+    for (k = 0; k < size; k++) {
        help_0[k] = data[k].p[0];
        help_1[k] = data[k].p[1];
        help_i[k] = data[k].i;
     }
     fprintf(stderr, "%s():\n-------------------\n>>SORTED:", __FUNCTION__);
-    fprintf(stderr, "\nIndex: "); vector_int_fprintf_fmt (stderr, help_i, size, "%4d");
+    fprintf(stderr, "\nIndex: "); vector_int_fprintf(stderr, help_i, size);
     fprintf(stderr, "\n[0]  : "); vector_fprintf (stderr, help_0, size);
     fprintf(stderr, "\n[1]  : "); vector_fprintf (stderr, help_1, size);
 #endif
@@ -126,8 +129,8 @@ pareto_rank_2D (const double *points, int size)
     {
         n_front++; // count max + 1
         int f, i;
-        int *front_size = calloc(nfront, sizeof(int));
-        int ** front = calloc(nfront, sizeof(int *));
+        int *front_size = calloc(n_front, sizeof(int));
+        int ** front = calloc(n_front, sizeof(int *));
         for (k = 0; k < size; k++) {
             f = data[k].f;
             if (front_size[f] == 0) {
@@ -140,7 +143,7 @@ pareto_rank_2D (const double *points, int size)
         f = 0, k = 0, i = 0;
         do {
             order[i] = front[f][k];
-            fprintf (stderr, "\nfront[%d][%d] = %d = { %g , %g, %d, %d }",
+            fprintf (stderr, "\n_front[%d][%d] = %d = { %g , %g, %d, %d }",
                      f, k, front[f][k],
                      data[front[f][k]].p[0], data[front[f][k]].p[1],
                      data[front[f][k]].i, data[front[f][k]].f);
@@ -159,7 +162,7 @@ pareto_rank_2D (const double *points, int size)
             help_i[k] = data[order[k]].i;
         }
         fprintf(stderr, "%s():\n-------------------\n>>OUTPUT:", __FUNCTION__);
-        fprintf(stderr, "\nIndex: "); vector_int_fprintf_fmt (stderr, help_i, size, "%4d");
+        fprintf(stderr, "\nIndex: "); vector_int_fprintf(stderr, help_i, size);
         fprintf(stderr, "\n[0]  : "); vector_fprintf (stderr, help_0, size);
         fprintf(stderr, "\n[1]  : "); vector_fprintf (stderr, help_1, size);
 
@@ -180,7 +183,7 @@ pareto_rank_2D (const double *points, int size)
     return rank;
 }
 
-static bool dominates(const double *pj, const double * pk, int dim)
+static bool weakly_dominates(const double *pj, const double * pk, int dim)
 {
     bool j_leq_k = true;
     for (int d = 0; d < dim; d++) {
@@ -226,8 +229,8 @@ pareto_rank (const double *points, int dim, int size)
                 if (rank[k] != level - 1) continue;
                 const double *pj = points + j * dim;
                 const double *pk = points + k * dim;
-                bool j_leq_k = dominates(pj, pk, dim);
-                bool k_leq_j = dominates(pk, pj, dim);
+                bool j_leq_k = weakly_dominates(pj, pk, dim);
+                bool k_leq_j = weakly_dominates(pk, pj, dim);
                 if (j_leq_k && !k_leq_j) {
                     nothing_new = false;
                     rank[k]++;
