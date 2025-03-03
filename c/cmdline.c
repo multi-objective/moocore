@@ -13,6 +13,7 @@ void fatal_error(const char *format,...)
     va_start(ap,format);
     vfprintf(stderr, format, ap);
     va_end(ap);
+    fprintf(stderr, "\n");
     exit(EXIT_FAILURE);
 }
 
