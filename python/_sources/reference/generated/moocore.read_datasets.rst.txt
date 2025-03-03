@@ -1,0 +1,6 @@
+﻿moocore.read\_datasets
+======================
+
+.. currentmodule:: moocore
+
+.. autofunction:: read_datasets
