@@ -31,22 +31,31 @@
    for negative values doesn't make sense.
  */
 static inline double
-epsilon_mult_minmax (int dim, const signed char *minmax,
-                     const double *points_a, int size_a,
-                     const double *points_b, int size_b)
+epsilon_mult_minmax (int dim, const signed char * restrict minmax,
+                     const double * restrict points_a, int size_a,
+                     const double * restrict points_b, int size_b)
 {
-    int a, b, d;
-    double epsilon = 0;
+    ASSUME(dim >= 2);
+    ASSUME(dim <= 32);
 
+    int a, b, d;
+    for (a = 0; a < size_a; a++)
+        for (d = 0; d < dim; d++)
+            if (points_a[a * dim + d] <= 0)
+                fatal_error ("cannot calculate multiplicative epsilon indicator with values <= 0\n.");
+
+    for (b = 0; b < size_b; b++)
+        for (d = 0; d < dim; d++)
+            if (points_b[b * dim + d] <= 0)
+                fatal_error ("cannot calculate multiplicative epsilon indicator with values <= 0\n.");
+
+    double epsilon = 0;
     for (b = 0; b < size_b; b++) {
         double epsilon_min = INFINITY;
         for (a = 0; a < size_a; a++) {
             double epsilon_max = 0;
             for (d = 0; d < dim; d++) {
                 double epsilon_temp;
-                if (points_a[a * dim + d] <= 0 || points_b[b * dim + d] <= 0) {
-                    fatal_error ("cannot calculate multiplicative epsilon indicator with values <= 0\n.");
-                }
                 if (minmax[d] < 0)
                     epsilon_temp =  points_a[a * dim + d] / points_b[b * dim + d];
                 else if (minmax[d] > 0)
@@ -54,9 +63,11 @@ epsilon_mult_minmax (int dim, const signed char *minmax,
                 else
                     epsilon_temp =  1;
 
+                ASSUME(epsilon_temp >= 0);
+                /* This cannot happen:
                 if (epsilon_temp < 0) {
                     fatal_error("cannot calculate multiplicative epsilon indicator with different signedness\n.");
-                }
+                    } */
                 epsilon_max = MAX (epsilon_max, epsilon_temp);
             }
             epsilon_min = MIN (epsilon_min, epsilon_max);
@@ -67,10 +78,12 @@ epsilon_mult_minmax (int dim, const signed char *minmax,
 }
 
 static inline double
-epsilon_additive_minmax (int dim, const signed char *minmax,
-                         const double *points_a, int size_a,
-                         const double *points_b, int size_b)
+epsilon_additive_minmax (int dim, const signed char * restrict minmax,
+                         const double * restrict points_a, int size_a,
+                         const double * restrict points_b, int size_b)
 {
+    ASSUME(dim >= 2);
+    ASSUME(dim <= 32);
     int a, b, d;
     double epsilon = -INFINITY;
 
@@ -94,8 +107,9 @@ epsilon_additive_minmax (int dim, const signed char *minmax,
 }
 
 _no_warn_unused static double
-epsilon_additive (const double *data, int nobj, int npoints,
-                  const double *ref, int ref_size, const bool * maximise)
+epsilon_additive (const double * restrict data, int nobj, int npoints,
+                  const double * restrict ref, int ref_size,
+                  const bool * restrict maximise)
 {
     const signed char *minmax = minmax_from_bool(nobj, maximise);
     double value = epsilon_additive_minmax (nobj, minmax, data, npoints, ref, ref_size);
@@ -103,8 +117,9 @@ epsilon_additive (const double *data, int nobj, int npoints,
     return(value);
 }
 _no_warn_unused static double
-epsilon_mult (const double *data, int nobj, int npoints,
-              const double *ref, int ref_size, const bool * maximise)
+epsilon_mult (const double * restrict data, int nobj, int npoints,
+              const double * restrict ref, int ref_size,
+              const bool * restrict maximise)
 {
     const signed char *minmax = minmax_from_bool(nobj, maximise);
     double value = epsilon_mult_minmax (nobj, minmax, data, npoints, ref, ref_size);
@@ -115,9 +130,9 @@ epsilon_mult (const double *data, int nobj, int npoints,
 /* FIXME: this can be done much faster. For example, the diff needs to
    be calculated just once and stored on a temporary array diff[].  */
 static inline int
-epsilon_additive_ind (int dim, const signed char *minmax,
-                      const double *points_a, int size_a,
-                      const double *points_b, int size_b)
+epsilon_additive_ind (int dim, const signed char * restrict minmax,
+                      const double * restrict points_a, int size_a,
+                      const double * restrict points_b, int size_b)
 {
     double eps_ab, eps_ba;
 

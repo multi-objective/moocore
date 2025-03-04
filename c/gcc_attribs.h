@@ -92,6 +92,16 @@
 # define __force_inline__ inline
 #endif
 
+#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L  // C99
+/* "restrict" is a known keyword */
+#elif defined(__GNUC__) || defined(__clang__) // GCC or Clang
+  #define restrict __restrict__
+#elif defined(_MSC_VER) // MSVC
+  #define restrict __restrict
+#else // Fallback
+  #define restrict
+#endif
+
 // C++ standard attribute
 #ifdef __has_cpp_attribute
 #  if __has_cpp_attribute(assume) >= 202207L
