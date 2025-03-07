@@ -89,8 +89,8 @@
 #define SEXP_2_DOUBLE_MATRIX(S, I, N_ROWS, N_COLS)                    \
     CHECK_ARG_IS_NUMERIC_MATRIX(S);                                   \
     double *I = REAL(S);                                              \
-    const int N_ROWS _no_warn_unused = Rf_nrows(S);                   \
-    const int N_COLS _no_warn_unused = Rf_ncols(S)
+    const int N_ROWS _attr_maybe_unused = Rf_nrows(S);                \
+    const int N_COLS _attr_maybe_unused = Rf_ncols(S)
 
 #define SEXP_2_INT_VECTOR(S, I, N)               \
     CHECK_ARG_IS_INT_VECTOR(S);                  \
