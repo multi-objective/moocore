@@ -734,11 +734,10 @@ static void free_removed(removed_list_t * removed_list)
     free(removed_list);
 }
 
-_no_warn_unused static void
+_attr_maybe_unused static void
 freeoutput(avl_tree_t **output, int nset)
 {
-    int i;
-    for(i = 0; i < nset; i++){
+    for(int i = 0; i < nset; i++){
         freetree(output[i]);
     }
     free(output);

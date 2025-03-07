@@ -209,7 +209,7 @@ eaf_print_attsurf (const eaf_t * eaf, int nobj, FILE *coord_file,  FILE *indic_f
     }
 }
 
-_no_warn_unused static void
+_attr_maybe_unused static void
 fprint_set2d (FILE *stream, const objective_t * const *data, int ntotal)
 {
     for (int k = 0; k < ntotal; k++)
@@ -236,7 +236,7 @@ eaf2matrix_R (double *rmat, eaf_t * const * eaf, int nobj, int totalpoints,
 }
 
 void
-eaf2matrix (double *rmat, eaf_t * const * eaf, int nobj, _no_warn_unused int totalpoints,
+eaf2matrix (double *rmat, eaf_t * const * eaf, int nobj, _attr_maybe_unused int totalpoints,
             const double * percentile, int nlevels)
 {
     int pos = 0;
@@ -316,20 +316,20 @@ eaf2d (const objective_t *data, const int *cumsize, int nruns,
             eaf_assert(cumsize[k-1] < cumsize[k]);
         );
 
-#if DEBUG > 1
-    fprintf (stderr, "Original data:\n");
-    fprint_set2d (stderr, datax, ntotal);
-#endif
+    DEBUG2(
+        fprintf (stderr, "Original data:\n");
+        fprint_set2d (stderr, datax, ntotal);
+        );
 
     qsort (datax, ntotal, sizeof(*datax), &compare_x_asc);
     qsort (datay, ntotal, sizeof(*datay), &compare_y_desc);
 
-#if DEBUG > 1
-    fprintf (stderr, "Sorted data (x):\n");
-    fprint_set2d (stderr, datax, ntotal);
-    fprintf (stderr, "Sorted data (y):\n");
-    fprint_set2d (stderr, datay, ntotal);
-#endif
+    DEBUG2(
+        fprintf (stderr, "Sorted data (x):\n");
+        fprint_set2d (stderr, datax, ntotal);
+        fprintf (stderr, "Sorted data (y):\n");
+        fprint_set2d (stderr, datay, ntotal);
+        );
 
     /* Setup a lookup table to go from a point to the approximation
        set (run) to which it belongs.  */
@@ -341,11 +341,11 @@ eaf2d (const objective_t *data, const int *cumsize, int nruns,
         runtab[k] = j;
     }
 
-#if DEBUG > 1
-    fprintf (stderr, "Runtab:\n");
-    for (k = 0; k < ntotal; k++)
-        fprintf (stderr, "%6d: %6d\n", k, runtab[k]);
-#endif
+    DEBUG2(
+        fprintf (stderr, "Runtab:\n");
+        for (k = 0; k < ntotal; k++)
+            fprintf (stderr, "%6d: %6d\n", k, runtab[k]);
+        );
 
     /* Setup tables to keep attainment statistics. In particular,
        save_attained is needed to cope with repeated values on the same
@@ -543,7 +543,7 @@ polygons_intersect(const objective_t *a, const objective_t *b, int nobj)
 }
 
 
-_no_warn_unused static void
+_attr_maybe_unused static void
 polygon_print(const objective_t *p, int nobj)
 {
     while (p[0] != objective_MIN) {
@@ -555,7 +555,7 @@ polygon_print(const objective_t *p, int nobj)
     fprintf(stderr, "\n");
 }
 
-_no_warn_unused static void
+_attr_maybe_unused static void
 eaf_check_polygons(eaf_polygon_t *p, int nobj)
 {
     // This only works for 2 objectives.
@@ -620,7 +620,7 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
                 POLY_SIZE_CHECK(); EXPENSIVE_CHECK_POLYGONS();                 \
             } while(0)
 
-    int _no_warn_unused _poly_size_check = 0;
+    _attr_maybe_unused int _poly_size_check = 0;
     int nruns = eaf[0]->nruns;
 
     eaf_assert(nruns % 2 == 0);
@@ -808,7 +808,7 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
 eaf_polygon_t *
 eaf_compute_polygon_old (eaf_t **eaf, int nobj, int nlevels)
 {
-    int _no_warn_unused _poly_size_check = 0;
+    _attr_maybe_unused int _poly_size_check = 0;
     int max_size = eaf_max_size(eaf, nlevels);
     int nruns = eaf[0]->nruns;
     eaf_assert(nruns % 2 == 0);

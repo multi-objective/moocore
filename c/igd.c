@@ -181,7 +181,7 @@ do_file (const char *filename, double *reference, int reference_size,
     int n;
     int cumsize;
     for (n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
-        double _no_warn_unused time_elapsed = 0;
+        _attr_maybe_unused double time_elapsed = 0;
         int size_a = cumsizes[n] - cumsize;
         const double *points_a = &data[nobj * cumsize];
         //Timer_start ();

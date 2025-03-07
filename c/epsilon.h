@@ -106,7 +106,7 @@ epsilon_additive_minmax (int dim, const signed char * restrict minmax,
     return epsilon;
 }
 
-_no_warn_unused static double
+_attr_maybe_unused static double
 epsilon_additive (const double * restrict data, int nobj, int npoints,
                   const double * restrict ref, int ref_size,
                   const bool * restrict maximise)
@@ -116,7 +116,7 @@ epsilon_additive (const double * restrict data, int nobj, int npoints,
     free ((void *)minmax);
     return(value);
 }
-_no_warn_unused static double
+_attr_maybe_unused static double
 epsilon_mult (const double * restrict data, int nobj, int npoints,
               const double * restrict ref, int ref_size,
               const bool * restrict maximise)

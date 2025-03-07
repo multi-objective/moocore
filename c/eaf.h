@@ -165,7 +165,7 @@ percentile2level (double p, int n)
     return level;
 }
 
-_no_warn_unused static int *
+_attr_maybe_unused static int *
 levels_from_percentiles(const double * percentile, int nlevels, int nruns)
 {
     int *level;
@@ -182,7 +182,7 @@ levels_from_percentiles(const double * percentile, int nlevels, int nruns)
     return level;
 }
 
-_no_warn_unused static void
+_attr_maybe_unused static void
 all_percentiles (double * percentiles, int n_sets)
 {
     const double x = 100.0 / (double)n_sets;
@@ -193,7 +193,7 @@ all_percentiles (double * percentiles, int n_sets)
 void eaf2matrix_R(double *rmat, eaf_t * const * eaf, int nobj, int totalpoints,
                   const double * percentile, int nlevels);
 
-void eaf2matrix(double *rmat, eaf_t * const * eaf, int nobj, _no_warn_unused int totalpoints,
+void eaf2matrix(double *rmat, eaf_t * const * eaf, int nobj, _attr_maybe_unused int totalpoints,
                 const double * percentile, int nlevels);
 
 double *

@@ -18,8 +18,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include "gcc_attribs.h"
-#define Rprintf(...) printf(__VA_ARGS__)
-void fatal_error(const char * format,...) __attribute__ ((format(printf, 1, 2))) __noreturn _no_warn_unused;
+_attr_maybe_unused void fatal_error(const char * format,...) __attribute__ ((format(printf, 1, 2))) __noreturn;
 void errprintf(const char * format,...) __attribute__ ((format(printf, 1, 2)));
 void warnprintf(const char *format,...)  __attribute__ ((format(printf, 1, 2)));
 #define moocore_perror(...) do {                                               \

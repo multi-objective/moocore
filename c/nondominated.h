@@ -15,7 +15,7 @@ nondom_init (size_t size)
 
 static inline const double *
 force_agree_minimize (const double *points, int dim, int size,
-                      const signed char *minmax, const signed char agree _no_warn_unused)
+                      const signed char *minmax, _attr_maybe_unused const signed char agree)
 {
     eaf_assert(agree != AGREE_MINIMISE);
 
@@ -359,7 +359,7 @@ filter_dominated_set (double *points, int dim, int size,
     return new_size;
 }
 
-_no_warn_unused static bool *
+_attr_maybe_unused static bool *
 is_nondominated (const double * data, int nobj, int npoint, const bool * maximise, bool keep_weakly)
 {
     bool * nondom = nondom_init(npoint);
@@ -412,7 +412,7 @@ normalise (double *points, int dim, int size,
     free (diff);
 }
 
-_no_warn_unused static void
+_attr_maybe_unused static void
 agree_normalise (double *data, int nobj, int npoint,
                  const bool * maximise,
                  const double lower_range, const double upper_range,

@@ -131,7 +131,7 @@ IGD_minmax (int dim, const signed char * restrict minmax,
                       /*p=*/(uint_fast8_t)1);
 }
 
-_no_warn_unused static double
+_attr_maybe_unused static double
 IGD (const double * restrict data, int nobj, int npoints,
      const double * restrict ref, int ref_size,
      const bool *  restrict maximise)
@@ -175,7 +175,7 @@ IGD_plus_minmax (int dim, const signed char * restrict minmax,
                       /*plus=*/true, /*psize=*/true, /*p=*/(uint_fast8_t)1);
 }
 
-_no_warn_unused static double
+_attr_maybe_unused static double
 IGD_plus (const double * restrict data, int nobj, int npoints, const double * restrict ref, int ref_size,
           const bool * restrict  maximise)
 {
@@ -204,7 +204,7 @@ avg_Hausdorff_dist_minmax (int dim, const signed char * restrict minmax,
 }
 /* TODO: Implement p=INFINITY See [4] */
 
-_no_warn_unused static double
+_attr_maybe_unused static double
 avg_Hausdorff_dist (const double * restrict data, int nobj, int npoints,
                     const double * restrict ref, int ref_size,
                     const bool * restrict maximise, unsigned int p)

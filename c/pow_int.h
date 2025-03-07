@@ -2,7 +2,7 @@
 #include "common.h"
 
 // Fast power function for exp between 0 and 32
-static inline double
+_attr_const_func static inline double
 fast_pow_uint_max32(double base, uint_fast8_t exp)
 {
     ASSUME(exp <= 32);
@@ -46,7 +46,7 @@ fast_pow_uint_max32(double base, uint_fast8_t exp)
     }
 }
 
-static inline double
+_attr_const_func static inline double
 pow_uint(double base, unsigned int exp)
 {
     if (exp <= 32)
@@ -63,7 +63,7 @@ pow_uint(double base, unsigned int exp)
     return result;
 }
 
-static inline long double
+_attr_const_func static inline long double
 fast_powl_uint_max32(long double base, uint_fast8_t exp)
 {
     ASSUME(exp <= 32);
@@ -107,7 +107,7 @@ fast_powl_uint_max32(long double base, uint_fast8_t exp)
     }
 }
 
-static inline long double
+_attr_const_func static inline long double
 powl_uint(long double base, unsigned int exp)
 {
     if (exp <= 32)

@@ -102,7 +102,7 @@ read_reference_set (double **reference_p, const char *filename, int *nobj_p)
 
 /* TODO: Handle "1 NAN 3", so NAN means use the minimum/maximum for this
    dimension.  */
-_no_warn_unused static double *
+_attr_maybe_unused static double *
 read_point(char * str, int * nobj)
 {
     int k = 0, size = 10;
@@ -173,7 +173,7 @@ data_bounds (double **minimum_p, double **maximum_p,
     }
 }
 
-_no_warn_unused static void
+_attr_maybe_unused static void
 file_bounds (const char *filename, double **maximum_p, double **minimum_p,
              int *dim_p)
 {
