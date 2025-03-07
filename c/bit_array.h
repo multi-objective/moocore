@@ -80,7 +80,7 @@ bit_array_set(bit_array * b, size_t i, bool x) {
 
 
 static inline void
-bitset_check(const bit_array *b _no_warn_unused, const bool * ref _no_warn_unused, size_t n)
+bitset_check(const bit_array * restrict b, const bool * restrict ref, size_t n)
 {
     for(size_t i = 0; i < n; i++) {
         if (bit_array_get(b, i) != ref[i]) {
@@ -96,7 +96,7 @@ bit_array_offset(bit_array *b, size_t k, size_t nbits)
 }
 
 static inline void
-bit_array_check (bit_array *b, const bool * ref, size_t n, size_t nbits)
+bit_array_check (bit_array * restrict b, const bool * restrict ref, size_t n, size_t nbits)
 {
     for (size_t k = 0; k < n; k++) {
         // fprintf(stderr,"checking: k=%ld n=%ld, nbits=%ld offset=%ld\n",
@@ -106,7 +106,7 @@ bit_array_check (bit_array *b, const bool * ref, size_t n, size_t nbits)
 }
 
 static inline void
-bit_array_copy(bit_array * dest, const bit_array *src, size_t n) {
+bit_array_copy(bit_array * restrict dest, const bit_array * restrict src, size_t n) {
     memcpy(dest, src, sizeof(bit_array_word_t) * bit_nwords(n));
 }
 
