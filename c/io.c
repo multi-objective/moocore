@@ -97,9 +97,9 @@ read_datasets(const char * filename, double **data_p, int *ncols_p, int *datasiz
     int * cumsizes = NULL;
     int nsets = 0, nobjs = 0;
     int error = read_double_data(filename, &data, &nobjs, &cumsizes, &nsets);
-    if (error) {
+    if (unlikely(error))
         return error;
-    }
+
     int ncols = nobjs + 1; // For the column 'set'
     int nrows = cumsizes[nsets - 1];
     int datasize = ncols * nrows * sizeof(double);

@@ -76,23 +76,22 @@ read_minmax (const char *str, int *nobj_p)
     size_t nobj = (size_t) *nobj_p;
     signed char * minmax = malloc (sizeof(signed char) * MAX(len, nobj));
     for (size_t i = 0; i < len; i++) {
-        switch (str[i])
-        {
-        case '+':
-            minmax[i] = 1;
-            all_ignored = false;
-            break;
-        case '-':
-            minmax[i] = -1;
-            all_ignored = false;
-            break;
-        case '0':
-        case 'i':
-            minmax[i] = 0;
-            break;
-        default: /* something unexpected was found */
-            return NULL;
-            break;
+        switch (str[i]) {
+          case '+':
+              minmax[i] = 1;
+              all_ignored = false;
+              break;
+          case '-':
+              minmax[i] = -1;
+              all_ignored = false;
+              break;
+          case '0':
+          case 'i':
+              minmax[i] = 0;
+              break;
+          default: /* something unexpected was found */
+              return NULL;
+              break;
         }
     }
 

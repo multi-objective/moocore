@@ -570,7 +570,7 @@ setup_cdllist(const double * restrict data, dimension_t d, int * restrict size,
         /* Filters those points that do not strictly dominate the reference
            point.  This is needed to assure that the points left are only those
            that are needed to calculate the hypervolume. */
-        if (strongly_dominates(data + j * d, ref, d)) {
+        if (unlikely(strongly_dominates(data + j * d, ref, d))) {
             head[i].x = data + (j+1) * d; /* this will be fixed a few lines below... */
             head[i].ignore = 0;
             head[i].next = head->next + i * d_stop;
@@ -582,7 +582,7 @@ setup_cdllist(const double * restrict data, dimension_t d, int * restrict size,
         }
     }
     n = i - 1;
-    if (n == 0)
+    if (unlikely(n == 0))
         goto finish;
 
     dlnode_t **scratch = malloc(n * sizeof(dlnode_t*));
@@ -856,7 +856,7 @@ double hv2d(const double * restrict data, int n, const double * restrict ref)
         /* Filter everything that may be above the ref point. */
         while (j < n && p[j][1] >= prev_j)
             j++;
-        if (j == n || p[j][0] >= ref[0])
+        if (unlikely(j == n || p[j][0] >= ref[0]))
             break; /* No other point dominates ref. */
         // We found one point that dominates ref.
         hyperv += (ref[0] - p[j][0]) * (prev_j - p[j][1]);
@@ -880,7 +880,7 @@ shift_reference(double * restrict data, dimension_t d, size_t n,
 double fpli_hv_shift(double * restrict data, int d, int n,
                      const double * restrict ref)
 {
-    if (n == 0) return 0.0;
+    if (unlikely(n == 0)) return 0.0;
     if (d == 2) return hv2d(data, n, ref);
     ASSUME(d < 256);
     ASSUME(d > 2);
@@ -1090,17 +1090,17 @@ hv_recursive_ref(avl_tree_t * restrict tree, dlnode_t * restrict list,
 double fpli_hv(const double * restrict data, int d, int n,
                const double * restrict ref)
 {
-    if (n == 0) return 0.0;
+    if (unlikely(n == 0)) return 0.0;
     if (d == 2) return hv2d(data, n, ref);
     ASSUME(d < 256);
     ASSUME(d > 2);
     dimension_t dim = (dimension_t) d;
     dlnode_t * list = setup_cdllist(data, dim, &n, ref);
     double hyperv;
-    if (n == 0) {
+    if (unlikely(n == 0)) {
         /* Returning here would leak memory.  */
 	hyperv = 0.0;
-    } else if (n == 1) {
+    } else if (unlikely(n == 1)) {
         dlnode_t * p = list->next[0];
         hyperv = 1;
         for (dimension_t i = 0; i < dim; i++)

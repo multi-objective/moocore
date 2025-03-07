@@ -31,19 +31,15 @@ read_objective_t_data (const char *filename, objective_t **data_p,
     if (filename == NULL) {
         instream = stdin;
         filename = stdin_name; /* used to diagnose errors.  */
-    } else if (NULL == (instream = fopen (filename,"rb"))) {
+    } else if (unlikely(NULL == (instream = fopen (filename,"rb")))) {
         errprintf ("%s: %s", filename, strerror (errno));
         return ERROR_FOPEN;
     }
 
-    int ntotal;			/* the current element of (*datap) */
-    int datasize;
-    int sizessize;
-    if (nsets == 0) {
-        ntotal = 0;
-        sizessize = 0;
-        datasize = 0;
-    } else {
+    int ntotal = 0;			/* the current element of (*datap) */
+    int sizessize = 0;
+    int datasize = 0;
+    if (nsets > 0) {
         ntotal = nobjs * cumsizes[nsets - 1];
         sizessize = (int) ((nsets - 1) / DATA_INC + 1) * DATA_INC;
         datasize  = (int) ((ntotal - 1) / DATA_INC + 1) * DATA_INC;
@@ -64,7 +60,7 @@ read_objective_t_data (const char *filename, objective_t **data_p,
         retval = skip_comment_line (instream);
     } while (retval == 1);
 
-    if (retval == EOF) { /* faster than !feof() */
+    if (unlikely(retval == EOF)) { /* faster than !feof() */
         errorcode = READ_INPUT_FILE_EMPTY;
         goto read_data_finish;
     }
@@ -86,7 +82,8 @@ read_objective_t_data (const char *filename, objective_t **data_p,
                 /* new column */
                 column++;
                 objective_t number;
-                if (fscanf (instream, objective_t_scanf_format, &number) != 1) {
+                retval = fscanf (instream, objective_t_scanf_format, &number);
+                if (unlikely(retval != 1)) {
                     char buffer[64];
                     if (fscanf (instream, "%60[^ \t\r\n]", buffer) != 1) {
                         errprintf ("%s: line %d column %d: "
@@ -119,9 +116,9 @@ read_objective_t_data (const char *filename, objective_t **data_p,
 
 	    if (!nobjs)
 		nobjs = column;
-            else if (column == nobjs)
+            else if (likely(column == nobjs))
                 ; /* OK */
-            else if (cumsizes[0] == 0) { /* just finished first row.  */
+            else if (unlikely(cumsizes[0] == 0)) { /* just finished first row.  */
                 errprintf ("%s: line %d: input has dimension %d"
                            " while previous data has dimension %d",
                            filename,line, column, nobjs);

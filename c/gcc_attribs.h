@@ -100,11 +100,12 @@
 #endif
 /* FIXME: add the explanation from the GCC documentation to each attribute. */
 
-#if __GNUC__ >= 3
-# define likely(x)	__builtin_expect (!!(x), 1)
-/* FIXME: add the explanation from the GCC documentation to each attribute. */
-# define unlikely(x)	__builtin_expect (!!(x), 0)
-/* FIXME: add the explanation from the GCC documentation to each attribute. */
+#if (defined(__GNUC__) && __GNUC__ >= 3) || defined(__clang__)
+# define likely(x)	__builtin_expect(!!(x), 1)
+# define unlikely(x)	__builtin_expect(!!(x), 0)
+#elif (defined(__cplusplus) && __cplusplus >= 202002L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
+# define likely(x)	(x) [[likely]]
+# define unlikely(x)	(x) [[unlikely]]
 #else
 # define likely(x)	(x)
 # define unlikely(x)	(x)
