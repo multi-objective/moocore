@@ -37,6 +37,7 @@ moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
     // FIXME: Check multiplication overflow.
     // https://github.com/bminor/glibc/blob/e64a1e81aadf6c401174ac9471ced0f0125c2912/malloc/malloc.c#L3709
     // https://github.com/libressl/openbsd/blob/master/src/lib/libc/stdlib/reallocarray.c
+    // https://github.com/python/cpython/blob/89df62c12093bfa079860a93032468ebece3774d/Include/internal/mimalloc/mimalloc/internal.h#L323
     void * p = malloc(nmemb * size);
     if (unlikely(!p))
         moocore_perror("%s:%d: malloc (%zu * %zu) failed",
