@@ -78,12 +78,85 @@ epsilon_mult_minmax (int dim, const signed char * restrict minmax,
 }
 
 static inline double
+epsilon_additive_minimize(int dim,
+                          const double * restrict points_a, int size_a,
+                          const double * restrict points_b, int size_b)
+{
+    ASSUME(dim >= 2);
+    ASSUME(dim <= 32);
+    ASSUME(size_a >= 0);
+    ASSUME(size_b >= 0);
+    int a, b, d;
+    double epsilon = -INFINITY;
+    for (b = 0; b < size_b; b++) {
+        double epsilon_min = INFINITY;
+        for (a = 0; a < size_a; a++) {
+            double epsilon_max = -INFINITY;
+            for (d = 0; d < dim; d++) {
+                double epsilon_temp = points_a[a * dim + d] - points_b[b * dim + d];
+                epsilon_max = MAX(epsilon_max, epsilon_temp);
+            }
+            epsilon_min = MIN (epsilon_min, epsilon_max);
+        }
+        epsilon = MAX(epsilon, epsilon_min);
+    }
+    return epsilon;
+}
+
+static inline double
+epsilon_additive_maximize(int dim,
+                          const double * restrict points_a, int size_a,
+                          const double * restrict points_b, int size_b)
+{
+    ASSUME(dim >= 2);
+    ASSUME(dim <= 32);
+    ASSUME(size_a >= 0);
+    ASSUME(size_b >= 0);
+    int a, b, d;
+    double epsilon = -INFINITY;
+    for (b = 0; b < size_b; b++) {
+        double epsilon_min = INFINITY;
+        for (a = 0; a < size_a; a++) {
+            double epsilon_max = -INFINITY;
+            for (d = 0; d < dim; d++) {
+                double epsilon_temp = points_b[b * dim + d] - points_a[a * dim + d];
+                epsilon_max = MAX (epsilon_max, epsilon_temp);
+            }
+            epsilon_min = MIN (epsilon_min, epsilon_max);
+        }
+        epsilon = MAX(epsilon, epsilon_min);
+    }
+    return epsilon;
+}
+
+static inline double
 epsilon_additive_minmax (int dim, const signed char * restrict minmax,
                          const double * restrict points_a, int size_a,
                          const double * restrict points_b, int size_b)
 {
     ASSUME(dim >= 2);
     ASSUME(dim <= 32);
+    ASSUME(size_a >= 0);
+    ASSUME(size_b >= 0);
+
+    bool all_minimize = true, all_maximize = true;
+    for (int d = 0; d < dim; d++) {
+        if (minmax[d] < 0) {
+            all_maximize = false;
+        } else if (minmax[d] > 0) {
+            all_minimize = false;
+        } else {
+            all_minimize = false;
+            all_maximize = false;
+            break;
+        }
+    }
+    assert(!all_maximize || !all_minimize);
+    if (all_minimize)
+        return epsilon_additive_minimize(dim, points_a, size_a, points_b, size_b);
+    if (all_maximize)
+        return epsilon_additive_maximize(dim, points_a, size_a, points_b, size_b);
+
     int a, b, d;
     double epsilon = -INFINITY;
 
@@ -101,7 +174,7 @@ epsilon_additive_minmax (int dim, const signed char * restrict minmax,
             }
             epsilon_min = MIN (epsilon_min, epsilon_max);
         }
-        epsilon = MAX (epsilon, epsilon_min);
+        epsilon = MAX(epsilon, epsilon_min);
     }
     return epsilon;
 }
@@ -134,12 +207,12 @@ epsilon_additive_ind (int dim, const signed char * restrict minmax,
                       const double * restrict points_a, int size_a,
                       const double * restrict points_b, int size_b)
 {
-    double eps_ab, eps_ba;
+    double eps_ab = epsilon_additive_minmax(
+        dim, minmax, points_a, size_a, points_b, size_b);
+    double eps_ba = epsilon_additive_minmax(
+        dim, minmax, points_b, size_b, points_a, size_a);
 
-    eps_ab = epsilon_additive_minmax (dim, minmax, points_a, size_a, points_b, size_b);
-    eps_ba = epsilon_additive_minmax (dim, minmax, points_b, size_b, points_a, size_a);
-
-    DEBUG2 (printf ("eps_ab = %g, eps_ba = %g\n", eps_ab, eps_ba));
+    DEBUG2(printf ("eps_ab = %g, eps_ba = %g\n", eps_ab, eps_ba));
 
     if (eps_ab <= 0 && eps_ba > 0)
         return -1;
