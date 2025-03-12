@@ -127,6 +127,12 @@ moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
 #define ignore_unused_result(X)  do { if(X) {}} while(0);
 #endif
 
+#ifdef __cplusplus
+#define STATIC_CAST(TYPE,OP) (static_cast<TYPE>(OP))
+#else
+#define STATIC_CAST(TYPE,OP) ((TYPE)(OP))
+#endif
+
 /* FIXME: Move this to a better place: matrix.h ? */
 /* FIXME: Measure if this is faster than the R implementation of t()  */
 static inline void

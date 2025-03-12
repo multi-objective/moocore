@@ -49,8 +49,8 @@ fast_pow_uint_max32(double base, uint_fast8_t exp)
 _attr_const_func static inline double
 pow_uint(double base, unsigned int exp)
 {
-    if (exp <= 32)
-        return fast_pow_uint_max32(base, (uint_fast8_t) exp); // Use lookup table for small values
+    if (exp <= 32) // Use lookup table for small values
+        return fast_pow_uint_max32(base, STATIC_CAST(uint_fast8_t, exp));
 
     double result = (exp & 1) ? base : 1;
     exp >>= 1;
@@ -110,8 +110,8 @@ fast_powl_uint_max32(long double base, uint_fast8_t exp)
 _attr_const_func static inline long double
 powl_uint(long double base, unsigned int exp)
 {
-    if (exp <= 32)
-        return fast_powl_uint_max32(base, (uint_fast8_t) exp); // Use lookup table for small values
+    if (exp <= 32) // Use lookup table for small values
+        return fast_powl_uint_max32(base, STATIC_CAST(uint_fast8_t, exp));
 
     long double result = (exp & 1) ? base : 1;
     exp >>= 1;
