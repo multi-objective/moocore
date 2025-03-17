@@ -35,6 +35,8 @@
 #'
 #' \insertRef{FonGueLopPaq2011emo}{moocore}
 #'
+#' \insertRef{LopVerDreDoe2025}{moocore}
+#'
 #'@seealso [read_datasets()]
 #'
 #'@examples

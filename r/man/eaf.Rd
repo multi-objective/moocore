@@ -61,6 +61,8 @@ str(z)
 \insertRef{Grunert01}{moocore}
 
 \insertRef{FonGueLopPaq2011emo}{moocore}
+
+\insertRef{LopVerDreDoe2025}{moocore}
 }
 \seealso{
 \code{\link[=read_datasets]{read_datasets()}}
