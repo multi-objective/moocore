@@ -6,12 +6,12 @@
 \title{Various strategies of Two-Phase Local Search applied to the Permutation
 Flowshop Problem with Makespan and Weighted Tardiness objectives.}
 \format{
-A data frame with 1511 observations of  4 variables:
+A data frame with 1511 observations of 4 variables:
 \describe{
 \item{\code{algorithm}}{TPLS search strategy}
 \item{\code{Makespan}}{first objective values.}
 \item{\code{WeightedTardiness}}{second objective values.}
-\item{\code{set}}{indices of corresponding conditional Pareto fronts.}
+\item{\code{run}}{index of the run.}
 }
 }
 \source{
