@@ -20,7 +20,7 @@ repos:
       - id: check-added-large-files
         args: ['--maxkb=200']
       - id: file-contents-sorter
-        files: '\.Rbuildignore$'
+        files: '\.Rbuildignore$|^bibkeys.txt$'
       - id: end-of-file-fixer
         exclude: '(\.Rd|python/doc/source/reference/.*|test-doctest-.*)'
 
