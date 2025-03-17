@@ -5,8 +5,8 @@ library(eaf)
 dat1 <- read_datasets("../input1.dat")
 dat_sphere <- read_datasets("../spherical-250-10-3d.txt")
 dat_uniform <- read_datasets("../uniform-250-10-3d.txt")
-wrots_l10 <- read_datasets("../wrots_l10w100_dat")
-wrots_l100 <- read_datasets("../wrots_l100w10_dat")
+wrots_l10 <- read_datasets("../wrots_l10w100_dat.xz")
+wrots_l100 <- read_datasets("../wrots_l100w10_dat.xz")
 ALG_1_dat <- read_datasets("../ALG_1_dat.xz")
 
 # These datasets are already in the form "Data + set number"

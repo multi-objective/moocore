@@ -39,8 +39,8 @@ def test_read_datasets_data(test_datapath):
         "input1.dat",
         "spherical-250-10-3d.txt",
         "uniform-250-10-3d.txt",
-        "wrots_l10w100_dat",
-        "wrots_l100w10_dat",
+        "wrots_l10w100_dat.xz",
+        "wrots_l100w10_dat.xz",
         "ALG_1_dat.xz",
     ]
     expected_names = [
@@ -254,13 +254,13 @@ def test_normalise():
 
 
 def test_eaf(test_datapath):
-    # FIXME ALG_1_dat is creating slightly different percentile values than expected in its EAF output
+    # FIXME: ALG_1_dat is creating slightly different percentile values than expected in its EAF output
     test_names = [
         "input1.dat",
         "spherical-250-10-3d.txt",
         "uniform-250-10-3d.txt",
-        "wrots_l10w100_dat",
-        "wrots_l100w10_dat",
+        "wrots_l10w100_dat.xz",
+        "wrots_l100w10_dat.xz",
         # "ALG_1_dat.xz",
     ]
     expected_eaf_names = [

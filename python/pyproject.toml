@@ -35,7 +35,7 @@ classifiers = [
 ]
 dependencies = [
   "cffi>=1.15.1",
-  "numpy>=1.22.3",
+  "numpy>=1.23",
 ]
 
 urls.Documentation = "https://multi-objective.github.io/moocore/python/"

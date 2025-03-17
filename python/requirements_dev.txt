@@ -1,6 +1,6 @@
 setuptools>=70.1,<74 # Sync with .pre-commit-config.yaml
 cffi >= 1.15.1
-numpy >= 1.22.3
+numpy >= 1.23.0
 
 pre-commit >= 3.3.2
 ruff >= 0.1.4

@@ -186,7 +186,7 @@ def igd(
 
     Returns
     -------
-        A single numerical value
+        A single numerical value.
 
     """
     data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
@@ -220,7 +220,7 @@ def igd_plus(
 
     Returns
     -------
-        A single numerical value
+        A single numerical value.
 
     Examples
     --------
@@ -272,7 +272,7 @@ def avg_hausdorff_dist(data, /, ref, *, maximise=False, p: float = 1) -> float: 
 
     Returns
     -------
-        A single numerical value
+        A single numerical value.
 
     """
     if p <= 0:
@@ -311,7 +311,7 @@ def epsilon_additive(
 
     Returns
     -------
-        A single numerical value
+        A single numerical value.
 
     Examples
     --------
@@ -338,7 +338,7 @@ def epsilon_mult(data, /, ref, *, maximise=False) -> float:
 
     Returns
     -------
-        A single numerical value
+        A single numerical value.
 
     """
     data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
@@ -386,7 +386,7 @@ def hypervolume(
 
     Returns
     -------
-        A single numerical value, the hypervolume indicator
+        A single numerical value, the hypervolume indicator.
 
     See Also
     --------
@@ -512,7 +512,7 @@ class Hypervolume:
 
         Returns
         -------
-           A single numerical value, the hypervolume indicator
+           A single numerical value, the hypervolume indicator.
 
         """
         data, data_copied = asarray_maybe_copy(data)
@@ -581,7 +581,7 @@ def hv_approx(
 
     Returns
     -------
-        A single numerical value, the approximate hypervolume indicator
+        A single numerical value, the approximate hypervolume indicator.
 
     References
     ----------
@@ -1153,7 +1153,7 @@ def eaf(data: ArrayLike, /, percentiles: list = []):
     Returns
     -------
     numpy array
-        Returns a numpy array containing the EAF data points, with the same number of columns as the input argument, but a different number of rows. The last column represents the EAF percentile for that data point
+        Returns a numpy array containing the EAF data points, with the same number of columns as the input argument, but a different number of rows. The last column represents the EAF percentile for that data point.
 
     Examples
     --------
@@ -1574,7 +1574,7 @@ def whv_rect(x, /, rectangles, *, ref, maximise=False) -> float:
 
     Returns
     -------
-        A single numerical value, the weighted hypervolume
+        A single numerical value, the weighted hypervolume.
 
     See Also
     --------
@@ -1662,7 +1662,7 @@ def total_whv_rect(
 
     Returns
     -------
-        A single numerical value, the weighted hypervolume
+        A single numerical value, the weighted hypervolume.
 
     See Also
     --------
@@ -1776,7 +1776,7 @@ def whv_hype(
 
     Returns
     -------
-       A single numerical value, the weighted hypervolume
+       A single numerical value, the weighted hypervolume.
 
 
     See Also
@@ -1883,7 +1883,7 @@ def get_dataset_path(filename: str, /) -> str:
 
     Returns
     -------
-        Full path to the dataset
+        Full path to the dataset.
 
     """
     return files("moocore.data").joinpath(filename)

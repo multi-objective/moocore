@@ -128,7 +128,6 @@ html_theme = "pydata_sphinx_theme"
 # else:
 #     switcher_version = f"{version}"
 
-
 html_theme_options = {
     "github_url": f"https://github.com/multi-objective/{project}",
     "collapse_navigation": True,
@@ -206,18 +205,14 @@ pygments_style = "sphinx"
 
 # Intersphinx mapping
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3/", None),
-    "numpy": ("https://numpy.org/doc/stable/", None),
-    "neps": ("https://numpy.org/neps/", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
-    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
-    "geopandas": ("https://geopandas.org/en/stable/", None),
-    "pygraphviz": ("https://pygraphviz.github.io/documentation/stable/", None),
-    "sphinx-gallery": ("https://sphinx-gallery.github.io/stable/", None),
-    "nx-guides": ("https://networkx.org/nx-guides/", None),
-    "sympy": ("https://docs.sympy.org/latest/", None),
     "mooplot": ("https://multi-objective.github.io/mooplot/python/", None),
+    "neps": ("https://numpy.org/neps/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "nx-guides": ("https://networkx.org/nx-guides/", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
+    "python": ("https://docs.python.org/3/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
 }
 
 # From https://github.com/scikit-learn/scikit-learn/blob/main/doc/conf.py
