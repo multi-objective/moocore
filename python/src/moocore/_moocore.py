@@ -351,6 +351,8 @@ def _hypervolume(data: ArrayLike, ref: ArrayLike):
     data_p, npoints, nobj = np2d_to_double_array(data)
     ref_buf = ffi.from_buffer("double []", ref)
     hv = lib.fpli_hv(data_p, nobj, npoints, ref_buf)
+    if hv < 0:
+        raise MemoryError("memory allocation failed")
     return hv
 
 

@@ -843,6 +843,7 @@ compare_x_asc_y_asc (const void * restrict p1, const void * restrict p2)
 double hv2d(const double * restrict data, int n, const double * restrict ref)
 {
     const double **p = malloc (n * sizeof(double *));
+    if (unlikely(!p)) return -1;
 
     for (int k = 0; k < n; k++)
         p[k] = data + 2 * k;
@@ -1087,6 +1088,10 @@ hv_recursive_ref(avl_tree_t * restrict tree, dlnode_t * restrict list,
                     "manuel.lopez-ibanez@manchester.ac.uk\n", __FILE__, __LINE__);
 }
 
+/*
+   Returns 0 if no point strictly dominates ref.
+   Returns -1 if out of memory.
+*/
 double fpli_hv(const double * restrict data, int d, int n,
                const double * restrict ref)
 {
