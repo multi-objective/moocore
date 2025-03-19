@@ -1,0 +1,6 @@
+﻿moocore.normalise
+=================
+
+.. currentmodule:: moocore
+
+.. autofunction:: normalise

@@ -1,0 +1,6 @@
+﻿moocore.eafdiff
+===============
+
+.. currentmodule:: moocore
+
+.. autofunction:: eafdiff
