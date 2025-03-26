@@ -3,7 +3,7 @@ WERROR=
 ifdef WERROR
 WERROR_FLAG:=-Werror
 endif
-WARN_CFLAGS = -pedantic -Wall -Wextra -Wvla  -pedantic -Wconversion -Wno-sign-conversion -Wstrict-prototypes $(WERROR_FLAG)
+WARN_CFLAGS = -pedantic -Wall -Wextra -Wvla -Wconversion -Wno-sign-conversion -Wstrict-prototypes $(WERROR_FLAG)
 SANITIZERS= -fsanitize=undefined -fsanitize=address
 ifeq ($(DEBUG), 0)
   OPT_CFLAGS ?= -DNDEBUG -O3 -flto
