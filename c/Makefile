@@ -177,49 +177,31 @@ clean:
 	@$(RM) $(OBJS) $(HV_OBJS)
 
 TESTSUITE:="../testsuite"
-test: clean
+test:
 	@if ! test -d $(TESTSUITE); then  		    	         \
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
 	$(MAKE) all DEBUG=1 SANITIZERS=""
-	$(MAKE) test-nondominated test-eaf test-hv
+	$(MAKE) test-nondominated test-eaf test-hv test-igd test-epsilon
 
-test-nondominated:
-	$(MAKE) $(nondominatedexe) DEBUG=1 SANITIZERS=""
-	$(call ECHO,---> Testing $(nondominatedexe) for errors (DEBUG=1) <--- )
-	@cd $(TESTSUITE)/nondominated && ../regtest.py $(nondominatedexe) && cd $(PWD)
+test-eaf test-nondominated test-hv test-igd test-epsilon: target=$(subst test-,,$@)
+test-eaf test-nondominated test-hv test-igd test-epsilon:
+	$(MAKE) $(target) DEBUG=1 SANITIZERS=""
+	$(call ECHO,---> Testing $(target) for errors (DEBUG=1) <--- )
+	@cd $(TESTSUITE)/$(target) && ../regtest.py $(BINDIR)/$(target)$(EXE) && cd $(PWD)
 
-test-eaf:
-	$(MAKE) eaf DEBUG=1 SANITIZERS=""
-	$(call ECHO,---> Testing $(eafexe) for errors (DEBUG=1) <--- )
-	@cd $(TESTSUITE)/eaf && ../regtest.py $(eafexe) && cd $(PWD)
-
-test-hv:
-	$(MAKE) $(hvexe) DEBUG=1 SANITIZERS=""
-	$(call ECHO,---> Testing $(hvexe) for errors (DEBUG=1) <--- )
-	@cd $(TESTSUITE)/hv && ../regtest.py $(hvexe) && cd $(PWD)
-
-time: clean
+time:
 	@if ! test -d $(TESTSUITE); then  		    	         \
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
 	$(MAKE) all DEBUG=0 SANITIZERS=""
-	$(MAKE) time-nondominated time-eaf time-hv
+	$(MAKE) time-eaf time-nondominated time-hv time-igd time-epsilon
 
-time-nondominated:
-	$(MAKE) $(nondominatedexe) DEBUG=0 SANITIZERS=""
-	$(call ECHO,---> Testing $(nondominatedexe) for speed (DEBUG=0) <--- )
-	@cd $(TESTSUITE)/nondominated && ../regtest.py $(nondominatedexe) && cd $(PWD)
-
-time-eaf:
-	$(MAKE) eaf DEBUG=0 SANITIZERS=""
-	$(call ECHO,---> Testing $(eafexe) for speed (DEBUG=0) <--- )
-	@cd $(TESTSUITE)/eaf && ../regtest.py $(eafexe) && cd $(PWD)
-
-time-hv:
-	$(MAKE) $(hvexe) DEBUG=0 SANITIZERS=""
-	$(call ECHO,---> Testing $(hvexe) for speed (DEBUG=0) <--- )
-	@cd $(TESTSUITE)/hv && ../regtest.py $(hvexe) && cd $(PWD)
+time-eaf time-nondominated time-hv time-igd time-epsilon: target=$(subst time-,,$@)
+time-eaf time-nondominated time-hv time-igd time-epsilon:
+	$(MAKE) $(target) DEBUG=0 SANITIZERS=""
+	$(call ECHO,---> Testing $(target) for speed (DEBUG=0) <--- )
+	@cd $(TESTSUITE)/$(target) && ../regtest.py $(BINDIR)/$(target)$(EXE) && cd $(PWD)
 
 all: clean
 	$(MAKE) default
