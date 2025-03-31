@@ -34,12 +34,14 @@
 #' objective 1 is to be minimized and objective 2 is to be maximized, and the
 #' multiplicative epsilon computed here for \eqn{epsilon(A,R) = 3}. This means
 #' that \eqn{A} needs to be multiplied by 1/3 for all \eqn{a_1} values and by 3
-#' for all \eqn{a_2} values in order to weakly dominate \eqn{R}. The
+#' for all \eqn{a_2} values in order to weakly dominate \eqn{R}.  The
 #' computation of the multiplicative version for negative values doesn't make
 #' sense.
 #'
-#' Computation of the epsilon indicator requires \eqn{O(n \cdot |A| \cdot
-#' |R|)}, where \eqn{n} is the number of objectives (dimension of vectors).
+#' The current implementation uses the naive algorithm that requires
+#' \eqn{O(n \cdot |A| \cdot |R|)}, where \eqn{n} is the number of objectives
+#' (dimension of vectors).
+#'
 #' @references
 #'
 #' \insertRef{ZitThiLauFon2003:tec}{moocore}
