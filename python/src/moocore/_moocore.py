@@ -158,7 +158,11 @@ def _parse_maximise(maximise, nobj):
     return atleast_1d_of_length_n(maximise, nobj).astype(bool)
 
 
-def _unary_refset_common(data, ref, maximise):
+def _all_positive(x: ArrayLike):
+    return x.min() > 0
+
+
+def _unary_refset_common(data, ref, maximise, check_all_positive=False):
     # Convert to numpy.array in case the user provides a list.  We use
     # np.asarray(dtype=float) to convert it to floating-point, otherwise if a user inputs
     # something like ref = np.array([10, 10]) then numpy would interpret it as
@@ -170,6 +174,16 @@ def _unary_refset_common(data, ref, maximise):
         raise ValueError(
             f"data and ref need to have the same number of columns ({nobj} != {ref.shape[1]})"
         )
+    if check_all_positive:
+        if not _all_positive(data):
+            raise ValueError(
+                "All values must be larger than 0 in the input data"
+            )
+        if not _all_positive(ref):
+            raise ValueError(
+                "All values must be larger than 0 in the reference set"
+            )
+
     maximise = _parse_maximise(maximise, nobj)
     data_p, npoints, nobj = np2d_to_double_array(data)
     ref_p, ref_size = np1d_to_double_array(ref)
@@ -290,9 +304,12 @@ def avg_hausdorff_dist(data, /, ref, *, maximise=False, p: float = 1) -> float: 
 def epsilon_additive(
     data: ArrayLike, /, ref: ArrayLike, *, maximise: bool | list[bool] = False
 ) -> float:
-    """Additive epsilon metric.
+    r"""Additive epsilon metric.
 
-    ``data`` and ``ref`` must all be larger than 0 for :func:`epsilon_mult`.
+    The current implementation uses the naive algorithm that requires
+    :math:`O(n \cdot |A| \cdot |R|)`, where :math:`n` is the number of
+    objectives (dimension of vectors), :math:`A` is the input set and :math:`R`
+    is the reference set.
 
     .. seealso:: For details of the calculation, see :ref:`epsilon_metric`.
 
@@ -334,6 +351,8 @@ def epsilon_additive(
 def epsilon_mult(data, /, ref, *, maximise=False) -> float:
     """Multiplicative epsilon metric.
 
+    ``data`` and ``ref`` must all be larger than 0.
+
     .. seealso:: For details about parameters, return value and examples, see :func:`epsilon_additive`.  For details of the calculation, see :ref:`epsilon_metric`.
 
     Returns
@@ -342,7 +361,7 @@ def epsilon_mult(data, /, ref, *, maximise=False) -> float:
 
     """
     data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
-        data, ref, maximise
+        data, ref, maximise, check_all_positive=True
     )
     return lib.epsilon_mult(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
 

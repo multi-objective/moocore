@@ -123,7 +123,7 @@ for all :math:`a_2` values in order to weakly dominate :math:`R`. The
 computation of the multiplicative version for negative values doesn't make
 sense.
 
-Computation of the epsilon indicator requires :math:`O(n \cdot |A| \cdot
+The current implementation uses the naive algorithm that requires :math:`O(n \cdot |A| \cdot
 |R|)`, where :math:`n` is the number of objectives (dimension of vectors).
 
 
