@@ -111,68 +111,72 @@ endif
 EXE_CFLAGS += $(OPT_CFLAGS) $(WARN_CFLAGS) \
 	-DDEBUG=$(DEBUG) -DVERSION='"$(VERSION)"' -DMARCH='"$(gcc-guess-march)"'
 
-igdexe = $(BINDIR)/igd$(EXE)
-epsilonexe = $(BINDIR)/epsilon$(EXE)
 dominatedsetsexe = $(BINDIR)/dominatedsets$(EXE)
-nondominatedexe = $(BINDIR)/nondominated$(EXE)
-ndsortexe = $(BINDIR)/ndsort$(EXE)
 eafexe=$(BINDIR)/eaf$(EXE)
+epsilonexe = $(BINDIR)/epsilon$(EXE)
 hvexe=$(BINDIR)/hv$(EXE)
+igdexe = $(BINDIR)/igd$(EXE)
+ndsortexe = $(BINDIR)/ndsort$(EXE)
+nondominatedexe = $(BINDIR)/nondominated$(EXE)
+allexes=$(dominatedsetsexe) $(eafexe) $(epsilonexe) $(hvexe) $(igdexe) $(ndsortexe) $(nondominatedexe)
 
+.PHONY : all clean default dist dominatedsets eaf epsilon hv igd ndsort nondominated test time
 
-.PHONY : all clean dist default test time eaf hv nondominated
+default: $(allexes)
 
-default: $(igdexe) $(epsilonexe) $(dominatedsetsexe) $(nondominatedexe) $(ndsortexe) $(eafexe) $(hvexe)
+all: clean
+	$(MAKE) default
 
-igd: $(igdexe)
-epsilon: $(epsilonexe)
+%.o : %.c
+	$(QUIET_CC)$(CC) $(CPPFLAGS) $(EXE_CFLAGS) $(CFLAGS) -c -o $@ $<
+
 dominatedsets: $(dominatedsetsexe)
-nondominated: $(nondominatedexe)
-ndsort: $(ndsortexe)
 eaf: $(eafexe)
+epsilon: $(epsilonexe)
 hv: $(hvexe)
+igd: $(igdexe)
+ndsort: $(ndsortexe)
+nondominated: $(nondominatedexe)
 
 include libhv.mk
-
-$(igdexe): OBJS=igd.o io.o cmdline.o
-$(igdexe): HEADERS=igd.h nondominated.h cmdline.h
-
-$(epsilonexe): OBJS=epsilon.o io.o cmdline.o
-$(epsilonexe): HEADERS=epsilon.h nondominated.h cmdline.h
 
 $(dominatedsetsexe): OBJS=dominatedsets.o io.o cmdline.o
 $(dominatedsetsexe): HEADERS=nondominated.h cmdline.h
 
-$(nondominatedexe): OBJS=nondominated.o io.o cmdline.o
-$(nondominatedexe): HEADERS=common.h cmdline.h nondominated.h
-
 $(eafexe): OBJS=eaf.o io.o eaf_main.o eaf3d.o avl.o cmdline.o
 $(eafexe): HEADERS=eaf.h
 
-$(ndsortexe): OBJS=ndsort.o pareto.o io.o hv_contrib.c $(LIBHV_OBJS) cmdline.o
-$(ndsortexe): HEADERS=nondominated.h cmdline.h
+$(epsilonexe): OBJS=epsilon.o io.o cmdline.o
+$(epsilonexe): HEADERS=epsilon.h nondominated.h cmdline.h
 
 $(hvexe): OBJS=main-hv.o io.o timer.o cmdline.o $(LIBHV_OBJS)
 $(hvexe): HEADERS=hv.h timer.h
 
+$(igdexe): OBJS=igd.o io.o cmdline.o
+$(igdexe): HEADERS=igd.h nondominated.h cmdline.h
+
+$(ndsortexe): OBJS=ndsort.o pareto.o io.o hv_contrib.c $(LIBHV_OBJS) cmdline.o
+$(ndsortexe): HEADERS=nondominated.h cmdline.h
+
+$(nondominatedexe): OBJS=nondominated.o io.o cmdline.o
+$(nondominatedexe): HEADERS=common.h cmdline.h nondominated.h
+
 io.o: io_priv.h io.h
 
-$(igdexe) $(epsilonexe) $(nondominatedexe) $(dominatedsetsexe) $(ndsortexe) $(eafexe) $(hvexe): $(OBJS) $(HEADERS)
+$(OBJS): $(HEADERS) common.h gcc_attribs.h
+
+$(allexes): $(OBJS) $(HEADERS)
 	$(call MKDIR, $(BINDIR)/)
 	$(call ECHO,--> Building $@ version $(VERSION) <---)
 	$(QUIET_LINK)$(CC) -o $@  $(OBJS) $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS)
 
-$(OBJS): $(HEADERS) common.h gcc_attribs.h
-
 clean:
 	@-$(RM) config.status config.log
 	@-$(RM) Hypervolume_MEX.mex
-
-	@for exe in $(igdexe) $(epsilonexe) $(dominatedsetsexe) $(nondominatedexe) $(ndsortexe) $(eafexe) $(hvexe); do \
+	@for exe in $(allexes); do \
 		echo "---> Removing $$exe <---"; \
 		$(RM) $$exe; \
 	done
-
 	$(call ECHO,---> Removing object files: $(OBJS) <---)
 	@$(RM) $(OBJS) $(HV_OBJS)
 
@@ -182,7 +186,7 @@ test:
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
 	$(MAKE) all DEBUG=1 SANITIZERS=""
-	$(MAKE) test-nondominated test-eaf test-hv test-igd test-epsilon
+	$(MAKE) test-eaf test-nondominated test-hv test-igd test-epsilon
 
 test-eaf test-nondominated test-hv test-igd test-epsilon: target=$(subst test-,,$@)
 test-eaf test-nondominated test-hv test-igd test-epsilon:
@@ -202,12 +206,6 @@ time-eaf time-nondominated time-hv time-igd time-epsilon:
 	$(MAKE) $(target) DEBUG=0 SANITIZERS=""
 	$(call ECHO,---> Testing $(target) for speed (DEBUG=0) <--- )
 	@cd $(TESTSUITE)/$(target) && ../regtest.py $(BINDIR)/$(target)$(EXE) && cd $(PWD)
-
-all: clean
-	$(MAKE) default
-
-%.o : %.c
-	$(QUIET_CC)$(CC) $(CPPFLAGS) $(EXE_CFLAGS) $(CFLAGS) -c -o $@ $<
 
 mex: Hypervolume_MEX.c $(LIBHV_OBJS)
 	$(call ECHO,---> You can use 'make mex MEXFLAGS="-O -std=c99"' to pass flags to mex. Code compiled by mex is less optimized (slower) than the default 'hv' command-line program <---)
