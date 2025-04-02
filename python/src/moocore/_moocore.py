@@ -332,11 +332,14 @@ def epsilon_additive(
 
     Examples
     --------
+    >>> import numpy as np
     >>> dat = np.array([[3.5, 5.5], [3.6, 4.1], [4.1, 3.2], [5.5, 1.5]])
     >>> ref = np.array([[1, 6], [2, 5], [3, 4], [4, 3], [5, 2], [6, 1]])
     >>> moocore.epsilon_additive(dat, ref=ref)
     2.5
     >>> moocore.epsilon_mult(dat, ref=ref)
+    3.5
+    >>> float(np.exp(moocore.epsilon_additive(np.log(dat), ref=np.log(ref))))
     3.5
 
     """
