@@ -4,13 +4,14 @@
 test_that("Doctest: epsilon_additive", {
   # Created from @doctest for `epsilon_additive`
   # Source file: R/epsilon.R
-  # Source line: 54
+  # Source line: 58
   A1 <- matrix(c(9, 2, 8, 4, 7, 5, 5, 6, 4, 7), ncol = 2, byrow = TRUE)
   A2 <- matrix(c(8, 4, 7, 5, 5, 6, 4, 7), ncol = 2, byrow = TRUE)
   A3 <- matrix(c(10, 4, 9, 5, 8, 6, 7, 7, 6, 8), ncol = 2, byrow = TRUE)
   expect_equal(epsilon_mult(A1, A3), 0.9)
   expect_equal(epsilon_mult(A1, A2), 1)
   expect_equal(epsilon_mult(A2, A1), 2)
+  expect_equal(exp(epsilon_additive(log(A2), log(A1))), 2)
   extdata_path <- system.file(package = "moocore", "extdata")
   path.A1 <- file.path(extdata_path, "ALG_1_dat.xz")
   path.A2 <- file.path(extdata_path, "ALG_2_dat.xz")
