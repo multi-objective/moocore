@@ -1488,9 +1488,9 @@ def eafdiff(
     """
     x = np.asarray(x, dtype=float)
     y = np.asarray(y, dtype=float)
-    assert (
-        x.shape[1] == y.shape[1]
-    ), "'x' and 'y' must have the same number of columns"
+    assert x.shape[1] == y.shape[1], (
+        "'x' and 'y' must have the same number of columns"
+    )
     nobj = x.shape[1] - 1
     assert nobj == 2
     maximise = _parse_maximise(maximise, nobj=nobj)

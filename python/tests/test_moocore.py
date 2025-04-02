@@ -21,9 +21,9 @@ def test_read_datasets_data(test_datapath):
 
     def check_testdata(testpath, expected_name, expected_shape):
         testdata = moocore.read_datasets(testpath)
-        assert (
-            testdata.shape == expected_shape
-        ), f"Read data array has incorrect shape, should be {expected_shape} but is {testdata.shape}"
+        assert testdata.shape == expected_shape, (
+            f"Read data array has incorrect shape, should be {expected_shape} but is {testdata.shape}"
+        )
         if expected_name != "":
             check_data = np.loadtxt(
                 test_datapath(f"expected_output/read_datasets/{expected_name}")
@@ -98,26 +98,26 @@ class TestHypervolume:
         X = self.input1
         dat = X[X[:, 2] == 1, :2]
         hv = moocore.hypervolume(dat, ref=np.array([10, 10]))
-        assert math.isclose(
-            hv, 90.46272765
-        ), "input1.dat hypervolume produces wrong output"
+        assert math.isclose(hv, 90.46272765), (
+            "input1.dat hypervolume produces wrong output"
+        )
 
         hv_ind = moocore.Hypervolume(ref=[10, 10])
         hv = hv_ind(dat)
-        assert math.isclose(
-            hv, 90.46272765
-        ), "input1.dat Hypervolume(ref = [10,10]) produces wrong output"
+        assert math.isclose(hv, 90.46272765), (
+            "input1.dat Hypervolume(ref = [10,10]) produces wrong output"
+        )
 
         dat = X[X[:, 2] == 2, :2]
         hv = moocore.hypervolume(dat, ref=[10, 10])
-        assert math.isclose(
-            hv, 53.969708954
-        ), "input1.dat hypervolume produces wrong output"
+        assert math.isclose(hv, 53.969708954), (
+            "input1.dat hypervolume produces wrong output"
+        )
 
         hv = hv_ind(dat)
-        assert math.isclose(
-            hv, 53.969708954
-        ), "input1.dat Hypervolume(ref = [10,10]) produces wrong output"
+        assert math.isclose(hv, 53.969708954), (
+            "input1.dat Hypervolume(ref = [10,10]) produces wrong output"
+        )
 
         X = moocore.read_datasets(test_datapath("duplicated3.inp"))[:, :-1]
         hv = moocore.hypervolume(
@@ -282,9 +282,9 @@ def test_eaf(test_datapath):
         expected_eaf_pct_result = np.loadtxt(
             test_datapath(f"expected_output/eaf/pct_{expected_eaf_name}")
         )
-        assert (
-            eaf_test.shape == expected_eaf_result.shape
-        ), f"Shapes of {test_name} and {expected_eaf_name} do not match"
+        assert eaf_test.shape == expected_eaf_result.shape, (
+            f"Shapes of {test_name} and {expected_eaf_name} do not match"
+        )
         assert_allclose(
             eaf_test,
             expected_eaf_result,
