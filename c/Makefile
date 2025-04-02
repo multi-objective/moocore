@@ -97,7 +97,6 @@ OBJS  = $(SRCS:.c=.o)
 EXE_LDFLAGS=-lm
 
 include gitversion.mk
-include gcc.mk
 
 # mex
 MEX?=mkoctfile --mex
@@ -181,16 +180,18 @@ clean:
 	@$(RM) $(OBJS) $(HV_OBJS)
 
 TESTSUITE:="../testsuite"
+test: OPT_CFLAGS ?=-Og -g3
 test:
 	@if ! test -d $(TESTSUITE); then  		    	         \
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
-	$(MAKE) all DEBUG=1 SANITIZERS=""
+	$(MAKE) all DEBUG=1 SANITIZERS="" OPT_CFLAGS="$(OPT_CFLAGS)"
 	$(MAKE) test-eaf test-nondominated test-hv test-igd test-epsilon
 
 test-eaf test-nondominated test-hv test-igd test-epsilon: target=$(subst test-,,$@)
+test-eaf test-nondominated test-hv test-igd test-epsilon: OPT_CFLAGS ?=-Og -g3
 test-eaf test-nondominated test-hv test-igd test-epsilon:
-	$(MAKE) $(target) DEBUG=1 SANITIZERS=""
+	$(MAKE) $(target) DEBUG=1 SANITIZERS="" OPT_CFLAGS="$(OPT_CFLAGS)"
 	$(call ECHO,---> Testing $(target) for errors (DEBUG=1) <--- )
 	@cd $(TESTSUITE)/$(target) && ../regtest.py $(BINDIR)/$(target)$(EXE) && cd $(PWD)
 
@@ -225,3 +226,5 @@ dist: all
 
 TAGS: *.c *.h
 	etags *.c *.h
+
+include gcc.mk
