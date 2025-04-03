@@ -1,0 +1,12 @@
+﻿igd\_plus
+=========
+
+.. currentmodule:: moocore
+
+.. autofunction:: igd_plus
+
+.. _sphx_glr_backref_moocore.igd_plus:
+
+.. minigallery:: moocore.igd_plus
+   :add-heading: Gallery examples
+   :heading-level: -
