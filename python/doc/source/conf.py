@@ -76,7 +76,7 @@ napoleon_google_docstring = False
 napoleon_numpy_docstring = True
 napoleon_preprocess_types = True
 napoleon_use_rtype = False
-napoleon_include_init_with_doc = True
+napoleon_include_init_with_doc = False
 napoleon_use_param = True
 napoleon_type_aliases = {
     "numpy.typing.ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
@@ -129,10 +129,12 @@ html_theme = "pydata_sphinx_theme"
 #     switcher_version = f"{version}"
 
 html_theme_options = {
+    "sidebar_includehidden": True,
     "github_url": f"https://github.com/multi-objective/{project}",
     "collapse_navigation": True,
-    "header_links_before_dropdown": 6,
-    #    "navigation_depth": 2,
+    "navigation_with_keys": False,
+    "navbar_align": "left",
+    "header_links_before_dropdown": 5,
     "show_prev_next": True,
     "use_edit_page_button": True,
     # Add light/dark mode and documentation version switcher:

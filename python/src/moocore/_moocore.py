@@ -645,9 +645,6 @@ def hv_approx(
     >>> moocore.hv_approx(x, ref=reference, maximise=True, seed=42)
     1.056312559097445
 
-    .. minigallery:: moocore.hv_approx
-       :add-heading:
-
     """
     # Convert to numpy.array in case the user provides a list.  We use
     # np.asarray to convert it to floating-point, otherwise if a user inputs
