@@ -135,6 +135,7 @@ html_theme_options = {
     "navigation_with_keys": False,
     "navbar_align": "left",
     "header_links_before_dropdown": 5,
+    "show_toc_level": 2,  # On this page sidebar
     "show_prev_next": True,
     "use_edit_page_button": True,
     # Add light/dark mode and documentation version switcher:
