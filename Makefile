@@ -1,10 +1,8 @@
 PACKAGEVERSION=0.1.5
 
-.PHONY: clean check test pre-commit
+.PHONY: default clean check test pre-commit
 
-pre-commit:
-	pre-commit autoupdate
-	pre-commit run -a
+default: test
 
 test, check:
 	$(MAKE) -C r/ check
@@ -15,6 +13,11 @@ clean:
 	$(MAKE) -C r/ clean
 	$(MAKE) -C python/ clean
 	rm -rf *.Rcheck/
+
+pre-commit:
+	pre-commit autoupdate
+	pre-commit run -a
+
 
 closeversion:
 	git push origin :refs/tags/v$(PACKAGEVERSION) # Remove any existing tag

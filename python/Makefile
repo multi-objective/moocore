@@ -32,5 +32,5 @@ clean:
 	$(MAKE) -C doc clean
 	$(MAKE) -C src/moocore/libmoocore/ clean
 	find . -name '__pycache__' | xargs $(RM) -r
-	$(RM) -rf .pytest_cache .tox .ruff_cache build src/*.egg-info/ doc/source/reference/generated doc/source/auto_examples
-	$(RM) -f .coverage coverage.xml c_coverage.xml dist/* src/moocore/*.so
+	$(RM) -r .pytest_cache .tox .ruff_cache build src/*.egg-info/ doc/source/reference/generated doc/source/auto_examples
+	$(RM) .coverage coverage.xml c_coverage.xml dist/* src/moocore/*.so

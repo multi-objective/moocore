@@ -105,25 +105,29 @@ is defined as :cite:p:`ZitThiLauFon2003:tec`
 .. math::
    epsilon(A,R) = \max_{r \in R} \min_{a \in A} \max_{1 \leq i \leq n} epsilon(a_i, r_i)
 
-where :math:`a` and :math:`b` are objective vectors and, in the case of
-minimization of objective :math:`i`, :math:`epsilon(a_i,b_i)` is computed as
-:math:`a_i/b_i` for the multiplicative variant (respectively, :math:`a_i = b_i`
-for the additive variant), whereas in the case of maximization of objective
-:math:`i`, :math:`epsilon(a_i,b_i) = b_i/a_i` for the multiplicative variant
-(respectively, :math:`b_i = a_i` for the additive variant). This allows
-computing a single value for problems where some objectives are to be
-maximized while others are to be minimized. Moreover, a lower value
-corresponds to a better approximation set, independently of the type of
-problem (minimization, maximization or mixed). However, the meaning of the
-value is different for each objective type. For example, imagine that
+where :math:`a` and :math:`b` are objective vectors of length :math:`n`.
+
+In the case of minimization of objective :math:`i`, :math:`epsilon(a_i,b_i)` is
+computed as :math:`a_i/b_i` for the multiplicative variant (respectively,
+:math:`a_i - b_i` for the additive variant), whereas in the case of
+maximization of objective :math:`i`, :math:`epsilon(a_i,b_i) = b_i/a_i` for the
+multiplicative variant (respectively, :math:`b_i - a_i` for the additive
+variant).  This allows computing a single value for problems where some
+objectives are to be maximized while others are to be minimized. Moreover, a
+lower value corresponds to a better approximation set, independently of the
+type of problem (minimization, maximization or mixed). However, the meaning of
+the value is different for each objective type. For example, imagine that
 objective 1 is to be minimized and objective 2 is to be maximized, and the
 multiplicative epsilon computed here for :math:`epsilon(A,R) = 3`. This means
-that :math:`A` needs to be multiplied by 1/3 for all :math:`a_1` values and by 3
-for all :math:`a_2` values in order to weakly dominate :math:`R`. The
-computation of the multiplicative version for negative values doesn't make
-sense.
+that :math:`A` needs to be multiplied by 1/3 for all :math:`a_1` values and by
+3 for all :math:`a_2` values in order to weakly dominate :math:`R`.
 
-Computation of the epsilon indicator requires :math:`O(n \cdot |A| \cdot
+The multiplicative variant can be computed as :math:`\exp(epsilon_{+}(\log(A),
+\log(R)))`, which makes clear that the computation of the multiplicative
+version for zero or negative values doesn't make sense. See the examples in
+:func:`epsilon_additive`.
+
+The current implementation uses the naive algorithm that requires :math:`O(n \cdot |A| \cdot
 |R|)`, where :math:`n` is the number of objectives (dimension of vectors).
 
 
@@ -133,7 +137,6 @@ Hypervolume metric
 
 .. autosummary::
    :toctree: generated/
-   :template: base.rst
 
    hypervolume
    Hypervolume
@@ -142,6 +145,8 @@ Hypervolume metric
 
 
 The hypervolume of a set of multidimensional points :math:`A` with respect to a reference point :math:`\vec{r}` is the volume of the region dominated by the set and bounded by the reference point :cite:p:`ZitThi1998ppsn`.
+
+
 
 .. _hv_approximation:
 
@@ -154,16 +159,16 @@ Approximating the hypervolume metric
    hv_approx
    whv_hype
 
-Computing the hypervolume can be time consuming, thus several approaches have been proposed in the literature to approximate its value via Monte-Carlo sampling. These methods are implemented in :func:`whv_hype()` and :func:`hv_approx()`.
+Computing the hypervolume can be time consuming, thus several approaches have been proposed in the literature to approximate its value via Monte-Carlo sampling. These methods are implemented in :func:`whv_hype` and :func:`hv_approx`.
 
 
-The default option ``method="DZ2019"`` of :func:`hv_approx()` implements the
+The default option ``method="DZ2019"`` of :func:`hv_approx` implements the
 method proposed by :cite:t:`DenZha2019approxhv` to approximate the hypervolume:
 
 .. math::
    \widehat{HV}_r(A) = \frac{\pi^\frac{m}{2}}{2^m \Gamma(\frac{m}{2} + 1)}\frac{1}{n}\sum_{i=1}^n \max_{y \in A} s(w^{(i)}, y)^m
 
-where :math:`m` is the number of objectives, :math:`n` is the number of weights :math:`w^{(i)}` sampled, :math:`\Gamma` is the gamma function :func:`math.gamma()`, i.e., the analytical continuation of the factorial function, and :math:`s(w, y) = \min_{k=1}^m (r_k - y_k)/w_k`. The weights :math:`w^{(i)}, i=1\ldots n`  are sampled from the unit normal vector such that each weight :math:`w = \frac{|x|}{\|x\|_2}` where each component of :math:`x` is independently sampled from the standard normal distribution. The  original source code in C++/MATLAB can be found `here <https://github.com/Ksrma/Hypervolume-Approximation-using-polar-coordinate>`_.
+where :math:`m` is the number of objectives, :math:`n` is the number of weights :math:`w^{(i)}` sampled, :math:`\Gamma` is the gamma function :func:`math.gamma`, i.e., the analytical continuation of the factorial function, and :math:`s(w, y) = \min_{k=1}^m (r_k - y_k)/w_k`. The weights :math:`w^{(i)}, i=1\ldots n`  are sampled from the unit normal vector such that each weight :math:`w = \frac{|x|}{\|x\|_2}` where each component of :math:`x` is independently sampled from the standard normal distribution. The  original source code in C++/MATLAB can be found `here <https://github.com/Ksrma/Hypervolume-Approximation-using-polar-coordinate>`_.
 
 
 
