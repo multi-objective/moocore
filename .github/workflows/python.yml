@@ -150,8 +150,6 @@ jobs:
 
       - name: Build the docs 🔧
         run: |
-          make -C doc clean
-          tox -e docs
           make -C doc html
         working-directory: python
 
