@@ -10,6 +10,7 @@ EAF computation
 
    eaf
    eafdiff
+   largest_eafdiff
 
 Vorob'ev
 --------

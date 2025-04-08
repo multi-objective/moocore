@@ -274,7 +274,14 @@ def igd_plus(
     return lib.IGD_plus(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
 
 
-def avg_hausdorff_dist(data, /, ref, *, maximise=False, p: float = 1) -> float:  # noqa: D417
+def avg_hausdorff_dist(  # noqa: D417
+    data: ArrayLike,
+    /,
+    ref: ArrayLike,
+    *,
+    maximise: bool | list[bool] = False,
+    p: float = 1,
+) -> float:
     """Average Hausdorff distance.
 
     .. seealso:: For details about parameters, return value and examples, see :func:`igd_plus`.  For details of the calculation, see :ref:`igd_hausdorf`.
@@ -351,10 +358,13 @@ def epsilon_additive(
     )
 
 
-def epsilon_mult(data, /, ref, *, maximise=False) -> float:
+def epsilon_mult(
+    data, /, ref, *, maximise: bool | list[bool] = False
+) -> float:
     """Multiplicative epsilon metric.
 
-    ``data`` and ``ref`` must all be larger than 0.
+    .. warning::
+       ``data`` and ``ref`` must all be larger than 0.
 
     .. seealso:: For details about parameters, return value and examples, see :func:`epsilon_additive`.  For details of the calculation, see :ref:`epsilon_metric`.
 
@@ -379,7 +389,7 @@ def _hypervolume(data: ArrayLike, ref: ArrayLike):
 
 
 def hypervolume(
-    data: ArrayLike, /, ref: ArrayLike, maximise: bool | list[bool] = False
+    data: ArrayLike, /, ref: ArrayLike, *, maximise: bool | list[bool] = False
 ) -> float:
     r"""Hypervolume indicator.
 
@@ -1042,7 +1052,7 @@ def normalise(
     *,
     lower: ArrayLike = np.nan,
     upper: ArrayLike = np.nan,
-    maximise=False,
+    maximise: bool | list[bool] = False,
 ) -> np.ndarray:
     """Normalise points per coordinate to a range, e.g., ``to_range = [1,2]``, where the minimum value will correspond to 1 and the maximum to 2.
 
@@ -1058,7 +1068,7 @@ def normalise(
     upper, lower:
         Bounds on the values. If :data:`numpy.nan`, the maximum and minimum values of each coordinate are used.
 
-    maximise : single bool, or list of booleans
+    maximise :
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
         Also accepts a 1D numpy array with values 0 or 1 for each objective
@@ -1161,7 +1171,7 @@ def normalise(
 #     return dataset
 
 
-def eaf(data: ArrayLike, /, percentiles: list = []):
+def eaf(data: ArrayLike, /, percentiles: list = []) -> np.ndarray:
     """Compute the Empirical attainment function (EAF) in 2D or 3D.
 
     Parameters
@@ -1173,8 +1183,7 @@ def eaf(data: ArrayLike, /, percentiles: list = []):
 
     Returns
     -------
-    numpy array
-        Returns a numpy array containing the EAF data points, with the same number of columns as the input argument, but a different number of rows. The last column represents the EAF percentile for that data point.
+        EAF data points, with the same number of columns as the input argument, but a different number of rows. The last column represents the EAF percentile for that data point.
 
     Examples
     --------
@@ -1316,8 +1325,8 @@ def vorobT(data: ArrayLike, /, ref: ArrayLike) -> dict:
         apply_within_sets(data[:, :-1], sets, hypervolume, ref=ref)
     )
     prev_hyp = diff = np.inf  # hypervolume of quantile at previous step
-    a = 0
-    b = 100
+    a = 0.0
+    b = 100.0
     while diff != 0:
         c = (a + b) / 2.0
         eaf_res = eaf(data, percentiles=c)[:, :nobj]
@@ -1396,7 +1405,13 @@ def vorobDev(
 
 
 def eafdiff(
-    x, y, /, *, intervals: int = None, maximise=False, rectangles: bool = False
+    x: ArrayLike,
+    y: ArrayLike,
+    /,
+    *,
+    intervals: int = None,
+    maximise: bool | list[bool] = False,
+    rectangles: bool = False,
 ) -> np.ndarray:
     """Compute empirical attainment function (EAF) differences.
 
@@ -1413,10 +1428,10 @@ def eafdiff(
     intervals :
        The absolute range of the differences :math:`[0, 1]` is partitioned into the number of intervals provided.
 
-    maximise : bool or list of bool
+    maximise :
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
-        Also accepts a 1D numpy array with value 0/1 for each objective.
+        Also accepts a 1D numpy array with values 0 or 1 for each objective
 
     rectangles :
        If ``True``, the output is in the form of rectangles of the same color.
@@ -1424,13 +1439,16 @@ def eafdiff(
 
     Returns
     -------
-       With ``rectangles=False``, a matrix with three columns, The first two columns describe the points where there
-       is a transition in the value of the EAF differences.  With
-       ``rectangles=True``, a matrix with five columns, where the first 4 columns give the
-       coordinates of two corners of each rectangle. In both
-       cases, the last column gives the difference in terms of sets in ``x`` minus
-       sets in ``y`` that attain each point (i.e., negative values are differences
-       in favour ``y``).
+       With ``rectangles=False``, a matrix with three columns, The first two
+       columns describe the points where there is a transition in the value of
+       the EAF differences.
+
+       With ``rectangles=True``, a matrix with five columns, where the first 4
+       columns give the coordinates of two corners of each rectangle. In both
+       cases, the last column gives the difference in terms of sets in ``x``
+       minus sets in ``y`` that attain each point (i.e., negative values are
+       differences in favour ``y``).
+
 
     See Also
     --------
@@ -1585,7 +1603,14 @@ def eafdiff(
 #     return np.reshape(eaf_arr, (num_data_columns, -1)).T
 
 
-def whv_rect(x, /, rectangles, *, ref, maximise=False) -> float:
+def whv_rect(
+    x: ArrayLike,
+    /,
+    rectangles: ArrayLike,
+    *,
+    ref: ArrayLike,
+    maximise: bool | list[bool] = False,
+) -> float:
     """Compute weighted hypervolume given a set of rectangles.
 
     .. seealso:: For details about parameters, return value and examples, see :func:`total_whv_rect`.
@@ -1615,7 +1640,9 @@ def whv_rect(x, /, rectangles, *, ref, maximise=False) -> float:
     x, npoints, _ = np2d_to_double_array(x)
     ref = ffi.from_buffer("double []", ref)
     rectangles, rectangles_nrow, _ = np2d_to_double_array(rectangles)
-    assert not maximise
+    maximise = _parse_maximise(maximise, nobj)
+    if maximise.any():
+        raise NotImplementedError("Only minimization is currently supported")
     # FIXME: Move to C code.
     # maximise = _parse_maximise(maximise, nobj)
     # if maximise.any():
@@ -1638,13 +1665,13 @@ def get_ideal(x, maximise):
 
 
 def total_whv_rect(
-    x,
+    x: ArrayLike,
     /,
-    rectangles,
+    rectangles: ArrayLike,
     *,
-    ref,
-    maximise=False,
-    ideal=None,
+    ref: ArrayLike,
+    maximise: bool | list[bool] = False,
+    ideal: ArrayLike = None,
     scalefactor: float = 0.1,
 ) -> float:
     r"""Compute total weighted hypervolume given a set of rectangles.
@@ -1740,13 +1767,148 @@ def total_whv_rect(
     return float(hv + beta * whv)
 
 
+def largest_eafdiff(
+    x: list,
+    /,
+    ref: ArrayLike,
+    *,
+    maximise: bool | list[bool] = False,
+    intervals: int = 5,
+    ideal: ArrayLike = None,
+) -> tuple[tuple[int, int], float]:
+    """Identify largest EAF differences.
+
+    Given a list of datasets, return the indexes of the pair with the largest
+    EAF differences according to the method proposed by :footcite:t:`DiaLop2020ejor`.
+
+    .. warning::
+        The current implementation only supports 2 objectives.
+
+    Parameters
+    ----------
+    x :
+       A list of matrices with at least 3 columns (last column indicates the set).
+
+    ref :
+        Reference point as a 1D vector. Must be same length as a single point in the input data.
+
+    maximise :
+        Whether the objectives must be maximised instead of minimised.
+        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
+        Also accepts a 1D numpy array with value 0/1 for each objective
+
+    intervals :
+       The absolute range of the differences :math:`[0, 1]` is partitioned into the number of intervals provided.
+
+    ideal :
+        Ideal point as a vector of numerical values.  If ``None``, it is calculated as minimum (or maximum if maximising that objective) of each objective in the input data.
+
+
+    Returns
+    -------
+    pair : tuple[int,int]
+        Pair of indexes into the list that give the largest EAF difference.
+
+    value : float
+        Value of the largest difference.
+
+
+    See Also
+    --------
+    eafdiff, whv_rect
+
+    References
+    ----------
+    .. footbibliography::
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> df = pd.read_csv(moocore.get_dataset_path("tpls50x20_1_MWT.csv"))
+    >>> df
+         algorithm  Makespan  WeightedTardiness   run
+    0         1to2    4280.0            10231.0   1.0
+    1         1to2    4238.0            10999.0   1.0
+    2         1to2    4137.0            11737.0   1.0
+    3         1to2    4024.0            14871.0   1.0
+    4         1to2    4014.0            17825.0   1.0
+    ...        ...       ...                ...   ...
+    1506    double    4048.0            14755.0  15.0
+    1507    double    3923.0            25507.0  15.0
+    1508    double    3890.0            29567.0  15.0
+    1509    double    3862.0            31148.0  15.0
+    1510    double    4413.0             9894.0  15.0
+    <BLANKLINE>
+    [1511 rows x 4 columns]
+    >>> nadir = df.iloc[:, 1:3].max().to_numpy()
+    >>> # Split by column 'algorithm'
+    >>> x = [
+    ...     g.drop("algorithm", axis=1)
+    ...     for i, g in df.groupby("algorithm", sort=False)
+    ... ]
+    >>> moocore.largest_eafdiff(x, ref=nadir)
+    ((2, 5), 777017.0)
+
+    """
+    n = len(x)
+    if n == 0:
+        raise ValueError("Empty list")
+    x = [np.asarray(z, dtype=float) for z in x]
+    nobj = x[0].shape[1] - 1
+    if nobj != 2:
+        raise NotImplementedError("Only 2D datasets are currently supported")
+
+    maximise = _parse_maximise(maximise, nobj)
+
+    if ideal is None:
+        ideal = get_ideal(
+            np.concatenate(
+                [[z[:, :-1].min(axis=0), z[:, :-1].max(axis=0)] for z in x],
+                axis=0,
+            ),
+            maximise=maximise,
+        )
+
+    ideal = ideal.reshape(1, -1)
+
+    best_value = 0
+    for a in range(n - 1):
+        for b in range(a + 1, n):
+            diff = eafdiff(
+                x[a],
+                x[b],
+                intervals=intervals,
+                maximise=maximise,
+                rectangles=True,
+            )
+            # Set color to 1
+            a_rectangles = diff[diff[:, -1] >= 1, :]
+            a_rectangles[:, -1] = 1
+            a_value = whv_rect(
+                ideal, rectangles=a_rectangles, ref=ref, maximise=maximise
+            )
+
+            b_rectangles = diff[diff[:, -1] <= -1, :]
+            b_rectangles[:, -1] = 1
+            b_value = whv_rect(
+                ideal, rectangles=b_rectangles, ref=ref, maximise=maximise
+            )
+
+            value = min(a_value, b_value)
+            if value > best_value:
+                best_value = value
+                best_pair = (a, b)
+
+    return best_pair, best_value
+
+
 def whv_hype(
-    data,
+    data: ArrayLike,
     /,
     *,
-    ref,
-    ideal,
-    maximise=False,
+    ref: ArrayLike,
+    ideal: ArrayLike,
+    maximise: bool | list[bool] = False,
     nsamples: int = 100000,
     dist: Literal["uniform", "point", "exponential"] = "uniform",
     seed=None,
@@ -1763,17 +1925,17 @@ def whv_hype(
 
     Parameters
     ----------
-    data : numpy.ndarray
+    data :
         Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
         If the array is created from the :func:`read_datasets` function, remove the last (set) column.
 
-    ref : numpy.ndarray or list
+    ref :
         Reference point as a numpy array or list. Must have same length as the number of columns of the dataset.
 
-    ideal : numpy.ndarray or list
+    ideal :
         Ideal point as a numpy array or list. Must have same length as the number of columns of the dataset.
 
-    maximise : bool or or list of bool
+    maximise :
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
         Also accepts a 1D numpy array with values 0 or 1 for each objective.
@@ -1911,7 +2073,7 @@ def get_dataset_path(filename: str, /) -> str:
 
 
 def get_dataset(filename: str, /) -> np.ndarray:
-    """Return path to dataset within the package.
+    """Return dataset within the package as a NumPy array .
 
     Parameters
     ----------
@@ -1923,6 +2085,10 @@ def get_dataset(filename: str, /) -> np.ndarray:
         An array containing a representation of the data in the file.
         The first :math:`n-1` columns contain the numerical data for each of the objectives.
         The last column contains an identifier for which set the data is relevant to.
+
+    See Also
+    --------
+    read_datasets : Function used to read the dataset.
 
     """
     return read_datasets(get_dataset_path(filename))
