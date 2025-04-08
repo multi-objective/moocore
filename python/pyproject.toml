@@ -47,6 +47,9 @@ urls.Tracker = "https://github.com/multi-objective/moocore/issues"
 zip-safe = false
 package-dir = { "" = "src" }
 
+[tool.setuptools.package-data]
+"moocore.data" = [ "*.txt", "*.dat", "*.xz", "*.csv" ]
+
 # FIXME: This doesn't work.
 # [tool.setuptools.packages.find]
 # where = ["src"]
