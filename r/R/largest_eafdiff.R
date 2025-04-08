@@ -37,8 +37,6 @@ largest_eafdiff <- function(x, maximise = FALSE, intervals = 5L, reference,
 
   n <- length(x)
   stopifnot(n > 1L)
-  best_pair <- NULL
-  best_value <- 0
   if (is.null(ideal)) {
     r1 <- range_df_list(x, 1L)
     r2 <- range_df_list(x, 2L)
@@ -49,6 +47,8 @@ largest_eafdiff <- function(x, maximise = FALSE, intervals = 5L, reference,
   # Convert to a 1-row matrix
   if (is.null(dim(ideal))) dim(ideal) <- c(1L,nobjs)
 
+  best_pair <- NULL
+  best_value <- 0
   for (a in seq_len(n-1)) {
     for (b in (a+1):n) {
       DIFF <- eafdiff(x[[a]], x[[b]], intervals = intervals,
