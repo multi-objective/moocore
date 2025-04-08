@@ -358,9 +358,7 @@ def epsilon_additive(
     )
 
 
-def epsilon_mult(
-    data, /, ref, *, maximise: bool | list[bool] = False
-) -> float:
+def epsilon_mult(data, /, ref, *, maximise: bool | list[bool] = False) -> float:
     """Multiplicative epsilon metric.
 
     .. warning::
@@ -756,9 +754,7 @@ def is_nondominated(
     data_p, npoints, nobj = np2d_to_double_array(data)
     maximise_p = ffi.from_buffer("bool []", maximise)
     keep_weakly = ffi.cast("bool", bool(keep_weakly))
-    nondom = lib.is_nondominated(
-        data_p, nobj, npoints, maximise_p, keep_weakly
-    )
+    nondom = lib.is_nondominated(data_p, nobj, npoints, maximise_p, keep_weakly)
     nondom = ffi.buffer(nondom, nrows)
     return np.frombuffer(nondom, dtype=bool)
 
@@ -808,9 +804,7 @@ def is_nondominated_within_sets(
     >>> moocore.is_nondominated_within_sets(x[:, :-1], x[:, -1])
     array([ True, False,  True,  True])
     >>> x = moocore.get_dataset("input1.dat")
-    >>> nondom_per_set = moocore.is_nondominated_within_sets(
-    ...     x[:, :-1], x[:, -1]
-    ... )
+    >>> nondom_per_set = moocore.is_nondominated_within_sets(x[:, :-1], x[:, -1])
     >>> len(nondom_per_set)
     100
     >>> nondom_per_set  # doctest: +ELLIPSIS
@@ -932,9 +926,7 @@ def filter_dominated_within_sets(
            [1.54506255, 0.38303122],
            [0.17470556, 8.89066343],
            [8.57911868, 0.35169752]])
-    >>> moocore.filter_dominated_within_sets(
-    ...     x[(x[:, 2] >= 3) & (x[:, 2] <= 5), :]
-    ... )
+    >>> moocore.filter_dominated_within_sets(x[(x[:, 2] >= 3) & (x[:, 2] <= 5), :])
     array([[2.60764118, 6.31309852, 3.        ],
            [3.22509709, 6.1522834 , 3.        ],
            [0.37731545, 9.02211752, 3.        ],
@@ -1271,9 +1263,7 @@ def eaf(data: ArrayLike, /, percentiles: list = []) -> np.ndarray:
         npercentiles,
     )
     eaf_npoints = eaf_npoints[0]
-    eaf_buf = ffi.buffer(
-        eaf_data_p, ffi.sizeof("double") * eaf_npoints * ncols
-    )
+    eaf_buf = ffi.buffer(eaf_data_p, ffi.sizeof("double") * eaf_npoints * ncols)
     return np.frombuffer(eaf_buf).reshape((eaf_npoints, -1))
 
 
@@ -1341,9 +1331,7 @@ def vorobT(data: ArrayLike, /, ref: ArrayLike) -> dict:
     return dict(threshold=c, VE=eaf_res, avg_hyp=float(avg_hyp))
 
 
-def vorobDev(
-    x: ArrayLike, /, ref: ArrayLike, *, VE: ArrayLike = None
-) -> float:
+def vorobDev(x: ArrayLike, /, ref: ArrayLike, *, VE: ArrayLike = None) -> float:
     r"""Compute Vorob'ev deviation.
 
     Parameters
@@ -1843,8 +1831,7 @@ def largest_eafdiff(
     >>> nadir = df.iloc[:, 1:3].max().to_numpy()
     >>> # Split by column 'algorithm'
     >>> x = [
-    ...     g.drop("algorithm", axis=1)
-    ...     for i, g in df.groupby("algorithm", sort=False)
+    ...     g.drop("algorithm", axis=1) for i, g in df.groupby("algorithm", sort=False)
     ... ]
     >>> moocore.largest_eafdiff(x, ref=nadir)
     ((2, 5), 777017.0)
@@ -1980,13 +1967,9 @@ def whv_hype(
     3.0
     >>> moocore.whv_hype([[3, 1]], ref=4, ideal=1, seed=42)
     3.00555
-    >>> moocore.whv_hype(
-    ...     [[2, 2]], ref=4, ideal=1, dist="exponential", mu=0.2, seed=42
-    ... )
+    >>> moocore.whv_hype([[2, 2]], ref=4, ideal=1, dist="exponential", mu=0.2, seed=42)
     1.14624
-    >>> moocore.whv_hype(
-    ...     [[3, 1]], ref=4, ideal=1, dist="exponential", mu=0.2, seed=42
-    ... )
+    >>> moocore.whv_hype([[3, 1]], ref=4, ideal=1, dist="exponential", mu=0.2, seed=42)
     1.66815
     >>> moocore.whv_hype(
     ...     [[2, 2]],

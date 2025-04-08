@@ -129,9 +129,7 @@ class TestHypervolume:
         """Check that the moocore.hv() functions fails correctly after a ref with the wrong dimensions is input."""
         X = self.input1
         with pytest.raises(Exception) as expt:
-            moocore.hypervolume(
-                X[X[:, 2] == 1, :2], ref=np.array([10, 10, 10])
-            )
+            moocore.hypervolume(X[X[:, 2] == 1, :2], ref=np.array([10, 10, 10]))
         assert expt.type is ValueError
 
 
@@ -185,9 +183,7 @@ def test_is_nondominated(test_datapath):
         ]
     )
     x_nondom = x[moocore.is_nondominated(x, maximise=True)]
-    expected_x_nondom = np.array(
-        [[0, 0, 1, 2], [10, 20, 0, 0], [20, 10, 0, 0]]
-    )
+    expected_x_nondom = np.array([[0, 0, 1, 2], [10, 20, 0, 0], [20, 10, 0, 0]])
     assert_array_equal(x_nondom, expected_x_nondom)
     assert_array_equal(
         moocore.filter_dominated(x, maximise=True), expected_x_nondom
