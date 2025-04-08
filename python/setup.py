@@ -14,10 +14,6 @@ class bdist_wheel_abi_none(_bdist_wheel):
 
 
 setup(
-    package_data={
-        "": ["*.h", "*.c"],
-        "moocore.data": ["*.txt", "*.dat", "*.xz"],
-    },
     cffi_modules=["src/moocore/_ffi_build.py:ffibuilder"],
     cmdclass={"bdist_wheel": bdist_wheel_abi_none},
 )

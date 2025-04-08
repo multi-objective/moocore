@@ -43,13 +43,34 @@ urls.Homepage = "https://multi-objective.github.io/moocore/python/"
 urls.Source = "https://github.com/multi-objective/moocore/"
 urls.Tracker = "https://github.com/multi-objective/moocore/issues"
 
+[dependency-groups]
+dev = [ "ruff>=0.1.4" ]
+test = [ "pandas>=2", "pytest>7", "seaborn", { include-group = "coverage" } ]
+docs = [
+  "ipykernel",
+  "ipywidgets",
+  "jupyter",
+  "jupyterlab",
+  "kaleido",
+  "pydata-sphinx-theme",
+  "sphinx>=6",
+  "sphinx-autodoc-typehints",
+  "sphinx-copybutton",
+  "sphinx-design",
+  "sphinx-gallery",
+  "sphinxcontrib-bibtex",
+  "sphinxcontrib-napoleon",
+]
+
+coverage = [ "coverage[toml]", "gcovr" ]
+
 [tool.setuptools]
 zip-safe = false
 package-dir = { "" = "src" }
 
-# FIXME: This doesn't work.
-# [tool.setuptools.packages.find]
-# where = ["src"]
+[tool.setuptools.package-data]
+"*" = [ "*.c", "*.h" ]
+"moocore.data" = [ "*.txt", "*.dat", "*.xz", "*.csv" ]
 
 [tool.cibuildwheel]
 skip = [
@@ -60,8 +81,8 @@ skip = [
   "*-manylinux_i686",      # Skip 32-bit builds
 ]
 build-verbosity = 2
-# Change import-mode to ensure we test against installed package, not local project
-test-requires = "pytest"
+# Will cause the wheel to be installed with these groups of dependencies
+test-groups = [ "test" ]
 test-command = [
   "pytest --doctest-modules --doctest-continue-on-failure {package}/tests {package}/src/moocore/_moocore.py",
 ]
@@ -105,8 +126,8 @@ repair-wheel-command = [
 ]
 
 [tool.ruff]
-# Set the maximum line length to 79.
-line-length = 79
+line-length = 80
+format.docstring-code-line-length = 80
 format.docstring-code-format = true
 lint.extend-select = [
   "D",    # pydocstyle
@@ -125,6 +146,8 @@ lint.per-file-ignores."*examples*/*.py" = [
   "D415", #  First line should end with a period, question mark, or exclamation point
   "E402", # Module level import not at top of file
 ]
+lint.pycodestyle.max-doc-length = 80
+lint.pycodestyle.max-line-length = 80
 lint.pydocstyle.convention = "numpy"
 
 [tool.pytest.ini_options]
