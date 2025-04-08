@@ -45,9 +45,8 @@ typedef struct dlnode {
     const double *x;                    /* The data vector              */
     struct dlnode * closest[2]; // closest[0] == cx, closest[1] == cy
     struct dlnode * cnext[2]; // current next
-    struct dlnode * next; //keeps the points sorted according to coordinates 2,3 and 4
-    // (in the case of 2 and 3, only the points swept by 4 are kept)
-    struct dlnode *prev; //keeps the points sorted according to coordinates 2 and 3 (except the sentinel 3)
+    struct dlnode * next; //keeps the points sorted according to coordinate 3
+    struct dlnode * prev; //keeps the points sorted according to coordinate 3 (except the sentinel 3)
     bool dom;    // is this point dominated?
 } dlnode_t;
 
@@ -483,10 +482,17 @@ static void avl_rebalance(avl_tree_t *avltree, avl_node_t *avlnode) {
 
 static void initSentinels(dlnode_t * list, const double * ref)
 {
+    /* The list that keeps the points sorted according to the 3rd-coordinate
+       does not really need the 3 sentinels, just one to represent (-inf, -inf,
+       ref[2]).  But we need the other two to maintain a list of nondominated
+       projections in the (x,y)-plane of points that is kept sorted according
+       to the 1st and 2nd coordinates, and for that list we need two sentinels
+       to represent (-inf, ref[1]) and (ref[0], -inf). */
     dlnode_t * s1 = list;
     dlnode_t * s2 = list + 1;
     dlnode_t * s3 = list + 2;
 
+    // Allocate the 3 sentinels of dimension 3.
     double * z = malloc(3 * 3 * sizeof(double));
     z[0] = -DBL_MAX;
     z[1] = ref[1];
@@ -519,7 +525,6 @@ static void initSentinels(dlnode_t * list, const double * ref)
 
 
     z += 3;
-    // ???? It was INT_MAX
     z[0] = -DBL_MAX;
     z[1] = -DBL_MAX;
     z[2] = ref[2];
@@ -625,7 +630,6 @@ setup_cdllist(const double * restrict data, int n, const double * restrict ref)
     assert(list->next == list + 1);
     assert(q->next == list + 2);
     for (int i = 0; i < n; i++) {
-        /* FIXME: This creates yet another copy of the data. */
         dlnode_t * p = list3 + i;
         p->x = scratchd[i];
         // clearPoint:
@@ -685,7 +689,7 @@ static inline const double *node_point(const avl_node_t *node)
 }
 
 
-static avl_node_t * new_avl_node (dlnode_t * p, avl_node_t * node)
+static avl_node_t * new_avl_node(dlnode_t * p, avl_node_t * node)
 {
     node->dlnode = p;
     node->item = p->x;
@@ -695,7 +699,7 @@ static avl_node_t * new_avl_node (dlnode_t * p, avl_node_t * node)
 static void preprocessing(dlnode_t * list, int n)
 {
     avl_tree_t * tree = avl_alloc_tree ((avl_compare_t) compare_tree_asc_y, NULL);
-    avl_node_t * tnodes = malloc((n+3)* sizeof(avl_node_t));
+    avl_node_t * tnodes = malloc((n+2) * sizeof(avl_node_t));
     dlnode_t * p = list;
     avl_node_t * nodeaux = new_avl_node(p, tnodes);
     avl_insert_top(tree, nodeaux);
