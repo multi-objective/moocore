@@ -92,6 +92,28 @@ static bool verbose_flag = false;
 static bool percentages_flag = false;
 static bool check_flag = true;
 
+// strnlen() is not available in C99.
+static inline size_t
+x_strnlen(const char *s, size_t maxlen)
+{
+    size_t len = 0;
+    while (len < maxlen && s[len] != '\0')
+        len++;
+    return len;
+}
+
+// strndup() is not available in C99.
+static char * x_strndup(const char *s, size_t n)
+{
+    size_t len = x_strnlen(s, n);         // Find length up to n or end of string
+    char * new_str = malloc(len + 1);      // Allocate memory (+1 for null terminator)
+    if (unlikely(new_str == NULL))
+        return NULL;                      // malloc failed
+    memcpy(new_str, s, len);              // Copy the string up to len
+    new_str[len] = '\0';                  // Null-terminate
+    return new_str;
+}
+
 void
 print_results (char **filenames, int numfiles, int *nruns, int **results)
 {
@@ -103,7 +125,7 @@ print_results (char **filenames, int numfiles, int *nruns, int **results)
 
     /* longest filename.  */
     for (k = 0; k < numfiles; k++)
-        max_filename_len = MAX (max_filename_len, (int) strlen (filenames[k]));
+        max_filename_len = MAX (max_filename_len, (int) strlen(filenames[k]));
 
     /* longest number.  */
     for (k = 0; k < numfiles; k++)
@@ -392,10 +414,10 @@ int main(int argc, char *argv[])
 
     /* Print filename substitutions.  */
     for (k = 0; k < numfiles; k++) {
-        char buffer[256];
-        snprintf(buffer, 255, "f%d", k + 1);
-        buffer[255] = '\0';
-        char *p = strndup(buffer, 255);
+        char buffer[32];
+        snprintf(buffer, 31, "f%d", k + 1);
+        buffer[31] = '\0';
+        char *p = x_strndup(buffer, 31);
         printf ("# %s: %s\n", p, filenames[k]);
         filenames[k] = p;
     }
