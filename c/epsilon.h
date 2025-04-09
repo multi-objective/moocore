@@ -93,15 +93,23 @@ epsilon_additive_minimize(dimension_t dim,
     dimension_t d;
     double epsilon = -INFINITY;
     for (b = 0; b < size_b; b++) {
+        bool skip_max = false;
         double epsilon_min = INFINITY;
         for (a = 0; a < size_a; a++) {
             double epsilon_max = points_a[a * dim + 0] - points_b[b * dim + 0];
+            if (epsilon_max >= epsilon_min)
+                continue;
             for (d = 1; d < dim; d++) {
                 double epsilon_temp = points_a[a * dim + d] - points_b[b * dim + d];
                 epsilon_max = MAX(epsilon_max, epsilon_temp);
             }
+            if (epsilon_max <= epsilon) {
+                skip_max = true;
+                break;
+            }
             epsilon_min = MIN (epsilon_min, epsilon_max);
         }
+        if (skip_max) continue;
         epsilon = MAX(epsilon, epsilon_min);
     }
     return epsilon;
@@ -118,15 +126,23 @@ epsilon_additive_maximize(dimension_t dim,
     dimension_t d;
     double epsilon = -INFINITY;
     for (b = 0; b < size_b; b++) {
+        bool skip_max = false;
         double epsilon_min = INFINITY;
         for (a = 0; a < size_a; a++) {
             double epsilon_max = points_b[b * dim + 0] - points_a[a * dim + 0];
+            if (epsilon_max >= epsilon_min)
+                continue;
             for (d = 1; d < dim; d++) {
                 double epsilon_temp = points_b[b * dim + d] - points_a[a * dim + d];
                 epsilon_max = MAX (epsilon_max, epsilon_temp);
             }
+            if (epsilon_max <= epsilon) {
+                skip_max = true;
+                break;
+            }
             epsilon_min = MIN (epsilon_min, epsilon_max);
         }
+        if (skip_max) continue;
         epsilon = MAX(epsilon, epsilon_min);
     }
     return epsilon;
@@ -164,10 +180,17 @@ epsilon_additive_minmax(int dim, const signed char * restrict minmax,
     int d;
     double epsilon = -INFINITY;
     for (b = 0; b < size_b; b++) {
+        bool skip_max = false;
         double epsilon_min = INFINITY;
         for (a = 0; a < size_a; a++) {
-            double epsilon_max = -INFINITY;
-            for (d = 0; d < dim; d++) {
+            double epsilon_max = (minmax[0] < 0)
+                ? points_a[a * dim + 0] - points_b[b * dim + 0]
+                : (minmax[0] > 0)
+                ? points_b[b * dim + 0] - points_a[a * dim + 0]
+                : 0;
+            if (epsilon_max >= epsilon_min)
+                continue;
+            for (d = 1; d < dim; d++) {
                 double epsilon_temp = points_a[a * dim + d] - points_b[b * dim + d];
                 if (minmax[d] > 0)
                     epsilon_temp = -epsilon_temp;
@@ -175,8 +198,13 @@ epsilon_additive_minmax(int dim, const signed char * restrict minmax,
                     epsilon_temp = 0;
                 epsilon_max = MAX (epsilon_max, epsilon_temp);
             }
+            if (epsilon_max <= epsilon) {
+                skip_max = true;
+                break;
+            }
             epsilon_min = MIN (epsilon_min, epsilon_max);
         }
+        if (skip_max) continue;
         epsilon = MAX(epsilon, epsilon_min);
     }
     return epsilon;
