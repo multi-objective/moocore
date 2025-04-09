@@ -53,17 +53,17 @@
 
 *************************************************************************/
 
-#include "epsilon.h"
-#include "nondominated.h"
-
 #include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <ctype.h> // for isspace()
-
+#include <string.h> // for strndup()
 #include <unistd.h>  // for getopt()
 #include <getopt.h> // for getopt_long()
+
+#include "epsilon.h"
+#include "nondominated.h"
+
 #define READ_INPUT_WRONG_INITIAL_DIM_ERRSTR "-o, --obj"
 #include "cmdline.h"
 

@@ -41,15 +41,16 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <ctype.h> // for isspace()
 
 #include <unistd.h>  // for getopt()
 #include <getopt.h> // for getopt_long()
 #include <math.h>  // for INFINITY
+
+#include "hv.h"
 #include "nondominated.h" // for normalise()
+
 #define READ_INPUT_WRONG_INITIAL_DIM_ERRSTR "-o, --obj"
 #include "cmdline.h"
-#include "hv.h"
 
 static void usage(void)
 {

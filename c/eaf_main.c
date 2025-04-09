@@ -31,11 +31,10 @@
 
 
 *************************************************************************/
-#include "eaf.h"
 
 #include <stdio.h>
 #include <stdlib.h> // strtol()
-#include <ctype.h>  // isprint()
+#include <ctype.h>  // isspace()
 #include <assert.h>
 #include <string.h>
 #include <stdbool.h> // for bool, true and false
@@ -43,6 +42,9 @@
 #include <unistd.h>  // for getopt()
 #include <getopt.h> // for getopt_long()
 #include <errno.h>
+
+#include "eaf.h"
+
 #define CMDLINE_COPYRIGHT_YEARS "2009-2023"
 #define CMDLINE_AUTHORS "Carlos Fonseca <cmfonsec@ualg.pt>\n" \
     "Manuel Lopez-Ibanez <manuel.lopez-ibanez@manchester.ac.uk>\n"

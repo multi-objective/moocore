@@ -58,7 +58,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h> // for isspace()
 
 #include <unistd.h>  // for getopt()
 #include <getopt.h> // for getopt_long()
