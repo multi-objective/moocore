@@ -122,9 +122,6 @@ moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
 #define ignore_unused_result(X)  do { if(X) {}} while(0);
 #endif
 
-typedef unsigned long ulong;
-typedef long long longlong;
-
 /* FIXME: Move this to a better place: matrix.h ? */
 /* FIXME: Measure if this is faster than the R implementation of t()  */
 static inline void
