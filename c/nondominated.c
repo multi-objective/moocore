@@ -339,12 +339,10 @@ print_input_info (FILE *stream, const char *filename,
     fprintf (stream, "# sizes: %d", cumsizes[0]);
     for (int n = 1; n < nruns; n++)
         fprintf (stream, ", %d", cumsizes[n] - cumsizes[n - 1]);
-    fprintf (stream, "\n");
-    fprintf (stream, "# points: %d\n", cumsizes[nruns - 1]);
-    fprintf (stream, "# minimum:");
+    fprintf (stream, "\n# points: %d\n", cumsizes[nruns - 1]);
+    fprintf (stream, "# minimum: ");
     vector_fprintf (stream, minimum, nobj);
-    fprintf (stream, "\n");
-    fprintf (stream, "# maximum:");
+    fprintf (stream, "\n# maximum: ");
     vector_fprintf (stream, maximum, nobj);
     fprintf (stream, "\n");
 }
