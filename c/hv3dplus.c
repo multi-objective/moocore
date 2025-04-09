@@ -542,20 +542,6 @@ static void initSentinels(dlnode_t * list, const double * ref)
 
 
 
-/* ---------------------------------- Update data structure ---------------------------------------*/
-
-
-
-
-static void removeFromz(dlnode_t * old)
-{
-    old->prev->next = old->next;
-    old->next->prev = old->prev;
-}
-
-
-
-
 /* ---------------------------------- Sort ---------------------------------------*/
 
 static int
@@ -744,6 +730,17 @@ static void preprocessing(dlnode_t * list, int n)
 }
 
 
+/* ---------------------------------- Update data structure ---------------------------------------*/
+
+
+
+
+static void removeFromz(dlnode_t * old)
+{
+    old->prev->next = old->next;
+    old->next->prev = old->prev;
+}
+
 
 
 /* ----------------------Hypervolume Indicator Algorithms ---------------------------------------*/
@@ -778,6 +775,7 @@ static double hv3dplus(dlnode_t * list)
     while (p != stop) {
         if (p->dom) {
             removeFromz(p);
+            //assert((p->next->x[2] - p->x[2]) == 0);
         } else {
             p->cnext[0] = p->closest[0];
             p->cnext[1] = p->closest[1];
@@ -789,15 +787,15 @@ static double hv3dplus(dlnode_t * list)
 
             p->cnext[0]->cnext[1] = p;
             p->cnext[1]->cnext[0] = p;
+            // FIXME: This assert should work but it fails because p and p->next are duplicated points:
+            // assert((p->next->x[2] - p->x[2]) != 0);
+            if (p->next->x[2] - p->x[2] == 0 && !p->next->dom) {
+                assert(p->next != p);
+                print_x(p);
+                print_x(p->next);
+                assert((p->next->x[0] - p->x[0] != 0) || (p->next->x[1] - p->x[1] != 0));
+            }
         }
-        // FIXME: This assert should work but it fails because p and p->next are duplicated points:
-        // assert((p->next->x[2] - p->x[2]) != 0);
-        /*if (p->next->x[2] - p->x[2] == 0) {
-            assert(p->next != p);
-            print_x(p);
-            print_x(p->next);
-            assert((p->next->x[2] - p->x[2]) != 0);
-            }*/
         assert(area > 0);
         volume += area * (p->next->x[2] - p->x[2]);
         p = p->next;
