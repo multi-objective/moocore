@@ -393,10 +393,9 @@ int main(int argc, char *argv[])
     /* Print filename substitutions.  */
     for (k = 0; k < numfiles; k++) {
         char buffer[256];
-        snprintf(buffer, 256, "f%d", k + 1);
+        snprintf(buffer, 255, "f%d", k + 1);
         buffer[255] = '\0';
-        char *p = malloc (sizeof(char) * (strlen(buffer) + 1));
-        strncpy (p, buffer, strlen(buffer) + 1);
+        char *p = strndup(buffer, 255);
         printf ("# %s: %s\n", p, filenames[k]);
         filenames[k] = p;
     }
