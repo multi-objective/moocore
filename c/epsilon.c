@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
     int nobj = 0, tmp_nobj = 0;
 
     /* see the man page for getopt_long for an explanation of these fields */
-    static const char short_options[] = "hVvqamr:us:o:";
+    static const char short_options[] = "hVvqamMr:s:o:";
     static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
         {"version",    no_argument,       NULL, 'V'},
@@ -254,17 +254,18 @@ int main(int argc, char *argv[])
                  ? "# Additive epsilon indicator\n"
                  : "# Multiplicative epsilon indicator\n");
 
-    if (minmax == NULL) {
-        minmax = minmax_minimise(nobj);
-    }
     if (reference == NULL) {
         errprintf ("a reference set must be provided (--reference)");
         exit (EXIT_FAILURE);
     }
+    if (minmax == NULL) {
+        minmax = maximise_all_flag ? minmax_maximise(nobj) : minmax_minimise(nobj);
+    }
+    /* Ensure the reference set is nondominated.  */
     reference_size = filter_dominated_set(reference, nobj, reference_size, minmax);
 
     int numfiles = argc - optind;
-    if (numfiles < 1) {/* Read stdin.  */
+    if (numfiles < 1) { /* Read stdin.  */
         do_file (NULL, reference, reference_size, &nobj, minmax, maximise_all_flag);
     } else if (numfiles == 1) {
         do_file (argv[optind], reference, reference_size, &nobj, minmax, maximise_all_flag);
