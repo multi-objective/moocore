@@ -22,6 +22,8 @@
     " -q, --quiet         print as little as possible;\n"
 #define OPTION_MAXIMISE_STR \
     "     --maximise      all objectives must be maximised;\n"
+#define OPTION_NOCHECK_STR \
+    "     --no-check      do not check nondominance of sets (faster but unsafe);\n"
 
 #include <stdbool.h>
 #include <ctype.h> // for isspace()

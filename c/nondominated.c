@@ -83,7 +83,7 @@ OPTION_HELP_STR
 OPTION_VERSION_STR
 " -v, --verbose       print some extra information;                         \n"
 OPTION_QUIET_STR
-"     --no-check      do not check nondominance of sets (faster but unsafe);\n"
+OPTION_NOCHECK_STR
 OPTION_OBJ_STR
 OPTION_MAXIMISE_STR
 " -u, --upper-bound POINT defines an upper bound to check, e.g. \"10 5 30\";\n"
