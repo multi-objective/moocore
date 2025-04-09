@@ -107,6 +107,7 @@ OPTION_QUIET_STR
 " -p,                 exponent that averages the distances\n"
 " -r, --reference FILE file that contains the reference set                  \n"
 OPTION_OBJ_STR
+OPTION_MAXIMISE_STR
 " -s, --suffix=STRING Create an output file for each input file by appending\n"
 "                     this suffix. This is ignored when reading from stdin. \n"
 "                     If missing, output is sent to stdout.                 \n"
@@ -115,7 +116,7 @@ OPTION_OBJ_STR
 
 static void
 do_file (const char *filename, double *reference, int reference_size,
-         int *nobj_p, const signed char * minmax)
+         int *nobj_p, const signed char * minmax, bool maximise_all_flag)
 {
     double *data = NULL;
     int *cumsizes = NULL;
@@ -145,7 +146,7 @@ do_file (const char *filename, double *reference, int reference_size,
     /* Default minmax if not set yet.  */
     bool free_minmax = false;
     if (minmax == NULL) {
-        minmax = minmax_minimise(nobj);
+        minmax = maximise_all_flag ? minmax_maximise(nobj) : minmax_minimise(nobj);
         free_minmax = true;
     }
 
@@ -229,15 +230,20 @@ int main(int argc, char *argv[])
 {
     double *reference = NULL;
     int reference_size = 0;
-    int nobj = 0, tmp_nobj = 0;
     const signed char *minmax = NULL;
+    bool maximise_all_flag = false;
+    int nobj = 0, tmp_nobj = 0;
 
     enum { GD_opt = 1000,
            IGD_opt, GD_p_opt, IGD_p_opt, IGD_plus_opt, hausdorff_opt};
 
     /* see the man page for getopt_long for an explanation of these fields */
-    static const char short_options[] = "hVvqamr:us:o:";
+    static const char short_options[] = "hVvqap:Mr:s:o:";
     static const struct option long_options[] = {
+        {"help",       no_argument,       NULL, 'h'},
+        {"version",    no_argument,       NULL, 'V'},
+        {"verbose",    no_argument,       NULL, 'v'},
+        {"quiet",      no_argument,       NULL, 'q'},
         {"gd",   no_argument,       NULL, GD_opt},
         {"igd",   no_argument,       NULL, IGD_opt},
         {"gd-p",   no_argument,       NULL, GD_p_opt},
@@ -247,10 +253,8 @@ int main(int argc, char *argv[])
         {"all",   no_argument,       NULL, 'a'},
         {"exponent-p", required_argument,       NULL, 'p'},
 
-        {"help",       no_argument,       NULL, 'h'},
-        {"version",    no_argument,       NULL, 'V'},
-        {"verbose",    no_argument,       NULL, 'v'},
-        {"quiet",      no_argument,       NULL, 'q'},
+        {"maximise",   no_argument,       NULL, 'M'},
+        {"maximize",   no_argument,       NULL, 'M'},
         {"reference",  required_argument, NULL, 'r'},
         {"suffix",     required_argument, NULL, 's'},
         {"obj",        required_argument, NULL, 'o'},
@@ -302,6 +306,10 @@ int main(int argc, char *argv[])
               hausdorff = true;
               break;
 
+        case 'M': // --maximise
+            maximise_all_flag = true;
+            break;
+
         case 'o': // --obj
             minmax = parse_cmdline_minmax(minmax, optarg, &nobj);
             break;
@@ -341,20 +349,20 @@ int main(int argc, char *argv[])
         igdp = true; // Default is IGD_p.
     }
 
-    if (minmax == NULL) {
-        minmax = minmax_minimise(nobj);
-    }
     if (reference == NULL) {
         errprintf ("a reference set must be provided (--reference)");
         exit(EXIT_FAILURE);
+    }
+    if (minmax == NULL) {
+        minmax = maximise_all_flag ? minmax_maximise(nobj) : minmax_minimise(nobj);
     }
     reference_size = filter_dominated_set(reference, nobj, reference_size, minmax);
 
     int numfiles = argc - optind;
     if (numfiles < 1) {/* Read stdin.  */
-        do_file (NULL, reference, reference_size, &nobj, minmax);
+        do_file (NULL, reference, reference_size, &nobj, minmax, maximise_all_flag);
     } else if (numfiles == 1) {
-        do_file (argv[optind], reference, reference_size, &nobj, minmax);
+        do_file (argv[optind], reference, reference_size, &nobj, minmax, maximise_all_flag);
     } else {
         int k;
         /* FIXME: Calculate the nondominated front among all input
@@ -379,7 +387,7 @@ int main(int argc, char *argv[])
         }
 #endif
         for (k = 0; k < numfiles; k++)
-            do_file (argv[optind + k], reference, reference_size, &nobj, minmax);
+            do_file (argv[optind + k], reference, reference_size, &nobj, minmax, maximise_all_flag);
     }
 
     free(reference);
