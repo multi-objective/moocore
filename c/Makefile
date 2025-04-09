@@ -186,11 +186,11 @@ test:
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
 	$(MAKE) all DEBUG=1 SANITIZERS="" OPT_CFLAGS="$(OPT_CFLAGS)"
-	$(MAKE) test-eaf test-nondominated test-hv test-igd test-epsilon
+	$(MAKE) test-eaf test-nondominated test-hv test-igd test-epsilon test-dominatedsets
 
-test-eaf test-nondominated test-hv test-igd test-epsilon: target=$(subst test-,,$@)
-test-eaf test-nondominated test-hv test-igd test-epsilon: OPT_CFLAGS ?=-Og -g3
-test-eaf test-nondominated test-hv test-igd test-epsilon:
+test-eaf test-nondominated test-hv test-igd test-epsilon test-dominatedsets: target=$(subst test-,,$@)
+test-eaf test-nondominated test-hv test-igd test-epsilon test-dominatedsets: OPT_CFLAGS ?=-Og -g3
+test-eaf test-nondominated test-hv test-igd test-epsilon test-dominatedsets:
 	$(MAKE) $(target) DEBUG=1 SANITIZERS="" OPT_CFLAGS="$(OPT_CFLAGS)"
 	$(call ECHO,---> Testing $(target) for errors (DEBUG=1) <--- )
 	@cd $(TESTSUITE)/$(target) && ../regtest.py $(BINDIR)/$(target)$(EXE) && cd $(PWD)
@@ -200,10 +200,10 @@ time:
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
 	$(MAKE) all DEBUG=0 SANITIZERS=""
-	$(MAKE) time-eaf time-nondominated time-hv time-igd time-epsilon
+	$(MAKE) time-eaf time-nondominated time-hv time-igd time-epsilon time-dominatedsets
 
-time-eaf time-nondominated time-hv time-igd time-epsilon: target=$(subst time-,,$@)
-time-eaf time-nondominated time-hv time-igd time-epsilon:
+time-eaf time-nondominated time-hv time-igd time-epsilon time-dominatedsets: target=$(subst time-,,$@)
+time-eaf time-nondominated time-hv time-igd time-epsilon time-dominatedsets:
 	$(MAKE) $(target) DEBUG=0 SANITIZERS=""
 	$(call ECHO,---> Testing $(target) for speed (DEBUG=0) <--- )
 	@cd $(TESTSUITE)/$(target) && ../regtest.py $(BINDIR)/$(target)$(EXE) && cd $(PWD)
