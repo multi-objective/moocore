@@ -173,6 +173,7 @@ do_file (const char *filename, double *reference, int reference_size,
 
 int main(int argc, char *argv[])
 {
+    bool check_flag = true;
     double *reference = NULL;
     int reference_size = 0;
     const signed char *minmax = NULL;
@@ -186,6 +187,7 @@ int main(int argc, char *argv[])
         {"version",    no_argument,       NULL, 'V'},
         {"verbose",    no_argument,       NULL, 'v'},
         {"quiet",      no_argument,       NULL, 'q'},
+        {"no-check",   no_argument,       NULL, 'c'},
         {"additive",   no_argument,       NULL, 'a'},
         {"multiplicative",   no_argument, NULL, 'm'},
         {"maximise",   no_argument,       NULL, 'M'},
@@ -203,6 +205,10 @@ int main(int argc, char *argv[])
     while (0 < (opt = getopt_long(argc, argv, short_options,
                                   long_options, &longopt_index))) {
         switch (opt) {
+          case 'c': // --no-check
+            check_flag = false;
+            break;
+
         case 'a': // --additive
             additive_flag = true;
             break;
@@ -262,8 +268,14 @@ int main(int argc, char *argv[])
     if (minmax == NULL) {
         minmax = maximise_all_flag ? minmax_maximise(nobj) : minmax_minimise(nobj);
     }
-    /* Ensure the reference set is nondominated.  */
-    reference_size = filter_dominated_set(reference, nobj, reference_size, minmax);
+    if (check_flag) {
+        /* Ensure the reference set is nondominated.  */
+        int prev_reference_size = reference_size;
+        reference_size = filter_dominated_set(reference, nobj, reference_size, minmax);
+        if (prev_reference_size > reference_size)
+            warnprintf("removed %d dominated points from the reference set",
+                       prev_reference_size - reference_size);
+    }
 
     int numfiles = argc - optind;
     if (numfiles < 1) { /* Read stdin.  */
