@@ -207,7 +207,7 @@ static int set_dominates (int dim, const signed char *minmax,
     for (int y = 0; y < size_y; y++) {
         x_weakly_dominates_y = false;
         for (int x = 0; x < size_x; x++) {
-            DEBUG1 (
+            DEBUG2 (
                 printf ("X:");
                 vector_printf (points_x + x * dim, dim);
                 printf ("Y:");
@@ -216,13 +216,13 @@ static int set_dominates (int dim, const signed char *minmax,
             int result = dominance (dim, &points_x[x * dim],
                                     &points_y[y * dim], minmax);
             if (result == 1) {
-                DEBUG1 (printf ("X dominates Y!\n"));
+                DEBUG2(printf ("X dominates Y!\n"));
                 x_weakly_dominates_y = true;
                 x_dominates_y = true;
                 break;
 
             } else if (result == 0) {
-                DEBUG1 (printf ("X weakly dominates Y!\n"));
+                DEBUG2(printf ("X weakly dominates Y!\n"));
                 x_weakly_dominates_y = true;
                 break;
             }
@@ -246,11 +246,11 @@ pareto_better (int dim, const signed char *minmax,
 {
     int result = set_dominates (dim, minmax, points_a, size_a, points_b, size_b);
     if (result == 1) {
-        DEBUG1 (printf ("Trying with B\n"));
+        DEBUG2 (printf ("Trying with B\n"));
         result = set_dominates (dim, minmax, points_b, size_b, points_a, size_a);
         result = -result;
         if (result != 1) {
-            DEBUG1(printf("A || B\n"));
+            DEBUG2(printf("A || B\n"));
             result = 0;
         }
     }
@@ -392,11 +392,11 @@ int main(int argc, char *argv[])
 
     /* Print filename substitutions.  */
     for (k = 0; k < numfiles; k++) {
-        char buffer[32];
-        snprintf(buffer, 32, "f%d", k + 1);
-        buffer[31] = '\0';
+        char buffer[256];
+        snprintf(buffer, 256, "f%d", k + 1);
+        buffer[255] = '\0';
         char *p = malloc (sizeof(char) * (strlen(buffer) + 1));
-        strncpy (p, buffer, 32);
+        strncpy (p, buffer, strlen(buffer) + 1);
         printf ("# %s: %s\n", p, filenames[k]);
         filenames[k] = p;
     }
