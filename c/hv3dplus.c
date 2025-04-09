@@ -789,15 +789,15 @@ static double hv3dplus(dlnode_t * list)
 
             p->cnext[0]->cnext[1] = p;
             p->cnext[1]->cnext[0] = p;
+            // FIXME: This assert should work but it fails because p and p->next are duplicated points:
+            // assert((p->next->x[2] - p->x[2]) != 0);
+            if (p->next->x[2] - p->x[2] == 0) {
+                assert(p->next != p);
+                print_x(p);
+                print_x(p->next);
+                assert((p->next->x[0] - p->x[0]) != 0 || (p->next->x[1] - p->x[1]));
+            }
         }
-        // FIXME: This assert should work but it fails because p and p->next are duplicated points:
-        // assert((p->next->x[2] - p->x[2]) != 0);
-        /*if (p->next->x[2] - p->x[2] == 0) {
-            assert(p->next != p);
-            print_x(p);
-            print_x(p->next);
-            assert((p->next->x[2] - p->x[2]) != 0);
-            }*/
         assert(area > 0);
         volume += area * (p->next->x[2] - p->x[2]);
         p = p->next;
