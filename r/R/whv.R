@@ -108,7 +108,9 @@ total_whv_rect <- function(x, rectangles, reference, maximise = FALSE, ideal = N
 #'
 #' @param ideal `numeric()`\cr Ideal point as a vector of numerical values.
 #'
-#' @param nsamples `integer(1)`\cr Number of samples for Monte-Carlo sampling.
+#' @param nsamples `integer(1)`\cr Number of samples for Monte-Carlo
+#'   sampling. Higher values typically produce more accurate approximations of
+#'   the true hypervolume, but require more time.
 #'
 #' @param seed `integer(1)`\cr Random seed.
 #'
@@ -151,7 +153,7 @@ total_whv_rect <- function(x, rectangles, reference, maximise = FALSE, ideal = N
 #' @concept metrics
 #' @export
 whv_hype <- function(x, reference, ideal, maximise = FALSE,
-                     nsamples = 1e5L, seed = NULL, dist = "uniform", mu = NULL)
+                     nsamples = 100000L, seed = NULL, dist = "uniform", mu = NULL)
 {
   x <- as_double_matrix(x)
   nobjs <- ncol(x)

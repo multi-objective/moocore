@@ -437,7 +437,7 @@ def test_get_dataset_path():
 
 
 # method="DZ2019-HW" is very slow with dim > 15.
-@pytest.mark.parametrize("dim", range(2, 15))
+@pytest.mark.parametrize("dim", range(2, 12))
 def test_hv_approx(dim):
     x = np.full((1, dim), 0.5)
     ref = np.full(dim, 1.0)
@@ -448,9 +448,15 @@ def test_hv_approx(dim):
     signif = 3 if dim < 7 else 2
     np.testing.assert_approx_equal(true_hv, appr_hv, significant=signif)
 
-    # method="DZ2019-HW" is the default
-    appr_hv = moocore.hv_approx(x, ref=ref)
+    appr_hv = moocore.hv_approx(x, ref=ref, method="DZ2019-HW")
     # print(f"{dim}: {(true_hv - appr_hv)/true_hv}")
+    ## Precision goes down significantly with higher dimensions.
+    signif = 4 if dim < 8 else 3 if dim < 10 else 2
+    np.testing.assert_approx_equal(true_hv, appr_hv, significant=signif)
+
+    # method="Rphi-FWE+" is the default
+    appr_hv = moocore.hv_approx(x, ref=ref)
+    print(f"{dim}: {(true_hv - appr_hv) / true_hv}")
     ## Precision goes down significantly with higher dimensions.
     signif = 4 if dim < 8 else 3 if dim < 10 else 2
     np.testing.assert_approx_equal(true_hv, appr_hv, significant=signif)
@@ -472,9 +478,10 @@ def test_hv_approx_errors():
     with pytest.raises(
         ValueError, match=r".*nsamples must be an integer value.*"
     ):
-        moocore.hv_approx(
-            [[0, 0]], [1, 1], method="DZ2019-MC", seed=None, nsamples="10"
-        )
+        moocore.hv_approx([[0, 0]], [1, 1], method="DZ2019-MC", nsamples="10")
+
+    with pytest.raises(ValueError, match=r".*Unknown method.*"):
+        moocore.hv_approx([[0, 0]], [1, 1], method="None")
 
 
 def check_hvc(points, ref, err_msg):

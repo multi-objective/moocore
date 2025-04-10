@@ -8,9 +8,9 @@ hv_approx(
   x,
   reference,
   maximise = FALSE,
-  nsamples = 100000L,
+  nsamples = 262144L,
   seed = NULL,
-  method = c("DZ2019-HW", "DZ2019-MC")
+  method = c("Rphi-FWE+", "DZ2019-HW", "DZ2019-MC")
 )
 }
 \arguments{
@@ -24,7 +24,9 @@ values.}
 instead of minimised. Either a single logical value that applies to all
 objectives or a vector of logical values, with one value per objective.}
 
-\item{nsamples}{\code{integer(1)}\cr Number of samples for Monte-Carlo sampling.}
+\item{nsamples}{\code{integer(1)}\cr Number of samples for Monte-Carlo
+sampling. Higher values typically produce more accurate approximations of
+the true hypervolume, but require more time.}
 
 \item{seed}{\code{integer(1)}\cr Random seed.}
 
@@ -35,16 +37,18 @@ A single numerical value.
 }
 \description{
 Approximate the value of the hypervolume metric with respect to a given
-reference point assuming minimization of all objectives. The default
-\code{method="DZ2019-HW"} is deterministic and ignores the parameter \code{seed},
-while \code{method="DZ2019-MC"} relies on Monte-Carlo sampling
-\citep{DenZha2019approxhv}.  Both methods tend to get more accurate with
+reference point assuming minimization of all objectives. Methods
+\code{"Rphi-FWE+"} and \code{"DZ2019-HW"} are deterministic and ignore the parameter
+\code{seed}, while \code{method="DZ2019-MC"} relies on Monte-Carlo sampling
+\citep{DenZha2019approxhv}.  All methods tend to get more accurate with
 higher values of \code{nsamples}, but the increase in accuracy is not monotonic,
-as shown in the vignette \HTMLVignette{hv_approx}{Approximating the hypervolume}.
+as shown in the vignette \HTMLVignette{hv_approx}{Approximating the
+hypervolume}.
 }
 \details{
-This function implements the method proposed by \citet{DenZha2019approxhv}
-to approximate the hypervolume:
+All available methods approximate the hypervolume as a
+\eqn{(m-1)}-dimensional integral over the surface of hypersphere
+\citep{DenZha2019approxhv}:
 
 \deqn{\widehat{HV}_r(A) = \frac{2\pi^\frac{m}{2}}{\Gamma(\frac{m}{2})}\frac{1}{m 2^m}\frac{1}{n}\sum_{i=1}^n \max_{y \in A} s(w^{(i)}, y)^m}
 
@@ -55,17 +59,32 @@ uniformly distributed on \eqn{S_{+}}, i.e., the positive orthant of the
 continuation of the factorial function, and \eqn{s(w, y) = \min_{k=1}^m (r_k
 - y_k)/w_k}.
 
-In the default \code{method="DZ2019-HW"}, the weights \eqn{w^{(i)}, i=1\ldots n}
-are defined using a deterministic low-discrepancy sequence. The weight
-values depend on their number (\code{nsamples}), thus increasing the number of
-weights may not necessarily increase accuracy because the set of weights
-would be different. In \code{method="DZ2019-MC"}, the weights \eqn{w^{(i)},
-i=1\ldots n} are sampled from the unit normal vector such that each weight
-\eqn{w = \frac{|x|}{\|x\|_2}} where each component of \eqn{x} is
+In the default \code{method="Rphi-FWE+"} \citep{Lop2026hvapprox}, the weights
+\eqn{w^{(i)}, i=1\ldots n} are defined using the deterministic
+low-discrepancy sequence \eqn{R_\phi} \citep{Rob2018unreasonable} mapped to
+the positive orthant of the hypersphere using a modified version of Fang and
+Wang efficient mapping \citep{FanWan1994numtheory}.
+
+In \code{method="DZ2019-HW"} \citep{DenZha2019approxhv}, the weights
+\eqn{w^{(i)}, i=1\ldots n} are defined using a deterministic low-discrepancy
+sequence. The weight values depend on their number (\code{nsamples}), thus
+increasing the number of weights may not necessarily increase accuracy
+because the set of weights would be different.
+
+In \code{method="DZ2019-MC"} \citep{DenZha2019approxhv}, the weights
+\eqn{w^{(i)}, i=1\ldots n} are sampled from the unit normal vector such that
+each weight \eqn{w = \frac{|x|}{\|x\|_2}} where each component of \eqn{x} is
 independently sampled from the standard normal distribution
-\citep{Muller1959sphere}.  The original source code in C++/MATLAB for both
-methods can be found at
+\citep{Muller1959sphere}.
+
+The original source code in C++/MATLAB for both \code{"DZ2019-HW"} and
+\code{"DZ2019-MC"} methods can be found at
 \url{https://github.com/Ksrma/Hypervolume-Approximation-using-polar-coordinate}.
+
+\citet{Lop2026hvapprox} empirically shows that \code{"Rphi-FWE+"} typically
+produces an approximation error as low as the other methods, with a
+computational cost similar to \code{"DZ2019-MC"} and significantly faster than
+\code{"DZ2019-HW"}.
 }
 \references{
 \insertAllCited{}
@@ -77,6 +96,7 @@ Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
 \examples{
 x <- matrix(c(5, 5, 4, 6, 2, 7, 7, 4), ncol=2, byrow=TRUE)
 hypervolume(x, ref=10)
-hv_approx(x, ref=10, seed=42, method="DZ2019-MC")
+hv_approx(x, ref=10, method="Rphi-FWE+")
 hv_approx(x, ref=10, method="DZ2019-HW")
+hv_approx(x, ref=10, seed=42, method="DZ2019-MC")
 }

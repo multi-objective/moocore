@@ -19,7 +19,7 @@ Description: Fast implementations of mathematical operations and performance met
 Depends: R (>= 4.1)
 Imports:
         matrixStats,
-        Rdpack
+        Rdpack (>= 2.4)
 Suggests:
     doctest (>= 0.4.0),
     spelling,

@@ -147,7 +147,12 @@ For 3D, `Optuna`_ uses a :math:`O(n^2)` algorithm, while `moocore`_ uses the bes
 Approximation of the hypervolume
 --------------------------------
 
-The following plots compare the accuracy and speed of approximating the hypervolume with the various methods provided by :func:`moocore.hv_approx`. The plots show that method ``DZ2019-HW`` consistently produces the lowest approximation error, but it is also slower than method ``DZ2019-MC``.  When the number of points increases, both methods are significantly faster than `pymoo`_.
+The following plots compare the accuracy and speed of approximating the
+hypervolume with the various methods provided by :func:`moocore.hv_approx`. The
+plots show that there is no clear winner, in terms of approximation error,
+between methods ``Rphi-FWE+`` (default) and ``DZ2019-HW``, but both produce
+consistently lower approximation errors than method ``DZ2019-MC`` and than
+`pymoo`_.  However, ``Rphi-FWE+`` is as fast as ``DZ2019-MC`` and both are consistently faster than ``DZ2019-HW``, in particular with higher number of objectives. The computation time of `pymoo`_ grows rapidly with the number of input points.
 
 If you compare the plots of **DTLZLinearShape-3d** and **DTLZLinearShape-4d** below to the ones above in the previous section, you can see that the exact computation of the hypervolume in 3D or 4D for thousands of points takes milliseconds, whereas approximating the hypervolume is significantly slower and, thus, not worth doing.
 
@@ -155,7 +160,10 @@ If you compare the plots of **DTLZLinearShape-3d** and **DTLZLinearShape-4d** be
 
 |hvapprox_bench-DTLZLinearShape-4d-values| |hvapprox_bench-DTLZLinearShape-4d-time|
 
-Approximating the hypervolume becomes more useful for dimensions higher than 5, where the exact computation becomes noticeably slower with hundreds of points.  For such problems,  method ``DZ2019-HW`` is significantly slower for few points than  `pymoo`_, which is much slower than ``DZ2019-MC``. However, the computation time of ``DZ2019-HW`` increases very slowly with the number of points whereas the computation time of  `pymoo`_ increases very rapidly.
+Approximating the hypervolume becomes more useful for dimensions higher than 5,
+where the exact computation becomes noticeably slower with hundreds of points.
+For such problems, method ``DZ2019-HW`` becomes significantly slower than
+``Rphi-FWE+``.
 
 |hvapprox_bench-DTLZLinearShape-6d-values| |hvapprox_bench-DTLZLinearShape-6d-time|
 

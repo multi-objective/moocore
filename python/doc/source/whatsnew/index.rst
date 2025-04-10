@@ -18,6 +18,9 @@ Version 0.3.0 (development)
   :func:`~moocore.generate_ndset`. Shape ``"convex-simplex"`` is now equivalent
   to ``generate_ndset(..., method="simplex") ** 2``, which is slightly more
   uniform than the previous approach.
+- The default method of :func:`~moocore.hv_approx` is now ``"Rphi-FWE+"``,
+  which is typically as accurate as the other methods, but significantly faster.
+
 
 Version 0.2.0 (10/01/2026)
 ---------------------------

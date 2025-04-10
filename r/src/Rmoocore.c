@@ -488,6 +488,22 @@ hv_approx_dz2019_hw_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE, SEXP NSAMPLES)
     return Rf_ScalarReal(hv);
 }
 
+SEXP
+hv_approx_rphi_fang_wang_plus_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE, SEXP NSAMPLES)
+{
+    SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoints);
+    SEXP_2_DOUBLE_VECTOR(REFERENCE, ref, reference_len);
+    SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
+    SEXP_2_INT(NSAMPLES, nsamples);
+
+    assert(nobj == reference_len);
+    assert(nobj == maximise_len);
+
+    double hv = hv_approx_rphi_fang_wang_plus(data, npoints, nobj, ref, maximise, (uint_fast32_t) nsamples);
+    free(maximise);
+    return Rf_ScalarReal(hv);
+}
+
 #include "r2_exact.h"
 
 SEXP

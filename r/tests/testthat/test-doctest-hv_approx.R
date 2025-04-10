@@ -6,7 +6,8 @@ test_that("Doctest: hv_approx", {
   # Source file: R/hv_approx.R
   x <- matrix(c(5, 5, 4, 6, 2, 7, 7, 4), ncol = 2, byrow = TRUE)
   expect_equal(hypervolume(x, ref = 10), 38)
-  expect_equal(hv_approx(x, ref = 10, seed = 42, method = "DZ2019-MC"), 38.014754)
-  expect_equal(hv_approx(x, ref = 10, method = "DZ2019-HW"), 37.99989)
+  expect_equal(hv_approx(x, ref = 10, method = "Rphi-FWE+"), 37.999979)
+  expect_equal(hv_approx(x, ref = 10, method = "DZ2019-HW"), 37.999958)
+  expect_equal(hv_approx(x, ref = 10, seed = 42, method = "DZ2019-MC"), 38.000806)
 })
 

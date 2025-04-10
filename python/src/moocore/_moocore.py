@@ -846,19 +846,19 @@ def hv_approx(
     ref: ArrayLike,
     *,
     maximise: bool | Sequence[bool] = False,
-    nsamples: int = 100_000,
+    nsamples: int = 262_144,
     seed: int | np.random.Generator | None = None,
-    method: Literal["DZ2019-HW", "DZ2019-MC"] = "DZ2019-HW",
+    method: Literal["DZ2019-HW", "DZ2019-MC", "Rphi-FWE+"] = "Rphi-FWE+",
 ) -> float:
     r"""Approximate the hypervolume indicator.
 
     Approximate the value of the hypervolume metric with respect to a given
-    reference point assuming minimization of all objectives. The default
-    ``method="DZ2019-HW"`` is deterministic and ignores the parameter ``seed``,
-    while ``method="DZ2019-MC"`` relies on Monte-Carlo sampling
-    :footcite:p:`DenZha2019approxhv`.  Both methods tend to get more accurate
-    with higher values of ``nsamples``, but the increase in accuracy is not
-    monotonic as shown in the example
+    reference point assuming minimization of all objectives. Methods
+    ``"Rphi-FWE+"`` and ``"DZ2019-HW"`` are deterministic and ignore the
+    parameter ``seed``, while ``method="DZ2019-MC"`` relies on Monte-Carlo
+    sampling :footcite:p:`DenZha2019approxhv`.  All methods tend to get more
+    accurate with higher values of ``nsamples``, but the increase in accuracy
+    is not monotonic as shown in the example
     :ref:`sphx_glr_auto_examples_plot_hv_approx.py`.
 
     .. seealso:: For details of the calculation, see the Notes section below.
@@ -876,10 +876,10 @@ def hv_approx(
     maximise :
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
-        Also accepts a 1d numpy array with value 0/1 for each objective
+        Also accepts a 1D numpy array with value 0/1 for each objective
     nsamples :
-        Number of samples for Monte-Carlo sampling. Higher values give more
-        accurate approximation of the true hypervolume but require more time.
+        Number of samples for Monte-Carlo sampling. Higher values typically produce more
+        accurate approximations of the true hypervolume, but require more time.
     seed :
         Either an integer to seed :func:`numpy.random.default_rng`, Numpy
         default random number generator (RNG) or an instance of a
@@ -898,8 +898,8 @@ def hv_approx(
 
     Notes
     -----
-    This function implements the methods proposed by
-    :footcite:t:`DenZha2019approxhv` to approximate the hypervolume:
+    All available methods approximate the hypervolume as a :math:`(m-1)`-dimensional
+    integral over the surface of hypersphere :footcite:p:`DenZha2019approxhv`:
 
     .. math::
        \widehat{HV}_r(A) = \frac{2\pi^\frac{m}{2}}{\Gamma(\frac{m}{2})}\frac{1}{m 2^m}\frac{1}{n}\sum_{i=1}^n \max_{y \in A} s(w^{(i)}, y)^m
@@ -911,17 +911,32 @@ def hv_approx(
     the analytical continuation of the factorial function, and :math:`s(w, y) =
     \min_{k=1}^m (r_k - y_k)/w_k`.
 
-    In the default ``method="DZ2019-HW"``, the weights :math:`w^{(i)},
-    i=1\ldots n` are defined using a deterministic low-discrepancy
-    sequence. The weight values depend on their number (``nsamples``), thus
-    increasing the number of weights may not necessarily increase accuracy
-    because the set of weights would be different. In ``method="DZ2019-MC"``,
-    the weights :math:`w^{(i)}, i=1\ldots n` are sampled from the unit normal
-    vector such that each weight :math:`w = \frac{|x|}{\|x\|_2}` where each
-    component of :math:`x` is independently sampled from the standard normal
-    distribution :footcite:p:`Muller1959sphere`.  The original source code in
-    C++/MATLAB for both methods can be found `here
+    In the default ``method="Rphi-FWE+"`` :footcite:p:`Lop2026hvapprox`, the
+    weights :math:`w^{(i)}, i=1\ldots n` are defined using the deterministic
+    low-discrepancy sequence :math:`R_\phi` :footcite:p:`Rob2018unreasonable`
+    mapped to the positive orthant of the hypersphere using a modified version
+    of Fang and Wang efficient mapping :footcite:p:`FanWan1994numtheory`.
+
+    In ``method="DZ2019-HW"`` :footcite:p:`DenZha2019approxhv`, the weights
+    :math:`w^{(i)}, i=1\ldots n` are defined using a deterministic
+    low-discrepancy sequence. The weight values depend on their number
+    (``nsamples``), thus increasing the number of weights may not necessarily
+    increase accuracy because the set of weights would be different.
+
+    In ``method="DZ2019-MC"`` :footcite:p:`DenZha2019approxhv`, the weights
+    :math:`w^{(i)}, i=1\ldots n` are sampled from the unit normal vector such
+    that each weight :math:`w = \frac{|x|}{\|x\|_2}` where each component of
+    :math:`x` is independently sampled from the standard normal distribution
+    :footcite:p:`Muller1959sphere`.
+
+    The original source code in C++/MATLAB for both ``"DZ2019-HW"`` and
+    ``"DZ2019-MC"`` methods can be found `here
     <https://github.com/Ksrma/Hypervolume-Approximation-using-polar-coordinate>`_.
+
+    :footcite:t:`Lop2026hvapprox` empirically shows that ``"Rphi-FWE+"``
+    typically produces an approximation error as low as the other methods, with
+    a computational cost similar to ``"DZ2019-MC"`` and significantly faster
+    than ``"DZ2019-HW"``.
 
 
     References
@@ -933,10 +948,12 @@ def hv_approx(
     >>> x = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
     >>> moocore.hypervolume(x, ref=[10, 10])
     38.0
-    >>> moocore.hv_approx(x, ref=[10, 10], seed=42, method="DZ2019-MC")
-    38.01475
+    >>> moocore.hv_approx(x, ref=[10, 10], method="Rphi-FWE+")
+    37.99998
     >>> moocore.hv_approx(x, ref=[10, 10], method="DZ2019-HW")
-    37.99989
+    37.99996
+    >>> moocore.hv_approx(x, ref=[10, 10], seed=42, method="DZ2019-MC")
+    38.00081
 
     Merge all the sets of a dataset by removing the set number column:
 
@@ -946,11 +963,15 @@ def hv_approx(
 
     >>> moocore.hv_approx(x, ref=10)
     93.5533
+    >>> moocore.hv_approx(x, ref=10, method="DZ2019-HW")
+    93.5533
 
     gives the same hypervolume approximation as this:
 
     >>> x = moocore.filter_dominated(x)
     >>> moocore.hv_approx(x, ref=10)
+    93.5533
+    >>> moocore.hv_approx(x, ref=10, method="DZ2019-HW")
     93.5533
 
     The approximation is far from perfect for large number of dimensions:
@@ -962,7 +983,9 @@ def hv_approx(
     >>> moocore.hypervolume(x, ref=reference, maximise=True)
     0.483633123747
     >>> moocore.hv_approx(x, ref=reference, maximise=True)
-    0.4852583123
+    0.48397532301
+    >>> moocore.hv_approx(x, ref=reference, maximise=True, method="DZ2019-HW")
+    0.483083547763
 
     """
     # Convert to numpy.array in case the user provides a list.  We use
@@ -998,8 +1021,12 @@ def hv_approx(
             hv = lib.hv_approx_hua_wang(
                 data_p, npoints, nobj, ref, maximise, nsamples
             )
+        case "Rphi-FWE+":
+            hv = lib.hv_approx_rphi_fang_wang_plus(
+                data_p, npoints, nobj, ref, maximise, nsamples
+            )
         case _:
-            raise ValueError("Unknown value of method = {method}")
+            raise ValueError("Unknown method = {method}")
 
     return hv
 

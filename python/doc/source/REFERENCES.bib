@@ -511,6 +511,15 @@
   annote = {Introduces Inverted Generational Distance (IGD)}
 }
 
+@book{FanWan1994numtheory,
+  author = {Fang, K. T. and Wang, Y.},
+  title = {Number-Theoretic Methods in Statistics},
+  year = 1994,
+  publisher = {Chapman \& Hall/CRC},
+  address = { London, UK },
+  keywords = {hypersphere, Monte-Carlo sampling, low-discrepancy sequences}
+}
+
 @incollection{FonGueLopPaq2011emo,
   booktitle = { Evolutionary Multi-criterion Optimization, EMO 2011},
   address = {Berlin~/ Heidelberg},
@@ -670,6 +679,43 @@
   pages = {711--716}
 }
 
+@incollection{Lop2026hvapprox,
+  location = {San Jos{\'e}, Costa Rica},
+  address = { New York, NY},
+  booktitle = {Proceedings of  the Genetic and Evolutionary Computation Conference, GECCO 2026},
+  publisher = {ACM Press},
+  year = 2026,
+  editor = {Hu, Ting and Trujillo, Leonardo},
+  author = { Manuel L{\'o}pez-Ib{\'a}{\~n}ez },
+  title = {Approximating the Hypervolume Indicator using Fast
+                  Low-Discrepancy Sequences},
+  annote = {Proposed Rphi-FWE+},
+  doi = {10.1145/3795095.3805198},
+  abstract = {The hypervolume indicator measures the volume of the
+                  objective space weakly dominated by a set of solutions in
+                  multi-objective optimization problems. It is one the most
+                  popular unary quality metrics for comparing multi-objective
+                  optimizers. The computation of the hypervolume requires
+                  exponential time on the number of objectives, hence, it
+                  becomes computationally expensive for thousands of points in
+                  more than 5 dimensions. To overcome this limitation, several
+                  methods for approximating the hypervolume have been proposed
+                  in the literature. A recent proposal uses polar coordinates
+                  to transform the hypervolume into an integral over the
+                  hypersphere that is approximated via (quasi-)Monte Carlo
+                  sampling. In this paper, we replace two key components of
+                  this proposal with: (1) $R_\phi$, a fast multi-dimensional
+                  generalization of the Kronecker sequence that generates
+                  sampling points in the hypercube, and (2) a simple and
+                  efficient mapping from the hypercube to the positive orthant
+                  of the hypersphere. We compare these components with other
+                  possible alternatives, including the well-known Sobol and
+                  Halton low-discrepancy sequences. Our experimental results
+                  show that combination of these two components, which we call
+                  $R_\phi$-FWE+, typically achieves lower approximation error
+                  at equal or lower computation cost.}
+}
+
 @incollection{LopPaqStu09emaa,
   editor = { Thomas Bartz-Beielstein  and  Marco Chiarandini  and  Lu{\'i}s Paquete  and  Mike Preuss },
   year = 2010,
@@ -716,6 +762,16 @@
   publisher = {Springer},
   year = 2005,
   keywords = {Vorob'ev expectation}
+}
+
+@misc{Rob2018unreasonable,
+  author = {Roberts, Martin},
+  title = {The Unreasonable Effectiveness of Quasirandom Sequences},
+  howpublished = {\url{https://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/}},
+  month = apr,
+  year = 2018,
+  note = {Last visited: 13/04/2025},
+  annote = {Proposed the Rphi low-discrepancy sequence}
 }
 
 @book{RubMel1998simulation,

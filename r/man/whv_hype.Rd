@@ -28,7 +28,9 @@ values.}
 instead of minimised. Either a single logical value that applies to all
 objectives or a vector of logical values, with one value per objective.}
 
-\item{nsamples}{\code{integer(1)}\cr Number of samples for Monte-Carlo sampling.}
+\item{nsamples}{\code{integer(1)}\cr Number of samples for Monte-Carlo
+sampling. Higher values typically produce more accurate approximations of
+the true hypervolume, but require more time.}
 
 \item{seed}{\code{integer(1)}\cr Random seed.}
 

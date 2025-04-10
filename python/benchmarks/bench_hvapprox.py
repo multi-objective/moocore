@@ -1,7 +1,8 @@
-"""Hypervolume Computation Benchmarks
+"""Hypervolume Approximation Benchmarks
 =======================================
 
-This example benchmarks the hypervolume implementation in ``moocore`` against other implementations.
+This example benchmarks the methods for approximating the hypervolume in
+``moocore`` against other implementations.
 
 """
 
@@ -101,6 +102,9 @@ for name in names:
         ),
         "moocore DZ2019-HW": lambda z, exact: relerror(
             exact, moocore.hv_approx(z, ref=ref, method="DZ2019-HW")
+        ),
+        "moocore Rphi-FWE+": lambda z, exact: relerror(
+            exact, moocore.hv_approx(z, ref=ref, method="Rphi-FWE+")
         ),
         "pymoo": lambda z, exact, hv=pymoo_hvapprox(ref_point=ref): relerror(
             exact, hv.add(z).hv

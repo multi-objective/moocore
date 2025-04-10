@@ -5,6 +5,7 @@
  * `fpli_hv()` calculates 4D contributions as the base case, which is
    significantly faster for more than four dimensions. (Andreia P. Guerreiro)
  * nondominated_kung.h: New.
+ * hvapprox.c (hv_approx_rphi_fang_wang_plus): New function.
 
 ## 0.18
 

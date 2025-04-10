@@ -11,6 +11,7 @@ Deb02nsga2
 DenZha2019approxhv
 DiaLop2020ejor
 DubLopStu2011amai
+FanWan1994numtheory
 FonGueLopPaq2011emo
 FonPaqLop06:hypervolume
 GruFon2009:emaa
@@ -26,11 +27,13 @@ JohAraMcGSch1991
 KnoCor2002cec
 KunLucPre1975jacm
 LacKlaFon2017box
+Lop2026hvapprox
 LopPaqStu09emaa
 LopVerDreDoe2025
 LopezIbanezPhD
 Molchanov2005theory
 Muller1959sphere
+Rob2018unreasonable
 RubMel1998simulation
 SchEsqLarCoe2012tec
 SchKer2025r2v2

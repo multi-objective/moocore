@@ -39,13 +39,13 @@ static int verbose_flag = 1;
 static bool union_flag = false;
 static char *suffix = NULL;
 
-enum approx_method_t { DZ2019_MC=1, DZ2019_HW=2 };
+enum approx_method_t { DZ2019_MC=1, DZ2019_HW=2, Rphi_FWEp=3 };
+static const char * approx_method_str[] = {"DZ2019-MC", "DZ2019-HW", "Rphi-FWE+"};
 
 static void usage(void)
 {
     printf("\n"
            "Usage: %s [OPTIONS] [FILE...]\n\n", program_invocation_short_name);
-
     printf(
 "Approximate the hypervolume value of each input set of each FILE. \n"
 "The approximation uses (quasi-)Monte-Carlo sampling, thus gets more accurate with larger\n"
@@ -66,7 +66,8 @@ OPTION_VERSION_STR
 "                     If missing, output is sent to stdout.                 \n"
 " -n, --nsamples=N    Number of Monte-Carlo samples (N is a positive integer).\n"
 " -m, --method=M      1: Monte-Carlo sampling using normal distribution;    \n"
-"                     2: Hua-Wang deterministic sampling (default).         \n"
+"                     2: Hua-Wang deterministic sampling.                   \n"
+"                     3: Rphi-FWE+ deterministic sampling (default).        \n"
 OPTION_SEED_STR
 "                     Only method=1.                                        \n"
 "\n");
@@ -156,16 +157,17 @@ hvapprox_file(const char * filename, double * restrict reference,
           case DZ2019_HW:
               volume = hv_approx_hua_wang(&data[nobj * cumsize], cumsizes[n] - cumsize, nobj, reference, maximise, nsamples);
               break;
+          case Rphi_FWEp:
+              volume = hv_approx_rphi_fang_wang_plus(&data[nobj * cumsize], cumsizes[n] - cumsize, nobj, reference, maximise, nsamples);
+              break;
           default:  // LCOV_EXCL_LINE # nocov
               unreachable();
         }
 
-        if (volume == 0.0) {
+        if (volume == 0.0)
             fatal_error("none of the points strictly dominates the reference point\n");
-        }
 
-        double time_elapsed = Timer_elapsed_virtual ();
-
+        double time_elapsed = Timer_elapsed_virtual();
         fprintf (outfile, indicator_printf_format "\n", volume);
         if (verbose_flag >= 2)
             fprintf (outfile, "# Time: %f seconds\n", time_elapsed);
@@ -205,7 +207,7 @@ int main(int argc, char *argv[])
     int nobj = 0;
     uint32_t seed = 0;
     uint_fast32_t nsamples = 0;
-    enum approx_method_t hv_approx_method = DZ2019_HW;
+    enum approx_method_t hv_approx_method = Rphi_FWEp;
 
     int opt; /* it's actually going to hold a char.  */
     int longopt_index;
@@ -240,8 +242,10 @@ int main(int argc, char *argv[])
                     hv_approx_method = DZ2019_MC; break;
                 case '2':
                     hv_approx_method = DZ2019_HW; break;
+                case '3':
+                    hv_approx_method = Rphi_FWEp; break;
                 default:
-                    fatal_error("valid values of --method (-m) are: 1 or 2, not '%s'", optarg);
+                    fatal_error("valid values of --method (-m) are: 1, 2 or 3, not '%s'", optarg);
               }
               break;
 
@@ -267,19 +271,20 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (nsamples == 0) {
-        fatal_error("must specify a value for --nsamples, for example, --nsamples 100000");
-    }
+    if (nsamples == 0)
+        fatal_error("must specify a value for --nsamples, for example, --nsamples 524288");
 
     if (seed == 0) {
         if (hv_approx_method == DZ2019_MC)
             seed = (uint32_t) time(NULL);
-    } else if (hv_approx_method == DZ2019_HW) {
-        fatal_error("cannot use --seed with --method=2");
+    } else if (hv_approx_method != DZ2019_MC) {
+        fatal_error("--seed only makes sense with --method=1");
     }
 
     if (verbose_flag >= 2)
-        printf("# seed: %"PRIu32 "\n# nsamples: %lu\n", seed, (unsigned long) nsamples);
+        printf("# Method: %s\n# seed: %"PRIu32 "\n# nsamples: %lu\n",
+               approx_method_str[hv_approx_method - 1],
+               seed, (unsigned long) nsamples);
 
     int numfiles = argc - optind;
     if (numfiles < 1) /* Read stdin.  */

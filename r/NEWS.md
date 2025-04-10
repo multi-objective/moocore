@@ -6,6 +6,7 @@
  *  Add `GPGame` and `targeted` packages to [Benchmarks](https://multi-objective.github.io/moocore/r/articles/benchmarks.html).
  * `is_nondominated()` and `filter_dominated()` use a significantly faster algorithm by Kung et al. for dimensions larger than 3.
  * `generate_ndset()`: New shapes `"inverted-simplex"` and `"concave-simplex"`. Shape `"convex-simplex"` is now equivalent to `generate_ndset(..., method="simplex")^2`, which is slightly more uniform than the previous approach.
+ * The default method of `hv_approx()` is now `"Rphi-FWE+"`, which is typically as accurate as the other methods, but significantly faster.
 
 
 # moocore 0.2.0

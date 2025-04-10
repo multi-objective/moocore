@@ -4,13 +4,13 @@ r"""Comparing methods for approximating the hypervolume
 The following examples compare various ways of approximating the hypervolume of
 a nondominated set.
 
-Comparing HypE and DZ2019
--------------------------
+Comparing HypE and Rphi-FWE+
+----------------------------
 
 This example shows how to approximate the hypervolume metric of the
 ``CPFs.txt`` dataset using both :func:`moocore.whv_hype()` (HypE), and
-:func:`moocore.hv_approx()` (DZ2019) for several values of the number of
-samples between :math:`10^1` and :math:`10^5`.  We repeat each calculation 10
+:func:`moocore.hv_approx()` for several values of the number of
+samples between :math:`10^1` and :math:`10^5`.  We repeat each calculation 5
 times to account for stochasticity.
 
 """
@@ -36,53 +36,52 @@ true_hv = moocore.hypervolume(x, ref=ref)
 #
 # Next, we approximate the hypervolume using :math:`\{10^1, 10^2, \ldots,
 # 10^5\}` random samples to show the higher samples reduce the approximation
-# error. Since the approximation is stochastic, we perform 10 repetitions of
+# error. Since the approximation is stochastic, we perform 5 repetitions of
 # each computation.
 
-nreps = 10
+nreps = 5
 nsamples_exp = 5
 rng1 = np.random.default_rng(42)
 rng2 = np.random.default_rng(42)
-results = {"HypE": {}, "DZ2019-HW": {}, "DZ2019-MC": {}}
+results = []
 for i in range(1, nsamples_exp + 1):
-    for what in results.keys():
-        results[what][i] = []
-
-    res = moocore.hv_approx(x, ref=ref, nsamples=10**i, method="DZ2019-HW")
-    results["DZ2019-HW"][i].append(res)
-
     for r in range(nreps):
         res = moocore.whv_hype(x, ref=ref, ideal=0, nsamples=10**i, seed=rng1)
-        results["HypE"][i].append(res)
+        results.append(dict(Method="HypE", rep=r, samples=i, value=res))
         res = moocore.hv_approx(
             x, ref=ref, nsamples=10**i, seed=rng2, method="DZ2019-MC"
         )
-        results["DZ2019-MC"][i].append(res)
+        results.append(dict(Method="DZ2019-MC", rep=r, samples=i, value=res))
+
+    res = moocore.hv_approx(x, ref=ref, nsamples=10**i, method="DZ2019-HW")
+    results.append(dict(Method="DZ2019-HW", rep=0, samples=i, value=res))
+    res = moocore.hv_approx(x, ref=ref, nsamples=10**i, method="Rphi-FWE+")
+    results.append(dict(Method="Rphi-FWE+", rep=0, samples=i, value=res))
+
 
 width = len("Mean DZ2019-MC")
 text = "True HV"
 print(f"{text:>{width}} : {true_hv:.5f}")
-for what in results.keys():
-    res = results[what][nsamples_exp]
+df = pd.DataFrame(results)
+df["Method"] = (
+    df["Method"]
+    .astype("category")
+    .cat.reorder_categories(["DZ2019-MC", "DZ2019-HW", "Rphi-FWE+", "HypE"])
+)
+subdf = (
+    df[df["samples"] == 4]
+    .groupby("Method", observed=True)["value"]
+    .agg(["mean", "min", "max"])
+)
+for what, mean, min, max in subdf.itertuples():
     text = "Mean " + what
-    print(
-        f"{text:>{width}} : {np.mean(res):.5f} [{np.min(res):.5f}, {np.max(res):.5f}]"
-    )
+    print(f"{text:>{width}} : {mean:.5f} [{min:.5f}, {max:.5f}]")
 
 
 # %%
 #
 # Next, we plot the results.
 
-df = [
-    pd.DataFrame(results[what]).assign(Method=what) for what in results.keys()
-]
-
-df = (
-    pd.concat(df)
-    .reset_index(names="rep")
-    .melt(id_vars=["rep", "Method"], var_name="samples")
-)
 df["samples"] = 10 ** df["samples"]
 df["value"] = np.abs(df["value"] - true_hv) / true_hv
 
@@ -95,14 +94,17 @@ plt.show()
 # Comparing Monte-Carlo and quasi-Monte-Carlo approximations
 # ----------------------------------------------------------
 #
-# The quasi-Monte-Carlo approximation with ``method=DZ2019-HW`` is
-# deterministic, but not monotonic on the number of samples. Nevertheless, it
-# tends to be better than the Monte-Carlo approximation generated with
-# ``method=DZ2019-MC``, specially with large number of objectives.
+# The quasi-Monte-Carlo approximations with ``method="Rphi-FWE+"``
+# :cite:p:`Lop2026hvapprox` and ``method="DZ2019-HW"``
+# :cite:p:`DenZha2019approxhv` is deterministic, but not monotonic on the
+# number of samples. Nevertheless, they are often better than the Monte-Carlo
+# approximation produced by ``method="DZ2019-MC"``
+# :cite:p:`DenZha2019approxhv`, specially with large number of objectives.  A
+# more detailed comparison is provided by :cite:t:`Lop2026hvapprox`.
 
 datasets = ["DTLZLinearShape.8d.front.60pts.10", "ran.10pts.9d.10"]
 ref = 10
-samples = 2 ** np.arange(12, 20)
+samples = 2 ** np.arange(12, 19)
 maxiter = samples.max()
 
 for dataset in datasets:
@@ -113,19 +115,22 @@ for dataset in datasets:
     res = []
     for i in samples:
         hv = moocore.hv_approx(x, ref=ref, nsamples=i, method="DZ2019-HW")
-        res.append(dict(samples=i, method="HW", hv=hv))
-
-    for k in range(16):
-        seed = k
-        for i in samples:
+        res.append(dict(samples=i, method="DZ2019-HW", hv=hv))
+        hv = moocore.hv_approx(x, ref=ref, nsamples=i, method="Rphi-FWE+")
+        res.append(dict(samples=i, method="Rphi-FWE+", hv=hv))
+        for k in range(5):
             hv = moocore.hv_approx(
-                x, ref=ref, nsamples=i, method="DZ2019-MC", seed=seed
+                x, ref=ref, nsamples=i, method="DZ2019-MC", seed=k
             )
-            res.append(dict(samples=i, method="MC", hv=hv))
+            res.append(dict(samples=i, method="DZ2019-MC", hv=hv))
 
     df = pd.DataFrame(res)
     df["hverror"] = np.abs(1.0 - (df.hv / exact))
-    df["method"] = df["method"].astype("category")
+    df["method"] = (
+        df["method"]
+        .astype("category")
+        .cat.reorder_categories(["DZ2019-MC", "DZ2019-HW", "Rphi-FWE+"])
+    )
 
     plt.figure()
     ax = sns.lineplot(

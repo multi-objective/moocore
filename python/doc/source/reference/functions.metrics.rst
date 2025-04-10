@@ -187,7 +187,11 @@ Approximating the hypervolume metric
    hv_approx
    whv_hype
 
-Computing the hypervolume can be time consuming, thus several approaches have been proposed in the literature to approximate its value via Monte-Carlo or quasi-Monte-Carlo sampling :cite:p:`DenZha2019approxhv`. These methods are implemented in :func:`whv_hype` and :func:`hv_approx`.
+Computing the hypervolume can be time consuming, thus several approaches have
+been proposed in the literature to approximate (estimate) its value via
+Monte-Carlo or quasi-Monte-Carlo sampling
+:cite:p:`AugBadBroZit2009gecco,DenZha2019approxhv,Lop2026hvapprox`.  These
+methods are implemented in :func:`whv_hype` and :func:`hv_approx`.
 
 
 .. _r2_indicator:
