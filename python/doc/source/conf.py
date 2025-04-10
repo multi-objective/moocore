@@ -86,6 +86,10 @@ napoleon_type_aliases = {
 bibtex_bibfiles = ["REFERENCES.bib"]
 bibtex_reference_style = "super"
 bibtex_default_style = "unsrt"
+bibtex_cite_id = "cite-{bibliography_count}-{key}"
+bibtex_footcite_id = "footcite-{key}"
+bibtex_bibliography_id = "bibliography-{bibliography_count}"
+bibtex_footbibliography_id = "footbibliography-{footbibliography_count}"
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = True
