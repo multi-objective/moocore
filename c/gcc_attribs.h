@@ -211,6 +211,15 @@
 
 #define PRAGMA(m_token_sequence) _Pragma(#m_token_sequence)
 
+#define STRINGIFY(x) #x
+#define TO_STRING(x) STRINGIFY(x)
+
+#ifdef _OPENMP
+# define PRAGMA_OMP(v) _Pragma(TO_STRING(omp v))
+#else
+# define PRAGMA_OMP(v)
+#endif
+
 #ifdef __ICC
 #define PRAGMA_ASSUME_NO_VECTOR_DEPENDENCY PRAGMA(ivdep)
 #elif defined(__GNUC__)  && __GNUC__ >= 5

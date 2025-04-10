@@ -157,8 +157,8 @@ hvapprox_file(const char * filename, double * restrict reference,
           case DZ2019_HW:
               volume = hv_approx_hua_wang(&data[nobj * cumsize], cumsizes[n] - cumsize, nobj, reference, maximise, nsamples);
               break;
-          case 3:
-              volume = hv_approx_rphi_fang_wang_plus(&data[nobj * cumsize], nobj, cumsizes[n] - cumsize, reference, maximise, nsamples);
+          case RPHI:
+              volume = hv_approx_rphi_fang_wang_plus(&data[nobj * cumsize], cumsizes[n] - cumsize, nobj, reference, maximise, nsamples);
               break;
           default:
               unreachable();  // COVR_EXCL_LINE # nocov
