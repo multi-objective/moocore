@@ -1992,7 +1992,7 @@ def whv_hype(
 
     """
     # Convert to numpy.array in case the user provides a list.  We use
-    # np.asfarray to convert it to floating-point, otherwise if a user inputs
+    # np.asarray to convert it to floating-point, otherwise if a user inputs
     # something like [10, 10] then numpy would interpret it as an int array.
     data, data_copied = asarray_maybe_copy(data)
     nobj = data.shape[1]
