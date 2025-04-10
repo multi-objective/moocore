@@ -107,7 +107,7 @@ else
 CPPFLAGS += -U_GNU_SOURCE
 endif
 
-EXE_CFLAGS += $(OPT_CFLAGS) $(WARN_CFLAGS) \
+EXE_CFLAGS += $(SANITIZERS) $(OPT_CFLAGS) $(WARN_CFLAGS) \
 	-DDEBUG=$(DEBUG) -DVERSION='"$(VERSION)"' -DMARCH='"$(gcc-guess-march)"'
 
 dominatedsetsexe = $(BINDIR)/dominatedsets$(EXE)
@@ -178,17 +178,19 @@ clean:
 
 TESTSUITE:="../testsuite"
 test: OPT_CFLAGS ?=-Og -g3
+test: SANITIZERS ?=
 test:
 	@if ! test -d $(TESTSUITE); then  		    	         \
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
-	$(MAKE) all DEBUG=1 SANITIZERS="" OPT_CFLAGS="$(OPT_CFLAGS)"
+	$(MAKE) all DEBUG=1 SANITIZERS="$(SANITIZERS)" OPT_CFLAGS="$(OPT_CFLAGS)"
 	$(MAKE) test-eaf test-nondominated test-hv test-igd test-epsilon test-dominatedsets
 
 test-eaf test-nondominated test-hv test-igd test-epsilon test-dominatedsets: target=$(subst test-,,$@)
 test-eaf test-nondominated test-hv test-igd test-epsilon test-dominatedsets: OPT_CFLAGS ?=-Og -g3
+test-eaf test-nondominated test-hv test-igd test-epsilon test-dominatedsets: SANITIZERS ?=
 test-eaf test-nondominated test-hv test-igd test-epsilon test-dominatedsets:
-	$(MAKE) $(target) DEBUG=1 SANITIZERS="" OPT_CFLAGS="$(OPT_CFLAGS)"
+	$(MAKE) $(target) DEBUG=1 SANITIZERS="$(SANITIZERS)" OPT_CFLAGS="$(OPT_CFLAGS)"
 	$(call ECHO,---> Testing $(target) for errors (DEBUG=1) <--- )
 	@cd $(TESTSUITE)/$(target) && ../regtest.py $(BINDIR)/$(target)$(EXE) && cd $(PWD)
 
