@@ -43,13 +43,15 @@ nreps = 10
 nsamples_exp = 5
 rng1 = np.random.default_rng(42)
 rng2 = np.random.default_rng(42)
-results = {"HypE": {}, "DZ2019-HW": {}, "DZ2019-MC": {}}
+results = {"HypE": {}, "DZ2019-HW": {}, "DZ2019-MC": {}, "Rphi": {}}
 for i in range(1, nsamples_exp + 1):
     for what in results.keys():
         results[what][i] = []
 
     res = moocore.hv_approx(x, ref=ref, nsamples=10**i, method="DZ2019-HW")
     results["DZ2019-HW"][i].append(res)
+    res = moocore.hv_approx(x, ref=ref, nsamples=10**i, method="Rphi")
+    results["Rphi"][i].append(res)
 
     for r in range(nreps):
         res = moocore.whv_hype(x, ref=ref, ideal=0, nsamples=10**i, seed=rng1)
@@ -114,6 +116,8 @@ for dataset in datasets:
     for i in samples:
         hv = moocore.hv_approx(x, ref=ref, nsamples=i, method="DZ2019-HW")
         res.append(dict(samples=i, method="HW", hv=hv))
+        hv = moocore.hv_approx(x, ref=ref, nsamples=i, method="Rphi")
+        res.append(dict(samples=i, method="Rphi", hv=hv))
 
     for k in range(16):
         seed = k

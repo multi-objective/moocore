@@ -22,5 +22,10 @@ MOOCORE_API double hv_approx_normal(
     const double * restrict ref, const bool * restrict maximise,
     uint_fast32_t nsamples, uint32_t random_seed);
 
+MOOCORE_API double hv_approx_rphi_fang_wang_plus(
+    const double * restrict data, size_t npoints, dimension_t nobjs,
+    const double * restrict ref, const bool * restrict maximise,
+    uint_fast32_t nsamples);
+
 END_C_DECLS
 #endif // HV_APPROX_H_

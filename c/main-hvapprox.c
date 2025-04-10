@@ -39,7 +39,7 @@ static int verbose_flag = 1;
 static bool union_flag = false;
 static char *suffix = NULL;
 
-enum approx_method_t { DZ2019_MC=1, DZ2019_HW=2 };
+enum approx_method_t { DZ2019_MC=1, DZ2019_HW=2, RPHI=3 };
 
 static void usage(void)
 {
@@ -67,6 +67,7 @@ OPTION_VERSION_STR
 " -n, --nsamples=N    Number of Monte-Carlo samples (N is a positive integer).\n"
 " -m, --method=M      1: Monte-Carlo sampling using normal distribution;    \n"
 "                     2: Hua-Wang deterministic sampling (default).         \n"
+"                     3: Rphi deterministic sampling (default).             \n"
 OPTION_SEED_STR
 "                     Only method=1.                                        \n"
 "\n");
@@ -156,6 +157,9 @@ hvapprox_file(const char * filename, double * restrict reference,
           case DZ2019_HW:
               volume = hv_approx_hua_wang(&data[nobj * cumsize], cumsizes[n] - cumsize, nobj, reference, maximise, nsamples);
               break;
+          case 3:
+              volume = hv_approx_rphi_fang_wang_plus(&data[nobj * cumsize], nobj, cumsizes[n] - cumsize, reference, maximise, nsamples);
+              break;
           default:
               unreachable();  // COVR_EXCL_LINE # nocov
         }
@@ -164,7 +168,7 @@ hvapprox_file(const char * filename, double * restrict reference,
             fatal_error("none of the points strictly dominates the reference point\n");
         }
 
-        double time_elapsed = Timer_elapsed_virtual ();
+        double time_elapsed = Timer_elapsed_virtual();
 
         fprintf (outfile, indicator_printf_format "\n", volume);
         if (verbose_flag >= 2)
@@ -240,6 +244,8 @@ int main(int argc, char *argv[])
                     hv_approx_method = DZ2019_MC; break;
                 case '2':
                     hv_approx_method = DZ2019_HW; break;
+                case '3':
+                    hv_approx_method = RPHI; break;
                 default:
                     fatal_error("valid values of --method (-m) are: 1 or 2, not '%s'", optarg);
               }
@@ -274,8 +280,8 @@ int main(int argc, char *argv[])
     if (seed == 0) {
         if (hv_approx_method == DZ2019_MC)
             seed = (uint32_t) time(NULL);
-    } else if (hv_approx_method == DZ2019_HW) {
-        fatal_error("cannot use --seed with --method=2");
+    } else if (hv_approx_method != DZ2019_MC) {
+        fatal_error("--seed only makes sense with --method=1");
     }
 
     if (verbose_flag >= 2)

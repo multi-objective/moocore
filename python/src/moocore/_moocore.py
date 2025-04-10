@@ -985,6 +985,10 @@ def hv_approx(
             hv = lib.hv_approx_hua_wang(
                 data_p, npoints, nobj, ref, maximise, nsamples
             )
+        case "Rphi":
+            hv = lib.hv_approx_rphi_fang_wang_plus(
+                data_p, npoints, nobj, ref, maximise, nsamples
+            )
         case _:
             raise ValueError("Unknown value of method = {method}")
 

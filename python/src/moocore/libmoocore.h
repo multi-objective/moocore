@@ -55,12 +55,18 @@ double hv_approx_hua_wang(const double * restrict data,
                           const double * restrict ref,
                           const bool * restrict maximise,
                           uint_fast32_t nsamples);
+
 double hv_approx_normal(const double * restrict data,
                         size_t npoints, dimension_t nobjs,
                         const double * restrict ref,
                         const bool * restrict maximise,
                         uint_fast32_t nsamples, uint32_t random_seed);
 
+double hv_approx_rphi_fang_wang_plus(const double * restrict data,
+                                     size_t npoints, dimension_t nobjs,
+                                     const double * restrict ref,
+                                     const bool * restrict maximise,
+                                     uint_fast32_t nsamples);
 /*
 typedef ... hype_sample_dist;
 hype_sample_dist * hype_dist_unif_new(unsigned long seed);
