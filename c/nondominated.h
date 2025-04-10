@@ -2,7 +2,10 @@
 #define NONDOMINATED_H
 
 #include <string.h> // memcpy
+#include <stdint.h>
 #include "common.h"
+
+typedef uint_fast8_t dimension_t;
 
 static inline bool *
 nondom_init (size_t size)
@@ -14,13 +17,13 @@ nondom_init (size_t size)
 }
 
 static inline const double *
-force_agree_minimize (const double *points, int dim, int size,
+force_agree_minimize (const double *points, int dim_, int size,
                       const signed char *minmax, _attr_maybe_unused const signed char agree)
 {
     eaf_assert(agree != AGREE_MINIMISE);
-
+    dimension_t dim = (dimension_t) dim_;
     bool no_copy = true;
-    for (int d = 0; d < dim; d++) {
+    for (dimension_t d = 0; d < dim; d++) {
         if (minmax[d] > 0) {
             no_copy = false;
             break;
@@ -32,7 +35,7 @@ force_agree_minimize (const double *points, int dim, int size,
     double *pnew = malloc(dim * size * sizeof(double));
     memcpy(pnew, points, dim * size * sizeof(double));
 
-    for (int d = 0; d < dim; d++) {
+    for (dimension_t d = 0; d < dim; d++) {
         eaf_assert(minmax[d] != 0);
         if (minmax[d] > 0)
             for (int k = 0; k < size; k++)
@@ -63,19 +66,20 @@ const double ** generate_sorted_pp_2d(const double *points, int size)
 }
 
 /*
-   Stop as soon as one dominated point is found and return its position.
+   Stop as soon as one dominated point is found and return its position (or SIZE_MAX if no dominated point found).
 */
 static inline int
-find_dominated_2d_(const double *points, int size,
-                   const bool keep_weakly)
+find_dominated_2d_(const double *points, int size, const bool keep_weakly)
 {
     const double **p = generate_sorted_pp_2d(points, size);
-    int n_dominated = 0, k = 0, j = 1;
+    // In this context, it means "no dominated solution found".
+    int pos_first_dom = -1;
+    int k = 0, j = 1;
     do {
         while (j < size && p[j][1] >= p[k][1]) {
             if (!keep_weakly || p[j][0] != p[k][0] || p[j][1] != p[k][1]) {
                 // In this context, it means "position of the first dominated solution found".
-                n_dominated = (int)((p[j] - points) / 2);
+                pos_first_dom = (int)((p[j] - points) / 2);
                 goto early_end;
             }
             j++;
@@ -84,11 +88,9 @@ find_dominated_2d_(const double *points, int size,
         j++;
     } while (j < size);
 
-    // In this context, it means "no dominated solution found".
-    n_dominated = -1;
 early_end:
     free(p);
-    return n_dominated;
+    return pos_first_dom;
 }
 
 
@@ -96,43 +98,20 @@ early_end:
    Store which points are nondominated in nondom and return the number of
    nondominated points.
 */
-static inline int
-find_nondominated_set_delete_weakly_2d_(const double *points, int size,
-                                        bool *nondom)
-{
-    const double **p = generate_sorted_pp_2d(points, size);
-    int n_dominated = 0, k = 0, j = 1;
-    do {
-        while (j < size && p[j][1] >= p[k][1]) {
-            nondom[j] = false;
-            n_dominated++;
-            j++;
-        }
-        k = j;
-        j++;
-    } while (j < size);
-
-    bool * nondom_new = malloc(size * sizeof(bool));
-    for (k = 0; k < size; k++)
-        nondom_new[(p[k] - points) / 2] = nondom[k];
-    memcpy(nondom, nondom_new, size * sizeof(bool));
-    free(nondom_new);
-    free(p);
-    return n_dominated;
-
-}
 
 static inline int
-find_nondominated_set_keep_weakly_2d_(const double *points, int size,
-                                      bool *nondom)
+find_nondominated_set_2d_(const double * points, int size, bool * nondom,
+                          const bool keep_weakly)
 {
+    // When compiling with -O3, GCC is able to create to versions of this loop
+    // and move keep_weakly out.
     const double **p = generate_sorted_pp_2d(points, size);
-    int n_dominated = 0, k = 0, j = 1;
+    int n_nondom = size, k = 0, j = 1;
     do {
         while (j < size && p[j][1] >= p[k][1]) {
-            if (p[j][0] != p[k][0] || p[j][1] != p[k][1]) {
+            if (!keep_weakly || p[j][0] != p[k][0] || p[j][1] != p[k][1]) {
                 nondom[j] = false;
-                n_dominated++;
+                n_nondom--;
             }
             j++;
         }
@@ -140,13 +119,17 @@ find_nondominated_set_keep_weakly_2d_(const double *points, int size,
         j++;
     } while (j < size);
 
-    bool * nondom_new = malloc(size * sizeof(bool));
-    for (k = 0; k < size; k++)
-        nondom_new[(p[k] - points) / 2] = nondom[k];
-    memcpy(nondom, nondom_new, size * sizeof(bool));
-    free(nondom_new);
+    if (n_nondom < size) {
+        /* nondom[] uses the order in p[], which is sorted, so we have to map it to
+           the original order in points. */
+        bool * nondom_new = malloc(size * sizeof(bool));
+        memcpy(nondom_new, nondom, size * sizeof(bool));
+        for (k = 0; k < size; k++)
+            nondom[(p[k] - points) / 2] = nondom_new[k];
+        free(nondom_new);
+    }
     free(p);
-    return n_dominated;
+    return n_nondom;
 }
 
 /* When find_dominated_p == true, then stop as soon as one dominated point is
@@ -157,27 +140,47 @@ find_nondominated_set_keep_weakly_2d_(const double *points, int size,
 
 */
 static inline int
-find_nondominated_set_ (const double *points, int dim, int size,
-                        const signed char *minmax, const signed char agree,
-                        bool *nondom, bool find_dominated_p, bool keep_weakly)
+find_nondominated_set_ (const double * points, int dim_, int size,
+                        const signed char * minmax, signed char agree,
+                        bool * nondom, bool find_dominated_p, bool keep_weakly)
 {
     if (size < 2)
         return size;
 
+    ASSUME(dim_ >= 2);
+    dimension_t dim = (dimension_t) dim_;
+
     if (dim == 2) {
         const double *pp = force_agree_minimize (points, 2, size, minmax, agree);
-        int res = (find_dominated_p) ?
-            find_dominated_2d_(pp, size, keep_weakly) :
-            (keep_weakly ?
-             find_nondominated_set_keep_weakly_2d_(pp, size, nondom) :
-             find_nondominated_set_delete_weakly_2d_(pp, size, nondom));
+        int res = (find_dominated_p)
+            ? find_dominated_2d_(pp, size, keep_weakly)
+            : find_nondominated_set_2d_(pp, size, nondom, keep_weakly);
         if (pp != points)
             free((void*)pp);
         return res;
     }
 
-    int j, k, d;
 
+    if (agree == AGREE_NONE) {
+        bool all_minimise = true, all_maximise = true;
+        for (dimension_t d = 0; d < dim; d++) {
+            if (minmax[d] < 0) {
+                all_maximise = false;
+            } else if (minmax[d] > 0) {
+                all_minimise = false;
+            } else {
+                all_minimise = false;
+                all_maximise = false;
+                break;
+            }
+        }
+        if (all_minimise)
+            agree = AGREE_MINIMISE;
+        else if (all_maximise)
+            agree = AGREE_MAXIMISE;
+    }
+
+    int j, k;
     for (k = 0; k < size - 1; k++) {
         for (j = k + 1; j < size; j++) {
 
@@ -195,26 +198,35 @@ find_nondominated_set_ (const double *points, int dim, int size,
             /* FIXME: Do not handle agree here, assume that objectives
                have been fixed already to agree on
                minimization/maximization.  */
-            if (agree < 0) {
-                for (d = 0; d < dim; d++) {
-                    j_leq_k = j_leq_k && (pj[d] <= pk[d]);
-                    k_leq_j = k_leq_j && (pk[d] <= pj[d]);
-                }
-            } else if (agree > 0) {
-                for (d = 0; d < dim; d++) {
-                    j_leq_k = j_leq_k && (pj[d] >= pk[d]);
-                    k_leq_j = k_leq_j && (pk[d] >= pj[d]);
-                }
-            } else {
-                for (d = 0; d < dim; d++) {
-                    if (minmax[d] < 0) {
-                        j_leq_k = j_leq_k && (pj[d] <= pk[d]);
-                        k_leq_j = k_leq_j && (pk[d] <= pj[d]);
-                    } else if (minmax[d] > 0) {
-                        j_leq_k = j_leq_k && (pj[d] >= pk[d]);
-                        k_leq_j = k_leq_j && (pk[d] >= pj[d]);
-                    }
-                }
+            switch (agree) {
+              case AGREE_NONE:
+                  for (dimension_t d = 0; d < dim; d++) {
+                      if (minmax[d] < 0) {
+                          j_leq_k = j_leq_k && (pj[d] <= pk[d]);
+                          k_leq_j = k_leq_j && (pk[d] <= pj[d]);
+                      } else if (minmax[d] > 0) {
+                          j_leq_k = j_leq_k && (pj[d] >= pk[d]);
+                          k_leq_j = k_leq_j && (pk[d] >= pj[d]);
+                      }
+                  }
+                  break;
+
+              case AGREE_MINIMISE:
+                  for (dimension_t d = 0; d < dim; d++) {
+                      j_leq_k = j_leq_k && (pj[d] <= pk[d]);
+                      k_leq_j = k_leq_j && (pk[d] <= pj[d]);
+                  }
+                  break;
+
+              case AGREE_MAXIMISE:
+                  for (dimension_t d = 0; d < dim; d++) {
+                      j_leq_k = j_leq_k && (pj[d] >= pk[d]);
+                      k_leq_j = k_leq_j && (pk[d] >= pj[d]);
+                  }
+                  break;
+
+              default:
+                  unreachable();
             }
 
             // k is removed if it is weakly dominated by j (unless keep_weakly == FALSE).
@@ -234,7 +246,7 @@ find_nondominated_set_ (const double *points, int dim, int size,
 
     int new_size = 0;
     for (k = 0; k < size; k++)
-        if (nondom[k]) new_size++;
+        new_size += (int) nondom[k];
     return new_size;
 }
 
@@ -243,7 +255,6 @@ find_dominated_point (const double *points, int dim, int size,
                       const signed char *minmax)
 {
     bool *nondom = nondom_init (size);
-
     int pos = find_nondominated_set_ (points, dim, size, minmax,
                                       AGREE_NONE, nondom,
                                       /* find_dominated_p = */true,
@@ -289,16 +300,12 @@ get_nondominated_set (double **pareto_set_p,
     ASSUME(dim <= 32);
     ASSUME(size > 0);
 
-    bool *nondom  = nondom_init(size);
+    bool *nondom = nondom_init(size);
     int new_size = find_nondominated_set (points, dim, size, minmax, nondom);
-
-    DEBUG2 (
-        fprintf (stderr, "# size\tnondom\tdom\n");
-        fprintf (stderr, "  %d\t%d\t%d\n",
-                 size, new_size, size - new_size);
-        );
-
-    if (new_size > size) {/* This can't happen.  */
+    if (new_size > size || new_size <= 0) { /* This can't happen.  */
+        fprintf (stderr,
+                 "# size\tnondom\tdom\n"
+                 "  %d\t%d\t%d\n",  size, new_size, size - new_size);
         fatal_error ("%s:%d: a bug happened: new_size > old_size!\n",
                      __FILE__, __LINE__);
     }
@@ -328,17 +335,16 @@ filter_dominated_set (double *points, int dim, int size,
     ASSUME(dim >= 1);
     ASSUME(dim <= 32);
     ASSUME(size > 0);
+    if (size == 1)
+        return 1;
 
-    bool *nondom  = nondom_init(size);
+    bool *nondom = nondom_init(size);
     int new_size = find_nondominated_set (points, dim, size, minmax, nondom);
+    if (new_size > size || new_size <= 0) { /* This can't happen.  */
+        fprintf (stderr,
+                 "# size\tnondom\tdom\n"
+                 "  %d\t%d\t%d\n",  size, new_size, size - new_size);
 
-    DEBUG2 (
-        fprintf (stderr, "# size\tnondom\tdom\n");
-        fprintf (stderr, "  %d\t%d\t%d\n",
-                 size, new_size, size - new_size);
-        );
-
-    if (new_size > size) {/* This can't happen.  */
         fatal_error ("%s:%d: a bug happened: new_size > old_size!\n",
                      __FILE__, __LINE__);
     }
