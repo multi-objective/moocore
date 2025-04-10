@@ -20,6 +20,13 @@ except ImportError:
 else:
     plotly.io.renderers.default = "sphinx_gallery"
 
+import os
+import sys
+
+# Prevent ruff from deleting seemingly unused imports
+sys.path.insert(0, os.path.abspath("."))
+import my_unsrt_style  # noqa: F401
+
 project = "moocore"
 _full_version = moocore.__version__
 release = _full_version  # _full_version.split("+", 1)[0]
@@ -85,7 +92,8 @@ napoleon_type_aliases = {
 
 bibtex_bibfiles = ["REFERENCES.bib"]
 bibtex_reference_style = "super"
-bibtex_default_style = "unsrt"
+# bibtex_default_style = "unsrt"
+bibtex_default_style = "my_unsrt"
 bibtex_cite_id = "cite-{bibliography_count}-{key}"
 bibtex_footcite_id = "footcite-{key}"
 bibtex_bibliography_id = "bibliography-{bibliography_count}"
