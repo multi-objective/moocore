@@ -2,7 +2,7 @@
 
 #  Makefile for moocore
 
-VERSION = 0.15.0$(REVISION)
+VERSION = 0.15.1$(REVISION)
 
 #-----------------------------------------------------------------------
 
@@ -139,35 +139,32 @@ nondominated: $(nondominatedexe)
 
 include libhv.mk
 
-$(dominatedsetsexe): OBJS=dominatedsets.o io.o cmdline.o
-$(dominatedsetsexe): HEADERS=nondominated.h cmdline.h
+$(dominatedsetsexe): OBJS:=dominatedsets.o
+$(eafexe): OBJS:=eaf.o eaf_main.o eaf3d.o avl.o
+$(epsilonexe): OBJS:=epsilon.o
+$(hvexe): OBJS:=main-hv.o timer.o $(LIBHV_OBJS)
+$(igdexe): OBJS:=igd.o
+$(ndsortexe): OBJS:=ndsort.o pareto.o hv_contrib.c $(LIBHV_OBJS)
+$(nondominatedexe): OBJS:=nondominated.o
 
-$(eafexe): OBJS=eaf.o io.o eaf_main.o eaf3d.o avl.o cmdline.o
-$(eafexe): HEADERS=eaf.h
-
-$(epsilonexe): OBJS=epsilon.o io.o cmdline.o
-$(epsilonexe): HEADERS=epsilon.h nondominated.h cmdline.h
-
-$(hvexe): OBJS=main-hv.o io.o timer.o cmdline.o $(LIBHV_OBJS)
-$(hvexe): HEADERS=hv.h timer.h
-
-$(igdexe): OBJS=igd.o io.o cmdline.o
-$(igdexe): HEADERS=igd.h nondominated.h cmdline.h
-
-$(ndsortexe): OBJS=ndsort.o pareto.o io.o hv_contrib.c $(LIBHV_OBJS) cmdline.o
-$(ndsortexe): HEADERS=nondominated.h cmdline.h
-
-$(nondominatedexe): OBJS=nondominated.o io.o cmdline.o
-$(nondominatedexe): HEADERS=common.h cmdline.h nondominated.h
-
+dominatedsets.o: cmdline.h io.h nondominated.h
+eaf_main.o: cmdline.h io.h eaf.h
+epsilon.o: cmdline.h io.h epsilon.h nondominated.h
+main-hv.o: cmdline.h io.h hv.h timer.h
+ndsort.o: cmdline.h io.h nondominated.h
+nondominated.o : cmdline.h io.h nondominated.h
+timer.o: timer.h
+eaf.o eaf3d.h: eaf.h
+cmdline.o: cmdline.h io.h
 io.o: io_priv.h io.h
+igd.o : cmdline.h io.h igd.h
+avl.o: avl.h
+$(OBJS): common.h gcc_attribs.h
 
-$(OBJS): $(HEADERS) common.h gcc_attribs.h
-
-$(allexes): $(OBJS) $(HEADERS)
+$(allexes): $(OBJS) cmdline.o io.o
 	$(call MKDIR, $(BINDIR)/)
 	$(call ECHO,--> Building $@ version $(VERSION) <---)
-	$(QUIET_LINK)$(CC) -o $@  $(OBJS) $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS)
+	$(QUIET_LINK)$(CC) -o $@ $(OBJS) cmdline.o io.o $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS)
 
 clean:
 	@-$(RM) config.status config.log
