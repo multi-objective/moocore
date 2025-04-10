@@ -1,3 +1,9 @@
+HV3Dplus and HV4Dplus: https://github.com/apguerreiro/HVC/blob/master/hv-plus.c#L415
+
+https://github.com/esa/pagmo2/tree/master/src/utils/hv_algos
+
+https://github.com/esa/pagmo/tree/master/src/util/hv_algorithm
+
 Trivial 2D: https://github.com/anyoptimization/pymoo/blob/main/pymoo/cython/vendor/hypervolume.cpp#L1597
 
 Hypervolume contributions:
