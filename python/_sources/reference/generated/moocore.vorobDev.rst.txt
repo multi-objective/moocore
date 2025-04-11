@@ -1,0 +1,12 @@
+﻿vorobDev
+========
+
+.. currentmodule:: moocore
+
+.. autofunction:: vorobDev
+
+.. _sphx_glr_backref_moocore.vorobDev:
+
+.. minigallery:: moocore.vorobDev
+   :add-heading: Gallery examples
+   :heading-level: -
