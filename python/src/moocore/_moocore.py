@@ -1052,7 +1052,6 @@ def normalise(
     ----------
     data :
         Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
-        See :func:`normalise_sets` to normalise data that includes set numbers (Multiple sets)
 
     to_range :
         Range composed of two numerical values. Normalise values to this range. If the objective is maximised, it is normalised to ``(to_range[1], to_range[0])`` instead.
@@ -1118,49 +1117,6 @@ def normalise(
     )
     # We can return data directly because we only changed the data, not the shape.
     return data
-
-
-# def normalise_sets(dataset, range=[0, 1], lower="na", upper="na", maximise=False):
-#     """Normalise dataset with multiple sets
-
-#     Executes the :func:`normalise` function for every set in a dataset (Performs normalise on every set separately)
-
-#     Examples
-#     --------
-#     >>> dataset = moocore.read_datasets("./doc/data/input1.dat")
-#     >>> subset = moocore.subset(dataset, range = [4,5])
-#     >>> moocore.normalise_sets(subset)
-#     array([[1.        , 0.38191742, 4.        ],
-#            [0.70069111, 0.5114669 , 4.        ],
-#            [0.12957487, 0.29411141, 4.        ],
-#            [0.28059067, 0.53580626, 4.        ],
-#            [0.32210885, 0.21797067, 4.        ],
-#            [0.39161668, 0.92106178, 4.        ],
-#            [0.        , 1.        , 4.        ],
-#            [0.62293227, 0.11315216, 4.        ],
-#            [0.76936124, 0.58159784, 4.        ],
-#            [0.12957384, 0.        , 4.        ],
-#            [0.82581672, 0.66566917, 5.        ],
-#            [0.44318444, 0.35888982, 5.        ],
-#            [0.80036477, 0.23242446, 5.        ],
-#            [0.88550836, 0.51482968, 5.        ],
-#            [0.89293026, 1.        , 5.        ],
-#            [1.        , 0.        , 5.        ],
-#            [0.79879657, 0.21247419, 5.        ],
-#            [0.07562783, 0.80266586, 5.        ],
-#            [0.        , 0.98703813, 5.        ],
-#            [0.6229605 , 0.8613516 , 5.        ]])
-
-#     See Also
-#     --------
-#     This function for data without set numbers - :func:`normalise`
-#     """
-#     for set in np.unique(dataset[:, -1]):
-#         setdata = dataset[dataset[:, -1] == set, :-1]
-#         dataset[dataset[:, -1] == set, :-1] = normalise(
-#             setdata, to_range=range, lower=np.nan, upper=np.nan, maximise=False
-#         )
-#     return dataset
 
 
 def eaf(data: ArrayLike, /, percentiles: list = []) -> np.ndarray:
