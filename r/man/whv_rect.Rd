@@ -40,7 +40,7 @@ the overall weight of the differences. This is parameter psi (\eqn{\psi})
 in \citet{DiaLop2020ejor}.}
 }
 \value{
-\code{numeric(1)}\cr A single numerical value.
+\code{numeric(1)} A single numerical value.
 }
 \description{
 Calculates the hypervolume weighted by a set of rectangles (with zero weight

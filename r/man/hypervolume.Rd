@@ -18,7 +18,7 @@ instead of minimised. Either a single logical value that applies to all
 objectives or a vector of logical values, with one value per objective.}
 }
 \value{
-\code{numeric(1)}\cr A single numerical value.
+\code{numeric(1)} A single numerical value.
 }
 \description{
 Compute the hypervolume metric with respect to a given reference point
@@ -33,6 +33,31 @@ the integration of the 3D case with the recursive algorithm, which leads to
 significant reduction of computation time. She has also enhanced the
 numerical stability of the algorithm by avoiding floating-point comparisons
 of partial hypervolumes.
+}
+\details{
+The hypervolume of a set of multidimensional points \eqn{A} with respect to
+a reference point \eqn{\vec{r}} is the volume of the region dominated by the
+set and bounded by the reference point \citep{ZitThi1998ppsn}.  Points in
+\eqn{A} that do not strictly dominated \eqn{\vec{r}} do not contribute to
+the hypervolume value, thus, ideally, the reference point must be strictly
+dominated by all points in the true Pareto front.
+
+More precisely, the hypervolume is the Lebesgue integral of the union of
+axis-aligned hyperrectangles
+\href{https://en.wikipedia.org/wiki/Hyperrectangle}{orthotopes}), where each
+hyperrectangle is defined by one point from \eqn{\vec{a} \in A} and the
+reference point.  The union of axis-aligned hyperrectangles is also called an
+\emph{orthogonal polytope}.
+
+The hypervolume is compatible with Pareto-optimality
+\citep{KnoCor2002cec,ZitThiLauFon2003:tec}, that is, \eqn{\not\exists A,B
+\subset \mathbb{R}^d}, such that \eqn{A} is better than \eqn{B} in terms of
+Pareto-optimality and \eqn{\text{hyp}(A) \leq \text{hyp}(B)}. In other
+words, if a set is better than another in terms of Pareto-optimality, the
+hypervolume of the former must be strictly larger than one of the
+latter. Conversely, if the hypervolume of one set is larger than one of
+another, then we know for sure than the latter set cannot be better than the
+former in terms of Pareto-optimality.
 }
 \examples{
 

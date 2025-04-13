@@ -131,6 +131,7 @@ The current implementation uses the naive algorithm that requires :math:`O(n \cd
 |R|)`, where :math:`n` is the number of objectives (dimension of vectors).
 
 
+.. _hypervolume_metric:
 
 Hypervolume metric
 ==================
@@ -144,7 +145,29 @@ Hypervolume metric
    whv_rect
 
 
-The hypervolume of a set of multidimensional points :math:`A` with respect to a reference point :math:`\vec{r}` is the volume of the region dominated by the set and bounded by the reference point :cite:p:`ZitThi1998ppsn`.
+The hypervolume of a set of multidimensional points :math:`A` with respect to a
+reference point :math:`\vec{r}` is the volume of the region dominated by the
+set and bounded by the reference point :cite:p:`ZitThi1998ppsn`.  Points in
+:math:`A` that do not strictly dominated :math:`\vec{r}` do not contribute to
+the hypervolume value, thus, ideally, the reference point must be strictly
+dominated by all points in the true Pareto front.
+
+More precisely, the hypervolume is the Lebesgue integral of the union of
+axis-aligned hyperrectangles
+(`orthotopes <https://en.wikipedia.org/wiki/Hyperrectangle>`_), where each
+hyperrectangle is defined by one point from :math:`\vec{a} \in A` and the
+reference point.  The union of axis-aligned hyperrectangles is also called an
+*orthogonal polytope*.
+
+The hypervolume is compatible with Pareto-optimality
+:cite:p:`KnoCor2002cec,ZitThiLauFon2003:tec`, that is, :math:`\not\exists A,B
+\subset \mathbb{R}^d`, such that :math:`A` is better than :math:`B` in terms of
+Pareto-optimality and :math:`\text{hyp}(A) \leq \text{hyp}(B)`. In other words,
+if a set is better than another in terms of Pareto-optimality, the hypervolume
+of the former must be strictly larger than one of the latter.  Conversely, if
+the hypervolume of one set is larger than one of another, then we know for sure
+than the latter set cannot be better than the former in terms of
+Pareto-optimality.
 
 
 

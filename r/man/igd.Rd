@@ -27,7 +27,7 @@ objectives or a vector of logical values, with one value per objective.}
 \item{p}{\code{integer(1)}\cr Hausdorff distance parameter (default: \code{1L}).}
 }
 \value{
-\code{numeric(1)}\cr A single numerical value.
+\code{numeric(1)} A single numerical value.
 }
 \description{
 Functions to compute the inverted generational distance (IGD and IGD+) and

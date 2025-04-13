@@ -22,7 +22,7 @@ instead of minimised. Either a single logical value that applies to all
 objectives or a vector of logical values, with one value per objective.}
 }
 \value{
-\code{numeric(1)}\cr A single numerical value.
+\code{numeric(1)} A single numerical value.
 }
 \description{
 Computes the epsilon metric, either additive or multiplicative.

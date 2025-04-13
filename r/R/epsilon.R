@@ -7,7 +7,7 @@
 #' @param reference `matrix`|`data.frame`\cr Reference set as a matrix or
 #'   data.frame of numerical values.
 #'
-#' @return  `numeric(1)`\cr A single numerical value.
+#' @return  `numeric(1)` A single numerical value.
 #'
 #' @name epsilon
 #'

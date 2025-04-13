@@ -404,6 +404,8 @@ def hypervolume(
     numerical stability of the algorithm by avoiding floating-point comparisons
     of partial hypervolumes.
 
+    .. seealso:: For details about the hypervolume, see :ref:`hypervolume_metric`.
+
     Parameters
     ----------
     data :
