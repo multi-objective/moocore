@@ -281,11 +281,9 @@ int main(int argc, char *argv[])
 
     if (numfiles < 1) /* Read stdin.  */
         hv_file (NULL, reference, NULL, NULL, &nobj);
-
     else if (numfiles == 1) {
         hv_file (argv[optind], reference, NULL, NULL, &nobj);
-    }
-    else {
+    } else {
         int k;
         double *maximum = NULL;
         double *minimum = NULL;

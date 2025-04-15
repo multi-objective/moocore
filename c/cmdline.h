@@ -92,9 +92,11 @@ read_reference_set (double **reference_p, const char *filename, int *nobj_p)
     int nobj = *nobj_p;
     int reference_size;
 
-    int err = read_double_data (filename, &reference, &nobj, &cumsizes, &nruns);
-    if (!filename) filename = stdin_name;
-    handle_read_data_error (err, filename);
+    handle_read_data_error(
+        read_double_data (filename, &reference, &nobj, &cumsizes, &nruns),
+        filename);
+    if (!filename)
+        filename = stdin_name;
     reference_size = cumsizes[nruns - 1];
     free(cumsizes);
     *nobj_p = nobj;
@@ -143,8 +145,8 @@ read_point(char * str, int * nobj)
 #include <math.h> // INFINITY
 
 static void
-data_bounds (double **minimum_p, double **maximum_p,
-             const double *data, int nobj, int rows)
+data_bounds(double **minimum_p, double **maximum_p,
+            const double *data, int nobj, int rows)
 {
     ASSUME(nobj > 1);
     ASSUME(nobj <= 32);
@@ -182,11 +184,12 @@ file_bounds (const char *filename, double **maximum_p, double **minimum_p,
     double *data = NULL;
     int *cumsizes = NULL;
     int nruns = 0;
-    handle_read_data_error (
-        read_double_data(filename, &data, dim_p, &cumsizes, &nruns), filename);
+    handle_read_data_error(
+        read_double_data(filename, &data, dim_p, &cumsizes, &nruns),
+        filename);
     data_bounds(minimum_p, maximum_p, data, *dim_p, cumsizes[nruns - 1]);
-    free (data);
-    free (cumsizes);
+    free(data);
+    free(cumsizes);
 }
 
 static inline char * m_strcat(const char * a, const char * b)

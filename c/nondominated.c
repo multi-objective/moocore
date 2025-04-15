@@ -366,9 +366,10 @@ process_file (const char *filename,
     int *cumsizes = NULL;
     int nsets = 0;
 
-    int err = read_double_data (filename, &points, &nobj, &cumsizes, &nsets);
-    if (!filename) filename = stdin_name;
-    handle_read_data_error (err, filename);
+    handle_read_data_error(
+        read_double_data (filename, &points, &nobj, &cumsizes, &nsets), filename);
+    if (!filename)
+        filename = stdin_name;
 
     if (union_flag) {
         cumsizes[0] = cumsizes[nsets - 1];

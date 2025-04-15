@@ -122,9 +122,10 @@ do_file (const char *filename, double *reference, int reference_size,
     int nruns = 0;
     int nobj = *nobj_p;
 
-    int err = read_double_data (filename, &data, &nobj, &cumsizes, &nruns);
-    if (!filename) filename = stdin_name;
-    handle_read_data_error (err, filename);
+    handle_read_data_error(
+        read_double_data (filename, &data, &nobj, &cumsizes, &nruns), filename);
+    if (!filename)
+        filename = stdin_name;
 
     char *outfilename = NULL;
     FILE *outfile = stdout;
@@ -235,7 +236,6 @@ int main(int argc, char *argv[])
 
     enum { GD_opt = 1000,
            IGD_opt, GD_p_opt, IGD_p_opt, IGD_plus_opt, hausdorff_opt};
-
     /* see the man page for getopt_long for an explanation of these fields */
     static const char short_options[] = "hVvqap:Mr:s:o:";
     static const struct option long_options[] = {
@@ -243,15 +243,14 @@ int main(int argc, char *argv[])
         {"version",    no_argument,       NULL, 'V'},
         {"verbose",    no_argument,       NULL, 'v'},
         {"quiet",      no_argument,       NULL, 'q'},
-        {"gd",   no_argument,       NULL, GD_opt},
-        {"igd",   no_argument,       NULL, IGD_opt},
-        {"gd-p",   no_argument,       NULL, GD_p_opt},
-        {"igd-p",   no_argument,       NULL, IGD_p_opt},
+        {"gd",         no_argument,       NULL, GD_opt},
+        {"igd",        no_argument,       NULL, IGD_opt},
+        {"gd-p",       no_argument,       NULL, GD_p_opt},
+        {"igd-p",      no_argument,       NULL, IGD_p_opt},
         {"igd-plus",   no_argument,       NULL, IGD_plus_opt},
-        {"hausdorff",   no_argument,       NULL, hausdorff_opt},
-        {"all",   no_argument,       NULL, 'a'},
-        {"exponent-p", required_argument,       NULL, 'p'},
-
+        {"hausdorff",  no_argument,       NULL, hausdorff_opt},
+        {"all",        no_argument,       NULL, 'a'},
+        {"exponent-p", required_argument, NULL, 'p'},
         {"maximise",   no_argument,       NULL, 'M'},
         {"maximize",   no_argument,       NULL, 'M'},
         {"reference",  required_argument, NULL, 'r'},
@@ -259,7 +258,6 @@ int main(int argc, char *argv[])
         {"obj",        required_argument, NULL, 'o'},
         {NULL, 0, NULL, 0} /* marks end of list */
     };
-
     set_program_invocation_short_name(argv[0]);
 
     int opt;

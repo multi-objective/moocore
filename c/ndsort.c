@@ -191,9 +191,11 @@ int main(int argc, char *argv[])
     }
 
     /* FIXME: Instead of this strange call, create a wrapper read_data_robust. */
-    int err = read_double_data (filename, &points, &dim, &cumsizes, &nsets);
-    if (!filename) filename = stdin_name;
-    handle_read_data_error (err, filename);
+    handle_read_data_error(
+        read_double_data (filename, &points, &dim, &cumsizes, &nsets),
+        filename);
+    if (!filename)
+        filename = stdin_name;
 
     const int size = cumsizes[0] = cumsizes[nsets - 1];
     nsets = 1;

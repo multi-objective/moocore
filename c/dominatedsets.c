@@ -351,7 +351,6 @@ int main(int argc, char *argv[])
         {"obj",        required_argument, NULL, 'o'},
         {NULL, 0, NULL, 0} /* marks end of list */
     };
-
     set_program_invocation_short_name(argv[0]);
 
     int opt; /* it's actually going to hold a char */
@@ -403,9 +402,9 @@ int main(int argc, char *argv[])
         points[k] = NULL;
         cumsizes[k] = NULL;
         nruns[k] = 0;
-        int err = read_double_data (filenames[k],
-                                    &points[k], &dim, &cumsizes[k], &nruns[k]);
-        handle_read_data_error (err, filenames[k]);
+        handle_read_data_error(
+            read_double_data (filenames[k], &points[k], &dim, &cumsizes[k], &nruns[k]),
+            filenames[k]);
     }
 
     /* Default minmax if not set yet.  */
