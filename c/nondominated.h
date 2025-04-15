@@ -158,7 +158,7 @@ find_nondominated_set_ (const double * points, int dim_, int size,
     }
 
     if (agree == AGREE_NONE)
-        agree = check_all_minimize_maximize(minmax, dim);
+        agree = (signed char) check_all_minimize_maximize(minmax, dim);
 
     int j, k;
     for (k = 0; k < size - 1; k++) {
