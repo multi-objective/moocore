@@ -106,9 +106,15 @@ do_file (const char *filename, double *reference, int reference_size,
     int nruns = 0;
     int nobj = *nobj_p;
 
-    int err = read_double_data (filename, &data, &nobj, &cumsizes, &nruns);
-    if (!filename) filename = stdin_name;
-    handle_read_data_error (err, filename);
+    handle_read_data_error(
+        read_double_data (filename, &data, &nobj, &cumsizes, &nruns), filename);
+    if (!filename)
+        filename = stdin_name;
+
+    if (!additive_flag && !all_positive(data, cumsizes[nruns - 1], (dimension_t) nobj)) {
+        errprintf("cannot calculate multiplicative epsilon indicator with non-positive values when reading '%s'.", filename);
+        exit(EXIT_FAILURE);
+    }
 
     char *outfilename = NULL;
     FILE *outfile = stdout;
@@ -148,8 +154,7 @@ do_file (const char *filename, double *reference, int reference_size,
                                    reference, reference_size);
         //        time_elapsed = Timer_elapsed_virtual ();
         fprintf (outfile, indicator_printf_format "\n", epsilon);
-        if ((additive_flag && epsilon < 0)
-            || (!additive_flag && epsilon < 1)) {
+        if ((additive_flag && epsilon < 0) || (!additive_flag && epsilon < 1)) {
             errprintf ("%s: some points are not  dominated by the reference set",
                        filename);
             exit (EXIT_FAILURE);
@@ -276,7 +281,10 @@ int main(int argc, char *argv[])
             warnprintf("removed %d dominated points from the reference set",
                        prev_reference_size - reference_size);
     }
-
+    if (!additive_flag && !all_positive(reference, (size_t) reference_size, (dimension_t) nobj)) {
+        errprintf("cannot calculate multiplicative epsilon indicator with non-positive values in reference front.");
+        exit(EXIT_FAILURE);
+    }
     int numfiles = argc - optind;
     if (numfiles < 1) { /* Read stdin.  */
         do_file (NULL, reference, reference_size, &nobj, minmax, maximise_all_flag);

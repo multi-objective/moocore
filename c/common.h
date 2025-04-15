@@ -137,8 +137,32 @@ matrix_transpose_double(double *dst, const double *src,
     }
 }
 
+#include <stdint.h>
+typedef uint_fast8_t dimension_t;
+
 /* FIXME: Move this to nondominated.h */
 enum objs_agree_t { AGREE_MINIMISE = -1, AGREE_NONE = 0, AGREE_MAXIMISE = 1 };
+
+static inline enum objs_agree_t
+check_all_minimize_maximize(const signed char * restrict minmax, dimension_t dim)
+{
+    bool all_minimize = true, all_maximize = true;
+    for (dimension_t d = 0; d < dim; d++) {
+        if (minmax[d] < 0) {
+            all_maximize = false;
+        } else if (minmax[d] > 0) {
+            all_minimize = false;
+        } else {
+            all_minimize = false;
+            all_maximize = false;
+            break;
+        }
+    }
+    assert(!all_maximize || !all_minimize);
+    if (all_minimize) return AGREE_MINIMISE;
+    if (all_maximize) return AGREE_MAXIMISE;
+    return AGREE_NONE;
+}
 
 /* Convert from bool vector to minmax vector.  */
 static inline signed char *

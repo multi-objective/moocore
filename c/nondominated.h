@@ -2,10 +2,7 @@
 #define NONDOMINATED_H
 
 #include <string.h> // memcpy
-#include <stdint.h>
 #include "common.h"
-
-typedef uint_fast8_t dimension_t;
 
 static inline bool *
 nondom_init (size_t size)
@@ -20,7 +17,7 @@ static inline const double *
 force_agree_minimize (const double *points, int dim_, int size,
                       const signed char *minmax, _attr_maybe_unused const signed char agree)
 {
-    eaf_assert(agree != AGREE_MINIMISE);
+    assert(agree != AGREE_MINIMISE);
     dimension_t dim = (dimension_t) dim_;
     bool no_copy = true;
     for (dimension_t d = 0; d < dim; d++) {
@@ -36,7 +33,7 @@ force_agree_minimize (const double *points, int dim_, int size,
     memcpy(pnew, points, dim * size * sizeof(double));
 
     for (dimension_t d = 0; d < dim; d++) {
-        eaf_assert(minmax[d] != 0);
+        assert(minmax[d] != 0);
         if (minmax[d] > 0)
             for (int k = 0; k < size; k++)
                 pnew[k * dim + d] = -pnew[k * dim + d];
@@ -160,25 +157,8 @@ find_nondominated_set_ (const double * points, int dim_, int size,
         return res;
     }
 
-
-    if (agree == AGREE_NONE) {
-        bool all_minimise = true, all_maximise = true;
-        for (dimension_t d = 0; d < dim; d++) {
-            if (minmax[d] < 0) {
-                all_maximise = false;
-            } else if (minmax[d] > 0) {
-                all_minimise = false;
-            } else {
-                all_minimise = false;
-                all_maximise = false;
-                break;
-            }
-        }
-        if (all_minimise)
-            agree = AGREE_MINIMISE;
-        else if (all_maximise)
-            agree = AGREE_MAXIMISE;
-    }
+    if (agree == AGREE_NONE)
+        agree = check_all_minimize_maximize(minmax, dim);
 
     int j, k;
     for (k = 0; k < size - 1; k++) {
@@ -234,7 +214,7 @@ find_nondominated_set_ (const double * points, int dim_, int size,
             // j is removed if it is dominated by k.
             nondom[j] = (!k_leq_j || j_leq_k);
 
-            eaf_assert(nondom[k] || nondom[j]); /* both cannot be removed.  */
+            assert(nondom[k] || nondom[j]); /* both cannot be removed.  */
 
             if (find_dominated_p && (!nondom[k] || !nondom[j])) {
                 return nondom[k] ? j : k;
