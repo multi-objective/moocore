@@ -38,8 +38,8 @@
 #'
 #' The hypervolume is compatible with Pareto-optimality
 #' \citep{KnoCor2002cec,ZitThiLauFon2003:tec}, that is, \eqn{\not\exists A,B
-#' \subset \mathbb{R}^d}, such that \eqn{A} is better than \eqn{B} in terms of
-#' Pareto-optimality and \eqn{\text{hyp}(A) \leq \text{hyp}(B)}. In other
+#' \subset \mathbb{R}^d}{¬E A,B subsets of R^d}, such that \eqn{A} is better than \eqn{B} in terms of
+#' Pareto-optimality and \eqn{\text{hyp}(A) \leq \text{hyp}(B)}{hyp(A) <= hyp(B)}. In other
 #' words, if a set is better than another in terms of Pareto-optimality, the
 #' hypervolume of the former must be strictly larger than one of the
 #' latter. Conversely, if the hypervolume of one set is larger than one of
