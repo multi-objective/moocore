@@ -4,11 +4,7 @@ https://github.com/esa/pagmo2/tree/master/src/utils/hv_algos
 
 https://github.com/esa/pagmo/tree/master/src/util/hv_algorithm
 
-Trivial 2D: https://github.com/anyoptimization/pymoo/blob/main/pymoo/cython/vendor/hypervolume.cpp#L1597
-
-Hypervolume contributions:
-
-https://hpi.de/en/friedrich/research/the-hypervolume-indicator.html
+Hypervolume contributions: https://hpi.de/en/friedrich/research/the-hypervolume-indicator.html
 
 0) The default reference point has changed. Update all tests with
    either explicit reference points or updated results.
