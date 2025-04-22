@@ -7,8 +7,12 @@ repo:
 
 template:
   bootstrap: 5
-  bootswatch: cosmo
   light-switch: true
+  bslib:
+    primary: "#0054AD"
+    border-radius: 0.5rem
+    btn-border-radius: 0.25rem
+    danger: "#A6081A"
   # This is needed until https://github.com/r-lib/pkgdown/issues/2704 is fixed.
   includes:
     in_header: |
@@ -19,12 +23,9 @@ template:
 
 development:
   mode: unreleased
-  destination: devel
-  version_label: light
   version_tooltip: "Development version"
 
 navbar:
-  bg: dark
   structure:
     right: [search, cran, github, lightswitch]
   components:
