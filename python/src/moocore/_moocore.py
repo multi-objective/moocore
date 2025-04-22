@@ -394,15 +394,16 @@ def hypervolume(
     Compute the hypervolume metric with respect to a given reference point
     assuming minimization of all objectives. For 2D and 3D, the algorithm used
     :footcite:p:`FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec` has :math:`O(n
-    \log n)` complexity. For 4D or higher, it uses a recursive algorithm that
-    has the 3D algorithm as a base case :footcite:p:`FonPaqLop06:hypervolume`,
-    which has :math:`O(n^{d-2} \log n)` time and linear space complexity in the
-    worst-case, but experimental results show that the pruning techniques used
-    may reduce the time complexity even further.  Andreia P. Guerreiro improved
-    the integration of the 3D case with the recursive algorithm, which leads to
-    significant reduction of computation time. She has also enhanced the
-    numerical stability of the algorithm by avoiding floating-point comparisons
-    of partial hypervolumes.
+    \log n)` complexity, where :math:`n` is the number of input points.  For 4D
+    or higher, it uses a recursive algorithm that has the 3D algorithm as a
+    base case :footcite:p:`FonPaqLop06:hypervolume`, which has :math:`O(n^{m-2}
+    \log n)` time and linear space complexity in the worst-case, where
+    :math:`m` is the dimension of the points, but experimental results show
+    that the pruning techniques used may reduce the time complexity even
+    further.  Andreia P. Guerreiro improved the integration of the 3D case with
+    the recursive algorithm, which leads to significant reduction of
+    computation time. She has also enhanced the numerical stability of the
+    algorithm by avoiding floating-point comparisons of partial hypervolumes.
 
     .. seealso:: For details about the hypervolume, see :ref:`hypervolume_metric`.
 
@@ -1889,11 +1890,18 @@ def whv_hype(
         Number of samples for Monte-Carlo sampling. Higher values give more accurate approximation of the true hypervolume but require more time.
 
     dist :
-      Weight distribution :footcite:p:`AugBadBroZit2009gecco`. The ones currently supported are:
+        Weight distribution :footcite:p:`AugBadBroZit2009gecco`. The ones currently supported are:
 
-       - ``uniform``:  corresponds to the default hypervolume (unweighted).
-       - ``point`` : describes a goal in the objective space, where `mu` gives the coordinates of the goal. The resulting weight distribution is a multivariate normal distribution centred at the goal.
-       - ``exponential`` : describes an exponential distribution with rate parameter ``1/mu``, i.e., :math:`\lambda = \frac{1}{\mu}`.
+       ``'uniform'``
+         corresponds to the default hypervolume (unweighted).
+
+       ``point``
+         describes a goal in the objective space, where ``mu`` gives the
+         coordinates of the goal. The resulting weight distribution is a
+         multivariate normal distribution centred at the goal.
+
+       ``exponential``
+         describes an exponential distribution with rate parameter ``1/mu``, i.e., :math:`\lambda = \frac{1}{\mu}`.
 
     seed : int or numpy.random.Generator
         Either an integer to seed the NumPy random number generator (RNG) or an instance of Numpy-compatible RNG. ``None`` uses the default RNG of Numpy.

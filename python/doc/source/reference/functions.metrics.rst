@@ -30,7 +30,7 @@ set :math:`R`, averaged over the size of :math:`A`. Formally,
 where the distance in our implementation is the Euclidean distance:
 
 .. math::
-   d(a,r) = \sqrt{\sum_{k=1}^M (a_k - r_k)^2}
+   d(a,r) = \sqrt{\sum_{k=1}^m (a_k - r_k)^2}
 
 The inverted generational distance (IGD) is calculated as :math:`IGD_p(A,R) = GD_p(R,A)`.
 
@@ -40,7 +40,7 @@ similarly to :func:`epsilon_additive` or :func:`epsilon_mult`. It modifies the
 distance measure as:
 
 .. math::
-   d^+(r,a) = \sqrt{\sum_{k=1}^M (\max\{r_k - a_k, 0\})^2}
+   d^+(r,a) = \sqrt{\sum_{k=1}^m (\max\{r_k - a_k, 0\})^2}
 
 The average Hausdorff distance (:math:`\Delta_p`) was proposed by
 :cite:t:`SchEsqLarCoe2012tec` and it is calculated as:
@@ -77,15 +77,14 @@ objective vector. It is also slightly faster to compute.
 
 GD should never be used directly to compare the quality of approximations to a
 Pareto front, as it often contradicts Pareto optimality (it is not weakly
-Pareto-compliant). We recommend IGD+ instead of IGD, since the latter
-contradicts Pareto optimality in some cases (see examples in :func:`igd_plus`) whereas IGD+
-is weakly Pareto-compliant, but we implement IGD here because it is still
-popular due to historical reasons.
+Pareto-compliant).
+
+IGD is still popular due to historical reasons, but we strongly recommend IGD+
+instead of IGD, since the latter contradicts Pareto optimality in some cases
+(see examples in :func:`igd_plus`) whereas IGD+ is weakly Pareto-compliant.
 
 The average Hausdorff distance (:math:`\Delta_p(A,R)`) is also not weakly
 Pareto-compliant, as shown in the examples in :func:`igd_plus`.
-
-
 
 
 .. _epsilon_metric:
@@ -99,13 +98,13 @@ Epsilon metric
    epsilon_additive
    epsilon_mult
 
-The epsilon metric of a set :math:`A` with respect to a reference set :math:`R`
+The epsilon metric of a set :math:`A \subset \mathbb{R}^m` with respect to a reference set :math:`R \subset \mathbb{R}^m`
 is defined as :cite:p:`ZitThiLauFon2003:tec`
 
 .. math::
-   epsilon(A,R) = \max_{r \in R} \min_{a \in A} \max_{1 \leq i \leq n} epsilon(a_i, r_i)
+   epsilon(A,R) = \max_{r \in R} \min_{a \in A} \max_{1 \leq i \leq m} epsilon(a_i, r_i)
 
-where :math:`a` and :math:`b` are objective vectors of length :math:`n`.
+where :math:`a` and :math:`b` are objective vectors of length :math:`m`.
 
 In the case of minimization of objective :math:`i`, :math:`epsilon(a_i,b_i)` is
 computed as :math:`a_i/b_i` for the multiplicative variant (respectively,
@@ -127,8 +126,8 @@ The multiplicative variant can be computed as :math:`\exp(epsilon_{+}(\log(A),
 version for zero or negative values doesn't make sense. See the examples in
 :func:`epsilon_additive`.
 
-The current implementation uses the naive algorithm that requires :math:`O(n \cdot |A| \cdot
-|R|)`, where :math:`n` is the number of objectives (dimension of vectors).
+The current implementation uses the naive algorithm that requires :math:`O(m \cdot |A| \cdot
+|R|)`, where :math:`m` is the number of objectives (dimension of vectors).
 
 
 .. _hypervolume_metric:
@@ -145,12 +144,13 @@ Hypervolume metric
    whv_rect
 
 
-The hypervolume of a set of multidimensional points :math:`A` with respect to a
-reference point :math:`\vec{r}` is the volume of the region dominated by the
-set and bounded by the reference point :cite:p:`ZitThi1998ppsn`.  Points in
-:math:`A` that do not strictly dominated :math:`\vec{r}` do not contribute to
-the hypervolume value, thus, ideally, the reference point must be strictly
-dominated by all points in the true Pareto front.
+The hypervolume of a set of multidimensional points :math:`A \subset
+\mathbb{R}^m` with respect to a reference point :math:`\vec{r} \in \matbb{R}^m`
+is the volume of the region dominated by the set and bounded by the reference
+point :cite:p:`ZitThi1998ppsn`.  Points in :math:`A` that do not strictly
+dominated :math:`\vec{r}` do not contribute to the hypervolume value, thus,
+ideally, the reference point must be strictly dominated by all points in the
+true Pareto front.
 
 More precisely, the hypervolume is the Lebesgue integral of the union of
 axis-aligned hyperrectangles
@@ -160,14 +160,14 @@ reference point.  The union of axis-aligned hyperrectangles is also called an
 *orthogonal polytope*.
 
 The hypervolume is compatible with Pareto-optimality
-:cite:p:`KnoCor2002cec,ZitThiLauFon2003:tec`, that is, :math:`\not\exists A,B
-\subset \mathbb{R}^d`, such that :math:`A` is better than :math:`B` in terms of
+:cite:p:`KnoCor2002cec,ZitThiLauFon2003:tec`, that is, :math:`\nexists A,B
+\subset \mathbb{R}^m`, such that :math:`A` is better than :math:`B` in terms of
 Pareto-optimality and :math:`\text{hyp}(A) \leq \text{hyp}(B)`. In other words,
 if a set is better than another in terms of Pareto-optimality, the hypervolume
-of the former must be strictly larger than one of the latter.  Conversely, if
-the hypervolume of one set is larger than one of another, then we know for sure
-than the latter set cannot be better than the former in terms of
-Pareto-optimality.
+of the former must be strictly larger than the hypervolume of the latter.
+Conversely, if the hypervolume of a set is larger than the hypervolume of
+another, then we know for sure than the latter set cannot be better than the
+former in terms of Pareto-optimality.
 
 
 

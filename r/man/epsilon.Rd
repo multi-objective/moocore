@@ -28,12 +28,12 @@ objectives or a vector of logical values, with one value per objective.}
 Computes the epsilon metric, either additive or multiplicative.
 }
 \details{
-The epsilon metric of a set \eqn{A} with respect to a reference set \eqn{R}
-is defined as
+The epsilon metric of a set \eqn{A \subset \mathbb{R}^m} with respect to a
+reference set \eqn{R \subset \mathbb{R}^m} is defined as
 
-\deqn{epsilon(A,R) = \max_{r \in R} \min_{a \in A} \max_{1 \leq i \leq n} epsilon(a_i, r_i)}
+\deqn{epsilon(A,R) = \max_{r \in R} \min_{a \in A} \max_{1 \leq i \leq m} epsilon(a_i, r_i)}
 
-where \eqn{a} and \eqn{b} are objective vectors of length \eqn{n}.
+where \eqn{a} and \eqn{b} are objective vectors of length \eqn{m}.
 
 In the case of minimization of objective \eqn{i}, \eqn{epsilon(a_i,b_i)} is
 computed as \eqn{a_i/b_i} for the multiplicative variant (respectively,
@@ -56,7 +56,7 @@ version for zero or negative values doesn't make sense. See the examples
 below.
 
 The current implementation uses the naive algorithm that requires
-\eqn{O(n \cdot |A| \cdot |R|)}, where \eqn{n} is the number of objectives
+\eqn{O(m \cdot |A| \cdot |R|)}, where \eqn{m} is the number of objectives
 (dimension of vectors).
 }
 \references{

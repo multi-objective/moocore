@@ -40,7 +40,7 @@ reference set \eqn{R}, averaged over the size of \eqn{A}. Formally,
 
 \deqn{GD_p(A,R) = \left(\frac{1}{|A|}\sum_{a\in A}\min_{r\in R} d(a,r)^p\right)^{\frac{1}{p}} }{GD(A,R) = (1/|A|) * ( sum_{a in A} min_{r in R} d(a,r)^p )^(1/p)}
 where the distance in our implementation is the Euclidean distance:
-\deqn{d(a,r) = \sqrt{\sum_{k=1}^M (a_k - r_k)^2} }{d(a,r) = sqrt( sum_{k=1}^M (a_k - r_k)^2)}
+\deqn{d(a,r) = \sqrt{\sum_{k=1}^m (a_k - r_k)^2} }{d(a,r) = sqrt( sum_{k=1}^m (a_k - r_k)^2)}
 
 The inverted generational distance (IGD) is calculated as \eqn{IGD_p(A,R) = GD_p(R,A)}.
 
@@ -49,7 +49,7 @@ The modified inverted generational distanced (IGD+) was proposed by
 similarly to \code{\link[=epsilon_additive]{epsilon_additive()}} or \code{\link[=epsilon_mult]{epsilon_mult()}}. It modifies the
 distance measure as:
 
-\deqn{d^+(r,a) = \sqrt{\sum_{k=1}^M (\max\{r_k - a_k, 0\})^2}}{d^+(r,a) = sqrt(sum_{k=1}^M (max {r_k - a_k, 0 })^2)}
+\deqn{d^+(r,a) = \sqrt{\sum_{k=1}^m (\max\{r_k - a_k, 0\})^2}}{d^+(r,a) = sqrt(sum_{k=1}^m (max {r_k - a_k, 0 })^2)}
 
 The average Hausdorff distance (\eqn{\Delta_p}) was proposed by
 \citet{SchEsqLarCoe2012tec} and it is calculated as:
@@ -84,12 +84,12 @@ objective vector. It is also slightly faster to compute.
 
 GD should never be used directly to compare the quality of approximations to
 a Pareto front, as it often contradicts Pareto optimality (it is not weakly
-Pareto-compliant). We recommend IGD+ instead of IGD, since the latter
-contradicts Pareto optimality in some cases (see examples below) whereas
-IGD+ is weakly Pareto-compliant, but we implement IGD here because it is
-still popular due to historical reasons.
+Pareto-compliant). IGD is still popular due to historical reasons, but we
+strongly recommend IGD+ instead of IGD, since the latter contradicts Pareto
+optimality in some cases (see examples below) whereas IGD+ is weakly
+Pareto-compliant.
 
-The average Hausdorff distance (\eqn{\Delta_p(A,R)}) is also not weakly
+The average Hausdorff distance \eqn{\Delta_p(A,R)} is also not weakly
 Pareto-compliant, as shown in the examples below.
 }
 \references{
