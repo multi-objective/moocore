@@ -8,6 +8,7 @@ repo:
 template:
   bootstrap: 5
   bootswatch: cosmo
+  light-switch: true
   # This is needed until https://github.com/r-lib/pkgdown/issues/2704 is fixed.
   includes:
     in_header: |
@@ -20,12 +21,12 @@ development:
   mode: unreleased
   destination: devel
   version_label: light
-  version_tooltip: "Github version"
+  version_tooltip: "Development version"
 
 navbar:
   bg: dark
   structure:
-    right: [search, cran, github]
+    right: [search, cran, github, lightswitch]
   components:
     cran:
       icon: fab fa-r-project
