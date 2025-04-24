@@ -1,3 +1,7 @@
+Klee's Measure Problem Made Easy: O(n^{d/3} polylog n) for d >= 3.
+https://ieeexplore.ieee.org/document/6686177
+
+
 HV3Dplus and HV4Dplus: https://github.com/apguerreiro/HVC/blob/master/hv-plus.c#L415
 
 https://github.com/esa/pagmo2/tree/master/src/utils/hv_algos
