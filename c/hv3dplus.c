@@ -40,6 +40,7 @@
 #include <float.h>
 #include <string.h>
 #include "common.h"
+#include "sort.h"
 
 typedef struct dlnode {
     const double *x;                    /* The data vector              */
@@ -558,19 +559,6 @@ compare_point3d(const void * restrict p1, const void * restrict p2)
     return 0;
 }
 
-typedef unsigned int dimension_t;
-
-static bool
-strongly_dominates(const double * restrict x, const double * restrict ref, dimension_t dim)
-{
-    ASSUME(dim >= 2);
-    for (dimension_t i = 0; i < dim; i++)
-        if (x[i] >= ref[i])
-            return false;
-    return true;
-}
-
-
 static void print_x(dlnode_t * p)
 {
     assert(p != NULL);
@@ -593,9 +581,9 @@ setup_cdllist(const double * restrict data, int n, const double * restrict ref)
     int i, j;
     for (i = 0, j = 0; j < n; j++) {
         /* Filters those points that do not strictly dominate the reference
-           point.  This is needed to assure that the points left are only those
+           point.  This is needed to ensure that the points left are only those
            that are needed to calculate the hypervolume. */
-        if (strongly_dominates(data + j * d, ref, d)) {
+        if (strongly_dominates(data + j * d, ref, d)) { /* TODO: unlikely */
             scratchd[i] = data + j * d;
             i++;
         }
@@ -605,7 +593,7 @@ setup_cdllist(const double * restrict data, int n, const double * restrict ref)
     dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(dlnode_t));
     dlnode_t * list3 = list+3;
     initSentinels(list, ref);
-    if (n == 0) {
+    if (n == 0) { /* TODO: unlikely */
         free(scratchd);
         return list;
     }
@@ -653,16 +641,11 @@ static void free_cdllist(dlnode_t * list)
 /* ---------------------------------- Preprocessing ---------------------------------------*/
 
 
-static int compare_tree_asc_y( const void * restrict p1, const void * restrict p2)
+static int compare_tree_asc_y(const void * restrict p1, const void * restrict p2)
 {
-    const double x1= *((const double *)p1+1);
-    const double x2= *((const double *)p2+1);
-
-    if (x1 < x2)
-        return -1;
-    else if (x1 > x2)
-        return 1;
-    else return 0;
+    const double y1 = *((const double *)p1+1);
+    const double y2 = *((const double *)p2+1);
+    return (y1 < y2) ? -1: ((y1 > y2) ? 1 : 0);
 }
 
 

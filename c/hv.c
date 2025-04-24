@@ -49,8 +49,7 @@
 #include <stdint.h>
 #include "common.h"
 #include "hv.h"
-
-typedef uint_fast8_t dimension_t;
+#include "sort.h"
 
 static int compare_tree_asc(const void *p1, const void *p2);
 
@@ -533,17 +532,6 @@ static int compare_tree_asc_y( const void *p1, const void *p2)
     return (x1 < x2) ? -1 : ((x1 > x2) ? 1 : 0;
 }
 */
-
-static bool
-strongly_dominates(const double * restrict x,
-                   const double * restrict ref, dimension_t dim)
-{
-    ASSUME(dim >= 2);
-    for (dimension_t i = 0; i < dim; i++)
-        if (x[i] >= ref[i])
-            return false;
-    return true;
-}
 
 /*
  * Setup circular double-linked list in each dimension
