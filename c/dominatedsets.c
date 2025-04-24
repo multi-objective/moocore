@@ -302,16 +302,12 @@ cmpparetos (int dim, const signed char *minmax,
             const double * points_b, int nruns_b,
             const int *cumsizes_b, int *numbetter_b)
 {
-    int a,b, result;
-    int size_a;
-    int size_b;
-
     *numbetter_a = 0;
     *numbetter_b = 0;
 
-    for (a = 0, size_a = 0; a < nruns_a; a++) {
-        for (b = 0, size_b = 0; b < nruns_b; b++) {
-            result =
+    for (int a = 0, size_a = 0; a < nruns_a; a++) {
+        for (int b = 0, size_b = 0; b < nruns_b; b++) {
+            int result =
                 pareto_better (dim, minmax,
                                points_a + (dim * size_a),
                                cumsizes_a[a] - size_a,

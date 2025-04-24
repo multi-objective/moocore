@@ -179,9 +179,7 @@ do_file (const char *filename, double *reference, int reference_size,
         printf("\n");
     }
 
-    int n;
-    int cumsize;
-    for (n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
+    for (int n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
         _attr_maybe_unused double time_elapsed = 0;
         int size_a = cumsizes[n] - cumsize;
         const double *points_a = &data[nobj * cumsize];
@@ -361,7 +359,6 @@ int main(int argc, char *argv[])
     } else if (numfiles == 1) {
         do_file (argv[optind], reference, reference_size, &nobj, minmax, maximise_all_flag);
     } else {
-        int k;
         /* FIXME: Calculate the nondominated front among all input
            files to use as reference set.  */
 #if 0
@@ -371,7 +368,7 @@ int main(int argc, char *argv[])
                                         minmax);
             write_sets (stderr, reference, nobj, &reference_size, 1);
         }
-        for (k = 0; k < numfiles; k++)
+        for (int k = 0; k < numfiles; k++)
             nondominatedfile_range (argv[optind + k], &maximum, &minimum, &nobj);
 
         if (verbose_flag >= 2) {
@@ -383,7 +380,7 @@ int main(int argc, char *argv[])
             printf ("\n");
         }
 #endif
-        for (k = 0; k < numfiles; k++)
+        for (int k = 0; k < numfiles; k++)
             do_file (argv[optind + k], reference, reference_size, &nobj, minmax, maximise_all_flag);
     }
 

@@ -228,10 +228,9 @@ printlist(const avl_tree_t *avltree, int dim, FILE *outfile)
 
 void printset(FILE* stream, avl_tree_t **set, int nset)
 {
-    int i;
     fprintf(stream, "# sets\n----------------------\n");
-    for(i = 0; i < nset; i++){
-        if(set[i]->top != NULL) {
+    for (int i = 0; i < nset; i++){
+        if (set[i]->top != NULL) {
             fprintf (stream, "set: %d", i);
             printlist(set[i], 3, stream);
         }
@@ -240,10 +239,9 @@ void printset(FILE* stream, avl_tree_t **set, int nset)
 
 void printlevel(FILE * stream, avl_tree_t **level, int nset)
 {
-    int i;
     fprintf (stream, "#levels\n-------------------\n");
-    for(i = 0; i < nset; i++){
-        if(level[i]->top != NULL){
+    for (int i = 0; i < nset; i++){
+        if (level[i]->top != NULL){
             fprintf (stream, "level: %d\n", i);
             printlist(level[i], 3, stream);
         }
@@ -261,17 +259,17 @@ printlist_points_indic(avl_tree_t *avltree, int dim, int nruns, FILE *outfile, F
             objective_t * val  = (objective_t *)aux->item;
         if (outfile) {
             fprintf(outfile, point_printf_format, val[0]);
-            for(i = 1; i < dim; i++){
+            for (i = 1; i < dim; i++){
                 fprintf(outfile, "\t" point_printf_format, val[i]);
             }
             fprintf(outfile, (outfile == outfileindic) ? "\t" : "\n");
         }
-        if(outfileindic) {
-            for(k = 0; k < nruns; k++)
+        if (outfileindic) {
+            for (k = 0; k < nruns; k++)
                 dom_sets[k] = 0;
             find_all_promoters(aux, dom_sets, nruns);
             fprintf(outfileindic, "%d", dom_sets[0]);
-            for(k = 1; k < nruns; k++){
+            for (k = 1; k < nruns; k++){
                 fprintf(outfileindic, "\t%d", dom_sets[k]);
             }
             fprintf(outfileindic, "\n");
@@ -288,20 +286,20 @@ printlist_points_indic(avl_tree_t *avltree, int dim, int nruns, FILE *outfile, F
 /* Returns the total number of points printed */
 int printoutput(avl_tree_t **level, int nset, int d, FILE **outfile, int noutfiles, FILE **outfileindic, int noutfilesi, int * attlevel, int nlevels)
 {
-    int i, k, f, fi, totalp = 0;
-    for(i = 0; i < nlevels; i++){
-        k = attlevel[i] - 1;
-        f = (noutfiles > 1) ? i : 0;
-        fi = (noutfilesi > 1) ? i : 0;
+    int totalp = 0;
+    for (int i = 0; i < nlevels; i++){
+        int k = attlevel[i] - 1;
+        int f = (noutfiles > 1) ? i : 0;
+        int fi = (noutfilesi > 1) ? i : 0;
 
-        if(level[k]->head != NULL){
+        if (level[k]->head != NULL) {
             totalp += printlist_points_indic(level[k], d, nset, (outfile ? outfile[f] : NULL), (outfileindic ? outfileindic[fi] : NULL));
         }
 
-        if(i < nlevels -1){
-            if(outfile)
+        if (i < nlevels - 1) {
+            if (outfile)
                 fprintf(outfile[f], "\n");
-            if(outfileindic && (outfile == NULL || outfile[f] != outfileindic[fi])){
+            if (outfileindic && (outfile == NULL || outfile[f] != outfileindic[fi])){
                 fprintf(outfileindic[fi], "\n");
             }
         }
@@ -316,13 +314,13 @@ static void print_list_indic(avl_tree_t * level, int nruns, FILE * indicfile)
     int * dom_sets = (int *) malloc(nruns * sizeof(int));
     int i;
     avl_node_t * avlnode = level->head;
-    while(avlnode){
-        for(i = 0;  i < nruns; i++){
+    while (avlnode) {
+        for (i = 0;  i < nruns; i++){
             dom_sets[i] = 0;
         }
         find_all_promoters(avlnode, dom_sets, nruns);
 
-        for(i = 0; i < nruns; i++){
+        for (i = 0; i < nruns; i++){
             fprintf(indicfile, "%d\t", dom_sets[i]);
         }
         fprintf(indicfile, "\n");
@@ -332,20 +330,18 @@ static void print_list_indic(avl_tree_t * level, int nruns, FILE * indicfile)
     free(dom_sets);
 }
 
-void printindic(avl_tree_t ** levels, int nruns, FILE ** indicfile, int nfiles, int * attlevel, int nlevels){
+void printindic(avl_tree_t ** levels, int nruns, FILE ** indicfile, int nfiles, int * attlevel, int nlevels)
+{
+    for (int i = 0; i < nlevels; i++){
+        int k = attlevel[i] - 1;
+        int f = (nfiles == 1) ? 0 : i;
 
-    int i, k, f;
-    for(i=0; i < nlevels; i++){
-        k = attlevel[i] - 1;
-        f = (nfiles == 1) ? 0 : i;
-
-        if(levels[k]->head != NULL){
+        if (levels[k]->head != NULL){
             print_list_indic(levels[k], nruns, indicfile[f]);
         }
 
         fprintf(indicfile[f], "\n");
     }
-
 }
 
 
@@ -811,7 +807,7 @@ eaf3d (objective_t *data, const int *cumsize, int nruns,
         add2output_all(output[i], level[i]);
     }
 
-    for(i=0; i<nruns; i++){
+    for (i = 0; i < nruns; i++) {
         freetree2(set[i]);
         free(level[i]);
     }

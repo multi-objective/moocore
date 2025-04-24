@@ -68,13 +68,12 @@ gd_common (int dim, const signed char * restrict minmax,
     ASSUME(dim >= 2);
     ASSUME(dim <= 32);
 
-    int a, r, d;
     double gd = 0;
-    for (a = 0; a < size_a; a++) {
+    for (int a = 0; a < size_a; a++) {
         double min_dist = INFINITY;
-        for (r = 0; r < size_r; r++) {
+        for (int r = 0; r < size_r; r++) {
             double dist = 0.0;
-            for (d = 0; d < dim; d++) {
+            for (int d = 0; d < dim; d++) {
                 if (minmax[d] == 0) continue;
                 double a_d = points_a[a * dim + d];
                 double r_d = points_r[r * dim + d];

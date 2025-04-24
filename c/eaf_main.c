@@ -153,8 +153,7 @@ static void
 eaf_print (eaf_t **eaf, int nobj, int nlevels,
            FILE *coord_file, FILE *indic_file, FILE *diff_file)
 {
-    int k;
-    for (k = 0; k < nlevels; k++) {
+    for (int k = 0; k < nlevels; k++) {
         eaf_print_attsurf (eaf[k], nobj, coord_file, indic_file, diff_file);
         if (coord_file)
             fprintf (coord_file, "\n");

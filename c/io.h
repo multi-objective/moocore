@@ -112,32 +112,22 @@ read_minmax (const char *str, int *nobj_p)
 static inline const bool *
 read_bitvector (const char *str, int *nobj_p)
 {
-    bool * vec;
-    size_t i;
     size_t nobj = *nobj_p;
 
     if (str == NULL) { /* Default all false.  */
         assert (nobj > 0);
-        vec = malloc (sizeof(bool) * nobj);
-        for (i = 0; i < nobj; i++)
-            vec[i] = false;
-        return vec;
+        return (bool *) calloc(nobj, sizeof(bool));
     }
 
     size_t len = strlen (str);
-    vec = malloc (sizeof(bool) * len);
-    for (i = 0; i < len; i++) {
-        switch (str[i]) {
-          case '1':
-              vec[i] = true;
-              break;
-          case '0':
-              vec[i] = false;
-              break;
-          default: /* something unexpected was found */
-              return NULL;
-        }
-    }
+    for (size_t i = 0; i < len; i++)
+        if (str[i] != '0' && str[i] != '1') /* something unexpected was found */
+            return NULL;
+
+    bool * vec = malloc (sizeof(bool) * len);
+    for (size_t i = 0; i < len; i++)
+        vec[i] = (str[i] == '1');
+
     *nobj_p = (int) len;
     return vec;
 }
