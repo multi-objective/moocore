@@ -160,6 +160,12 @@ html_theme_options = {
             "icon": "fa-solid fa-box",
         },
     ],
+    # https://sphinx-gallery.github.io/stable/advanced.html#using-sphinx-gallery-sidebar-components
+    "secondary_sidebar_items": [
+        "page-toc",
+        "sg_download_links",
+        "sg_launcher_links",
+    ],
     # "icon_links": [
     #     {
     #         # Label for this link
