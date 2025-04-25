@@ -33,15 +33,15 @@
 
 *************************************************************************/
 
-#include "eaf.h"
-#include "avl.h"
-
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
 #include <math.h>
 #include <string.h>
+
+#include "eaf.h"
+#include "avl.h"
 
 typedef struct dlnode {
     objective_t *x;             /* The data vector */
@@ -53,8 +53,6 @@ typedef struct dlnode {
 typedef struct removed_list {
     avl_node_t *head;
 } removed_list_t;
-
-static removed_list_t * removed_list;
 
 /*
 static bool avl_tree_is_empty (const avl_tree_t *avltree)
@@ -345,24 +343,14 @@ void printindic(avl_tree_t ** levels, int nruns, FILE ** indicfile, int nfiles, 
 }
 
 
-void printitem(FILE * stream, objective_t *value, int dim)
-{
-    int i;
-    for (i = 0; i < dim; i++)
-        fprintf (stream, "%f ", value[i]);
-    fprintf (stream, "\n");
-}
-
-
 void add2output(avl_tree_t *output, avl_node_t *tnode)
 {
-    if(output->top != NULL){
+    if (output->top != NULL) {
         output->tail->next = tnode;
         output->tail = tnode;
-    }else{
+    } else {
         avl_insert_top(output, tnode);
     }
-
 }
 
 void add2output_all(avl_tree_t *output, avl_tree_t *tree_add){
@@ -394,9 +382,8 @@ void add2output_all(avl_tree_t *output, avl_tree_t *tree_add){
 static void
 add2set(avl_tree_t *tree, avl_node_t *prevnode, avl_node_t *tnode, objective_t *item)
 {
-
     avl_init_node (tnode, item);
-    if(node_point(prevnode)[0] == item[0])
+    if (node_point(prevnode)[0] == item[0])
         prevnode = prevnode->prev;
     avl_insert_after (tree, prevnode, tnode);
 
@@ -422,18 +409,17 @@ static void avl_add_promoter(avl_node_t *avlnode, int set, avl_node_t *promoter)
 }
 
 
-static void add_removed(avl_node_t *node)
+static void add_removed(removed_list_t * removed_list, avl_node_t *node)
 {
     node->next = removed_list->head;
     removed_list->head = node;
 }
 
 static avl_node_t *
-add2level(avl_tree_t *tree, objective_t *item, avl_tree_t *output, int set, avl_node_t * promoter)
+add2level(removed_list_t * removed_list, avl_tree_t *tree,
+          objective_t *item, avl_tree_t *output, int set, avl_node_t * promoter)
 {
     avl_node_t *prevnode;
-    avl_node_t *aux;
-
     switch (avl_search_closest_y(tree, item, &prevnode)) {
       case -1:
           prevnode = prevnode->prev;
@@ -447,7 +433,7 @@ add2level(avl_tree_t *tree, objective_t *item, avl_tree_t *output, int set, avl_
     }
 
     //aux represents the point immediately below item.
-    aux = prevnode->next;
+    avl_node_t *aux = prevnode->next;
     // A new point (item) is added, but only if it isn't dominated.
     if (node_point(aux)[0] > item[0]) {
         avl_node_t *tnode = malloc(sizeof(avl_node_t));
@@ -466,7 +452,7 @@ add2level(avl_tree_t *tree, objective_t *item, avl_tree_t *output, int set, avl_
                 add2output(output, aux);
             else{
                 free(aux->item);
-                add_removed(aux);
+                add_removed(removed_list, aux);
                 aux->remover = newnode;
             }
             /* Each point that is removed from this level,
@@ -505,15 +491,14 @@ static avl_node_t * find_point_at_left(avl_tree_t *tree, objective_t *item){
 }
 
 //below and not equal
-static avl_node_t * find_point_below(avl_tree_t *tree, objective_t *item){
-
+static avl_node_t * find_point_below(avl_tree_t *tree, objective_t *item)
+{
     avl_node_t *belowNode;
 
     if (avl_search_closest_y(tree, item, &belowNode) >= 0)
         belowNode = belowNode->next;
 
     return belowNode;
-
 }
 
 
@@ -529,12 +514,9 @@ static objective_t * new_point(objective_t x1, objective_t x2, objective_t x3)
 
 
 void
-eaf3df(dlnode_t *list, avl_tree_t **set, avl_tree_t **level,
-       avl_tree_t **output, int nset)
+eaf3df(removed_list_t * removed_list, dlnode_t *list, avl_tree_t **set,
+       avl_tree_t **level, avl_tree_t **output, int nset)
 {
-    // point from some level immediately at new's left, corresponds to r in pseudocode
-    avl_node_t *leftNodeL;
-
     struct aux_nodes {
         /* levelNode[t] is the point being verified (possibly to be promoted) from level t,
            corresponds to s_t in pseudocode */
@@ -582,10 +564,9 @@ eaf3df(dlnode_t *list, avl_tree_t **set, avl_tree_t **level,
         stop_at = 0;
 
         // First part
-        int k;
-        for(k = start_at; k >= stop_at; k--) {
-
-            leftNodeL = find_point_at_left(level[k], new->x);
+        for (int k = start_at; k >= stop_at; k--) {
+            // point from some level immediately at new's left, corresponds to r in pseudocode
+            avl_node_t *leftNodeL = find_point_at_left(level[k], new->x);
 
             // new is dominated by a point from level k
             if (node_point(leftNodeL)[1] <= new->x[1]) {
@@ -620,7 +601,7 @@ eaf3df(dlnode_t *list, avl_tree_t **set, avl_tree_t **level,
             setNode = setNode->next;
             objective_t lbound = MAX(node_point(setNode)[1], new->x[1]);
 
-            for (k = start_at; k >= stop_at; k--) {
+            for (int k = start_at; k >= stop_at; k--) {
                 //while levelNode is dominated by new but not by any point from new's set, levelNode is promoted
                 while (node_point(aux[k].levelNode)[1] >= lbound
                        && (node_point(aux[k].levelNode)[1] > lbound || lbound > new->x[1])) {
@@ -630,7 +611,7 @@ eaf3df(dlnode_t *list, avl_tree_t **set, avl_tree_t **level,
                         aux[k].promoter = aux[k].levelNode;
                     } else {
                         objective_t *value = new_point(node_point(aux[k].levelNode)[0], node_point(aux[k].levelNode)[1], new->x[2]);
-                        tnode = add2level(level[k+1], value, output[k+1], new->set, aux[k].promoter);
+                        tnode = add2level(removed_list, level[k+1], value, output[k+1], new->set, aux[k].promoter);
                         if(tnode != NULL && new->x[2] == node_point(aux[k].promoter)[2] && node_point(aux[k].levelNode)[0] == node_point(aux[k].promoter)[0]){
                             aux[k].promoter->equal = tnode;
                         }
@@ -641,16 +622,16 @@ eaf3df(dlnode_t *list, avl_tree_t **set, avl_tree_t **level,
                 }
             }
 
-        } while(node_point(setNode)[1] > new->x[1]);
+        } while (node_point(setNode)[1] > new->x[1]);
 
         //Third part
-        for(k = start_at; k >= stop_at; k--){
+        for (int k = start_at; k >= stop_at; k--){
             //if the intersection point of new with the point from level k immediately below new
             //isn't dominated, it is added to level k+1
             if(node_point(aux[k].levelNode)[0] < node_point(setNode)[0]){
 
                 objective_t *value =new_point(node_point(aux[k].levelNode)[0], new->x[1], new->x[2]);
-                tnode = add2level(level[k+1], value, output[k+1], new->set, aux[k].promoter);
+                tnode = add2level(removed_list, level[k+1], value, output[k+1], new->set, aux[k].promoter);
                 if (tnode != NULL && new->x[2] == node_point(aux[k].levelNode)[2] && new->x[1] == node_point(aux[k].levelNode)[1]){
                     aux[k].promoter->equal = tnode;
                 }
@@ -662,7 +643,7 @@ eaf3df(dlnode_t *list, avl_tree_t **set, avl_tree_t **level,
         add2set(set[new->set], newPrev, tnode, new->x);
 
         //add new to the lowest level where it isn't dominated by any point from that level
-        tnode = add2level(level[stop_at], copy_point(new->x), output[stop_at], new->set, dom_new);
+        tnode = add2level(removed_list, level[stop_at], copy_point(new->x), output[stop_at], new->set, dom_new);
         if(stop_at > 0 && tnode != NULL && new->x[2] == node_point(dom_new)[2] &&
            new->x[1] == node_point(dom_new)[1] && new->x[0] == node_point(dom_new)[0]){
             dom_new->equal = tnode;
@@ -720,10 +701,9 @@ freetree2(avl_tree_t *avltree)
 
 static void free_removed(removed_list_t * removed_list)
 {
-    avl_node_t * aux, * node = removed_list->head;
-
-    while(node != NULL){
-        aux = node;
+    avl_node_t * node = removed_list->head;
+    while (node != NULL) {
+        avl_node_t * aux = node;
         node = node->next;
         free(aux);
     }
@@ -731,9 +711,9 @@ static void free_removed(removed_list_t * removed_list)
 }
 
 _attr_maybe_unused static void
-freeoutput(avl_tree_t **output, int nset)
+freeoutput(removed_list_t * removed_list, avl_tree_t **output, int nset)
 {
-    for(int i = 0; i < nset; i++){
+    for (int i = 0; i < nset; i++){
         freetree(output[i]);
     }
     free(output);
@@ -798,10 +778,10 @@ eaf3d (objective_t *data, const int *cumsize, int nruns,
 
     }
 
-    removed_list = (removed_list_t *) malloc(sizeof(removed_list_t));
+    removed_list_t * removed_list = (removed_list_t *) malloc(sizeof(removed_list_t));
     removed_list->head = NULL;
     dlnode_t *list = setup_cdllist(data, nobj, cumsize, nruns);
-    eaf3df(list, set, level, output, nruns);
+    eaf3df(removed_list, list, set, level, output, nruns);
 
     for (i = 0; i < nruns; i++) {
         add2output_all(output[i], level[i]);
