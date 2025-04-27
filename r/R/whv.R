@@ -110,9 +110,9 @@ total_whv_rect <- function(x, rectangles, reference, maximise = FALSE, ideal = N
 #'
 #' @param nsamples `integer(1)`\cr number of samples for Monte-Carlo sampling.
 #'
-#' @param dist `character(1)`\cr weight distribution type. See Details.
-#'
 #' @param seed `integer(1)`\cr random seed.
+#'
+#' @param dist `character(1)`\cr weight distribution type. See Details.
 #'
 #' @param mu `numeric()`\cr parameter of the weight distribution. See Details.
 #'
@@ -151,7 +151,7 @@ total_whv_rect <- function(x, rectangles, reference, maximise = FALSE, ideal = N
 #' @concept metrics
 #' @export
 whv_hype <- function(x, reference, ideal, maximise = FALSE,
-                     dist = "uniform", nsamples = 1e5L, seed = NULL, mu = NULL)
+                     nsamples = 1e5L, seed = NULL, dist = "uniform", mu = NULL)
 {
   x <- as_double_matrix(x)
   nobjs <- ncol(x)

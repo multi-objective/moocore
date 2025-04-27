@@ -9,9 +9,9 @@ whv_hype(
   reference,
   ideal,
   maximise = FALSE,
-  dist = "uniform",
   nsamples = 100000L,
   seed = NULL,
+  dist = "uniform",
   mu = NULL
 )
 }
@@ -28,11 +28,11 @@ values.}
 instead of minimised. Either a single logical value that applies to all
 objectives or a vector of logical values, with one value per objective.}
 
-\item{dist}{\code{character(1)}\cr weight distribution type. See Details.}
-
 \item{nsamples}{\code{integer(1)}\cr number of samples for Monte-Carlo sampling.}
 
 \item{seed}{\code{integer(1)}\cr random seed.}
+
+\item{dist}{\code{character(1)}\cr weight distribution type. See Details.}
 
 \item{mu}{\code{numeric()}\cr parameter of the weight distribution. See Details.}
 }
