@@ -37,6 +37,7 @@ del _metadata_version
 
 
 __all__ = [
+    "Hypervolume",
     "ReadDatasetsError",
     "apply_within_sets",
     "avg_hausdorff_dist",
@@ -48,9 +49,8 @@ __all__ = [
     "filter_dominated_within_sets",
     "get_dataset",
     "get_dataset_path",
-    "hypervolume",
-    "Hypervolume",
     "hv_approx",
+    "hypervolume",
     "igd",
     "igd_plus",
     "is_nondominated",
@@ -59,9 +59,9 @@ __all__ = [
     "normalise",
     "pareto_rank",
     "read_datasets",
+    "total_whv_rect",
     "vorob_dev",
     "vorob_t",
     "whv_hype",
     "whv_rect",
-    "total_whv_rect",
 ]
