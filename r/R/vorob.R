@@ -9,21 +9,21 @@
 #' @inheritParams eaf
 #' @inheritParams hypervolume
 #'
-#' @return `vorobT` returns a list with elements `threshold`,
-#'   `VE`, and `avg_hyp` (average hypervolume)
+#' @return `vorob_t` returns a list with elements `threshold`,
+#'   `ve`, and `avg_hyp` (average hypervolume)
 #' @rdname Vorob
 #' @author Mickael Binois
 #' @doctest
 #' data(CPFs)
-#' res <- vorobT(CPFs, reference = c(2, 200))
+#' res <- vorob_t(CPFs, reference = c(2, 200))
 #' @expect equal(44.140625)
 #' res$threshold
 #' @expect equal(8943.3332)
 #' res$avg_hyp
 #' # Now print Vorob'ev deviation
-#' VD <- vorobDev(CPFs, VE = res$VE, reference = c(2, 200))
+#' vd <- vorob_dev(CPFs, ve = res$ve, reference = c(2, 200))
 #' @expect equal(3017.1299)
-#' VD
+#' vd
 #' @references
 #' \insertRef{BinGinRou2015gaupar}{moocore}
 #'
@@ -34,7 +34,7 @@
 #'
 #' @concept eaf
 #' @export
-vorobT <- function(x, sets, reference, maximise = FALSE)
+vorob_t <- function(x, sets, reference, maximise = FALSE)
 {
   if (missing(sets)) {
     sets <- x[, ncol(x)]
@@ -60,39 +60,39 @@ vorobT <- function(x, sets, reference, maximise = FALSE)
   setcol <- ncol(x) + 1L
   while (diff != 0) {
     c <- (a + b) / 2
-    VE <- eaf(x, sets = sets, percentiles = c)[,-setcol]
-    tmp <- hypervolume(VE, reference = reference)
+    ve <- eaf(x, sets = sets, percentiles = c)[,-setcol]
+    tmp <- hypervolume(ve, reference = reference)
     if (tmp > avg_hyp) a <- c else b <- c
     diff <- prev_hyp - tmp
     prev_hyp <- tmp
   }
-  VE <- transform_maximise(VE, maximise)
-  list(threshold = c, VE = VE, avg_hyp = avg_hyp)
+  ve <- transform_maximise(ve, maximise)
+  list(threshold = c, ve = ve, avg_hyp = avg_hyp)
 }
 
 #' @concept eaf
 #' @rdname Vorob
-#' @param VE `matrix()`\cr Vorob'ev expectation, e.g., as returned by [vorobT()].
-#' @return `vorobDev` returns the Vorob'ev deviation.
+#' @param ve `matrix()`\cr Vorob'ev expectation, e.g., as returned by [vorob_t()].
+#' @return `vorob_dev` returns the Vorob'ev deviation.
 #' @export
-vorobDev <- function(x, sets, reference, VE = NULL, maximise = FALSE)
+vorob_dev <- function(x, sets, reference, ve = NULL, maximise = FALSE)
 {
   # FIXME: Does it make sense to call this function with 'x' different than the
-  # one used to calculate VE? If not, then we should merge them and avoid a lot
+  # one used to calculate ve? If not, then we should merge them and avoid a lot
   # of redundant work.
   if (missing(sets)) {
     sets <- x[, ncol(x)]
     x <- x[, -ncol(x), drop=FALSE]
   }
-  if (is.null(VE)) {
-    VE <- vorobT(x, sets, reference = reference, maximise = maximise)$VE
+  if (is.null(ve)) {
+    ve <- vorob_t(x, sets, reference = reference, maximise = maximise)$ve
   } else {
     x <- as_double_matrix(x)
   }
 
   if (any(maximise)) {
     x <- transform_maximise(x, maximise)
-    VE <- transform_maximise(VE, maximise)
+    ve <- transform_maximise(ve, maximise)
     if (all(maximise)) {
       reference <- -reference
     } else {
@@ -102,14 +102,14 @@ vorobDev <- function(x, sets, reference, VE = NULL, maximise = FALSE)
   setcol <- ncol(x)
   # Hypervolume of the symmetric difference between A and B:
   # 2 * H(AUB) - H(A) - H(B)
-  H2 <- hypervolume(VE, reference = reference)
+  h2 <- hypervolume(ve, reference = reference)
   x_split <- split.data.frame(x, sets)
-  H1 <- mean(sapply(x_split, hypervolume, reference = reference))
+  h1 <- mean(sapply(x_split, hypervolume, reference = reference))
 
-  hv_union_VE <- function(y)
-    hypervolume(rbind(y, VE), reference = reference)
+  hv_union_ve <- function(y)
+    hypervolume(rbind(y, ve), reference = reference)
 
-  VD <- 2 * sum(sapply(x_split, hv_union_VE))
+  vd <- 2 * sum(sapply(x_split, hv_union_ve))
   nruns <- length(x_split)
-  ((VD / nruns) - H1 - H2)
+  ((vd / nruns) - h1 - h2)
 }

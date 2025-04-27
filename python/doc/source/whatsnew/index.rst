@@ -10,6 +10,9 @@ Version 0.1.5
 - New function: :func:`~moocore.largest_eafdiff`.
 - New dataset ``tpls50x20_1_MWT.csv``.
 - Extended example :ref:`sphx_glr_auto_examples_plot_metrics.py`.
+- ``vorobT()`` and ``vorobDev()`` were renamed to :func:`~moocore.vorob_t` and
+  :func:`~moocore.vorob_dev` to follow Python convention.
+
 
 Version 0.1.4 (30/10/2024)
 --------------------------

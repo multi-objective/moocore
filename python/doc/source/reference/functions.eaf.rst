@@ -17,5 +17,5 @@ Vorob'ev
 .. autosummary::
    :toctree: generated/
 
-   vorobT
-   vorobDev
+   vorob_t
+   vorob_dev

@@ -72,8 +72,8 @@ NULL
 
 #' Conditional Pareto fronts obtained from Gaussian processes simulations.
 #'
-#' The data has the only goal of providing an example of use of [vorobT()] and
-#' [vorobDev()]. It has been obtained by fitting two Gaussian processes on 20
+#' The data has the only goal of providing an example of use of [vorob_t()] and
+#' [vorob_dev()]. It has been obtained by fitting two Gaussian processes on 20
 #' observations of a bi-objective problem, before generating conditional
 #' simulation of both GPs at different locations and extracting non-dominated
 #' values of coupled simulations.
@@ -91,7 +91,7 @@ NULL
 #'
 #'@examples
 #' data(CPFs)
-#' vorobT(CPFs, reference = c(2, 200))
+#' vorob_t(CPFs, reference = c(2, 200))
 #'@keywords datasets
 "CPFs"
 

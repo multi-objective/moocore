@@ -19,14 +19,14 @@ A data frame with 2967 observations on the following 3 variables.
 CPFs
 }
 \description{
-The data has the only goal of providing an example of use of \code{\link[=vorobT]{vorobT()}} and
-\code{\link[=vorobDev]{vorobDev()}}. It has been obtained by fitting two Gaussian processes on 20
+The data has the only goal of providing an example of use of \code{\link[=vorob_t]{vorob_t()}} and
+\code{\link[=vorob_dev]{vorob_dev()}}. It has been obtained by fitting two Gaussian processes on 20
 observations of a bi-objective problem, before generating conditional
 simulation of both GPs at different locations and extracting non-dominated
 values of coupled simulations.
 }
 \examples{
 data(CPFs)
-vorobT(CPFs, reference = c(2, 200))
+vorob_t(CPFs, reference = c(2, 200))
 }
 \keyword{datasets}

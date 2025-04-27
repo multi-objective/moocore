@@ -134,18 +134,26 @@ lint.extend-select = [
   "D402", # no-signature
   "D415", # ends-in-punctuation
   "D417", # undocumented-param
+  "N",
+  "PD",
 ]
 lint.ignore = [
-  "D203", # one-blank-line-before-class
-  "D213", # multi-line-summary-second-line
+  "D203",  # one-blank-line-before-class
+  "D213",  # multi-line-summary-second-line
+  "PD901", # pandas-df-variable-name
 ]
 
-lint.per-file-ignores."*examples*/*.py" = [
+lint.extend-per-file-ignores."*examples*/*.py" = [
   "D205", # 1 blank line required between summary line and description
   "D400", # First line should end with a period
   "D415", #  First line should end with a period, question mark, or exclamation point
   "E402", # Module level import not at top of file
 ]
+
+lint.extend-per-file-ignores."*tests*/*.py" = [
+  "N806", # non-lowercase-variable-in-function
+]
+
 lint.pycodestyle.max-doc-length = 80
 lint.pycodestyle.max-line-length = 80
 lint.pydocstyle.convention = "numpy"

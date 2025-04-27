@@ -1226,7 +1226,7 @@ def eaf(data: ArrayLike, /, percentiles: list = []) -> np.ndarray:
     return np.frombuffer(eaf_buf).reshape((eaf_npoints, -1))
 
 
-def vorobT(data: ArrayLike, /, ref: ArrayLike) -> dict:
+def vorob_t(data: ArrayLike, /, ref: ArrayLike) -> dict:
     """Compute Vorob'ev threshold and expectation.
 
     Parameters
@@ -1238,11 +1238,11 @@ def vorobT(data: ArrayLike, /, ref: ArrayLike) -> dict:
 
     Returns
     -------
-        A dictionary with elements `threshold`, `VE`, and `avg_hyp` (average hypervolume).
+        A dictionary with elements `threshold`, `ve`, and `avg_hyp` (average hypervolume).
 
     See Also
     --------
-    vorobDev : Compute Vorob'ev deviation.
+    vorob_dev : Compute Vorob'ev deviation.
 
     Notes
     -----
@@ -1255,12 +1255,13 @@ def vorobT(data: ArrayLike, /, ref: ArrayLike) -> dict:
     Examples
     --------
     >>> CPFs = moocore.get_dataset("CPFs.txt")
-    >>> res = moocore.vorobT(CPFs, ref=(2, 200))
+    >>> res = moocore.vorob_t(CPFs, ref=(2, 200))
     >>> res["threshold"]
     44.140625
     >>> res["avg_hyp"]
     8943.333191728081
-
+    >>> res["ve"].shape
+    (213, 2)
     """
     data = np.asarray(data, dtype=float)
     ncols = data.shape[1]
@@ -1287,10 +1288,12 @@ def vorobT(data: ArrayLike, /, ref: ArrayLike) -> dict:
         diff = prev_hyp - tmp
         prev_hyp = tmp
 
-    return dict(threshold=c, VE=eaf_res, avg_hyp=float(avg_hyp))
+    return dict(threshold=c, ve=eaf_res, avg_hyp=float(avg_hyp))
 
 
-def vorobDev(x: ArrayLike, /, ref: ArrayLike, *, VE: ArrayLike = None) -> float:
+def vorob_dev(
+    x: ArrayLike, /, ref: ArrayLike, *, ve: ArrayLike = None
+) -> float:
     r"""Compute Vorob'ev deviation.
 
     Parameters
@@ -1300,9 +1303,9 @@ def vorobDev(x: ArrayLike, /, ref: ArrayLike, *, VE: ArrayLike = None) -> float:
        For example the output of the :func:`read_datasets` function.
     ref : ArrayLike
        Reference point set as a numpy array or list. Must be same length as a single point in the dataset.
-    VE :
-       Vorob'ev expectation, e.g., as returned by :func:`vorobT`.
-       If not provided, it is calculated as ``vorobT(x, ref)``.
+    ve :
+       Vorob'ev expectation, e.g., as returned by :func:`vorob_t`.
+       If not provided, it is calculated as ``vorob_t(x, ref)``.
 
     Returns
     -------
@@ -1310,7 +1313,7 @@ def vorobDev(x: ArrayLike, /, ref: ArrayLike, *, VE: ArrayLike = None) -> float:
 
     See Also
     --------
-    vorobT : Compute Vorob'ev threshold and expectation.
+    vorob_t : Compute Vorob'ev threshold and expectation.
 
     Notes
     -----
@@ -1323,13 +1326,13 @@ def vorobDev(x: ArrayLike, /, ref: ArrayLike, *, VE: ArrayLike = None) -> float:
     Examples
     --------
     >>> CPFs = moocore.get_dataset("CPFs.txt")
-    >>> VD = moocore.vorobDev(CPFs, ref=(2, 200))
-    >>> VD
+    >>> vd = moocore.vorob_dev(CPFs, ref=(2, 200))
+    >>> vd
     3017.12989402326
 
     """
-    if VE is None:
-        VE = vorobT(x, ref)["VE"]
+    if ve is None:
+        ve = vorob_t(x, ref)["ve"]
 
     x = np.asarray(x, dtype=float)
     ncols = x.shape[1]
@@ -1341,14 +1344,14 @@ def vorobDev(x: ArrayLike, /, ref: ArrayLike, *, VE: ArrayLike = None) -> float:
     # Hypervolume of the symmetric difference between A and B:
     # 2 * H(AUB) - H(A) - H(B)
     hv_ind = Hypervolume(ref=ref)
-    H2 = hv_ind(VE)
+    h2 = hv_ind(ve)
     sets = x[:, -1]
     x = x[:, :-1]
-    H1 = np.mean(apply_within_sets(x, sets, hv_ind))
-    VD = 2 * np.mean(
-        apply_within_sets(x, sets, lambda g: hv_ind(np.vstack((g, VE))))
+    h1 = np.mean(apply_within_sets(x, sets, hv_ind))
+    vd = 2 * np.mean(
+        apply_within_sets(x, sets, lambda g: hv_ind(np.vstack((g, ve))))
     )
-    return float(VD - H1 - H2)
+    return float(vd - h1 - h2)
 
 
 def eafdiff(
