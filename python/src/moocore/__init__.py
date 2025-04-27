@@ -13,6 +13,7 @@ from ._moocore import (
     get_dataset_path,
     hypervolume,
     Hypervolume,
+    RelativeHypervolume,
     hv_approx,
     igd,
     igd_plus,
@@ -39,6 +40,7 @@ del _metadata_version
 __all__ = [
     "Hypervolume",
     "ReadDatasetsError",
+    "RelativeHypervolume",
     "apply_within_sets",
     "avg_hausdorff_dist",
     "eaf",

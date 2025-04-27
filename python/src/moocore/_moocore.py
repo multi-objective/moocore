@@ -573,13 +573,73 @@ class Hypervolume:
         return _hypervolume(data, ref)
 
 
+class RelativeHypervolume(Hypervolume):
+    """Computes the hypervolume value of fronts relative to the hypervolume of a reference front.
+
+    The value is computed as :math:`1 - (hypervolume(X) / hypervolume(R))`,
+    where :math:`X` is an input front and :math:`R` is the reference
+    front. Thus, lower values are better, in contrast to the usual hypervolume.
+
+    Parameters
+    ----------
+    ref :
+       Reference point as a 1D vector. Must be same length as a single point in ``ref_set``.
+    ref_set :
+       Reference set (front) as 2D array. The reference front does not need to
+       weakly dominate the input sets. If this is required, the user must ensure it.
+    maximise :
+       Whether the objectives must be maximised instead of minimised.
+       Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
+       Also accepts a 1D numpy array with value 0/1 for each objective
+
+    Examples
+    --------
+    Default is minimization, we can easily assume maximization.
+
+    >>> hv_ind = moocore.RelativeHypervolume(
+    ...     ref=0, ref_set=[[6, 6], [2, 7], [7, 2]], maximise=True
+    ... )
+    >>> hv_ind([[5, 5], [4, 6], [2, 7], [7, 4]])
+    0.0250000
+    >>> hv_ind([[5, 5], [4, 6], [7, 4]])
+    0.0749999
+
+    """
+
+    def __init__(
+        self,
+        ref: ArrayLike,
+        ref_set: ArrayLike,
+        maximise: bool | list[bool] = False,
+    ) -> None:
+        super().__init__(ref=ref, maximise=maximise)
+        self._ref_set_hv = super().__call__(ref_set)
+
+    def __call__(self, data: ArrayLike) -> float:
+        r"""Compute relative hypervolume indicator as ``1 - (hypervolume(data) / hypervolume(ref_set))``.
+
+        Parameters
+        ----------
+        data :
+            Numpy array of numerical values, where each row gives the coordinates of a point.
+            If the array is created from the :func:`read_datasets` function, remove the last column.
+
+        Returns
+        -------
+           A single numerical value, the relative hypervolume indicator, which must be minimized.
+
+        """
+        data_hv = super().__call__(data)
+        return 1.0 - data_hv / self._ref_set_hv
+
+
 def hv_approx(
     data: ArrayLike,
     /,
     ref: ArrayLike,
     maximise: bool | list[bool] = False,
     nsamples: int = 100000,
-    seed=None,
+    seed: int | np.random.Generator | None = None,
     method: Literal["DZ2019"] = "DZ2019",
 ) -> float:
     r"""Approximate the hypervolume indicator.
@@ -604,12 +664,14 @@ def hv_approx(
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
         Also accepts a 1d numpy array with value 0/1 for each objective
-
     nsamples :
-        Number of samples for Monte-Carlo sampling. Higher values give more accurate approximation of the true hypervolume but require more time.
-
-    seed : int or numpy.random.Generator
-        Either an integer to seed the NumPy random number generator (RNG) or an instance of Numpy-compatible RNG. ``None`` uses the default RNG of Numpy.
+        Number of samples for Monte-Carlo sampling. Higher values give more
+        accurate approximation of the true hypervolume but require more time.
+    seed :
+        Either an integer to seed :func:`numpy.random.default_rng`, Numpy
+        default random number generator (RNG) or an instance of a
+        Numpy-compatible RNG. ``None`` uses the equivalent of a random seed
+        (see :func:`numpy.random.default_rng`).
 
     method :
         Method to approximate the hypervolume.
@@ -1860,8 +1922,8 @@ def whv_hype(
     maximise: bool | list[bool] = False,
     nsamples: int = 100000,
     dist: Literal["uniform", "point", "exponential"] = "uniform",
-    seed=None,
-    mu=None,
+    seed: int | np.random.Generator | None = None,
+    mu: float | ArrayLike | None = None,
 ) -> float:
     r"""Approximation of the (weighted) hypervolume by Monte-Carlo sampling (2D only).
 
@@ -1890,26 +1952,30 @@ def whv_hype(
         Also accepts a 1D numpy array with values 0 or 1 for each objective.
 
     nsamples :
-        Number of samples for Monte-Carlo sampling. Higher values give more accurate approximation of the true hypervolume but require more time.
+        Number of samples for Monte-Carlo sampling. Higher values give more
+        accurate approximation of the true hypervolume but require more time.
+
+    seed :
+        Either an integer to seed :func:`numpy.random.default_rng`, Numpy
+        default random number generator (RNG) or an instance of a
+        Numpy-compatible RNG. ``None`` uses the equivalent of a random seed
+        (see :func:`numpy.random.default_rng`).
 
     dist :
         Weight distribution :footcite:p:`AugBadBroZit2009gecco`. The ones currently supported are:
 
        ``'uniform'``
-         corresponds to the default hypervolume (unweighted).
+         corresponds to the default hypervolume (unweighted). ``mu`` should be ``None``.
 
-       ``point``
+       ``'point'``
          describes a goal in the objective space, where ``mu`` gives the
-         coordinates of the goal. The resulting weight distribution is a
+         coordinates of the goal (1d Numpy array). The resulting weight distribution is a
          multivariate normal distribution centred at the goal.
 
-       ``exponential``
+       ``'exponential'``
          describes an exponential distribution with rate parameter ``1/mu``, i.e., :math:`\lambda = \frac{1}{\mu}`.
 
-    seed : int or numpy.random.Generator
-        Either an integer to seed the NumPy random number generator (RNG) or an instance of Numpy-compatible RNG. ``None`` uses the default RNG of Numpy.
-
-    mu : float or 1D numpy.array
+    mu :
        Parameter of ``dist``. See above for details.
 
 
