@@ -3,7 +3,7 @@ cffi >= 1.15.1
 numpy >= 1.23.0
 
 pre-commit >= 3.3.2
-ruff >= 0.1.4
+ruff >= 0.11.2
 
 tox >= 4.6.2 # Sync with tox.ini
 pytest >= 7  # Sync with tox.ini

@@ -44,7 +44,7 @@ urls.Source = "https://github.com/multi-objective/moocore/"
 urls.Tracker = "https://github.com/multi-objective/moocore/issues"
 
 [dependency-groups]
-dev = [ "ruff>=0.1.4" ]
+dev = [ "ruff>=0.11.2" ]
 test = [ "pandas>=2", "pytest>7", "seaborn", { include-group = "coverage" } ]
 docs = [
   "ipykernel",
