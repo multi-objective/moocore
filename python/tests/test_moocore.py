@@ -125,6 +125,20 @@ class TestHypervolume:
         )
         assert math.isclose(hv, 1.52890128312393e20)
 
+        ref_set = moocore.read_datasets(test_datapath("duplicated3.inp"))[
+            :, :-1
+        ]
+        ref_set = moocore.filter_dominated(ref_set)
+        rhv_ind = moocore.RelativeHypervolume(
+            ref=[-14324, -14906, -14500, -14654, -14232, -14093],
+            ref_set=ref_set,
+        )
+        assert rhv_ind(X) == 0
+
+        ref = [2, 2, 2]
+        x = [[1, 0, 1], [0, 1, 0]]
+        assert moocore.hypervolume(x, ref) == 5.0
+
     def test_hv_wrong_ref(self, test_datapath):
         """Check that the moocore.hv() functions fails correctly after a ref with the wrong dimensions is input."""
         X = self.input1
@@ -133,18 +147,46 @@ class TestHypervolume:
         assert expt.type is ValueError
 
 
+def assert_igd(x, ref, value):
+    assert math.isclose(moocore.igd(x, ref), value)
+
+
+def assert_igd_plus(x, ref, value):
+    assert math.isclose(moocore.igd_plus(x, ref), value)
+
+
 def test_igd():
     ref = np.array([10, 0, 6, 1, 2, 2, 1, 6, 0, 10]).reshape((-1, 2))
     A = np.array([4, 2, 3, 3, 2, 4]).reshape((-1, 2))
     B = np.array([8, 2, 4, 4, 2, 8]).reshape((-1, 2))
-    assert math.isclose(moocore.igd(A, ref), 3.707092031609239)
-    assert math.isclose(moocore.igd(B, ref), 2.59148346584763)
+    assert_igd(A, ref, 3.707092031609239)
+    assert_igd(B, ref, 2.59148346584763)
 
-    assert math.isclose(moocore.igd_plus(A, ref), 1.482842712474619)
-    assert math.isclose(moocore.igd_plus(B, ref), 2.260112615949154)
+    assert_igd_plus(A, ref, 1.482842712474619)
+    assert_igd_plus(B, ref, 2.260112615949154)
 
     assert math.isclose(moocore.avg_hausdorff_dist(A, ref), 3.707092031609239)
     assert math.isclose(moocore.avg_hausdorff_dist(B, ref), 2.59148346584763)
+
+    ref = np.array([[1, 1]])
+    assert_igd(ref, ref, 0.0)
+    assert_igd_plus(ref, ref, 0.0)
+
+    ref = np.array([[1, 1], [2, 2]])
+    x = np.array([[1, 1]])
+    assert_igd(x, ref, 0.7071067811865476)
+    assert_igd_plus(x, ref, 0.0)
+
+    x = [[1.5, 1.5], [2.2, 2.2], [1.9, 1.9]]
+    assert_igd(x, ref, 0.4242640687119286)
+
+    ref = [[1.0, 1.0], [2.1, 2.1]]
+    x = [[1.5, 1.5], [2.2, 2.2]]
+    assert_igd(x, ref, 0.4242640687119286)
+
+    ref = np.array([[1, 1, 1], [2, 2, 2]])
+    x = np.array([[1, 1, 1]])
+    assert_igd(x, ref, 0.8660254037844386)
 
 
 def test_is_nondominated(test_datapath):

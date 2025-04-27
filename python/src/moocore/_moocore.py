@@ -574,11 +574,14 @@ class Hypervolume:
 
 
 class RelativeHypervolume(Hypervolume):
-    """Computes the hypervolume value of fronts relative to the hypervolume of a reference front.
+    r"""Computes the hypervolume value of fronts relative to the hypervolume of a reference front.
 
-    The value is computed as :math:`1 - (hypervolume(X) / hypervolume(R))`,
-    where :math:`X` is an input front and :math:`R` is the reference
-    front. Thus, lower values are better, in contrast to the usual hypervolume.
+    The value is computed as :math:`1 - \frac{\text{hyp}(X)}{\text{hyp}(R)}`,
+    where :math:`X` is an input set (front), :math:`R` is the reference front
+    and :math:`\text{hyp}()` is calculated by :func:`hypervolume`.  Thus, lower
+    values are better, in contrast to the usual hypervolume.  The metric has
+    also been called *hypervolume relative deviation*
+    :footcite:p:`BezLopStu2017assessment`.
 
     Parameters
     ----------
@@ -590,19 +593,28 @@ class RelativeHypervolume(Hypervolume):
     maximise :
        Whether the objectives must be maximised instead of minimised.
        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
-       Also accepts a 1D numpy array with value 0/1 for each objective
+       Also accepts a 1D numpy array with value 0/1 for each objective.
+
+
+    References
+    ----------
+    .. footbibliography::
+
 
     Examples
     --------
     Default is minimization, we can easily assume maximization.
 
-    >>> hv_ind = moocore.RelativeHypervolume(
-    ...     ref=0, ref_set=[[6, 6], [2, 7], [7, 2]], maximise=True
-    ... )
+    >>> ref_set = [[6, 6], [2, 7], [7, 2]]
+    >>> hv_ind = moocore.RelativeHypervolume(ref=0, ref_set=ref_set, maximise=True)
     >>> hv_ind([[5, 5], [4, 6], [2, 7], [7, 4]])
     0.0250000
     >>> hv_ind([[5, 5], [4, 6], [7, 4]])
     0.0749999
+    >>> hv_ind([[0, 0]])
+    1.0
+    >>> hv_ind(ref_set)
+    0.0
 
     """
 
@@ -614,15 +626,18 @@ class RelativeHypervolume(Hypervolume):
     ) -> None:
         super().__init__(ref=ref, maximise=maximise)
         self._ref_set_hv = super().__call__(ref_set)
+        if self._ref_set_hv == 0:
+            raise ValueError("hypervolume of 'ref_set' is zero")
 
     def __call__(self, data: ArrayLike) -> float:
-        r"""Compute relative hypervolume indicator as ``1 - (hypervolume(data) / hypervolume(ref_set))``.
+        r"""Compute relative hypervolume indicator as ``1 - (hypervolume(data, ref=ref) / hypervolume(ref_set, ref=ref))``.
 
         Parameters
         ----------
         data :
-            Numpy array of numerical values, where each row gives the coordinates of a point.
-            If the array is created from the :func:`read_datasets` function, remove the last column.
+            Numpy array of numerical values, where each row gives the
+            coordinates of a point.  If the array is created from the
+            :func:`read_datasets` function, remove the last column.
 
         Returns
         -------
