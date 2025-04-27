@@ -136,6 +136,9 @@ lint.extend-select = [
   "D417", # undocumented-param
   "N",
   "PD",
+  "PERF",
+  "RUF",
+  "UP",
 ]
 lint.ignore = [
   "D203",  # one-blank-line-before-class

@@ -42,14 +42,14 @@ class ReadDatasetsError(Exception):
 
     """
 
-    _error_strings = [
+    _error_strings = (
         "NO_ERROR",
         "READ_INPUT_FILE_EMPTY",
         "READ_INPUT_WRONG_INITIAL_DIM",
         "ERROR_FOPEN",
         "ERROR_CONVERSION",
         "ERROR_COLUMNS",
-    ]
+    )
 
     def __init__(self, error_code):
         self.error = error_code
@@ -1359,7 +1359,7 @@ def eafdiff(
     y: ArrayLike,
     /,
     *,
-    intervals: int = None,
+    intervals: int | None = None,
     maximise: bool | list[bool] = False,
     rectangles: bool = False,
 ) -> np.ndarray:
