@@ -168,8 +168,6 @@ jobs:
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
     name: Coverage ${{ matrix.os }} (${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
-    env:
-      CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
     strategy:
       # When set to true, GitHub cancels all in-progress jobs if any matrix job fails.
       matrix:
@@ -194,7 +192,7 @@ jobs:
         working-directory: python
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
           verbose: true

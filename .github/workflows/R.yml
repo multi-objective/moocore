@@ -132,7 +132,6 @@ jobs:
         r: [release]
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
 
     steps:
       - uses: actions/checkout@v4
@@ -163,13 +162,13 @@ jobs:
         working-directory: r
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
-          file: ./r/cobertura.xml
+          files: ./r/cobertura.xml
           verbose: true
           flags: R
-          plugin: noop
+          plugins: noop
           disable_search: true
           token: ${{secrets.CODECOV_TOKEN}}
 
