@@ -57,3 +57,8 @@ libre
 matrixStats
 metaheuristic
 nondominated
+hyperrectangle
+hyperrectangles
+hypervolumes
+orthotopes
+polytope
