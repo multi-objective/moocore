@@ -52,13 +52,13 @@ color
 colormap
 colors
 doi
+hyperrectangle
+hyperrectangles
 hypervolume
+hypervolumes
 libre
 matrixStats
 metaheuristic
 nondominated
-hyperrectangle
-hyperrectangles
-hypervolumes
 orthotopes
 polytope
