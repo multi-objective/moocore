@@ -43,13 +43,13 @@ We recommend that you compile specifically for your architecture using GCC optio
 
 This uses the option `"-march=native"`. If your GCC version does not support `"native"`, you can give an explicit architecture:
 
-    make nondominated march=i686
+    make nondominated march=x86-64
 
 See the [GCC manual](https://gcc.gnu.org/onlinedocs/gcc/Submodel-Options.html** for the names of the architectures supported by your version of GCC.
 
 
-Command-line tools
-==================
+Command-line executables
+========================
 
 **TODO**: *This section is incomplete, please help us to complete it.*
 
@@ -58,11 +58,29 @@ nondominated
 
 Obtain information and perform filtering operations on the nondominated sets given as input.
 
+Testsuite
+=========
+
+The **moocore** executables are validated using a [comprehensive testsuite](https://github.com/multi-objective/testsuite). Running the testsuite requires [Python](https://www.python.org/downloads/) `>= 3.10` and additional Python packages (see `[testsuite/requirements.txt](https://github.com/multi-objective/testsuite/blob/main/requirements.txt)`) .To run the testsuite yourself, follow these steps:
+
+```bash
+# Download moocore
+git clone https://github.com/multi-objective/moocore moocore
+# Download the testsuite
+git clone https://github.com/multi-objective/testsuite moocore/testsuite
+# Checking
+make -C moocore/c/ check
+# Timing
+make -C moocore/c/ time
+```
+
+
 
 License
 ========
 
-See the LICENSE file and the COPYRIGHTS file.
+See the [LICENSE](/LICENSE
+) and [COPYRIGHTS](/r/inst/COPYRIGHTS) files.
 
 
 [c-build-badge]: https://github.com/multi-objective/moocore/actions/workflows/C.yml/badge.svg?event=push
