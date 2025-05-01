@@ -91,9 +91,9 @@ rect_weighted_hv2d(double *data, int n, double * rectangles,
         lower0= rect[0]; lower1= rect[1]; upper0= rect[2]; upper1= rect[3];    \
         color = rect[4];                                                       \
         print_rect(ROW, rect);                                                 \
-        eaf_assert(lower0 < upper0);                                           \
-        eaf_assert(lower1 < upper1);                                           \
-        eaf_assert(color >= 0);                                                \
+        assert(lower0 < upper0);                                           \
+        assert(lower1 < upper1);                                           \
+        assert(color >= 0);                                                \
     } while(0)
 
 #define next_point() do {                                                      \
@@ -147,13 +147,13 @@ rect_weighted_hv2d(double *data, int n, double * rectangles,
 
     r = 0;
     while (true) {
-        eaf_assert(p[1] < upper1);
+        assert(p[1] < upper1);
         do {
             if (p[0] < upper0 && lower1 < top) {
                 // Case #4: p strictly dominates u and not completed
-                eaf_assert(p[0] < upper0 && p[1] < upper1);
-                eaf_assert(top > lower1);
-                eaf_assert(top > p[1]);
+                assert(p[0] < upper0 && p[1] < upper1);
+                assert(top > lower1);
+                assert(top > p[1]);
                 // min(top, upper1) because the whole rect may be below top.
                 whv += (upper0 - MAX(p[0],lower0)) * (MIN(top, upper1) - MAX(p[1], lower1)) * color;
                 DEBUG2_PRINT("whv: %16.15g\n", whv);

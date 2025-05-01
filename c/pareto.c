@@ -97,7 +97,7 @@ pareto_rank_2D (const double *points, int size)
             int high = n_front + 1;
             do {
                 int mid = low + (high - low) /2;
-                eaf_assert (mid <= n_front);
+                assert (mid <= n_front);
                 const double *pmid = data[front_last[mid]].p;
                 if (p[1] < pmid[1])
                     high = mid;
@@ -108,8 +108,8 @@ pareto_rank_2D (const double *points, int size)
                     break;
                 }
             } while (low < high);
-            eaf_assert (low <= n_front);
-            eaf_assert (p[1] < data[front_last[low]].p[1]
+            assert (low <= n_front);
+            assert (p[1] < data[front_last[low]].p[1]
                         || (p[1] == data[front_last[low]].p[1]
                             && p[0] == data[front_last[low]].p[0]));
             front_last[low] = k;
@@ -220,7 +220,7 @@ pareto_rank (const double *points, int dim, int size)
     do {
         nothing_new = true;
         for (int j = 0; j < size; j++) {
-            eaf_assert(rank[j] <= level);
+            assert(rank[j] <= level);
             /* is already dominated or belongs to a previous front? */
             if (rank[j] != level - 1) continue;
 
@@ -246,7 +246,7 @@ pareto_rank (const double *points, int dim, int size)
 
     if (rank2 != NULL) {
         for (int k = 0; k < size; k++) {
-            eaf_assert(rank[k] == rank2[k]);
+            assert(rank[k] == rank2[k]);
         }
         free(rank2);
     }

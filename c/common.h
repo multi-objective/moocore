@@ -45,7 +45,6 @@ moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
 }
 
 #define MOOCORE_MALLOC(NMEMB, TYPE) moocore_malloc((NMEMB), sizeof(TYPE), __FILE__, __LINE__)
-#define eaf_assert(X) assert(X)
 
 #if __GNUC__ >= 3
 #define __cmp_op_min <

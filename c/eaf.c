@@ -112,10 +112,10 @@ void eaf_realloc(eaf_t * eaf, size_t nobj)
     const int nruns = eaf->nruns;
     eaf->data = realloc (eaf->data,
                          sizeof(objective_t) * nobj * eaf->maxsize);
-    eaf_assert(eaf->data);
+    assert(eaf->data);
     eaf->bit_attained = realloc (eaf->bit_attained,
                                  bit_array_bytesize(nruns) * eaf->maxsize);
-    eaf_assert(eaf->bit_attained);
+    assert(eaf->bit_attained);
 }
 
 objective_t *
@@ -125,7 +125,7 @@ eaf_store_point_help (eaf_t * eaf, int nobj,
     const int nruns = eaf->nruns;
 
     if (eaf->size == eaf->maxsize) {
-        eaf_assert (eaf->size < INT_MAX / 2);
+        assert (eaf->size < INT_MAX / 2);
         //size_t old_maxsize = eaf->maxsize;
         eaf->maxsize = (size_t) ((double) eaf->maxsize * (1.0 + 1.0 / pow(2, eaf->nreallocs / 4.0)));
         eaf->maxsize += 100; // At least we increase it by 100 points
@@ -313,7 +313,7 @@ eaf2d (const objective_t *data, const int *cumsize, int nruns,
 
     DEBUG1(/* Sanity check. */
         for (k = 1; k < nruns ; k++)
-            eaf_assert(cumsize[k-1] < cumsize[k]);
+            assert(cumsize[k-1] < cumsize[k]);
         );
 
     DEBUG2(
@@ -414,7 +414,7 @@ eaf2d (const objective_t *data, const int *cumsize, int nruns,
                 } while (y < ntotal && datay[y][1] == datay[y - 1][1]);
             } while (nattained >= level && y < ntotal);
 
-            eaf_assert (nattained < level);
+            assert (nattained < level);
 
             eaf_store_point_2d (eaf[l], datax[x][0], datay[y - 1][1],
                                 save_attained);
@@ -483,8 +483,8 @@ min_max_in_objective(const objective_t *v,
                      int nobj, int k,
                      objective_t *min_ref, objective_t *max_ref)
 {
-    eaf_assert(k < nobj);
-    eaf_assert(v[k] != objective_MIN); // Empty polygon?
+    assert(k < nobj);
+    assert(v[k] != objective_MIN); // Empty polygon?
 
     objective_t min = v[k];
     objective_t max = v[k];
@@ -501,7 +501,7 @@ min_max_in_objective(const objective_t *v,
 static bool
 polygon_dominates_point(const objective_t *p, const objective_t *x, int nobj)
 {
-    eaf_assert(x[0] != objective_MIN);
+    assert(x[0] != objective_MIN);
     while (p[0] != objective_MIN) {
         if (p[0] < x[0] && p[1] < x[1]) {
             /* point2d_printf(stdout, p[0], p[1]); */
@@ -559,24 +559,24 @@ _attr_maybe_unused static void
 eaf_check_polygons(eaf_polygon_t *p, int nobj)
 {
     // This only works for 2 objectives.
-    eaf_assert(nobj == 2);
+    assert(nobj == 2);
 
     // Check #1: Polygons don't intersect
     // Last point of last polygon
     const objective_t * end = vector_objective_end(&p->xy);
     const objective_t * pi = vector_objective_begin(&p->xy);
 
-    while(pi < end) {
+    while (pi < end) {
         const objective_t * pj = next_polygon(pi, nobj, end);
         const objective_t * next = pj;
-        while(pj < end) {
+        while (pj < end) {
             if (polygons_intersect(pi, pj, nobj)) {
 #if DEBUG_POLYGONS > 0
                 fprintf(stderr, "ERROR: Polygons intersect!\n");
                 polygon_print(pi, nobj);
                 polygon_print(pj, nobj);
 #endif
-                eaf_assert(false);
+                assert(!polygons_intersect(pi, pj, nobj));
             }
             pj = next_polygon(pj, nobj, end);
         }
@@ -597,8 +597,8 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
 /* FIXME: Don't add anything if color_0 == 0 */
 
 #define POLY_SIZE_CHECK()                                                      \
-    do { _poly_size_check--; eaf_assert(_poly_size_check >= 4);                \
-        eaf_assert(_poly_size_check % 2 == 0); _poly_size_check = 0; } while(0)
+    do { _poly_size_check--; assert(_poly_size_check >= 4);                \
+        assert(_poly_size_check % 2 == 0); _poly_size_check = 0; } while(0)
 #define eaf_point(A,K) (eaf[(A)]->data + (K) * nobj)
 #define push_point_color(X, Y, C)                                              \
         do {  vector_objective_push_back (&polygon->xy, (X));                  \
@@ -623,7 +623,7 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
     _attr_maybe_unused int _poly_size_check = 0;
     int nruns = eaf[0]->nruns;
 
-    eaf_assert(nruns % 2 == 0);
+    assert(nruns % 2 == 0);
 
     int max_size = eaf_max_size(eaf, nlevels);
     int * color = MOOCORE_MALLOC(max_size, int);
@@ -657,11 +657,11 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
                 if (pkb[1] == pka[1]) {
                     /* Ignore points that exactly overlap.  */
                     // FIXME: This should not happen, but it does. We should remove these points.
-                    // eaf_assert(false);
+                    // assert(false);
                     ka++; kb++;
                 } else {
                     /* b intersects a above pka. */
-                    eaf_assert(pkb[1] > pka[1]);
+                    assert(pkb[1] > pka[1]);
                     kb++;
                     break;
                 }
@@ -679,12 +679,12 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
                 /* Find the point in B not above the current point in A. */
                 while (kb < eaf_b_size) {
                     pkb = eaf_point (b, kb);
-                    eaf_assert(pkb[0] > pka[0]);
+                    assert(pkb[0] > pka[0]);
                     if (pkb[1] <= pka[1])
                         break;
                     kb++;
                 }
-                eaf_assert(pka[1] < prev_pka_y);
+                assert(pka[1] < prev_pka_y);
                 push_point (pka[0], prev_pka_y);
                 push_point (pka[0], pka[1]);
                 prev_pka_y = pka[1];
@@ -692,12 +692,12 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
 
                 if (kb < eaf_b_size && ka < eaf_a_size) {
                     const objective_t * pka_next = eaf_point (a, ka);
-                    eaf_assert (pkb[0] > pka[0]);
-                    eaf_assert (pkb[1] <= pka[1]);
+                    assert (pkb[0] > pka[0]);
+                    assert (pkb[1] <= pka[1]);
                     if (pkb[0] <= pka_next[0]) {
                         /* If B intersects with A, stop here.  */
-                        eaf_assert(pkb[1] == pka[1] || pkb[0] == pka_next[0]);
-                        eaf_assert (prev_pka_y >= pkb[1]);
+                        assert(pkb[1] == pka[1] || pkb[0] == pka_next[0]);
+                        assert (prev_pka_y >= pkb[1]);
                         break;
                     }
                 }
@@ -716,23 +716,23 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
                        the infinity. */
                     push_point (objective_MAX, pka[1]);
                     push_point (objective_MAX, topleft_y);
-                    eaf_assert(topleft_y > pka[1]);
+                    assert(topleft_y > pka[1]);
                 } else {
                     kb = eaf_b_size - 1;
                     pkb = eaf_point(b, kb);
-                    eaf_assert (pkb[1] >= pka[1]);
+                    assert (pkb[1] >= pka[1]);
                     if (pkb[1] > pka[1]) {
                         // Create two points in the infinity to jump from a to b (turn the corner).
                         /* If pkb is above pkda, then it may happen that pkb[0]
                            <= pka[0] if pkb is dominated by a previous pka. */
                         push_point (objective_MAX, pka[1]);
                         push_point (objective_MAX, pkb[1]);
-                        eaf_assert (pkb[1] <= topleft_y);
+                        assert (pkb[1] <= topleft_y);
                     } else {
                         // If they are at the same y-level, then pka must be to
                         // the left, otherwise we should have found the
                         // intersection earlier and something is wrong.
-                        eaf_assert(pkb[0] > pka[0]);
+                        assert(pkb[0] > pka[0]);
                     }
                     /* Now print in reverse.  */
                     objective_t prev_pkb_x = pkb[0];
@@ -740,21 +740,21 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
                     kb--;
                     while (kb > last_b) {
                         pkb = eaf_point(b, kb);
-                        eaf_assert (pkb[1] > pka[1]); // pkb cannot be below pka
+                        assert (pkb[1] > pka[1]); // pkb cannot be below pka
                         push_point (prev_pkb_x, pkb[1]);
                         push_point (pkb[0], pkb[1]);
                         prev_pkb_x = pkb[0];
                         kb--;
                     }
                     push_point (pkb[0], topleft_y);
-                    eaf_assert (topleft_y > pkb[1]);
+                    assert (topleft_y > pkb[1]);
                 }
                 /* last_b = eaf_b_size - 1; */
                 polygon_close(color_0); /* DONE */
                 break; /* Really done! */
             } else {
                 if (kb == eaf_b_size) {
-                    eaf_assert (pka[1] < topleft_y);
+                    assert (pka[1] < topleft_y);
                     /* There is nothing on the other side, just create
                        two points in the infinity. */
                     push_point (objective_MAX, pka[1]);
@@ -762,11 +762,11 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
                     last_b = eaf_b_size - 1;
                 } else {
                     // This polygon is bounded above by eaf_b from last_b up to kb.
-                    eaf_assert (kb < eaf_b_size);
+                    assert (kb < eaf_b_size);
                     pkb = eaf_point (b, kb);
                     // If we have not finished eaf_b is because pkb is not above pka
-                    eaf_assert (pkb[1] <= pka[1]);
-                    eaf_assert (pkb[0] != pka[0]);
+                    assert (pkb[1] <= pka[1]);
+                    assert (pkb[0] != pka[0]);
                     /* If pkb and pka are in the same horizontal, pkb
                        does not affect the next polygon. Otherwise, it
                        does. */
@@ -779,18 +779,18 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
                         pkb = eaf_point (b, kb);
                         // pkb must be above pka or we would have found the
                         // intersection earlier.
-                        eaf_assert (pkb[1] > pka[1]);
+                        assert (pkb[1] > pka[1]);
                         push_point (prev_pkb_x, pkb[1]);
                         push_point (pkb[0], pkb[1]);
                         prev_pkb_x = pkb[0];
                         kb--;
                     }
                     push_point (pkb[0], topleft_y);
-                    eaf_assert (topleft_y > pkb[1]);
+                    assert (topleft_y > pkb[1]);
                     last_b = save_last_b;
                 }
                 polygon_close(color_0); /* DONE */
-                eaf_assert(topleft_y >= pka[1]);
+                assert(topleft_y >= pka[1]);
                 topleft_y = pka[1];
             }
         }
@@ -811,7 +811,7 @@ eaf_compute_polygon_old (eaf_t **eaf, int nobj, int nlevels)
     _attr_maybe_unused int _poly_size_check = 0;
     int max_size = eaf_max_size(eaf, nlevels);
     int nruns = eaf[0]->nruns;
-    eaf_assert(nruns % 2 == 0);
+    assert(nruns % 2 == 0);
 
     int * color = MOOCORE_MALLOC(max_size, int);
     eaf_polygon_t * polygon = MOOCORE_MALLOC(1, eaf_polygon_t);
@@ -856,7 +856,7 @@ eaf_compute_polygon_old (eaf_t **eaf, int nobj, int nlevels)
                     push_point (objective_MAX, topleft_y);
                 } else {
                     const objective_t * pkb = eaf_point(a + 1, kb);
-                    eaf_assert (pkb[1] >= pka[1]);
+                    assert (pkb[1] >= pka[1]);
                     if (pkb[1] > pka[1]) {
                         /* Create two points in the infinity.  */
                         push_point (objective_MAX, pka[1]);
@@ -961,8 +961,8 @@ rectangle_add(eaf_polygon_t * regions,
 #if 0
     printf("rectangle_add: (" point_printf_format ", " point_printf_format ", " point_printf_format ", " point_printf_format ")[%d]\n", lx, ly, ux, uy, color);
 #endif
-    eaf_assert(lx < ux);
-    eaf_assert(ly < uy);
+    assert(lx < ux);
+    assert(ly < uy);
     vector_objective *rect = &regions->xy;
     vector_objective_push_back(rect, lx);
     vector_objective_push_back(rect, ly);
@@ -986,7 +986,7 @@ eaf_compute_rectangles (eaf_t **eaf, int nobj, int nlevels)
 #endif
     int nruns = eaf[0]->nruns;
 
-    eaf_assert(nruns % 2 == 0);
+    assert(nruns % 2 == 0);
 
     int max_size = eaf_max_size(eaf, nlevels);
     int * color = MOOCORE_MALLOC(max_size, int);
@@ -1023,7 +1023,7 @@ eaf_compute_rectangles (eaf_t **eaf, int nobj, int nlevels)
                 rectangle_add(regions, pka[0], pka[1], pkb[0], top, color[ka]);
             } else {
                 // Skip repeated points
-                eaf_assert(pka[0] == pkb[0] && pka[1] == pkb[1]);
+                assert(pka[0] == pkb[0] && pka[1] == pkb[1]);
             }
             top = pka[1];
             ka++;
@@ -1042,7 +1042,7 @@ eaf_compute_rectangles (eaf_t **eaf, int nobj, int nlevels)
     close_eaf:
         // b is finished, add one rectangle for each pka point.
         while (true) {
-            eaf_assert(pka[1] < pkb[1]);
+            assert(pka[1] < pkb[1]);
             rectangle_add(regions, pka[0], pka[1], objective_MAX, top, color[ka]);
             top = pka[1];
             ka++;

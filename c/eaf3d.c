@@ -757,17 +757,16 @@ eaf3d (objective_t *data, const int *cumsize, int nruns,
 {
     const int nobj = 3;
     const int ntotal = cumsize[nruns - 1]; /* total number of points in data */
-    int i;
-
     DEBUG1(/* Sanity check. */
-        for (i = 1; i < nruns ; i++)
-            eaf_assert(cumsize[i-1] < cumsize[i]);
+        for (int i = 1; i < nruns ; i++)
+            assert(cumsize[i-1] < cumsize[i]);
         );
 
     avl_tree_t **set = malloc (nruns * sizeof(avl_tree_t));
     avl_tree_t **level = malloc (nruns * sizeof(avl_tree_t));
     avl_tree_t **output = malloc (nruns * sizeof(avl_tree_t));
 
+    int i;
     for (i = 0; i < nruns; i++) {
         set[i]  = avl_alloc_tree ((avl_compare_t) compare_tree_asc_x, (avl_freeitem_t) free);
         level[i]  = avl_alloc_tree ((avl_compare_t) compare_tree_asc_x, (avl_freeitem_t) free);

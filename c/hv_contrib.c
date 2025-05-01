@@ -43,6 +43,6 @@ hv_contributions (double *hvc, double *points, int dim, int size, const double *
         hvc[i] = hv_total - hvc[i];
         // Handle very small values.
         hvc[i] = (fabs(hvc[i]) >= tolerance) ? hvc[i] : 0.0;
-        eaf_assert(hvc[i] >= 0);
+        assert(hvc[i] >= 0);
     }
 }
