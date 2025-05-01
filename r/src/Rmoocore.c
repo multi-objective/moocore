@@ -384,8 +384,8 @@ rect_weighted_hv2d_C(SEXP DATA, SEXP RECTANGLES, SEXP REFERENCE)
     SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
     SEXP_2_DOUBLE_MATRIX(RECTANGLES, rectangles, ncol, rectangles_nrow);
     SEXP_2_DOUBLE_VECTOR(REFERENCE, reference, reference_len);
-    eaf_assert(ncol == 5);
-    eaf_assert(reference_len == 2);
+    assert(ncol == 5);
+    assert(reference_len == 2);
     double hv = rect_weighted_hv2d(data, npoint, rectangles, rectangles_nrow, reference);
     return Rf_ScalarReal(hv);
 }
@@ -399,8 +399,8 @@ whv_hype_C(SEXP DATA, SEXP IDEAL, SEXP REFERENCE, SEXP NSAMPLES, SEXP DIST, SEXP
     SEXP_2_DOUBLE_VECTOR(IDEAL, ideal, ideal_len);
     SEXP_2_DOUBLE_VECTOR(REFERENCE, reference, reference_len);
     SEXP_2_INT(NSAMPLES, nsamples);
-    eaf_assert(reference_len == ideal_len);
-    eaf_assert(reference_len == 2);
+    assert(reference_len == ideal_len);
+    assert(reference_len == 2);
     SEXP_2_STRING(DIST, dist_type);
     SEXP_2_UINT32(SEED, seed);
 
