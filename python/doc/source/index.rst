@@ -59,6 +59,19 @@ performance measures, performance assessment
 
         Detailed examples and tutorials.
 
+
+The following two images compare the speed of computing the hypervolume indicator (:ref:`hypervolume_metric`) in 3D and 4D using ``moocore``, `pymooo <https://pymoo.org/>`_, `BoTorch <https://botorch.org/>`_ and `jMetalPy <https://jmetal.github.io/jMetalPy/index.html>`_.
+
+|pic1| |pic2|
+
+.. |pic1| image:: _static/hv_bench-DTLZLinearShape.3d-time.png
+   :width: 48%
+
+.. |pic2| image:: _static/hv_bench-DTLZLinearShape.4d-time.png
+   :width: 48%
+
+
+
 .. This is not really the index page, that is found in
    _templates/indexcontent.html The toctree content here will be added to the
    top of the template header
