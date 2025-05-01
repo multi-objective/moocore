@@ -68,8 +68,8 @@ The **moocore** executables are validated using a [comprehensive testsuite](http
 git clone https://github.com/multi-objective/moocore moocore
 # Download the testsuite
 git clone https://github.com/multi-objective/testsuite moocore/testsuite
-# Checking
-make -C moocore/c/ check
+# Testing
+make -C moocore/c/ test
 # Timing
 make -C moocore/c/ time
 ```
