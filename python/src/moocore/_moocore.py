@@ -14,7 +14,6 @@ from math import ldexp
 import lzma
 import shutil
 import tempfile
-from importlib.resources import files
 
 import numpy as np
 
@@ -2087,44 +2086,6 @@ def whv_hype(
         raise ValueError("Unknown value of dist = {dist}")
 
     return hv
-
-
-def get_dataset_path(filename: str, /) -> str:
-    """Return path to dataset within the package.
-
-    Parameters
-    ----------
-    filename :
-        Name of the dataset.
-
-    Returns
-    -------
-        Full path to the dataset.
-
-    """
-    return files("moocore.data").joinpath(filename)
-
-
-def get_dataset(filename: str, /) -> np.ndarray:
-    """Return dataset within the package as a NumPy array .
-
-    Parameters
-    ----------
-    filename :
-        Name of the dataset.
-
-    Returns
-    -------
-        An array containing a representation of the data in the file.
-        The first :math:`n-1` columns contain the numerical data for each of the objectives.
-        The last column contains an identifier for which set the data is relevant to.
-
-    See Also
-    --------
-    read_datasets : Function used to read the dataset.
-
-    """
-    return read_datasets(get_dataset_path(filename))
 
 
 def apply_within_sets(

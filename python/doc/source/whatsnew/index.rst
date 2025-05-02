@@ -13,7 +13,7 @@ Version 0.1.5
 - Extended example :ref:`sphx_glr_auto_examples_plot_metrics.py`.
 - ``vorobT()`` and ``vorobDev()`` were renamed to :func:`~moocore.vorob_t` and
   :func:`~moocore.vorob_dev` to follow Python convention.
-
+- :func:`~moocore.get_dataset_path` and :func:`~moocore.get_dataset` can download large datasets from a remote repository.
 
 Version 0.1.4 (30/10/2024)
 --------------------------

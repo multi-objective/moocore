@@ -10,6 +10,7 @@ Read data
 
    read_datasets
    ReadDatasetsError
+   get_dataset
    get_dataset_path
 
 Transform data

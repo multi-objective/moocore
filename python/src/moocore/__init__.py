@@ -9,8 +9,6 @@ from ._moocore import (
     epsilon_mult,
     filter_dominated,
     filter_dominated_within_sets,
-    get_dataset,
-    get_dataset_path,
     hypervolume,
     Hypervolume,
     RelativeHypervolume,
@@ -28,6 +26,11 @@ from ._moocore import (
     whv_hype,
     whv_rect,
     total_whv_rect,
+)
+
+from ._datasets import (
+    get_dataset,
+    get_dataset_path,
 )
 
 from importlib.metadata import version as _metadata_version

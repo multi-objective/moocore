@@ -335,6 +335,12 @@ def test_eaf(test_datapath):
         )
 
 
+def test_get_dataset_path():
+    with pytest.raises(Exception) as expt:
+        moocore.get_dataset_path("notavailable")
+    assert expt.type is ValueError
+
+
 # def test_eafdiff(test_datapath):
 #     diff1 = np.loadtxt(test_datapath("100_diff_points_1.txt"))
 #     diff2 = np.loadtxt(test_datapath("100_diff_points_2.txt"))

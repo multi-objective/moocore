@@ -1,6 +1,5 @@
 # ruff: noqa: D100, D101, D102, D103
 import pytest
-import os
 import moocore
 
 
@@ -9,9 +8,9 @@ def test_datapath(request):
     """Return the directory of the currently running test script."""
 
     def _(file_path: str):
-        filename = moocore.get_dataset_path(file_path)
-        if os.path.isfile(filename):
+        filename = request.path.parent / "test_data" / file_path
+        if filename.is_file():
             return filename
-        return request.path.parent.joinpath("test_data/" + file_path)
+        return moocore.get_dataset_path(file_path)
 
     return _
