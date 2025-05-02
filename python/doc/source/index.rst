@@ -60,7 +60,7 @@ performance measures, performance assessment
         Detailed examples and tutorials.
 
 
-The following two images compare the speed of computing the hypervolume indicator (:ref:`hypervolume_metric`) in 3D and 4D using ``moocore``, `pymooo <https://pymoo.org/>`_, `BoTorch <https://botorch.org/>`_ and `jMetalPy <https://jmetal.github.io/jMetalPy/index.html>`_.
+The following two images compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D and 4D using ``moocore``, `pymooo <https://pymoo.org/>`_, `BoTorch <https://botorch.org/>`_, `DEAP-er <https://deap-er.readthedocs.io/en/latest/>`_ and `jMetalPy <https://jmetal.github.io/jMetalPy/index.html>`_.
 
 |pic1| |pic2|
 
