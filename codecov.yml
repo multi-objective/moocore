@@ -1,6 +1,8 @@
 fixes:
   - "python/src/moocore/libmoocore/::c/" # Python package symlink
+  - "src/moocore/libmoocore/::c/" # Python package symlink
   - "r/src/libmoocore/::c/" # R package symlink
+  - "src/libmoocore/::c/" # R package symlink
   - ".tox/cov*/lib/*/site-packages/::python/src/"
 
 comment:
