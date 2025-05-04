@@ -25,9 +25,11 @@ repos:
       - id: check-merge-conflict
         args: [ --assume-in-merge ]
       - id: check-added-large-files
-        args: ['--maxkb=500']
+        name: check-added-large-files (>200kb)
+        args: ['--maxkb=200']
         exclude: 'python/tests/test_data/expected_output/.*'
       - id: check-added-large-files
+        name: check-added-large-files in tests (>999kb)
         args: ['--maxkb=999']
         files: 'python/tests/test_data/expected_output/.*'
       - id: file-contents-sorter
