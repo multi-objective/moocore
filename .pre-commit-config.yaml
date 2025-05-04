@@ -25,7 +25,11 @@ repos:
       - id: check-merge-conflict
         args: [ --assume-in-merge ]
       - id: check-added-large-files
-        args: ['--maxkb=200']
+        args: ['--maxkb=500']
+        exclude: 'python/tests/test_data/expected_output/.*'
+      - id: check-added-large-files
+        args: ['--maxkb=999']
+        files: 'python/tests/test_data/expected_output/.*'
       - id: file-contents-sorter
         files: '\.Rbuildignore$|^bibkeys.txt$|WORDLIST'
       - id: end-of-file-fixer

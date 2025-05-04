@@ -35,34 +35,20 @@ def test_read_datasets_data(test_datapath):
             err_msg=f"read_datasets does not produce expected array for file {testpath}",
         )
 
-    test_names = [
-        "input1.dat",
-        "spherical-250-10-3d.txt",
-        "uniform-250-10-3d.txt",
-        "wrots_l10w100_dat.xz",
-        "wrots_l100w10_dat.xz",
-        "ALG_1_dat.xz",
-    ]
-    expected_names = [
-        "dat1_read_datasets.txt",
-        "spherical_read_datasets.txt",
-        "uniform_read_datasets.txt",
-        "wrots_l10_read_datasets.txt",
-        "wrots_l100_read_datasets.txt",
-        "ALG_1_dat_read_datasets.txt",
-    ]
-    expected_shapes = [
-        (100, 3),
-        (2500, 4),
-        (2500, 4),
-        (3262, 3),
-        (888, 3),
-        (23260, 3),
+    tests = [
+        ("input1.dat", "dat1_read_datasets.txt", (100, 3)),
+        (
+            "spherical-250-10-3d.txt",
+            "spherical_read_datasets.txt.gz",
+            (2500, 4),
+        ),
+        ("uniform-250-10-3d.txt", "uniform_read_datasets.txt.gz", (2500, 4)),
+        ("wrots_l10w100_dat.xz", "wrots_l10_read_datasets.txt", (3262, 3)),
+        ("wrots_l100w10_dat.xz", "wrots_l100_read_datasets.txt", (888, 3)),
+        ("ALG_1_dat.xz", "ALG_1_dat_read_datasets.txt.gz", (23260, 3)),
     ]
 
-    for test, expected_name, expected_shape in zip(
-        test_names, expected_names, expected_shapes
-    ):
+    for test, expected_name, expected_shape in tests:
         check_testdata(test_datapath(test), expected_name, expected_shape)
 
 
@@ -293,23 +279,15 @@ def test_normalise():
 
 def test_eaf(test_datapath):
     # FIXME: ALG_1_dat is creating slightly different percentile values than expected in its EAF output
-    test_names = [
-        "input1.dat",
-        "spherical-250-10-3d.txt",
-        "uniform-250-10-3d.txt",
-        "wrots_l10w100_dat.xz",
-        "wrots_l100w10_dat.xz",
-        # "ALG_1_dat.xz",
+    tests = [
+        ("input1.dat", "dat1_eaf.txt"),
+        ("spherical-250-10-3d.txt", "spherical_eaf.txt.gz"),
+        ("uniform-250-10-3d.txt", "uniform_eaf.txt"),
+        ("wrots_l10w100_dat.xz", "wrots_l10_eaf.txt.gz"),
+        ("wrots_l100w10_dat.xz", "wrots_l100_eaf.txt.gz"),
+        # ("ALG_1_dat.xz",          # "ALG_1_dat_get_eaf.txt.gz"),
     ]
-    expected_eaf_names = [
-        "dat1_eaf.txt",
-        "spherical_eaf.txt",
-        "uniform_eaf.txt",
-        "wrots_l10_eaf.txt",
-        "wrots_l100_eaf.txt",
-        # "ALG_1_dat_get_eaf.txt"
-    ]
-    for test_name, expected_eaf_name in zip(test_names, expected_eaf_names):
+    for test_name, expected_eaf_name in tests:
         filename = test_datapath(test_name)
         dataset = moocore.read_datasets(filename)
         eaf_test = moocore.eaf(dataset)
