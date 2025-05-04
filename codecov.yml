@@ -1,7 +1,7 @@
 fixes:
-  - "src/moocore/libmoocore/::" # Python package symlink
-  - "src/moocore/::" # R package symlink
-  - ".tox/coverage/lib/*/site-packages/::python/src/"
+  - "python/src/moocore/libmoocore/::c/" # Python package symlink
+  - "r/src/libmoocore/::c/" # R package symlink
+  - ".tox/cov*/lib/*/site-packages/::python/src/"
 
 comment:
   layout: "header, diff, flags, components"  # show component info in the PR comment
