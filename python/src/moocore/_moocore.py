@@ -220,11 +220,11 @@ def igd_plus(
     Parameters
     ----------
     data :
-        2D matrix of numerical values, where each row gives the coordinates of a point in objective space.
+        Matrix of numerical values, where each row gives the coordinates of a point in objective space.
         If the array is created from the :func:`read_datasets` function, remove the last (set) column.
 
     ref :
-        Reference point (1D vector). Must have same length as the number of column in ``data``.
+        Reference set as a matrix of numerical values. Must have the same number of columns as ``data``.
 
     maximise :
         Whether the objectives must be maximised instead of minimised.
@@ -325,8 +325,7 @@ def epsilon_additive(
         Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
         If the array is created from the :func:`read_datasets` function, remove the last (set) column
     ref :
-        Reference point set as a numpy array or list. Must have same number of columns as a single point in the
-        dataset
+        Reference set as a matrix of numerical values. Must have the same number of columns as ``data``.
     maximise :
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
@@ -1308,9 +1307,10 @@ def vorob_t(data: ArrayLike, /, ref: ArrayLike) -> dict:
     Parameters
     ----------
     data :
-        Numpy array of numerical values and set numbers, containing multiple sets. For example the output of the :func:`read_datasets` function
+        Numpy array of numerical values and set numbers, containing multiple
+        sets. For example the output of the :func:`read_datasets` function.
     ref :
-        Reference point set as a numpy array or list. Must be same length as a single point in the dataset
+        Reference point set as a numpy array or list. Must be same length as a single point in ``data``.
 
     Returns
     -------
@@ -1368,17 +1368,17 @@ def vorob_t(data: ArrayLike, /, ref: ArrayLike) -> dict:
 
 
 def vorob_dev(
-    x: ArrayLike, /, ref: ArrayLike, *, ve: ArrayLike = None
+    data: ArrayLike, /, ref: ArrayLike, *, ve: ArrayLike = None
 ) -> float:
     r"""Compute Vorob'ev deviation.
 
     Parameters
     ----------
-    x :
+    data :
        Numpy array of numerical values and set numbers, containing multiple sets.
        For example the output of the :func:`read_datasets` function.
-    ref : ArrayLike
-       Reference point set as a numpy array or list. Must be same length as a single point in the dataset.
+    ref :
+       Reference point set as a numpy array or list. Must be same length as a single point in ``data``.
     ve :
        Vorob'ev expectation, e.g., as returned by :func:`vorob_t`.
        If not provided, it is calculated as ``vorob_t(x, ref)``.
@@ -1408,24 +1408,24 @@ def vorob_dev(
 
     """
     if ve is None:
-        ve = vorob_t(x, ref)["ve"]
+        ve = vorob_t(data, ref=ref)["ve"]
 
-    x = np.asarray(x, dtype=float)
-    ncols = x.shape[1]
+    data = np.asarray(data, dtype=float)
+    ncols = data.shape[1]
     if ncols < 3:
         raise ValueError(
-            "'x' must have at least 3 columns (2 objectives + set column)"
+            "'data' must have at least 3 columns (2 objectives + set column)"
         )
 
     # Hypervolume of the symmetric difference between A and B:
     # 2 * H(AUB) - H(A) - H(B)
     hv_ind = Hypervolume(ref=ref)
     h2 = hv_ind(ve)
-    sets = x[:, -1]
-    x = x[:, :-1]
-    h1 = np.mean(apply_within_sets(x, sets, hv_ind))
+    sets = data[:, -1]
+    data = data[:, :-1]
+    h1 = np.mean(apply_within_sets(data, sets, hv_ind))
     vd = 2 * np.mean(
-        apply_within_sets(x, sets, lambda g: hv_ind(np.vstack((g, ve))))
+        apply_within_sets(data, sets, lambda g: hv_ind(np.vstack((g, ve))))
     )
     return float(vd - h1 - h2)
 
