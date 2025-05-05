@@ -1,5 +1,5 @@
 # -*- Makefile-gmake -*-
-LIBHV_SRCS    = hv.c
+LIBHV_SRCS    = hv.c hv3dplus.c
 LIBHV_HDRS    = hv.h
 LIBHV_OBJS    = $(LIBHV_SRCS:.c=.o)
 HV_LIB     = fpli_hv.a
