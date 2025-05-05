@@ -7,7 +7,7 @@ for file in $BIBFILES; do
     curl --silent https://raw.githubusercontent.com/iridia-ulb/references/master/${file} -o ${file}
 done
 tmpbib=$(mktemp --tmpdir tmpXXXXXXXXXX.bib)
-keys=$(cat bibkeys.txt | paste -d '#' -s | sed 's/#/\\\|/g')
+keys=$(paste -d '#' -s bibkeys.txt | sed 's/#/\\\|/g')
 bib2bib --warn-error --expand --expand-xrefs --no-comment --quiet --expand-xrefs $BIBFILES --remove pdf --remove alias -c "(\$key : \"$keys\")" -ob $tmpbib -oc /dev/null
 
 # Workaround https://github.com/GeoBosh/rbibutils/issues/9
