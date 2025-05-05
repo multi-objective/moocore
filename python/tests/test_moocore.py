@@ -39,13 +39,13 @@ def test_read_datasets_data(test_datapath):
         ("input1.dat", "dat1_read_datasets.txt", (100, 3)),
         (
             "spherical-250-10-3d.txt",
-            "spherical_read_datasets.txt.gz",
+            "spherical_read_datasets.txt.xz",
             (2500, 4),
         ),
-        ("uniform-250-10-3d.txt", "uniform_read_datasets.txt.gz", (2500, 4)),
+        ("uniform-250-10-3d.txt", "uniform_read_datasets.txt.xz", (2500, 4)),
         ("wrots_l10w100_dat.xz", "wrots_l10_read_datasets.txt", (3262, 3)),
         ("wrots_l100w10_dat.xz", "wrots_l100_read_datasets.txt", (888, 3)),
-        ("ALG_1_dat.xz", "ALG_1_dat_read_datasets.txt.gz", (23260, 3)),
+        ("ALG_1_dat.xz", "ALG_1_dat_read_datasets.txt.xz", (23260, 3)),
     ]
 
     for test, expected_name, expected_shape in tests:
@@ -281,11 +281,11 @@ def test_eaf(test_datapath):
     # FIXME: ALG_1_dat is creating slightly different percentile values than expected in its EAF output
     tests = [
         ("input1.dat", "dat1_eaf.txt"),
-        ("spherical-250-10-3d.txt", "spherical_eaf.txt.gz"),
-        ("uniform-250-10-3d.txt", "uniform_eaf.txt"),
-        ("wrots_l10w100_dat.xz", "wrots_l10_eaf.txt.gz"),
-        ("wrots_l100w10_dat.xz", "wrots_l100_eaf.txt.gz"),
-        # ("ALG_1_dat.xz",          # "ALG_1_dat_get_eaf.txt.gz"),
+        ("spherical-250-10-3d.txt", "spherical_eaf.txt.xz"),
+        ("uniform-250-10-3d.txt", "uniform_eaf.txt.xz"),
+        ("wrots_l10w100_dat.xz", "wrots_l10_eaf.txt.xz"),
+        ("wrots_l100w10_dat.xz", "wrots_l100_eaf.txt.xz"),
+        # ("ALG_1_dat.xz",          # "ALG_1_dat_get_eaf.txt.xz"),
     ]
     for test_name, expected_eaf_name in tests:
         filename = test_datapath(test_name)
