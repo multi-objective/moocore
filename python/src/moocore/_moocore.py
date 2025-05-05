@@ -1310,7 +1310,7 @@ def vorob_t(data: ArrayLike, /, ref: ArrayLike) -> dict:
         Numpy array of numerical values and set numbers, containing multiple
         sets. For example the output of the :func:`read_datasets` function.
     ref :
-        Reference point set as a numpy array or list. Must be same length as a single point in ``data``.
+       Reference point as a 1D vector. Must be same length as a single point in the ``data``.
 
     Returns
     -------
@@ -1378,7 +1378,7 @@ def vorob_dev(
        Numpy array of numerical values and set numbers, containing multiple sets.
        For example the output of the :func:`read_datasets` function.
     ref :
-       Reference point set as a numpy array or list. Must be same length as a single point in ``data``.
+       Reference point as a 1D vector. Must be same length as a single point in the ``data``.
     ve :
        Vorob'ev expectation, e.g., as returned by :func:`vorob_t`.
        If not provided, it is calculated as ``vorob_t(x, ref)``.
