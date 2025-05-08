@@ -100,7 +100,7 @@ static inline int
 find_nondominated_set_2d_(const double * points, int size, bool * nondom,
                           const bool keep_weakly)
 {
-    // When compiling with -O3, GCC is able to create to versions of this loop
+    // When compiling with -O3, GCC is able to create two versions of this loop
     // and move keep_weakly out.
     const double **p = generate_sorted_pp_2d(points, size);
     int n_nondom = size, k = 0, j = 1;
