@@ -4,8 +4,8 @@
 What's new
 **********
 
-Version 0.1.5
--------------
+Version 0.1.5 (11/05/2025)
+--------------------------
 
 - New function: :func:`~moocore.largest_eafdiff`.
 - New class: :class:`~moocore.RelativeHypervolume`.

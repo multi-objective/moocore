@@ -8,7 +8,7 @@ How to release
     - r/DESCRIPTION: Remove .900 and set to `${PACKAGEVERSION}`.
     - python/pyproject.toml: Remove `.dev[0-9]`.
 
-1. Update dates and version number in `python/doc/source/whatsnew/index.rst`
+1. Update dates and version number in `python/doc/source/whatsnew/index.rst` and `r/NEWS.md`
 
 1. `git ci -a -m "Prepare to release v${PACKAGEVERSION}"`
 
