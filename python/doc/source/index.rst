@@ -12,15 +12,16 @@ moocore: Core Algorithms for Multi-Objective Optimization
    Examples <auto_examples/index>
    whatsnew/index
 
-**Version**: |version| (See :ref:`whatsnew`)
+**Version**: |version| (:ref:`whatsnew`)
 
 **Date** |today|
 
 **Useful links**:
+`Install <https://github.com/multi-objective/moocore/tree/main/python#install>`_ |
 `Source Repository <https://github.com/multi-objective/moocore>`_ |
 `Issue Tracker <https://github.com/multi-objective/moocore/issues>`_
 
-This webpage documents the ``moocore`` Python package. There is also a ``moocore`` `R package <https://multi-objective.github.io/moocore/r>`_.
+This webpage documents the ``moocore`` Python package. There is also a  `moocore R package <https://multi-objective.github.io/moocore/r>`_.
 
 The goal of the **moocore** project (https://github.com/multi-objective/moocore/) is to collect fast implementations of core mathematical functions and algorithms for multi-objective optimization and make them available to different programming languages via similar interfaces. These functions include:
 

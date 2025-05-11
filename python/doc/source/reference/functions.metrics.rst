@@ -146,7 +146,7 @@ Hypervolume metric
 
 
 The hypervolume of a set of multidimensional points :math:`A \subset
-\mathbb{R}^m` with respect to a reference point :math:`\vec{r} \in \matbb{R}^m`
+\mathbb{R}^m` with respect to a reference point :math:`\vec{r} \in \mathbb{R}^m`
 is the volume of the region dominated by the set and bounded by the reference
 point :cite:p:`ZitThi1998ppsn`.  Points in :math:`A` that do not strictly
 dominated :math:`\vec{r}` do not contribute to the hypervolume value, thus,

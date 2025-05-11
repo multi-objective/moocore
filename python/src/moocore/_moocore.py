@@ -436,7 +436,8 @@ def hypervolume(
     >>> moocore.hypervolume(dat, ref=[10, 10])
     38.0
 
-    Default is minimization, we can easily assume maximization.
+    This function assumes that objectives must be minimized by default. We can
+    easily specify maximization:
 
     >>> dat = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
     >>> moocore.hypervolume(dat, ref=0, maximise=True)
@@ -502,7 +503,8 @@ class Hypervolume:
 
     Examples
     --------
-    Default is minimization, we can easily assume maximization.
+    This function assumes that objectives must be minimized by default. We can
+    easily specify maximization:
 
     >>> hv_ind = moocore.Hypervolume(ref=0, maximise=True)
     >>> hv_ind([[5, 5], [4, 6], [2, 7], [7, 4]])
@@ -601,7 +603,8 @@ class RelativeHypervolume(Hypervolume):
 
     Examples
     --------
-    Default is minimization, we can easily assume maximization.
+    This function assumes that objectives must be minimized by default. We can
+    easily specify maximization:
 
     >>> ref_set = [[6, 6], [2, 7], [7, 2]]
     >>> hv_ind = moocore.RelativeHypervolume(ref=0, ref_set=ref_set, maximise=True)
