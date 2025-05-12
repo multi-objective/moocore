@@ -20,7 +20,9 @@ How to release
   1. Submit to CRAN: `make submit`
   1. Once accepted, `make closeversion`
 
-1. Publish a release in github to automatically submit to PyPi.
+1. Publish a release in github to automatically submit to PyPi:
+
+  1. [Create release](https://github.com/multi-objective/moocore/releases/new)
 
 1. Bump version number ${PACKAGEVERSION} in `Makefile` and update:
 
