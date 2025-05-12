@@ -13,7 +13,10 @@ OBJECTS = $(SOURCES:.c=.o)
 
 all: exes $(SHLIB)
 
-exes:
+# We need this to force building order in parallel builds
+$(SHLIB): $(OBJECTS)
+
+exes: $(SHLIB)
 	$(MAKE) -C libmoocore all march=none CC="$(CC)" CFLAGS="$(CFLAGS) $(LTO)" OPT_CFLAGS="" WARN_CFLAGS="" DEBUG=$(DEBUG) EXE=$(EXEEXT) BINDIR=$(PWD)
 	@-$(RM) libmoocore/*.o
 

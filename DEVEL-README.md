@@ -12,9 +12,13 @@ How to release
 
 1. `git ci -a -m "Prepare to release v${PACKAGEVERSION}"`
 
-1. Submit to CRAN.
+1. R release (within `r/`):
 
-1. Once accepted, `make closeversion`
+  1. `make releasecheck`
+  1. Check reverse dependencies.
+  1. Update `cran-comments.md`
+  1. Submit to CRAN: `make submit`
+  1. Once accepted, `make closeversion`
 
 1. Publish a release in github to automatically submit to PyPi.
 

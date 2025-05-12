@@ -1,3 +1,7 @@
+# moocore 0.1.6
+
+ * Fix parallel build in CRAN.
+
 # moocore 0.1.5
 
  * Rename `vorobT()` and `vorobDev()` to `vorob_t()` and `vorob_dev()` to be
