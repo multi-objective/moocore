@@ -49,8 +49,7 @@
 #include <stdint.h>
 #include "common.h"
 #include "hv.h"
-
-typedef uint_fast8_t dimension_t;
+#include "sort.h"
 
 static int compare_tree_asc(const void *p1, const void *p2);
 
@@ -533,17 +532,6 @@ static int compare_tree_asc_y( const void *p1, const void *p2)
     return (x1 < x2) ? -1 : ((x1 > x2) ? 1 : 0;
 }
 */
-
-static bool
-strongly_dominates(const double * restrict x,
-                   const double * restrict ref, dimension_t dim)
-{
-    ASSUME(dim >= 2);
-    for (dimension_t i = 0; i < dim; i++)
-        if (x[i] >= ref[i])
-            return false;
-    return true;
-}
 
 /*
  * Setup circular double-linked list in each dimension
@@ -1088,6 +1076,9 @@ hv_recursive_ref(avl_tree_t * restrict tree, dlnode_t * restrict list,
                     "manuel.lopez-ibanez@manchester.ac.uk\n", __FILE__, __LINE__);
 }
 
+
+double hv3d_plus(const double * restrict data, int n, const double * restrict ref);
+
 /*
    Returns 0 if no point strictly dominates ref.
    Returns -1 if out of memory.
@@ -1097,6 +1088,7 @@ double fpli_hv(const double * restrict data, int d, int n,
 {
     if (unlikely(n == 0)) return 0.0;
     if (d == 2) return hv2d(data, n, ref);
+    if (d == 3) return hv3d_plus(data, n, ref);
     ASSUME(d < 256);
     ASSUME(d > 2);
     dimension_t dim = (dimension_t) d;
