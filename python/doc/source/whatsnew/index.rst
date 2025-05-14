@@ -4,7 +4,7 @@
 What's new
 **********
 
-Version 0.1.5 (11/05/2025)
+Version 0.1.6 (14/05/2025)
 --------------------------
 
 - New function: :func:`~moocore.largest_eafdiff`.
