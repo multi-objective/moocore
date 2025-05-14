@@ -440,12 +440,12 @@ int main(int argc, char *argv[])
         for (k = 0; k < numfiles; k++) {
             int size = 0;
             for (n = 0; n < nruns[k]; n++) {
-                int failed_pos
+                size_t failed_pos
                     = find_dominated_point (&points[k][dim * size], dim,
                                             cumsizes[k][n] - size, minmax);
-                if (failed_pos >= 0) {
+                if (failed_pos < SIZE_MAX) {
                     fprintf (stderr,
-                             "%s: %s: set %d: point %d is dominated.\n",
+                             "%s: %s: set %d: point %zu is dominated.\n",
                              program_invocation_short_name,
                              filenames[k], n, failed_pos);
                     check_failed = true;

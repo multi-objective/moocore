@@ -240,11 +240,10 @@ check_nondominated (const char * filename, const double *points,
 
     bool first_time = true;
     bool dominated_found = false;
-    int n, cumsize;
     int filename_len = (int) MAX(strlen(filename), strlen("filename"));
-    for (n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
-        int old_size = cumsizes[n] - cumsize;
-        int new_size
+    for (int n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
+        size_t old_size = cumsizes[n] - cumsize;
+        size_t new_size
             = find_nondominated_set_agree (&points[nobj * cumsize], nobj,
                                            old_size, minmax, agree,
                                            &nondom[cumsize]);
@@ -255,14 +254,14 @@ check_nondominated (const char * filename, const double *points,
                          filename_len - 2, "filename");
                 first_time = false;
             }
-            fprintf (stderr, "%-*s\t%d\t%d\t%d\t%d\n",
+            fprintf (stderr, "%-*s\t%d\t%zu\t%zu\t%zd\n",
                      filename_len, filename, n+1, old_size, new_size, old_size - new_size);
         } else if (verbose_flag && new_size < old_size) {
             if (first_time) {
                 fprintf (stderr, "%-*s\tset\tdom\n", filename_len, "filename");
                 first_time = false;
             }
-            fprintf (stderr, "%-*s\t%d\t%d dominated\n",
+            fprintf (stderr, "%-*s\t%d\t%zd dominated\n",
                      filename_len, filename, n+1, old_size - new_size);
         }
 

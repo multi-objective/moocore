@@ -114,7 +114,7 @@ OPTION_MAXIMISE_STR
 }
 
 static void
-do_file (const char *filename, double *reference, int reference_size,
+do_file (const char *filename, double *reference, size_t reference_size,
          int *nobj_p, const signed char * minmax, bool maximise_all_flag)
 {
     double *data = NULL;
@@ -190,7 +190,7 @@ do_file (const char *filename, double *reference, int reference_size,
         do {                                                                   \
             if (IF) {                                                          \
                 fprintf (outfile, "%s" indicator_printf_format, sep,           \
-                         FUN(nobj, minmax, points_a, size_a, reference, reference_size, ## __VA_ARGS__)); \
+                         FUN(nobj, minmax, points_a, size_a, reference, (int) reference_size, ## __VA_ARGS__)); \
                 sep = "\t";                                                    \
             }                                                                  \
         } while (0)
@@ -227,7 +227,7 @@ do_file (const char *filename, double *reference, int reference_size,
 int main(int argc, char *argv[])
 {
     double *reference = NULL;
-    int reference_size = 0;
+    size_t reference_size = 0;
     const signed char *minmax = NULL;
     bool maximise_all_flag = false;
     int nobj = 0, tmp_nobj = 0;
@@ -311,7 +311,7 @@ int main(int argc, char *argv[])
 
         case 'r': // --reference
             reference_size = read_reference_set(&reference, optarg, &tmp_nobj);
-            if (reference == NULL || reference_size <= 0) {
+            if (reference == NULL || reference_size == 0) {
                 errprintf ("invalid reference set '%s", optarg);
                 exit(EXIT_FAILURE);
             }

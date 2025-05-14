@@ -98,7 +98,7 @@ OPTION_MAXIMISE_STR
 }
 
 static void
-do_file (const char *filename, double *reference, int reference_size,
+do_file (const char *filename, double *reference, size_t reference_size,
          int *nobj_p, const signed char * minmax, bool maximise_all_flag)
 {
     double *data = NULL;
@@ -148,10 +148,10 @@ do_file (const char *filename, double *reference, int reference_size,
         double epsilon = (additive_flag)
             ? epsilon_additive_minmax (nobj,  minmax,
                                        &data[nobj * cumsize], cumsizes[n] - cumsize,
-                                       reference, reference_size)
+                                       reference, (int) reference_size)
             : epsilon_mult_minmax (nobj,  minmax,
                                    &data[nobj * cumsize], cumsizes[n] - cumsize,
-                                   reference, reference_size);
+                                   reference, (int) reference_size);
         //        time_elapsed = Timer_elapsed_virtual ();
         fprintf (outfile, indicator_printf_format "\n", epsilon);
         if ((additive_flag && epsilon < 0) || (!additive_flag && epsilon < 1)) {
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
 {
     bool check_flag = true;
     double *reference = NULL;
-    int reference_size = 0;
+    size_t reference_size = 0;
     const signed char *minmax = NULL;
     bool maximise_all_flag = false;
     int nobj = 0, tmp_nobj = 0;
@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 
         case 'r': // --reference
             reference_size = read_reference_set(&reference, optarg, &tmp_nobj);
-            if (reference == NULL || reference_size <= 0) {
+            if (reference == NULL || reference_size == 0) {
                 errprintf ("invalid reference set '%s", optarg);
                 exit(EXIT_FAILURE);
             }
@@ -275,13 +275,13 @@ int main(int argc, char *argv[])
     }
     if (check_flag) {
         /* Ensure the reference set is nondominated.  */
-        int prev_reference_size = reference_size;
+        size_t prev_reference_size = reference_size;
         reference_size = filter_dominated_set(reference, nobj, reference_size, minmax);
         if (prev_reference_size > reference_size)
-            warnprintf("removed %d dominated points from the reference set",
+            warnprintf("removed %zd dominated points from the reference set",
                        prev_reference_size - reference_size);
     }
-    if (!additive_flag && !all_positive(reference, (size_t) reference_size, (dimension_t) nobj)) {
+    if (!additive_flag && !all_positive(reference, reference_size, (dimension_t) nobj)) {
         errprintf("cannot calculate multiplicative epsilon indicator with non-positive values in reference front.");
         exit(EXIT_FAILURE);
     }

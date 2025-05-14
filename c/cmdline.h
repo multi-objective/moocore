@@ -83,21 +83,21 @@ handle_read_data_error (int err, const char *filename)
 
 */
 
-static inline int
+static inline size_t
 read_reference_set (double **reference_p, const char *filename, int *nobj_p)
 {
     double *reference = NULL;
     int *cumsizes = NULL;
     int nruns = 0;
     int nobj = *nobj_p;
-    int reference_size;
+    size_t reference_size;
 
     handle_read_data_error(
         read_double_data (filename, &reference, &nobj, &cumsizes, &nruns),
         filename);
     if (!filename)
         filename = stdin_name;
-    reference_size = cumsizes[nruns - 1];
+    reference_size = (size_t) cumsizes[nruns - 1];
     free(cumsizes);
     *nobj_p = nobj;
     *reference_p = reference;
