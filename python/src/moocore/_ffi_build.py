@@ -30,6 +30,7 @@ sources = [
     "eafdiff.c",
     "eaf3d.c",
     "hv.c",
+    "hv_contrib.c",
     "io.c",
     "pareto.c",
     "mt19937/mt19937.c",

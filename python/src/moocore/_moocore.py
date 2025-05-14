@@ -649,6 +649,80 @@ class RelativeHypervolume(Hypervolume):
         return 1.0 - data_hv / self._ref_set_hv
 
 
+def hv_contributions(
+    x: ArrayLike,
+    /,
+    ref: ArrayLike,
+    maximise: bool | list[bool] = False,
+) -> np.array:
+    r"""Hypervolume contributions of a set of points.
+
+    Computes the hypervolume contribution of each point of a set of points with
+    respect to a given reference point. The hypervolume contribution of point
+    :math:`\vec{p} \in X` is :math:`\text{hvc}(\vec{p}) = \text{hyp}(X) -
+    \text{hyp}(X \setminus \{\vec{p}\})`. Dominated points have zero
+    contribution. Duplicated points have zero contribution even if not
+    dominated, because removing one of the duplicates does not change the
+    hypervolume of the remaining set.
+
+    The current implementation uses the naive algorithm that requires
+    calculating the hypervolume :math:`|X|+1` times.
+
+    .. seealso:: For details about the hypervolume, see :ref:`hypervolume_metric`.
+
+    Parameters
+    ----------
+    x :
+        Numpy array of numerical values, where each row gives the coordinates of a point.
+        If the array is created from the :func:`read_datasets` function, remove the last column.
+    ref :
+        Reference point as a 1D vector. Must be same length as a single point in ``x``.
+    maximise :
+        Whether the objectives must be maximised instead of minimised.
+        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
+        Also accepts a 1D numpy array with value 0/1 for each objective
+
+    Returns
+    -------
+        An array of floating-point values as long as the number of rows in ``x``.
+        Each value is the contribution of the corresponding point in ``x``.
+
+    Examples
+    --------
+    >>> dat = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
+    >>> moocore.hv_contributions(dat, ref=[10, 10])
+    array([2., 1., 6., 3.])
+
+    """
+    # Convert to numpy.array in case the user provides a list.  We use
+    # np.asarray to convert it to floating-point, otherwise if a user inputs
+    # something like ref = np.array([10, 10]) then numpy would interpret it as
+    # an int array.
+    x, x_copied = asarray_maybe_copy(x)
+    nobj = x.shape[1]
+    ref = atleast_1d_of_length_n(np.array(ref, dtype=float), nobj)
+    if nobj != ref.shape[0]:
+        raise ValueError(
+            f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
+        )
+
+    maximise = _parse_maximise(maximise, nobj)
+    # FIXME: Do this in C.
+    if maximise.any():
+        if not x_copied:
+            x = x.copy()
+        x[:, maximise] = -x[:, maximise]
+        ref = ref.copy()
+        ref[maximise] = -ref[maximise]
+
+    hvc = np.empty(len(x), dtype=float)
+    hvc_p, _ = np1d_to_double_array(hvc)
+    x_p, npoints, nobj = np2d_to_double_array(x)
+    ref_buf = ffi.from_buffer("double []", ref)
+    lib.hv_contributions(hvc_p, x_p, nobj, npoints, ref_buf)
+    return hvc
+
+
 def hv_approx(
     data: ArrayLike,
     /,

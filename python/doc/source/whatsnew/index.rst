@@ -7,6 +7,7 @@ What's new
 Version 0.1.7 (dev)
 -------------------
 
+- New function: :func:`~moocore.hv_contributions`.
 - New online datasets: ``test2D-200k.inp.xz`` and ``ran.1000pts.3d.10`` (see
   :func:`~moocore.get_dataset`).
 

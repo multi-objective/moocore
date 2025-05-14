@@ -141,6 +141,7 @@ Hypervolume metric
    hypervolume
    Hypervolume
    RelativeHypervolume
+   hv_contributions
    total_whv_rect
    whv_rect
 

@@ -1,6 +1,8 @@
 # ruff: noqa: D104
 from ._moocore import (
+    Hypervolume,
     ReadDatasetsError,
+    RelativeHypervolume,
     apply_within_sets,
     avg_hausdorff_dist,
     eaf,
@@ -9,10 +11,9 @@ from ._moocore import (
     epsilon_mult,
     filter_dominated,
     filter_dominated_within_sets,
-    hypervolume,
-    Hypervolume,
-    RelativeHypervolume,
     hv_approx,
+    hv_contributions,
+    hypervolume,
     igd,
     igd_plus,
     is_nondominated,
@@ -21,11 +22,11 @@ from ._moocore import (
     normalise,
     pareto_rank,
     read_datasets,
+    total_whv_rect,
     vorob_dev,
     vorob_t,
     whv_hype,
     whv_rect,
-    total_whv_rect,
 )
 
 from ._datasets import (
@@ -55,6 +56,7 @@ __all__ = [
     "get_dataset",
     "get_dataset_path",
     "hv_approx",
+    "hv_contributions",
     "hypervolume",
     "igd",
     "igd_plus",
