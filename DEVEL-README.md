@@ -27,7 +27,7 @@ How to release
 1. Bump version number ${PACKAGEVERSION} in `Makefile` and update:
 
     - c/Makefile: Append `$(REVISION)`
-    - r/DESCRIPTION: Append .900.
+    - r/DESCRIPTION: Append .900
     - python/pyproject.toml: set to `${PACKAGEVERSION}.dev0`.
 
 1. `git ci -a -m "Start development version"`
