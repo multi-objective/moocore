@@ -4,6 +4,11 @@
 What's new
 **********
 
+Version 0.1.7 (dev)
+-------------------
+
+- New online dataset ``test2D-200k.inp.xz`` (see :func:`~moocore.get_dataset`).
+
 Version 0.1.6 (14/05/2025)
 --------------------------
 

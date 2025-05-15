@@ -25,6 +25,7 @@ _BASE_URL = (
 # FIXME: This could be a namedtuple so that each dataset can have its own URL.
 _DATASETS_CHECKSUMS = {
     "ALG_1_dat.xz": "a51165fe69b356c45e5bb052c747e7dcb97432975b5e7a632fc94f0b59620046",
+    "test2D-200k.inp.xz": "5e211ea67d228512bd27521fae63856c74694d0aa61fe077d5d37181623671ad",
 }
 
 
