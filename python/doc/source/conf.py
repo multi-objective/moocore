@@ -10,7 +10,6 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 from datetime import date
 import sphinx
-import moocore
 
 # Set plotly renderer to capture _repr_html_ for sphinx-gallery
 try:
@@ -24,6 +23,9 @@ import os
 import sys
 
 # Prevent ruff from deleting seemingly unused imports
+sys.path.insert(0, os.path.abspath("../../src/moocore/"))
+import moocore
+
 sys.path.insert(0, os.path.abspath("."))
 import my_unsrt_style  # noqa: F401
 
