@@ -2,11 +2,12 @@
 How to release
 ==============
 
-1. Bump version number in `c/Makefile`, `r/DESCRIPTION` and `python/pyproject.toml`
+1. Bump version number:
 
-    - c/Makefile: Remove `$(REVISION)` and set to `${PACKAGEVERSION}`.
-    - r/DESCRIPTION: Remove .900 and set to `${PACKAGEVERSION}`.
-    - python/pyproject.toml: Remove `.dev[0-9]`.
+    - `Makefile`: Bump `PACKAGEVERSION`
+    - `c/Makefile`: Remove `$(REVISION)` and set to `${PACKAGEVERSION}`.
+    - `r/DESCRIPTION`: Remove .900 and set to `${PACKAGEVERSION}`.
+    - `python/pyproject.toml`: Remove `.dev[0-9]`.
 
 1. Update dates and version number in `python/doc/source/whatsnew/index.rst` and `r/NEWS.md`
 

@@ -1,12 +1,13 @@
-PACKAGEVERSION=0.1.5
+PACKAGEVERSION=0.1.6
 
 .PHONY: default clean check test pre-commit
 
 default: test
 
-test, check:
+test check:
 	$(MAKE) -C r/ check
 	$(MAKE) -C python/ test
+	$(MAKE) -C c/ test
 
 clean:
 	$(MAKE) -C c/ clean
