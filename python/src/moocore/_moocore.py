@@ -787,7 +787,11 @@ def is_nondominated(
 ) -> np.ndarray:
     r"""Identify dominated points according to Pareto optimality.
 
-    For two dimensions, the algorithm has complexity :math:`O(n \log n)`.
+    Given :math:`n` points of dimension :math:`m`, the current implementation
+    uses the well-known :math:`O(n \log n)` dimension-sweep algorithm
+    :footcite:p:`KunLucPre1975jacm` for :math:`m \leq 3` and the naive
+    :math:`O(m n^2)` algorithm for :math:`m \geq 4`.
+
 
     Parameters
     ----------
@@ -800,6 +804,8 @@ def is_nondominated(
         Also accepts a 1D numpy array with value 0/1 for each objective.
     keep_weakly:
         If ``False``, return ``False`` for any duplicates of nondominated points.
+        Which of the duplicates is identified as nondominated is unspecified
+        due to the sorting not being stable in this version.
 
     Returns
     -------
@@ -811,6 +817,11 @@ def is_nondominated(
     filter_dominated : to filter out dominated points.
 
     pareto_rank : to rank points according to Pareto dominance.
+
+
+    References
+    ----------
+    .. footbibliography::
 
 
     Examples

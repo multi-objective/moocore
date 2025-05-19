@@ -20,8 +20,10 @@ values, where each row gives the coordinates of a point.}
 instead of minimised. Either a single logical value that applies to all
 objectives or a vector of logical values, with one value per objective.}
 
-\item{keep_weakly}{If \code{FALSE}, return \code{FALSE} for any duplicates
-of nondominated points.}
+\item{keep_weakly}{\code{logical(1)}\cr If \code{FALSE}, return \code{FALSE} for any
+duplicates of nondominated points.  Which of the duplicates is identified
+as nondominated is unspecified due to the sorting not being stable in this
+version.}
 }
 \value{
 \code{\link[=is_nondominated]{is_nondominated()}} returns a logical vector of the same length
@@ -42,6 +44,11 @@ ones with \code{filter_dominated()}.
 which is also called nondominated sorting \citep{Deb02nsga2}.
 }
 \details{
+Given \eqn{n} points of dimension \eqn{m}, the current implementation uses
+the well-known \eqn{O(n \log n)} dimension-sweep algorithm
+\citep{KunLucPre1975jacm} for \eqn{m \leq 3} and the naive \eqn{O(m n^2)}
+algorithm for \eqn{m \geq 4}.
+
 \code{pareto_rank()} is meant to be used like \code{rank()}, but it
 assigns ranks according to Pareto dominance. Duplicated points are kept on
 the same front. When \code{ncol(data) == 2}, the code uses the \eqn{O(n

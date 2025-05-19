@@ -12,14 +12,23 @@
 #'   instead of minimised. Either a single logical value that applies to all
 #'   objectives or a vector of logical values, with one value per objective.
 #'
-#' @param keep_weakly If `FALSE`, return `FALSE` for any duplicates
-#'   of nondominated points.
+#' @param keep_weakly `logical(1)`\cr If `FALSE`, return `FALSE` for any
+#'   duplicates of nondominated points.  Which of the duplicates is identified
+#'   as nondominated is unspecified due to the sorting not being stable in this
+#'   version.
 #'
 #' @return [is_nondominated()] returns a logical vector of the same length
 #'   as the number of rows of `data`, where `TRUE` means that the
 #'   point is not dominated by any other point.
 #'
 #' @author Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
+#'
+#' @details
+#'
+#' Given \eqn{n} points of dimension \eqn{m}, the current implementation uses
+#' the well-known \eqn{O(n \log n)} dimension-sweep algorithm
+#' \citep{KunLucPre1975jacm} for \eqn{m \leq 3} and the naive \eqn{O(m n^2)}
+#' algorithm for \eqn{m \geq 4}.
 #'
 #' @examples
 #' S = matrix(c(1,1,0,1,1,0,1,0), ncol = 2, byrow = TRUE)

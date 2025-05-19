@@ -61,7 +61,10 @@ performance measures, performance assessment
         Detailed examples and tutorials.
 
 
-The following two images compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D and 4D using ``moocore``, `pymooo <https://pymoo.org/>`_, `BoTorch <https://botorch.org/>`_, `DEAP-er <https://deap-er.readthedocs.io/en/latest/>`_ and `jMetalPy <https://jmetal.github.io/jMetalPy/index.html>`_.
+Benchmarks
+----------
+
+The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D and 4D using ``moocore``, `pymooo <https://pymoo.org/>`_, `BoTorch <https://botorch.org/>`_, `DEAP-er <https://deap-er.readthedocs.io/en/latest/>`_ and `jMetalPy <https://jmetal.github.io/jMetalPy/index.html>`_.
 
 |pic1| |pic2|
 
@@ -72,6 +75,16 @@ The following two images compare the speed of computing the :ref:`hypervolume in
    :width: 48%
 
 
+The following plots compare the speed of finding nondominated solutions, equivalent to :func:`moocore.is_nondominated`, in 2D and 3D using ``moocore``, `pymooo <https://pymoo.org/>`_, and `BoTorch <https://botorch.org/>`_.
+
+
+|pic3| |pic4|
+
+.. |pic3| image:: _static/ndom_bench-test2D-200k-time.png
+   :width: 48%
+
+.. |pic4| image:: _static/ndom_bench-ran3d-10k-time.png
+   :width: 48%
 
 .. This is not really the index page, that is found in
    _templates/indexcontent.html The toctree content here will be added to the
