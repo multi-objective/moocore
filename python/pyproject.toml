@@ -147,6 +147,12 @@ lint.ignore = [
   "PD901", # pandas-df-variable-name
 ]
 
+lint.extend-per-file-ignores."*benchmarks*/*.py" = [
+  "D",
+  "N806", # non-lowercase-variable-in-function
+  "N813",
+]
+
 lint.extend-per-file-ignores."*examples*/*.py" = [
   "D205", # 1 blank line required between summary line and description
   "D400", # First line should end with a period

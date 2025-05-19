@@ -77,7 +77,6 @@ The following plots compare the speed of computing the :ref:`hypervolume indicat
 
 The following plots compare the speed of finding nondominated solutions, equivalent to :func:`moocore.is_nondominated`, in 2D and 3D using ``moocore``, `pymooo <https://pymoo.org/>`_, and `BoTorch <https://botorch.org/>`_.
 
-
 |pic3| |pic4|
 
 .. |pic3| image:: _static/ndom_bench-test2D-200k-time.png
@@ -85,6 +84,19 @@ The following plots compare the speed of finding nondominated solutions, equival
 
 .. |pic4| image:: _static/ndom_bench-ran3d-10k-time.png
    :width: 48%
+
+
+The following plot compares the speed of computing the :ref:`epsilon <epsilon_metric>` and :ref:`IGD+ <igd_hausdorf>` metrics using ``moocore``, `pymooo <https://pymoo.org/>`_, and `jMetalPy <https://jmetal.github.io/jMetalPy/index.html>`_.
+
+|pic5| |pic6|
+
+.. |pic5| image:: _static/eps_bench-rmnk_10D_random_search-time.png
+   :width: 48%
+
+.. |pic6| image:: _static/igd_plus_bench-ran.40000pts.3d-time.png
+   :width: 48%
+
+
 
 .. This is not really the index page, that is found in
    _templates/indexcontent.html The toctree content here will be added to the
