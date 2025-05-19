@@ -26,7 +26,7 @@
     Mail him if you find new bugs.
 
 *****************************************************************************/
-
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>

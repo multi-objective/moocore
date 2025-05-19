@@ -38,7 +38,7 @@
     read, then unmmap.
 
 *****************************************************************************/
-
+#include "config.h"
 #include <stdio.h>
 #include "common.h"
 #include "io.h"

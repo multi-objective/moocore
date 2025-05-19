@@ -259,9 +259,18 @@ find_nondominated_set (const double *points, int dim, size_t size,
 {
     ASSUME(dim >= 1);
     ASSUME(dim <= 32);
-    return find_nondominated_set_(points, (dimension_t) dim, size, minmax, AGREE_NONE, nondom,
-                                  /* find_dominated_p = */false,
-                                  /* keep_weakly = */false);
+    size_t new_size = find_nondominated_set_(
+        points, (dimension_t) dim, size, minmax, AGREE_NONE, nondom,
+        /* find_dominated_p = */false,
+        /* keep_weakly = */false);
+
+    if (new_size > size || new_size == 0 || new_size == SIZE_MAX) { /* This can't happen.  */
+        fatal_error ("%s:%d: a bug happened: new_size > old_size!\n"
+                     "# size\tnondom\tdom\n"
+                     "  %zu\t%zu\t%zd\n",
+                     __FILE__, __LINE__, size, new_size, size - new_size);
+    }
+    return new_size;
 }
 
 static inline size_t
@@ -286,15 +295,8 @@ get_nondominated_set (double **pareto_set_p,
 
     bool *nondom = nondom_init(size);
     size_t new_size = find_nondominated_set (points, dim, size, minmax, nondom);
-    if (new_size > size || new_size == 0 || new_size == SIZE_MAX) { /* This can't happen.  */
-        fprintf (stderr,
-                 "# size\tnondom\tdom\n"
-                 "  %zu\t%zu\t%zd\n",  size, new_size, size - new_size);
-        fatal_error ("%s:%d: a bug happened: new_size > old_size!\n",
-                     __FILE__, __LINE__);
-    }
+    double *pareto_set = malloc(sizeof (double) * new_size * dim);
 
-    double *pareto_set = malloc (sizeof (double) * new_size * dim);
     if (new_size < size) {
         size_t n = 0, k = 0;
         do {
@@ -319,18 +321,9 @@ filter_dominated_set (double *points, int dim, size_t size,
     ASSUME(dim >= 1);
     ASSUME(dim <= 32);
     ASSUME(size > 0);
-    if (size == 1)
-        return 1;
 
     bool *nondom = nondom_init(size);
     size_t new_size = find_nondominated_set (points, (dimension_t) dim, size, minmax, nondom);
-    if (new_size > size || new_size == 0 || new_size == SIZE_MAX) { /* This can't happen.  */
-        fprintf (stderr,
-                 "# size\tnondom\tdom\n"
-                 "  %zu\t%zu\t%zd\n",  size, new_size, size - new_size);
-        fatal_error ("%s:%d: a bug happened: new_size > old_size!\n",
-                     __FILE__, __LINE__);
-    }
 
     if (new_size < size) {
         size_t k = 0;

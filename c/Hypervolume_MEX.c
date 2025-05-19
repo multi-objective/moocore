@@ -118,6 +118,7 @@
     scatter3(XX,YY,ZZ);
 *************************************************************************/
 
+#include "config.h"
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>

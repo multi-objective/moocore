@@ -144,7 +144,7 @@ $(eafexe): OBJS:=eaf.o eaf_main.o eaf3d.o avl.o
 $(epsilonexe): OBJS:=epsilon.o
 $(hvexe): OBJS:=main-hv.o timer.o $(LIBHV_OBJS)
 $(igdexe): OBJS:=igd.o
-$(ndsortexe): OBJS:=ndsort.o pareto.o hv_contrib.c $(LIBHV_OBJS)
+$(ndsortexe): OBJS:=ndsort.o pareto.o hv_contrib.o $(LIBHV_OBJS)
 $(nondominatedexe): OBJS:=nondominated.o
 
 dominatedsets.o: cmdline.h io.h nondominated.h

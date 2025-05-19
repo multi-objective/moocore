@@ -1,6 +1,14 @@
 #ifndef EAF_INPUT_OUTPUT_H
 #define EAF_INPUT_OUTPUT_H
 
+#include "config.h"
+#ifndef R_PACKAGE
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+#endif
+
 #include "common.h"
 
 static const char stdin_name[] = "<stdin>";
@@ -26,11 +34,6 @@ read_double_data (const char *filename, double **data_p,
                   int *nobjs_p, int **cumsizes_p, int *nsets_p);
 
 #ifndef R_PACKAGE
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
 
 void vector_fprintf (FILE *stream, const double * vector, int size);
 void vector_printf (const double *vector, int size);

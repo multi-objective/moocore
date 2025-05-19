@@ -1,3 +1,5 @@
+#ifndef _BIT_ARRAY_H_
+#define _BIT_ARRAY_H_
 /* A better implementation
    https://github.com/noporpoise/BitArray
 */
@@ -84,8 +86,8 @@ bitset_check(const bit_array * restrict b, const bool * restrict ref, size_t n)
 {
     for(size_t i = 0; i < n; i++) {
         if (bit_array_get(b, i) != ref[i]) {
-            fatal_error("bit_array_check_failed at %lu: %d != %d : %lu!\n",
-                        (unsigned long) i, bit_array_get(b, i), ref[i], (unsigned long) n);
+            fatal_error("bit_array_check_failed at %zu: %d != %d : %zu!\n",
+                        i, bit_array_get(b, i), ref[i], n);
         }
     }
 }
@@ -110,6 +112,8 @@ bit_array_copy(bit_array * restrict dest, const bit_array * restrict src, size_t
     memcpy(dest, src, sizeof(bit_array_word_t) * bit_nwords(n));
 }
 
+#ifndef R_PACKAGE
+
 static inline void
 bit_array_fprintf(FILE *stream, bit_array *b, size_t n)
 {
@@ -117,3 +121,6 @@ bit_array_fprintf(FILE *stream, bit_array *b, size_t n)
         fprintf(stream, "%d", bit_array_get(b, k) ? 1 : 0);
     }
 }
+#endif // R_PACKAGE
+
+#endif // _BIT_ARRAY_H_

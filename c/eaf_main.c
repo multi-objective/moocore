@@ -31,7 +31,7 @@
 
 
 *************************************************************************/
-
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h> // strtol()
 #include <ctype.h>  // isspace()

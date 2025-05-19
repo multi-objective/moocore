@@ -1,3 +1,4 @@
+#include "config.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h> /* for strerror() */
@@ -104,10 +105,9 @@ read_objective_t_data (const char *filename, objective_t **data_p,
                 }
                 data[ntotal] = number;
                 ntotal++;
-                DEBUG2(fprintf(stderr, "%s:%d:%d(%d) %d (set %d) = "
-                               point_printf_format "\n",
-                               filename, line, column, nobjs,
-                               cumsizes[nsets], nsets, (double)number));
+                DEBUG2_PRINT("%s:%d:%d(%d) %d (set %d) = " point_printf_format "\n",
+                             filename, line, column, nobjs,
+                             cumsizes[nsets], nsets, (double)number);
 
                 /* skip possible trailing whitespace */
                 skip_trailing_whitespace(instream);
@@ -139,8 +139,8 @@ read_objective_t_data (const char *filename, objective_t **data_p,
 	} while (retval == 0);
 
 	nsets++; /* new data set */
-        DEBUG2(fprintf (stderr, "%s: set %d, read %d rows\n",
-                    filename, nsets, cumsizes[nsets - 1]));
+        DEBUG2_PRINT("%s: set %d, read %d rows\n",
+                     filename, nsets, cumsizes[nsets - 1]);
         /* skip over successive empty lines */
         do {
             line++;

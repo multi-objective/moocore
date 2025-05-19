@@ -3,6 +3,7 @@
  Global timer functions.
 
 *************************************************************************/
+#include "config.h"
 #include <stddef.h>
 #if DEBUG >= 1
 #include <stdio.h>
