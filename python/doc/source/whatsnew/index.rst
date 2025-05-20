@@ -7,6 +7,8 @@ What's new
 Version 0.1.7 (dev)
 -------------------
 
+- :func:`~moocore.is_nondominated` and :func:`~moocore.filter_dominated` are
+  faster for 3D inputs.
 - New function: :func:`~moocore.hv_contributions`.
 - New online datasets: ``test2D-200k.inp.xz`` and ``ran.1000pts.3d.10`` (see
   :func:`~moocore.get_dataset`).

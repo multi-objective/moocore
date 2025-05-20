@@ -1,3 +1,7 @@
+# moocore 0.1.6.900
+
+ * `is_nondominaed()` and `filter_dominated()` are faster for 3D inputs.
+
 # moocore 0.1.6
 
  * Fix parallel build in CRAN.
