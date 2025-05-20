@@ -7,10 +7,16 @@
 #define QUOTE(name) #name
 #define STR(macro) QUOTE(macro)
 #define objective_t_str STR(objective_t)
+#ifndef fread_objective_t
+#error "fread_objective_t is not defined"
+#endif
 
-#define PAGE_SIZE 4096           /* allocate one page at a time      */
-#define DATA_INC (PAGE_SIZE/sizeof(objective_t))
-
+/* allocate ~512kB at once, allowing for malloc overhead */
+#ifndef IO_SLAB_SIZE
+#define IO_SLAB_SIZE (512*1024 - 32)
+#endif
+#define DATA_INC (IO_SLAB_SIZE / sizeof(objective_t))
+#define CUMSIZE_INC (128)
 /*
  * Read an array of objective values from a stream.  This function may
  * be called repeatedly to add data to an existing data set.
@@ -26,7 +32,6 @@ read_objective_t_data (const char *filename, objective_t **data_p,
     int nsets    = *nsets_p;     /* number of data sets.                 */
     objective_t *data = *data_p;
 
-    int errorcode = 0;
     FILE *instream;
 
     if (filename == NULL) {
@@ -37,19 +42,20 @@ read_objective_t_data (const char *filename, objective_t **data_p,
         return ERROR_FOPEN;
     }
 
-    int ntotal = 0;			/* the current element of (*datap) */
-    int sizessize = 0;
-    int datasize = 0;
+    size_t ntotal = 0;			/* the current element of (*datap) */
+    size_t sizessize = 0;
+    size_t datasize = 0;
     if (nsets > 0) {
-        ntotal = nobjs * cumsizes[nsets - 1];
-        sizessize = (int) ((nsets - 1) / DATA_INC + 1) * DATA_INC;
-        datasize  = (int) ((ntotal - 1) / DATA_INC + 1) * DATA_INC;
+        ntotal = (size_t) nobjs * cumsizes[nsets - 1];
+        assert(ntotal > 0);
+        sizessize = nsets + CUMSIZE_INC;
+        datasize  = ((ntotal - 1) / DATA_INC + 1) * DATA_INC;
     }
 
-    /* if size is equal to zero, this is equivalent to free().
+    /* If size is equal to zero, this is equivalent to free().
        That is, reinitialize the data structures.  */
-    cumsizes = realloc (cumsizes, sizessize * sizeof(int));
     data = realloc (data, datasize * sizeof(objective_t));
+    cumsizes = realloc (cumsizes, sizessize * sizeof(int));
 
     /* skip over leading whitespace, comments and empty lines.  */
     int retval;			/* return value for fscanf */
@@ -61,6 +67,7 @@ read_objective_t_data (const char *filename, objective_t **data_p,
         retval = skip_comment_line (instream);
     } while (retval == 1);
 
+    int errorcode = 0;
     if (unlikely(retval == EOF)) { /* faster than !feof() */
         errorcode = READ_INPUT_FILE_EMPTY;
         goto read_data_finish;
@@ -68,8 +75,8 @@ read_objective_t_data (const char *filename, objective_t **data_p,
 
     do {
         /* beginning of data set */
-	if (nsets == sizessize) {
-            sizessize += DATA_INC;
+	if ((size_t) nsets == sizessize) {
+            sizessize += CUMSIZE_INC;
             cumsizes = realloc(cumsizes, sizessize * sizeof(int));
         }
 
@@ -83,7 +90,7 @@ read_objective_t_data (const char *filename, objective_t **data_p,
                 /* new column */
                 column++;
                 objective_t number;
-                retval = fscanf (instream, objective_t_scanf_format, &number);
+                retval = fread_objective_t(instream, &number);
                 if (unlikely(retval != 1)) {
                     char buffer[64];
                     if (fscanf (instream, "%60[^ \t\r\n]", buffer) != 1) {
@@ -92,8 +99,8 @@ read_objective_t_data (const char *filename, objective_t **data_p,
                                    filename, line, column);
                     } else {
                         errprintf ("%s: line %d column %d: "
-                                   "could not convert string `%s' to %s (format: %s)",
-                                   filename, line, column, buffer, objective_t_str, objective_t_scanf_format);
+                                   "could not convert string `%s' to %s",
+                                   filename, line, column, buffer, objective_t_str);
                     }
                     errorcode = ERROR_CONVERSION;
                     goto read_data_finish;
@@ -107,11 +114,10 @@ read_objective_t_data (const char *filename, objective_t **data_p,
                 ntotal++;
                 DEBUG2_PRINT("%s:%d:%d(%d) %d (set %d) = " point_printf_format "\n",
                              filename, line, column, nobjs,
-                             cumsizes[nsets], nsets, (double)number);
+                             cumsizes[nsets], nsets, (double) number);
 
                 /* skip possible trailing whitespace */
-                skip_trailing_whitespace(instream);
-                retval = fscanf_newline(instream);
+                retval = skip_trailing_whitespace(instream);
 	    } while (retval == 0);
 
 	    if (!nobjs)
@@ -150,8 +156,8 @@ read_objective_t_data (const char *filename, objective_t **data_p,
     } while (retval != EOF); /* faster than !feof() */
 
     /* adjust to real size (saves memory but probably slower).  */
-    cumsizes = realloc (cumsizes, nsets * sizeof(int));
     data = realloc (data, ntotal * sizeof(objective_t));
+    cumsizes = realloc (cumsizes, nsets * sizeof(int));
 
 read_data_finish:
 
@@ -166,7 +172,8 @@ read_data_finish:
     return errorcode;
 }
 
-#undef PAGE_SIZE
+#undef IO_SLAB_SIZE
+#undef CUMSIZE_INC
 #undef DATA_INC
 #undef QUOTE
 #undef STR

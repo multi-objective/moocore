@@ -7,6 +7,7 @@ What's new
 Version 0.1.7 (dev)
 -------------------
 
+- :func:`~moocore.read_datasets` is significantly faster for large files.
 - :func:`~moocore.is_nondominated` and :func:`~moocore.filter_dominated` are
   faster for 3D inputs.
 - New function: :func:`~moocore.hv_contributions`.

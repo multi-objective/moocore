@@ -40,6 +40,9 @@
 *****************************************************************************/
 #include "config.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <limits.h>
 #include "common.h"
 #include "io.h"
 
@@ -51,42 +54,143 @@
                    if (retval == 1 && newline[0] == '\r')
 		    fscanf (instream, "%*[\n]");
                 */
-static inline void skip_trailing_whitespace (FILE * instream)
+static inline int
+skip_trailing_whitespace(FILE * instream)
 {
-    ignore_unused_result (fscanf (instream, "%*[ \t\r]"));
-}
+    int c;
+    do {
+        c = fgetc(instream);
+    } while (c == ' ' || c == '\t' || unlikely(c == '\r'));
 
-static inline int fscanf_newline(FILE * instream)
-{
-    char newline[2];
-    return fscanf (instream, "%1[\n]", newline);
+    if (c == '\n')
+        return 1;
+    if (unlikely(c == EOF))
+        return EOF;
+    ungetc(c, instream);  // Push the non-whitespace character back
+    return 0;
 }
 
 /* skip full lines starting with # */
-static inline int skip_comment_line (FILE * instream)
+static inline int
+skip_comment_line(FILE *instream)
 {
-    char newline[2];
-    if (!fscanf (instream, "%1[#]%*[^\n]", newline))
-        /* and whitespace */
-        skip_trailing_whitespace(instream);
-    return fscanf_newline(instream);
+    int c = skip_trailing_whitespace(instream);
+    if (c == 1)
+        return 1;
+    if (unlikely(c == EOF))
+        return EOF;
+
+    c = fgetc(instream);
+    if (unlikely(c == '#')) {
+        do { // Skip the rest of the line
+            c = fgetc(instream);
+            if (c == '\n')
+                return 1;
+            if (unlikely(c == EOF))
+                return EOF;
+        } while (true);
+    }
+
+    if (c == '\n')
+        return 1;
+    if (unlikely(c == EOF))
+        return EOF;
+
+    ungetc(c, instream);  // Not a comment, push back
+    return 0;
 }
 
+int
+fread_double(FILE *instream, double *number)
+{
+    int c;
+    // Skip leading whitespace.
+    do {
+        c = fgetc(instream);
+    } while (c == ' ' || c == '\t' || c == '\r');
+
+    if (unlikely(c == EOF))
+        return EOF;
+
+    char buffer[128];
+    size_t i = 0;
+    do {
+        buffer[i] = (char) c;
+        i++;
+        c = fgetc(instream);
+        if (isspace(c) || unlikely(c == EOF))
+            break;
+        if (unlikely(i == sizeof(buffer) - 1))
+            return 0; // Number is too long.
+    } while (true);
+
+    if (c == '\n')
+        ungetc(c, instream);  // Push back newlines
+
+    buffer[i] = '\0';
+    char *endptr;
+    *number = strtod(buffer, &endptr);
+    if (unlikely(endptr == buffer))
+        return 0; // Invalid conversion
+
+    return 1; // Success !
+}
+
+int
+fread_int(FILE *instream, int *number)
+{
+    int c;
+    // Skip leading whitespace.
+    do {
+        c = fgetc(instream);
+    } while (c == ' ' || c == '\t' || c == '\r');
+
+    if (c == EOF)
+        return EOF;
+
+    char buffer[64];
+    size_t i = 0;
+    do {
+        buffer[i] = (char) c;
+        i++;
+        c = fgetc(instream);
+        if (isspace(c) || c == EOF)
+            break;
+        if (i == sizeof(buffer) - 1)
+            return 0; // Number is too long.
+    } while (true);
+
+    if (c == '\n')
+        ungetc(c, instream);  // Push back newlines.
+
+    buffer[i] = '\0';
+
+    char *endptr;
+    long value = strtol(buffer, &endptr, /*base=*/10);
+    if (endptr == buffer)
+        return 0; // Invalid conversion.
+
+    if (value < INT_MIN || value > INT_MAX)
+        return 0;  // Out of range.
+
+    *number = (int) value;
+    return 1; // Success !
+}
 
 #define objective_t int
-#define objective_t_scanf_format "%d"
+#define fread_objective_t fread_int
 #define read_objective_t_data read_int_data
 #include "io_priv.h"
 #undef objective_t
-#undef objective_t_scanf_format
+#undef fread_objective_t
 #undef read_objective_t_data
 
 #define objective_t double
-#define objective_t_scanf_format "%lf"
+#define fread_objective_t fread_double
 #define read_objective_t_data read_double_data
 #include "io_priv.h"
 #undef objective_t
-#undef objective_t_scanf_format
+#undef fread_objective_t
 #undef read_objective_t_data
 
 /* Convenience wrapper to read_double_data used by Python's moocore.  */
