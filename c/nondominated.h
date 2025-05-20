@@ -4,6 +4,18 @@
 #include <string.h> // memcpy
 #include <math.h> // INFINITY
 #include "common.h"
+
+typedef const double avl_item_t;
+typedef struct avl_node_t {
+    struct avl_node_t *next;
+    struct avl_node_t *prev;
+    struct avl_node_t *parent;
+    struct avl_node_t *left;
+    struct avl_node_t *right;
+    avl_item_t *item;
+    unsigned char depth;
+} avl_node_t;
+
 #include "avl_tiny.h"
 
 static inline bool *

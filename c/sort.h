@@ -1,6 +1,8 @@
 #ifndef   	SORT_H_
 # define   	SORT_H_
 
+#include "common.h"
+
 /*
    x < y, i.e., x is strictly lower than y in all dimensions. Assumes minimization.
 */
