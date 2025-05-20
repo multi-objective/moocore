@@ -66,7 +66,8 @@ typedef struct avl_node_t {
 
 /* ---------------- Data Structures Functions --------------------------------*/
 
-static void initSentinels(dlnode_t * list, const double * ref)
+static void
+init_sentinels(dlnode_t * list, const double * ref, dimension_t dim)
 {
     /* The list that keeps the points sorted according to the 3rd-coordinate
        does not really need the 3 sentinels, just one to represent (-inf, -inf,
@@ -78,47 +79,41 @@ static void initSentinels(dlnode_t * list, const double * ref)
     dlnode_t * s2 = list + 1;
     dlnode_t * s3 = list + 2;
 
-    // Allocate the 3 sentinels of dimension 3.
-    double * z = malloc(3 * 3 * sizeof(double));
-    // Sentinel 1 (-INF, ref[1], -INF)
-    z[0] = -DBL_MAX;
-    z[1] = ref[1];
-    z[2] = -DBL_MAX;
-    s1->x = z;
+    // Allocate the 3 sentinels of dimension dim.
+    const double z3[] = {
+        -DBL_MAX, ref[1], -DBL_MAX, // Sentinel 1
+        ref[0], -DBL_MAX, -DBL_MAX, // Sentinel 2
+        -DBL_MAX, -DBL_MAX, ref[2]  // Sentinel 2
+    };
+    double * x = malloc(sizeof(z3));
+    memcpy(x, z3, sizeof(z3));
+    // Sentinel 1
+    s1->x = x;
     s1->closest[0] = s2;
     s1->closest[1] = s1;
-
-    s1->next = s2;
     s1->cnext[0] = NULL;
     s1->cnext[1] = NULL;
+    s1->next = s2;
     s1->prev = s3;
 
-    // Sentinel 2 (ref[0], -INF, -INF)
-    z += 3;
-    z[0] = ref[0];
-    z[1] = -DBL_MAX;
-    z[2] = -DBL_MAX;
-    s2->x = z;
+    x += dim;
+    // Sentinel 2
+    s2->x = x;
     s2->closest[0] = s2;
     s2->closest[1] = s1;
-
-    s2->next = s3;
     s2->cnext[0] = NULL;
     s2->cnext[1] = NULL;
+    s2->next = s3;
     s2->prev = s1;
 
-    // Sentinel 3 (-INF, -INF, ref[2])
-    z += 3;
-    z[0] = -DBL_MAX;
-    z[1] = -DBL_MAX;
-    z[2] = ref[2];
-    s3->x = z;
+    x += dim;
+    // Sentinel 3
+    s3->x = x;
     s3->closest[0] = s2;
     s3->closest[1] = s1;
-
-    s3->next = s1;
     s3->cnext[0] = NULL;
     s3->cnext[1] = NULL;
+    s3->next = s1;
     s3->prev = s2;
 }
 
@@ -162,13 +157,15 @@ cmp_double_asc_y_des_x(const void * restrict p1, const void * restrict p2)
 }
 
 
-static inline const double *node_point(const avl_node_t *node)
+static inline const double *
+node_point(const avl_node_t *node)
 {
     return node->item;
 }
 
 
-static avl_node_t * new_avl_node(dlnode_t * p, avl_node_t * node)
+static inline avl_node_t *
+new_avl_node(dlnode_t * p, avl_node_t * node)
 {
     node->dlnode = p;
     node->item = p->x;
@@ -177,7 +174,8 @@ static avl_node_t * new_avl_node(dlnode_t * p, avl_node_t * node)
 
 /* ---------------------------------- Update data structure ---------------------------------------*/
 
-static inline void removeFromz(dlnode_t * old)
+static inline void
+removeFromz(dlnode_t * old)
 {
     old->prev->next = old->next;
     old->next->prev = old->prev;
@@ -189,10 +187,11 @@ static inline void removeFromz(dlnode_t * old)
    F. Luccio, and F. P. Preparata.  On Finding the Maxima of a Set of
    Vectors. Journal of the ACM, 22(4):469–476, 1975.
 
-   The main different is that the order of the points is 2D tracked by p->closest.
+   The main difference is that the order of the points in 2D is tracked by p->closest.
 */
 
-static void preprocessing(dlnode_t * list, size_t n)
+static inline void
+preprocessing(dlnode_t * list, size_t n)
 {
     ASSUME(n >= 1);
 
@@ -222,29 +221,30 @@ static void preprocessing(dlnode_t * list, size_t n)
     assert(stop == list->prev);
     p = p->next;
     while (p != stop) {
+        const double * px = p->x;
         const double * prev_x;
         // == 1 means that nodeaux goes before pj, so move to the next one.
-        if (avl_search_closest(&tree, p->x, &nodeaux) == 1) {
+        if (avl_search_closest(&tree, px, &nodeaux) == 1) {
             prev_x = node_point(nodeaux);
             nodeaux = nodeaux->next;
         } else {
             prev_x = node_point(nodeaux->prev);
         }
-        assert(node_point(nodeaux)[1] > p->x[1] // node_point(nodeaux) comes after p->x.
-               || (node_point(nodeaux)[1] == p->x[1] && node_point(nodeaux)[0] < p->x[0]));
-        assert(prev_x[1] <= p->x[1]);
-        assert(prev_x[2] <= p->x[2]);
-        if (prev_x[0] <= p->x[0]) { // p->x is dominated by a point in the tree.
+        assert(node_point(nodeaux)[1] > px[1] // node_point(nodeaux) comes after px.
+               || (node_point(nodeaux)[1] == px[1] && node_point(nodeaux)[0] < px[0]));
+        assert(prev_x[1] <= px[1]);
+        assert(prev_x[2] <= px[2]);
+        if (prev_x[0] <= px[0]) { // px is dominated by a point in the tree.
             removeFromz(p);
-        } else if (node_point(nodeaux)[1] == p->x[1]) { // p->x is dominated by a point in the tree.
+        } else if (node_point(nodeaux)[1] == px[1]) { // px is dominated by a point in the tree.
             // FIXME: If the points were ordered by asc x we would only need the first condition.
-            assert(node_point(nodeaux)[0] < p->x[0]);
+            assert(node_point(nodeaux)[0] < px[0]);
             removeFromz(p);
         } else {
-            assert(node_point(nodeaux)[1] >= p->x[1]);
+            assert(node_point(nodeaux)[1] >= px[1]);
             // Delete everything in the tree that is dominated by pj.
-            while (node_point(nodeaux)[0] >= p->x[0]) {
-                assert(node_point(nodeaux)[1] >= p->x[1]);
+            while (node_point(nodeaux)[0] >= px[0]) {
+                assert(node_point(nodeaux)[1] >= px[1]);
                 nodeaux = nodeaux->next;
                 /* FIXME: A possible speed up is to delete without rebalancing
                    the tree because avl_insert_before() will rebalance. */
@@ -266,38 +266,37 @@ static void preprocessing(dlnode_t * list, size_t n)
 static dlnode_t *
 setup_cdllist(const double * restrict data, size_t n, const double * restrict ref)
 {
-    ASSUME(n > 1);
+    ASSUME(n >= 1);
     const dimension_t d = 3;
-
-    const double **scratchd = malloc(n * sizeof(const double*));
+    const double **scratch = malloc(n * sizeof(const double*));
     size_t i, j;
     for (i = 0, j = 0; j < n; j++) {
         /* Filters those points that do not strictly dominate the reference
            point.  This is needed to ensure that the points left are only those
            that are needed to calculate the hypervolume. */
-        if (strongly_dominates(data + j * d, ref, d)) { /* TODO: unlikely */
-            scratchd[i] = data + j * d;
+        if (unlikely(strongly_dominates(data + j * d, ref, d))) {
+            scratch[i] = data + j * d;
             i++;
         }
     }
     n = i; // Update number of points.
 
-    dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(dlnode_t));
+    dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(*list));
     dlnode_t * list3 = list+3;
-    initSentinels(list, ref);
-    if (n == 0) { /* TODO: unlikely */
-        free(scratchd);
+    init_sentinels(list, ref, d);
+    if (unlikely(n == 0)) {
+        free(scratch);
         return list;
     }
 
-    qsort(scratchd, n, sizeof(const double*), compare_point3d);
+    qsort(scratch, n, sizeof(*scratch), compare_point3d);
 
     dlnode_t * q = list+1;
     assert(list->next == list + 1);
     assert(q->next == list + 2);
     for (size_t i = 0; i < n; i++) {
         dlnode_t * p = list3 + i;
-        p->x = scratchd[i];
+        p->x = scratch[i];
         // clearPoint:
         assert(list->next == list + 1);
         // FIXME: Do we need to initialize this here?
@@ -311,7 +310,7 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
         p->prev = q;
         q = p;
     }
-    free(scratchd);
+    free(scratch);
     q = list->prev;
     (list3 + n - 1)->next = q;
     q->prev = list3 + n - 1;
@@ -321,7 +320,8 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
 
 
 
-static void free_cdllist(dlnode_t * list)
+static void
+free_cdllist(dlnode_t * list)
 {
     free((void*) list->x); // Free sentinels.
     free(list);
@@ -335,7 +335,7 @@ static void free_cdllist(dlnode_t * list)
 
 
 
-static double
+static inline double
 compute_area3d_simple(const double * px, const dlnode_t * q)
 {
     const dlnode_t * u = q->cnext[1];
@@ -382,10 +382,10 @@ hv3dplus(dlnode_t * list)
 
 }
 
-double hv3d_plus(const double * restrict data, int n, const double * restrict ref)
+double
+hv3d_plus(const double * restrict data, size_t n, const double * restrict ref)
 {
-    ASSUME(n >= 0);
-    dlnode_t * list = setup_cdllist(data, (size_t) n, ref);
+    dlnode_t * list = setup_cdllist(data, n, ref);
     double hv = hv3dplus(list);
     free_cdllist(list);
     return hv;
