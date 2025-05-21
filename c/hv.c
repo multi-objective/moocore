@@ -838,19 +838,19 @@ compare_x_asc_y_asc (const void * restrict p1, const void * restrict p2)
                              ((y1 < y2) ? -1 : ((y1 > y2) ? 1 : 0)));
 }
 
-double hv2d(const double * restrict data, int n, const double * restrict ref)
+double hv2d(const double * restrict data, size_t n, const double * restrict ref)
 {
     const double **p = malloc (n * sizeof(double *));
     if (unlikely(!p)) return -1;
 
-    for (int k = 0; k < n; k++)
+    for (size_t k = 0; k < n; k++)
         p[k] = data + 2 * k;
 
     qsort(p, n, sizeof(*p), &compare_x_asc_y_asc);
 
     double hyperv = 0;
     double prev_j = ref[1];
-    int j = 0;
+    size_t j = 0;
     do {
         /* Filter everything that may be above the ref point. */
         while (j < n && p[j][1] >= prev_j)
@@ -1094,7 +1094,7 @@ double fpli_hv(const double * restrict data, int d, int n,
                const double * restrict ref)
 {
     if (unlikely(n == 0)) return 0.0;
-    if (d == 2) return hv2d(data, n, ref);
+    if (d == 2) return hv2d(data, (size_t) n, ref);
     ASSUME(d < 256);
     ASSUME(d > 2);
     dimension_t dim = (dimension_t) d;
