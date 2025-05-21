@@ -23,7 +23,7 @@ from pymoo.util.nds.non_dominated_sorting import (
 # See https://github.com/multi-objective/testsuite/tree/main/data
 files = {
     "test2D-200k": dict(file="test2D-200k.inp.xz", ranges=(1000, 10000, 1000)),
-    "ran3d-10k": dict(file="ran.1000pts.3d.10", ranges=(1000, 10000, 1000)),
+    "ran3d-10k": dict(file="ran.1000pts.3d.10", ranges=(1000, 5000, 1000)),
 }
 
 

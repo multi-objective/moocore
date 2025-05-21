@@ -33,6 +33,24 @@ def read_datasets_and_filter_dominated(filename):
     return x
 
 
+def get_package_version(package):
+    match package:
+        case "moocore":
+            from moocore import __version__ as version
+        case "botorch":
+            from botorch import __version__ as version
+        case "pymoo":
+            from pymoo import __version__ as version
+        case "jMetalPy":
+            from jmetal import __version__ as version
+        case "DEAP_er":
+            version = "DEAP-er"
+        case _:
+            raise ValueError(f"unknown package {package}")
+
+    return version
+
+
 class Bench:
     # FIXME: How to get this info automatically?
     cpu = "Intel i5-6200U 2.30GHz"
@@ -42,6 +60,10 @@ class Bench:
         self.n = n
         self.bench = bench
         self.times = {k: [] for k in bench.keys()}
+        self.versions = {
+            what: f"{what} ({get_package_version(what)})"
+            for what in bench.keys()
+        }
 
     def keys(self):
         return self.bench.keys()
@@ -57,7 +79,11 @@ class Bench:
         for what in self.keys():
             self.times[what] = np.asarray(self.times[what])
 
-        df = pd.DataFrame(dict(n=self.n, **self.times)).set_index("n")
+        df = (
+            pd.DataFrame(dict(n=self.n, **self.times))
+            .set_index("n")
+            .rename(columns=self.versions)
+        )
         df.plot(
             grid=True,
             ylabel="CPU time (seconds)",
@@ -73,7 +99,11 @@ class Bench:
                 continue
             reltimes["Rel_" + what] = self.times[what] / self.times["moocore"]
 
-        df = pd.DataFrame(dict(n=self.n, **reltimes)).set_index("n")
+        df = (
+            pd.DataFrame(dict(n=self.n, **reltimes))
+            .set_index("n")
+            .rename(columns=self.versions)
+        )
         df.plot(
             grid=True,
             ylabel="Time relative to moocore",
