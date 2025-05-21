@@ -50,8 +50,6 @@
 #include "common.h"
 #include "hv.h"
 
-typedef uint_fast8_t dimension_t;
-
 static int compare_tree_asc(const void *p1, const void *p2);
 
 /*-----------------------------------------------------------------------------
