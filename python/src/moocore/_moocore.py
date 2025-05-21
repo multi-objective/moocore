@@ -1299,6 +1299,12 @@ def eaf(data: ArrayLike, /, percentiles: list = []) -> np.ndarray:
     -------
         EAF data points, with the same number of columns as the input argument, but a different number of rows. The last column represents the EAF percentile for that data point.
 
+    See Also
+    --------
+    mooplot.plot_eaf: Plotting the EAF.
+
+
+
     Examples
     --------
     >>> x = moocore.get_dataset("input1.dat")
@@ -1532,6 +1538,10 @@ def eafdiff(
     Calculate the differences between the empirical attainment functions of two
     data sets.
 
+    .. warning::
+        The current implementation only supports 2 objectives.
+
+
     Parameters
     ----------
     x, y : ArrayLike
@@ -1566,7 +1576,7 @@ def eafdiff(
 
     See Also
     --------
-    moocore.read_datasets, mooplot.eafdiffplot
+    mooplot.eafdiffplot: Plotting EAF differences.
 
 
     Examples

@@ -11,6 +11,7 @@ moocore: Core Algorithms for Multi-Objective Optimization
    API reference <reference/index>
    Examples <auto_examples/index>
    whatsnew/index
+   contribute/index
 
 **Version**: |version| (:ref:`whatsnew`)
 

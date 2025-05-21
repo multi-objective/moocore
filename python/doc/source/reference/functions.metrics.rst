@@ -1,3 +1,5 @@
+.. _unary_quality_metrics:
+
 =====================
 Unary quality metrics
 =====================

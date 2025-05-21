@@ -1,6 +1,6 @@
 .. module:: mooocore
 
-.. _reference:
+.. _api_reference:
 
 #############
 API reference
@@ -12,9 +12,6 @@ API reference
 This reference manual details functions, modules, and objects
 included in moocore, describing what they are and what they do.
 For learning how to use moocore, see the :ref:`complete documentation <moocore_docs_mainpage>`.
-
-Python API
-==========
 
 .. toctree::
    :maxdepth: 2
