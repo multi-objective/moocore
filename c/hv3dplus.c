@@ -175,7 +175,7 @@ new_avl_node(dlnode_t * p, avl_node_t * node)
 /* ---------------------------------- Update data structure ---------------------------------------*/
 
 static inline void
-removeFromz(dlnode_t * old)
+remove_from_z(dlnode_t * old)
 {
     old->prev->next = old->next;
     old->next->prev = old->prev;
@@ -235,11 +235,11 @@ preprocessing(dlnode_t * list, size_t n)
         assert(prev_x[1] <= px[1]);
         assert(prev_x[2] <= px[2]);
         if (prev_x[0] <= px[0]) { // px is dominated by a point in the tree.
-            removeFromz(p);
+            remove_from_z(p);
         } else if (node_point(nodeaux)[1] == px[1]) { // px is dominated by a point in the tree.
             // FIXME: If the points were ordered by asc x we would only need the first condition.
             assert(node_point(nodeaux)[0] < px[0]);
-            removeFromz(p);
+            remove_from_z(p);
         } else {
             assert(node_point(nodeaux)[1] >= px[1]);
             // Delete everything in the tree that is dominated by pj.
@@ -268,7 +268,7 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
 {
     ASSUME(n >= 1);
     const dimension_t d = 3;
-    const double **scratch = malloc(n * sizeof(const double*));
+    const double **scratch = malloc(n * sizeof(*scratch));
     size_t i, j;
     for (i = 0, j = 0; j < n; j++) {
         /* Filters those points that do not strictly dominate the reference
@@ -297,14 +297,12 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     for (size_t i = 0; i < n; i++) {
         dlnode_t * p = list3 + i;
         p->x = scratch[i];
-        // clearPoint:
-        assert(list->next == list + 1);
-        // FIXME: Do we need to initialize this here?
-        p->closest[0] = list + 1;
-        p->closest[1] = list;
-        // FIXME: Do we need to initialize this here?
-        p->cnext[0] = list + 1;
-        p->cnext[1] = list;
+        // Initialize it when debugging so it will crash if uninitialized.
+        DEBUG1(
+            p->closest[0] = NULL;
+            p->closest[1] = NULL;
+            p->cnext[0] = NULL;
+            p->cnext[1] = NULL;);
         // Link the list in order.
         q->next = p;
         p->prev = q;
@@ -344,7 +342,8 @@ compute_area3d_simple(const double * px, const dlnode_t * q)
     while (px[0] < u->x[0]) {
         q = u;
         u = u->cnext[1];
-        assert((q->x[0] - px[0]) * (u->x[1] - q->x[1]) > 0);
+        // With repeated coordinates, they can be zero.
+        assert((q->x[0] - px[0] >= 0) && (u->x[1] - q->x[1] >= 0));
         area += (q->x[0] - px[0]) * (u->x[1] - q->x[1]);
     }
     return area;
@@ -353,15 +352,15 @@ compute_area3d_simple(const double * px, const dlnode_t * q)
 static double
 hv3dplus(dlnode_t * list)
 {
-    // restartList:
-    list->next->cnext[1] = list; // Link sentinels (-inf ref[1] -inf) and (ref[0] -inf -inf).
-    list->cnext[0] = list+1;
+    // restart_list_y:
     assert(list + 1 == list->next);
+    list->cnext[0] = list+1;
+    list->cnext[0]->cnext[1] = list; // Link sentinels (-inf ref[1] -inf) and (ref[0] -inf -inf).
 
     double area = 0;
     double volume = 0;
     dlnode_t * p = (list+1)->next;
-    dlnode_t * stop = list+2;
+    const dlnode_t * stop = list+2;
     assert(stop == list->prev);
     while (p != stop) {
         p->cnext[0] = p->closest[0];
