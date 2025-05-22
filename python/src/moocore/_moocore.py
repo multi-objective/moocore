@@ -390,18 +390,7 @@ def hypervolume(
     r"""Hypervolume indicator.
 
     Compute the hypervolume metric with respect to a given reference point
-    assuming minimization of all objectives. For 2D and 3D, the algorithm used
-    :footcite:p:`FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec` has :math:`O(n
-    \log n)` complexity, where :math:`n` is the number of input points.  For 4D
-    or higher, it uses a recursive algorithm that has the 3D algorithm as a
-    base case :footcite:p:`FonPaqLop06:hypervolume`, which has :math:`O(n^{m-2}
-    \log n)` time and linear space complexity in the worst-case, where
-    :math:`m` is the dimension of the points, but experimental results show
-    that the pruning techniques used may reduce the time complexity even
-    further.  Andreia P. Guerreiro improved the integration of the 3D case with
-    the recursive algorithm, which leads to significant reduction of
-    computation time. She has also enhanced the numerical stability of the
-    algorithm by avoiding floating-point comparisons of partial hypervolumes.
+    assuming minimization of all objectives.
 
     .. seealso:: For details about the hypervolume, see :ref:`hypervolume_metric`.
 
@@ -425,6 +414,30 @@ def hypervolume(
     --------
     Hypervolume : object-oriented interface.
     RelativeHypervolume : Compute hypervolume relative to a reference set.
+
+
+    Notes
+    -----
+    For 2D and 3D, the algorithms used
+    :footcite:p:`FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec` have :math:`O(n
+    \log n)` complexity, where :math:`n` is the number of input points.  The 3D case uses the HV3D\ :sup:`+` algorithm :footcite:p:`GueFon2017hv4d`, which has the same complexity as the HV3D algorithm :footcite:p:`FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec`, but it is faster in practice.
+
+    For 4D, the algorithm used is HV4D\ :sup:`+` :footcite:p:`GueFon2017hv4d`,
+    which has :math:`O(n^2)` complexity.  Compared to the `original
+    implementation <https://github.com/apguerreiro/HVC/>`_, this implementation
+    correctly handles weakly dominated points and has been further optimized
+    for speed.
+
+    For 5D or higher, it uses a recursive algorithm that has the 3D algorithm
+    as a base case :footcite:p:`FonPaqLop06:hypervolume`, which has
+    :math:`O(n^{m-2} \log n)` time and linear space complexity in the
+    worst-case, where :math:`m` is the dimension of the points, but
+    experimental results show that the pruning techniques used may reduce the
+    time complexity even further.  Andreia P. Guerreiro improved the
+    integration of the 3D case with the recursive algorithm, which leads to
+    significant reduction of computation time. She has also enhanced the
+    numerical stability of the algorithm by avoiding floating-point comparisons
+    of partial hypervolumes.
 
 
     References

@@ -41,26 +41,11 @@
 
 ******************************************************************************/
 
-
-#include <stdlib.h>
-#include <limits.h>
 #include <float.h>
 #include <string.h>
 #include "common.h"
-#include "sort.h"
-
-/*
-  Writing 'struct dlnode * next[1]' instead of 'struct dlnode * next' allows us
-  to share more code with the 4D case.  The compiler should be able to remove
-  the extra indirection.
-*/
-typedef struct dlnode {
-    const double *x;            // point coordinates (objective vector).
-    struct dlnode * closest[2]; // closest[0] == cx, closest[1] == cy
-    struct dlnode * cnext[2];   // current next
-    struct dlnode * next[1]; // keeps the points sorted according to coordinate 3.
-    struct dlnode * prev[1]; // keeps the points sorted according to coordinate 3 (except the sentinel 3).
-} dlnode_t;
+#define HV_DIMENSION 3
+#include "hv_priv.h"
 
 typedef const double avl_item_t;
 typedef struct avl_node_t {
@@ -77,60 +62,6 @@ typedef struct avl_node_t {
 #include "avl_tiny.h"
 
 /* ---------------- Data Structures Functions --------------------------------*/
-
-static void
-init_sentinels(dlnode_t * list, const double * ref)
-{
-    const dimension_t dim = 3;
-    /* The list that keeps the points sorted according to the 3rd-coordinate
-       does not really need the 3 sentinels, just one to represent (-inf, -inf,
-       ref[2]).  But we need the other two to maintain a list of nondominated
-       projections in the (x,y)-plane of points that is kept sorted according
-       to the 1st and 2nd coordinates, and for that list we need two sentinels
-       to represent (-inf, ref[1]) and (ref[0], -inf). */
-
-    // Allocate the 3 sentinels of dimension dim.
-    const double z3[] = {
-        -DBL_MAX, ref[1], -DBL_MAX, // Sentinel 1
-        ref[0], -DBL_MAX, -DBL_MAX, // Sentinel 2
-        -DBL_MAX, -DBL_MAX, ref[2]  // Sentinel 2
-    };
-    double * x = malloc(sizeof(z3));
-    memcpy(x, z3, sizeof(z3));
-
-    dlnode_t * s1 = list;
-    dlnode_t * s2 = list + 1;
-    dlnode_t * s3 = list + 2;
-
-    // Sentinel 1
-    s1->x = x;
-    s1->closest[0] = s2;
-    s1->closest[1] = s1;
-    s1->cnext[0] = NULL;
-    s1->cnext[1] = NULL;
-    s1->next[0] = s2;
-    s1->prev[0] = s3;
-
-    x += dim;
-    // Sentinel 2
-    s2->x = x;
-    s2->closest[0] = s2;
-    s2->closest[1] = s1;
-    s2->cnext[0] = NULL;
-    s2->cnext[1] = NULL;
-    s2->next[0] = s3;
-    s2->prev[0] = s1;
-
-    x += dim;
-    // Sentinel 3
-    s3->x = x;
-    s3->closest[0] = s2;
-    s3->closest[1] = s1;
-    s3->cnext[0] = NULL;
-    s3->cnext[1] = NULL;
-    s3->next[0] = s1;
-    s3->prev[0] = s2;
-}
 
 static inline void
 print_x(dlnode_t * p)
@@ -152,15 +83,6 @@ new_avl_node(dlnode_t * p, avl_node_t * node)
     node->dlnode = p;
     node->item = p->x;
     return node;
-}
-
-/* ------------ Update data structure ---------------------------------------*/
-
-static inline void
-remove_from_z(dlnode_t * old)
-{
-    old->prev[0]->next[0] = old->next[0];
-    old->next[0]->prev[0] = old->prev[0];
 }
 
 
@@ -243,102 +165,22 @@ preprocessing(dlnode_t * list, size_t n)
     free(tnodes);
 }
 
-/*
- * Setup circular double-linked list in each dimension.
- */
-static dlnode_t *
-setup_cdllist(const double * restrict data, size_t n, const double * restrict ref)
-{
-    ASSUME(n >= 1);
-    const dimension_t d = 3;
-    const double **scratch = malloc(n * sizeof(*scratch));
-    size_t i, j;
-    for (i = 0, j = 0; j < n; j++) {
-        /* Filters those points that do not strictly dominate the reference
-           point.  This is needed to ensure that the points left are only those
-           that are needed to calculate the hypervolume. */
-        if (unlikely(strongly_dominates(data + j * d, ref, d))) {
-            scratch[i] = data + j * d;
-            i++;
-        }
-    }
-    n = i; // Update number of points.
-    if (n > 1)
-        qsort(scratch, n, sizeof(*scratch), cmp_double_asc_rev_3d);
-
-    dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(*list));
-    init_sentinels(list, ref);
-    if (unlikely(n == 0)) {
-        free(scratch);
-        return list;
-    }
-
-    dlnode_t * q = list+1;
-    dlnode_t * list3 = list+3;
-    assert(list->next[0] == list + 1);
-    assert(q->next[0] == list + 2);
-    for (size_t i = 0; i < n; i++) {
-        dlnode_t * p = list3 + i;
-        p->x = scratch[i];
-        // Initialize it when debugging so it will crash if uninitialized.
-        DEBUG1(
-            p->closest[0] = NULL;
-            p->closest[1] = NULL;
-            p->cnext[0] = NULL;
-            p->cnext[1] = NULL;);
-        // Link the list in order.
-        q->next[0] = p;
-        p->prev[0] = q;
-        q = p;
-    }
-    free(scratch);
-    assert(q == (list3 + n - 1));
-    assert(list+2 == list->prev[0]);
-    // q = last point, q->next = s3, s3->prev = last point
-    q->next[0] = list + 2;
-    (list+2)->prev[0] = q;
-    preprocessing(list, n);
-    return list;
-}
-
-
-
-static void
-free_cdllist(dlnode_t * list)
-{
-    free((void*) list->x); // Free sentinels.
-    free(list);
-}
-
 static inline double
 compute_area3d_simple(const double * px, const dlnode_t * q)
 {
-    const dlnode_t * u = q->cnext[1];
-    double area = (q->x[0] - px[0]) * (u->x[1] - px[1]);
-    assert(area > 0);
-    while (px[0] < u->x[0]) {
-        q = u;
-        u = u->cnext[1];
-        // With repeated coordinates, they can be zero.
-        assert((q->x[0] - px[0] >= 0) && (u->x[1] - q->x[1] >= 0));
-        area += (q->x[0] - px[0]) * (u->x[1] - q->x[1]);
-    }
-    return area;
+    return compute_area_simple(px, q, 1);
 }
 
 static double
 hv3dplus(dlnode_t * list)
 {
-    // restart_list_y:
-    assert(list + 1 == list->next[0]);
-    list->cnext[0] = list+1;
-    (list+1)->cnext[1] = list; // Link sentinels (-inf ref[1] -inf) and (ref[0] -inf -inf).
+    restart_list_y(list);
+    assert(list+2 == list->prev[0]);
 
     double area = 0;
     double volume = 0;
     dlnode_t * p = (list+1)->next[0];
     const dlnode_t * stop = list+2;
-    assert(stop == list->prev[0]);
     while (p != stop) {
         p->cnext[0] = p->closest[0];
         p->cnext[1] = p->closest[1];

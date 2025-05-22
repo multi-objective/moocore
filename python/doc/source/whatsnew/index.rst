@@ -7,7 +7,7 @@ What's new
 Version 0.1.7 (dev)
 -------------------
 
-- :func:`~moocore.hypervolume` now uses the HV3D+ algorithm for the 3D case.
+- :func:`~moocore.hypervolume` now uses the HV3D\ :sup:`+` algorithm for the 3D case and the HV4D\ :sup:`+` algorithm for the 4D case.
 - :func:`~moocore.read_datasets` is significantly faster for large files.
 - :func:`~moocore.is_nondominated` and :func:`~moocore.filter_dominated` are
   faster for 3D inputs.
