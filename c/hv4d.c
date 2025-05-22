@@ -147,6 +147,23 @@ remove_from_z(dlnode_t * old)
     old->next[0]->prev[0] = old->prev[0];
 }
 
+static void
+free_cdllist(dlnode_t * list)
+{
+    free((void*) list->x); // Free sentinels.
+    free(list);
+}
+
+static inline void
+restart_list_y(dlnode_t * list)
+{
+    assert(list+1 == list->next[0]);
+    list->next[0]->cnext[1] = list; //link sentinels sentinels ((-inf ref[1] -inf) and (ref[0] -inf -inf))
+    list->cnext[0] = list->next[0];
+
+}
+
+
 static inline bool
 lex_cmp_3d_102(const double * a, const double *b)
 {
@@ -191,32 +208,8 @@ update_links(dlnode_t * list, dlnode_t * new)
     return ndom;
 }
 
-static inline bool
-weakly_dominates(const double * a, const double * b, dimension_t dim)
-{
-    ASSUME(dim >= 1);
-    for (dimension_t d = 0; d < dim; d++)
-        if (a[d] > b[d])
-            return false;
-    return true;
-}
-
-static int
-compare_point4d(const void * p1, const void * p2)
-{
-    const double * x1 = *((const double **)p1);
-    const double * x2 = *((const double **)p2);
-
-    for (int i = 3; i >= 0; i--) {
-        if (x1[i] < x2[i])
-            return -1;
-        if (x1[i] > x2[i])
-            return 1;
-    }
-    return 0;
-}
-
-static void print_point(const char *s, const double * x)
+static inline void _attr_maybe_unused
+print_point(const char *s, const double * x)
 {
     fprintf(stderr, "%s: %g %g %g %g\n", s, x[0], x[1], x[2], x[4]);
 }
@@ -230,7 +223,7 @@ static dlnode_t *
 setup_cdllist(const double * restrict data, size_t n, const double * restrict ref, dimension_t dim)
 {
     ASSUME(n >= 1);
-    const double **scratch = new_sorted_scratch(data, &n, dim, ref, compare_point4d);
+    const double **scratch = new_sorted_scratch(data, &n, dim, ref, cmp_double_asc_rev_4d);
     dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(*list));
     init_sentinels(list, ref, dim);
     if (n == 0) {
@@ -277,30 +270,6 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
 }
 
 
-static void
-free_cdllist(dlnode_t * list)
-{
-    free((void*) list->x); // Free sentinels.
-    free(list);
-}
-
-
-
-
-
-/* ----------------------Hypervolume Indicator Algorithms ---------------------------------------*/
-
-
-
-static inline void
-restart_list_y(dlnode_t * list)
-{
-    assert(list+1 == list->next[0]);
-    list->next[0]->cnext[1] = list; //link sentinels sentinels ((-inf ref[1] -inf) and (ref[0] -inf -inf))
-    list->cnext[0] = list->next[0];
-
-}
-
 static inline double
 compute_area_simple(const double * px, int i, const dlnode_t * q)
 {
@@ -324,8 +293,8 @@ restart_base_setup_z_and_closest(dlnode_t * list, dlnode_t * new)
     assert(closest0 == list+1);
     const double * closest1x = closest1->x;
     const double * closest0x = closest0->x;
-    dlnode_t * p = list->next[0]->next[0];
-    assert(p == (list+1)->next[0]);
+    dlnode_t * p = closest0->next[0];
+    assert(p == list->next[0]->next[0]);
     const double * px =  p->x;
     const double * newx = new->x;
 
@@ -373,6 +342,7 @@ one_contribution_3d(dlnode_t * list, dlnode_t * new)
     dlnode_t * p = new->next[0];
     const double * px = p->x;
     double lastz = newx[2];
+    assert(!weakly_dominates(px, newx, 4));
     double volume = area * (px[2] - lastz);
     while (px[0] > newx[0] || px[1] > newx[1]) {
         p->cnext[0] = p->closest[0];
@@ -399,6 +369,8 @@ one_contribution_3d(dlnode_t * list, dlnode_t * new)
             p->cnext[0]->cnext[1] = p;
             new->cnext[1] = p;
         }
+        // FIXME: this fails:
+        // assert(!weakly_dominates(px, p->next[0]->x, 4));
         lastz = px[2];
         p = p->next[0];
         px = p->x;
@@ -421,7 +393,9 @@ hv4dplusU(dlnode_t * list)
     while (new != last) {
         volume += one_contribution_3d(list, new);
         add_to_z(new);
+        // FIXME update_links return ndom but that value is not used by the algorithm?
         update_links(list, new);
+        assert(!weakly_dominates(new->x, new->next[1]->x, 4));
         double height = new->next[1]->x[3] - new->x[3];
         hv += volume * height;
         new = new->next[1];
