@@ -1,6 +1,6 @@
 # moocore 0.1.6.900
 
- * `hypervolume()` now uses the HV3D+ algorithm for the 3D case.
+ * `hypervolume()` now uses the HV3D+ algorithm for the 3D case and the HV4D+ algorithm for the 4D case.
 
  * `read_datasets()` is significantly faster for large files.
 

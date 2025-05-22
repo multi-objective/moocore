@@ -2,7 +2,7 @@
 
 #  Makefile for moocore
 
-VERSION = 0.16.3$(REVISION)
+VERSION = 0.16.4$(REVISION)
 
 #-----------------------------------------------------------------------
 
@@ -82,12 +82,55 @@ BINDIR?=../bin
 BINDIR:=$(abspath $(BINDIR))
 
 ## Define source files
-SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c hv_contrib.c hv.c hv3dplus.c pareto.c whv.c whv_hype.c \
-	eaf.c eafdiff.c eaf_main.c eaf3d.c avl.c cmdline.c libutil.c main-hv.c timer.c \
-	rng.c mt19937/mt19937.c
-HEADERS = io.h io_priv.h common.h gcc_attribs.h igd.h epsilon.h nondominated.h hv.h cmdline.h whv.h whv_hype.h \
-	eaf.h cvector.h avl.h bit_array.h \
-	rng.h ziggurat_constants.h mt19937/mt19937.h
+SRCS =  avl.c                                                                \
+        cmdline.c                                                            \
+        dominatedsets.c                                                      \
+        eaf3d.c                                                              \
+        eaf.c                                                                \
+        eafdiff.c                                                            \
+        eaf_main.c                                                           \
+        epsilon.c                                                            \
+        hv3dplus.c                                                           \
+        hv4d.c                                                               \
+        hv.c                                                                 \
+        hv_contrib.c                                                         \
+        igd.c                                                                \
+        io.c                                                                 \
+        libutil.c                                                            \
+        main-hv.c                                                            \
+        mt19937/mt19937.c                                                    \
+        ndsort.c                                                             \
+        nondominated.c                                                       \
+        pareto.c                                                             \
+        rng.c                                                                \
+        timer.c                                                              \
+        whv.c                                                                \
+        whv_hype.c
+
+HDRS =  avl.h                                                                \
+        avl_tiny.h                                                           \
+        bit_array.h                                                          \
+        cmdline.h                                                            \
+        common.h                                                             \
+        config.h                                                             \
+        cvector.h                                                            \
+        eaf.h                                                                \
+        epsilon.h                                                            \
+        gcc_attribs.h                                                        \
+        hv.h                                                                 \
+        hv_priv.h                                                            \
+        igd.h                                                                \
+        io.h                                                                 \
+        io_priv.h                                                            \
+        mt19937/mt19937.h                                                    \
+        nondominated.h                                                       \
+        pow_int.h                                                            \
+        rng.h                                                                \
+        sort.h                                                               \
+        timer.h                                                              \
+        whv.h                                                                \
+        whv_hype.h                                                           \
+        ziggurat_constants.h
 
 # Relative to root folder.
 DIST_OTHER_FILES =  git_version *.mk
@@ -211,7 +254,7 @@ mex: Hypervolume_MEX.c $(LIBHV_OBJS)
 	$(call ECHO,---> You can use 'make mex MEXFLAGS="-O -std=c99"' to pass flags to mex. Code compiled by mex is less optimized (slower) than the default 'hv' command-line program <---)
 	$(MEX) -v $(MEXFLAGS) -std=c99 $^
 
-DIST_SRC_FILES = $(DIST_OTHER_FILES) $(OBJS:.o=.c) $(HEADERS)
+DIST_SRC_FILES = $(DIST_OTHER_FILES) $(OBJS:.o=.c) $(HDRS)
 DIST_SRC:= moocore-$(VERSION)-src
 dist: DEBUG=0
 dist: CDEBUG=

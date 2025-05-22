@@ -1078,6 +1078,7 @@ hv_recursive_ref(avl_tree_t * restrict tree, dlnode_t * restrict list,
 
 
 double hv3d_plus(const double * restrict data, size_t n, const double * restrict ref);
+double hv4d(const double * restrict data, size_t n, const double * restrict ref);
 
 /*
    Returns 0 if no point strictly dominates ref.
@@ -1089,6 +1090,7 @@ double fpli_hv(const double * restrict data, int d, int n,
     if (unlikely(n == 0)) return 0.0;
     ASSUME(d < 256);
     ASSUME(d > 1);
+    if (d == 4) return hv4d(data, n, ref);
     if (d == 3) return hv3d_plus(data, n, ref);
     if (d == 2) return hv2d(data, n, ref);
     dimension_t dim = (dimension_t) d;

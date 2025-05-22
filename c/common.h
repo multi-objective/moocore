@@ -28,7 +28,7 @@ void warnprintf(const char *format,...) ATTRIBUTE_FORMAT_PRINTF(1, 2);
         perror(buffer);                                                        \
         exit(EXIT_FAILURE);                                                    \
     } while(0)
-#endif
+#endif // R_PACKAGE
 
 #include <stdbool.h>
 static inline void *
