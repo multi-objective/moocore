@@ -75,9 +75,6 @@ init_sentinels(dlnode_t * list, const double * ref, dimension_t dim)
        projections in the (x,y)-plane of points that is kept sorted according
        to the 1st and 2nd coordinates, and for that list we need two sentinels
        to represent (-inf, ref[1]) and (ref[0], -inf). */
-    dlnode_t * s1 = list;
-    dlnode_t * s2 = list + 1;
-    dlnode_t * s3 = list + 2;
 
     // Allocate the 3 sentinels of dimension dim.
     const double z3[] = {
@@ -87,6 +84,10 @@ init_sentinels(dlnode_t * list, const double * ref, dimension_t dim)
     };
     double * x = malloc(sizeof(z3));
     memcpy(x, z3, sizeof(z3));
+    dlnode_t * s1 = list;
+    dlnode_t * s2 = list + 1;
+    dlnode_t * s3 = list + 2;
+
     // Sentinel 1
     s1->x = x;
     s1->closest[0] = s2;
@@ -120,20 +121,6 @@ init_sentinels(dlnode_t * list, const double * ref, dimension_t dim)
 
 
 /* ---------------------------------- Sort ---------------------------------------*/
-
-static int
-compare_point3d(const void * restrict p1, const void * restrict p2)
-{
-    const double *x1 = *((const double **)p1);
-    const double *x2 = *((const double **)p2);
-    for (int i = 2; i >= 0; i--) {
-        if (x1[i] < x2[i])
-            return -1;
-        if (x1[i] > x2[i])
-            return 1;
-    }
-    return 0;
-}
 
 static void print_x(dlnode_t * p)
 {
@@ -280,18 +267,18 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
         }
     }
     n = i; // Update number of points.
+    if (n > 1)
+        qsort(scratch, n, sizeof(*scratch), cmp_double_asc_rev_3d);
 
     dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(*list));
-    dlnode_t * list3 = list+3;
     init_sentinels(list, ref, d);
     if (unlikely(n == 0)) {
         free(scratch);
         return list;
     }
 
-    qsort(scratch, n, sizeof(*scratch), compare_point3d);
-
     dlnode_t * q = list+1;
+    dlnode_t * list3 = list+3;
     assert(list->next == list + 1);
     assert(q->next == list + 2);
     for (size_t i = 0; i < n; i++) {
@@ -309,9 +296,11 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
         q = p;
     }
     free(scratch);
-    q = list->prev;
-    (list3 + n - 1)->next = q;
-    q->prev = list3 + n - 1;
+    assert(q == (list3 + n - 1));
+    assert(list+2 == list->prev);
+    // q = last point, q->next = s3, s3->prev = last point
+    q->next = list + 2;
+    q->next->prev = q;
     preprocessing(list, n);
     return list;
 }
@@ -378,7 +367,6 @@ hv3dplus(dlnode_t * list)
         p = p->next;
     }
     return volume;
-
 }
 
 double
