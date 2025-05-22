@@ -40,7 +40,7 @@
 #include <float.h>
 #include <string.h>
 #include "common.h"
-#include "sort.h"
+#include "hv_priv.h"
 
 typedef struct dlnode {
     const double *x;            // point coordinates (objective vector).
@@ -255,21 +255,7 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
 {
     ASSUME(n >= 1);
     const dimension_t d = 3;
-    const double **scratch = malloc(n * sizeof(*scratch));
-    size_t i, j;
-    for (i = 0, j = 0; j < n; j++) {
-        /* Filters those points that do not strictly dominate the reference
-           point.  This is needed to ensure that the points left are only those
-           that are needed to calculate the hypervolume. */
-        if (unlikely(strongly_dominates(data + j * d, ref, d))) {
-            scratch[i] = data + j * d;
-            i++;
-        }
-    }
-    n = i; // Update number of points.
-    if (n > 1)
-        qsort(scratch, n, sizeof(*scratch), cmp_double_asc_rev_3d);
-
+    const double **scratch = new_sorted_scratch(data, &n, d, ref, cmp_double_asc_rev_3d);
     dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(*list));
     init_sentinels(list, ref, d);
     if (unlikely(n == 0)) {

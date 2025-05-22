@@ -82,7 +82,8 @@ BINDIR?=../bin
 BINDIR:=$(abspath $(BINDIR))
 
 ## Define source files
-SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c hv_contrib.c hv.c hv3dplus.c pareto.c whv.c whv_hype.c \
+SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c pareto.c \
+	hv_contrib.c hv.c hv3dplus.c hv4d.c whv.c whv_hype.c \
 	eaf.c eafdiff.c eaf_main.c eaf3d.c avl.c cmdline.c libutil.c main-hv.c timer.c \
 	rng.c mt19937/mt19937.c
 HEADERS = io.h io_priv.h common.h gcc_attribs.h igd.h epsilon.h nondominated.h hv.h cmdline.h whv.h whv_hype.h \

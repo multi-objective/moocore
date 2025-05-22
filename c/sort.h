@@ -3,11 +3,14 @@
 
 #include "common.h"
 
+// General type for comparison functions used in qsort().
+typedef int (*cmp_fun_t)(const void *, const void *);
+
 /*
    x < y, i.e., x is strictly lower than y in all dimensions. Assumes minimization.
 */
 
-static bool
+static inline bool
 strongly_dominates(const double * restrict x, const double * restrict y, dimension_t dim)
 {
     ASSUME(dim >= 2);
@@ -35,6 +38,12 @@ static inline int
 cmp_double_asc_rev_3d(const void * restrict p1, const void * restrict p2)
 {
     return cmp_double_asc_rev(p1, p2, 3);
+}
+
+static inline bool
+lexicographic_less_3d(const double * a, const double * b)
+{
+    return (a[2] < b[2] || (a[2] == b[2] && (a[1] < b[1] || (a[1] == b[1] && a[0] <= b[0]))));
 }
 
 
