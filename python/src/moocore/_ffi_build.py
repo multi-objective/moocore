@@ -31,6 +31,7 @@ sources = [
     "eafdiff.c",
     "hv.c",
     "hv3dplus.c",
+    "hv4d.c",
     "hv_contrib.c",
     "io.c",
     "libutil.c",  # For fatal_error()
