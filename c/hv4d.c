@@ -191,6 +191,15 @@ update_links(dlnode_t * list, dlnode_t * new)
     return ndom;
 }
 
+static inline bool
+weakly_dominates(const double * a, const double * b, dimension_t dim)
+{
+    ASSUME(dim >= 1);
+    for (dimension_t d = 0; d < dim; d++)
+        if (a[d] > b[d])
+            return false;
+    return true;
+}
 
 static int
 compare_point4d(const void * p1, const void * p2)
@@ -205,6 +214,11 @@ compare_point4d(const void * p1, const void * p2)
             return 1;
     }
     return 0;
+}
+
+static void print_point(const char *s, const double * x)
+{
+    fprintf(stderr, "%s: %g %g %g %g\n", s, x[0], x[1], x[2], x[4]);
 }
 
 
@@ -228,8 +242,14 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     dlnode_t * list3 = list+3;
     assert(list->next[1] == list + 1);
     assert(q->next[1] == list + 2);
+    size_t j = 0;
     for (size_t i = 0; i < n; i++) {
-        dlnode_t * p = list3 + i;
+        if (weakly_dominates(q->x, scratch[i], dim)) {
+            /* print_point("q", q->x); */
+            /* print_point("i", scratch[i]); */
+            continue;
+        }
+        dlnode_t * p = list3 + j;
         p->x = scratch[i];
         assert(list->next[0] == list + 1);
         assert(list->next[1] == list + 1);
@@ -244,8 +264,12 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
         q->next[1] = p;
         p->prev[1] = q;
         q = p;
+        j++;
     }
+    n = j;
     free(scratch);
+    assert((list3 + n - 1) == q);
+    assert(list+2 == list->prev[1]);
     q = list->prev[1];
     (list3 + n - 1)->next[1] = q;
     q->prev[1] = list3 + n - 1;
