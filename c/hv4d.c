@@ -64,6 +64,16 @@ typedef struct dlnode {
 static void
 init_sentinels(dlnode_t * list, const double * ref, dimension_t dim)
 {
+    // Allocate the 3 sentinels of dimension dim.
+    const double z4[] = {
+        -DBL_MAX, ref[1], -DBL_MAX, -DBL_MAX, // Sentinel 1
+        ref[0], -DBL_MAX, -DBL_MAX, -DBL_MAX, // Sentinel 2
+        -DBL_MAX, -DBL_MAX, ref[2], ref[3]    // Sentinel 2
+    };
+
+    double * x = malloc(sizeof(z4));
+    memcpy(x, z4, sizeof(z4));
+
     /* The list that keeps the points sorted according to the 3rd-coordinate
        does not really need the 3 sentinels, just one to represent (-inf, -inf,
        ref[2]).  But we need the other two to maintain a list of nondominated
@@ -74,15 +84,6 @@ init_sentinels(dlnode_t * list, const double * ref, dimension_t dim)
     dlnode_t * s2 = list + 1;
     dlnode_t * s3 = list + 2;
 
-    // Allocate the 3 sentinels of dimension dim.
-    const double z4[] = {
-        -DBL_MAX, ref[1], -DBL_MAX, -DBL_MAX, // Sentinel 1
-        ref[0], -DBL_MAX, -DBL_MAX, -DBL_MAX, // Sentinel 2
-        -DBL_MAX, -DBL_MAX, ref[2], ref[3]    // Sentinel 2
-    };
-
-    double * x = malloc(sizeof(z4));
-    memcpy(x, z4, sizeof(z4));
     // Sentinel 1
     s1->x = x;
     s1->closest[0] = s2;
@@ -116,7 +117,7 @@ init_sentinels(dlnode_t * list, const double * ref, dimension_t dim)
     s3->cnext[1] = NULL;
     s3->cnext[0] = NULL;
     s3->next[0] = s1;
-    s3->next[1] = NULL;
+    s3->next[1] = s1;
     s3->prev[0] = s2;
     s3->prev[1] = s2;
     s3->ndomr = 0;
@@ -217,7 +218,6 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     ASSUME(n >= 1);
     const double **scratch = new_sorted_scratch(data, &n, dim, ref, compare_point4d);
     dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(*list));
-    dlnode_t * list3 = list+3;
     init_sentinels(list, ref, dim);
     if (n == 0) {
         free(scratch);
@@ -225,6 +225,7 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     }
 
     dlnode_t * q = list+1;
+    dlnode_t * list3 = list+3;
     assert(list->next[1] == list + 1);
     assert(q->next[1] == list + 2);
     for (size_t i = 0; i < n; i++) {
