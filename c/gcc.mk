@@ -21,11 +21,11 @@ endif
 ifndef MARCH
   MARCH=native
 endif
-gcc-guess-march = $(strip $(shell $(CC) -march=$(MARCH) $(CFLAGS)  -x c -S -\#\#\# - < /dev/null 2>&1 | \
-	 	            grep -m 1 -e cc1 | grep -o -e "march=[^'\"]*" | head -n 1 | sed 's,march=,,'))
-ifeq ($(gcc-guess-march),)
-  gcc-guess-march=unknown
-endif
 ifneq ($(MARCH),none)
-  OPT_CFLAGS += -march=$(MARCH)
+ MARCH_FLAGS = -march=$(MARCH)
+ gcc-guess-march = $(strip $(shell $(CC) $(CFLAGS) $(OPT_CFLAGS) $(MARCH_FLAGS)  -x c -S -\#\#\# - < /dev/null 2>&1 | \
+	 	            grep -m 1 -e cc1 | grep -o -e "march=[^'\"]*" | head -n 1 | sed 's,march=,,'))
+ ifeq ($(gcc-guess-march),)
+   gcc-guess-march=unknown
+ endif
 endif

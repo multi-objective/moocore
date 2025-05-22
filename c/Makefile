@@ -107,7 +107,7 @@ else
 CPPFLAGS += -U_GNU_SOURCE
 endif
 
-EXE_CFLAGS += $(SANITIZERS) $(OPT_CFLAGS) $(WARN_CFLAGS) \
+EXE_CFLAGS += $(SANITIZERS) $(OPT_CFLAGS) $(MARCH_FLAGS) $(WARN_CFLAGS) \
 	-DDEBUG=$(DEBUG) -DVERSION='"$(VERSION)"' -DMARCH='"$(gcc-guess-march)"'
 
 dominatedsetsexe = $(BINDIR)/dominatedsets$(EXE)
