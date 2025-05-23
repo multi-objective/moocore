@@ -11,7 +11,7 @@ ifeq ($(DEBUG), 0)
 # Options -fstandard-precision=fast -ftree-vectorize are not well supported
 # in some versions/architectures.
 else
-  SANITIZERS ?= -fsanitize=undefined -fsanitize=address
+  SANITIZERS ?= -fsanitize=undefined -fsanitize=address -fsanitize=float-cast-overflow -fsanitize=float-divide-by-zero
   OPT_CFLAGS ?= -g3 -O0
 endif
 
