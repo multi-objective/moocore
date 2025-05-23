@@ -4,12 +4,19 @@ BIBFILES="authors.bib abbrev.bib journals.bib articles.bib biblio.bib crossref.b
 
 for file in $BIBFILES; do
     # echo $file
-    curl --silent https://raw.githubusercontent.com/iridia-ulb/references/master/${file} -o ${file}
+    curl --silent --show-error https://raw.githubusercontent.com/iridia-ulb/references/master/${file} -o ${file}
+    if [ ! -s "${file}" ]; then
+        echo "error: ${file} is empty!"
+        exit 1
+    fi
 done
 tmpbib=$(mktemp --tmpdir tmpXXXXXXXXXX.bib)
 keys=$(paste -d '#' -s bibkeys.txt | sed 's/#/\\\|/g')
-bib2bib --warn-error --expand --expand-xrefs --no-comment --quiet --expand-xrefs $BIBFILES --remove pdf --remove alias -c "(\$key : \"$keys\")" -ob $tmpbib -oc /dev/null
-
+bib2bib --warn-error --expand --expand-xrefs --no-comment --expand-xrefs $BIBFILES --remove pdf --remove alias -c "(\$key : \"$keys\")" -ob $tmpbib -oc /dev/null
+if [ ! -s "${tmpbib}" ]; then
+    echo "error: ${tmpbib} is empty! keys:= $keys"
+    exit 1
+fi
 # Workaround https://github.com/GeoBosh/rbibutils/issues/9
 sed -i 's#\\slash #~/ #g' $tmpbib
 sed -i 's#\\hspace{0pt}#{}{}{}#g' $tmpbib
