@@ -176,6 +176,11 @@ lex_cmp_3d_012(const double * a, const double *b)
     return a[0] < b[0] || (a[0] == b[0] && (a[1] < b[1] || (a[1] == b[1] && a[2] < b[2])));
 }
 
+/*
+   Go through the points in the order of z and either remove points that are
+   dominated by new with respect to x,y,z or update the cx and cy lists by
+   adding new.
+*/
 static int
 update_links(dlnode_t * list, dlnode_t * new)
 {
@@ -192,6 +197,7 @@ update_links(dlnode_t * list, dlnode_t * new)
         if (newx[0] <= px[0]){
             //new <= p
             if (newx[1] <= px[1]){
+                assert(weakly_dominates(newx, px, 3));
                 p->ndomr++;
                 // p->domr = new;
                 ndom++;
@@ -310,6 +316,10 @@ restart_base_setup_z_and_closest(dlnode_t * list, dlnode_t * new)
         // setup_z_and_closest
         if (px[0] <= newx[0] && px[1] <= newx[1]) {
             new->ndomr++;
+            assert(weakly_dominates(px, newx, 4));
+            // FIXME: If it is dominated why update new->closest[0] and
+            // new->closest[1] and the rest? Why not return here?
+            return;
         } else if (px[1] < newx[1] && (px[0] < closest0x[0] || (px[0] == closest0x[0] && px[1] < closest0x[1]))) {
             closest0 = p;
             closest0x = closest0->x;
@@ -385,16 +395,20 @@ static double
 hv4dplusU(dlnode_t * list)
 {
     double volume = 0, hv = 0;
-    dlnode_t * last = list->prev[1];
+    dlnode_t * last = list+2;
     assert(last == list->prev[0]);
-    assert(last == list+2);
+    assert(last == list->prev[1]);
     dlnode_t * new = list->next[1]->next[1];
     assert(new == (list+1)->next[1]);
     while (new != last) {
-        volume += one_contribution_3d(list, new);
-        add_to_z(new);
-        // FIXME update_links return ndom but that value is not used by the algorithm?
-        update_links(list, new);
+        double new_v = one_contribution_3d(list, new);
+        assert(new_v > 0 || (new_v == 0 && new->ndomr));
+        if (new_v > 0) { // new was dominated by something else, so ignore it.
+            add_to_z(new);
+            // FIXME update_links return ndom but that value is not used by the algorithm?
+            update_links(list, new);
+            volume += new_v;
+        }
         assert(!weakly_dominates(new->x, new->next[1]->x, 4));
         double height = new->next[1]->x[3] - new->x[3];
         hv += volume * height;
