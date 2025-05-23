@@ -5,7 +5,7 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
-from bench import Bench, read_datasets
+from bench import Bench, read_datasets_and_filter_dominated
 
 import numpy as np
 import moocore
@@ -32,7 +32,7 @@ title = "HV computation"
 file_prefix = "hv"
 names = files.keys()
 for name in names:
-    x = read_datasets(files[name])
+    x = read_datasets_and_filter_dominated(files[name])
     ref = np.ones(x.shape[1])
     n = np.arange(500, min(len(x), 3000) + 1, 500)
 
