@@ -65,7 +65,12 @@ performance measures, performance assessment
 Benchmarks
 ----------
 
-The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D and 4D using ``moocore``, `pymooo <https://pymoo.org/>`_, `BoTorch <https://botorch.org/>`_, `DEAP-er <https://deap-er.readthedocs.io/en/latest/>`_ and `jMetalPy <https://jmetal.github.io/jMetalPy/index.html>`_.
+The following plots compare the performance of `moocore`_, `pymoo`_,
+`BoTorch`_, `jMetalPy`_, and `DEAP-er`_. Other optimization packages are not included in the comparison because they are based on these packages so they are *at least* as slow as them. For example `Xopt`_ uses `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_.
+
+Not all packages provided the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>` whereas `jMetalPy`_ does not provide the :ref:`IGD+ indicator <igd_hausdorf>`. `BoTorch`_ provides neither of them.
+
+The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D and 4D. As the plots show, `moocore`_ is nearly 100 times faster than the other packages and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_, which is an order of magnitude slower than the second slowest.
 
 |pic1| |pic2|
 
@@ -76,7 +81,7 @@ The following plots compare the speed of computing the :ref:`hypervolume indicat
    :width: 48%
 
 
-The following plots compare the speed of finding nondominated solutions, equivalent to :func:`moocore.is_nondominated`, in 2D and 3D using ``moocore``, `pymooo <https://pymoo.org/>`_, and `BoTorch <https://botorch.org/>`_.
+The following plots compare the speed of finding nondominated solutions, equivalent to :func:`moocore.is_nondominated`, in 2D and 3D. As the plots show, `moocore`_ is nearly 100 times faster in 2D and 1000 times faster in 3D than the other packages. Here, `pymoo`_ quickly becomes even slower than `BoTorch`_.
 
 |pic3| |pic4|
 
@@ -87,7 +92,7 @@ The following plots compare the speed of finding nondominated solutions, equival
    :width: 48%
 
 
-The following plot compares the speed of computing the :ref:`epsilon <epsilon_metric>` and :ref:`IGD+ <igd_hausdorf>` metrics using ``moocore``, `pymooo <https://pymoo.org/>`_, and `jMetalPy <https://jmetal.github.io/jMetalPy/index.html>`_.
+The following plot compares the speed of computing the :ref:`epsilon indicator  <epsilon_metric>` metric and :ref:`IGD+ indicator <igd_hausdorf>`. Despite the algorithms for computing these metrics are relatively simple and easy to vectorize in Python, the `moocore`_ implementation is still 10 to 100 times faster.
 
 |pic5| |pic6|
 
@@ -98,6 +103,16 @@ The following plot compares the speed of computing the :ref:`epsilon <epsilon_me
    :width: 48%
 
 
+The source code for the benchmarks above can be found at https://github.com/multi-objective/moocore/tree/main/python/benchmarks .
+
+
+.. _moocore: https://multi-objective.github.io/moocore/python/
+.. _pymoo: https://pymoo.org/
+.. _BoTorch: https://botorch.org/
+.. _jMetalPy: https://jmetal.github.io/jMetalPy/index.html
+.. _DEAP-er: https://deap-er.readthedocs.io/en/latest/
+.. _Xopt: https://xopt.xopt.org/index.html
+.. _pysamoo: https://anyoptimization.com/projects/pysamoo/
 
 .. This is not really the index page, that is found in
    _templates/indexcontent.html The toctree content here will be added to the
