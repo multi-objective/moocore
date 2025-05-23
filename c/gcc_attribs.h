@@ -1,6 +1,10 @@
 #ifndef GCC_ATTRIBUTES
 #define GCC_ATTRIBUTES
 
+#if !defined(__GNUC__) && !defined(__clang__ ) && !defined(__ICC)
+#  define __attribute__(x) /* Elide __attribute__ */
+#endif
+
 /* When passing the -Wunused flag, entities that are unused by the program may
    be diagnosed. The _attr_maybe_unused attribute can be used to silence such
    diagnostics when the entity cannot be removed. For instance, a local
@@ -10,68 +14,60 @@
    The attribute may be applied to the declaration of a class, a typedef, a
    variable, a function or method, a function parameter, an enumeration, an
    enumerator, a non-static data member, or a label. */
-#if defined(__GNUC__) || defined(__clang__ ) || defined(__ICC)
-#  define _attr_maybe_unused __attribute__ ((unused))
-#else
-#  define _attr_maybe_unused
-#  define __attribute__(x) /* Elide __attribute__ */
+#ifndef __attr_maybe_unused
+#  define _attr_maybe_unused  __attribute__((unused))
 #endif
 
-/* Many functions have no effects except the return value and their
-   return value depends only on the parameters and/or global
-   variables. Such a function can be subject to common subexpression
-   elimination and loop optimization just as an arithmetic operator
-   would be.
+/* Calls to functions whose return value is not affected by changes to the
+   observable state of the program and that have no observable effects on such
+   state other than to return a value may lend themselves to optimizations such
+   as common subexpression elimination. Declaring such functions with the const
+   attribute allows GCC to avoid emitting some calls in repeated invocations of
+   the function with the same argument values.
 
-   Some of common examples of pure functions are strlen or
-   memcmp. Interesting non-pure functions are functions with infinite
-   loops or those depending on volatile memory or other system
-   resource, that may change between two consecutive calls (such as
-   feof in a multithreading environment).
+   The const attribute imposes greater restrictions on a function's definition
+   than the similar pure attribute.
 
-   Note that a function that has pointer arguments and examines the data
-   pointed to must not be declared const if the pointed-to data might change
-   between successive invocations of the function. In general, since a function
-   cannot distinguish data that might change from data that cannot, const
-   functions should never take pointer or, in C++, reference arguments.  */
+   A function that has pointer arguments and examines the data pointed to must
+   not be declared const if the pointed-to data might change between successive
+   invocations of the function. In general, since a function cannot distinguish
+   data that might change from data that cannot, const functions should never
+   take pointer or, in C++, reference arguments.  */
 #if defined(__GNUC__) || defined(__clang__ ) || defined(__ICC)
 #  define _attr_const_func __attribute__((const))
 #else
 #  define _attr_const_func
 #endif
 
-#if defined(__GNUC__) || defined(__clang__) || defined(__ICC)
-    #define _attr_aligned(x) __attribute__ ((aligned (x)))
-#elif defined(_MSC_VER)
-    #define _attr_aligned(x) __declspec(align(x))
-#else
-    #define _attr_aligned(x)
-#endif
+/* The pure attribute prohibits a function from modifying the state of the
+   program that is observable by means other than inspecting the function's
+   return value. However, functions declared with the pure attribute can safely
+   read any non-volatile objects, and modify the value of objects in a way that
+   does not affect their return value or the observable state of the
+   program.
 
-/* FIXME: does this handle C++? */
+   Some common examples of pure functions are strlen or memcmp. Interesting
+   non-pure functions are functions with infinite loops or those depending on
+   volatile memory or other system resource, that may change between
+   consecutive calls (such as the standard C feof function in a multithreading
+   environment).
+
+   The pure attribute imposes similar but looser restrictions on a function’s
+   definition than the const attribute: pure allows the function to read any
+   non-volatile memory, even if it changes in between successive invocations of
+   the function.  */
 #ifndef __pure_func
 # define __pure_func	__attribute__((__pure__))
 #endif
-/* Many functions do not examine any values except their arguments,
-   and have no effects except the return value. Basically this is just
-   slightly more strict class than the pure attribute below, since
-   function is not allowed to read global memory.
 
-   Note that a function that has pointer arguments and examines the
-   data pointed to must not be declared const. Likewise, a function
-   that calls a non-const function usually must not be const. It does
-   not make sense for a const function to return void.  */
+/* The noreturn keyword tells the compiler to assume that function cannot
+   return. It can then optimize without regard to what would happen if fatal
+   ever did return. This makes slightly better code. More importantly, it helps
+   avoid spurious warnings of uninitialized variables. */
 #ifndef __noreturn
 # define __noreturn	__attribute__((__noreturn__))
 #endif
-/* The noreturn keyword tells the compiler to assume that function
-   cannot return. It can then optimize without regard to what would
-   happen if fatal ever did return. This makes slightly better
-   code. More importantly, it helps avoid spurious warnings of
-   uninitialized variables. */
-#ifndef __malloc
-# define __malloc	__attribute__((__malloc__))
-#endif
+
 /* The malloc attribute is used to tell the compiler that a function
    may be treated as if any non-NULL pointer it returns cannot alias
    any other pointer valid when the function returns. This will often
@@ -80,25 +76,39 @@
    long as the old pointer is never referred to (including comparing
    it to the new pointer) after the function returns a non-NULL
    value.  */
-#ifndef __must_check
-# define __must_check	__attribute__((__warn_unused_result__))
+#ifndef __malloc
+# define __malloc	__attribute__((__malloc__))
 #endif
+
 /* The warn_unused_result attribute causes a warning to be emitted if
    a caller of the function with this attribute does not use its
    return value.  */
+#ifndef __must_check
+# define __must_check	__attribute__((__warn_unused_result__))
+#endif
+
+/* The deprecated attribute results in a warning if the function is
+   used anywhere in the source file.  */
 #ifndef __deprecated
 # define __deprecated	__attribute__((__deprecated__))
 #endif
-/* The deprecated attribute results in a warning if the function is
-   used anywhere in the source file.  */
+
+/* FIXME: add the explanation from the GCC documentation to each attribute. */
 #ifndef __used
 # define __used		__attribute__((__used__))
 #endif
-/* FIXME: add the explanation from the GCC documentation to each attribute. */
 #ifndef __packed
 # define __packed	__attribute__((__packed__))
 #endif
-/* FIXME: add the explanation from the GCC documentation to each attribute. */
+
+#if defined(__GNUC__) || defined(__clang__) || defined(__ICC)
+    #define _attr_aligned(x) __attribute__((aligned (x)))
+#elif defined(_MSC_VER)
+    #define _attr_aligned(x) __declspec(align(x))
+#else
+    #define _attr_aligned(x)
+#endif
+
 
 #if (defined(__GNUC__) && __GNUC__ >= 3) || defined(__clang__)
 # define likely(x)	__builtin_expect(!!(x), 1)
