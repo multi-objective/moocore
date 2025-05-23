@@ -103,12 +103,13 @@ jobs:
 
   build-doc:
     name: Build documentation
-    timeout-minutes: 10
     needs: build_sdist
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
     permissions:
       contents: write
-    concurrency: web # Recommended if you intend to make multiple deployments in quick succession.
-    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    concurrency: # Recommended if you intend to make multiple deployments in quick succession.
+      group: web-${{ github.workflow }}-${{ github.ref }}
+    timeout-minutes: 10
     runs-on:  ubuntu-latest
     steps:
       - name: Checkout sources 🛎

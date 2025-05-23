@@ -173,15 +173,16 @@ jobs:
           token: ${{secrets.CODECOV_TOKEN}}
 
   pkgdown:
+    name: pkgdown ${{ matrix.os }} (${{ matrix.r }})
     needs: R-CMD-check
     if: contains('
         refs/heads/master
         refs/heads/main
       ', github.ref) && github.event_name == 'push'
-    name: pkgdown ${{ matrix.os }} (${{ matrix.r }})
     permissions:
       contents: write # github-pages-deploy-action
-    concurrency: web # Recommended if you intend to make multiple deployments in quick succession.
+    concurrency: # Recommended if you intend to make multiple deployments in quick succession.
+      group: web-${{ github.workflow }}-${{ github.ref }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
