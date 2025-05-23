@@ -108,6 +108,11 @@ moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
     do { DEBUG2_PRINT ("%s(): ", __FUNCTION__); \
          DEBUG2_PRINT (__VA_ARGS__); } while(0)
 
+#if DEBUG >= 1
+#define ASSERT_OR_DO(COND, X) do{ if (!(COND)) { X;} assert(COND); } while(0)
+#else
+#define ASSERT_OR_DO(COND, X) while(0){ if (!(COND)) { X;} assert(COND); }
+#endif
 
 /* This is deprecated. See https://www.gnu.org/software/libc/manual/html_node/Heap-Consistency-Checking.html
 #if DEBUG >= 1
