@@ -22,11 +22,11 @@ else:
 import os
 import sys
 
-# Prevent ruff from deleting seemingly unused imports
-sys.path.insert(0, os.path.abspath("../../src/moocore/"))
+# Building the docs requires installing the package.
 import moocore
 
 sys.path.insert(0, os.path.abspath("."))
+# Prevent ruff from deleting seemingly unused imports
 import my_unsrt_style  # noqa: F401
 
 project = "moocore"
