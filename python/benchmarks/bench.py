@@ -33,6 +33,10 @@ def read_datasets_and_filter_dominated(filename):
     return x
 
 
+def get_range(lenx, start, stop, step):
+    return np.arange(start, min(stop, lenx) + 1, step)
+
+
 def get_package_version(package):
     match package:
         case "moocore":

@@ -5,7 +5,7 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
-from bench import Bench, read_datasets_and_filter_dominated
+from bench import Bench, read_datasets_and_filter_dominated, get_range
 
 import numpy as np
 import moocore
@@ -19,12 +19,19 @@ from pymoo.indicators.hv import Hypervolume as pymoo_HV
 from jmetal.core.quality_indicator import HyperVolume as jmetal_HV
 from deap_er.utilities.hypervolume import HyperVolume as deaper_HV
 
+# See https://github.com/multi-objective/testsuite/tree/main/data
 path_to_data = "../../testsuite/data/"
 assert pathlib.Path(path_to_data).expanduser().exists()
 
 files = {
-    "DTLZLinearShape.3d": path_to_data + "DTLZLinearShape.3d.front.1000pts.10",
-    "DTLZLinearShape.4d": path_to_data + "DTLZLinearShape.4d.front.1000pts.10",
+    "DTLZLinearShape.3d": dict(
+        file=path_to_data + "DTLZLinearShape.3d.front.1000pts.10",
+        range=(500, 3000, 500),
+    ),
+    "DTLZLinearShape.4d": dict(
+        file=path_to_data + "DTLZLinearShape.4d.front.1000pts.10",
+        range=(250, 1500, 250),
+    ),
 }
 
 
@@ -32,9 +39,9 @@ title = "HV computation"
 file_prefix = "hv"
 names = files.keys()
 for name in names:
-    x = read_datasets_and_filter_dominated(files[name])
+    x = read_datasets_and_filter_dominated(files[name]["file"])
     ref = np.ones(x.shape[1])
-    n = np.arange(500, min(len(x), 3000) + 1, 500)
+    n = get_range(len(x), *files[name]["range"])
 
     bench = Bench(
         name=name,

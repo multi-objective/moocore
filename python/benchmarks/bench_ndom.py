@@ -5,7 +5,7 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
-from bench import Bench
+from bench import Bench, get_range
 
 import numpy as np
 import moocore
@@ -22,13 +22,9 @@ from pymoo.util.nds.non_dominated_sorting import (
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
 files = {
-    "test2D-200k": dict(file="test2D-200k.inp.xz", ranges=(1000, 10000, 1000)),
-    "ran3d-10k": dict(file="ran.1000pts.3d.10", ranges=(1000, 5000, 1000)),
+    "test2D-200k": dict(file="test2D-200k.inp.xz", range=(1000, 10000, 1000)),
+    "ran3d-10k": dict(file="ran.1000pts.3d.10", range=(1000, 5000, 1000)),
 }
-
-
-def get_n(lenx, start, stop, step):
-    return np.arange(start, min(stop, len(x)) + 1, step)
 
 
 title = "is_non_dominated()"
@@ -37,7 +33,7 @@ file_prefix = "ndom"
 names = files.keys()
 for name in names:
     x = moocore.get_dataset(files[name]["file"])[:, :-1]
-    n = get_n(len(x), *files[name]["ranges"])
+    n = get_range(len(x), *files[name]["range"])
 
     bench = Bench(
         name=name,
