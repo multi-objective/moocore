@@ -36,9 +36,6 @@
 
 
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <limits.h>
 #include <float.h>
 #include <string.h>
 #include "common.h"
@@ -53,7 +50,7 @@ typedef struct dlnode {
     struct dlnode * next[2]; /* keeps the points sorted according to coordinates 2,3 and 4
                                 (in the case of 2 and 3, only the points swept by 4 are kept) */
     struct dlnode * prev[2]; //keeps the points sorted according to coordinates 2 and 3 (except the sentinel 3)
-    int ndomr;    //number of dominators
+    unsigned int ndomr;    //number of dominators
 } dlnode_t;
 
 
@@ -181,10 +178,10 @@ lex_cmp_3d_012(const double * a, const double *b)
    dominated by new with respect to x,y,z or update the cx and cy lists by
    adding new.
 */
-static int
+static unsigned int
 update_links(dlnode_t * list, dlnode_t * new)
 {
-    int ndom = 0;
+    unsigned int ndom = 0;
     const double * newx = new->x;
     dlnode_t * p = new->next[0];
     const double * px = p->x;
