@@ -424,6 +424,7 @@ def hypervolume(
     See Also
     --------
     Hypervolume : object-oriented interface.
+    RelativeHypervolume : Compute hypervolume relative to a reference set.
 
 
     References
@@ -511,6 +512,10 @@ class Hypervolume:
     39.0
     >>> hv_ind([[5, 5], [4, 6], [7, 4]])
     37.0
+
+    See Also
+    --------
+    RelativeHypervolume : Compute hypervolume relative to a reference set.
 
     """
 
