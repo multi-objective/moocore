@@ -52,6 +52,7 @@ jobs:
           - { os: ubuntu-24.04, r: 'devel', http-user-agent: 'release' }
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      MAKEFLAGS: "-j 2"
 
     steps:
       - name: Disable autocrlf
