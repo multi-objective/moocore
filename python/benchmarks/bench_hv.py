@@ -14,10 +14,8 @@ import matplotlib.pyplot as plt
 
 from botorch.utils.multi_objective.hypervolume import Hypervolume as botorch_HV
 import torch
-
 from pymoo.indicators.hv import Hypervolume as pymoo_HV
 from jmetal.core.quality_indicator import HyperVolume as jmetal_HV
-from deap_er.utilities.hypervolume import HyperVolume as deaper_HV
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
 path_to_data = "../../testsuite/data/"
@@ -52,9 +50,6 @@ for name in names:
             "jMetalPy": lambda z, hv=jmetal_HV(ref): hv.compute(z),
             "botorch": lambda z,
             hv=botorch_HV(ref_point=torch.from_numpy(-ref)): hv.compute(z),
-            "DEAP_er": lambda z, fun=deaper_HV(ref_point=ref).compute: fun(
-                np.copy(z)
-            ),
         },
     )
 

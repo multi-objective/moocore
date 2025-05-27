@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import moocore
 import timeit
+import cpuinfo
 
 timeit.template = """
 def inner(_it, _timer{init}):
@@ -48,7 +49,8 @@ def get_package_version(package):
         case "jMetalPy":
             from jmetal import __version__ as version
         case "DEAP_er":
-            version = "DEAP-er"
+            # Requires version >= 0.2.0
+            from deap_er import __version__ as version
         case _:
             raise ValueError(f"unknown package {package}")
 
@@ -56,8 +58,7 @@ def get_package_version(package):
 
 
 class Bench:
-    # FIXME: How to get this info automatically?
-    cpu = "Intel i5-6200U 2.30GHz"
+    cpu_model = cpuinfo.get_cpu_info()["brand_raw"]
 
     def __init__(self, name, n, bench):
         self.name = name
@@ -92,7 +93,7 @@ class Bench:
             grid=True,
             ylabel="CPU time (seconds)",
             style="o-",
-            title=f"{title} for {self.name} ({self.cpu})",
+            title=f"{title} for {self.name} ({self.cpu_model})",
             logy=True,
         )
         plt.savefig(f"{file_prefix}_bench-{self.name}-time.png")
@@ -112,6 +113,6 @@ class Bench:
             grid=True,
             ylabel="Time relative to moocore",
             style="o-",
-            title=f"{title} for {self.name} ({self.cpu})",
+            title=f"{title} for {self.name} ({self.cpu_model})",
         )
         plt.savefig(f"{file_prefix}_bench-{self.name}-reltime.png")

@@ -1,0 +1,7 @@
+cpuinfo
+numpy
+pandas
+matplotlib
+botorch
+pymoo
+jmetal
