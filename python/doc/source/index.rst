@@ -46,7 +46,7 @@ performance measures, performance assessment
         :img-top: _static/index_user_guide.svg
         :class-card: intro-card
         :shadow: md
-        :link: reference
+        :link: api_reference
         :link-type: ref
 
         The reference guide contains a detailed description of the functions,
