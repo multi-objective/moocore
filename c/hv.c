@@ -621,8 +621,8 @@ static void free_cdllist(dlnode_t * head)
 static void delete (dlnode_t * nodep, dimension_t dim, double * restrict bound)
 {
     ASSUME(dim > STOP_DIMENSION);
-    for (int i = STOP_DIMENSION; i < dim; i++) {
-        int d = i - STOP_DIMENSION;
+    for (dimension_t  i = STOP_DIMENSION; i < dim; i++) {
+        dimension_t  d = i - STOP_DIMENSION;
         nodep->prev[d]->next[d] = nodep->next[d];
         nodep->next[d]->prev[d] = nodep->prev[d];
         if (bound[i] > nodep->x[i])
@@ -633,8 +633,8 @@ static void delete (dlnode_t * nodep, dimension_t dim, double * restrict bound)
 static void reinsert (dlnode_t *nodep, dimension_t dim, double * restrict bound)
 {
     ASSUME(dim > STOP_DIMENSION);
-    for (int i = STOP_DIMENSION; i < dim; i++) {
-        int d = i - STOP_DIMENSION;
+    for (dimension_t i = STOP_DIMENSION; i < dim; i++) {
+        dimension_t d = i - STOP_DIMENSION;
         nodep->prev[d]->next[d] = nodep;
         nodep->next[d]->prev[d] = nodep;
         if (bound[i] > nodep->x[i])
@@ -987,34 +987,13 @@ fpli_hv3d_ref(avl_tree_t *tree, dlnode_t *list, int c,
 static double
 hv_recursive_ref(avl_tree_t * restrict tree, dlnode_t * restrict list,
                  dimension_t dim, int c,
-                 const double * restrict ref, double * restrict bound);
-
-static void
-skip_or_recurse_ref(dlnode_t *p, avl_tree_t *tree, dlnode_t *list,
-                    dimension_t dim, int c,
-                    const double * restrict ref, double * restrict bound)
-{
-    ASSUME(dim > STOP_DIMENSION);
-    dimension_t d_stop = dim - STOP_DIMENSION;
-    if (p->ignore >= dim) {
-        p->area[d_stop] = p->prev[d_stop]->area[d_stop];
-    } else {
-        p->area[d_stop] = hv_recursive_ref(tree, list, dim-1, c, ref, bound);
-        if (p->area[d_stop] <= p->prev[d_stop]->area[d_stop])
-            p->ignore = dim;
-    }
-}
-
-static double
-hv_recursive_ref(avl_tree_t * restrict tree, dlnode_t * restrict list,
-                 dimension_t dim, int c,
                  const double * restrict ref, double * restrict bound)
 {
     /* ------------------------------------------------------
        General case for dimensions higher than 3D
        ------------------------------------------------------ */
     if ( dim > STOP_DIMENSION ) {
-        dimension_t d_stop = dim - STOP_DIMENSION;
+        const dimension_t d_stop = dim - STOP_DIMENSION;
         dlnode_t *p1 = list->prev[d_stop];
         for (dlnode_t *pp = p1; pp->x; pp = pp->prev[d_stop]) {
             if (pp->ignore < dim)
@@ -1047,21 +1026,28 @@ hv_recursive_ref(avl_tree_t * restrict tree, dlnode_t * restrict list,
             for (int i = 1; i <= d_stop; i++)
                 p1->area[i] = p1->area[i-1] * (ref[STOP_DIMENSION + i] - p1->x[STOP_DIMENSION + i]);
         }
-        p1->vol[d_stop] = hyperv;
-        skip_or_recurse_ref(p1, tree, list, dim, c, ref, bound);
 
-        while (p0->x != NULL) {
+        while(true) {
+            p1->vol[d_stop] = hyperv;
+            if (p1->ignore >= dim) {
+                p1->area[d_stop] = p1->prev[d_stop]->area[d_stop];
+            } else {
+                p1->area[d_stop] = hv_recursive_ref(tree, list, dim-1, c, ref, bound);
+                if (p1->area[d_stop] <= p1->prev[d_stop]->area[d_stop])
+                    p1->ignore = dim;
+            }
+
+            if (p0->x == NULL) {
+                hyperv += p1->area[d_stop] * (ref[dim] - p1->x[dim]);
+                return hyperv;
+            }
             hyperv += p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
             bound[dim] = p0->x[dim];
             reinsert(p0, dim, bound);
+            c++;
             p1 = p0;
             p0 = p0->next[d_stop];
-            p1->vol[d_stop] = hyperv;
-            c++;
-            skip_or_recurse_ref(p1, tree, list, dim, c, ref, bound);
         }
-        hyperv += p1->area[d_stop] * (ref[dim] - p1->x[dim]);
-        return hyperv;
     }
 
     /* ---------------------------
@@ -1098,7 +1084,7 @@ double fpli_hv(const double * restrict data, int d, int n,
     double hyperv;
     if (unlikely(n == 0)) {
         /* Returning here would leak memory.  */
-	hyperv = 0.0;
+        hyperv = 0.0;
     } else if (unlikely(n == 1)) {
         dlnode_t * p = list->next[0];
         hyperv = 1;
@@ -1109,7 +1095,7 @@ double fpli_hv(const double * restrict data, int d, int n,
                                           (avl_freeitem_t) NULL);
         double * bound = malloc (dim * sizeof(double));
         for (dimension_t i = 0; i < dim; i++) bound[i] = -DBL_MAX;
-	hyperv = hv_recursive_ref(tree, list, dim - 1, n, ref, bound);
+        hyperv = hv_recursive_ref(tree, list, dim - 1, n, ref, bound);
         free (bound);
         free (tree);  /* The nodes are freed by free_cdllist ().  */
     }
