@@ -91,10 +91,11 @@ class Bench:
         )
         df.plot(
             grid=True,
-            ylabel="CPU time (seconds)",
+            logy=True,
             style="o-",
             title="",
-            logy=True,
+            xticks=df.index,
+            ylabel="CPU time (seconds)",
         )
         plt.title(f"({self.cpu_model})", fontsize=10)
         plt.suptitle(f"{title} for {self.name}", fontsize=12)
@@ -113,9 +114,10 @@ class Bench:
         )
         df.plot(
             grid=True,
-            ylabel="Time relative to moocore",
             style="o-",
             title="",
+            xticks=df.index,
+            ylabel="Time relative to moocore",
         )
         plt.title(f"({self.cpu_model})", fontsize=10)
         plt.suptitle(f"{title} for {self.name}", fontsize=12)
