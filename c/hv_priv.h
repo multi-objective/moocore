@@ -202,6 +202,7 @@ remove_from_z(dlnode_t * old)
 static inline double
 compute_area_simple(const double * px, const dlnode_t * q, int i)
 {
+    ASSUME(i == 0 || i == 1);
     const int j = 1 - i;
     const dlnode_t * u = q->cnext[i];
     double area = (q->x[j] - px[j]) * (u->x[i] - px[i]);
@@ -213,7 +214,7 @@ compute_area_simple(const double * px, const dlnode_t * q, int i)
         u = u->cnext[i];
         // With repeated coordinates, they can be zero.
 #if HV_DIMENSION == 3
-        assert((q->x[0] - px[0] >= 0) && (u->x[1] - q->x[1] >= 0));
+        assert((q->x[j] - px[j] >= 0) && (u->x[i] - q->x[i] >= 0));
 #endif
         area += (q->x[j] - px[j]) * (u->x[i] - q->x[i]);
     }

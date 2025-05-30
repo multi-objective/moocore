@@ -259,3 +259,90 @@ double hv4d(const double * restrict data, size_t n, const double * restrict ref)
     free_cdllist(list);
     return hv;
 }
+
+struct hv4d_state {
+    const double ** scratch;
+    dlnode_t * list;
+};
+
+void *
+setup_list4d(size_t n, const double * ref)
+{
+    struct hv4d_state * state = malloc(sizeof(*state));
+    state->scratch = malloc(sizeof(*(state->scratch)) * n);
+    state->list = (dlnode_t *) malloc((n + 3) * sizeof(*(state->list)));
+    return state;
+}
+
+void free_list4d(void * state)
+{
+    free(((struct hv4d_state *)state)->scratch);
+    free(((struct hv4d_state *)state)->list);
+    free((struct hv4d_state *)state);
+}
+
+const double ** hv4d_get_scratch(void *list4d)
+{
+    return ((struct hv4d_state *)list4d)->scratch;
+}
+
+static dlnode_t *
+setup_cdllist_recursive(struct hv4d_state *state, size_t n, const double * restrict ref)
+{
+    ASSUME(n > 1);
+    const dimension_t dim = HV_DIMENSION;
+    //qsort(scratch, n, sizeof(*scratch), cmp_double_asc_rev_4d);
+    //dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(*list));
+    dlnode_t * list = state->list;
+    init_sentinels(list, ref);
+
+    const double ** scratch = hv4d_get_scratch(state);
+
+    const dimension_t d = HV_DIMENSION - 3; // index within the list.
+    dlnode_t * q = list+1;
+    dlnode_t * list3 = list+3;
+    assert(list->next[d] == list + 1);
+    assert(q->next[d] == list + 2);
+    size_t i,j;
+    for (i = 0, j = 0; j < n; j++) {
+        if (weakly_dominates(q->x, scratch[j], dim)) {
+            /* print_point("q", q->x); */
+            /* print_point("i", scratch[j]); */
+            continue;
+        }
+        dlnode_t * p = list3 + i;
+        p->x = scratch[j];
+        // Initialize it when debugging so it will crash if uninitialized.
+        DEBUG1(
+            p->closest[0] = NULL;
+            p->closest[1] = NULL;
+            p->cnext[0] = NULL;
+            p->cnext[1] = NULL;);
+#if HV_DIMENSION == 4
+        p->ndomr = 0;
+#endif
+        // Link the list in order.
+        q->next[d] = p;
+        p->prev[d] = q;
+        q = p;
+        i++;
+    }
+    n = i;
+    assert((list3 + n - 1) == q);
+    assert(list+2 == list->prev[d]);
+    // q = last point, q->next = s3, s3->prev = last point
+    q->next[d] = list+2;
+    (list+2)->prev[d] = q;
+#if HV_DIMENSION == 3
+    preprocessing(list, n);
+#endif
+    return list;
+}
+
+double hv4d_recursive(void * list4d, size_t n, const double * restrict ref)
+{
+    dlnode_t * list = setup_cdllist_recursive(list4d, n, ref);
+    double hv = hv4dplusU(list);
+    //free_cdllist(list);
+    return hv;
+}
