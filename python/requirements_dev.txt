@@ -12,11 +12,11 @@ virtualenv >= 20
 build
 
 sphinx >= 6.0
-pydata_sphinx_theme
+pydata_sphinx_theme>=0.16.0
 jupyter
 ipykernel
 kaleido
-sphinx-gallery
+sphinx-gallery>=0.19.0
 sphinxcontrib-napoleon
 sphinxcontrib-bibtex
 sphinx-autodoc-typehints
