@@ -1,0 +1,13 @@
+﻿RelativeHypervolume
+===================
+
+.. currentmodule:: moocore
+
+.. autoclass:: RelativeHypervolume
+   :members:
+   :inherited-members:
+   :special-members: __call__
+
+.. minigallery:: moocore.RelativeHypervolume moocore.RelativeHypervolume.__init__ 
+   :add-heading: Gallery examples
+   :heading-level: -
