@@ -21,7 +21,7 @@ endif
 ## Set version information:
 REVNUM = $(shell sh -c 'cat git_version 2> /dev/null')
 
-.PHONY: build test check clean install pdf submit cran winbuild help gendoc pkgdown show
+.PHONY: build test check clean install pdf submit cran winbuild help gendoc pkgdown show doc
 
 help :
 	@echo 'This makefile has the following targets                  '
@@ -45,7 +45,7 @@ gendoc: $(PACKAGEDIR)/man/$(PACKAGE)-package.Rd
 NAMESPACE $(PACKAGEDIR)/man/$(PACKAGE)-package.Rd: $(PACKAGEDIR)/R/*.R
 	$(Reval) 'pkgbuild::compile_dll();devtools::document()'
 
-pkgdown: gendoc
+pkgdown doc: gendoc
 	$(Reval) 'pkgdown::build_site(run_dont_run = TRUE); warnings()'
 
 build:
