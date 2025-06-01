@@ -33,7 +33,7 @@ weakly_dominates(const double * restrict x, const double * restrict y, dimension
 static inline bool
 lexicographic_less_3d(const double * restrict a, const double * restrict b)
 {
-    return (a[2] < b[2] || (a[2] == b[2] && (a[1] < b[1] || (a[1] == b[1] && a[0] <= b[0]))));
+    return a[2] < b[2] || (a[2] == b[2] && (a[1] < b[1] || (a[1] == b[1] && a[0] <= b[0])));
 }
 
 

@@ -122,9 +122,10 @@ update_links(dlnode_t * list, dlnode_t * new)
 
 
 // This does what setupZandClosest does while reconstructing L at z = new->x[2].
-static void
-restart_base_setup_z_and_closest(dlnode_t * list, dlnode_t * new)
+__attribute__((hot)) static void
+restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict new)
 {
+    // FIXME: This is the most expensive function in the HV4D+ algorithm.
     assert(list+1 == list->next[0]);
     dlnode_t * closest1 = list;
     dlnode_t * closest0 = list+1;
