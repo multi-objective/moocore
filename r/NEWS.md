@@ -1,6 +1,7 @@
 # moocore 0.1.6.900
 
  * `hypervolume()` now uses the HV3D+ algorithm for the 3D case and the HV4D+ algorithm for the 4D case.
+   For dimension larger than 4, the recursive algorithm uses HV4D+ as the base case, which is significantly faster.
 
  * `read_datasets()` is significantly faster for large files.
 

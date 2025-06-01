@@ -2,6 +2,7 @@
 
 ## 0.16.5
 
+ * The base case of the recursive HV algorithm is HV4D+.
  * Remove the `--shift` option of `hv` executable.
 
 ## 0.16.4

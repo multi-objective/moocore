@@ -64,15 +64,15 @@ which has \eqn{O(n^2)} complexity.  Compared to the \href{https://github.com/apg
 correctly handles weakly dominated points and has been further optimized for
 speed.
 
-For 5D or higher, it uses a recursive algorithm that has the 3D algorithm as
-a base case algorithm \citep{FonPaqLop06:hypervolume}, which has
-\eqn{O(n^{m-2} \log n)} time and linear space complexity in the worst-case,
-where \eqn{m} is the dimension of the points, but experimental results show
-that the pruning techniques used may reduce the time complexity even
-further.  Andreia P. Guerreiro improved the integration of the 3D case with
-the recursive algorithm, which leads to significant reduction of computation
-time. She has also enhanced the numerical stability of the algorithm by
-avoiding floating-point comparisons of partial hypervolumes.
+For 5D or higher, it uses a recursive algorithm
+\citep{FonPaqLop06:hypervolume} with \eqn{\text{HV4D}^{+}} as the base case.
+The original proposal \citep{FonPaqLop06:hypervolume} had the HV3D algorithm
+as the base case.  This recursive algorithm has \eqn{O(n^{m-2} \log n)} time
+and linear space complexity in the worst-case, where \eqn{m} is the
+dimension of the points, but experimental results show that the pruning
+techniques used may reduce the time complexity even further.  Andreia
+P. Guerreiro enhanced the numerical stability of the algorithm by avoiding
+floating-point comparisons of partial hypervolumes.
 }
 \examples{
 

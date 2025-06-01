@@ -249,12 +249,62 @@ hv4dplusU(dlnode_t * list)
     return hv;
 }
 
-
-
-
 double hv4d(const double * restrict data, size_t n, const double * restrict ref)
 {
     dlnode_t * list = setup_cdllist(data, n, ref);
+    double hv = hv4dplusU(list);
+    free_cdllist(list);
+    return hv;
+}
+
+static dlnode_t *
+setup_cdllist_recursive(const double **scratch, size_t n, const double * restrict ref)
+{
+    ASSUME(n > 1);
+    const dimension_t dim = HV_DIMENSION;
+    qsort(scratch, n, sizeof(*scratch), cmp_double_asc_rev_4d);
+    dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(*list));
+    init_sentinels(list, ref);
+
+    const dimension_t d = HV_DIMENSION - 3; // index within the list.
+    dlnode_t * q = list+1;
+    dlnode_t * list3 = list+3;
+    assert(list->next[d] == list + 1);
+    assert(q->next[d] == list + 2);
+    size_t i,j;
+    for (i = 0, j = 0; j < n; j++) {
+        if (weakly_dominates(q->x, scratch[j], dim)) {
+            /* print_point("q", q->x); */
+            /* print_point("i", scratch[j]); */
+            continue;
+        }
+        dlnode_t * p = list3 + i;
+        p->x = scratch[j];
+        // Initialize it when debugging so it will crash if uninitialized.
+        DEBUG1(
+            p->closest[0] = NULL;
+            p->closest[1] = NULL;
+            p->cnext[0] = NULL;
+            p->cnext[1] = NULL;);
+        p->ndomr = 0;
+        // Link the list in order.
+        q->next[d] = p;
+        p->prev[d] = q;
+        q = p;
+        i++;
+    }
+    n = i;
+    assert((list3 + n - 1) == q);
+    assert(list+2 == list->prev[d]);
+    // q = last point, q->next = s3, s3->prev = last point
+    q->next[d] = list+2;
+    (list+2)->prev[d] = q;
+    return list;
+}
+
+double hv4d_recursive(const double ** scratch, size_t n, const double * restrict ref)
+{
+    dlnode_t * list = setup_cdllist_recursive(scratch, n, ref);
     double hv = hv4dplusU(list);
     free_cdllist(list);
     return hv;
