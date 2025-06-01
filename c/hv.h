@@ -38,8 +38,6 @@
 extern "C" {
 #endif
 
-// Data may be modified. Make a copy if you want to keep the original!
-double fpli_hv_shift(double *data, int d, int n, const double *ref);
 double fpli_hv(const double *data, int d, int n, const double *ref);
 void hv_contributions (double *hvc, double *points, int dim, int size, const double * ref);
 #ifdef __cplusplus

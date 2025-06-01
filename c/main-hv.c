@@ -61,7 +61,6 @@
 
 static int verbose_flag = 1;
 static bool union_flag = false;
-static bool shift_flag = false;
 static char *suffix = NULL;
 
 static void usage(void)
@@ -90,8 +89,6 @@ OPTION_VERSION_STR
 " -s, --suffix=STRING Create an output file for each input file by appending\n"
 "                     this suffix. This is ignored when reading from stdin. \n"
 "                     If missing, output is sent to stdout.                 \n"
-" -S, --shift         Shift the data before calculating the hypervolume.    \n"
-"                     This consumes more memory but it is faster.           \n"
 "\n");
 }
 
@@ -187,9 +184,7 @@ hv_file (const char *filename, double *reference,
     for (n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
         Timer_start ();
 
-        double volume = (shift_flag)
-            ? fpli_hv_shift (&data[nobj * cumsize], nobj, cumsizes[n] - cumsize, reference)
-            : fpli_hv (&data[nobj * cumsize], nobj, cumsizes[n] - cumsize, reference);
+        double volume = fpli_hv (&data[nobj * cumsize], nobj, cumsizes[n] - cumsize, reference);
 
         if (volume == 0.0) {
             errprintf ("none of the points strictly dominates the reference point\n");
@@ -230,7 +225,6 @@ int main(int argc, char *argv[])
         {"reference",  required_argument, NULL, 'r'},
         {"union",      no_argument,       NULL, 'u'},
         {"suffix",     required_argument, NULL, 's'},
-        {"shift",      no_argument,       NULL, 'S'},
         {NULL, 0, NULL, 0} /* marks end of list */
     };
 
@@ -259,10 +253,6 @@ int main(int argc, char *argv[])
 
         case 's': // --suffix
             suffix = optarg;
-            break;
-
-        case 'S': // --shift
-            shift_flag = true;
             break;
 
         case 'q': // --quiet

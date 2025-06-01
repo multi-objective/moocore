@@ -1,5 +1,9 @@
 # moocore C library
 
+## 0.16.5
+
+ * Remove the `--shift` option of `hv` executable.
+
 ## 0.16.4
 
  * Implementation of HV4D+ algorithm.
