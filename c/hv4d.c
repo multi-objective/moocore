@@ -95,6 +95,7 @@ update_links(dlnode_t * list, dlnode_t * new)
     const double * newx = new->x;
     dlnode_t * stop = list+2;
     while (p != stop) {
+        // px dominates newx (but not equal)
         if (px[0] <= newx[0] && px[1] <= newx[1] && (px[0] < newx[0] || px[1] < newx[1]))
             break;
 
@@ -240,9 +241,10 @@ hv4dplusU(dlnode_t * list)
             // FIXME update_links return ndom but that value is not used by the algorithm?
             update_links(list, new);
             volume += new_v;
+            assert(!weakly_dominates(new->x, new->next[1]->x, 4));
         }
-        assert(!weakly_dominates(new->x, new->next[1]->x, 4));
         double height = new->next[1]->x[3] - new->x[3];
+        assert(height >= 0);
         hv += volume * height;
         new = new->next[1];
     }
