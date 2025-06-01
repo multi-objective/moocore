@@ -14,7 +14,7 @@
    The attribute may be applied to the declaration of a class, a typedef, a
    variable, a function or method, a function parameter, an enumeration, an
    enumerator, a non-static data member, or a label. */
-#ifndef __attr_maybe_unused
+#ifndef _attr_maybe_unused
 #  define _attr_maybe_unused  __attribute__((unused))
 #endif
 
