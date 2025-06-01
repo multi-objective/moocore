@@ -3,8 +3,8 @@
 
 #include "common.h"
 
-// General type for comparison functions used in qsort().
-typedef int (*cmp_fun_t)(const void *, const void *);
+// ---------- Relational functions (return bool) -----------------------------
+
 
 /*
    x < y, i.e., x is strictly lower than y in all dimensions. Assumes minimization.
@@ -30,6 +30,17 @@ weakly_dominates(const double * restrict x, const double * restrict y, dimension
     return true;
 }
 
+static inline bool
+lexicographic_less_3d(const double * restrict a, const double * restrict b)
+{
+    return (a[2] < b[2] || (a[2] == b[2] && (a[1] < b[1] || (a[1] == b[1] && a[0] <= b[0]))));
+}
+
+
+// ---------- Comparison functions (e.g, qsort). Return 'int' ----------------
+
+// General type for comparison functions used in qsort().
+typedef int (*cmp_fun_t)(const void *, const void *);
 
 static inline int
 cmp_double_asc_rev(const void * restrict p1, const void * restrict p2, dimension_t dim)
@@ -57,13 +68,6 @@ cmp_double_asc_rev_4d(const void * restrict p1, const void * restrict p2)
     return cmp_double_asc_rev(p1, p2, 4);
 }
 
-static inline bool
-lexicographic_less_3d(const double * a, const double * b)
-{
-    return (a[2] < b[2] || (a[2] == b[2] && (a[1] < b[1] || (a[1] == b[1] && a[0] <= b[0]))));
-}
-
-
 static inline int
 cmp_double_asc_y_des_x(const void * restrict p1, const void * restrict p2)
 {
@@ -84,7 +88,6 @@ cmp_doublep_x_asc_y_asc(const void * restrict p1, const void * restrict p2)
     return (x1 < x2) ? -1 : ((x1 > x2) ? 1 :
                              ((y1 < y2) ? -1 : ((y1 > y2) ? 1 : 0)));
 }
-
 
 
 #endif 	    /* !SORT_H_ */
