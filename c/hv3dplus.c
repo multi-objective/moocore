@@ -113,13 +113,13 @@ preprocessing(dlnode_t * list, size_t n)
     p->closest[0] = list+1;
     p->closest[1] = list;
 
+    // After the top node, we insert sentinel 1 (-INF, ref[1])
+    avl_node_t * node = new_avl_node(list, tnodes + 1);
+    avl_insert_after(&tree, nodeaux, node);
     // Before the top node, we insert sentinel 2 (ref[0], -INF)
-    avl_node_t * node = new_avl_node(list + 1, tnodes + 1);
+    node = new_avl_node(list + 1, tnodes + 2);
     avl_insert_before(&tree, nodeaux, node);
 
-    // After the top node, we insert sentinel 1 (-INF, ref[1])
-    node = new_avl_node(list, tnodes + 2);
-    avl_insert_after(&tree, nodeaux, node);
     assert(p->closest[0] == nodeaux->prev->dlnode);
     assert(p->closest[1] == nodeaux->next->dlnode);
 

@@ -123,7 +123,8 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     n = i; // Update number of points.
     if (likely(n > 1))
         qsort(scratch, n, sizeof(*scratch),
-              (HV_DIMENSION == 3) ? cmp_double_asc_rev_3d : cmp_double_asc_rev_4d);
+              // FIXME: do we need to sort all the objectives in 4d?
+              (HV_DIMENSION == 3) ? cmp_double_asc_only_3d : cmp_double_asc_rev_4d);
 
     dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(*list));
     init_sentinels(list, ref);
@@ -138,11 +139,13 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     assert(list->next[d] == list + 1);
     assert(q->next[d] == list + 2);
     for (i = 0, j = 0; j < n; j++) {
+#if HV_DIMENSION == 4
         if (weakly_dominates(q->x, scratch[j], dim)) {
             /* print_point("q", q->x); */
             /* print_point("i", scratch[j]); */
             continue;
         }
+#endif
         dlnode_t * p = list3 + i;
         p->x = scratch[j];
         // Initialize it when debugging so it will crash if uninitialized.
@@ -212,10 +215,8 @@ compute_area_simple(const double * px, const dlnode_t * q, int i)
     while (px[j] < u->x[j]) {
         q = u;
         u = u->cnext[i];
-        // With repeated coordinates, they can be zero.
-#if HV_DIMENSION == 3
-        assert((q->x[j] - px[j] >= 0) && (u->x[i] - q->x[i] >= 0));
-#endif
+        // With repeated coordinates, it can be zero.
+        assert(u->x[i] - q->x[i] >= 0);
         area += (q->x[j] - px[j]) * (u->x[i] - q->x[i]);
     }
     return area;

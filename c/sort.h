@@ -69,6 +69,14 @@ cmp_double_asc_rev_4d(const void * restrict p1, const void * restrict p2)
 }
 
 static inline int
+cmp_double_asc_only_3d(const void * restrict p1, const void * restrict p2)
+{
+    const double x1 = *(*(const double **)p1 + 2);
+    const double x2 = *(*(const double **)p2 + 2);
+    return (x1 < x2) ? -1 : (x1 > x2 ? 1 : 0);
+}
+
+static inline int
 cmp_double_asc_y_des_x(const void * restrict p1, const void * restrict p2)
 {
     const double x1 = *(const double *)p1;
