@@ -1,19 +1,10 @@
 Klee's Measure Problem Made Easy: O(n^{d/3} polylog n) for d >= 3.
 https://ieeexplore.ieee.org/document/6686177
 
-
-HV3Dplus and HV4Dplus: https://github.com/apguerreiro/HVC/blob/master/hv-plus.c#L415
-
 https://github.com/esa/pagmo2/tree/master/src/utils/hv_algos
-
 https://github.com/esa/pagmo/tree/master/src/util/hv_algorithm
 
 Hypervolume contributions: https://hpi.de/en/friedrich/research/the-hypervolume-indicator.html
-
-0) The default reference point has changed. Update all tests with
-   either explicit reference points or updated results.
-
-1) Robust read of floating-point numbers:
 
 a) Issue error if number is infinite or NaN
    x = strtod(str, &endp);
@@ -28,33 +19,6 @@ b) check overflow/underflow: strtod() returns plus or minus HUGE_VAL
    x = strtod(str, &endp);
    if(errno != 0) { error("Overflow/underflow");
 
-
-2) [DONE in 1.3] Specifying a reference point smaller than the max of
-   all points could also be permitted, as long as points outside the
-   desired region are eliminated when building the linked lists. This
-   would be useful when optimizing with goals, but saving all
-   non-dominated points to files.
-
-3) [DONE in 1.2] Instead of computing the volume of the union of all
-   sets, I would let hv compute the volumes of each set individually,
-   but using the same reference (eventually computed from the union of
-   those sets). The reason is that it is easy to compute the union as
-
-   grep '[0-9]' file1.dat ... filen.dat | hv
-
-   if you have multiple files or multiple sets per file.
-
-4) Minimization/maximization could be handled by switching signs when
-   reading the data/building the linked list. It would be no big deal.
-
-5) Permutations of the objectives could be included at this stage as
-   well, because it is difficult to permutate columns with the
-   standard unix tools. (I don't agree. It is true that there is no
-   standard tool for permuting columns. One can do it with some
-   combination of cut and paste. However, this is easier to implement
-   in perl or python. Moreover, I would prefer to implement it in C as
-   a general purpose and independent tool.)
-
 6) Sort array in memory by 3rd (or 2nd) dimension, depending on
    special case used. This may (or may not) improve performance
    significantly for large sets, by speeding up the special case.
@@ -62,17 +26,3 @@ b) check overflow/underflow: strtod() returns plus or minus HUGE_VAL
 7) verify the handling of repeated coordinate values and of dominated
    points, to avoid performing more math operations than actually
    required in these cases.
-
-8) I think setup_cddllist() could be further simplified and
-   clarified. What we currently do with 'head' and 'scratch' is
-   difficult to understand. Also, I don't get why the nodes of the
-   tree must be in the list or, if they must, why the nodes are not
-   initialised instead of calling repeatedly avl_init_node() in
-   hv_recursive(). Why the nodes of the tree must be included in the
-   list? I see no reason since we destroy the whole tree at every
-   iteration... Solution: dynamic malloc() and free() required tnodes
-   and replace pp->tnode by newtnode. If we require a tnode for each
-   point, then this can be slower, so we keep old behaviour but move
-   avl_init_node() to setup_cdllist().
-
-9) Provide example data set in the webpage.
