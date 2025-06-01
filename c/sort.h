@@ -74,5 +74,17 @@ cmp_double_asc_y_des_x(const void * restrict p1, const void * restrict p2)
     return (y1 < y2) ? -1: ((y1 > y2) ? 1 : (x1 > x2 ? -1 : 1));
 }
 
+static inline int
+cmp_doublep_x_asc_y_asc(const void * restrict p1, const void * restrict p2)
+{
+    const double x1 = **(const double **)p1;
+    const double x2 = **(const double **)p2;
+    const double y1 = *(*(const double **)p1 + 1);
+    const double y2 = *(*(const double **)p2 + 1);
+    return (x1 < x2) ? -1 : ((x1 > x2) ? 1 :
+                             ((y1 < y2) ? -1 : ((y1 > y2) ? 1 : 0)));
+}
+
+
 
 #endif 	    /* !SORT_H_ */

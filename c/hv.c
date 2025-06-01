@@ -647,26 +647,16 @@ static inline const double *node_point(const avl_node_t *node)
     return (const double *) node->item;
 }
 
-static int
-compare_x_asc_y_asc (const void * restrict p1, const void * restrict p2)
+static double
+hv2d(const double * restrict data, size_t n, const double * restrict ref)
 {
-    const double x1 = **(const double **)p1;
-    const double x2 = **(const double **)p2;
-    const double y1 = *(*(const double **)p1 + 1);
-    const double y2 = *(*(const double **)p2 + 1);
-    return (x1 < x2) ? -1 : ((x1 > x2) ? 1 :
-                             ((y1 < y2) ? -1 : ((y1 > y2) ? 1 : 0)));
-}
-
-double hv2d(const double * restrict data, size_t n, const double * restrict ref)
-{
-    const double **p = malloc (n * sizeof(double *));
+    const double **p = malloc (n * sizeof(*p));
     if (unlikely(!p)) return -1;
 
     for (size_t k = 0; k < n; k++)
         p[k] = data + 2 * k;
 
-    qsort(p, n, sizeof(*p), &compare_x_asc_y_asc);
+    qsort(p, n, sizeof(*p), &cmp_doublep_x_asc_y_asc);
 
     double hyperv = 0;
     double prev_j = ref[1];
