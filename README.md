@@ -1,10 +1,6 @@
 **moocore**: Core Mathematical Functions for Multi-Objective Optimization
 =====================================================================
 
-
-
-
-
 |Homepage | Code | Build status | Coverage | Package | Downloads |
 | :---: | :---: | :---: | :---: | :---: | :---: |
 | [**C library**][c-moocore-homepage] | [GitHub][c-moocore-github] |[![Build status][c-build-badge]][c-build-link]| |
@@ -40,6 +36,9 @@ The repository is composed of:
  * `python/`: A Python package that uses the C library.
 
 Each component is documented in the `README.md` file found under each folder.
+
+In addition to the tests within each component, there is a separate [comprehensive **testsuite**](https://github.com/multi-objective/testsuite) that is run before each release.
+
 
 [c-build-badge]: https://github.com/multi-objective/moocore/actions/workflows/C.yml/badge.svg?event=push
 [c-build-link]: https://github.com/multi-objective/moocore/actions/workflows/C.yml
