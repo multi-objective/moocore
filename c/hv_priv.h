@@ -1,3 +1,4 @@
+#include <string.h> // memcpy
 #include "sort.h"
 
 #if !defined(HV_DIMENSION) || (HV_DIMENSION != 3 && HV_DIMENSION != 4)
@@ -104,7 +105,7 @@ static inline void preprocessing(dlnode_t * list, size_t n);
 /*
  * Setup circular double-linked list in each dimension
  */
-static dlnode_t *
+_attr_maybe_unused static dlnode_t *
 setup_cdllist(const double * restrict data, size_t n, const double * restrict ref)
 {
     ASSUME(n >= 1);
