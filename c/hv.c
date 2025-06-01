@@ -625,8 +625,8 @@ static void delete (dlnode_t * nodep, dimension_t dim, double * restrict bound)
         dimension_t  d = i - STOP_DIMENSION;
         nodep->prev[d]->next[d] = nodep->next[d];
         nodep->next[d]->prev[d] = nodep->prev[d];
-        if (bound[i] > nodep->x[i])
-            bound[i] = nodep->x[i];
+        if (bound[d] > nodep->x[i])
+            bound[d] = nodep->x[i];
   }
 }
 
@@ -637,8 +637,8 @@ static void reinsert (dlnode_t *nodep, dimension_t dim, double * restrict bound)
         dimension_t d = i - STOP_DIMENSION;
         nodep->prev[d]->next[d] = nodep;
         nodep->next[d]->prev[d] = nodep;
-        if (bound[i] > nodep->x[i])
-            bound[i] = nodep->x[i];
+        if (bound[d] > nodep->x[i])
+            bound[d] = nodep->x[i];
     }
 }
 
@@ -782,11 +782,11 @@ hv_recursive(avl_tree_t * restrict tree, dlnode_t * restrict list,
         }
         dlnode_t *p0 = list;
         while (c > 1
-               /* We delete all points x[dim] > bound[dim]. In case of
+               /* We delete all points x[dim] > bound[d_stop]. In case of
                   repeated coordinates, we also delete all points
-                  x[dim] == bound[dim] except one. */
-               && (p1->x[dim] > bound[dim]
-                   || p1->prev[d_stop]->x[dim] >= bound[dim])
+                  x[dim] == bound[d_stop] except one. */
+               && (p1->x[dim] > bound[d_stop]
+                   || p1->prev[d_stop]->x[dim] >= bound[d_stop])
             ) {
             delete(p1, dim, bound);
             p0 = p1;
@@ -823,7 +823,7 @@ hv_recursive(avl_tree_t * restrict tree, dlnode_t * restrict list,
                 return hyperv;
             }
             hyperv += p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
-            bound[dim] = p0->x[dim];
+            bound[d_stop] = p0->x[dim];
             reinsert(p0, dim, bound);
             c++;
             p1 = p0;
@@ -867,15 +867,16 @@ double fpli_hv(const double * restrict data, int d, int n,
         /* Returning here would leak memory.  */
         hyperv = 0.0;
     } else if (unlikely(n == 1)) {
-        dlnode_t * p = list->next[0];
+        const double * x = list->next[0]->x;
         hyperv = 1;
         for (dimension_t i = 0; i < dim; i++)
-            hyperv *= ref[i] - p->x[i];
+            hyperv *= ref[i] - x[i];
     } else {
         avl_tree_t *tree = avl_alloc_tree((avl_compare_t) compare_tree_asc,
                                           (avl_freeitem_t) NULL);
-        double * bound = malloc (dim * sizeof(double));
-        for (dimension_t i = 0; i < dim; i++) bound[i] = -DBL_MAX;
+        double * bound = malloc ( (dim - STOP_DIMENSION) * sizeof(double));
+        for (dimension_t i = 0; i < (dim - STOP_DIMENSION); i++)
+            bound[i] = -DBL_MAX;
         hyperv = hv_recursive(tree, list, dim - 1, n, ref, bound);
         free (bound);
         free (tree);  /* The nodes are freed by free_cdllist ().  */
