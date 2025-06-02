@@ -414,6 +414,8 @@ int main(int argc, char *argv[])
         snprintf(buffer, 31, "f%d", k + 1);
         buffer[31] = '\0';
         char *p = x_strndup(buffer, 31);
+        if (unlikely(!p))
+            fatal_error("%s:%d: malloc failed", __FILE__, __LINE__);
         printf ("# %s: %s\n", p, filenames[k]);
         filenames[k] = p;
     }
