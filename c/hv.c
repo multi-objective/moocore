@@ -178,7 +178,7 @@ static void reinsert (fpli_dlnode_t * restrict nodep, dimension_t dim,
 
 static dlnode_t *
 fpli_hv4d_setup_cdllist(const fpli_dlnode_t * restrict pp,
-                        dlnode_t * restrict list, size_t n)
+                        dlnode_t * restrict list, size_t n _attr_maybe_unused)
 {
     ASSUME(n > 1);
     reset_sentinels(list);
