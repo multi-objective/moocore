@@ -141,6 +141,22 @@
   #define restrict
 #endif
 
+/*
+   See https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-format-function-attribute
+   The correct format archetype to use for MinGW varies.
+*/
+#ifdef __MINGW_PRINTF_FORMAT // Defined by MinGW in stdio.h
+#define ATTRIBUTE_FORMAT_PRINTF_ARCHETYPE __MINGW_PRINTF_FORMAT
+#elif defined(__MINGW__) || defined(__MINGW32__) || defined(__MINGW64__)
+// Otherwise, __gnu_printf__ is a good default for MinGW.
+#define ATTRIBUTE_FORMAT_PRINTF_ARCHETYPE __gnu_printf__
+#else
+#define ATTRIBUTE_FORMAT_PRINTF_ARCHETYPE __printf__
+#endif
+
+#define ATTRIBUTE_FORMAT_PRINTF(STRING_INDEX, FIRST_TO_CHECK)                  \
+    __attribute__((__format__(ATTRIBUTE_FORMAT_PRINTF_ARCHETYPE, STRING_INDEX, FIRST_TO_CHECK)))
+
 // C++ standard attribute
 #ifdef __has_cpp_attribute
 #  if __has_cpp_attribute(assume) >= 202207L
@@ -161,23 +177,6 @@
 #ifndef INTERNAL_ASSUME
 #  define INTERNAL_ASSUME(EXPR)
 #endif
-
-/*
-   See https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-format-function-attribute
-   The correct format archetype to use for MinGW varies.
-*/
-#ifdef __MINGW_PRINTF_FORMAT // Defined by MinGW in stdio.h
-#define ATTRIBUTE_FORMAT_PRINTF_ARCHETYPE __MINGW_PRINTF_FORMAT
-#elif defined(__MINGW__) || defined(__MINGW32__) || defined(__MINGW64__)
-// Otherwise, __gnu_printf__ is a good default for MinGW.
-#define ATTRIBUTE_FORMAT_PRINTF_ARCHETYPE __gnu_printf__
-#else
-#define ATTRIBUTE_FORMAT_PRINTF_ARCHETYPE __printf__
-#endif
-
-#define ATTRIBUTE_FORMAT_PRINTF(STRING_INDEX, FIRST_TO_CHECK)                  \
-    __attribute__((__format__(ATTRIBUTE_FORMAT_PRINTF_ARCHETYPE, STRING_INDEX, FIRST_TO_CHECK)))
-
 
 /* Allow to redefine assert, for example, for R packages */
 #ifndef assert
