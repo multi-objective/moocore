@@ -21,13 +21,20 @@ strongly_dominates(const double * restrict x, const double * restrict y, dimensi
 }
 
 static inline bool
-weakly_dominates(const double * restrict x, const double * restrict y, dimension_t dim)
+weakly_dominates(const double * restrict x, const double * restrict y, const dimension_t dim)
 {
     ASSUME(dim >= 2);
+    /* The code below is a vectorized version of this code:
     for (dimension_t d = 0; d < dim; d++)
         if (x[d] > y[d])
             return false;
     return true;
+    */
+    // GCC 15 is not yet able to infer this from attribute ASSUME().
+    bool dominated = (x[0] <= y[0]) & (x[1] <= y[1]);
+    for (dimension_t d = 2; d < dim; d++)
+        dominated &= (x[d] <= y[d]);
+    return dominated;
 }
 
 static inline bool
@@ -35,7 +42,6 @@ lexicographic_less_3d(const double * restrict a, const double * restrict b)
 {
     return a[2] < b[2] || (a[2] == b[2] && (a[1] < b[1] || (a[1] == b[1] && a[0] <= b[0])));
 }
-
 
 // ---------- Comparison functions (e.g, qsort). Return 'int' ----------------
 
