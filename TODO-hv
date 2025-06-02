@@ -1,10 +1,20 @@
+## Hypervolume
+
 Klee's Measure Problem Made Easy: O(n^{d/3} polylog n) for d >= 3.
 https://ieeexplore.ieee.org/document/6686177
 
 https://github.com/esa/pagmo2/tree/master/src/utils/hv_algos
 https://github.com/esa/pagmo/tree/master/src/util/hv_algorithm
 
-Hypervolume contributions: https://hpi.de/en/friedrich/research/the-hypervolume-indicator.html
+## Hypervolume contributions:
+
+https://hpi.de/en/friedrich/research/the-hypervolume-indicator.html
+
+https://github.com/apguerreiro/HVC
+
+https://github.com/adbjesus/mooutils/blob/main/include/mooutils/indicators.hpp
+
+## Other
 
 a) Issue error if number is infinite or NaN
    x = strtod(str, &endp);
