@@ -1,8 +1,10 @@
-#include "sort.h"
-
 #if !defined(HV_DIMENSION) || (HV_DIMENSION != 3 && HV_DIMENSION != 4)
 #error "HV_DIMENSION must be 3 or 4"
 #endif
+
+#include <float.h> // DBL_MAX
+#include <string.h> // memcpy
+#include "sort.h"
 
 /* ----------------------- Data Structure -----------------------------------*/
 
@@ -23,6 +25,41 @@ typedef struct dlnode {
 #endif
 } dlnode_t;
 
+static inline void
+reset_sentinels(dlnode_t * list)
+{
+    dlnode_t * restrict s1 = list;
+    dlnode_t * restrict s2 = list + 1;
+    dlnode_t * restrict s3 = list + 2;
+
+    s1->closest[0] = s2;
+    s1->closest[1] = s1;
+    s1->next[0] = s2;
+    s1->prev[0] = s3;
+#if HV_DIMENSION == 4
+    s1->next[1] = s2;
+    s1->prev[1] = s3;
+#endif
+
+    s2->closest[0] = s2;
+    s2->closest[1] = s1;
+    s2->next[0] = s3;
+    s2->prev[0] = s1;
+#if HV_DIMENSION == 4
+    s2->next[1] = s3;
+    s2->prev[1] = s1;
+#endif
+
+    s3->closest[0] = s2;
+    s3->closest[1] = s1;
+    s3->next[0] = s1;
+    s3->prev[0] = s2;
+#if HV_DIMENSION == 4
+    s3->next[1] = s1;
+    s3->prev[1] = s2;
+#endif
+}
+
 static void
 init_sentinels(dlnode_t * list, const double * ref)
 {
@@ -41,16 +78,15 @@ init_sentinels(dlnode_t * list, const double * ref)
 
     double * x = malloc(sizeof(z));
     memcpy(x, z, sizeof(z));
-
     /* The list that keeps the points sorted according to the 3rd-coordinate
        does not really need the 3 sentinels, just one to represent (-inf, -inf,
        ref[2]).  But we need the other two to maintain a list of nondominated
        projections in the (x,y)-plane of points that is kept sorted according
        to the 1st and 2nd coordinates, and for that list we need two sentinels
        to represent (-inf, ref[1]) and (ref[0], -inf). */
-    dlnode_t * s1 = list;
-    dlnode_t * s2 = list + 1;
-    dlnode_t * s3 = list + 2;
+    dlnode_t * restrict s1 = list;
+    dlnode_t * restrict s2 = list + 1;
+    dlnode_t * restrict s3 = list + 2;
 
     // Sentinel 1
     s1->x = x;
@@ -101,10 +137,18 @@ init_sentinels(dlnode_t * list, const double * ref)
 static inline void preprocessing(dlnode_t * list, size_t n);
 #endif
 
+static inline dlnode_t *
+new_cdllist(size_t n, const double * ref)
+{
+    dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(*list));
+    init_sentinels(list, ref);
+    return list;
+}
+
 /*
  * Setup circular double-linked list in each dimension
  */
-static dlnode_t *
+static inline dlnode_t *
 setup_cdllist(const double * restrict data, size_t n, const double * restrict ref)
 {
     ASSUME(n >= 1);
@@ -126,8 +170,7 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
               // FIXME: do we need to sort all the objectives in 4d?
               (HV_DIMENSION == 3) ? cmp_double_asc_only_3d : cmp_double_asc_rev_4d);
 
-    dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(*list));
-    init_sentinels(list, ref);
+    dlnode_t * list = new_cdllist(n, ref);
     if (unlikely(n == 0)) {
         free(scratch);
         return list;
