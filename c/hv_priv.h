@@ -167,8 +167,7 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     n = i; // Update number of points.
     if (likely(n > 1))
         qsort(scratch, n, sizeof(*scratch),
-              // FIXME: do we need to sort all the objectives in 4d?
-              (HV_DIMENSION == 3) ? cmp_double_asc_only_3d : cmp_double_asc_rev_4d);
+              (HV_DIMENSION == 3) ? cmp_double_asc_only_3d : cmp_double_asc_only_4d);
 
     dlnode_t * list = new_cdllist(n, ref);
     if (unlikely(n == 0)) {
