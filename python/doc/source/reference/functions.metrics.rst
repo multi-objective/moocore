@@ -152,11 +152,11 @@ The hypervolume of a set of multidimensional points :math:`A \subset
 \mathbb{R}^m` with respect to a reference point :math:`\vec{r} \in \mathbb{R}^m`
 is the volume of the region dominated by the set and bounded by the reference
 point :cite:p:`ZitThi1998ppsn`.  Points in :math:`A` that do not strictly
-dominated :math:`\vec{r}` do not contribute to the hypervolume value, thus,
+dominate :math:`\vec{r}` do not contribute to the hypervolume value, thus,
 ideally, the reference point must be strictly dominated by all points in the
 true Pareto front.
 
-More precisely, the hypervolume is the Lebesgue integral of the union of
+More precisely, the hypervolume is the `Lebesgue measure <https://en.wikipedia.org/wiki/Lebesgue_measure>`_ of the union of
 axis-aligned hyperrectangles
 (`orthotopes <https://en.wikipedia.org/wiki/Hyperrectangle>`_), where each
 hyperrectangle is defined by one point from :math:`\vec{a} \in A` and the
@@ -205,5 +205,3 @@ Bibliography
 ============
 
 .. bibliography::
-
-

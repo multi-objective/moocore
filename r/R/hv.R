@@ -17,11 +17,11 @@
 #' \mathbb{R}^d}{A in R^m} with respect to a reference point \eqn{\vec{r} \in
 #' \mathbb{R}^d}{r in R^m} is the volume of the region dominated by the set and
 #' bounded by the reference point \citep{ZitThi1998ppsn}.  Points in \eqn{A}
-#' that do not strictly dominated \eqn{\vec{r}} do not contribute to the
+#' that do not strictly dominate \eqn{\vec{r}} do not contribute to the
 #' hypervolume value, thus, ideally, the reference point must be strictly
 #' dominated by all points in the true Pareto front.
 #'
-#' More precisely, the hypervolume is the Lebesgue integral of the union of
+#' More precisely, the hypervolume is the [Lebesgue measure](https://en.wikipedia.org/wiki/Lebesgue_measure) of the union of
 #' axis-aligned hyperrectangles
 #' ([orthotopes](https://en.wikipedia.org/wiki/Hyperrectangle)), where each
 #' hyperrectangle is defined by one point from \eqn{\vec{a} \in A} and the
