@@ -6,6 +6,8 @@ https://ieeexplore.ieee.org/document/6686177
 https://github.com/esa/pagmo2/tree/master/src/utils/hv_algos
 https://github.com/esa/pagmo/tree/master/src/util/hv_algorithm
 
+Version 2.0rc2 has some improvements from Andreia to the recursive hypervolume that are still not part of moocore: https://lopez-ibanez.eu/hypervolume#download
+
 ## Hypervolume contributions:
 
 https://hpi.de/en/friedrich/research/the-hypervolume-indicator.html
