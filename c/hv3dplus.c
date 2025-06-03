@@ -93,7 +93,7 @@ new_avl_node(dlnode_t * p, avl_node_t * node)
   F. Luccio, and F. P. Preparata.  On Finding the Maxima of a Set of
   Vectors. Journal of the ACM, 22(4):469–476, 1975.
 
-  The main difference is that the order of the points in 2D is tracked by p->closest.
+  The main difference is that the order of the points in 2D is tracked by p->cnext.
 */
 static inline void
 preprocessing(dlnode_t * list, size_t n)
@@ -110,8 +110,8 @@ preprocessing(dlnode_t * list, size_t n)
     dlnode_t * p = (list+1)->next[0];
     avl_node_t * nodeaux = new_avl_node(p, tnodes);
     avl_insert_top(&tree, nodeaux);
-    p->closest[0] = list+1;
-    p->closest[1] = list;
+    p->cnext[0] = list+1;
+    p->cnext[1] = list;
 
     // After the top node, we insert sentinel 1 (-INF, ref[1])
     avl_node_t * node = new_avl_node(list, tnodes + 1);
@@ -119,9 +119,9 @@ preprocessing(dlnode_t * list, size_t n)
     // Before the top node, we insert sentinel 2 (ref[0], -INF)
     node = new_avl_node(list + 1, tnodes + 2);
     avl_insert_before(&tree, nodeaux, node);
+    assert(p->cnext[0] == nodeaux->prev->dlnode);
 
-    assert(p->closest[0] == nodeaux->prev->dlnode);
-    assert(p->closest[1] == nodeaux->next->dlnode);
+    assert(p->cnext[1] == nodeaux->next->dlnode);
 
     const dlnode_t * stop = list + 2;
     p = p->next[0];
@@ -157,8 +157,8 @@ preprocessing(dlnode_t * list, size_t n)
             }
             node = new_avl_node(p, node + 1);
             avl_insert_before(&tree, nodeaux, node);
-            p->closest[0] = node->prev->dlnode;
-            p->closest[1] = node->next->dlnode;
+            p->cnext[0] = node->prev->dlnode;
+            p->cnext[1] = node->next->dlnode;
         }
         p = p->next[0];
     }
@@ -182,8 +182,6 @@ hv3dplus(dlnode_t * list)
     dlnode_t * p = (list+1)->next[0];
     const dlnode_t * stop = list+2;
     while (p != stop) {
-        p->cnext[0] = p->closest[0];
-        p->cnext[1] = p->closest[1];
         area += compute_area3d_simple(p->x, p->cnext[0]);
         p->cnext[0]->cnext[1] = p;
         p->cnext[1]->cnext[0] = p;

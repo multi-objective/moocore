@@ -15,12 +15,12 @@
 
 typedef struct dlnode {
     const double *x;            // point coordinates (objective vector).
-    struct dlnode * closest[2]; // closest[0] == cx, closest[1] == cy
-    struct dlnode * cnext[2]; //current next
     struct dlnode * next[HV_DIMENSION - 2]; /* keeps the points sorted according to coordinates 2,3 and 4
                                 (in the case of 2 and 3, only the points swept by 4 are kept) */
     struct dlnode * prev[HV_DIMENSION - 2]; //keeps the points sorted according to coordinates 2 and 3 (except the sentinel 3)
+    struct dlnode * cnext[2]; //current next
 #if HV_DIMENSION == 4
+    struct dlnode * closest[2]; // closest[0] == cx, closest[1] == cy
     unsigned int ndomr;    // number of dominators.
 #endif
 } dlnode_t;
@@ -32,29 +32,29 @@ reset_sentinels(dlnode_t * list)
     dlnode_t * restrict s2 = list + 1;
     dlnode_t * restrict s3 = list + 2;
 
-    s1->closest[0] = s2;
-    s1->closest[1] = s1;
     s1->next[0] = s2;
     s1->prev[0] = s3;
 #if HV_DIMENSION == 4
+    s1->closest[0] = s2;
+    s1->closest[1] = s1;
     s1->next[1] = s2;
     s1->prev[1] = s3;
 #endif
 
-    s2->closest[0] = s2;
-    s2->closest[1] = s1;
     s2->next[0] = s3;
     s2->prev[0] = s1;
 #if HV_DIMENSION == 4
+    s2->closest[0] = s2;
+    s2->closest[1] = s1;
     s2->next[1] = s3;
     s2->prev[1] = s1;
 #endif
 
-    s3->closest[0] = s2;
-    s3->closest[1] = s1;
     s3->next[0] = s1;
     s3->prev[0] = s2;
 #if HV_DIMENSION == 4
+    s3->closest[0] = s2;
+    s3->closest[1] = s1;
     s3->next[1] = s1;
     s3->prev[1] = s2;
 #endif
@@ -90,13 +90,13 @@ init_sentinels(dlnode_t * list, const double * ref)
 
     // Sentinel 1
     s1->x = x;
-    s1->closest[0] = s2;
-    s1->closest[1] = s1;
-    s1->cnext[1] = NULL;
-    s1->cnext[0] = NULL;
+    // Initialize it when debugging so it will crash if uninitialized.
+    DEBUG1(s1->cnext[0] = s1->cnext[1] = NULL);
     s1->next[0] = s2;
     s1->prev[0] = s3;
 #if HV_DIMENSION == 4
+    s1->closest[0] = s2;
+    s1->closest[1] = s1;
     s1->next[1] = s2;
     s1->prev[1] = s3;
     s1->ndomr = 0;
@@ -105,13 +105,12 @@ init_sentinels(dlnode_t * list, const double * ref)
     x += HV_DIMENSION;
     // Sentinel 2
     s2->x = x;
-    s2->closest[0] = s2;
-    s2->closest[1] = s1;
-    s2->cnext[1] = NULL;
-    s2->cnext[0] = NULL;
+    DEBUG1(s2->cnext[0] = s2->cnext[1] = NULL);
     s2->next[0] = s3;
     s2->prev[0] = s1;
 #if HV_DIMENSION == 4
+    s2->closest[0] = s2;
+    s2->closest[1] = s1;
     s2->next[1] = s3;
     s2->prev[1] = s1;
     s2->ndomr = 0;
@@ -120,13 +119,12 @@ init_sentinels(dlnode_t * list, const double * ref)
     x += HV_DIMENSION;
     // Sentinel 3
     s3->x = x;
-    s3->closest[0] = s2;
-    s3->closest[1] = s1;
-    s3->cnext[1] = NULL;
-    s3->cnext[0] = NULL;
+    DEBUG1(s3->cnext[0] = s3->cnext[1] = NULL);
     s3->next[0] = s1;
     s3->prev[0] = s2;
 #if HV_DIMENSION == 4
+    s3->closest[0] = s2;
+    s3->closest[1] = s1;
     s3->next[1] = s1;
     s3->prev[1] = s2;
     s3->ndomr = 0;
@@ -190,16 +188,13 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
 #endif
         dlnode_t * p = list3 + i;
         p->x = scratch[j];
-        // Initialize it when debugging so it will crash if uninitialized.
-        DEBUG1(
-            p->closest[0] = NULL;
-            p->closest[1] = NULL;
-            p->cnext[0] = NULL;
-            p->cnext[1] = NULL;);
 #if HV_DIMENSION == 4
         p->ndomr = 0;
+        // Initialize it when debugging so it will crash if uninitialized.
+        DEBUG1(p->closest[0] = p->closest[1] = NULL);
 #endif
-        // Link the list in order.
+        DEBUG1(p->cnext[0] = p->cnext[1] = NULL);
+         // Link the list in order.
         q->next[d] = p;
         p->prev[d] = q;
         q = p;
