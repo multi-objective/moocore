@@ -6,7 +6,7 @@
 #include <string.h> // memcpy
 #include "sort.h"
 
-/* ----------------------- Data Structure -----------------------------------*/
+// ----------------------- Data Structure -------------------------------------
 
 /*
   With HV_DIMENSION==3, we have 'struct dlnode * next[1]' instead of 'struct dlnode * next'.
@@ -220,7 +220,7 @@ free_cdllist(dlnode_t * list)
     free(list);
 }
 
-/* ------------ Update data structure ---------------------------------------*/
+// ------------ Update data structure -----------------------------------------
 
 // Link sentinels (-inf ref[1] -inf) and (ref[0] -inf -inf).
 static inline void

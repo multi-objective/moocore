@@ -47,7 +47,7 @@
 #define HV_DIMENSION 4
 #include "hv_priv.h"
 
-/* ---------- Data Structures Functions -------------------------------------*/
+// ---------- Data Structures Functions ---------------------------------------
 
 static inline void _attr_maybe_unused
 print_point(const char *s, const double * x)
@@ -58,7 +58,7 @@ print_point(const char *s, const double * x)
 
 
 
-/* ------------ Update data structure ---------------------------------------*/
+// ------------ Update data structure -----------------------------------------
 
 static inline void
 add_to_z(dlnode_t * new)
@@ -102,7 +102,7 @@ update_links(dlnode_t * restrict list, dlnode_t * restrict new)
             //new <= p
             if (newx[1] <= px[1]){
                 assert(weakly_dominates(newx, px, 3));
-                p->ndomr++;
+                //p->ndomr++;
                 remove_from_z(p);
             } else if (newx[0] < px[0] && lex_cmp_3d_102(newx, p->closest[1]->x)) { // newx[1] > px[1]
                 p->closest[1] = new;
@@ -121,30 +121,33 @@ update_links(dlnode_t * restrict list, dlnode_t * restrict new)
 __attribute__((hot)) static bool
 restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict new)
 {
-    const double * newx = new->x;
-    dlnode_t * p = (list+1)->next[0];
-    const double * px =  p->x;
-    while (px[2] <= newx[2]) {
-        if (px[0] <= newx[0] && px[1] <= newx[1]) {
-            new->ndomr++;
-            assert(weakly_dominates(px, newx, 4));
-            return true;
-        }
-        p = p->next[0];
-        px = p->x;
-    }
-
+    const double * restrict newx = new->x;
     // FIXME: This is the most expensive function in the HV4D+ algorithm.
     assert(list+1 == list->next[0]);
     dlnode_t * closest1 = list;
     dlnode_t * closest0 = list+1;
     const double * closest0x = closest0->x;
     const double * closest1x = closest1->x;
-    p = (list+1)->next[0];
-    assert(p == list->next[0]->next[0]);
-    px = p->x;
+    dlnode_t * p = list+1;
+    assert(p->next[0] == list->next[0]->next[0]);
     restart_list_y(list);
-    while (lexicographic_less_3d(px, newx)) {
+    while (true) {
+        p = p->next[0];
+        const double * restrict px =  p->x;
+        // Help auto-vectorization.
+        bool p_leq_new_0 = px[0] <= newx[0];
+        bool p_leq_new_1 = px[1] <= newx[1];
+        bool p_leq_new_2 = px[2] <= newx[2];
+
+        if (p_leq_new_0 & p_leq_new_1 & p_leq_new_2) {
+            //new->ndomr++;
+            assert(weakly_dominates(px, newx, 4));
+            return false;
+        }
+
+        if (!lexicographic_less_3d(px, newx))
+            break;
+
         // reconstruct
         p->cnext[0] = p->closest[0];
         p->cnext[1] = p->closest[1];
@@ -161,8 +164,6 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
             closest1 = p;
             closest1x = px;
         }
-        p = p->next[0];
-        px = p->x;
     }
 
     new->closest[0] = closest0;
@@ -170,38 +171,47 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
 
     new->prev[0] = p->prev[0];
     new->next[0] = p;
-    return false;
+    return true;
 }
 
 static double
-one_contribution_3d(dlnode_t * restrict list, dlnode_t * restrict new)
+one_contribution_3d(dlnode_t * restrict new)
 {
-    if (restart_base_setup_z_and_closest(list, new))
-        return 0;
-
     new->cnext[0] = new->closest[0];
     new->cnext[1] = new->closest[1];
 
     const double * newx = new->x;
     // if newx[0] == new->cnext[0]->x[0], the first area is zero
     double area = compute_area_simple(newx, new->cnext[0], 1);
-    dlnode_t * p = new->next[0];
+    double volume = 0;
+    dlnode_t * p = new;
     const double * px = p->x;
-    assert(!weakly_dominates(px, newx, 4));
+    assert(!weakly_dominates(p->next[0]->x, newx, 4));
+    while (true) {
+        double lastz = px[2];
+        p = p->next[0];
+        px = p->x;
+        volume += area * (px[2] - lastz);
 
-    double lastz = newx[2];
-    double volume = area * (px[2] - lastz);
-    while (px[0] > newx[0] || px[1] > newx[1]) {
+        if (px[0] <= newx[0] && px[1] <= newx[1])
+            return volume;
+
+        assert(px[0] > newx[0] || px[1] > newx[1]);
+        assert(!weakly_dominates(px, p->next[0]->x, 4));
+
         p->cnext[0] = p->closest[0];
         p->cnext[1] = p->closest[1];
 
-        if (px[0] >= newx[0] && px[1] >= newx[1]) {
-            // if px[0] == p->cnext[0]->x[0] then area starts at 0.
-            area -= compute_area_simple(px, p->cnext[0], 1);
-            p->cnext[1]->cnext[0] = p;
-            p->cnext[0]->cnext[1] = p;
-
-        } else if (px[0] >= newx[0]) {
+        if (px[0] < newx[0])  {
+            if (px[1] <= new->cnext[1]->x[1]) {
+                const double tmpx[] = { newx[0], px[1] };
+                // if px[1] == new->cnext[1]->x[1] then area starts at 0.
+                area -= compute_area_simple(tmpx, new->cnext[1], 0);
+                p->cnext[1] = new->cnext[1];
+                p->cnext[0]->cnext[1] = p;
+                new->cnext[1] = p;
+            }
+        } else if (px[1] < newx[1]) {
             if (px[0] <= new->cnext[0]->x[0]) {
                 const double tmpx[] = { px[0], newx[1] };
                 // if px[0] == new->cnext[0]->x[0] then area starts at 0.
@@ -210,19 +220,13 @@ one_contribution_3d(dlnode_t * restrict list, dlnode_t * restrict new)
                 p->cnext[1]->cnext[0] = p;
                 new->cnext[0] = p;
             }
-        } else if (px[1] <= new->cnext[1]->x[1]) {
-            const double tmpx[] = { newx[0], px[1] };
-            // if px[1] == new->cnext[1]->x[1] then area starts at 0.
-            area -= compute_area_simple(tmpx, new->cnext[1], 0);
-            p->cnext[1] = new->cnext[1];
+        } else {
+            assert(px[0] >= newx[0] && px[1] >= newx[1]);
+            // if px[0] == p->cnext[0]->x[0] then area starts at 0.
+            area -= compute_area_simple(px, p->cnext[0], 1);
+            p->cnext[1]->cnext[0] = p;
             p->cnext[0]->cnext[1] = p;
-            new->cnext[1] = p;
         }
-        assert(!weakly_dominates(px, p->next[0]->x, 4));
-        lastz = px[2];
-        p = p->next[0];
-        px = p->x;
-        volume += area * (px[2] - lastz);
     }
     return volume;
 }
@@ -240,13 +244,13 @@ hv4dplusU(dlnode_t * list)
     dlnode_t * new = (list+1)->next[1];
     dlnode_t * last = list+2;
     while (new != last) {
-        double new_v = one_contribution_3d(list, new);
-        assert(new_v > 0 || (new_v == 0 && new->ndomr));
-        // if new_v == 0, then new was dominated by something else.
-        if (new_v > 0) {
+        if (restart_base_setup_z_and_closest(list, new)) {
+            // new was not dominated by something else.
+            double new_v = one_contribution_3d(new);
+            assert(new_v > 0);
+            volume += new_v;
             add_to_z(new);
             update_links(list, new);
-            volume += new_v;
         }
         double height = new->next[1]->x[3] - new->x[3];
         assert(height >= 0);
