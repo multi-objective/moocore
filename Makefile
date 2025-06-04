@@ -1,4 +1,4 @@
-PACKAGEVERSION=0.1.6
+PACKAGEVERSION=0.1.7
 
 .PHONY: default clean check test pre-commit
 

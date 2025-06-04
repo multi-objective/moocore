@@ -4,7 +4,7 @@
 What's new
 **********
 
-Version 0.1.7 (dev)
+Version 0.1.7 (04/06/2025)
 -------------------
 
 - :func:`~moocore.hypervolume` now uses the HV3D\ :sup:`+` algorithm for the 3D case and the HV4D\ :sup:`+` algorithm for the 4D case.
