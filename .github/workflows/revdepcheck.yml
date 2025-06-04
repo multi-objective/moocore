@@ -10,6 +10,9 @@ on:
 
 name: Reverse dependency check
 
+env:
+  NOT_CRAN: false
+
 jobs:
   revdep_check:
     name: Reverse check ${{ inputs.which }} dependents
