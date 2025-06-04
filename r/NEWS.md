@@ -5,7 +5,7 @@
 
  * `read_datasets()` is significantly faster for large files.
 
- * `is_nondominaed()` and `filter_dominated()` are faster for 3D inputs.
+ * `is_nondominated()` and `filter_dominated()` are faster for 3D inputs.
 
 # moocore 0.1.6
 
