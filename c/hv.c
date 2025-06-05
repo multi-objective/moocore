@@ -83,13 +83,13 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     ASSUME(d > STOP_DIMENSION);
     dimension_t d_stop = d - STOP_DIMENSION;
     int n = *size;
-    fpli_dlnode_t *head  = malloc ((n+1) * sizeof(fpli_dlnode_t));
+    fpli_dlnode_t *head = malloc ((n+1) * sizeof(*head));
+    head->next = malloc(2 * d_stop * (n+1) * sizeof(fpli_dlnode_t*));
+    head->prev = head->next + d_stop * (n+1);
+    head->area = malloc(2 * d_stop * (n+1) * sizeof(double));
+    head->vol = head->area + d_stop * (n+1);
     head->x = NULL; /* head contains no data */
     head->ignore = 0;  /* should never get used */
-    head->next = malloc(d_stop * (n+1) * sizeof(fpli_dlnode_t*));
-    head->prev = malloc(d_stop * (n+1) * sizeof(fpli_dlnode_t*));
-    head->area = malloc(d_stop * (n+1) * sizeof(double));
-    head->vol = malloc(d_stop * (n+1) * sizeof(double));
 
     int i, j;
     for (i = 1, j = 0; j < n; j++) {
@@ -133,6 +133,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
 
     free(scratch);
 
+    // FIXME: This should not be necessary.
     for (i = 0; i < d_stop; i++)
         head->area[i] = 0;
 
@@ -144,9 +145,7 @@ finish:
 static void fpli_free_cdllist(fpli_dlnode_t * head)
 {
     free(head->next);
-    free(head->prev);
     free(head->area);
-    free(head->vol);
     free(head);
 }
 
@@ -213,6 +212,15 @@ fpli_hv4d_setup_cdllist(const fpli_dlnode_t * restrict pp,
     return list;
 }
 
+static double
+one_point_hv(const double * restrict x, const double * restrict ref, dimension_t d)
+{
+    double hv = ref[0] - x[0];
+    for (dimension_t i = 1; i < d; i++)
+        hv *= (ref[i] - x[i]);
+    return hv;
+}
+
 double hv4dplusU(dlnode_t * list);
 
 static double
@@ -222,7 +230,7 @@ fpli_hv4d(fpli_dlnode_t *list, dlnode_t * restrict list4d,
     ASSUME(c >= 1);
     fpli_dlnode_t *pp = list->next[0];
     if (c == 1) {
-        return (ref[0] - pp->x[0]) * (ref[1] - pp->x[1]) * (ref[2] - pp->x[2]) * (ref[3] - pp->x[3]);
+        return one_point_hv(pp->x, ref, 4);
     }
     fpli_hv4d_setup_cdllist(pp, list4d, c);
     double hv = hv4dplusU(list4d);
@@ -266,10 +274,7 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
                 * (p1->x[dim] - p1->prev[d_stop]->x[dim]);
         } else {
             ASSUME(c == 1);
-            double area = (ref[0] - p1->x[0]);
-            for (dimension_t i = 1; i <= STOP_DIMENSION; i++)
-                area = area * (ref[i] - p1->x[i]);
-            p1->area[0] = area;
+            p1->area[0] = one_point_hv(p1->x, ref, STOP_DIMENSION + 1);
             for (dimension_t i = 1; i <= d_stop; i++)
                 p1->area[i] = p1->area[i-1] * (ref[STOP_DIMENSION + i] - p1->x[STOP_DIMENSION + i]);
         }
@@ -370,10 +375,7 @@ double fpli_hv(const double * restrict data, int d, int n,
         /* Returning here would leak memory.  */
         hyperv = 0.0;
     } else if (unlikely(n == 1)) {
-        const double * x = list->next[0]->x;
-        hyperv = 1;
-        for (dimension_t i = 0; i < dim; i++)
-            hyperv *= ref[i] - x[i];
+        hyperv = one_point_hv(list->next[0]->x, ref, dim);
     } else {
         dlnode_t * list4d = new_cdllist(n, ref);
         double * bound = malloc ( (dim - STOP_DIMENSION) * sizeof(double));
