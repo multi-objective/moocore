@@ -19,4 +19,4 @@ How to release
 
 1. `./release.py --dev NEW_VERSION`
 
-1. `git ci -a -m "Start development version"`
+1. `git ci -a -m "Start development of v{NEW_VERSION}"`
