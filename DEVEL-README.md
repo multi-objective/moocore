@@ -14,7 +14,6 @@ How to release
     1. [Check reverse dependencies](https://github.com/multi-objective/moocore/actions/workflows/revdepcheck.yml)
     1. Update `cran-comments.md`
     1. Submit to CRAN: `make submit`
-    1. Once accepted, `make closeversion`
 
 1. [Publish a release in github](https://github.com/multi-objective/moocore/releases/new) to automatically submit to PyPi.
 
