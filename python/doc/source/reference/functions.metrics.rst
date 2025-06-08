@@ -78,14 +78,14 @@ the average Euclidean distance from each reference point to its nearest
 objective vector. It is also slightly faster to compute.
 
 GD should never be used directly to compare the quality of approximations to a
-Pareto front, as it often contradicts Pareto optimality (it is not weakly
-Pareto-compliant).
+Pareto front, it is not weakly Pareto-compliant and it often contradicts Pareto
+optimality.
 
 IGD is still popular due to historical reasons, but we strongly recommend IGD+
-instead of IGD, since the latter contradicts Pareto optimality in some cases
+instead of IGD, because IGD contradicts Pareto optimality in some cases
 (see examples in :func:`igd_plus`) whereas IGD+ is weakly Pareto-compliant.
 
-The average Hausdorff distance (:math:`\Delta_p(A,R)`) is also not weakly
+The average Hausdorff distance (:math:`\Delta_p(A,R)`) is not weakly
 Pareto-compliant, as shown in the examples in :func:`igd_plus`.
 
 

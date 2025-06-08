@@ -80,18 +80,26 @@ The following plots compare the speed of computing the :ref:`hypervolume indicat
    :width: 49%
 
 
-The following plots compare the speed of finding nondominated solutions, equivalent to :func:`moocore.is_nondominated`, in 2D and 3D. As the plots show, `moocore`_ is more than 100 times faster in 2D and 3D than the other packages.
+The following plots compare the speed of finding nondominated solutions, equivalent to :func:`moocore.is_nondominated`, in 2D and 3D. We test both ``keep_weakly=True`` and ``keep_weakly=False`` (the latter is not supported by `pymoo`_). As the plots show, `moocore`_ is more than 100 times faster in 2D and 3D than the other packages.
 
-|pic3| |pic4|
+|wndom_bench-test2D-200k| |wndom_bench-ran3d-10k|
 
-.. |pic3| image:: _static/ndom_bench-test2D-200k-time.png
+.. |wndom_bench-test2D-200k| image:: _static/wndom_bench-test2D-200k-time.png
    :width: 49%
 
-.. |pic4| image:: _static/ndom_bench-ran3d-10k-time.png
+.. |wndom_bench-ran3d-10k| image:: _static/wndom_bench-ran3d-10k-time.png
+   :width: 49%
+
+|ndom_bench-test2D-200k| |ndom_bench-ran3d-10k|
+
+.. |ndom_bench-test2D-200k| image:: _static/ndom_bench-test2D-200k-time.png
+   :width: 49%
+
+.. |ndom_bench-ran3d-10k| image:: _static/ndom_bench-ran3d-10k-time.png
    :width: 49%
 
 
-The following plot compares the speed of computing the :ref:`epsilon indicator  <epsilon_metric>` metric and :ref:`IGD+ indicator <igd_hausdorf>`. Despite the algorithms for computing these metrics are relatively simple and easy to vectorize in Python, the `moocore`_ implementation is still 10 to 100 times faster.
+The following plots compare the speed of computing the :ref:`epsilon indicator  <epsilon_metric>` metric and :ref:`IGD+ indicator <igd_hausdorf>`. Despite the algorithms for computing these metrics are relatively simple and easy to vectorize in Python, the `moocore`_ implementation is still 10 to 100 times faster.
 
 |pic5| |pic6|
 
