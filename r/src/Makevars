@@ -1,7 +1,8 @@
 # 							-*- mode: makefile -*-
 # Do not put GCC specific flags here. Put them instead in CFLAGS and
 # CXXFLAGS in ~/.R/Makevars
-LTO=-flto
+# We cannot use -flto here because R CMD check complains.
+LTO=$(LTO_OPT)
 DEBUG=0
 PKG_CPPFLAGS=-DR_PACKAGE -DDEBUG=$(DEBUG) -I./libmoocore/ $(LTO)
 
