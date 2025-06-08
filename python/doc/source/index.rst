@@ -65,7 +65,7 @@ performance measures, performance assessment
 Benchmarks
 ----------
 
-The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, `jMetalPy`_, and `DEAP-er`_. Other optimization packages are not included in the comparison because they are based on these packages so they are **at least as slow** as them. For example `Xopt`_ uses `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, and `DESDEO`_ uses `pymoo`_ internally.
+The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, and `jMetalPy`_. Other optimization packages are not included in the comparison because they are based on these packages so they are **at least as slow** as them. For example `Xopt`_ uses `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ uses `pymoo`_ internally, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.
 
 Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>` whereas `jMetalPy`_ does not provide the :ref:`IGD+ indicator <igd_hausdorf>`. `BoTorch`_ provides neither of them.
 
@@ -80,7 +80,7 @@ The following plots compare the speed of computing the :ref:`hypervolume indicat
    :width: 49%
 
 
-The following plots compare the speed of finding nondominated solutions, equivalent to :func:`moocore.is_nondominated`, in 2D and 3D. As the plots show, `moocore`_ is nearly 100 times faster in 2D and 1000 times faster in 3D than the other packages. Here, `pymoo`_ quickly becomes even slower than `BoTorch`_.
+The following plots compare the speed of finding nondominated solutions, equivalent to :func:`moocore.is_nondominated`, in 2D and 3D. As the plots show, `moocore`_ is more than 100 times faster in 2D and 3D than the other packages.
 
 |pic3| |pic4|
 
@@ -109,7 +109,7 @@ The source code for the benchmarks above can be found at https://github.com/mult
 .. _pymoo: https://pymoo.org/
 .. _BoTorch: https://botorch.org/
 .. _jMetalPy: https://jmetal.github.io/jMetalPy/index.html
-.. _DEAP-er: https://deap-er.readthedocs.io/en/latest/
+.. _DEAP: https://deap.readthedocs.io/en/master/
 .. _Xopt: https://xopt.xopt.org/index.html
 .. _pysamoo: https://anyoptimization.com/projects/pysamoo/
 .. _DESDEO: https://desdeo.readthedocs.io/en/latest/

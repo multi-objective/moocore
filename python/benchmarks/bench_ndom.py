@@ -17,13 +17,13 @@ from botorch.utils.multi_objective.pareto import (
     is_non_dominated as botorch_is_non_dominated,
 )
 from pymoo.util.nds.non_dominated_sorting import (
-    find_non_dominated as pymoo_find_non_dominated,
+    NonDominatedSorting as pymoo_NonDominatedSorting,
 )
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
 files = {
     "test2D-200k": dict(file="test2D-200k.inp.xz", range=(1000, 10000, 1000)),
-    "ran3d-10k": dict(file="ran.1000pts.3d.10", range=(1000, 5000, 1000)),
+    "ran3d-10k": dict(file="ran.1000pts.3d.10", range=(1000, 10000, 1000)),
 }
 
 
@@ -42,7 +42,9 @@ for name in names:
             "moocore": lambda z: np.nonzero(
                 moocore.is_nondominated(z, maximise=True)
             )[0],
-            "pymoo": lambda z: pymoo_find_non_dominated(-z),
+            "pymoo": lambda z: pymoo_NonDominatedSorting().do(
+                -z, only_non_dominated_front=True
+            ),
             "botorch": lambda z: np.nonzero(
                 np.asarray(botorch_is_non_dominated(z))
             )[0],
