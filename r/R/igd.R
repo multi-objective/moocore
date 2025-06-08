@@ -58,11 +58,12 @@
 #' objective vector. It is also slightly faster to compute.
 #'
 #' GD should never be used directly to compare the quality of approximations to
-#' a Pareto front, as it often contradicts Pareto optimality (it is not weakly
-#' Pareto-compliant). IGD is still popular due to historical reasons, but we
-#' strongly recommend IGD+ instead of IGD, since the latter contradicts Pareto
-#' optimality in some cases (see examples below) whereas IGD+ is weakly
-#' Pareto-compliant.
+#' a Pareto front, because it is not weakly Pareto-compliant and often
+#' contradicts Pareto optimality.
+#'
+#' IGD is still popular due to historical reasons, but we strongly recommend
+#' IGD+ instead of IGD, because IGD contradicts Pareto optimality in some cases
+#' (see examples below) whereas IGD+ is weakly Pareto-compliant.
 #'
 #' The average Hausdorff distance \eqn{\Delta_p(A,R)} is also not weakly
 #' Pareto-compliant, as shown in the examples below.
