@@ -1,0 +1,13 @@
+﻿Hypervolume
+===========
+
+.. currentmodule:: moocore
+
+.. autoclass:: Hypervolume
+   :members:
+   :inherited-members:
+   :special-members: __call__
+
+.. minigallery:: moocore.Hypervolume moocore.Hypervolume.__init__ 
+   :add-heading: Gallery examples
+   :heading-level: -
