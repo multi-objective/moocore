@@ -54,14 +54,15 @@
 #' speed.
 #'
 #' For 5D or higher, it uses a recursive algorithm
-#' \citep{FonPaqLop06:hypervolume} with \eqn{\text{HV4D}^{+}} as the base case.
-#' The original proposal \citep{FonPaqLop06:hypervolume} had the HV3D algorithm
-#' as the base case.  This recursive algorithm has \eqn{O(n^{m-2} \log n)} time
-#' and linear space complexity in the worst-case, where \eqn{m} is the
-#' dimension of the points, but experimental results show that the pruning
-#' techniques used may reduce the time complexity even further.  Andreia
-#' P. Guerreiro enhanced the numerical stability of the algorithm by avoiding
-#' floating-point comparisons of partial hypervolumes.
+#' \citep{FonPaqLop06:hypervolume} with \eqn{\text{HV4D}^{+}} as the base case,
+#' resulting in a \eqn{O(n^{d-2})} time complexity and \eqn{O(n)} space
+#' complexity in the worst-case, where \eqn{m} is the dimension of the points.
+#' Experimental results show that the pruning techniques used may reduce the
+#' time complexity even further.  The original proposal
+#' \citep{FonPaqLop06:hypervolume} had the HV3D algorithm as the base case,
+#' giving a time complexity of \eqn{O(n^{m-2} \log n)}.  Andreia P. Guerreiro
+#' enhanced the numerical stability of the algorithm by avoiding floating-point
+#' comparisons of partial hypervolumes.
 #'
 #'
 #' @references
