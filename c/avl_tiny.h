@@ -71,6 +71,13 @@ static int avl_check_balance(const avl_node_t *avlnode) {
 	return d < -1 ? -1 : d > 1 ? 1 : 0;
 }
 
+/* Searches for a node with the key closest (or equal) to the given item.
+   If avlnode is not NULL, *avlnode will be set to the node found or NULL
+   if the tree is empty. Return values:
+    -1  if the returned node is greater
+     0  if the returned node is equal or if the tree is empty
+     1  if the returned node is smaller
+  O(lg n) */
 static int
 avl_search_closest(const avl_tree_t *avltree, const avl_item_t *item, avl_node_t **avlnode)
 {
@@ -95,6 +102,10 @@ avl_search_closest(const avl_tree_t *avltree, const avl_item_t *item, avl_node_t
     }
 }
 
+/* Initializes a new tree for elements that will be ordered using
+ * the supplied strcmp()-like function.
+ * Returns the value of avltree (even if it's NULL).
+ * O(1) */
 static avl_tree_t *
 avl_init_tree(avl_tree_t *rc, avl_compare_t cmp) {
     rc->head = NULL;
@@ -104,12 +115,19 @@ avl_init_tree(avl_tree_t *rc, avl_compare_t cmp) {
     return rc;
 }
 
+/* Reinitializes the tree structure for reuse. Nothing is free()d.
+ * Compare and freeitem functions are left alone.
+ * O(1) */
 static void
 avl_clear_node(avl_node_t *newnode) {
 	newnode->left = newnode->right = NULL;
 	newnode->depth = 1;
 }
 
+/* Insert a node in an empty tree. If avlnode is NULL, the tree will be
+ * cleared and ready for re-use.
+ * If the tree is not empty, the old nodes are left dangling.
+ * O(1) */
 static avl_node_t *
 avl_insert_top(avl_tree_t *avltree, avl_node_t *newnode) {
 	avl_clear_node(newnode);
@@ -121,6 +139,9 @@ avl_insert_top(avl_tree_t *avltree, avl_node_t *newnode) {
 static avl_node_t *
 avl_insert_after(avl_tree_t *avltree, avl_node_t *node, avl_node_t *newnode);
 
+/* Insert a node before another node. Returns the new node.
+ * If old is NULL, the item is appended to the tree.
+ * O(lg n) */
 static avl_node_t *
 avl_insert_before(avl_tree_t *avltree, avl_node_t *node, avl_node_t *newnode) {
 	if(!node)
@@ -151,6 +172,9 @@ avl_insert_before(avl_tree_t *avltree, avl_node_t *node, avl_node_t *newnode) {
 	return newnode;
 }
 
+/* Insert a node after another node. Returns the new node.
+ * If old is NULL, the item is prepended to the tree.
+ * O(lg n) */
 static avl_node_t *
 avl_insert_after(avl_tree_t *avltree, avl_node_t *node, avl_node_t *newnode) {
 	if(!node)
@@ -181,12 +205,10 @@ avl_insert_after(avl_tree_t *avltree, avl_node_t *node, avl_node_t *newnode) {
 	return newnode;
 }
 
-/*
- * avl_unlink_node:
- * Removes the given node.  Does not delete the item at that node.
+/* Deletes the node from the tree.  Does not delete the item at that node.
  * The item of the node may be freed before calling avl_unlink_node.
  * (In other words, it is not referenced by this function.)
- */
+ * O(lg n) */
 static void
 avl_unlink_node(avl_tree_t *avltree, avl_node_t *avlnode) {
 	avl_node_t *parent;
@@ -341,7 +363,7 @@ avl_rebalance(avl_tree_t *avltree, avl_node_t *avlnode) {
 	}
 }
 
-/*------------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  end of functions from AVL-tree library.
-*******************************************************************************/
+******************************************************************************/
 #endif
