@@ -259,3 +259,12 @@ hv4dplusU(dlnode_t * list)
     }
     return hv;
 }
+
+double
+hv4d(const double * restrict data, size_t n, const double * restrict ref)
+{
+    dlnode_t * list = setup_cdllist(data, n, ref);
+    double hv = hv4dplusU(list);
+    free_cdllist(list);
+    return hv;
+}

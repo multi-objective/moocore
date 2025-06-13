@@ -78,11 +78,11 @@ static int compare_node(const void *p1, const void* p2)
 
 static fpli_dlnode_t *
 fpli_setup_cdllist(const double * restrict data, dimension_t d,
-                   int * restrict size, const double * restrict ref)
+                   size_t * restrict size, const double * restrict ref)
 {
     ASSUME(d > STOP_DIMENSION);
     dimension_t d_stop = d - STOP_DIMENSION;
-    int n = *size;
+    size_t n = *size;
     fpli_dlnode_t *head = malloc ((n+1) * sizeof(*head));
     head->next = malloc(2 * d_stop * (n+1) * sizeof(fpli_dlnode_t*));
     head->prev = head->next + d_stop * (n+1);
@@ -91,8 +91,8 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     head->x = NULL; /* head contains no data */
     head->ignore = 0;  /* should never get used */
 
-    int i, j;
-    for (i = 1, j = 0; j < n; j++) {
+    size_t i = 1;
+    for (size_t j = 0; j < n; j++) {
         /* Filters those points that do not strictly dominate the reference
            point.  This is needed to assure that the points left are only those
            that are needed to calculate the hypervolume. */
@@ -149,8 +149,8 @@ static void fpli_free_cdllist(fpli_dlnode_t * head)
     free(head);
 }
 
-static void delete(fpli_dlnode_t * restrict nodep, dimension_t dim,
-                   double * restrict bound)
+static void
+delete(fpli_dlnode_t * restrict nodep, dimension_t dim, double * restrict bound)
 {
     ASSUME(dim > STOP_DIMENSION);
     for (dimension_t i = STOP_DIMENSION; i < dim; i++) {
@@ -159,11 +159,11 @@ static void delete(fpli_dlnode_t * restrict nodep, dimension_t dim,
         nodep->next[d]->prev[d] = nodep->prev[d];
         if (bound[d] > nodep->x[i])
             bound[d] = nodep->x[i];
-  }
+    }
 }
 
-static void reinsert (fpli_dlnode_t * restrict nodep, dimension_t dim,
-                      double * restrict bound)
+static void
+reinsert(fpli_dlnode_t * restrict nodep, dimension_t dim, double * restrict bound)
 {
     ASSUME(dim > STOP_DIMENSION);
     for (dimension_t i = STOP_DIMENSION; i < dim; i++) {
@@ -274,12 +274,12 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
                 * (p1->x[dim] - p1->prev[d_stop]->x[dim]);
         } else {
             ASSUME(c == 1);
-            p1->area[0] = one_point_hv(p1->x, ref, STOP_DIMENSION + 1);
-            for (dimension_t i = 1; i <= d_stop; i++)
-                p1->area[i] = p1->area[i-1] * (ref[STOP_DIMENSION + i] - p1->x[STOP_DIMENSION + i]);
+            p1->area[0] = one_point_hv(p1->x, ref, STOP_DIMENSION);
+            for (dimension_t i = STOP_DIMENSION; i < dim; i++)
+                p1->area[i + 1 - STOP_DIMENSION] = p1->area[i - STOP_DIMENSION] * (ref[i] - p1->x[i]);
         }
 
-        while(true) {
+        while (true) {
             p1->vol[d_stop] = hyperv;
             if (p1->ignore >= dim) {
                 p1->area[d_stop] = p1->prev[d_stop]->area[d_stop];
@@ -323,7 +323,7 @@ hv2d(const double * restrict data, size_t n, const double * restrict ref)
     for (size_t k = 0; k < n; k++)
         p[k] = data + 2 * k;
 
-    qsort(p, n, sizeof(*p), &cmp_doublep_x_asc_y_asc);
+    qsort(p, n, sizeof(*p), cmp_doublep_x_asc_y_asc);
 
     double hyperv = 0;
     double prev_j = ref[1];
@@ -345,23 +345,16 @@ hv2d(const double * restrict data, size_t n, const double * restrict ref)
 }
 
 double hv3d_plus(const double * restrict data, size_t n, const double * restrict ref);
-
-static double
-hv4d(const double * restrict data, size_t n, const double * restrict ref)
-{
-    dlnode_t * list = setup_cdllist(data, n, ref);
-    double hv = hv4dplusU(list);
-    free_cdllist(list);
-    return hv;
-}
+double hv4d(const double * restrict data, size_t n, const double * restrict ref);
 
 /*
    Returns 0 if no point strictly dominates ref.
    Returns -1 if out of memory.
 */
-double fpli_hv(const double * restrict data, int d, int n,
+double fpli_hv(const double * restrict data, int d, int npoints,
                const double * restrict ref)
 {
+    size_t n = (size_t) npoints;
     if (unlikely(n == 0)) return 0.0;
     ASSUME(d < 256);
     ASSUME(d > 1);
@@ -378,8 +371,8 @@ double fpli_hv(const double * restrict data, int d, int n,
         hyperv = one_point_hv(list->next[0]->x, ref, dim);
     } else {
         dlnode_t * list4d = new_cdllist(n, ref);
-        double * bound = malloc ( (dim - STOP_DIMENSION) * sizeof(double));
-        for (dimension_t i = 0; i < (dim - STOP_DIMENSION); i++)
+        double * bound = malloc ((dim - STOP_DIMENSION) * sizeof(double));
+        for (dimension_t i = 0; i < dim - STOP_DIMENSION; i++)
             bound[i] = -DBL_MAX;
         hyperv = hv_recursive(list, list4d, dim - 1, n, ref, bound);
         free (bound);
