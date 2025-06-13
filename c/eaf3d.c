@@ -666,7 +666,7 @@ freetree(avl_tree_t *avltree)
     avl_node_t *aux, *aux2;
     aux=avltree->head;
 
-    if(aux){
+    if(aux){ // FIXME: Double check of aux?
         while(aux){
             aux2 = aux;
             aux = aux2->next;
@@ -689,9 +689,10 @@ freetree2(avl_tree_t *avltree)
     while(aux->next){
         aux2 = aux;
         aux = aux2->next;
+        // FIXME: aux2->time is not freed?
         free(aux2);
     }
-
+    // FIXME: Double free of aux->item
     free(aux->item);
     free(aux);
 
@@ -705,6 +706,7 @@ static void free_removed(removed_list_t * removed_list)
     while (node != NULL) {
         avl_node_t * aux = node;
         node = node->next;
+        // FIXME: Do not free aux->item? Same as freetree()?
         free(aux);
     }
     free(removed_list);
@@ -762,6 +764,14 @@ eaf3d (objective_t *data, const int *cumsize, int nruns,
             assert(cumsize[i-1] < cumsize[i]);
         );
 
+    /* FIXME: This seems wrong. It should be:
+       avl_tree_t * set = malloc (nruns * sizeof(*set));
+       avl_tree_t * level = malloc (nruns * sizeof(*level));
+       avl_tree_t * output = malloc (nruns * sizeof(*output));
+
+       This way we do not need to do avl_alloc_tree for each tree, which
+       creates a lot of small memory chunks.
+    */
     avl_tree_t **set = malloc (nruns * sizeof(avl_tree_t));
     avl_tree_t **level = malloc (nruns * sizeof(avl_tree_t));
     avl_tree_t **output = malloc (nruns * sizeof(avl_tree_t));
