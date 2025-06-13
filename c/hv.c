@@ -175,7 +175,7 @@ reinsert(fpli_dlnode_t * restrict nodep, dimension_t dim, double * restrict boun
     }
 }
 
-static dlnode_t *
+static void
 fpli_hv4d_setup_cdllist(const fpli_dlnode_t * restrict pp,
                         dlnode_t * restrict list, size_t n _attr_maybe_unused)
 {
@@ -209,7 +209,6 @@ fpli_hv4d_setup_cdllist(const fpli_dlnode_t * restrict pp,
     // q = last point, q->next = s3, s3->prev = last point
     q->next[d] = list+2;
     (list+2)->prev[d] = q;
-    return list;
 }
 
 static double
@@ -224,15 +223,10 @@ one_point_hv(const double * restrict x, const double * restrict ref, dimension_t
 double hv4dplusU(dlnode_t * list);
 
 static double
-fpli_hv4d(fpli_dlnode_t *list, dlnode_t * restrict list4d,
-          size_t c, const double * restrict ref)
+fpli_hv4d(fpli_dlnode_t *list, dlnode_t * restrict list4d, size_t c)
 {
-    ASSUME(c >= 1);
-    fpli_dlnode_t *pp = list->next[0];
-    if (c == 1) {
-        return one_point_hv(pp->x, ref, 4);
-    }
-    fpli_hv4d_setup_cdllist(pp, list4d, c);
+    ASSUME(c > 1);
+    fpli_hv4d_setup_cdllist(list->next[0], list4d, c);
     double hv = hv4dplusU(list4d);
     return hv;
 }
@@ -242,76 +236,84 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
              dimension_t dim, size_t c,
              const double * restrict ref, double * restrict bound)
 {
+    ASSUME(dim > STOP_DIMENSION);
+    ASSUME(c > 1);
     /* ------------------------------------------------------
        General case for dimensions higher than 4D
        ------------------------------------------------------ */
-    if ( dim > STOP_DIMENSION ) {
-        const dimension_t d_stop = dim - STOP_DIMENSION;
-        fpli_dlnode_t *p1 = list->prev[d_stop];
-        for (fpli_dlnode_t *pp = p1; pp->x; pp = pp->prev[d_stop]) {
-            if (pp->ignore < dim)
-                pp->ignore = 0;
-        }
-        fpli_dlnode_t *p0 = list;
-        while (c > 1
-               /* We delete all points x[dim] > bound[d_stop]. In case of
-                  repeated coordinates, we also delete all points
-                  x[dim] == bound[d_stop] except one. */
-               && (p1->x[dim] > bound[d_stop]
-                   || p1->prev[d_stop]->x[dim] >= bound[d_stop])
-            ) {
-            // FIXME: Instead of deleting each point, unlink the start and end
-            // nodes after the loop.
-            delete(p1, dim, bound);
-            p0 = p1;
-            p1 = p1->prev[d_stop];
-            c--;
-        }
+    const dimension_t d_stop = dim - STOP_DIMENSION;
+    fpli_dlnode_t *p1 = list->prev[d_stop];
+    for (fpli_dlnode_t *pp = p1; pp->x; pp = pp->prev[d_stop]) {
+        if (pp->ignore < dim)
+            pp->ignore = 0;
+    }
+    fpli_dlnode_t *p0 = list;
+    /* Delete all points x[dim] > bound[d_stop].  In case of repeated
+       coordinates, delete also all points x[dim] == bound[d_stop] except
+       one.  */
+    while (p1->x[dim] > bound[d_stop] || p1->prev[d_stop]->x[dim] >= bound[d_stop]) {
+        // FIXME: Instead of deleting each point, unlink the start and end
+        // nodes after the loop.
+        delete(p1, dim, bound);
+        p0 = p1;
+        p1 = p1->prev[d_stop];
+        c--;
+        if (c == 1)
+            break;
+    }
 
-        double hyperv = 0;
-        if (c > 1) {
-            hyperv = p1->prev[d_stop]->vol[d_stop] + p1->prev[d_stop]->area[d_stop]
-                * (p1->x[dim] - p1->prev[d_stop]->x[dim]);
+    double hyperv = 0;
+    if (c > 1) {
+        hyperv = p1->prev[d_stop]->vol[d_stop] + p1->prev[d_stop]->area[d_stop]
+            * (p1->x[dim] - p1->prev[d_stop]->x[dim]);
+    } else {
+        ASSUME(c == 1);
+        p1->area[0] = one_point_hv(p1->x, ref, STOP_DIMENSION);
+        for (dimension_t i = STOP_DIMENSION; i < dim; i++)
+            p1->area[i + 1 - STOP_DIMENSION] = p1->area[i - STOP_DIMENSION] * (ref[i] - p1->x[i]);
+        p1->vol[d_stop] = 0;
+        if (p0->x == NULL) {
+            hyperv += p1->area[d_stop] * (ref[dim] - p1->x[dim]);
+            return hyperv;
+        }
+        hyperv = p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
+        bound[d_stop] = p0->x[dim];
+        reinsert(p0, dim, bound);
+        c++;
+        p1 = p0;
+        p0 = p0->next[d_stop];
+    }
+
+    assert(c > 1);
+    while (true) {
+        p1->vol[d_stop] = hyperv;
+        double hypera;
+        if (p1->ignore >= dim) {
+            hypera = p1->prev[d_stop]->area[d_stop];
         } else {
-            ASSUME(c == 1);
-            p1->area[0] = one_point_hv(p1->x, ref, STOP_DIMENSION);
-            for (dimension_t i = STOP_DIMENSION; i < dim; i++)
-                p1->area[i + 1 - STOP_DIMENSION] = p1->area[i - STOP_DIMENSION] * (ref[i] - p1->x[i]);
-        }
-
-        while (true) {
-            p1->vol[d_stop] = hyperv;
-            if (p1->ignore >= dim) {
-                p1->area[d_stop] = p1->prev[d_stop]->area[d_stop];
+            if (dim - 1 == STOP_DIMENSION) {
+                /*---------------------------------------
+                  base case of dimension 4
+                  --------------------------------------*/
+                hypera = fpli_hv4d(list, list4d, c);
             } else {
-                p1->area[d_stop] = hv_recursive(list, list4d, dim-1, c, ref, bound);
-                if (p1->area[d_stop] <= p1->prev[d_stop]->area[d_stop])
-                    p1->ignore = dim;
+                hypera = hv_recursive(list, list4d, dim-1, c, ref, bound);
             }
-
-            if (p0->x == NULL) {
-                hyperv += p1->area[d_stop] * (ref[dim] - p1->x[dim]);
-                return hyperv;
-            }
-            hyperv += p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
-            bound[d_stop] = p0->x[dim];
-            reinsert(p0, dim, bound);
-            c++;
-            p1 = p0;
-            p0 = p0->next[d_stop];
+            if (hypera <= p1->prev[d_stop]->area[d_stop])
+                p1->ignore = dim;
         }
+        p1->area[d_stop] = hypera;
+        if (p0->x == NULL) {
+            hyperv += hypera * (ref[dim] - p1->x[dim]);
+            return hyperv;
+        }
+        hyperv += hypera * (p0->x[dim] - p1->x[dim]);
+        bound[d_stop] = p0->x[dim];
+        reinsert(p0, dim, bound);
+        c++;
+        p1 = p0;
+        p0 = p0->next[d_stop];
     }
-
-    /* ---------------------------
-       special case of dimension 4
-       --------------------------- */
-    else if (dim == STOP_DIMENSION) {
-        return fpli_hv4d(list, list4d, c, ref);
-    }
-    else
-        fatal_error("%s:%d: unreachable condition! \n"
-                    "This is a bug, please report it to "
-                    "manuel.lopez-ibanez@manchester.ac.uk\n", __FILE__, __LINE__);
 }
 
 static double
