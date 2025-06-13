@@ -30,6 +30,14 @@ files = {
         file=path_to_data + "DTLZLinearShape.4d.front.1000pts.10",
         range=(300, 1500, 200),
     ),
+    "DTLZLinearShape.5d": dict(
+        file=path_to_data + "DTLZLinearShape.5d.front.500pts.10",
+        range=(100, 600, 100),
+    ),
+    "DTLZLinearShape.6d": dict(
+        file=path_to_data + "DTLZLinearShape.6d.front.700pts.10",
+        range=(100, 500, 100),
+    ),
 }
 
 
@@ -41,18 +49,17 @@ for name in names:
     ref = np.ones(x.shape[1])
     n = get_range(len(x), *files[name]["range"])
 
-    bench = Bench(
-        name=name,
-        n=n,
-        bench={
-            "moocore": moocore.Hypervolume(ref=ref),
-            "pymoo": lambda z, hv=pymoo_HV(ref_point=ref): hv(z),
-            "jMetalPy": lambda z, hv=jmetal_HV(ref): hv.compute(z),
-            "botorch": lambda z,
-            hv=botorch_HV(ref_point=torch.from_numpy(-ref)): hv.compute(z),
-        },
-    )
+    benchmarks = {
+        "moocore": moocore.Hypervolume(ref=ref),
+        "pymoo": lambda z, hv=pymoo_HV(ref_point=ref): hv(z),
+        "jMetalPy": lambda z, hv=jmetal_HV(ref): hv.compute(z),
+    }
+    if name not in ["DTLZLinearShape.5d", "DTLZLinearShape.6d"]:
+        benchmarks["botorch"] = lambda z, hv=botorch_HV(
+            ref_point=torch.from_numpy(-ref)
+        ): hv.compute(z)
 
+    bench = Bench(name=name, n=n, bench=benchmarks)
     values = {}
     for maxrow in n:
         z = x[:maxrow, :]
