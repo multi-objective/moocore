@@ -69,14 +69,22 @@ The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_,
 
 Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>` whereas `jMetalPy`_ does not provide the :ref:`IGD+ indicator <igd_hausdorf>`. `BoTorch`_ provides neither of them.
 
-The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D and 4D. As the plots show, `moocore`_ is nearly 100 times faster than the other packages and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_, which is an order of magnitude slower than the second slowest.
+The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D, 4D, 5D and 6D. As the plots show, `moocore`_ is 100 times faster than the other packages and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_.  `BoTorch`_ is not included for more than 4 objectives because it is tens of thousands of times slower than `moocore`_.
 
-|pic1| |pic2|
+|hv_bench-DTLZLinearShape-3d| |hv_bench-DTLZLinearShape-4d|
 
-.. |pic1| image:: _static/hv_bench-DTLZLinearShape.3d-time.png
+|hv_bench-DTLZLinearShape-5d| |hv_bench-DTLZLinearShape-6d|
+
+.. |hv_bench-DTLZLinearShape-3d| image:: _static/hv_bench-DTLZLinearShape.3d-time.png
    :width: 49%
 
-.. |pic2| image:: _static/hv_bench-DTLZLinearShape.4d-time.png
+.. |hv_bench-DTLZLinearShape-4d| image:: _static/hv_bench-DTLZLinearShape.4d-time.png
+   :width: 49%
+
+.. |hv_bench-DTLZLinearShape-5d| image:: _static/hv_bench-DTLZLinearShape.5d-time.png
+   :width: 49%
+
+.. |hv_bench-DTLZLinearShape-6d| image:: _static/hv_bench-DTLZLinearShape.6d-time.png
    :width: 49%
 
 
