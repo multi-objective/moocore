@@ -273,8 +273,7 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
             p1->area[i + 1 - STOP_DIMENSION] = p1->area[i - STOP_DIMENSION] * (ref[i] - p1->x[i]);
         p1->vol[d_stop] = 0;
         if (p0->x == NULL) {
-            hyperv += p1->area[d_stop] * (ref[dim] - p1->x[dim]);
-            return hyperv;
+            return p1->area[d_stop] * (ref[dim] - p1->x[dim]);
         }
         hyperv = p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
         bound[d_stop] = p0->x[dim];
