@@ -371,15 +371,17 @@ double fpli_hv(const double * restrict data, int d, int npoints,
     } else if (unlikely(n == 1)) {
         hyperv = one_point_hv(list->next[0]->x, ref, dim);
     } else {
-        dlnode_t * list4d = new_cdllist(n, ref);
-        double * bound = malloc ((dim - STOP_DIMENSION) * sizeof(double));
-        for (dimension_t i = 0; i < dim - STOP_DIMENSION; i++)
+        const dimension_t d_stop = dim - STOP_DIMENSION;
+        ASSUME(d_stop > 1 && d_stop < 255); // Silence -Walloc-size-larger-than= warning
+        double * bound = malloc(d_stop * sizeof(double));
+        for (dimension_t i = 0; i < d_stop; i++)
             bound[i] = -DBL_MAX;
+        dlnode_t * list4d = new_cdllist(n, ref);
         hyperv = hv_recursive(list, list4d, dim - 1, n, ref, bound);
-        free (bound);
         free_cdllist(list4d);
+        free(bound);
     }
     /* Clean up.  */
-    fpli_free_cdllist (list);
+    fpli_free_cdllist(list);
     return hyperv;
 }
