@@ -7,8 +7,9 @@ What's new
 Version 0.1.8 (dev)
 -------------------
 
-- :func:`~moocore.eaf` now takes the set indices as a separate argument
-  ``sets`` following the API of the R package.
+- :func:`~moocore.eaf`, :func:`~moocore.vorob_t` and :func:`~moocore.vorob_dev`
+  take the set indices as a separate argument ``sets`` following the API of the
+  R package.
 
 
 Version 0.1.7 (04/06/2025)

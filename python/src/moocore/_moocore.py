@@ -1421,14 +1421,15 @@ def eaf(
     return np.frombuffer(eaf_buf).reshape((eaf_npoints, -1))
 
 
-def vorob_t(data: ArrayLike, /, ref: ArrayLike) -> dict:
+def vorob_t(data: ArrayLike, /, sets: ArrayLike, *, ref: ArrayLike) -> dict:
     """Compute Vorob'ev threshold and expectation.
 
     Parameters
     ----------
     data :
-        Numpy array of numerical values and set numbers, containing multiple
-        sets. For example the output of the :func:`read_datasets` function.
+        Matrix of numerical values that represents multiple sets of points, where each row represents a point.
+    sets :
+        Vector that indicates the set of each point in ``data``.
     ref :
        Reference point as a 1D vector. Must be same length as a single point in the ``data``.
 
@@ -1451,7 +1452,7 @@ def vorob_t(data: ArrayLike, /, ref: ArrayLike) -> dict:
     Examples
     --------
     >>> CPFs = moocore.get_dataset("CPFs.txt")
-    >>> res = moocore.vorob_t(CPFs, ref=(2, 200))
+    >>> res = moocore.vorob_t(CPFs[:, :-1], sets=CPFs[:, -1], ref=(2, 200))
     >>> res["threshold"]
     44.140625
     >>> res["avg_hyp"]
@@ -1460,22 +1461,19 @@ def vorob_t(data: ArrayLike, /, ref: ArrayLike) -> dict:
     (213, 2)
     """
     data = np.asarray(data, dtype=float)
-    ncols = data.shape[1]
-    if ncols < 3:
-        raise ValueError(
-            "'data' must have at least 3 columns (2 objectives + set column)"
-        )
-    nobj = ncols - 1
-    sets = data[:, -1]
-    data = data[:, :-1]
-    avg_hyp = np.mean(apply_within_sets(data, sets, hypervolume, ref=ref))
+    nobj = data.shape[1]
+    if nobj < 2:
+        raise ValueError("'data' must have at least 2 columns")
+
+    hv_ind = Hypervolume(ref=ref)
+    avg_hyp = np.mean(apply_within_sets(data, sets, hv_ind))
     prev_hyp = diff = np.inf  # hypervolume of quantile at previous step
     a = 0.0
     b = 100.0
     while diff != 0:
         c = (a + b) / 2.0
         eaf_res = eaf(data, sets=sets, percentiles=c)[:, :nobj]
-        tmp = hypervolume(eaf_res, ref=ref)
+        tmp = hv_ind(eaf_res)
         if tmp > avg_hyp:
             a = c
         else:
@@ -1487,20 +1485,21 @@ def vorob_t(data: ArrayLike, /, ref: ArrayLike) -> dict:
 
 
 def vorob_dev(
-    data: ArrayLike, /, ref: ArrayLike, *, ve: ArrayLike = None
+    data: ArrayLike, /, sets: ArrayLike, *, ref: ArrayLike, ve: ArrayLike = None
 ) -> float:
     r"""Compute Vorob'ev deviation.
 
     Parameters
     ----------
     data :
-       Numpy array of numerical values and set numbers, containing multiple sets.
-       For example the output of the :func:`read_datasets` function.
+        Matrix of numerical values that represents multiple sets of points, where each row represents a point.
+    sets :
+        Vector that indicates the set of each point in ``data``.
     ref :
        Reference point as a 1D vector. Must be same length as a single point in the ``data``.
     ve :
-       Vorob'ev expectation, e.g., as returned by :func:`vorob_t`.
-       If not provided, it is calculated as ``vorob_t(x, ref)``.
+       Vorob'ev expectation, e.g., as returned by :func:`vorob_t`.  If not
+       provided, it is calculated by calling ``vorob_t(data, sets, ref)``.
 
     Returns
     -------
@@ -1521,28 +1520,28 @@ def vorob_dev(
     Examples
     --------
     >>> CPFs = moocore.get_dataset("CPFs.txt")
-    >>> vd = moocore.vorob_dev(CPFs, ref=(2, 200))
+    >>> vd = moocore.vorob_dev(CPFs[:, :-1], sets=CPFs[:, -1], ref=(2, 200))
     >>> vd
     3017.12989402326
 
     """
-    if ve is None:
-        ve = vorob_t(data, ref=ref)["ve"]
-
     data = np.asarray(data, dtype=float)
-    ncols = data.shape[1]
-    if ncols < 3:
-        raise ValueError(
-            "'data' must have at least 3 columns (2 objectives + set column)"
-        )
+    nobj = data.shape[1]
+    if nobj < 2:
+        raise ValueError("'data' must have at least 2 columns")
 
     # Hypervolume of the symmetric difference between A and B:
     # 2 * H(AUB) - H(A) - H(B)
     hv_ind = Hypervolume(ref=ref)
+
+    if ve is None:
+        res = vorob_t(data, sets=sets, ref=ref)
+        ve = res["ve"]
+        h1 = res["avg_hyp"]
+    else:
+        h1 = np.mean(apply_within_sets(data, sets, hv_ind))
+
     h2 = hv_ind(ve)
-    sets = data[:, -1]
-    data = data[:, :-1]
-    h1 = np.mean(apply_within_sets(data, sets, hv_ind))
     vd = 2 * np.mean(
         apply_within_sets(data, sets, lambda g: hv_ind(np.vstack((g, ve))))
     )
