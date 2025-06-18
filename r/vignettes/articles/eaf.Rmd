@@ -1,5 +1,7 @@
 ---
 title: "Empirical Attainment Function (EAF)"
+bibliography: REFERENCES.bib
+link-citations: true
 ---
 
 ```{r, include = FALSE}
@@ -17,7 +19,7 @@ The AUC of the EAF and the AOC (Hypervolume)
 --------------------------------------------
 
 The Area-Over-the-Curve (i.e., the hypervolume) of a set of nondominated sets
-is exactly the the Area-Under-the-Curve (AUC) of their corresponding EAF, as
+is exactly the the Area-Under-the-Curve (AUC) of their corresponding EAF [@LopVerDreDoe2025], as
 this example shows.
 
 
@@ -30,22 +32,23 @@ A <- read_datasets(file.path(extdata_dir, "ALG_1_dat.xz"))
 A[,1:2] <- normalise(A[,1:2], to_range = c(0,1))
 
 aoc <- mean(sapply(split.data.frame(A[,1:2], A[,3]), hypervolume, reference = 1))
-eafA <- eaf(A[,1:2], A[,3])
-eafA[,3] <- eafA[,3]/100
-auc <- hypervolume(eafA, reference = c(1,1,0), maximise = c(FALSE,FALSE,TRUE))
-cat("Runs = ", length(unique(A[,3])),
+eaf_a <- eaf(A[,1:2], A[,3])
+eaf_a[,3] <- eaf_a[,3]/100
+auc <- hypervolume(eaf_a, reference = c(1,1,0), maximise = c(FALSE,FALSE,TRUE))
+nruns <- length(unique(A[,3]))
+cat("Runs = ", nruns,
     "\nAUC of EAF = ", auc,
     "\nMean AOC = ", aoc, "\n")
 
-runs <- 5:length(unique(A[,3]))
+runs <- 5:nruns
 aocs <- c()
 aucs <- c()
 for (r in runs) {
   a <- A[A[,3] <= r, ]
   aoc <- mean(sapply(split.data.frame(a[,1:2], a[,3]), hypervolume, reference = 1))
-  eafa <- eaf(a[,1:2], a[,3])
-  eafa[,3] <- eafa[,3]/100
-  auc <- hypervolume(eafa, reference = c(1,1,0), maximise = c(FALSE,FALSE,TRUE))
+  eaf_a <- eaf(a[,1:2], a[,3])
+  eaf_a[,3] <- eaf_a[,3]/100
+  auc <- hypervolume(eaf_a, reference = c(1,1,0), maximise = c(FALSE,FALSE,TRUE))
   aocs <- c(aocs, aoc)
   aucs <- c(aucs, auc)
 }
@@ -59,3 +62,5 @@ ggplot(x, aes(r, value, color=variable, linetype=variable)) +
   geom_line(linewidth=1.5) +
   labs(x = "Number of sets", y = "Value", color = "", linetype="")
 ```
+
+# References
