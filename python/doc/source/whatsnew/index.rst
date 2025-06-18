@@ -10,6 +10,7 @@ Version 0.1.8 (dev)
 - :func:`~moocore.eaf`, :func:`~moocore.vorob_t` and :func:`~moocore.vorob_dev`
   take the set indices as a separate argument ``sets`` following the API of the
   R package.
+- New example :ref:`sphx_glr_auto_examples_plot_eaf.py`.
 
 
 Version 0.1.7 (04/06/2025)
