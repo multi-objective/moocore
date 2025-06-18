@@ -57,7 +57,7 @@
    non-volatile memory, even if it changes in between successive invocations of
    the function.  */
 #ifndef __pure_func
-# define __pure_func	__attribute__((__pure__))
+# define __pure_func __attribute__((__pure__))
 #endif
 
 /* The noreturn keyword tells the compiler to assume that function cannot
@@ -65,7 +65,14 @@
    ever did return. This makes slightly better code. More importantly, it helps
    avoid spurious warnings of uninitialized variables. */
 #ifndef __noreturn
-# define __noreturn	__attribute__((__noreturn__))
+# if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202301L
+// gcc 15-, LLVM clang 19- and Apple clang 17
+#  define __noreturn [[noreturn]]
+# elif defined(_MSC_VER) && _MSC_VER >= 1200
+#  define __noreturn __declspec(noreturn)
+# else
+#  define __noreturn __attribute__((__noreturn__))
+# endif
 #endif
 
 /* The malloc attribute is used to tell the compiler that a function
@@ -102,11 +109,11 @@
 #endif
 
 #if defined(__GNUC__) || defined(__clang__) || defined(__ICC)
-    #define _attr_aligned(x) __attribute__((aligned (x)))
+# define _attr_aligned(x) __attribute__((aligned (x)))
 #elif defined(_MSC_VER)
-    #define _attr_aligned(x) __declspec(align(x))
+# define _attr_aligned(x) __declspec(align(x))
 #else
-    #define _attr_aligned(x)
+# define _attr_aligned(x)
 #endif
 
 
@@ -134,11 +141,11 @@
 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L  // C99
 /* "restrict" is a known keyword */
 #elif defined(__GNUC__) || defined(__clang__) // GCC or Clang
-  #define restrict __restrict__
+# define restrict __restrict__
 #elif defined(_MSC_VER) // MSVC
-  #define restrict __restrict
+# define restrict __restrict
 #else // Fallback
-  #define restrict
+# define restrict
 #endif
 
 /*
@@ -157,26 +164,28 @@
 #define ATTRIBUTE_FORMAT_PRINTF(STRING_INDEX, FIRST_TO_CHECK)                  \
     __attribute__((__format__(ATTRIBUTE_FORMAT_PRINTF_ARCHETYPE, STRING_INDEX, FIRST_TO_CHECK)))
 
+#ifndef INTERNAL_ASSUME
 // C++ standard attribute
-#ifdef __has_cpp_attribute
+# if defined(__has_cpp_attribute)
 #  if __has_cpp_attribute(assume) >= 202207L
-#    define INTERNAL_ASSUME(EXPR) [[assume(EXPR)]]
+#   define INTERNAL_ASSUME(EXPR) [[assume(EXPR)]]
 #  endif
+# endif
 #endif
+
 #ifndef INTERNAL_ASSUME
-#  if defined(__clang__)
-#    define INTERNAL_ASSUME(EXPR) __builtin_assume(EXPR)
-#  elif defined(_MSC_VER)
-#    define INTERNAL_ASSUME(EXPR) __assume(EXPR)
-#  elif defined(__GNUC__)
-#    if __GNUC__ >= 13
-#      define INTERNAL_ASSUME(EXPR) __attribute__((__assume__(EXPR)))
-#    endif
-#  endif
+// C++ standard attribute
+# if defined(__clang__)
+#  define INTERNAL_ASSUME(EXPR) __builtin_assume(EXPR)
+# elif defined(_MSC_VER)
+#  define INTERNAL_ASSUME(EXPR) __assume(EXPR)
+# elif defined(__GNUC__) && __GNUC__ >= 13
+#  define INTERNAL_ASSUME(EXPR) __attribute__((__assume__(EXPR)))
+# else
+#  define INTERNAL_ASSUME(EXPR) ((void)0)
+# endif
 #endif
-#ifndef INTERNAL_ASSUME
-#  define INTERNAL_ASSUME(EXPR)
-#endif
+
 
 /* Allow to redefine assert, for example, for R packages */
 #ifndef assert
@@ -187,12 +196,12 @@
 /* unreachable() is sometimes defined by stddef.h */
 #ifndef unreachable
 # if defined(__GNUC__) || defined(__clang__)
-#   define unreachable() __builtin_unreachable()
+#  define unreachable() __builtin_unreachable()
 # elif defined(_MSC_VER) // MSVC
-#   define unreachable() __assume(0)
+#  define unreachable() __assume(0)
 # else
-#   include <stdlib.h>
-#   define unreachable() do { assert(0); abort(); } while(0)
+#  include <stdlib.h>
+#  define unreachable() do { assert(0); abort(); } while(0)
 # endif
 #endif
 

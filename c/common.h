@@ -19,7 +19,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include "gcc_attribs.h"
-_attr_maybe_unused void fatal_error(const char * format,...) ATTRIBUTE_FORMAT_PRINTF(1, 2) __noreturn;
+__noreturn _attr_maybe_unused void fatal_error(const char * format,...) ATTRIBUTE_FORMAT_PRINTF(1, 2);
 void errprintf(const char * format,...) ATTRIBUTE_FORMAT_PRINTF(1, 2);
 void warnprintf(const char *format,...) ATTRIBUTE_FORMAT_PRINTF(1, 2);
 #define moocore_perror(...) do {                                               \
