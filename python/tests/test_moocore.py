@@ -307,8 +307,10 @@ def test_eaf(test_datapath):
     for test_name, expected_eaf_name in tests:
         filename = test_datapath(test_name)
         dataset = moocore.read_datasets(filename)
-        eaf_test = moocore.eaf(dataset)
-        eaf_pct_test = moocore.eaf(dataset, percentiles=[0, 50, 100])
+        x = dataset[:, :-1]
+        sets = dataset[:, -1]
+        eaf_test = moocore.eaf(x, sets=sets)
+        eaf_pct_test = moocore.eaf(x, sets=sets, percentiles=[0, 50, 100])
         expected_eaf_result = np.loadtxt(
             test_datapath(f"expected_output/eaf/{expected_eaf_name}")
         )
