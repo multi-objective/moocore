@@ -8,36 +8,36 @@ eaf(x, sets, percentiles = NULL, maximise = FALSE, groups = NULL)
 }
 \arguments{
 \item{x}{\code{matrix()}|\code{data.frame()}\cr Matrix or data frame of numerical
-values, where each row gives the coordinates of a point. If \code{sets} is
-missing, the last column of \code{x} gives the sets.}
+values that represents multiple sets of points, where each row represents
+a point. If \code{sets} is missing, the last column of \code{x} gives the sets.}
 
-\item{sets}{\code{integer()}\cr A vector that indicates the set of each point in \code{x}. If
-missing, the last column of \code{x} is used instead.}
+\item{sets}{\code{integer()}\cr Vector that indicates the set of each point in
+\code{x}. If missing, the last column of \code{x} is used instead.}
 
-\item{percentiles}{\code{numeric()}\cr Vector indicating which percentiles are computed.
-\code{NULL} computes all.}
+\item{percentiles}{\code{numeric()}\cr Vector indicating which percentiles are
+computed.  \code{NULL} computes all.}
 
 \item{maximise}{\code{logical()}\cr Whether the objectives must be maximised
 instead of minimised. Either a single logical value that applies to all
 objectives or a vector of logical values, with one value per objective.}
 
-\item{groups}{\code{factor()}\cr Indicates that the EAF must be computed separately for data
-belonging to different groups.}
+\item{groups}{\code{factor()}\cr Indicates that the EAF must be computed
+separately for data belonging to different groups.}
 }
 \value{
-\code{data.frame()}\cr A data frame containing the exact representation of
-EAF. The last column gives the percentile that corresponds to each
+\code{data.frame()}\cr A data frame containing the exact representation
+of EAF. The last column gives the percentile that corresponds to each
 point. If groups is not \code{NULL}, then an additional column indicates to
 which group the point belongs.
 }
 \description{
-This function computes the EAF given a set of 2D or 3D points and a vector \code{set}
-that indicates to which set each point belongs.
+This function computes the EAF given a set of 2D or 3D points and a vector
+\code{set} that indicates to which set each point belongs.
 }
 \note{
 There are several examples of data sets in
-\code{system.file(package="moocore","extdata")}.  The current implementation
-only supports two and three dimensional points.
+\code{system.file(package="moocore","extdata")}.  The current implementation only
+supports two and three dimensional points.
 }
 \examples{
 extdata_path <- system.file(package="moocore", "extdata")

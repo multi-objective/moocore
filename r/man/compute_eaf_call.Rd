@@ -10,17 +10,17 @@ compute_eaf_call(x, cumsizes, percentiles)
 }
 \arguments{
 \item{x}{\code{matrix()}|\code{data.frame()}\cr Matrix or data frame of numerical
-values, where each row gives the coordinates of a point. If \code{sets} is
-missing, the last column of \code{x} gives the sets.}
+values that represents multiple sets of points, where each row represents
+a point. If \code{sets} is missing, the last column of \code{x} gives the sets.}
 
 \item{cumsizes}{\code{integer()}\cr Cumulative size of the different sets of points in \code{x}.}
 
-\item{percentiles}{\code{numeric()}\cr Vector indicating which percentiles are computed.
-\code{NULL} computes all.}
+\item{percentiles}{\code{numeric()}\cr Vector indicating which percentiles are
+computed.  \code{NULL} computes all.}
 }
 \value{
-\code{data.frame()}\cr A data frame containing the exact representation of
-EAF. The last column gives the percentile that corresponds to each
+\code{data.frame()}\cr A data frame containing the exact representation
+of EAF. The last column gives the percentile that corresponds to each
 point. If groups is not \code{NULL}, then an additional column indicates to
 which group the point belongs.
 }

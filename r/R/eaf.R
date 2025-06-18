@@ -1,33 +1,35 @@
 #' Exact computation of the EAF in 2D or 3D
 #'
-#' This function computes the EAF given a set of 2D or 3D points and a vector `set`
-#' that indicates to which set each point belongs.
+#' This function computes the EAF given a set of 2D or 3D points and a vector
+#' `set` that indicates to which set each point belongs.
 #'
 #' @param x `matrix()`|`data.frame()`\cr Matrix or data frame of numerical
-#'   values, where each row gives the coordinates of a point. If `sets` is
-#'   missing, the last column of `x` gives the sets.
+#'   values that represents multiple sets of points, where each row represents
+#'   a point. If `sets` is missing, the last column of `x` gives the sets.
 #'
-#' @param sets `integer()`\cr A vector that indicates the set of each point in `x`. If
-#'   missing, the last column of `x` is used instead.
+#' @param sets `integer()`\cr Vector that indicates the set of each point in
+#'   `x`. If missing, the last column of `x` is used instead.
 #'
-#' @param percentiles `numeric()`\cr Vector indicating which percentiles are computed.
-#' `NULL` computes all.
+#' @param percentiles `numeric()`\cr Vector indicating which percentiles are
+#'   computed.  `NULL` computes all.
 #'
 #' @inheritParams is_nondominated
 #'
-#' @param groups `factor()`\cr Indicates that the EAF must be computed separately for data
-#'   belonging to different groups.
+#' @param groups `factor()`\cr Indicates that the EAF must be computed
+#'   separately for data belonging to different groups.
 #'
-#' @return `data.frame()`\cr A data frame containing the exact representation of
-#'   EAF. The last column gives the percentile that corresponds to each
+#' @return `data.frame()`\cr A data frame containing the exact representation
+#'   of EAF. The last column gives the percentile that corresponds to each
 #'   point. If groups is not `NULL`, then an additional column indicates to
 #'   which group the point belongs.
 #'
 #' @author  Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
 #'
-#' @note There are several examples of data sets in
-#'   `system.file(package="moocore","extdata")`.  The current implementation
-#'   only supports two and three dimensional points.
+#' @note
+#'
+#' There are several examples of data sets in
+#' `system.file(package="moocore","extdata")`.  The current implementation only
+#' supports two and three dimensional points.
 #'
 #' @references
 #'

@@ -11,11 +11,11 @@ vorob_dev(x, sets, reference, ve = NULL, maximise = FALSE)
 }
 \arguments{
 \item{x}{\code{matrix()}|\code{data.frame()}\cr Matrix or data frame of numerical
-values, where each row gives the coordinates of a point. If \code{sets} is
-missing, the last column of \code{x} gives the sets.}
+values that represents multiple sets of points, where each row represents
+a point. If \code{sets} is missing, the last column of \code{x} gives the sets.}
 
-\item{sets}{\code{integer()}\cr A vector that indicates the set of each point in \code{x}. If
-missing, the last column of \code{x} is used instead.}
+\item{sets}{\code{integer()}\cr Vector that indicates the set of each point in
+\code{x}. If missing, the last column of \code{x} is used instead.}
 
 \item{reference}{\code{numeric()}\cr Reference point as a vector of numerical
 values.}
