@@ -152,12 +152,12 @@ def read_datasets(filename: str | os.PathLike | StringIO) -> np.ndarray:
     return np.frombuffer(data_buf).reshape((-1, ncols_p[0]))
 
 
-def _parse_maximise(maximise, nobj):
-    # Converts maximise array or single bool to ndarray format
+def _parse_maximise(maximise, nobj: int):
+    """Convert maximise array or single bool to ndarray format."""
     return atleast_1d_of_length_n(maximise, nobj).astype(bool)
 
 
-def _all_positive(x: ArrayLike):
+def _all_positive(x: ArrayLike) -> bool:
     return x.min() > 0
 
 
@@ -323,7 +323,7 @@ def epsilon_additive(
     ----------
     data :
         Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
-        If the array is created from the :func:`read_datasets` function, remove the last (set) column
+        If the array is created from the :func:`read_datasets` function, remove the last (set) column.
     ref :
         Reference set as a matrix of numerical values. Must have the same number of columns as ``data``.
     maximise :
