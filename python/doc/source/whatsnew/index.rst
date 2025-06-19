@@ -8,7 +8,7 @@ Version 0.1.8 (dev)
 -------------------
 
 - Correct license to LGPL v2.1 or later.
-- Bump dependencies to cffi>=1.17.1" and setuptools>=77.0.3.
+- Bump dependencies to ``cffi>=1.17.1`` and ``setuptools>=77.0.3``.
 - :func:`~moocore.eaf`, :func:`~moocore.vorob_t` and :func:`~moocore.vorob_dev`
   take the set indices as a separate argument ``sets`` following the API of the
   R package.
