@@ -3,7 +3,7 @@
 
 <!-- badges: start -->
 [![PyPI - Version](https://img.shields.io/pypi/v/moocore)][py-moocore-pypi]
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/moocore?color=blue)][py-moocore-pypi]
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/moocore?color=blue)][py-moocore-pypi-stats]
 [![Python build status][py-build-badge]][py-build-link]
 [![coverage][py-coverage-badge]][py-coverage-link]
 <!-- badges: end -->
@@ -72,3 +72,4 @@ There is also a `moocore` package for R: https://multi-objective.github.io/mooco
 [py-moocore-github]: https://github.com/multi-objective/moocore/tree/main/python#readme
 [py-moocore-homepage]: https://multi-objective.github.io/moocore/python
 [py-moocore-pypi]: https://pypi.org/project/moocore/
+[py-moocore-pypi-stats]: https://pypistats.org/packages/moocore
