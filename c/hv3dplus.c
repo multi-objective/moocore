@@ -120,7 +120,6 @@ preprocessing(dlnode_t * list, size_t n)
     node = new_avl_node(list + 1, tnodes + 2);
     avl_insert_before(&tree, nodeaux, node);
     assert(p->cnext[0] == nodeaux->prev->dlnode);
-
     assert(p->cnext[1] == nodeaux->next->dlnode);
 
     const dlnode_t * stop = list + 2;
@@ -177,8 +176,7 @@ hv3dplus(dlnode_t * list)
     restart_list_y(list);
     assert(list+2 == list->prev[0]);
 
-    double area = 0;
-    double volume = 0;
+    double area = 0, volume = 0;
     dlnode_t * p = (list+1)->next[0];
     const dlnode_t * stop = list+2;
     while (p != stop) {
