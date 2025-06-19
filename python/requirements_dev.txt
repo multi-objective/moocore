@@ -1,5 +1,6 @@
-setuptools>=70.1,<74 # Sync with .pre-commit-config.yaml
-cffi >= 1.15.1
+# Sync with .pre-commit-config.yaml
+setuptools>=77.0.3
+cffi >= 1.17.1
 numpy >= 1.23.0
 
 pre-commit >= 3.3.2

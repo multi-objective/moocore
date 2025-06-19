@@ -1,8 +1,8 @@
 [build-system]
 build-backend = "setuptools.build_meta"
 requires = [
-  "cffi>=1.15.1",
-  "setuptools>=70.1,<74", # TODO: Remove pin once python-cffi/cffi#117 is solved
+  "cffi>=1.17.1",
+  "setuptools>=77.0.3",
   "wheel",
 ]
 
@@ -18,6 +18,8 @@ keywords = [
   "operations research",
   "Optimization",
 ]
+license = "LGPL-2.1-or-later"
+license-files = [ "COPYRIGHTS" ]
 authors = [
   { name = "Manuel López-Ibáñez", email = "manuel.lopez-ibanez@manchester.ac.uk" },
   { name = "Fergus Rooney", email = "fergus.rooney@outlook.com" },
@@ -25,7 +27,6 @@ authors = [
 requires-python = ">=3.10"
 classifiers = [
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
@@ -34,7 +35,7 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-  "cffi>=1.15.1",
+  "cffi>=1.17.1",
   "numpy>=1.23",
   "platformdirs",
 ]
