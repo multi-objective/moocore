@@ -8,6 +8,7 @@
 | [**Python package**][py-moocore-homepage] | [GitHub][py-moocore-github] |[![Build status][py-build-badge]][py-build-link]|[![Code Coverage][py-coverage-badge]][py-coverage-link]|[![PyPI - Version](https://img.shields.io/pypi/v/moocore)][py-moocore-pypi]|[![PyPI - Downloads](https://img.shields.io/pypi/dm/moocore?color=blue)][py-moocore-pypi-stats]|
 
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/multi-objective/moocore/main.svg)](https://results.pre-commit.ci/latest/github/multi-objective/moocore/main)
+[![Testsuite status][testsuite-badge]][testsuite-link]
 
 **Contributors:**
     [Manuel López-Ibáñez](https://lopez-ibanez.eu),
@@ -60,3 +61,5 @@ In addition to the tests within each component, there is a separate [comprehensi
 [r-moocore-cran-results]: https://cran.r-project.org/web/checks/check_results_moocore.html
 [r-moocore-github]: https://github.com/multi-objective/moocore/tree/main/r#readme
 [r-moocore-homepage]: https://multi-objective.github.io/moocore/r/
+[testsuite-badge]: https://github.com/multi-objective/testsuite/actions/workflows/moocore.yml/badge.svg?event=push
+[testsuite-link]: https://github.com/multi-objective/testsuite/actions/workflows/moocore.yml
