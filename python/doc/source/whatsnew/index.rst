@@ -13,7 +13,7 @@ Version 0.1.8 (dev)
   take the set indices as a separate argument ``sets`` following the API of the
   R package.
 - New example :ref:`sphx_glr_auto_examples_plot_eaf.py`.
-
+- Document EAF and Vorob'ev expectation and deviation in more detail.
 
 Version 0.1.7 (04/06/2025)
 --------------------------

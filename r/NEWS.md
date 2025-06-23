@@ -1,3 +1,8 @@
+# moocore 0.1.7.900
+
+ * Document the EAF and Vorob'ev expectation and deviation in more detail.
+
+
 # moocore 0.1.7
 
  * `hypervolume()` now uses the HV3D+ algorithm for the 3D case and the HV4D+ algorithm for the 4D case.
