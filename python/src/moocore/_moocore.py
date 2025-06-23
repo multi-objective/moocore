@@ -1308,6 +1308,8 @@ def eaf(
 ) -> np.ndarray:
     r"""Exact computation of the Empirical Attainment Function (EAF).
 
+    .. seealso:: For the definition of EAF, see :ref:`eaf_computation`.
+
     Parameters
     ----------
     data :
@@ -1327,41 +1329,6 @@ def eaf(
 
     Notes
     -----
-    Given a set :math:`A \subset \mathbb{R}^d`, the attainment function of
-    :math:`A`, denoted by :math:`\alpha_{A}\colon \mathbb{R}^d\to \{0,1\}`,
-    specifies which points in the objective space are weakly dominated by
-    :math:`A`, where :math:`\alpha_A(\vec{z}) = 1` if :math:`\exists \vec{a}
-    \in A, \vec{a} \leq \vec{z}`, and :math:`\alpha_A(\vec{z}) = 0`, otherwise.
-
-    Let :math:`\mathcal{A} = \{A_1, \dots, A_n\}` be a multi-set of :math:`n`
-    sets :math:`A_i \subset \mathbb{R}^d`, the EAF
-    :footcite:p:`Grunert01,GruFon2009:emaa` is the function
-    :math:`\hat{\alpha}_{\mathcal{A}}\colon \mathbb{R}^d\to [0,1]`, such that:
-
-    .. math::
-       \hat{\alpha}_{\mathcal{A}}(\vec{z}) = \frac{1}{n}\sum_{i=1}^n \alpha_{A_i}(\vec{z})
-
-    The EAF is a coordinate-wise non-decreasing step function, similar to the
-    empirical cumulative distribution function (ECDF)
-    :footcite:p:`LopVerDreDoe2025`.  Thus, a finite representation of the EAF
-    can be computed as the set of minima, in terms of Pareto optimality, with a
-    value of the EAF not smaller than a given :math:`t/n`, where
-    :math:`t=1,\dots,n` :footcite:p:`FonGueLopPaq2011emo`. Formally, the EAF
-    can be represented by the sequence :math:`(L_1, L_2, \dots, L_n)`, where:
-
-    .. math::
-       L_t = \min \{\vec{z} \in \mathbb{R}^d : \hat{\alpha}_{\mathcal{A}}(\vec{z}) \geq t/n\}
-
-    It is also common to refer to the :math:`k\% \in [0,100]` percentile. For
-    example, the *median* (or 50\%) attainment surface corresponds to :math:`L_{\lfloor n/2\rfloor}` and it
-    is the lower boundary of the vector space attained by at least 50\% of
-    the input sets :math:`A_i`. Similarly, :math:`L_1` is called the *best*
-    attainment surface (:math:`\frac{1}{n}`\%) and represents the lower
-    boundary of the space attained by at least one input set, whereas
-    :math:`L_{100}` is called the *worst* attainment surface (100\%) and
-    represents the lower boundary of the space attained by all input
-    sets.
-
     In the current implementation, the EAF is computed using the algorithms
     proposed by :footcite:t:`FonGueLopPaq2011emo`, which have complexity
     :math:`O(m\log m + nm)` in 2D and :math:`O(n^2 m \log m)` in 3D, where
@@ -1468,7 +1435,9 @@ def eaf(
 
 
 def vorob_t(data: ArrayLike, /, sets: ArrayLike, *, ref: ArrayLike) -> dict:
-    """Compute Vorob'ev threshold and expectation.
+    r"""Compute Vorob'ev threshold and expectation.
+
+    .. seealso:: For the definition of these concepts, see :ref:`vorobev_expectation_and_deviation`.
 
     Parameters
     ----------
@@ -1481,19 +1450,12 @@ def vorob_t(data: ArrayLike, /, sets: ArrayLike, *, ref: ArrayLike) -> dict:
 
     Returns
     -------
-        A dictionary with elements `threshold`, `ve`, and `avg_hyp` (average hypervolume).
+        A dictionary with elements ``threshold``, ``ve``, and ``avg_hyp`` (average hypervolume).  The threshold is returned as a percentile :math:`\beta^{*} \in [0,100]`.  The expectation :math:`\mathcal{Q}_{\beta^{*}}` is returned as a 2D array (``np.ndarray``).  In addition, the hypervolume of the expectation is returned as ``avg_hyp``.
+
 
     See Also
     --------
     vorob_dev : Compute Vorob'ev deviation.
-
-    Notes
-    -----
-    For more background, see :footcite:t:`BinGinRou2015gaupar,Molchanov2005theory,CheGinBecMol2013moda`.
-
-    References
-    ----------
-    .. footbibliography::
 
     Examples
     --------
