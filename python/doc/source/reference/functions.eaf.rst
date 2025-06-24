@@ -1,3 +1,5 @@
+.. _empirical_attainment_function:
+
 ===================================
 Empirical Attainment Function (EAF)
 ===================================
@@ -42,7 +44,7 @@ sequence :math:`(L_1, L_2, \dots, L_n)`, where:
 
 It is also common to refer to the :math:`k\% \in [0,100]` percentile. For
 example, the *median* (or 50\%) attainment surface corresponds to
-:math:`L_{\lfloor n/2\rfloor}` and it is the lower boundary of the vector space
+:math:`L_{\lceil n/2\rceil}` and it is the lower boundary of the vector space
 attained by at least 50\% of the input sets :math:`A_i`. Similarly, :math:`L_1`
 is called the *best* attainment surface (:math:`\frac{1}{n}`\%) and represents
 the lower boundary of the space attained by at least one input set, whereas

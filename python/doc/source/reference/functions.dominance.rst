@@ -1,10 +1,13 @@
-Dominance relation
-==================
+.. _identifying_and_filtering_dominated_vectors:
+
+===========================================
+Identifying and filtering dominated vectors
+===========================================
 
 .. currentmodule:: moocore
 
 Dominance relations
--------------------
+===================
 
 .. autosummary::
    :toctree: generated/

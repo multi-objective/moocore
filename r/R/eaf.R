@@ -52,7 +52,7 @@
 #'
 #' It is also common to refer to the \eqn{k\% \in [0,100]} percentile. For
 #' example, the *median* (or 50%) attainment surface corresponds to
-#' \eqn{L_{\lfloor n/2 \rfloor}} and it is the lower boundary of the vector space
+#' \eqn{L_{\lceil n/2 \rceil}} and it is the lower boundary of the vector space
 #' attained by at least 50% of the input sets \eqn{A_i}. Similarly, \eqn{L_1}
 #' is called the *best* attainment surface (\eqn{\frac{1}{n}}%) and
 #' represents the lower boundary of the space attained by at least one input
