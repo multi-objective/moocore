@@ -2,7 +2,7 @@
 =========================================================================
 
 <!-- badges: start -->
-[ [**C library**][c-moocore-homepage] ] [ [GitHub][c-moocore-github] ] [![Build status][c-build-badge]][c-build-link]
+[ [**C library**][c-moocore-homepage] ] [ [GitHub][c-moocore-github] ] [![Build status][c-build-badge]][c-build-link] [![Testsuite status][testsuite-badge]][testsuite-link]
 <!-- badges: end -->
 
 **Contributors:**
@@ -61,7 +61,7 @@ Obtain information and perform filtering operations on the nondominated sets giv
 Testsuite
 =========
 
-The **moocore** executables are validated using a [comprehensive testsuite](https://github.com/multi-objective/testsuite). Running the testsuite requires [Python](https://www.python.org/downloads/) `>= 3.10` and additional Python packages (see `[testsuite/requirements.txt](https://github.com/multi-objective/testsuite/blob/main/requirements.txt)`) .To run the testsuite yourself, follow these steps:
+The **moocore** executables are validated using a [comprehensive testsuite](https://github.com/multi-objective/testsuite). Running the testsuite requires [Python](https://www.python.org/downloads/) `>= 3.10` and additional Python packages (see [`testsuite/requirements.txt`](https://github.com/multi-objective/testsuite/blob/main/requirements.txt)).  To run the testsuite yourself, follow these steps:
 
 ```bash
 # Download moocore
@@ -79,8 +79,7 @@ make -C moocore/c/ time
 License
 ========
 
-See the [LICENSE](/LICENSE
-) and [COPYRIGHTS](/r/inst/COPYRIGHTS) files.
+See the [LICENSE](/LICENSE) and [COPYRIGHTS](/r/inst/COPYRIGHTS) files.
 
 
 [c-build-badge]: https://github.com/multi-objective/moocore/actions/workflows/C.yml/badge.svg?event=push
@@ -102,3 +101,5 @@ See the [LICENSE](/LICENSE
 [r-moocore-cran]: https://cran.r-project.org/package=moocore
 [r-moocore-github]: https://github.com/multi-objective/moocore/tree/main/r#readme
 [r-moocore-homepage]: https://multi-objective.github.io/moocore/r/
+[testsuite-badge]: https://github.com/multi-objective/testsuite/actions/workflows/moocore.yml/badge.svg?event=push
+[testsuite-link]: https://github.com/multi-objective/testsuite/actions/workflows/moocore.yml
