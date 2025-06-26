@@ -2,6 +2,8 @@
 
 #include "common.h"
 
+// FIXME: Avoid duplication with cmdline.c
+
 #ifndef R_PACKAGE
 void fatal_error(const char *format,...)
 {
