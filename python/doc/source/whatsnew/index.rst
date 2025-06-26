@@ -14,6 +14,8 @@ Version 0.1.8 (dev)
   R package.
 - New example :ref:`sphx_glr_auto_examples_plot_eaf.py`.
 - Document EAF and Vorob'ev expectation and deviation in more detail.
+- New online dataset: ``DTLZLinearShape.8d.front.60pts.10`` (see :func:`~moocore.get_dataset`).
+
 
 Version 0.1.7 (04/06/2025)
 --------------------------
