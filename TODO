@@ -7,6 +7,12 @@
  - [ ] R2 indicator: [Reinvestigating the R2 Indicator: Achieving Pareto Compliance by Integration](https://link.springer.com/chapter/10.1007/978-3-031-70085-9_13) [Brockhoff, D., Wagner, T., Trautmann, H.: On the properties of the R2 indicator. In: Proceedings of the 14th Annual Conference on Genetic and Evolutionary
 Computation, pp. 465–472 (2012)]
  - [ ] Convert code from https://github.com/fieldsend/multiobjective_data_structures
+ - [ ] hv2d contributions
+ - [ ] Take a look at https://github.com/esa/pagmo2/blob/master/src/utils/multi_objective.cpp
+ - [ ] Faster epsilon: https://github.com/mbuzdalov/orthant-search/blob/master/implementations/src/main/java/ru/ifmo/orthant/epsilon/OrthantImplementation.java
+       and https://dl.acm.org/doi/pdf/10.1145/3205455.3205469 and http://www.cmap.polytechnique.fr/~nikolaus.hansen/proceedings/2016/GECCO/proceedings/p613.pdf
+ - [ ] 3D Nondominated sorting:
+     Y. Nekrich. A fast algorithm for three-dimensional layers of maxima problem. In Algorithms and Data Structures, number 6844 in Lecture Notes in Computer Science, pages 607–618. 2011.
  - [X] pre-commit for R: https://lorenzwalthert.github.io/precommit/articles/ci.html
  - [X] create moocore R package
  - [X] create moocore Python package
