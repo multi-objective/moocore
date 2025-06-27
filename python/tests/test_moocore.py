@@ -1,7 +1,10 @@
 # ruff: noqa: D100, D101, D102, D103
 import pytest
 import numpy as np
-from numpy.testing import assert_array_equal, assert_allclose
+from numpy.testing import (
+    assert_array_equal,
+    assert_allclose,
+)
 import math
 
 import moocore
@@ -354,3 +357,23 @@ def test_get_dataset_path():
 #     assert np.allclose(diff_intervals, expected_diff12_intervals3)
 
 # FIXME add more tests including intervals
+
+
+def test_hv_approx():
+    # method="DZ2019-HW" is very slow with dim > 15.
+    for dim in range(2, 16):
+        x = np.full((1, dim), 0.5)
+        ref = np.full(dim, 1.0)
+        true_hv = moocore.hypervolume(x, ref=ref)
+        appr_hv = moocore.hv_approx(x, ref=ref, method="DZ2019-MC", seed=42)
+        # print(f"{dim}: {(true_hv - appr_hv)/true_hv}")
+        ## Precision goes down significantly with higher dimensions.
+        signif = 3 if dim < 7 else 2
+        np.testing.assert_approx_equal(true_hv, appr_hv, significant=signif)
+
+        # method="DZ2019-HW" is the default
+        appr_hv = moocore.hv_approx(x, ref=ref)
+        # print(f"{dim}: {(true_hv - appr_hv)/true_hv}")
+        ## Precision goes down significantly with higher dimensions.
+        signif = 4 if dim < 8 else 3 if dim < 10 else 2
+        np.testing.assert_approx_equal(true_hv, appr_hv, significant=signif)
