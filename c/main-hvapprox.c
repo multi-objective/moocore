@@ -315,7 +315,7 @@ int main(int argc, char *argv[])
     }
 
     if (nsamples == 0) {
-        errprintf ("must specify a value for --nsamples");
+        errprintf ("must specify a value for --nsamples, for example, --nsamples 100000");
         exit(EXIT_FAILURE);
     }
 
