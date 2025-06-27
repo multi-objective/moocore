@@ -156,19 +156,17 @@ endif
 EXE_CFLAGS += $(SANITIZERS) $(OPT_CFLAGS) $(MARCH_FLAGS) $(WARN_CFLAGS) \
 	-DDEBUG=$(DEBUG) -DVERSION='"$(VERSION)"' -DMARCH='"$(gcc-guess-march)"'
 
-dominatedsetsexe = $(BINDIR)/dominatedsets$(EXE)
-eafexe=$(BINDIR)/eaf$(EXE)
-epsilonexe = $(BINDIR)/epsilon$(EXE)
-hvapproxexe=$(BINDIR)/hvapprox$(EXE)
-hvexe=$(BINDIR)/hv$(EXE)
-igdexe = $(BINDIR)/igd$(EXE)
-ndsortexe = $(BINDIR)/ndsort$(EXE)
-nondominatedexe = $(BINDIR)/nondominated$(EXE)
-allexes=$(dominatedsetsexe) $(eafexe) $(epsilonexe) $(hvexe) $(hvapproxexe) $(igdexe) $(ndsortexe) $(nondominatedexe)
+# List of test target base names
+TEST_NAMES := eaf nondominated hv hvapprox igd epsilon dominatedsets
+TEST_TARGETS := $(addprefix test-,$(TEST_NAMES))
+TIME_TARGETS := $(addprefix time-,$(TEST_NAMES))
+ALL_NAMES := $(TEST_NAMES) ndsort
 
-.PHONY : all clean default dist dominatedsets eaf epsilon hv hvapprox igd ndsort nondominated test time
+EXE_FILES := $(addsuffix $(EXE), $(addprefix $(BINDIR)/,$(ALL_NAMES)))
 
-default: $(allexes)
+default: $(EXE_FILES)
+
+.PHONY : all clean default dist $(ALL_NAMES) test time
 
 all: clean
 	$(MAKE) default
@@ -176,25 +174,23 @@ all: clean
 %.o : %.c
 	$(QUIET_CC)$(CC) $(CPPFLAGS) $(EXE_CFLAGS) $(CFLAGS) -c -o $@ $<
 
-dominatedsets: $(dominatedsetsexe)
-eaf: $(eafexe)
-epsilon: $(epsilonexe)
-hv: $(hvexe)
-hvapprox: $(hvapproxexe)
-igd: $(igdexe)
-ndsort: $(ndsortexe)
-nondominated: $(nondominatedexe)
+$(ALL_NAMES): %: $(BINDIR)/%$(EXE)
 
 include libhv.mk
 
-$(dominatedsetsexe): dominatedsets.o
-$(eafexe): eaf.o eaf_main.o eaf3d.o avl.o
-$(epsilonexe): epsilon.o
-$(hvapproxexe): main-hvapprox.o timer.o hvapprox.o rng.o mt19937/mt19937.o
-$(hvexe): main-hv.o timer.o $(LIBHV_OBJS)
-$(igdexe): igd.o
-$(ndsortexe): ndsort.o pareto.o hv_contrib.o $(LIBHV_OBJS)
-$(nondominatedexe): nondominated.o
+$(BINDIR)/dominatedsets$(EXE): dominatedsets.o
+$(BINDIR)/eaf$(EXE): eaf.o eaf_main.o eaf3d.o avl.o
+$(BINDIR)/epsilon$(EXE): epsilon.o
+$(BINDIR)/hv$(EXE): main-hv.o timer.o $(LIBHV_OBJS)
+$(BINDIR)/hvapprox$(EXE): main-hvapprox.o timer.o hvapprox.o rng.o mt19937/mt19937.o
+$(BINDIR)/igd$(EXE): igd.o
+$(BINDIR)/ndsort$(EXE): ndsort.o pareto.o hv_contrib.o $(LIBHV_OBJS)
+$(BINDIR)/nondominated$(EXE): nondominated.o
+
+$(EXE_FILES): cmdline.o io.o
+	$(call MKDIR, $(BINDIR)/)
+	$(call ECHO,--> Building $@ version $(VERSION) <---)
+	$(QUIET_LINK)$(CC) -o $@ $^ $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS)
 
 dominatedsets.o: cmdline.h io.h nondominated.h
 eaf_main.o: cmdline.h io.h eaf.h
@@ -212,15 +208,10 @@ igd.o : cmdline.h io.h igd.h
 avl.o: avl.h
 $(OBJS): common.h gcc_attribs.h
 
-$(allexes): cmdline.o io.o
-	$(call MKDIR, $(BINDIR)/)
-	$(call ECHO,--> Building $@ version $(VERSION) <---)
-	$(QUIET_LINK)$(CC) -o $@ $^ $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS)
-
 clean:
 	@-$(RM) config.status config.log
 	@-$(RM) Hypervolume_MEX.mex
-	@for exe in $(allexes); do \
+	@for exe in $(EXE_FILES); do \
 		echo "---> Removing $$exe <---"; \
 		$(RM) $$exe; \
 	done
@@ -235,12 +226,12 @@ test:
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
 	$(MAKE) all DEBUG=1 SANITIZERS="$(SANITIZERS)" OPT_CFLAGS="$(OPT_CFLAGS)"
-	$(MAKE) test-eaf test-nondominated test-hv test-igd test-epsilon test-dominatedsets
+	$(MAKE) $(TEST_TARGETS)
 
-test-eaf test-nondominated test-hv test-hvapprox test-igd test-epsilon test-dominatedsets: target=$(subst test-,,$@)
-test-eaf test-nondominated test-hv test-hvapprox test-igd test-epsilon test-dominatedsets: OPT_CFLAGS ?=-Og -g3
-test-eaf test-nondominated test-hv test-hvapprox test-igd test-epsilon test-dominatedsets: SANITIZERS ?=
-test-eaf test-nondominated test-hv test-hvapprox test-igd test-epsilon test-dominatedsets:
+$(TEST_TARGETS): target=$(subst test-,,$@)
+$(TEST_TARGETS): OPT_CFLAGS ?=-Og -g3
+$(TEST_TARGETS): SANITIZERS ?=
+$(TEST_TARGETS):
 	$(MAKE) $(target) DEBUG=1 SANITIZERS="$(SANITIZERS)" OPT_CFLAGS="$(OPT_CFLAGS)"
 	$(call ECHO,---> Testing $(target) for errors (DEBUG=1) <--- )
 	@cd $(TESTSUITE)/$(target) && ../regtest.py $(BINDIR)/$(target)$(EXE) && cd $(PWD)
@@ -250,10 +241,10 @@ time:
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
 	$(MAKE) all DEBUG=0 SANITIZERS=""
-	$(MAKE) time-eaf time-nondominated time-hv time-igd time-epsilon time-dominatedsets
+	$(MAKE) $(TIME_TARGETS)
 
-time-eaf time-nondominated time-hv time-hvapprox time-igd time-epsilon time-dominatedsets: target=$(subst time-,,$@)
-time-eaf time-nondominated time-hv time-hvapprox time-igd time-epsilon time-dominatedsets:
+$(TIME_TARGETS): target=$(subst time-,,$@)
+$(TIME_TARGETS):
 	$(MAKE) $(target) DEBUG=0 SANITIZERS=""
 	$(call ECHO,---> Testing $(target) for speed (DEBUG=0) <--- )
 	@cd $(TESTSUITE)/$(target) && ../regtest.py $(BINDIR)/$(target)$(EXE) && cd $(PWD)
