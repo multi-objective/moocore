@@ -40,6 +40,17 @@ Each component is documented in the `README.md` file found under each folder.
 
 In addition to the tests within each component, there is a separate [comprehensive **testsuite**](https://github.com/multi-objective/testsuite) that is run before each release.
 
+Who is using `moocore`?
+-----------------------
+
+The following projects currently use `moocore`:
+
+ - [`mooplot`](https://github.com/multi-objective/mooplot)
+ - [`gMOIP`](https://cran.r-project.org/web/packages/gMOIP/index.html)
+ - [`jMetalPy`](https://jmetalpy.readthedocs.io/en/develop/)
+ - [`pymoo`](https://pymoo.org/)
+ - [`Liger`](https://www.ide.uk/project-liger)
+
 
 [c-build-badge]: https://github.com/multi-objective/moocore/actions/workflows/C.yml/badge.svg?event=push
 [c-build-link]: https://github.com/multi-objective/moocore/actions/workflows/C.yml
