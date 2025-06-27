@@ -1,0 +1,12 @@
+﻿get\_dataset
+============
+
+.. currentmodule:: moocore
+
+.. autofunction:: get_dataset
+
+.. _sphx_glr_backref_moocore.get_dataset:
+
+.. minigallery:: moocore.get_dataset
+   :add-heading: Gallery examples
+   :heading-level: -
