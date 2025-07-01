@@ -743,8 +743,9 @@ def hv_approx(
     data: ArrayLike,
     /,
     ref: ArrayLike,
+    *,
     maximise: bool | list[bool] = False,
-    nsamples: int = 100000,
+    nsamples: int = 100_000,
     seed: int | np.random.Generator | None = None,
     method: Literal["DZ2019-HW", "DZ2019-MC"] = "DZ2019-HW",
 ) -> float:
