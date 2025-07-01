@@ -16,6 +16,7 @@
     [Luís Paquete](https://eden.dei.uc.pt/~paquete/),
     Andreia P. Guerreiro
     Mickaël Binois.
+    Leonardo C.T. Bezerra,
     Fergus Rooney.
 
 ---------------------------------------
