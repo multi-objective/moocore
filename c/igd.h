@@ -1,7 +1,7 @@
 #ifndef IGD_H
 #define IGD_H
 
-/*************************************
+/******************************************************************************
 
  GD was first proposed in [1] with p=2. IGD seems to have been mentioned first
  in [2], however, some people also used the name D-metric for the same thing
@@ -45,7 +45,7 @@
      editors, Evolutionary Multi-criterion Optimization, EMO 2017, Lecture
      Notes in Computer Science, pages 31–45. Springer, 2017.
 
-*/
+******************************************************************************/
 
 #include <float.h>
 #include <math.h>
