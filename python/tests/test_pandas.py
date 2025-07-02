@@ -1,4 +1,4 @@
-# ruff: noqa: D100, D101, D102, D103
+# ruff: noqa: D100, D103
 import pytest
 import moocore
 from numpy.testing import assert_array_equal, assert_allclose
