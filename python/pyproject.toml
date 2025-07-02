@@ -88,11 +88,10 @@ test-groups = [ "test" ]
 test-command = [
   "pytest --doctest-modules --doctest-continue-on-failure {package}/tests {package}/src/moocore/_moocore.py",
 ]
-# skip tests on cp38-macosx_x86_64 because of https://github.com/catboost/catboost/issues/2371
 # skip tests on emulated architectures, as they are very slow
 # skip tests on *-macosx_arm64 , as cibuildwheel does not support tests on arm64 (yet)
 # skip tests on *-musllinux*" since llvmlite and numba do not provide musllinux wheels
-test-skip = "cp38-macosx_x86_64 *-*linux_{aarch64,ppc64le,s390x} *-macosx_arm64 *-musllinux*"
+test-skip = "*-*linux_{aarch64,ppc64le,s390x} *-macosx_arm64 *-musllinux*"
 
 [tool.cibuildwheel.linux]
 archs = [
