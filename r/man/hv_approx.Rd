@@ -24,9 +24,9 @@ values.}
 instead of minimised. Either a single logical value that applies to all
 objectives or a vector of logical values, with one value per objective.}
 
-\item{nsamples}{\code{integer(1)}\cr number of samples for Monte-Carlo sampling.}
+\item{nsamples}{\code{integer(1)}\cr Number of samples for Monte-Carlo sampling.}
 
-\item{seed}{\code{integer(1)}\cr random seed.}
+\item{seed}{\code{integer(1)}\cr Random seed.}
 
 \item{method}{\code{character(1)}\cr Method to generate the sampling weights. See `Details'.}
 }
@@ -38,9 +38,8 @@ Approximate the value of the hypervolume metric with respect to a given
 reference point assuming minimization of all objectives. The default
 \code{method="DZ2019-HW"} is deterministic and ignores the parameter \code{seed},
 while \code{method="DZ2019-MC"} relies on Monte-Carlo sampling
-\citep{DenZha2019approxhv}.  Both methods tend to get more accurate, for
-higher values of \code{nsamples}, but the increase in accuracy is not monotonic
-as shown in the example below.
+\citep{DenZha2019approxhv}.  Both methods tend to get more accurate with
+higher values of \code{nsamples}, but the increase in accuracy is not monotonic.
 }
 \details{
 This function implements the method proposed by \citet{DenZha2019approxhv}

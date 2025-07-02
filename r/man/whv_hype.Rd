@@ -28,13 +28,13 @@ values.}
 instead of minimised. Either a single logical value that applies to all
 objectives or a vector of logical values, with one value per objective.}
 
-\item{nsamples}{\code{integer(1)}\cr number of samples for Monte-Carlo sampling.}
+\item{nsamples}{\code{integer(1)}\cr Number of samples for Monte-Carlo sampling.}
 
-\item{seed}{\code{integer(1)}\cr random seed.}
+\item{seed}{\code{integer(1)}\cr Random seed.}
 
-\item{dist}{\code{character(1)}\cr weight distribution type. See Details.}
+\item{dist}{\code{character(1)}\cr Weight distribution type. See Details.}
 
-\item{mu}{\code{numeric()}\cr parameter of the weight distribution. See Details.}
+\item{mu}{\code{numeric()}\cr Parameter of the weight distribution. See Details.}
 }
 \value{
 A single numerical value.

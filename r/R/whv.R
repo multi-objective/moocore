@@ -108,13 +108,13 @@ total_whv_rect <- function(x, rectangles, reference, maximise = FALSE, ideal = N
 #'
 #' @param ideal `numeric()`\cr Ideal point as a vector of numerical values.
 #'
-#' @param nsamples `integer(1)`\cr number of samples for Monte-Carlo sampling.
+#' @param nsamples `integer(1)`\cr Number of samples for Monte-Carlo sampling.
 #'
-#' @param seed `integer(1)`\cr random seed.
+#' @param seed `integer(1)`\cr Random seed.
 #'
-#' @param dist `character(1)`\cr weight distribution type. See Details.
+#' @param dist `character(1)`\cr Weight distribution type. See Details.
 #'
-#' @param mu `numeric()`\cr parameter of the weight distribution. See Details.
+#' @param mu `numeric()`\cr Parameter of the weight distribution. See Details.
 #'
 #' @details
 #' The current implementation only supports 2 objectives.
