@@ -98,6 +98,7 @@ archs = [
   "x86_64",
   #  "aarch64", FAILS doctests
 ]
+manylinux-x86_64-image = "manylinux_2_28"
 # Use abi3audit to catch issues with Limited API wheels
 repair-wheel-command = [
   "auditwheel repair -w {dest_dir} {wheel}",
