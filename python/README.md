@@ -33,30 +33,30 @@ objective space.
 differences, multi-objective optimization, bi-objective optimization,
 performance measures, performance assessment
 
+For more details, see the complete [Documentation][py-moocore-homepage].
 
 Install
 -------
 
-You can install the latest released using `pip`:
+You can install the [latest release](https://pypi.org/project/moocore/) using `pip`, for example:
 
 ```bash
 python3 -m pip install moocore
 ```
 
-
-Or to build the latest development version from github:
+Or to build the latest development version from GitHub:
 
 ```bash
 python3 -m pip install 'git+https://github.com/multi-objective/moocore.git#egg=moocore&subdirectory=python'
 ```
 
-You can also install binary development wheels for your operating system. See the list of wheels here (https://github.com/multi-objective/moocore/tree/wheels), click in the wheel you wish to install then copy the **View Raw** link. For example,
+Building the development version requires a C/C++ compiler. Instead, you can install pre-compiled development wheels for your operating system. See the list of wheels here (https://github.com/multi-objective/moocore/tree/wheels), click in the wheel you wish to install then copy the **View Raw** link. For example,
 
 ```bash
 python3 -m pip install https://github.com/multi-objective/moocore/raw/refs/heads/wheels/moocore-0.1.5.dev0-py3-none-macosx_10_9_universal2.whl
 ```
 
-If the URL does not have the word `raw` then you are not using the raw link.
+If the URL does not have the word `raw` then you are not using the **View Raw** link.
 
 
 R package
