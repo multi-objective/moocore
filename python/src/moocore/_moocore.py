@@ -755,9 +755,10 @@ def hv_approx(
     reference point assuming minimization of all objectives. The default
     ``method="DZ2019-HW"`` is deterministic and ignores the parameter ``seed``,
     while ``method="DZ2019-MC"`` relies on Monte-Carlo sampling
-    :footcite:p:`DenZha2019approxhv`.  Both methods tend to get more accurate,
-    for higher values of ``nsamples``, but the increase in accuracy is not
-    monotonic as shown in the example :ref:`sphx_glr_auto_examples_plot_hv_approx.py`.
+    :footcite:p:`DenZha2019approxhv`.  Both methods tend to get more accurate
+    with higher values of ``nsamples``, but the increase in accuracy is not
+    monotonic as shown in the example
+    :ref:`sphx_glr_auto_examples_plot_hv_approx.py`.
 
     .. seealso:: For details of the calculation, see the Notes section below.
 
