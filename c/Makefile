@@ -1,43 +1,7 @@
 #-----------------------------------------------------------------------
-
 #  Makefile for moocore
-
-VERSION = 0.16.5$(REVISION)
-
 #-----------------------------------------------------------------------
-
-#                        Copyright (c) 2007-2023
-#           Manuel Lopez-Ibanez  <manuel.lopez-ibanez@manchester.ac.uk>
-
-#  This program is free software (software libre); you can redistribute
-#  it and/or modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation; either version 2 of the
-#  License, or (at your option) any later version.
-
-#  This program is distributed in the hope that it will be useful, but
-#  WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#  General Public License for more details.
-
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, you can obtain a copy of the GNU
-#  General Public License at:
-#                  http://www.gnu.org/copyleft/gpl.html
-#  or by writing to:
-#            Free Software Foundation, Inc., 59 Temple Place,
-#                  Suite 330, Boston, MA 02111-1307 USA
-#
-#-----------------------------------------------------------------------
-# IMPORTANT NOTE: Please be aware that the fact that this program is
-# released as Free Software does not excuse you from scientific
-# propriety, which obligates you to give appropriate credit! If you
-# write a scientific paper describing research that made substantive
-# use of this program, it is your obligation as a scientist to
-# acknowledge its use.  Moreover, as a personal note, I would
-# appreciate it if you would email manuel.lopez-ibanez@manchester.ac.uk with
-# citations of papers referencing this work so I can mention them to
-# my funding agent and tenure committee.
-#-----------------------------------------------------------------------
+VERSION = 0.16.6$(REVISION)
 
 S=
 ## Quiet / verbose output:
@@ -216,7 +180,7 @@ clean:
 		$(RM) $$exe; \
 	done
 	$(call ECHO,---> Removing object files: $(OBJS) <---)
-	@$(RM) $(OBJS) $(HV_OBJS)
+	@$(RM) $(OBJS) $(HV_OBJS) $(HV_LIB)
 
 TESTSUITE:="../testsuite"
 test: OPT_CFLAGS ?=-Og -g3

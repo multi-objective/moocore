@@ -3,7 +3,8 @@
 /*-----------------------------------------------------------------------------
 
   The following is a reduced version of the AVL-tree library used here
-  according to the terms of the GPL. See the copyright notice below.
+  according to the terms of the LGPL-2.1-or-later.  See the copyright notice
+  below.
 
 */
 

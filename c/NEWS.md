@@ -1,5 +1,10 @@
 # moocore C library
 
+## 0.16.6
+
+ * main-hvapprox.c, hv_approx.c: New.
+ * The license of files copyrighted by Manuel López-Ibáñez, Carlos M. Fonseca, Luís Paquete, Andreia P. Guerreiro and Leonardo C.T. Bezerra is now MPL v2.0.
+
 ## 0.16.5
 
  * The base case of the recursive HV algorithm is HV4D+.

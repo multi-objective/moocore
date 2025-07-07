@@ -3,22 +3,12 @@
  ndsort: Perform nondominated sorting in a list of points.
 
  ---------------------------------------------------------------------
-                       Copyright (c) 2011
+                       Copyright (C) 2011, 2025
           Manuel Lopez-Ibanez  <manuel.lopez-ibanez@manchester.ac.uk>
 
- This program is free software (software libre); you can redistribute
- it and/or modify it under the terms of the GNU General Public License
- as published by the Free Software Foundation; either version 2 of the
- License, or (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program; if not, you can obtain a copy of the GNU
- General Public License at <http://www.gnu.org/copyleft/gpl.html>
+ This Source Code Form is subject to the terms of the Mozilla Public
+ License, v. 2.0. If a copy of the MPL was not distributed with this
+ file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
  ----------------------------------------------------------------------
   IMPORTANT NOTE: Please be aware that the fact that this program is
@@ -29,7 +19,7 @@
   acknowledge its use.  Moreover, as a personal note, I would
   appreciate it if you would email manuel.lopez-ibanez@manchester.ac.uk with
   citations of papers referencing this work so I can mention them to
-  my funding agent and tenure committee.
+  my funding body and tenure committee.
  ---------------------------------------------------------------------
 
  Literature:

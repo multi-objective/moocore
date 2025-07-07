@@ -315,6 +315,7 @@ epsilon_additive (const double * restrict data, int nobj, int npoints,
     free ((void *)minmax);
     return(value);
 }
+
 _attr_maybe_unused static double
 epsilon_mult (const double * restrict data, int nobj, int npoints,
               const double * restrict ref, int ref_size,
