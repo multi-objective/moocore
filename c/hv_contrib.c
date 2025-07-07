@@ -12,14 +12,11 @@
    where HV_total is the total HV and HV_i is the contribution of the
    point, that is, it actually computes the HV minus the point i.
 */
-static double *
+static void
 hv_1point_diffs (double *hvc, double *points, int dim, int size, const double * ref,
                  const bool * uev)
 {
     bool keep_uevs = uev != NULL;
-    if (hvc == NULL)
-        hvc = MOOCORE_MALLOC(size, double);
-
     double * tmp = MOOCORE_MALLOC(dim, double);
     for (int i = 0; i < size; i++) {
         memcpy (tmp, points + i * dim, sizeof(double) * dim);
@@ -30,19 +27,19 @@ hv_1point_diffs (double *hvc, double *points, int dim, int size, const double * 
         memcpy (points + i * dim, tmp, sizeof(double) * dim);
     }
     free(tmp);
-    return hvc;
 }
 
 void
 hv_contributions (double *hvc, double *points, int dim, int size, const double * ref)
 {
+    assert(hvc != NULL);
     const double tolerance = sqrt(DBL_EPSILON);
     double hv_total = fpli_hv(points, dim, size, ref);
     hv_1point_diffs(hvc, points, dim, size, ref, NULL);
     for (int i = 0; i < size; i++) {
         hvc[i] = hv_total - hvc[i];
         // Handle very small values.
-        hvc[i] = (fabs(hvc[i]) >= tolerance) ? hvc[i] : 0.0;
+        hvc[i] = fabs(hvc[i]) >= tolerance ? hvc[i] : 0.0;
         assert(hvc[i] >= 0);
     }
 }
