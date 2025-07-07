@@ -20,13 +20,34 @@
 #ifndef HV_H_
 #define HV_H_
 
-#ifdef __cplusplus
+// For now, we only need dllexport and dllimport for C++
+#ifdef	__cplusplus
+# ifdef _WIN32
+#  ifndef MOOCORE_STATIC_LIB
+#   ifdef MOOCORE_SHARED_LIB
+#    define MOOCORE_API extern __declspec(dllexport)
+#   else
+#    define MOOCORE_API extern __declspec(dllimport)
+#   endif
+#  endif
+# elif __GNUC__ >= 4
+#  define MOOCORE_API extern __attribute__((visibility("default")))
+# endif
+#endif
+
+#ifndef MOOCORE_API
+# define MOOCORE_API extern
+#endif
+
+// C++ needs to know that types and declarations are C, not C++.
+#ifdef	__cplusplus
 extern "C" {
 #endif
 
-double fpli_hv(const double *data, int d, int n, const double *ref);
-void hv_contributions (double *hvc, double *points, int dim, int size, const double * ref);
-#ifdef __cplusplus
+MOOCORE_API double fpli_hv(const double *data, int d, int n, const double *ref);
+MOOCORE_API void hv_contributions (double *hvc, double *points, int dim, int size, const double * ref);
+
+#ifdef	__cplusplus
 }
 #endif
 
