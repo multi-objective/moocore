@@ -117,15 +117,6 @@ read_range (char *str, double *lower, double *upper)
     return true;
 }
 
-static double *
-robust_read_point (char * str, int *nobj, const char * errmsg)
-{
-    double * point = read_point(str, nobj);
-    if (point == NULL)
-        fatal_error(errmsg, optarg);
-    return point;
-}
-
 static inline bool
 any_less_than (const double *a, const double *b, int nobj)
 {
@@ -587,11 +578,11 @@ int main(int argc, char *argv[])
             break;
 
         case 'u': // --upper-bound
-            upper_bound = robust_read_point (optarg, &nobj, "invalid upper bound point '%s'");
+            upper_bound = robust_read_point(optarg, &nobj, "invalid upper bound point '%s'");
             break;
 
         case 'l': // --lower-bound
-            lower_bound = robust_read_point (optarg, &nobj, "invalid lower bound point '%s'");
+            lower_bound = robust_read_point(optarg, &nobj, "invalid lower bound point '%s'");
             break;
 
         case 's': // --suffix

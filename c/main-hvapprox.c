@@ -180,8 +180,7 @@ hvapprox_file (const char *filename, double *reference,
         }
 
         if (volume == 0.0) {
-            errprintf ("none of the points strictly dominates the reference point\n");
-            exit (EXIT_FAILURE);
+            fatal_error("none of the points strictly dominates the reference point\n");
         }
 
         double time_elapsed = Timer_elapsed_virtual ();
@@ -239,11 +238,7 @@ int main(int argc, char *argv[])
                                    long_options, &longopt_index))) {
         switch (opt) {
           case 'r': // --reference
-              reference = read_point(optarg, &nobj);
-              if (reference == NULL) {
-                  errprintf ("invalid reference point '%s'", optarg);
-                  exit (EXIT_FAILURE);
-              }
+              reference = robust_read_point(optarg, &nobj, "invalid reference point '%s'");
               break;
 
           case 'u': // --union
@@ -258,8 +253,7 @@ int main(int argc, char *argv[])
               char *endp;
               long int value = strtol(optarg, &endp, 10);
               if (endp == optarg || *endp != '\0' || value <= 0 || value == LONG_MAX) {
-                  errprintf ("value of --nsamples must be a positive integer '%s'", optarg);
-                  exit (EXIT_FAILURE);
+                  fatal_error("value of --nsamples must be a positive integer '%s'", optarg);
               }
               nsamples = (uint_fast32_t) value;
               break;
@@ -272,8 +266,7 @@ int main(int argc, char *argv[])
                 case '2':
                     hv_approx_method = DZ2019_HW; break;
                 default:
-                    errprintf ("valid values of --method (-m) are: 1 or 2, not '%s'", optarg);
-                  exit(EXIT_FAILURE);
+                    fatal_error("valid values of --method (-m) are: 1 or 2, not '%s'", optarg);
               }
               break;
 
@@ -281,8 +274,7 @@ int main(int argc, char *argv[])
               char *endp;
               long int value = strtol(optarg, &endp, 10);
               if (endp == optarg || *endp != '\0' || value <= 0) {
-                  errprintf ("value of --seed must be a positive integer '%s'", optarg);
-                  exit (EXIT_FAILURE);
+                  fatal_error("value of --seed must be a positive integer '%s'", optarg);
               }
               seed = (uint32_t) value;
               break;
@@ -301,16 +293,14 @@ int main(int argc, char *argv[])
     }
 
     if (nsamples == 0) {
-        errprintf ("must specify a value for --nsamples, for example, --nsamples 100000");
-        exit(EXIT_FAILURE);
+        fatal_error("must specify a value for --nsamples, for example, --nsamples 100000");
     }
 
     if (seed == 0) {
         if (hv_approx_method == DZ2019_MC)
             seed = (uint32_t) time(NULL);
     } else if (hv_approx_method == DZ2019_HW) {
-        errprintf("cannot use --seed with --method=2");
-        exit(EXIT_FAILURE);
+        fatal_error("cannot use --seed with --method=2");
     }
 
     if (verbose_flag >= 2)

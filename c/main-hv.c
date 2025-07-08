@@ -221,11 +221,7 @@ int main(int argc, char *argv[])
                                    long_options, &longopt_index))) {
         switch (opt) {
           case 'r': // --reference
-              reference = read_point(optarg, &nobj);
-              if (reference == NULL) {
-                  errprintf ("invalid reference point '%s'", optarg);
-                  exit (EXIT_FAILURE);
-              }
+              reference = robust_read_point(optarg, &nobj, "invalid reference point '%s'");
               break;
 
           case 'u': // --union
