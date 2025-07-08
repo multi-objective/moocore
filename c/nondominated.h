@@ -103,8 +103,7 @@ static inline const double **
 generate_sorted_pp_2d(const double *points, size_t size)
 {
     const double **p = malloc (size * sizeof(*p));
-    p[0] = points;
-    for (size_t k = 1; k < size; k++)
+    for (size_t k = 0; k < size; k++)
         p[k] = points + 2 * k;
 
     qsort(p, size, sizeof(*p), &cmp_double_2d_asc);
@@ -115,8 +114,7 @@ static inline const double **
 generate_sorted_pp_3d(const double *points, size_t size)
 {
     const double **p = malloc (size * sizeof(*p));
-    p[0] = points;
-    for (size_t k = 1; k < size; k++)
+    for (size_t k = 0; k < size; k++)
         p[k] = points + 3 * k;
 
     qsort(p, size, sizeof(*p), &cmp_double_3d_asc);
