@@ -47,6 +47,7 @@
 
 static int verbose_flag = 1;
 static bool union_flag = false;
+static bool contributions_flag = false;
 static char *suffix = NULL;
 
 static void usage(void)
@@ -68,10 +69,19 @@ OPTION_VERSION_STR
 "                     quotes, e.g., \"10 10 10\". If no reference point is  \n"
 "                     given, it is taken as max + 0.1 * (max - min) for each\n"
 "                     coordinate from the union of all input points.        \n"
+" -c, --contributions print the exclusive contribution of each input point. \n"
 " -s, --suffix=STRING Create an output file for each input file by appending\n"
 "                     this suffix. This is ignored when reading from stdin. \n"
 "                     If missing, output is sent to stdout.                 \n"
 "\n");
+}
+
+static void
+fprint_hvc(FILE * outfile, const double * hvc, size_t n)
+{
+    for (size_t i = 0; i < n; i++)
+        fprintf(outfile, indicator_printf_format "\n", hvc[i]);
+    fprintf(outfile, "\n");
 }
 
 /*
@@ -106,11 +116,7 @@ hv_file (const char *filename, double *reference,
         filename = stdin_name;
 
     if (filename != stdin_name && suffix) {
-        size_t outfilename_len = strlen(filename) + strlen(suffix) + 1;
-        outfilename = malloc (sizeof(char) * outfilename_len);
-        strcpy (outfilename, filename);
-        strcat (outfilename, suffix);
-
+        outfilename = m_strcat(filename, suffix);
         outfile = fopen (outfilename, "w");
         if (outfile == NULL) {
             errprintf ("%s: %s\n", outfilename, strerror(errno));
@@ -157,28 +163,44 @@ hv_file (const char *filename, double *reference,
         }
     }
 
+    if (needs_minimum) {
+        free(minimum);
+        free(maximum);
+    }
+
     if (verbose_flag >= 2) {
         printf ("# reference: ");
         vector_printf (reference, nobj);
         printf ("\n");
     }
 
+    double * hvc = NULL;
     for (n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
         Timer_start ();
-
-        double volume = fpli_hv (&data[nobj * cumsize], nobj, cumsizes[n] - cumsize, reference);
-
+        double volume, time_elapsed;
+        if (contributions_flag) {
+            hvc = realloc(hvc, (cumsizes[n] - cumsize) * sizeof(*hvc));
+            volume = hv_contributions(hvc, &data[nobj * cumsize], nobj, cumsizes[n] - cumsize, reference);
+        } else {
+            volume = fpli_hv(&data[nobj * cumsize], nobj, cumsizes[n] - cumsize, reference);
+        }
         if (volume == 0.0) {
             errprintf ("none of the points strictly dominates the reference point\n");
             exit (EXIT_FAILURE);
         }
-
-        double time_elapsed = Timer_elapsed_virtual ();
-
-        fprintf (outfile, indicator_printf_format "\n", volume);
+        time_elapsed = Timer_elapsed_virtual();
+        if (contributions_flag) {
+            fprint_hvc(outfile, hvc, cumsizes[n] - cumsize);
+        } else {
+            fprintf (outfile, indicator_printf_format "\n", volume);
+        }
         if (verbose_flag >= 2)
             fprintf (outfile, "# Time: %f seconds\n", time_elapsed);
     }
+    if (contributions_flag)
+        free(hvc);
+    free(data);
+    free(cumsizes);
 
     if (outfilename) {
         if (verbose_flag)
@@ -186,19 +208,13 @@ hv_file (const char *filename, double *reference,
         fclose (outfile);
         free (outfilename);
     }
-    free (data);
-    free (cumsizes);
-    if (needs_minimum) {
-        free (minimum);
-        free (maximum);
-    }
     *nobj_p = nobj;
 }
 
 int main(int argc, char *argv[])
 {
     /* See the man page for getopt_long for an explanation of these fields.  */
-    static const char short_options[] = "hVvqur:s:S";
+    static const char short_options[] = "hVvqucr:s:S";
     static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
         {"version",    no_argument,       NULL, 'V'},
@@ -206,6 +222,7 @@ int main(int argc, char *argv[])
         {"quiet",      no_argument,       NULL, 'q'},
         {"reference",  required_argument, NULL, 'r'},
         {"union",      no_argument,       NULL, 'u'},
+        {"contributions", no_argument,    NULL, 'c'},
         {"suffix",     required_argument, NULL, 's'},
         {NULL, 0, NULL, 0} /* marks end of list */
     };
@@ -226,6 +243,10 @@ int main(int argc, char *argv[])
 
           case 'u': // --union
               union_flag = true;
+              break;
+
+          case 'c': // --contributions
+              contributions_flag = true;
               break;
 
           case 's': // --suffix

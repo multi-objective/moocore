@@ -148,7 +148,7 @@ $(BINDIR)/epsilon$(EXE): epsilon.o
 $(BINDIR)/hv$(EXE): main-hv.o timer.o $(LIBHV_OBJS)
 $(BINDIR)/hvapprox$(EXE): main-hvapprox.o timer.o hvapprox.o rng.o mt19937/mt19937.o
 $(BINDIR)/igd$(EXE): igd.o
-$(BINDIR)/ndsort$(EXE): ndsort.o pareto.o hv_contrib.o $(LIBHV_OBJS)
+$(BINDIR)/ndsort$(EXE): ndsort.o pareto.o $(LIBHV_OBJS)
 $(BINDIR)/nondominated$(EXE): nondominated.o
 
 $(EXE_FILES): cmdline.o io.o
