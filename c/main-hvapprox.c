@@ -105,11 +105,7 @@ hvapprox_file (const char *filename, double *reference,
         filename = stdin_name;
 
     if (filename != stdin_name && suffix) {
-        size_t outfilename_len = strlen(filename) + strlen(suffix) + 1;
-        outfilename = malloc (sizeof(char) * outfilename_len);
-        strcpy (outfilename, filename);
-        strcat (outfilename, suffix);
-
+        outfilename = m_strcat(filename, suffix);
         outfile = fopen (outfilename, "w");
         if (outfile == NULL) {
             errprintf ("%s: %s\n", outfilename, strerror(errno));
