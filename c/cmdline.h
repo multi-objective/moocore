@@ -204,8 +204,9 @@ file_bounds (const char *filename, double **maximum_p, double **minimum_p,
 static inline char * m_strcat(const char * a, const char * b)
 {
     size_t dest_len = strlen(a) + strlen(b) + 1;
-    char *dest = malloc (sizeof(char) * dest_len);
-    if (dest == NULL) return NULL;
+    char * dest = malloc(sizeof(char) * dest_len);
+    if (unlikely(dest == NULL))
+        return NULL;
     strcpy (dest, a);
     strcat (dest, b);
     return dest;
