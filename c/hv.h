@@ -45,7 +45,7 @@ extern "C" {
 #endif
 
 MOOCORE_API double fpli_hv(const double *data, int d, int n, const double *ref);
-MOOCORE_API void hv_contributions (double *hvc, double *points, int dim, int size, const double * ref);
+MOOCORE_API double hv_contributions(double *hvc, double *points, int dim, int size, const double * ref);
 
 #ifdef	__cplusplus
 }

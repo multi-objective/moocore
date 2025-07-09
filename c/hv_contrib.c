@@ -29,8 +29,16 @@ hv_1point_diffs (double *hvc, double *points, int dim, int size, const double * 
     free(tmp);
 }
 
-void
-hv_contributions (double *hvc, double *points, int dim, int size, const double * ref)
+/* Store the exclusive hypervolume contribution of each input point in hvc[],
+   which is allocated by the caller.
+
+   Return the total hypervolume. A negative value indicates insufficient
+   memory. A value of zero indicates that no input point strictly dominates the
+   reference point.
+*/
+double
+hv_contributions(double * restrict hvc, double * restrict points, int dim, int size,
+                 const double * restrict ref)
 {
     assert(hvc != NULL);
     const double tolerance = sqrt(DBL_EPSILON);
@@ -42,4 +50,5 @@ hv_contributions (double *hvc, double *points, int dim, int size, const double *
         hvc[i] = fabs(hvc[i]) >= tolerance ? hvc[i] : 0.0;
         assert(hvc[i] >= 0);
     }
+    return hv_total;
 }
