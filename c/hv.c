@@ -304,13 +304,9 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
 static double
 hv2d(const double * restrict data, size_t n, const double * restrict ref)
 {
-    const double **p = malloc (n * sizeof(*p));
+    const double **p = generate_sorted_doublep_2d(data, &n, ref[0]);
+    if (unlikely(n == 0)) return 0;
     if (unlikely(!p)) return -1;
-
-    for (size_t k = 0; k < n; k++)
-        p[k] = data + 2 * k;
-
-    qsort(p, n, sizeof(*p), cmp_doublep_x_asc_y_asc);
 
     double hyperv = 0;
     double prev_j = ref[1];
@@ -319,13 +315,13 @@ hv2d(const double * restrict data, size_t n, const double * restrict ref)
         /* Filter everything that may be above the ref point. */
         while (j < n && p[j][1] >= prev_j)
             j++;
-        if (unlikely(j == n || p[j][0] >= ref[0]))
+        if (unlikely(j == n))
             break; /* No other point dominates ref. */
         // We found one point that dominates ref.
         hyperv += (ref[0] - p[j][0]) * (prev_j - p[j][1]);
         prev_j = p[j][1];
         j++;
-    } while (j < n && p[j][0] < ref[0]);
+    } while (j < n);
 
     free(p);
     return hyperv;

@@ -4,6 +4,7 @@
 #include <string.h> // memcpy
 #include <math.h> // INFINITY
 #include "common.h"
+#include "sort.h"
 
 typedef const double avl_item_t;
 typedef struct avl_node_t {
@@ -74,30 +75,6 @@ cmp_double_asc_x_asc_y(const void * restrict p1, const void * restrict p2)
     return (x1 < x2) ? -1: ((x1 > x2) ? 1 : (y1 < y2 ? -1 : 1));
 }
 
-static inline int
-cmp_double_2d_asc (const void *p1, const void *p2)
-{
-    const double x1 = **(const double **)p1;
-    const double x2 = **(const double **)p2;
-    const double y1 = *(*(const double **)p1 + 1);
-    const double y2 = *(*(const double **)p2 + 1);
-    return (y1 < y2) ? -1 : ((y1 > y2) ? 1 :
-                             ((x1 < x2) ? -1 : ((x1 > x2) ? 1 : 0)));
-}
-
-static inline int
-cmp_double_3d_asc(const void *p1, const void *p2)
-{
-    const double x1 = **(const double **)p1;
-    const double x2 = **(const double **)p2;
-    const double y1 = *(*(const double **)p1 + 1);
-    const double y2 = *(*(const double **)p2 + 1);
-    const double z1 = *(*(const double **)p1 + 2);
-    const double z2 = *(*(const double **)p2 + 2);
-
-    return (z1 < z2) ? -1 : ((z1 > z2) ? 1 :
-                             ((y1 < y2) ? -1 : ((y1 > y2) ? 1 : ((x1 < x2) ? -1 : ((x1 > x2) ? 1 : 0)))));
-}
 
 static inline const double **
 generate_sorted_pp_2d(const double *points, size_t size)

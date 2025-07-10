@@ -31,10 +31,10 @@ weakly_dominates(const double * restrict x, const double * restrict y, const dim
     return true;
     */
     // GCC 15 is not yet able to infer this from attribute ASSUME().
-    bool dominated = (x[0] <= y[0]) & (x[1] <= y[1]);
+    bool x_leq_y = (x[0] <= y[0]) & (x[1] <= y[1]);
     for (dimension_t d = 2; d < dim; d++)
-        dominated &= (x[d] <= y[d]);
-    return dominated;
+        x_leq_y &= (x[d] <= y[d]);
+    return x_leq_y;
 }
 
 static inline bool
@@ -109,6 +109,55 @@ cmp_doublep_x_asc_y_asc(const void * restrict p1, const void * restrict p2)
     const double y2 = *(*(const double **)p2 + 1);
     return (x1 < x2) ? -1 : ((x1 > x2) ? 1 :
                              ((y1 < y2) ? -1 : ((y1 > y2) ? 1 : 0)));
+}
+
+static inline int
+cmp_double_2d_asc(const void * restrict p1, const void * restrict p2)
+{
+    const double x1 = **(const double **)p1;
+    const double x2 = **(const double **)p2;
+    const double y1 = *(*(const double **)p1 + 1);
+    const double y2 = *(*(const double **)p2 + 1);
+    return (y1 < y2) ? -1 : ((y1 > y2) ? 1 :
+                             ((x1 < x2) ? -1 : ((x1 > x2) ? 1 : 0)));
+}
+
+static inline int
+cmp_double_3d_asc(const void * restrict p1, const void * restrict p2)
+{
+    const double x1 = **(const double **)p1;
+    const double x2 = **(const double **)p2;
+    const double y1 = *(*(const double **)p1 + 1);
+    const double y2 = *(*(const double **)p2 + 1);
+    const double z1 = *(*(const double **)p1 + 2);
+    const double z2 = *(*(const double **)p2 + 2);
+
+    return (z1 < z2) ? -1 : ((z1 > z2) ? 1 :
+                             ((y1 < y2) ? -1 : ((y1 > y2) ? 1 : ((x1 < x2) ? -1 : ((x1 > x2) ? 1 : 0)))));
+}
+
+static inline const double **
+generate_sorted_doublep_2d(const double * restrict points, size_t * restrict size, const double ref0)
+{
+    size_t n = *size;
+    const double **p = malloc(n * sizeof(*p));
+    size_t j = 0;
+    for (size_t k = 0; k < n; k++) {
+        // There is no point in checking ref1 here because the algorithms have to check anyway.
+        if (points[2 * k] < ref0) {
+            p[j] = points + 2 * k;
+            j++;
+        }
+    }
+    n = j;
+    if (unlikely(n == 0)) {
+        free(p);
+    } else {
+        qsort(p, n, sizeof(*p), cmp_doublep_x_asc_y_asc);
+    }
+
+    *size = n;
+    return p;
 }
 
 

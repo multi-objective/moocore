@@ -183,16 +183,6 @@ pareto_rank_2D (const double *points, int size)
     return rank;
 }
 
-static bool weakly_dominates(const double *pj, const double * pk, int dim)
-{
-    bool j_leq_k = true;
-    for (int d = 0; d < dim; d++) {
-        j_leq_k = j_leq_k && (pj[d] <= pk[d]);
-    }
-    return j_leq_k;
-
-}
-
 /* FIXME: This takes O(n^3). Look at
 
    M. T. Jensen. Reducing the run-time complexity of multiobjective
@@ -200,8 +190,10 @@ static bool weakly_dominates(const double *pj, const double * pk, int dim)
    Evolutionary Computation, 7(5):503–515, 2003.
 */
 int *
-pareto_rank (const double *points, int dim, int size)
+pareto_rank (const double *points, int d, int size)
 {
+    ASSUME(d >= 2 && d <= 32);
+    dimension_t dim = (dimension_t) d;
     int * rank2 = NULL;
     if (dim == 2) {
         rank2 = pareto_rank_2D(points, size);
