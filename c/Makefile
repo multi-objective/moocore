@@ -17,6 +17,13 @@ ifneq ($(findstring $(MAKEFLAGS),s),s)
   endif
 endif
 
+ifeq ($(OS),Windows_NT)
+  uname_S:=Windows
+else
+  uname_S:=$(shell uname -s || echo unknown)
+endif
+$(info Building on '$(uname_S)')
+
 # ifeq ($(OS),Windows_NT)
 #   uname_S:=Windows
 #   ECHO = @echo $(1)
@@ -120,6 +127,21 @@ endif
 EXE_CFLAGS += $(SANITIZERS) $(OPT_CFLAGS) $(MARCH_FLAGS) $(WARN_CFLAGS) \
 	-DDEBUG=$(DEBUG) -DVERSION='"$(VERSION)"' -DMARCH='"$(gcc-guess-march)"'
 
+SHLIB_CFLAGS = -fPIC -fvisibility=hidden -DMOOCORE_SHARED_LIB $(OPT_CFLAGS) $(MARCH_FLAGS)
+SHLIB_LDFLAGS = -shared -lm
+
+# Platform-specific linker flags
+ifeq ($(uname_S),Linux)
+  SHLIB_LDFLAGS += -Wl,--no-undefined
+  SHLIB_EXT=so
+endif
+ifeq ($(uname_S),Darwin)
+  SHLIB_EXT=dylib
+endif
+ifeq ($(uname_S),Windows)
+  SHLIB_EXT=dll
+endif
+
 # List of test target base names
 TEST_NAMES := eaf nondominated hv hvapprox igd epsilon dominatedsets
 TEST_TARGETS := $(addprefix test-,$(TEST_NAMES))
@@ -128,9 +150,12 @@ ALL_NAMES := $(TEST_NAMES) ndsort
 
 EXE_FILES := $(addsuffix $(EXE), $(addprefix $(BINDIR)/,$(ALL_NAMES)))
 
+SHLIB=libmoocore.$(SHLIB_EXT)
+CXXSHLIB=libmoocorepp.$(SHLIB_EXT)
+
 default: $(EXE_FILES)
 
-.PHONY : all clean default dist $(ALL_NAMES) test time
+.PHONY : all clean default dist $(ALL_NAMES) test time shlibs
 
 all: clean
 	$(MAKE) default
@@ -172,9 +197,20 @@ igd.o : cmdline.h io.h igd.h
 avl.o: avl.h
 $(OBJS): common.h gcc_attribs.h
 
+shlibs: clean $(SHLIB) $(CXXSHLIB)
+
+$(SHLIB): CFLAGS += $(SHLIB_CFLAGS)
+$(SHLIB): $(LIBHV_OBJS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $^ $(SHLIB_LDFLAGS)
+
+$(CXXSHLIB): CFLAGS += $(SHLIB_CFLAGS)
+$(CXXSHLIB): $(LIBHV_OBJS)
+	$(CXX) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $^ $(SHLIB_LDFLAGS)
+
 clean:
 	@-$(RM) config.status config.log
 	@-$(RM) Hypervolume_MEX.mex
+	@-$(RM) $(SHLIB) $(CXXSHLIB)
 	@for exe in $(EXE_FILES); do \
 		echo "---> Removing $$exe <---"; \
 		$(RM) $$exe; \

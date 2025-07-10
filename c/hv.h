@@ -20,19 +20,16 @@
 #ifndef HV_H_
 #define HV_H_
 
-// For now, we only need dllexport and dllimport for C++
-#ifdef	__cplusplus
-# ifdef _WIN32
-#  ifndef MOOCORE_STATIC_LIB
-#   ifdef MOOCORE_SHARED_LIB
-#    define MOOCORE_API extern __declspec(dllexport)
-#   else
-#    define MOOCORE_API extern __declspec(dllimport)
-#   endif
+#if defined(_WIN32) && !(defined(__MINGW__) || defined(__MINGW32__) || defined(__MINGW64__))
+# ifndef MOOCORE_STATIC_LIB
+#  ifdef MOOCORE_SHARED_LIB
+#   define MOOCORE_API extern __declspec(dllexport)
+#  else
+#   define MOOCORE_API extern __declspec(dllimport)
 #  endif
-# elif __GNUC__ >= 4
-#  define MOOCORE_API extern __attribute__((visibility("default")))
 # endif
+#elif __GNUC__ >= 4 && defined(MOOCORE_SHARED_LIB)
+# define MOOCORE_API extern __attribute__((visibility("default")))
 #endif
 
 #ifndef MOOCORE_API

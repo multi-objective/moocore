@@ -72,8 +72,8 @@ void VECTOR_TYPE##_delete(VECTOR_TYPE * v)                                    \
                                                                               \
 /* Returns the number of elements in the vector container. */                 \
 static inline                                                                 \
-size_t VECTOR_TYPE##_size(const VECTOR_TYPE * v)			      \
-{ return v->_end - v->_begin; }						      \
+size_t VECTOR_TYPE##_size(const VECTOR_TYPE * v)                              \
+{ return v->_end - v->_begin; }                                               \
                                                                               \
 /* Return size of allocated storage capacity. */                              \
 static inline                                                                 \
@@ -108,8 +108,8 @@ bool VECTOR_TYPE##_empty(const VECTOR_TYPE * v)                               \
    contained in the vector, nor the vector size. */                           \
 static inline                                                                 \
 void VECTOR_TYPE##_reserve(VECTOR_TYPE * v, size_t n)                         \
-{									      \
-    size_t old_capacity = VECTOR_TYPE##_capacity(v);			      \
+{                                                                             \
+    size_t old_capacity = VECTOR_TYPE##_capacity(v);                          \
     size_t old_size = VECTOR_TYPE##_size(v);                                  \
     if (n > old_capacity) {                                                   \
         cvector_assert(SIZE_MAX / sizeof(BASE_TYPE) >= n);                    \
@@ -117,8 +117,8 @@ void VECTOR_TYPE##_reserve(VECTOR_TYPE * v, size_t n)                         \
         cvector_assert(v->_begin != NULL);                                    \
         v->_end = v->_begin + old_size;                                       \
         v->_capacity = v->_begin + n;                                         \
-    }									      \
-}      									      \
+    }                                                                         \
+}                                                                             \
                                                                               \
 /* Adds a new element at the end of the vector, after its current last
    element. The content of this new element is initialized to a copy
@@ -132,14 +132,13 @@ void VECTOR_TYPE##_reserve(VECTOR_TYPE * v, size_t n)                         \
 static inline                                                                 \
 void VECTOR_TYPE##_push_back(VECTOR_TYPE * v, BASE_TYPE x)                    \
 {                                                                             \
-    if (v->_end == v->_capacity)                                              \
-        VECTOR_TYPE##_reserve (v,                                             \
-                               (VECTOR_TYPE##_capacity (v) == 0)              \
-                               ? 8                                            \
-                               : 2 * VECTOR_TYPE##_capacity (v));             \
+    if (v->_end == v->_capacity) {                                            \
+        size_t capacity = VECTOR_TYPE##_capacity(v);                          \
+        VECTOR_TYPE##_reserve(v,  capacity == 0 ? 8 : 2 * capacity);          \
+    }                                                                         \
     *(v->_end) = x;                                                           \
     v->_end++;                                                                \
-}									      \
+}                                                                             \
                                                                               \
 /* Removes the last element in the vector, effectively reducing the
    vector size by one and invalidating all iterators and references to

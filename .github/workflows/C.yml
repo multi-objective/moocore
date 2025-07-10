@@ -32,14 +32,18 @@ jobs:
       fail-fast: false
       matrix:
         # macos-13 is an intel runner, macos-14 is apple silicon
-        os: [ubuntu-22.04, windows-latest, macos-13, macos-14]
+        os: [ubuntu-22.04, windows-latest]
         cc: [ gcc ]
+        cxx: [ g++ ]
         include:
-          - { os: macos-13, cc: clang }
-          - { os: macos-14, cc: clang }
-          - { os: ubuntu-24.04, cc: gcc-14 }
+          - { os: macos-13, cc: clang, cxx: clang++ }
+          - { os: macos-13, cc: gcc-12, cxx: g++-12 }
+          - { os: macos-14, cc: clang, cxx: clang++ }
+          - { os: macos-14, cc: gcc-13, cxx: g++-13 }
+          - { os: ubuntu-24.04, cc: gcc-14, cxx: g++-14 }
     env:
       CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
 
     steps:
       - uses: actions/checkout@v4
@@ -53,11 +57,13 @@ jobs:
       - run: $CC -v
         shell: bash
 
-      - run: make -C c all DEBUG=1 WERROR=1
-        if: runner.os != 'Windows'
-        # FIXME: How to install sanitizers in Windows?
+      - run: $CXX -v
+        shell: bash
 
       - run: make -C c all DEBUG=0 WERROR=1
+      - run: make -C c all DEBUG=1 WERROR=1
+        if: ${{ runner.os == 'Linux' || (runner.os == 'macOS' && matrix.cc == 'clang') }}
+      - run: make -C c all DEBUG=1 WERROR=1 SANITIZERS=
 
       - name: Functional tests
         run: |
@@ -70,6 +76,12 @@ jobs:
           ./bin/ndsort --help
           ./bin/nondominated --help
 
+      - name: Test building shared libraries
+        run: |
+          make -C c shlibs DEBUG=0 WERROR=1
+          ./tools/check_so_symbols.sh c/libmoocore.* tools/expected_libmoocore_exports.txt
+          ./tools/check_so_symbols.sh c/libmoocorepp.* tools/expected_libmoocore_exports.txt
+
   msys2:
     runs-on: windows-latest
     strategy:
@@ -77,8 +89,13 @@ jobs:
       matrix:
         sys: [ clang64 ]
         cc: [ clang ]
+        cxx: [ clang++ ]
         #- { sys: mingw64, cc: gcc }
         #- { sys: ucrt64,  cc: gcc }
+
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
 
     defaults:
       run:
@@ -99,11 +116,12 @@ jobs:
           update: true
           install: >-
             make
+            diffutils
           pacboy: >-
             ${{ matrix.cc }}:p
 
-      - run: make -C c all DEBUG=1 WARN_FLAGS='-Werror' CC=${{ matrix.cc }}
-      - run: make -C c all DEBUG=0 WARN_FLAGS='-Werror' CC=${{ matrix.cc }}
+      - run: make -C c all DEBUG=1 WARN_FLAGS='-Werror'
+      - run: make -C c all DEBUG=0 WARN_FLAGS='-Werror'
 
       - name: Functional tests
         run: |
@@ -115,3 +133,9 @@ jobs:
           ./bin/igd --help
           ./bin/ndsort --help
           ./bin/nondominated --help
+
+      - name: Test building shared libraries
+        run: |
+          make -C c shlibs DEBUG=0 WERROR=1
+          ./tools/check_so_symbols.sh c/libmoocore.* tools/expected_libmoocore_exports.txt
+          ./tools/check_so_symbols.sh c/libmoocorepp.* tools/expected_libmoocore_exports.txt
