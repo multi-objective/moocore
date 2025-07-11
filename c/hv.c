@@ -313,13 +313,11 @@ hv2d(const double * restrict data, size_t n, const double * restrict ref)
     size_t j = 0;
     do {
         /* Filter everything that may be above the ref point. */
-        while (j < n && p[j][1] >= prev_j)
-            j++;
-        if (unlikely(j == n))
-            break; /* No other point dominates ref. */
-        // We found one point that dominates ref.
-        hyperv += (ref[0] - p[j][0]) * (prev_j - p[j][1]);
-        prev_j = p[j][1];
+        if (p[j][1] < prev_j) {
+            // We found one point that dominates ref.
+            hyperv += (ref[0] - p[j][0]) * (prev_j - p[j][1]);
+            prev_j = p[j][1];
+        }
         j++;
     } while (j < n);
 
