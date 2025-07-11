@@ -1,0 +1,12 @@
+﻿epsilon\_mult
+=============
+
+.. currentmodule:: moocore
+
+.. autofunction:: epsilon_mult
+
+.. _sphx_glr_backref_moocore.epsilon_mult:
+
+.. minigallery:: moocore.epsilon_mult
+   :add-heading: Gallery examples
+   :heading-level: -
