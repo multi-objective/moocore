@@ -125,23 +125,31 @@ else
 CPPFLAGS += -U_GNU_SOURCE
 endif
 
-EXE_CFLAGS += $(SANITIZERS) $(OPT_CFLAGS) $(MARCH_FLAGS) $(WARN_CFLAGS) \
-	-DDEBUG=$(DEBUG) -DVERSION='"$(VERSION)"' -DMARCH='"$(gcc-guess-march)"'
-
-SHLIB_CFLAGS = -fPIC -fvisibility=hidden -DMOOCORE_SHARED_LIB $(OPT_CFLAGS) $(MARCH_FLAGS)
-SHLIB_LDFLAGS = -shared -lm
+SHLIB_CFLAGS = -fvisibility=hidden -DMOOCORE_SHARED_LIB $(OPT_CFLAGS) $(MARCH_FLAGS)
+SHLIB_LDFLAGS = -shared
 
 # Platform-specific linker flags
 ifeq ($(uname_S),Linux)
-  SHLIB_LDFLAGS += -Wl,--no-undefined
+  SHLIB_CFLAGS += -fPIC
+  SHLIB_LDFLAGS += -lm -Wl,--no-undefined
   SHLIB_EXT=so
 endif
 ifeq ($(uname_S),Darwin)
+  SHLIB_CFLAGS += -fPIC
+  SHLIB_LDFLAGS += -lm
   SHLIB_EXT=dylib
 endif
 ifeq ($(uname_S),Windows)
+  # No LTO for Windows.
+  OPT_CFLAGS = -DNDEBUG -O2
+  MARCH_FLAGS=
   SHLIB_EXT=dll
+  SHLIB_LDFLAGS += -fuse-ld=lld
 endif
+
+EXE_CFLAGS += $(SANITIZERS) $(OPT_CFLAGS) $(MARCH_FLAGS) $(WARN_CFLAGS) \
+	-DDEBUG=$(DEBUG) -DVERSION='"$(VERSION)"' -DMARCH='"$(gcc-guess-march)"'
+
 
 # List of test target base names
 TEST_NAMES := eaf nondominated hv hvapprox igd epsilon dominatedsets

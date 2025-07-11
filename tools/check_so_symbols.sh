@@ -49,16 +49,8 @@ case "$OSTYPE" in
                     fi
                 done | sort > "${TMP_ACTUAL}"
         elif command -v nm &>/dev/null; then
-            if command -v gcc-nm &>/dev/null; then
-                echo "[Windows MinGW gcc-nm] Extracting symbols..."
-                NM=gcc-nm
-            elif command -v llvm-nm &>/dev/null; then
-                echo "[Windows LLVM llvm-nm] Extracting symbols..."
-                NM=llvm-nm
-            else
-                echo "[Windows nm] Extracting symbols..."
-                NM=nm
-            fi
+            echo "[Windows nm] Extracting symbols..."
+            NM=nm
             $NM -P -g --defined-only "$LIBRARY" | tr -s ' ' | sed 's/^_//' | grep ' T ' | cut -d' ' -f1 | sort > "${TMP_ACTUAL}"
             cat "$TMP_ACTUAL"
         else
