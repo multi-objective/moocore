@@ -9,6 +9,11 @@
 #include <stdbool.h>
 #include <limits.h> // SIZE_MAX
 
+// This warning is buggy in GCC 12.
+#if defined(__GNUC__) && __GNUC__ == 12
+#  pragma GCC diagnostic ignored "-Wuse-after-free"
+#endif
+
 #define vector_define(VECTOR_TYPE, BASE_TYPE)                                  \
 struct VECTOR_TYPE;                                                            \
 typedef struct VECTOR_TYPE VECTOR_TYPE;                                        \

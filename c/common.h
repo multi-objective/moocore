@@ -47,7 +47,7 @@ moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
 
 #define MOOCORE_MALLOC(NMEMB, TYPE) moocore_malloc((NMEMB), sizeof(TYPE), __FILE__, __LINE__)
 
-#if __GNUC__ >= 3
+#if (defined(__GNUC__) && __GNUC__ >= 3) || defined(__clang__)
 #define __cmp_op_min <
 #define __cmp_op_max >
 #define __cmp(op, x, y) ((x) __cmp_op_##op (y) ? (x) : (y))
