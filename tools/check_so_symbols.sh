@@ -21,10 +21,9 @@ case "$OSTYPE" in
         echo "[macOS] Extracting symbols..."
         EXPORTED=$(nm -P -g --defined-only "$LIBRARY" | tr -s ' ' | sed 's/^_//' | grep ' T ' | cut -d' ' -f1 | sort)
         # Compare both lists
-        if ! diff -q <(echo "$EXPORTED") <(sort "$EXPECTED_FILE") &> /dev/null; then
+        if ! diff -q <(echo "$EXPORTED") "${EXPECTED_FILE}" &> /dev/null; then
             echo "❌ Exported symbols do not match expected list:"
-            DIFF=$(diff -u <(echo "$EXPORTED") <(sort "$EXPECTED_FILE"))
-            echo "$DIFF"
+            diff -u <(echo "$EXPORTED") "$EXPECTED_FILE"
             exit 1
         fi
         ;;
@@ -32,41 +31,51 @@ case "$OSTYPE" in
         echo "[Linux] Extracting symbols..."
         EXPORTED=$(nm -P -g --defined-only "$LIBRARY" | tr -s ' ' | grep ' T ' | cut -d' ' -f1 | sort)
         # Compare both lists
-        if ! diff -q <(echo "$EXPORTED") <(sort "$EXPECTED_FILE") &> /dev/null; then
+        if ! diff -q <(echo "$EXPORTED") "$EXPECTED_FILE" &> /dev/null; then
             echo "❌ Exported symbols do not match expected list:"
-            DIFF=$(diff -u <(echo "$EXPORTED") <(sort "$EXPECTED_FILE"))
-            echo "$DIFF"
+            diff -u <(echo "$EXPORTED") "$EXPECTED_FILE"
             exit 1
         fi
         ;;
     [Ww]indows*|msys*|cygwin*)
+        TMP_ACTUAL=$(mktemp)
         if command -v dumpbin &>/dev/null; then
             echo "[Windows MSVC] Extracting symbols..."
-            TMP_ACTUAL=$(mktemp)
             dumpbin /EXPORTS "$LIBRARY" |
                 while read -r line; do
                     if [[ "$line" =~ ^[[:space:]]*[0-9]+[[:space:]]+[0-9A-Fa-f]+[[:space:]]+[0-9A-Fa-f]+[[:space:]]+(.+) ]]; then
                         symbol="${BASH_REMATCH[1]}"
                         undname "$symbol"
                     fi
-                done | sort > "$TMP_ACTUAL"
-            EXPORTED=$(cat $TMP_ACTUAL)
-            rm -f $TMP_ACTUAL
+                done | sort > "${TMP_ACTUAL}"
         elif command -v nm &>/dev/null; then
-            echo "[Windows MinGW] Extracting symbols..."
-            EXPORTED=$(nm -P -g --defined-only "$LIBRARY" | tr -s ' ' | sed 's/^_//' | grep ' T ' | cut -d' ' -f1 | sort)
-            echo Exported: "$EXPORTED"
+            if command -v gcc-nm &>/dev/null; then
+                echo "[Windows MinGW gcc-nm] Extracting symbols..."
+                NM=gcc-nm
+            elif command -v llvm-nm &>/dev/null; then
+                echo "[Windows LLVM llvm-nm] Extracting symbols..."
+                NM=llvm-nm
+            else
+                echo "[Windows nm] Extracting symbols..."
+                NM=nm
+            fi
+            $NM -P -g --defined-only "$LIBRARY" | tr -s ' ' | sed 's/^_//' | grep ' T ' | cut -d' ' -f1 | sort > "${TMP_ACTUAL}"
+            cat "$TMP_ACTUAL"
         else
             echo "No supported symbol tool found on Windows."
             exit 1
         fi
-        MISSING=$(comm -23  <(sort "$EXPECTED_FILE") <(echo "$EXPORTED"))
+        cat "${EXPECTED_FILE}"
+        MISSING=$(comm -23  "${EXPECTED_FILE}" "${TMP_ACTUAL}")
         # Compare both lists
         if [ -n "$MISSING" ]; then
-            echo "❌ Exported symbols do not match expected list:"
+            echo "❌ Exported symbols of $LIBRARY do NOT match expected list in $EXPECTED_FILE :"
             echo $MISSING
+            diff -u "${EXPECTED_FILE}" "${TMP_ACTUAL}"
+            rm -f "$TMP_ACTUAL"
             exit 1
         fi
+        rm -f "$TMP_ACTUAL"
         ;;
     *)
         echo "Unsupported platform: $OSTYPE"

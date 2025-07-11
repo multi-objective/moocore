@@ -41,6 +41,7 @@ jobs:
           - { os: macos-14, cc: clang, cxx: clang++ }
           - { os: macos-14, cc: gcc-13, cxx: g++-13 }
           - { os: ubuntu-24.04, cc: gcc-14, cxx: g++-14 }
+
     env:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
@@ -76,11 +77,48 @@ jobs:
           ./bin/ndsort --help
           ./bin/nondominated --help
 
+  shlibs:
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    name: Test building shared libaries on ${{ matrix.os }} with ${{ matrix.cc }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # macos-13 is an intel runner, macos-14 is apple silicon
+        os: [ubuntu-22.04, windows-latest]
+        cc: [ gcc ]
+        cxx: [ g++ ]
+        include:
+          - { os: macos-13, cc: clang, cxx: clang++ }
+          - { os: macos-13, cc: gcc-12, cxx: g++-12 }
+          - { os: macos-14, cc: clang, cxx: clang++ }
+          - { os: macos-14, cc: gcc-13, cxx: g++-13 }
+          - { os: windows-latest, cc: clang, cxx: clang++ }
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Put MSYS2_MinGW64 on PATH
+        if: runner.os == 'Windows'
+        run: |
+          echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          echo "${{ runner.temp }}/msys64/mingw64/usr/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - run: $CC -v
+        shell: bash
+
+      - run: $CXX -v
+        shell: bash
+
       - name: Test building shared libraries
         run: |
           make -C c shlibs DEBUG=0 WERROR=1
-          ./tools/check_so_symbols.sh c/libmoocore.* tools/expected_libmoocore_exports.txt
-          ./tools/check_so_symbols.sh c/libmoocorepp.* tools/expected_libmoocore_exports.txt
+          ./tools/check_so_symbols.sh ./c/libmoocore.* ./tools/expected_libmoocore_exports.txt
+          ./tools/check_so_symbols.sh ./c/libmoocorepp.* ./tools/expected_libmoocore_exports.txt
+        shell: bash
 
   msys2:
     runs-on: windows-latest
