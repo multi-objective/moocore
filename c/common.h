@@ -1,5 +1,5 @@
-#ifndef   	LIBMISC_COMMON_H_
-# define   	LIBMISC_COMMON_H_
+#ifndef   	MOOCORE_COMMON_H_
+# define   	MOOCORE_COMMON_H_
 
 #include "config.h"
 #ifdef R_PACKAGE
@@ -187,4 +187,4 @@ minmax_from_bool(int nobj, const bool * restrict maximise)
     return minmax;
 }
 
-#endif 	    /* !LIBMISC_COMMON_H_ */
+#endif 	    /* !MOOCORE_COMMON_H_ */

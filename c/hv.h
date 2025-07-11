@@ -20,32 +20,14 @@
 #ifndef HV_H_
 #define HV_H_
 
-#if defined(_WIN32) && !(defined(__MINGW__) || defined(__MINGW32__) || defined(__MINGW64__))
-# ifndef MOOCORE_STATIC_LIB
-#  ifdef MOOCORE_SHARED_LIB
-#   define MOOCORE_API extern __declspec(dllexport)
-#  else
-#   define MOOCORE_API extern __declspec(dllimport)
-#  endif
-# endif
-#elif __GNUC__ >= 4 && defined(MOOCORE_SHARED_LIB)
-# define MOOCORE_API extern __attribute__((visibility("default")))
-#endif
-
-#ifndef MOOCORE_API
-# define MOOCORE_API extern
-#endif
+#include "libmoocore-config.h"
 
 // C++ needs to know that types and declarations are C, not C++.
-#ifdef	__cplusplus
-extern "C" {
-#endif
+BEGIN_C_DECLS
 
 MOOCORE_API double fpli_hv(const double *data, int d, int n, const double *ref);
 MOOCORE_API double hv_contributions(double *hvc, double *points, int dim, int size, const double * ref);
 
-#ifdef	__cplusplus
-}
-#endif
+END_C_DECLS
 
 #endif // HV_H_

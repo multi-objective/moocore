@@ -1,6 +1,6 @@
 # -*- Makefile-gmake -*-
 LIBHV_SRCS    = hv.c hv3dplus.c hv4d.c hv_contrib.c
-LIBHV_HDRS    = hv.h hv_priv.h
+LIBHV_HDRS    = hv.h hv_priv.h libmoocore-config.h
 LIBHV_OBJS    = $(LIBHV_SRCS:.c=.o)
 HV_LIB     = fpli_hv.a
 

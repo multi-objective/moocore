@@ -96,6 +96,7 @@ HDRS =  avl.h                                                                \
         igd.h                                                                \
         io.h                                                                 \
         io_priv.h                                                            \
+        libmoocore-config.h	                                             \
         mt19937/mt19937.h                                                    \
         nondominated.h                                                       \
         pow_int.h                                                            \
