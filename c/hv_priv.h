@@ -157,7 +157,7 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
         /* Filters those points that do not strictly dominate the reference
            point.  This is needed to ensure that the points left are only those
            that are needed to calculate the hypervolume. */
-        if (unlikely(strongly_dominates(data + j * dim, ref, dim))) {
+        if (likely(strongly_dominates(data + j * dim, ref, dim))) {
             scratch[i] = data + j * dim;
             i++;
         }

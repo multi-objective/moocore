@@ -82,7 +82,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         /* Filters those points that do not strictly dominate the reference
            point.  This is needed to assure that the points left are only those
            that are needed to calculate the hypervolume. */
-        if (unlikely(strongly_dominates(data + j * d, ref, d))) {
+        if (likely(strongly_dominates(data + j * d, ref, d))) {
             head[i].x = data + (j+1) * d; /* this will be fixed a few lines below... */
             head[i].ignore = 0;
             head[i].next = head->next + i * d_stop;
