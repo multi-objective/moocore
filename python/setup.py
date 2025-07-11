@@ -1,4 +1,4 @@
-# ruff: noqa: D100, D101, D102, D103, N801
+# ruff: noqa: D100, D101, D102, N801
 from setuptools import setup
 from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
 
