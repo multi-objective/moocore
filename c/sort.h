@@ -137,13 +137,15 @@ cmp_double_3d_asc(const void * restrict p1, const void * restrict p2)
 }
 
 static inline const double **
-generate_sorted_doublep_2d(const double * restrict points, size_t * restrict size, const double ref0)
+generate_sorted_doublep_2d(const double * restrict points,
+                           size_t * restrict size, const double ref0)
 {
     size_t n = *size;
     const double **p = malloc(n * sizeof(*p));
     size_t j = 0;
     for (size_t k = 0; k < n; k++) {
-        // There is no point in checking ref1 here because the algorithms have to check anyway.
+        /* There is no point in checking p[k][1] < ref[1] here because the
+           algorithms have to check anyway. */
         if (points[2 * k] < ref0) {
             p[j] = points + 2 * k;
             j++;
