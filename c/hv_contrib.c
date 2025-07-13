@@ -131,6 +131,26 @@ hvc2d(double * restrict hvc, const double * restrict data, size_t n, const doubl
     return hyperv;
 }
 
+static inline void
+hvc_check(double hv_total, const double * restrict hvc,
+          double * restrict points,
+          dimension_t dim, size_t size, const double * restrict ref)
+{
+    const double tolerance = sqrt(DBL_EPSILON);
+    double hv_total_tmp = fpli_hv(points, dim, (int) size, ref);
+    if (fabs(hv_total_tmp - hv_total) > tolerance) {
+        fatal_error("hv_total = %g != hv_total_tmp = %g !", hv_total, hv_total_tmp);
+    }
+    double * hvc_tmp = MOOCORE_MALLOC(size, double);
+    hv_1point_diffs(hvc_tmp, points, dim, size, ref, NULL, hv_total);
+    for (size_t i = 0; i < size; i++) {
+        if (fabs(hvc[i] - hvc_tmp[i]) > tolerance) {
+            fatal_error("hvc[%zu] = %g != hvc_tmp[%zu] = %g !", i, hvc[i], i, hvc_tmp[i]);
+        }
+    }
+    free (hvc_tmp);
+}
+
 /* Store the exclusive hypervolume contribution of each input point in hvc[],
    which is allocated by the caller.
 
@@ -145,7 +165,6 @@ hv_contributions(double * restrict hvc, double * restrict points, int d, int n,
     assert(hvc != NULL);
     ASSUME(d > 1 && d <= 32);
     ASSUME(n >= 0);
-    const double tolerance = sqrt(DBL_EPSILON);
     dimension_t dim = (dimension_t) d;
     size_t size = (size_t) n;
     if (n == 0) return 0;
@@ -153,20 +172,7 @@ hv_contributions(double * restrict hvc, double * restrict points, int d, int n,
     double hv_total;
     if (dim == 2) {
         hv_total = hvc2d(hvc, points, size, ref);
-        DEBUG1(
-            double hv_total_tmp = fpli_hv(points, dim, (int) size, ref);
-            if (fabs(hv_total_tmp - hv_total) > tolerance) {
-                fatal_error("hv_total = %g != hv_total_tmp = %g !", hv_total, hv_total_tmp);
-            }
-            double * hvc_tmp = MOOCORE_MALLOC(size, double);
-            hv_1point_diffs(hvc_tmp, points, dim, size, ref, NULL, hv_total);
-            for (size_t i = 0; i < size; i++) {
-                if (fabs(hvc[i] - hvc_tmp[i]) > tolerance) {
-                    fatal_error("hvc[%zu] = %g != hvc_tmp[%zu] = %g !", i, hvc[i], i, hvc_tmp[i]);
-                }
-            }
-            free (hvc_tmp);
-            );
+        DEBUG1(hvc_check(hv_total, hvc, points, dim, size, ref));
     } else {
         hv_total = fpli_hv(points, dim, (int) size, ref);
         hv_1point_diffs(hvc, points, dim, size, ref, NULL, hv_total);
