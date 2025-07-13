@@ -74,7 +74,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           install-pandoc: true
-          extra-packages: any::remotes, any::rcmdcheck, any::spelling
+          extra-packages: any::purrr@1.0.4, any::remotes, any::rcmdcheck, any::spelling
           needs: check
           working-directory: r
 
