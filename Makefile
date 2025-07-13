@@ -13,7 +13,7 @@ clean:
 	$(MAKE) -C c/ clean
 	$(MAKE) -C r/ clean
 	$(MAKE) -C python/ clean
-	rm -rf *.Rcheck/
+	rm -rf *.Rcheck/ ./*/.mypy_cache
 
 pre-commit:
 	pre-commit autoupdate
