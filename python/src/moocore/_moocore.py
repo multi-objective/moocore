@@ -677,12 +677,14 @@ def hv_contributions(
     respect to a given reference point. The hypervolume contribution of point
     :math:`\vec{p} \in X` is :math:`\text{hvc}(\vec{p}) = \text{hyp}(X) -
     \text{hyp}(X \setminus \{\vec{p}\})`. Dominated points have zero
-    contribution. Duplicated points have zero contribution even if not
-    dominated, because removing one of the duplicates does not change the
-    hypervolume of the remaining set.
+    contribution but they may influence the contribution of other points.
+    Duplicated points have zero contribution even if not dominated, because
+    removing one of the duplicates does not change the hypervolume of the
+    remaining set.
 
-    The current implementation uses the naive algorithm that requires
-    calculating the hypervolume :math:`|X|+1` times.
+    The current implementation uses the :math:`O(n \log n)` dimension-sweep
+    algorithm for 2D and the naive algorithm that requires calculating the
+    hypervolume :math:`|X|+1` times for dimensions larger than 2.
 
     .. seealso:: For details about the hypervolume, see :ref:`hypervolume_metric`.
 
@@ -705,8 +707,18 @@ def hv_contributions(
 
     Examples
     --------
-    >>> dat = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
-    >>> moocore.hv_contributions(dat, ref=[10, 10])
+    >>> x = np.array([[5, 1], [1, 5], [4, 2], [4, 4], [5, 1]])
+    >>> moocore.hv_contributions(x, ref=(6, 6))
+    array([0., 3., 2., 0., 0.])
+
+    # hvc[(5,1)] = 0 = duplicated
+    # hvc[(1,5)] = 3 = (4 - 1) * (6 - 5)
+    # hvc[(4,2)] = 2 = (5 - 4) * (4 - 2)
+    # hvc[(4,4)] = 0 = dominated
+    # hvc[(5,1)] = 0 = duplicated
+
+    >>> x = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
+    >>> moocore.hv_contributions(x, ref=[10, 10])
     array([2., 1., 6., 3.])
 
     """

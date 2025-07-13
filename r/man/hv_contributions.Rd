@@ -21,13 +21,31 @@ objectives or a vector of logical values, with one value per objective.}
 \code{numeric()}\cr A numerical vector
 }
 \description{
-Computes the hypervolume contribution of each point given a set of points
-with respect to a given reference point assuming minimization of all
-objectives.  Dominated points have zero contribution. Duplicated points have
-zero contribution even if not dominated, because removing one of them does
-not change the hypervolume dominated by the remaining set.
+Computes the hypervolume contribution of each point of a set of points with
+respect to a given reference point.  The hypervolume contribution of point
+\eqn{\vec{p} \in X} is \eqn{\text{hvc}(\vec{p}) = \text{hyp}(X) -
+\text{hyp}(X \setminus \{\vec{p}\})}. Dominated points have zero
+contribution but they may influence the contribution of other
+points. Duplicated points have zero contribution even if not dominated,
+because removing one of the duplicates does not change the hypervolume of
+the remaining set.
+}
+\details{
+The current implementation uses the \eqn{O(n\log n)} dimension-sweep
+algorithm for 2D and the naive algorithm that requires calculating the
+hypervolume \eqn{|X|+1} times for dimensions larger than 2.
+
+For details about the hypervolume, see \code{\link[=hypervolume]{hypervolume()}}.
 }
 \examples{
+
+x <- matrix(c(5,1, 1,5, 4,2, 4,4, 5,1), ncol=2, byrow=TRUE)
+hv_contributions(x, reference=c(6,6))
+# hvc[(5,1)] = 0 = duplicated
+# hvc[(1,5)] = 3 = (4 - 1) * (6 - 5)
+# hvc[(4,2)] = 2 = (5 - 4) * (4 - 2)
+# hvc[(4,4)] = 0 = dominated
+# hvc[(5,1)] = 0 = duplicated
 
 data(SPEA2minstoptimeRichmond)
 # The second objective must be maximized
