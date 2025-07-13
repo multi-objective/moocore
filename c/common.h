@@ -100,9 +100,11 @@ moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
 #endif
 
 #ifndef R_PACKAGE
-#define DEBUG2_PRINT(...) DEBUG2(fprintf (stderr,  __VA_ARGS__))
+# define DEBUG1_PRINT(...) DEBUG1(fprintf(stderr,  __VA_ARGS__))
+# define DEBUG2_PRINT(...) DEBUG2(fprintf(stderr,  __VA_ARGS__))
 #else
-#define DEBUG2_PRINT(...) DEBUG2(Rprintf ( __VA_ARGS__))
+# define DEBUG1_PRINT(...) DEBUG1(Rprintf( __VA_ARGS__))
+# define DEBUG2_PRINT(...) DEBUG2(Rprintf( __VA_ARGS__))
 #endif
 
 #define DEBUG2_FUNPRINT(...)                    \
