@@ -127,7 +127,6 @@ for dataset in datasets:
     df["hverror"] = np.abs(1.0 - (df.hv / exact))
     df["method"] = df["method"].astype("category")
 
-    # Plot the responses for different events and regions
     plt.figure()
     ax = sns.lineplot(
         data=df, x="samples", y="hverror", hue="method", marker="o"
