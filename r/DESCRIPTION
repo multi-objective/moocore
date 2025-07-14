@@ -21,10 +21,10 @@ Imports:
         matrixStats,
         Rdpack
 Suggests:
-    doctest (>= 0.2.0),
+    doctest (>= 0.3.0),
     knitr,
     spelling,
-    testthat (>= 3.0.0),
+    testthat (>= 3.2.0),
     withr
 License: LGPL (>= 2.1)
 Copyright: file COPYRIGHTS
@@ -42,4 +42,4 @@ SystemRequirements: GNU make
 RdMacros: Rdpack
 Config/testthat/edition: 3
 Language: en-GB
-Config/Needs/website: rmarkdown, tidyr, ggplot2
+Config/Needs/website: rmarkdown, tidyr, dplyr, ggplot2, scales, Hmisc
