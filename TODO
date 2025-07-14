@@ -6,8 +6,9 @@
  - [ ] Document relation between hypervolume and attainment function.
  - [ ] R2 indicator: [Reinvestigating the R2 Indicator: Achieving Pareto Compliance by Integration](https://link.springer.com/chapter/10.1007/978-3-031-70085-9_13) [Brockhoff, D., Wagner, T., Trautmann, H.: On the properties of the R2 indicator. In: Proceedings of the 14th Annual Conference on Genetic and Evolutionary
 Computation, pp. 465–472 (2012)]
+ - [ ] archiving: https://github.com/CMA-ES/moarchiving
  - [ ] Convert code from https://github.com/fieldsend/multiobjective_data_structures
- - [ ] hv2d contributions
+ - [x] hv2d contributions
  - [ ] Take a look at https://github.com/esa/pagmo2/blob/master/src/utils/multi_objective.cpp
  - [ ] Faster epsilon: https://github.com/mbuzdalov/orthant-search/blob/master/implementations/src/main/java/ru/ifmo/orthant/epsilon/OrthantImplementation.java
        and https://dl.acm.org/doi/pdf/10.1145/3205455.3205469 and http://www.cmap.polytechnique.fr/~nikolaus.hansen/proceedings/2016/GECCO/proceedings/p613.pdf
