@@ -3,7 +3,7 @@
  * Document the EAF and Vorob'ev expectation and deviation in more detail.
  * New function `hv_approx()`.
  * Function `hv_contributions()` is much faster for 2D inputs.
- * New vignette hv_approx.Rmd.
+ * New article "[Approximating the hypervolume](https://multi-objective.github.io/moocore/r/articles/hv_approx.html)".
  * New datasets `DTLZLinearShape.8d.front.60pts.10` and `ran.10pts.9d.10`.
 
 # moocore 0.1.7
