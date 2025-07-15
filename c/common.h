@@ -1,5 +1,5 @@
-#ifndef   	MOOCORE_COMMON_H_
-# define   	MOOCORE_COMMON_H_
+#ifndef MOOCORE_COMMON_H_
+#define MOOCORE_COMMON_H_
 
 #include "config.h"
 #ifdef R_PACKAGE
@@ -187,6 +187,17 @@ minmax_from_bool(int nobj, const bool * restrict maximise)
         minmax[k] = (maximise[k]) ? AGREE_MAXIMISE : AGREE_MINIMISE;
     }
     return minmax;
+}
+
+static inline bool *
+new_bool_maximise(dimension_t nobj, bool maximise_all)
+{
+    ASSUME(nobj > 0);
+    ASSUME(nobj < 128);
+    bool * maximise = malloc(sizeof(bool) * nobj);
+    for (dimension_t k = 0; k < nobj; k++)
+        maximise[k] = maximise_all;
+    return maximise;
 }
 
 #endif 	    /* !MOOCORE_COMMON_H_ */

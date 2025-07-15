@@ -969,8 +969,11 @@ def is_nondominated(
     """
     data = np.asarray(data, dtype=float)
     nrows, nobj = data.shape
+    if nrows == 0:
+        return np.array([], dtype=bool)
     maximise = _parse_maximise(maximise, nobj)
     data_p, npoints, nobj = np2d_to_double_array(data)
+    npoints = ffi.cast("size_t", npoints)
     maximise_p = ffi.from_buffer("bool []", maximise)
     keep_weakly = ffi.cast("bool", bool(keep_weakly))
     nondom = lib.is_nondominated(data_p, nobj, npoints, maximise_p, keep_weakly)

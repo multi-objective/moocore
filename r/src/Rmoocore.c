@@ -320,7 +320,7 @@ is_nondominated_C(SEXP DATA, SEXP MAXIMISE, SEXP KEEP_WEAKLY)
     SEXP_2_LOGICAL(KEEP_WEAKLY, keep_weakly);
     assert (nobj == maximise_len);
 
-    bool * bool_is_nondom = is_nondominated(data, nobj, npoint, maximise, keep_weakly);
+    bool * bool_is_nondom = is_nondominated(data, nobj, (size_t) npoint, maximise, keep_weakly);
     free (maximise);
 
     new_logical_vector (is_nondom, npoint);

@@ -511,15 +511,17 @@ filter_dominated_set (double *points, int dim, size_t size,
 }
 
 _attr_maybe_unused static bool *
-is_nondominated (const double * data, int nobj, int npoint, const bool * maximise, bool keep_weakly)
+is_nondominated(const double * data, int nobj, size_t npoint,
+                const bool * maximise, bool keep_weakly)
 {
     ASSUME(nobj >= 1);
     ASSUME(nobj <= 32);
     bool * nondom = nondom_init(npoint);
     const signed char * minmax = minmax_from_bool(nobj, maximise);
-    find_nondominated_set_(data, (dimension_t) nobj, (size_t) npoint, minmax, AGREE_NONE, nondom,
-                            /* find_dominated_p = */false,
-                            /* keep_weakly = */keep_weakly);
+    find_nondominated_set_(data, (dimension_t) nobj, npoint, minmax,
+                           AGREE_NONE, nondom,
+                           /* find_dominated_p = */false,
+                           /* keep_weakly = */keep_weakly);
     free((void *)minmax);
     return nondom;
 }
