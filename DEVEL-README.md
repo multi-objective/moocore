@@ -10,6 +10,7 @@ How to release
 
 1. R release (within `r/`):
 
+    1. `make releasebuild` and check which files are included in the package.
     1. `make releasecheck`
     1. [Check reverse dependencies](https://github.com/multi-objective/moocore/actions/workflows/revdepcheck.yml)
     1. Update `cran-comments.md`
