@@ -2,7 +2,7 @@
 How to release
 ==============
 
-1. Bump version number `PACKAGEVERSION` in `Makefile`.
+1. Run [testsuite workflow](https://github.com/multi-objective/testsuite/actions/workflows/moocore.yml)
 
 1. `./release.py`
 

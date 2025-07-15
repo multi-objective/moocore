@@ -1,4 +1,4 @@
-# moocore 0.1.7.900
+# moocore 0.1.8
 
  * Document the EAF and Vorob'ev expectation and deviation in more detail.
  * New function `hv_approx()`.
