@@ -4,6 +4,7 @@
 #include <float.h>
 #include "common.h"
 #include "hv.h"
+#include "nondominated.h"
 #include "sort.h"
 
 /* Given a list of points, compute the exclusive hypervolume contribution of
@@ -21,10 +22,14 @@ hv_1point_diffs (double *hvc, double *points, dimension_t dim, size_t size, cons
     bool keep_uevs = uev != NULL;
     const double tolerance = sqrt(DBL_EPSILON);
     double * tmp = MOOCORE_MALLOC(dim, double);
+    const bool * maximise = new_bool_maximise(dim, /*maximise_all=*/false);
+    const bool * nondom = is_nondominated(points, dim, size, maximise,
+                                          /*keep_weakly=*/false);
+    free((void *) maximise);
     for (size_t i = 0; i < size; i++) {
         if (unlikely(keep_uevs && uev[i])) {
             hvc[i] = hv_total;
-        } else if (unlikely(!strongly_dominates(points + i * dim, ref, dim))) {
+        } else if (unlikely(!nondom[i] || !strongly_dominates(points + i * dim, ref, dim))) {
             hvc[i] = 0.0;
         } else {
             memcpy(tmp, points + i * dim, sizeof(double) * dim);
@@ -36,13 +41,15 @@ hv_1point_diffs (double *hvc, double *points, dimension_t dim, size_t size, cons
             memcpy(points + i * dim, tmp, sizeof(double) * dim);
         }
     }
+    free((void *)nondom);
     free(tmp);
 }
 
-/* O(n log n) dimension-sweep algorithm. hvc[] must be already allocated with size n.
+/* O(n log n) dimension-sweep algorithm.
 
-   Points that are duplicated have zero exclusive contribution.  Thus, the sum
-   of contributions may increase if one removes any duplicates.
+   hvc[] must be already allocated with size n.  Points that are duplicated
+   have zero exclusive contribution.  Thus, the sum of contributions may
+   increase if one removes any duplicates.
 
    Returns -1 if something fails, >= 0 on success.
 */
