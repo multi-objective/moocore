@@ -431,6 +431,41 @@ static const long double int_power_of_sin_from_0_to_half_pi[] = {
     /* d =  0 */ M_PI_2l,
     /* d =  1 */ 1.L,
     /* d =  2 */ M_PI_4l,
+/* GCC on powerpc cannot fold some floating-point expressions involving IBM
+   long double into constant initializers, unless -ffast-math is enabled.  See
+   https://gcc.gnu.org/PR19779 */
+#if defined(__GNUC__) && (defined(__PPC__) || defined(__POWERPC__) || defined(__ppc__))
+    /* d =  3 */ 2. / 3.,
+    /* d =  4 */ 3.L * M_PI / 16.L,
+    /* d =  5 */ 8. / 15.,
+    /* d =  6 */ 5.L * M_PI / 32.L,
+    /* d =  7 */ 16. / 35.,
+    /* d =  8 */ 35.L * M_PI / 256.L,
+    /* d =  9 */ 128. / 315.,
+    /* d = 10 */ 63.L * M_PI / 512.L,
+    /* d = 11 */ 256. / 693.,
+    /* d = 12 */ 231.L * M_PI / 2048.L,
+    /* d = 13 */ 1024. / 3003.,
+    /* d = 14 */ 429.L * M_PI / 4096.L,
+    /* d = 15 */ 2048. / 6435.,
+    /* d = 16 */ 6435.L * M_PI / 65536.L,
+    /* d = 17 */ 32768. / 109395.,
+    /* d = 18 */ 12155.L * M_PI / 131072.L,
+    /* d = 19 */ 65536. / 230945.,
+    /* d = 20 */ 46189.L * M_PI / 524288.L,
+    /* d = 21 */ 262144. / 969969.,
+    /* d = 22 */ 88179.L * M_PI / 1048576.L,
+    /* d = 23 */ 524288. / 2028117.,
+    /* d = 24 */ 676039.L * M_PI / 8388608.L,
+    /* d = 25 */ 4194304. / 16900975.,
+    /* d = 26 */ 1300075.L * M_PI / 16777216.L,
+    /* d = 27 */ 8388608. / 35102025.,
+    /* d = 28 */ 5014575.L * M_PI / 67108864.L,
+    /* d = 29 */ 33554432. / 145422675.,
+    /* d = 30 */ 9694845.L * M_PI / 134217728.L,
+    /* d = 31 */ 67108864. / 300540195.,
+    /* d = 32 */ 300540195.L * M_PI / 4294967296.L
+#else
     /* d =  3 */ 2 / 3.L,
     /* d =  4 */ 3 * M_PIl / 16,
     /* d =  5 */ 8 / 15.L,
@@ -461,6 +496,7 @@ static const long double int_power_of_sin_from_0_to_half_pi[] = {
     /* d = 30 */ 9694845 * M_PIl / 134217728.L,
     /* d = 31 */ 67108864 / 300540195.L,
     /* d = 32 */ 300540195 * M_PIl / 4294967296
+#endif
 };
 
 // Solve inverse integral of power of sin.
