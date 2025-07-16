@@ -1,0 +1,12 @@
+﻿avg\_hausdorff\_dist
+====================
+
+.. currentmodule:: moocore
+
+.. autofunction:: avg_hausdorff_dist
+
+.. _sphx_glr_backref_moocore.avg_hausdorff_dist:
+
+.. minigallery:: moocore.avg_hausdorff_dist
+   :add-heading: Gallery examples
+   :heading-level: -

@@ -1,0 +1,12 @@
+﻿pareto\_rank
+============
+
+.. currentmodule:: moocore
+
+.. autofunction:: pareto_rank
+
+.. _sphx_glr_backref_moocore.pareto_rank:
+
+.. minigallery:: moocore.pareto_rank
+   :add-heading: Gallery examples
+   :heading-level: -
