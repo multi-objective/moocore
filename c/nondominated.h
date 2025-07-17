@@ -140,8 +140,8 @@ early_end:
 */
 
 static inline size_t
-find_nondominated_set_2d_(const double * points, size_t size, bool * nondom,
-                          const bool keep_weakly)
+find_nondominated_set_2d_(const double * restrict points, size_t size,
+                          bool * restrict nondom, const bool keep_weakly)
 {
     ASSUME(size >= 2);
     // When compiling with -O3, GCC is able to create two versions of this loop
@@ -177,8 +177,10 @@ find_nondominated_set_2d_(const double * points, size_t size, bool * nondom,
 */
 
 static inline size_t
-find_nondominated_set_3d_helper(const double * points, size_t size, bool * nondom,
-                                const bool find_dominated_p, const bool keep_weakly)
+find_nondominated_set_3d_helper(const double * restrict points, size_t size,
+                                bool * restrict nondom,
+                                const bool find_dominated_p,
+                                const bool keep_weakly)
 {
     ASSUME (size >= 2);
     const double **p = generate_sorted_pp_3d(points, size);
