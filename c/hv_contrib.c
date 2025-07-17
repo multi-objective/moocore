@@ -138,6 +138,9 @@ hvc2d(double * restrict hvc, const double * restrict data, size_t n, const doubl
     return hyperv;
 }
 
+/* This function is only called if DEBUG>=1, but MSVC is not smart enough to
+   remove the call when DEBUG==0, so libutil.c is still required to get a
+   definition of fatal_error().  */
 static inline void
 hvc_check(double hv_total, const double * restrict hvc,
           double * restrict points,
