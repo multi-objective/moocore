@@ -16,6 +16,9 @@ from botorch.utils.multi_objective.hypervolume import Hypervolume as botorch_HV
 import torch
 from pymoo.indicators.hv import Hypervolume as pymoo_HV
 from jmetal.core.quality_indicator import HyperVolume as jmetal_HV
+# from trieste.acquisition.multi_objective import Pareto as trieste_Pareto
+# import tensorflow as tf
+
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
 path_to_data = "../../testsuite/data/"
@@ -55,6 +58,9 @@ for name in names:
         "jMetalPy": lambda z, hv=jmetal_HV(ref): hv.compute(z),
     }
     if name not in ["DTLZLinearShape.5d", "DTLZLinearShape.6d"]:
+        ## Trieste is hundreds of times slower than botorch. It is so slow that
+        ## we cannot run the benchmark with the initial value of 500 points.
+        # benchmarks["trieste"] = lambda z, tf_ref=tf.convert_to_tensor(ref): float(trieste_Pareto(z, already_non_dominated=True).hypervolume_indicator(tf_ref))
         benchmarks["botorch"] = lambda z, hv=botorch_HV(
             ref_point=torch.from_numpy(-ref)
         ): hv.compute(z)
@@ -66,6 +72,8 @@ for name in names:
         for what in bench.keys():
             if what == "botorch":
                 zz = torch.from_numpy(-z)
+            # elif what == "trieste":
+            #     zz = tf.convert_to_tensor(z)
             else:
                 zz = z
             values[what] = bench(what, maxrow, zz)

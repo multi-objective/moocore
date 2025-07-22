@@ -65,7 +65,7 @@ performance measures, performance assessment
 Benchmarks
 ----------
 
-The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, and `jMetalPy`_. Other optimization packages are not included in the comparison because they are based on these packages so they are **at least as slow** as them. For example `Xopt`_ uses `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ uses `pymoo`_ internally, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.
+The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, and `jMetalPy`_. Other optimization packages are not included in the comparison because they are based on these packages so they are **at least as slow** as them. For example `Xopt`_ uses `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ uses `pymoo`_ internally, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.  We do not compare with the Bayesian optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and too slow to run the benchmarks in a reasonable time.
 
 Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>` whereas `jMetalPy`_ does not provide the :ref:`IGD+ indicator <igd_hausdorf>`. `BoTorch`_ provides neither of them.
 
@@ -129,6 +129,7 @@ The source code for the benchmarks above can be found at https://github.com/mult
 .. _Xopt: https://xopt.xopt.org/index.html
 .. _pysamoo: https://anyoptimization.com/projects/pysamoo/
 .. _DESDEO: https://desdeo.readthedocs.io/en/latest/
+.. _trieste: https://secondmind-labs.github.io/trieste
 
 .. This is not really the index page, that is found in
    _templates/indexcontent.html The toctree content here will be added to the
