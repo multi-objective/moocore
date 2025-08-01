@@ -97,3 +97,8 @@ is_nondom
 # And use the boolean vector above to filter rows:
 #
 df[is_nondom]
+
+# %%
+# This is different from calculating the nondominated set over all sets:
+
+moocore.filter_dominated(df[obj_cols])
