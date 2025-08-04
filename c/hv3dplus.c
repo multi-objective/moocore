@@ -113,7 +113,7 @@ preprocessing(dlnode_t * list, size_t n)
     while (p != stop) {
         const double * px = p->x;
         const double * prev_x;
-        // == 1 means that nodeaux goes before pj, so move to the next one.
+        // == 1 means that nodeaux goes before p, so move to the next one.
         if (avl_search_closest(&tree, px, &nodeaux) == 1) {
             prev_x = node_point(nodeaux);
             nodeaux = nodeaux->next;
@@ -132,7 +132,7 @@ preprocessing(dlnode_t * list, size_t n)
             remove_from_z(p);
         } else {
             assert(node_point(nodeaux)[1] >= px[1]);
-            // Delete everything in the tree that is dominated by pj.
+            // Delete everything in the tree that is dominated by p.
             while (node_point(nodeaux)[0] >= px[0]) {
                 assert(node_point(nodeaux)[1] >= px[1]);
                 nodeaux = nodeaux->next;
