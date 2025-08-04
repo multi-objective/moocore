@@ -66,7 +66,7 @@ OPTION_VERSION_STR
 " -n, --nsamples=N    Number of Monte-Carlo samples (N is a positive integer).\n"
 " -m, --method=M      1: Monte-Carlo sampling using normal distribution;    \n"
 "                     2: Hua-Wang deterministic sampling (default).         \n"
-" -S, --seed=S        Seed of the random number generator (S: positive integer).\n"
+OPTION_SEED_STR
 "                     Only method=1.                                        \n"
 "\n");
 }

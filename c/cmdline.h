@@ -24,6 +24,8 @@
     "     --maximise      all objectives must be maximised;\n"
 #define OPTION_NOCHECK_STR \
     "     --no-check      do not check nondominance of sets (faster but unsafe);\n"
+#define OPTION_SEED_STR \
+    " -S, --seed=SEED     Seed of the random number generator (positive integer).\n"
 
 #include <stdbool.h>
 #include <ctype.h> // for isspace()
