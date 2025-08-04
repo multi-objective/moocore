@@ -87,18 +87,12 @@ init_sentinels(dlnode_t * list, const double * ref)
     dlnode_t * restrict s1 = list;
     dlnode_t * restrict s2 = list + 1;
     dlnode_t * restrict s3 = list + 2;
-
+    reset_sentinels(list);
     // Sentinel 1
     s1->x = x;
     // Initialize it when debugging so it will crash if uninitialized.
     DEBUG1(s1->cnext[0] = s1->cnext[1] = NULL);
-    s1->next[0] = s2;
-    s1->prev[0] = s3;
 #if HV_DIMENSION == 4
-    s1->closest[0] = s2;
-    s1->closest[1] = s1;
-    s1->next[1] = s2;
-    s1->prev[1] = s3;
     s1->ndomr = 0;
 #endif
 
@@ -106,13 +100,7 @@ init_sentinels(dlnode_t * list, const double * ref)
     // Sentinel 2
     s2->x = x;
     DEBUG1(s2->cnext[0] = s2->cnext[1] = NULL);
-    s2->next[0] = s3;
-    s2->prev[0] = s1;
 #if HV_DIMENSION == 4
-    s2->closest[0] = s2;
-    s2->closest[1] = s1;
-    s2->next[1] = s3;
-    s2->prev[1] = s1;
     s2->ndomr = 0;
 #endif
 
@@ -120,13 +108,7 @@ init_sentinels(dlnode_t * list, const double * ref)
     // Sentinel 3
     s3->x = x;
     DEBUG1(s3->cnext[0] = s3->cnext[1] = NULL);
-    s3->next[0] = s1;
-    s3->prev[0] = s2;
 #if HV_DIMENSION == 4
-    s3->closest[0] = s2;
-    s3->closest[1] = s1;
-    s3->next[1] = s1;
-    s3->prev[1] = s2;
     s3->ndomr = 0;
 #endif
 }
