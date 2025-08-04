@@ -65,6 +65,7 @@ SRCS =  avl.c                                                                \
         hv4d.c                                                               \
         hv.c                                                                 \
         hvapprox.c                                                           \
+        hvc3d.c                                                              \
         hv_contrib.c                                                         \
         igd.c                                                                \
         io.c                                                                 \
@@ -93,6 +94,7 @@ HDRS =  avl.h                                                                \
         hv.h                                                                 \
         hvapprox.h                                                           \
         hv_priv.h                                                            \
+        hv3d_priv.h                                                          \
         igd.h                                                                \
         io.h                                                                 \
         io_priv.h                                                            \

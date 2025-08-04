@@ -2,7 +2,7 @@
 
 ## 0.17.0
 
- * `hv_contributions()` gains a parameter `ignore_dominated`.
+ * `hv_contributions()` gains a parameter `ignore_dominated`.  The 3D case uses the HVC3D algorithm implemented in `hvc3d()`.
  * In the output of `hv --contributions`, dominated points do not affect the
    contribution of nondominated points.
 

@@ -733,10 +733,11 @@ def hv_contributions(
     ``ignore_dominated`` does not change the result, but the default value is
     significantly faster.
 
-    The current implementation uses the :math:`O(n \log n)` dimension-sweep
-    algorithm for 2D and the naive algorithm that requires calculating the
-    hypervolume :math:`|X|+1` times for dimensions larger than 2.
-
+    The current implementation uses a :math:`O(n \log n)` dimension-sweep
+    algorithm for 2D.  With ``ignore_dominated=True``, the 3D case uses the
+    HVC3D algorithm :footcite:p:`GueFon2017hv4d`, which has :math:`O(n \log n)`
+    complexity.  Otherwise, the implementation uses the naive algorithm that
+    requires calculating the hypervolume :math:`|X|+1` times.
 
 
     Examples

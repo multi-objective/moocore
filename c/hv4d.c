@@ -135,9 +135,7 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
             break;
 
         // reconstruct
-        p->cnext[0] = p->closest[0];
-        p->cnext[1] = p->closest[1];
-
+        set_cnext_to_closest(p);
         p->cnext[0]->cnext[1] = p;
         p->cnext[1]->cnext[0] = p;
 
@@ -160,15 +158,14 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
     return true;
 }
 
+// FIXME: This is very similar to the loop in hvc3d_list() but it doesn't use p->last_slice_z
 static double
 one_contribution_3d(dlnode_t * restrict new)
 {
-    new->cnext[0] = new->closest[0];
-    new->cnext[1] = new->closest[1];
-
+    set_cnext_to_closest(new);
     const double * newx = new->x;
     // if newx[0] == new->cnext[0]->x[0], the first area is zero
-    double area = compute_area_simple(newx, new->cnext[0], 1);
+    double area = compute_area_no_inners(newx, new->cnext[0], 1);
     double volume = 0;
     dlnode_t * p = new;
     const double * px = p->x;
@@ -185,14 +182,13 @@ one_contribution_3d(dlnode_t * restrict new)
         assert(px[0] > newx[0] || px[1] > newx[1]);
         assert(!weakly_dominates(px, p->next[0]->x, 4));
 
-        p->cnext[0] = p->closest[0];
-        p->cnext[1] = p->closest[1];
+        set_cnext_to_closest(p);
 
         if (px[0] < newx[0])  {
             if (px[1] <= new->cnext[1]->x[1]) {
                 const double tmpx[] = { newx[0], px[1] };
                 // if px[1] == new->cnext[1]->x[1] then area starts at 0.
-                area -= compute_area_simple(tmpx, new->cnext[1], 0);
+                area -= compute_area_no_inners(tmpx, new->cnext[1], 0);
                 p->cnext[1] = new->cnext[1];
                 p->cnext[0]->cnext[1] = p;
                 new->cnext[1] = p;
@@ -201,7 +197,7 @@ one_contribution_3d(dlnode_t * restrict new)
             if (px[0] <= new->cnext[0]->x[0]) {
                 const double tmpx[] = { px[0], newx[1] };
                 // if px[0] == new->cnext[0]->x[0] then area starts at 0.
-                area -= compute_area_simple(tmpx, new->cnext[0], 1);
+                area -= compute_area_no_inners(tmpx, new->cnext[0], 1);
                 p->cnext[0] = new->cnext[0];
                 p->cnext[1]->cnext[0] = p;
                 new->cnext[0] = p;
@@ -209,7 +205,7 @@ one_contribution_3d(dlnode_t * restrict new)
         } else {
             assert(px[0] >= newx[0] && px[1] >= newx[1]);
             // if px[0] == p->cnext[0]->x[0] then area starts at 0.
-            area -= compute_area_simple(px, p->cnext[0], 1);
+            area -= compute_area_no_inners(px, p->cnext[0], 1);
             p->cnext[1]->cnext[0] = p;
             p->cnext[0]->cnext[1] = p;
         }

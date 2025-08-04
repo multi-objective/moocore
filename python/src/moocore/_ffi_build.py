@@ -34,6 +34,7 @@ sources = [
     "hvapprox.c",
     "hv3dplus.c",
     "hv4d.c",
+    "hvc3d.c",
     "hv_contrib.c",
     "io.c",
     "libutil.c",  # For fatal_error()

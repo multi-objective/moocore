@@ -43,6 +43,18 @@ lexicographic_less_3d(const double * restrict a, const double * restrict b)
     return a[2] < b[2] || (a[2] == b[2] && (a[1] < b[1] || (a[1] == b[1] && a[0] <= b[0])));
 }
 
+static inline bool
+all_equal_double(const double * restrict x, const double * restrict y, dimension_t dim)
+{
+    ASSUME(dim >= 2);
+    // The code below is written in a way that helps vectorization.
+    // GCC 15 is not yet able to infer this from attribute ASSUME().
+    bool x_eq_y = (x[0] == y[0]) & (x[1] == y[1]);
+    for (dimension_t d = 2; d < dim; d++)
+        x_eq_y &= (x[d] == y[d]);
+    return x_eq_y;
+}
+
 // ---------- Comparison functions (e.g, qsort). Return 'int' ----------------
 
 // General type for comparison functions used in qsort().

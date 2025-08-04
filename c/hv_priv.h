@@ -22,13 +22,64 @@ typedef struct dlnode {
                                 (in the case of 2 and 3, only the points swept by 4 are kept) */
     struct dlnode * prev[HV_DIMENSION - 2]; //keeps the points sorted according to coordinates 2 and 3 (except the sentinel 3)
     struct dlnode * cnext[2]; //current next
-#if HV_DIMENSION == 4
+#if HV_DIMENSION == 4 || defined(HVC_ONLY)
     struct dlnode * closest[2]; // closest[0] == cx, closest[1] == cy
     // FIXME: unused
     //unsigned int ndomr;    // number of dominators.
 #endif
+#ifdef HVC_ONLY
+    double area, volume;
+    double last_slice_z; // FIXME: Is this really needed?
+    struct dlnode * head[2]; // lowest (x, y)
+    bool ignore;    // hvc should be zero (duplicated or dominated)
+#endif
 } dlnode_t;
 
+// ------------ Update data structure -----------------------------------------
+
+// Link sentinels (-inf ref[1] -inf) and (ref[0] -inf -inf).
+static inline void
+restart_list_y(dlnode_t * list)
+{
+    assert(list+1 == list->next[0]);
+    list->cnext[0] = list+1;
+    (list+1)->cnext[1] = list;
+}
+
+#if HV_DIMENSION == 4 || defined(HVC_ONLY)
+static inline void
+set_cnext_to_closest(dlnode_t * p)
+{
+    p->cnext[0] = p->closest[0];
+    p->cnext[1] = p->closest[1];
+    assert(p->cnext[0]);
+    assert(p->cnext[1]);
+}
+#endif
+
+static inline void
+remove_from_z(dlnode_t * old)
+{
+    old->prev[0]->next[0] = old->next[0];
+    old->next[0]->prev[0] = old->prev[0];
+}
+
+/* -------------------- Preprocessing ---------------------------------------*/
+
+
+_attr_maybe_unused static inline void
+print_x(const dlnode_t * p)
+{
+    assert(p != NULL);
+    const double * x = p->x;
+    fprintf(stderr, "x: %g %g %g\n", x[0], x[1], x[2]);
+}
+
+#if HV_DIMENSION == 3
+#include "hv3d_priv.h"
+#endif // HV_DIMENSION == 3
+
+// ------------------------ Circular double-linked list ----------------------
 static inline void
 reset_sentinels(dlnode_t * list)
 {
@@ -38,27 +89,33 @@ reset_sentinels(dlnode_t * list)
 
     s1->next[0] = s2;
     s1->prev[0] = s3;
-#if HV_DIMENSION == 4
+#if HV_DIMENSION == 4 || defined(HVC_ONLY)
     s1->closest[0] = s2;
     s1->closest[1] = s1;
+#endif
+#if HV_DIMENSION == 4
     s1->next[1] = s2;
     s1->prev[1] = s3;
 #endif
 
     s2->next[0] = s3;
     s2->prev[0] = s1;
-#if HV_DIMENSION == 4
+#if HV_DIMENSION == 4 || defined(HVC_ONLY)
     s2->closest[0] = s2;
     s2->closest[1] = s1;
+#endif
+#if HV_DIMENSION == 4
     s2->next[1] = s3;
     s2->prev[1] = s1;
 #endif
 
     s3->next[0] = s1;
     s3->prev[0] = s2;
-#if HV_DIMENSION == 4
+#if HV_DIMENSION == 4 || defined(HVC_ONLY)
     s3->closest[0] = s2;
     s3->closest[1] = s1;
+#endif
+#if HV_DIMENSION == 4
     s3->next[1] = s1;
     s3->prev[1] = s2;
 #endif
@@ -73,8 +130,12 @@ init_sentinel(dlnode_t * s, const double * x)
 #if HV_DIMENSION == 4
     //s->ndomr = 0;
 #endif
+#ifdef HVC_ONLY
+    s->ignore = false;
+    s->volume = s->area = 0;
+    s->head[0] = s->head[1] = s;
+#endif
 }
-
 
 static void
 init_sentinels(dlnode_t * list, const double * ref)
@@ -106,10 +167,6 @@ init_sentinels(dlnode_t * list, const double * ref)
     init_sentinel(list+2, x + 2 * HV_DIMENSION); // Sentinel 3
 }
 
-#if HV_DIMENSION == 3 // Defined in hv3dplus.c
-static inline void preprocessing(dlnode_t * list, size_t n);
-#endif
-
 static inline dlnode_t *
 new_cdllist(size_t n, const double * ref)
 {
@@ -140,7 +197,13 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     n = i; // Update number of points.
     if (likely(n > 1))
         qsort(scratch, n, sizeof(*scratch),
-              (HV_DIMENSION == 3) ? cmp_double_asc_only_3d : cmp_double_asc_only_4d);
+#ifdef HVC_ONLY
+              // Lexicographic ordering ensures that we do not have dominated points in the AVL-tree.
+              cmp_double_asc_rev_3d
+#else
+              (HV_DIMENSION == 3) ? cmp_double_asc_only_3d : cmp_double_asc_only_4d
+#endif
+            );
 
     dlnode_t * list = new_cdllist(n, ref);
     if (unlikely(n == 0)) {
@@ -149,19 +212,24 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     }
 
     const dimension_t d = HV_DIMENSION - 3; // index within the list.
+    assert(list->next[d] == list+1);
     dlnode_t * q = list+1;
     dlnode_t * list3 = list+3;
-    assert(list->next[d] == list + 1);
     assert(q->next[d] == list + 2);
     for (i = 0, j = 0; j < n; j++) {
         dlnode_t * p = list3 + i;
         p->x = scratch[j];
-#if HV_DIMENSION == 4
+        DEBUG1(p->cnext[0] = p->cnext[1] = NULL);
+#if HV_DIMENSION == 4 || defined(HVC_ONLY)
         //p->ndomr = 0;
         // Initialize it when debugging so it will crash if uninitialized.
         DEBUG1(p->closest[0] = p->closest[1] = NULL);
 #endif
-        DEBUG1(p->cnext[0] = p->cnext[1] = NULL);
+#ifdef HVC_ONLY
+        p->ignore = false;
+        // Initialize it when debugging so it will crash if uninitialized.
+        DEBUG1(p->head[0] = p->head[1] = NULL);
+#endif
          // Link the list in order.
         q->next[d] = p;
         p->prev[d] = q;
@@ -176,7 +244,7 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     q->next[d] = list+2;
     (list+2)->prev[d] = q;
 #if HV_DIMENSION == 3
-    preprocessing(list, n);
+    hv3d_preprocessing(list, n);
 #endif
     return list;
 }
@@ -188,33 +256,29 @@ free_cdllist(dlnode_t * list)
     free(list);
 }
 
-// ------------ Update data structure -----------------------------------------
-
-// Link sentinels (-inf ref[1] -inf) and (ref[0] -inf -inf).
-static inline void
-restart_list_y(dlnode_t * list)
-{
-    assert(list+1 == list->next[0]);
-    list->cnext[0] = list+1;
-    (list+1)->cnext[1] = list;
-}
-
-static inline void
-remove_from_z(dlnode_t * old)
-{
-    old->prev[0]->next[0] = old->next[0];
-    old->next[0]->prev[0] = old->prev[0];
-}
-
-
+/*
+  Returns the area dominated by 'p', by sweeping points in ascending order of
+  coordinate 'i' (which is either 0 or 1, i.e., x or y), starting from
+  point 'q' and stopping when a point nondominated by 'p' and with coordinate
+  'i' higher than that of 'p' on the (x,y)-plane is reached.
+    p : The point whose contributions in 2D is to be computed.
+    i : Dimension used for sweeping points (in ascending order).
+    q : Outer delimiter of p (with lower 'i'-coordinate value than p) from
+        which to start the sweep.
+    u : The delimiter of p with lowest 'i'-coordinate which is not q. If p has
+        inner delimiters, then u is the inner delimiter of p with lowest
+        'i'-coordinate, otherwise, u is the outer delimiter with higher
+        'i'-coordinate than p. Note: u is given because of the cases for
+        which p has inner delimiter(s). When p does not have any inner delimiters
+        then u=q->cnext[i].
+*/
 static inline double
-compute_area_simple(const double * px, const dlnode_t * q, int i)
+compute_area_simple(const double * px, const dlnode_t * q, const dlnode_t * u, uint_fast8_t i)
 {
     ASSUME(i == 0 || i == 1);
-    const int j = 1 - i;
-    const dlnode_t * u = q->cnext[i];
+    const uint_fast8_t j = 1 - i;
     double area = (q->x[j] - px[j]) * (u->x[i] - px[i]);
-#if HV_DIMENSION == 3
+#if HV_DIMENSION == 3 && !defined(HVC_ONLY)
     assert(area > 0);
 #endif
     while (px[j] < u->x[j]) {
@@ -225,5 +289,14 @@ compute_area_simple(const double * px, const dlnode_t * q, int i)
         area += (q->x[j] - px[j]) * (u->x[i] - q->x[i]);
     }
     return area;
+}
+
+/* Same as compute_area_simple() but for cases when p does not have any inner
+   delimiters and u=q->cnext[i].  */
+static inline double
+compute_area_no_inners(const double * px, const dlnode_t * q, uint_fast8_t i)
+{
+    ASSUME(i == 0 || i == 1);
+    return compute_area_simple(px, q, q->cnext[i], i);
 }
 #endif // _HV_PRIV_H

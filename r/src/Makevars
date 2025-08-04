@@ -6,7 +6,7 @@ LTO=$(LTO_OPT)
 DEBUG=0
 PKG_CPPFLAGS=-DR_PACKAGE -DDEBUG=$(DEBUG) -I./libmoocore/ $(LTO)
 
-MOOCORE_SRC_FILES = hv3dplus.c hv4d.c hv_contrib.c hv.c hvapprox.c pareto.c whv.c whv_hype.c avl.c eaf3d.c eaf.c io.c rng.c mt19937/mt19937.c
+MOOCORE_SRC_FILES = hv3dplus.c hv4d.c hv_contrib.c hv.c hvapprox.c hvc3d.c pareto.c whv.c whv_hype.c avl.c eaf3d.c eaf.c io.c rng.c mt19937/mt19937.c
 SOURCES = $(MOOCORE_SRC_FILES:%=libmoocore/%) init.c Rmoocore.c
 OBJECTS = $(SOURCES:.c=.o)
 

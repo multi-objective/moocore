@@ -1,6 +1,6 @@
 # moocore 0.1.9
 
- * `hv_contributions()` ignores dominated points by default. Set `ignore_dominated=FALSE` to restore the previous behavior.
+ * `hv_contributions()` ignores dominated points by default.  Set `ignore_dominated=FALSE` to restore the previous behavior.  The 3D case uses the HVC3D algorithm.
  * New function `any_dominated()`.
 
 # moocore 0.1.8

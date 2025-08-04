@@ -332,6 +332,9 @@ hvc_check(double hv_total, const double * restrict hvc,
     free(hvc_true);
 }
 
+extern double
+hvc3d(double * restrict hvc, const double * restrict data, size_t n, const double * restrict ref);
+
 /* Store the exclusive hypervolume contribution of each input point in hvc[],
    which is allocated by the caller.
 
@@ -363,6 +366,10 @@ hv_contributions(double * restrict hvc, double * restrict points, int d, int n,
             ? hvc2d_nondom(hvc, points, size, ref)
             : hvc2d(hvc, points, size, ref);
         DEBUG1(hvc_check(hv_total, hvc, points, dim, size, ref, ignore_dominated));
+    } else if (dim == 3 && ignore_dominated) {
+        hv_total = hvc3d(hvc, points, size, ref);
+        DEBUG1(hvc_check(hv_total, hvc, points, dim, size, ref,
+                         /* ignore_dominated = */true));
     } else {
         hv_total = fpli_hv(points, dim, (int) size, ref);
         if (ignore_dominated)
