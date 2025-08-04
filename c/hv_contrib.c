@@ -161,6 +161,9 @@ hvc_check(double hv_total, const double * restrict hvc,
     free (hvc_tmp);
 }
 
+extern double
+hvc3d(double * restrict hvc, const double * restrict data, size_t n, const double * restrict ref);
+
 /* Store the exclusive hypervolume contribution of each input point in hvc[],
    which is allocated by the caller.
 
@@ -182,6 +185,9 @@ hv_contributions(double * restrict hvc, double * restrict points, int d, int n,
     double hv_total;
     if (dim == 2) {
         hv_total = hvc2d(hvc, points, size, ref);
+        DEBUG1(hvc_check(hv_total, hvc, points, dim, size, ref));
+    } else if (dim == 3) {
+        hv_total = hvc3d(hvc, points, size, ref);
         DEBUG1(hvc_check(hv_total, hvc, points, dim, size, ref));
     } else {
         hv_total = fpli_hv(points, dim, (int) size, ref);

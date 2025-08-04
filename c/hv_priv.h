@@ -19,9 +19,15 @@ typedef struct dlnode {
                                 (in the case of 2 and 3, only the points swept by 4 are kept) */
     struct dlnode * prev[HV_DIMENSION - 2]; //keeps the points sorted according to coordinates 2 and 3 (except the sentinel 3)
     struct dlnode * cnext[2]; //current next
-#if HV_DIMENSION == 4
+#if HV_DIMENSION == 4 || defined(HVC_ONLY)
     struct dlnode * closest[2]; // closest[0] == cx, closest[1] == cy
     unsigned int ndomr;    // number of dominators.
+#endif
+#ifdef HVC_ONLY
+    double area, volume;
+    double lastSlicez; // FIXME: Is this really needed?
+    struct dlnode * head[2]; // lowest (x, y)
+    struct dlnode * domr; // Point dominated by this one.
 #endif
 } dlnode_t;
 
@@ -34,27 +40,33 @@ reset_sentinels(dlnode_t * list)
 
     s1->next[0] = s2;
     s1->prev[0] = s3;
-#if HV_DIMENSION == 4
+#if HV_DIMENSION == 4 || defined(HVC_ONLY)
     s1->closest[0] = s2;
     s1->closest[1] = s1;
+#endif
+#if HV_DIMENSION == 4
     s1->next[1] = s2;
     s1->prev[1] = s3;
 #endif
 
     s2->next[0] = s3;
     s2->prev[0] = s1;
-#if HV_DIMENSION == 4
+#if HV_DIMENSION == 4 || defined(HVC_ONLY)
     s2->closest[0] = s2;
     s2->closest[1] = s1;
+#endif
+#if HV_DIMENSION == 4
     s2->next[1] = s3;
     s2->prev[1] = s1;
 #endif
 
     s3->next[0] = s1;
     s3->prev[0] = s2;
-#if HV_DIMENSION == 4
+#if HV_DIMENSION == 4 || defined(HVC_ONLY)
     s3->closest[0] = s2;
     s3->closest[1] = s1;
+#endif
+#if HV_DIMENSION == 4
     s3->next[1] = s1;
     s3->prev[1] = s2;
 #endif
@@ -66,11 +78,15 @@ init_sentinel(dlnode_t * s, const double * x)
     s->x = x;
     // Initialize it when debugging so it will crash if uninitialized.
     DEBUG1(s->cnext[0] = s->cnext[1] = NULL);
-#if HV_DIMENSION == 4
+#if HV_DIMENSION == 4 || defined(HVC_ONLY)
     s->ndomr = 0;
 #endif
+#ifdef HVC_ONLY
+    s->volume = s->area = 0;
+    s->domr = NULL;
+    s->head[0] = s->head[1] = s;
+#endif
 }
-
 
 static void
 init_sentinels(dlnode_t * list, const double * ref)
