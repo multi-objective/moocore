@@ -60,6 +60,18 @@ reset_sentinels(dlnode_t * list)
 #endif
 }
 
+static inline void
+init_sentinel(dlnode_t * s, const double * x)
+{
+    s->x = x;
+    // Initialize it when debugging so it will crash if uninitialized.
+    DEBUG1(s->cnext[0] = s->cnext[1] = NULL);
+#if HV_DIMENSION == 4
+    s->ndomr = 0;
+#endif
+}
+
+
 static void
 init_sentinels(dlnode_t * list, const double * ref)
 {
@@ -84,33 +96,10 @@ init_sentinels(dlnode_t * list, const double * ref)
        projections in the (x,y)-plane of points that is kept sorted according
        to the 1st and 2nd coordinates, and for that list we need two sentinels
        to represent (-inf, ref[1]) and (ref[0], -inf). */
-    dlnode_t * restrict s1 = list;
-    dlnode_t * restrict s2 = list + 1;
-    dlnode_t * restrict s3 = list + 2;
     reset_sentinels(list);
-    // Sentinel 1
-    s1->x = x;
-    // Initialize it when debugging so it will crash if uninitialized.
-    DEBUG1(s1->cnext[0] = s1->cnext[1] = NULL);
-#if HV_DIMENSION == 4
-    s1->ndomr = 0;
-#endif
-
-    x += HV_DIMENSION;
-    // Sentinel 2
-    s2->x = x;
-    DEBUG1(s2->cnext[0] = s2->cnext[1] = NULL);
-#if HV_DIMENSION == 4
-    s2->ndomr = 0;
-#endif
-
-    x += HV_DIMENSION;
-    // Sentinel 3
-    s3->x = x;
-    DEBUG1(s3->cnext[0] = s3->cnext[1] = NULL);
-#if HV_DIMENSION == 4
-    s3->ndomr = 0;
-#endif
+    init_sentinel(list, x); // Sentinel 1
+    init_sentinel(list+1, x + HV_DIMENSION); // Sentinel 2
+    init_sentinel(list+2, x + 2 * HV_DIMENSION); // Sentinel 3
 }
 
 #if HV_DIMENSION == 3 // Defined in hv3dplus.c
@@ -136,7 +125,7 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     const double **scratch = malloc(n * sizeof(*scratch));
     size_t i, j;
     for (i = 0, j = 0; j < n; j++) {
-        /* Filters those points that do not strictly dominate the reference
+        /* Filter those points that do not strictly dominate the reference
            point.  This is needed to ensure that the points left are only those
            that are needed to calculate the hypervolume. */
         if (likely(strongly_dominates(data + j * dim, ref, dim))) {
