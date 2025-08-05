@@ -24,11 +24,12 @@ objectives or a vector of logical values, with one value per objective.}
 Computes the hypervolume contribution of each point of a set of points with
 respect to a given reference point.  The hypervolume contribution of point
 \eqn{\vec{p} \in X} is \eqn{\text{hvc}(\vec{p}) = \text{hyp}(X) -
-\text{hyp}(X \setminus \{\vec{p}\})}. Dominated points have zero
-contribution but they may influence the contribution of other
-points. Duplicated points have zero contribution even if not dominated,
-because removing one of the duplicates does not change the hypervolume of
-the remaining set.
+\text{hyp}(X \setminus \{\vec{p}\})}.  Dominated points have zero
+contribution. However, a point that is dominated by a single (dominating)
+point reduces the contribution of the latter, because removing the
+dominating point makes the dominated one become nondominated.  Duplicated
+points have zero contribution even if not dominated, because removing one of
+the duplicates does not change the hypervolume of the remaining set.
 }
 \details{
 The current implementation uses the \eqn{O(n\log n)} dimension-sweep
