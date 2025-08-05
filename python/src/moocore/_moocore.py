@@ -358,7 +358,7 @@ def epsilon_mult(data, /, ref, *, maximise: bool | list[bool] = False) -> float:
     """Multiplicative epsilon metric.
 
     .. warning::
-       ``data`` and ``ref`` must all be larger than 0.
+       All values in ``data`` and ``ref`` must be larger than 0.
 
     .. seealso:: For details about parameters, return value and examples, see :func:`epsilon_additive`.  For details of the calculation, see :ref:`epsilon_metric`.
 
@@ -710,13 +710,14 @@ def hv_contributions(
     --------
     >>> x = np.array([[5, 1], [1, 5], [4, 2], [4, 4], [5, 1]])
     >>> moocore.hv_contributions(x, ref=(6, 6))
+    ... ## Explanation:
+    ... # hvc[(5,1)] = 0 = duplicated
+    ... # hvc[(1,5)] = 3 = (4 - 1) * (6 - 5)
+    ... # hvc[(4,2)] = 2 = (5 - 4) * (4 - 2)
+    ... # hvc[(4,4)] = 0 = dominated
+    ... # hvc[(5,1)] = 0 = duplicated
     array([0., 3., 2., 0., 0.])
 
-    # hvc[(5,1)] = 0 = duplicated
-    # hvc[(1,5)] = 3 = (4 - 1) * (6 - 5)
-    # hvc[(4,2)] = 2 = (5 - 4) * (4 - 2)
-    # hvc[(4,4)] = 0 = dominated
-    # hvc[(5,1)] = 0 = duplicated
 
     >>> x = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
     >>> moocore.hv_contributions(x, ref=[10, 10])
