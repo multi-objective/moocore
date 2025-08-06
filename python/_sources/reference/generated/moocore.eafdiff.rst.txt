@@ -1,0 +1,12 @@
+﻿eafdiff
+=======
+
+.. currentmodule:: moocore
+
+.. autofunction:: eafdiff
+
+.. _sphx_glr_backref_moocore.eafdiff:
+
+.. minigallery:: moocore.eafdiff
+   :add-heading: Gallery examples
+   :heading-level: -
