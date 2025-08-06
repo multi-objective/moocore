@@ -238,7 +238,7 @@ hvc_setup_cdllist(const double * data, size_t n, const double *ref)
 
 
 static void
-setup_nodominated_point(dlnode_t * p)
+setup_nondominated_point(dlnode_t * p)
 {
     p->cnext[0] = p->closest[0];
     p->cnext[1] = p->closest[1];
@@ -392,8 +392,8 @@ hvc3d_list(dlnode_t * list, bool considerDominated)
     assert(list->prev[0] == list+2);
 
     double area = 0, volume = 0;
-    dlnode_t * p = list->next[0]->next[0];
-    const dlnode_t * stop = list->prev[0];
+    dlnode_t * p = (list+1)->next[0];
+    const dlnode_t * stop = list+2;
     while (p != stop) {
         p->area = 0;
         p->volume = 0;
@@ -401,7 +401,7 @@ hvc3d_list(dlnode_t * list, bool considerDominated)
 
         if (p->ndomr < 1) {
 
-            setup_nodominated_point(p);
+            setup_nondominated_point(p);
             assert(p->head[1] == p->cnext[0]->cnext[1]);
             update_volume_simple(p->x, p->head[1], 1);
             assert(p->head[1] == p->cnext[0]->cnext[1]);
@@ -428,12 +428,16 @@ hvc3d_list(dlnode_t * list, bool considerDominated)
             p->domr->area -= computeAreaSimple(p->x, p->cnext[0], p->head[1], 1);
 
             addDomPoint(p);
+
         }
+        assert(area > 0);
+        /* It is possible to have two points with the same z-value, e.g.,
+           (1,2,3) and (2,1,3). */
         volume += area * (p->next[0]->x[2]- p->x[2]);
         p = p->next[0];
 
     }
-    setup_nodominated_point(p);
+    setup_nondominated_point(p);
     update_volume_simple(p->x, p->head[1], 1);
     return volume;
 }
