@@ -7,8 +7,10 @@ What's new
 Version 0.1.9 (dev)
 -------------------
 
-- New function: :func:`~moocore.any_dominated` to quickly detect if a set is
-  nondominated.
+- New functions: :func:`~moocore.any_dominated` to quickly detect if a set is
+  nondominated and :func:`~moocore.generate_ndset` to generate random
+  nondominated sets with different shapes.
+- New example :ref:`sphx_glr_auto_examples_plot_generate.py`.
 
 
 Version 0.1.8 (15/07/2025)

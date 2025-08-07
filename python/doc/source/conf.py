@@ -11,21 +11,17 @@
 from datetime import date
 import sphinx
 
-# Set plotly renderer to capture _repr_html_ for sphinx-gallery
-try:
-    import plotly.io
-except ImportError:
-    pass
-else:
-    plotly.io.renderers.default = "sphinx_gallery"
-
 import os
 import sys
 
 # Building the docs requires installing the package.
 import moocore
 
+# If extensions (or modules to document with autodoc) are in another directory,
+# add these directories to sys.path here. If the directory is relative to the
+# documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath("."))
+
 # Prevent ruff from deleting seemingly unused imports
 import my_unsrt_style  # noqa: F401
 
@@ -42,9 +38,10 @@ html_site_root = f"https://multi-objective.github.io/{project}/python/"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-html_js_files = [
-    "https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"
-]
+# FIXME: This breaks plotly rendering.
+# html_js_files = [
+#     "https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"
+# ]
 
 extensions = [
     "sphinx_design",  # grid directive
@@ -238,6 +235,16 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
 }
 
+# Set plotly renderer to capture _repr_html_ for sphinx-gallery
+try:
+    import plotly
+    import plotly.io as pio
+
+    pio.renderers.default = "sphinx_gallery"
+except ImportError:
+    plotly = None
+
+
 # From https://github.com/scikit-learn/scikit-learn/blob/main/doc/conf.py
 sphinx_gallery_conf = {
     "examples_dirs": "../../examples",
@@ -262,15 +269,12 @@ sphinx_gallery_conf = {
     #     "dependencies": "./binder/requirements.txt",
     #     "use_jupyter_lab": True,
     # },
+    "image_srcset": ["2x"],
+    "nested_sections": True,
     # avoid generating too many cross links
     "inspect_global_variables": False,
     "remove_config_comments": True,
     "matplotlib_animations": True,
     # "plot_gallery": "True",
     # "recommender": {"enable": True, "n_examples": 5, "min_df": 12},
-    # "reset_modules": ("matplotlib", "seaborn"),
 }
-# if with_jupyterlite:
-#     sphinx_gallery_conf["jupyterlite"] = {
-#         "notebook_modification_function": notebook_modification_function
-#     }

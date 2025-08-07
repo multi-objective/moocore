@@ -29,3 +29,4 @@ ipywidgets
 # Gallery examples
 pandas >=2.0.0
 seaborn
+plotly

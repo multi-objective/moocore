@@ -22,3 +22,9 @@ Transform data
    apply_within_sets
 
 
+Generate data
+-------------
+.. autosummary::
+   :toctree: generated/
+
+   generate_ndset

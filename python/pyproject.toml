@@ -54,6 +54,7 @@ docs = [
   "jupyter",
   "jupyterlab",
   "kaleido",
+  "plotly",
   "pydata-sphinx-theme>=0.16",
   "sphinx>=6",
   "sphinx-autodoc-typehints",
