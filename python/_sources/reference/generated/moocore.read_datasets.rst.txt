@@ -1,0 +1,12 @@
+﻿read\_datasets
+==============
+
+.. currentmodule:: moocore
+
+.. autofunction:: read_datasets
+
+.. _sphx_glr_backref_moocore.read_datasets:
+
+.. minigallery:: moocore.read_datasets
+   :add-heading: Gallery examples
+   :heading-level: -
