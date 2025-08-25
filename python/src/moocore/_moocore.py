@@ -923,10 +923,10 @@ def generate_ndset(
 ) -> np.ndarray:
     r"""Generate a random set of ``n`` mutually nondominated points of dimension ``d`` with the shape defined by ``method``.
 
-    If ``integer==False``, the points are generated within the hypercube
-    :math:`(0,1)^d` and can be scaled to another range using :func:`normalise`.
-    Otherwise, points are scaled to the smallest non-negative integer range
-    that keeps the points mutually nondominated.
+    When ``integer=False`` (the default), the points are generated within the
+    hypercube :math:`(0,1)^d` and can be scaled to another range using
+    :func:`normalise`.  Otherwise, points are scaled to a non-negative integer
+    range that keeps the points mutually nondominated.
 
     Parameters
     ----------
