@@ -323,6 +323,11 @@ find_nondominated_set_ (const double * points, dimension_t dim, size_t size,
     if (agree == AGREE_NONE)
         agree = (signed char) check_all_minimize_maximize(minmax, dim);
 
+    if (find_dominated_p) {
+        assert(nondom == NULL);
+        nondom = nondom_init(size);
+    }
+
     size_t j, k;
     for (k = 0; k < size - 1; k++) {
         for (j = k + 1; j < size; j++) {
@@ -383,12 +388,17 @@ find_nondominated_set_ (const double * points, dimension_t dim, size_t size,
             assert(nondom[k] || nondom[j]); /* both cannot be removed.  */
 
             if (find_dominated_p && (!nondom[k] || !nondom[j])) {
-                return nondom[k] ? j : k;
+                size_t res = nondom[k] ? j : k;
+                free(nondom);
+                return res;
             }
         }
     }
 
-    if (find_dominated_p) return SIZE_MAX;
+    if (find_dominated_p) {
+        free(nondom);
+        return SIZE_MAX;
+    }
 
     size_t new_size = nondom[0];
     for (k = 1; k < size; k++)
@@ -402,13 +412,25 @@ find_dominated_point (const double *points, int dim, size_t size,
 {
     ASSUME(dim >= 1);
     ASSUME(dim <= 32);
-
-    bool *nondom = nondom_init (size);
     size_t pos = find_nondominated_set_ (points, (dimension_t) dim, size, minmax,
-                                         AGREE_NONE, nondom,
+                                         AGREE_NONE, /*nondom=*/NULL,
                                          /* find_dominated_p = */true,
                                          /* keep_weakly = */false);
-    free (nondom);
+    return pos;
+}
+
+static inline size_t
+find_weakly_dominated_point(const double * points, int dim, size_t size,
+                            const bool * maximise)
+{
+    ASSUME(dim >= 1);
+    ASSUME(dim <= 32);
+    const signed char * minmax = minmax_from_bool(dim, maximise);
+    size_t pos = find_nondominated_set_ (points, (dimension_t) dim, size, minmax,
+                                         AGREE_NONE, /*nondom=*/NULL,
+                                         /* find_dominated_p = */true,
+                                         /* keep_weakly = */false);
+    free((void *)minmax);
     return pos;
 }
 

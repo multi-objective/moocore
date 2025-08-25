@@ -4,6 +4,13 @@
 What's new
 **********
 
+Version 0.1.9 (dev)
+-------------------
+
+- New function: :func:`~moocore.any_dominated` to quickly detect if a set is
+  nondominated.
+
+
 Version 0.1.8 (15/07/2025)
 --------------------------
 

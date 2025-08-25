@@ -983,6 +983,52 @@ def is_nondominated(
     return np.frombuffer(nondom, dtype=bool)
 
 
+def any_dominated(
+    data: ArrayLike,
+    maximise: bool | list[bool] = False,
+    keep_weakly: bool = False,
+) -> bool:
+    r"""Test whether the input data contains any (weakly-)dominated point.
+
+    This function is equivalent to ``np.logical_not(moocore.is_nondominated(x)).any()``, but faster.
+
+    .. seealso:: For details about parameters and the calculation, see :func:`is_nondominated`.
+
+    Returns
+    -------
+        Returns ``True`` if the input array contains at least one point that is weakly-dominated by another point in the array. With ``keep_weakly=True``, the point must be dominated not just a duplicate.
+
+    Examples
+    --------
+    >>> S = np.array([[1, 1], [0, 1], [1, 0], [1, 0]])
+    >>> moocore.is_nondominated(S)
+    array([False,  True,  True, False])
+    >>> moocore.any_dominated(S)
+    True
+    >>> moocore.any_dominated(moocore.filter_dominated(S))
+    False
+    >>> S = np.array([[0, 1], [1, 0], [1, 0]])
+    >>> moocore.is_nondominated(S, keep_weakly=True)
+    array([ True,  True,  True])
+    >>> moocore.any_dominated(S, keep_weakly=True)
+    False
+    """
+    if keep_weakly:
+        data = np.unique(data, axis=0)
+
+    data = np.asarray(data, dtype=float)
+    nrows, nobj = data.shape
+    if nrows == 0:
+        raise ValueError("no points in the input data")
+
+    maximise = _parse_maximise(maximise, nobj)
+    data_p, npoints, nobj = np2d_to_double_array(data)
+    npoints = ffi.cast("size_t", npoints)
+    maximise_p = ffi.from_buffer("bool []", maximise)
+    res = lib.find_weakly_dominated_point(data_p, nobj, npoints, maximise_p)
+    return res < nrows
+
+
 def is_nondominated_within_sets(
     data: ArrayLike,
     /,

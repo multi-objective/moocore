@@ -331,6 +331,22 @@ is_nondominated_C(SEXP DATA, SEXP MAXIMISE, SEXP KEEP_WEAKLY)
 }
 
 SEXP
+any_dominated_C(SEXP DATA, SEXP MAXIMISE)
+{
+    int nprotected = 0;
+    /* We transpose the matrix before calling this function. */
+    SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
+    SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
+    assert (nobj == maximise_len);
+
+    size_t res = find_weakly_dominated_point(data, nobj, (size_t) npoint, maximise);
+    free (maximise);
+    UNPROTECT(nprotected);
+
+    return Rf_ScalarLogical((res < npoint) ? 1 : 0);
+}
+
+SEXP
 pareto_ranking_C(SEXP DATA)
 {
     int nprotected = 0;

@@ -1,3 +1,7 @@
+# moocore 0.1.9
+
+ * New function `any_dominated()`.
+
 # moocore 0.1.8
 
  * Document the EAF and Vorob'ev expectation and deviation in more detail.

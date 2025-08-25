@@ -16,4 +16,5 @@ Dominance relations
    is_nondominated_within_sets
    filter_dominated
    filter_dominated_within_sets
+   any_dominated
    pareto_rank

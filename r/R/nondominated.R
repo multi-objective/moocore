@@ -30,16 +30,30 @@
 #' \citep{KunLucPre1975jacm} for \eqn{m \leq 3} and the naive \eqn{O(m n^2)}
 #' algorithm for \eqn{m \geq 4}.
 #'
-#' @examples
+#' @doctest
 #' S = matrix(c(1,1,0,1,1,0,1,0), ncol = 2, byrow = TRUE)
+#' @expect equal(c(FALSE,TRUE,TRUE,FALSE))
 #' is_nondominated(S)
 #'
+#' @expect equal(c(TRUE,FALSE,FALSE,FALSE))
 #' is_nondominated(S, maximise = TRUE)
 #'
+#' @expect equal(matrix(c(0,1,1,0), ncol = 2, byrow = TRUE))
 #' filter_dominated(S)
 #'
+#' @expect equal(matrix(c(0,1,1,0,1,0), ncol = 2, byrow = TRUE))
 #' filter_dominated(S, keep_weakly = TRUE)
 #'
+#' @expect equal(TRUE)
+#' any_dominated(S)
+#'
+#' @expect equal(TRUE)
+#' any_dominated(S, keep_weakly = TRUE)
+#'
+#' @expect equal(FALSE)
+#' any_dominated(filter_dominated(S))
+#'
+#' @omit
 #' path_A1 <- file.path(system.file(package="moocore"),"extdata","ALG_1_dat.xz")
 #' set <- read_datasets(path_A1)[,1:2]
 #' is_nondom <- is_nondominated(set)
@@ -51,6 +65,12 @@
 #'    points(ndset[order(ndset[,1]),], col = "red", pch = 21)
 #' }
 #'
+#' ranks <- pareto_rank(set)
+#' str(ranks)
+#' if (requireNamespace("graphics", quietly = TRUE)) {
+#'    colors <- colorRampPalette(c("red","yellow","springgreen","royalblue"))(max(ranks))
+#'    plot(set, col = colors[ranks], type = "p", pch = 20)
+#' }
 #' @export
 #' @concept dominance
 is_nondominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
@@ -70,6 +90,21 @@ is_nondominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 filter_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
   x[is_nondominated(x, maximise = maximise, keep_weakly = keep_weakly), , drop = FALSE]
 
+#' @rdname nondominated
+#' @concept dominance
+#' @return `any_dominated` returns `TRUE` if `x` contains any (weakly-)dominated points, `FALSE` otherwise.
+#' @export
+any_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
+{
+  x <- as_double_matrix(x)
+  if (keep_weakly)
+    x <- x[!duplicated(x), , drop = FALSE]
+  nobjs <- ncol(x)
+  .Call(any_dominated_C,
+    t(x),
+    rep_len(as.logical(maximise), nobjs))
+}
+
 #' @description `pareto_rank()` ranks points according to Pareto-optimality,
 #'   which is also called nondominated sorting \citep{Deb02nsga2}.
 #'
@@ -88,13 +123,6 @@ filter_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 #'
 #' \insertAllCited{}
 #'
-#' @examples
-#' ranks <- pareto_rank(set)
-#' str(ranks)
-#' if (requireNamespace("graphics", quietly = TRUE)) {
-#'    colors <- colorRampPalette(c("red","yellow","springgreen","royalblue"))(max(ranks))
-#'    plot(set, col = colors[ranks], type = "p", pch = 20)
-#' }
 #' @export
 pareto_rank <- function(x, maximise = FALSE)
 {

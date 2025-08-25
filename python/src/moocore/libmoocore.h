@@ -8,6 +8,7 @@ double IGD_plus (const double *data, int nobj, int npoints, const double *ref, i
 double avg_Hausdorff_dist (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise, unsigned int p);
 double epsilon_additive (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);
 double epsilon_mult (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);
+size_t find_weakly_dominated_point(const double * points, int dim, size_t size, const bool * maximise);
 bool * is_nondominated (const double * data, int nobj, size_t npoint, const bool * maximise, bool keep_weakly);
 int * pareto_rank (const double *points, int dim, int size);
 void agree_normalise (double *data, int nobj, int npoint, const bool * maximise,

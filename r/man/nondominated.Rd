@@ -3,12 +3,15 @@
 \name{is_nondominated}
 \alias{is_nondominated}
 \alias{filter_dominated}
+\alias{any_dominated}
 \alias{pareto_rank}
 \title{Identify, remove and rank dominated points according to Pareto optimality}
 \usage{
 is_nondominated(x, maximise = FALSE, keep_weakly = FALSE)
 
 filter_dominated(x, maximise = FALSE, keep_weakly = FALSE)
+
+any_dominated(x, maximise = FALSE, keep_weakly = FALSE)
 
 pareto_rank(x, maximise = FALSE)
 }
@@ -32,6 +35,8 @@ point is not dominated by any other point.
 
 \code{filter_dominated} returns a matrix or data.frame with only mutually nondominated points.
 
+\code{any_dominated} returns \code{TRUE} if \code{x} contains any (weakly-)dominated points, \code{FALSE} otherwise.
+
 \code{pareto_rank()} returns an integer vector of the same length as
 the number of rows of \code{data}, where each value gives the rank of each
 point.
@@ -54,16 +59,22 @@ assigns ranks according to Pareto dominance. Duplicated points are kept on
 the same front. When \code{ncol(data) == 2}, the code uses the \eqn{O(n
   \log n)} algorithm by \citet{Jen03}.
 }
+\references{
+\insertAllCited{}
+}
+\author{
+Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
+}
+\concept{dominance}
 \examples{
 S = matrix(c(1,1,0,1,1,0,1,0), ncol = 2, byrow = TRUE)
 is_nondominated(S)
-
 is_nondominated(S, maximise = TRUE)
-
 filter_dominated(S)
-
 filter_dominated(S, keep_weakly = TRUE)
-
+any_dominated(S)
+any_dominated(S, keep_weakly = TRUE)
+any_dominated(filter_dominated(S))
 path_A1 <- file.path(system.file(package="moocore"),"extdata","ALG_1_dat.xz")
 set <- read_datasets(path_A1)[,1:2]
 is_nondom <- is_nondominated(set)
@@ -82,10 +93,3 @@ if (requireNamespace("graphics", quietly = TRUE)) {
    plot(set, col = colors[ranks], type = "p", pch = 20)
 }
 }
-\references{
-\insertAllCited{}
-}
-\author{
-Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
-}
-\concept{dominance}
