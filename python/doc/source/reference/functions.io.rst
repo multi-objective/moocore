@@ -1,5 +1,7 @@
-Read/write/transform data
-=========================
+.. _read_generate_transform_sets:
+
+Read, generate and transform sets
+========================================
 
 .. currentmodule:: moocore
 
