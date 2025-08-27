@@ -1103,7 +1103,9 @@ def is_nondominated(
     Given :math:`n` points of dimension :math:`m`, the current implementation
     uses the well-known :math:`O(n \log n)` dimension-sweep algorithm
     :footcite:p:`KunLucPre1975jacm` for :math:`m \leq 3` and the naive
-    :math:`O(m n^2)` algorithm for :math:`m \geq 4`.
+    :math:`O(m n^2)` algorithm for :math:`m \geq 4`. The best-known
+    :math:`O(n(\log_2 n)^{d-2})` algorithm for :math:`m \geq 4`
+    :footcite:p:`KunLucPre1975jacm` is not implemented yet.
 
 
     Parameters
