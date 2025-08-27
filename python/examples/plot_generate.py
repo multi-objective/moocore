@@ -4,6 +4,7 @@ r"""Sampling Random Nondominated Sets
 This example illustrates how to sample random sets with
 mutually nondominated points.
 
+First we define a few functions useful for plotting.
 """
 
 import moocore
@@ -88,9 +89,7 @@ def plot_3d(what, x, title, plotly=False):
             z=x[:, 2],
             mode="markers",
             marker=dict(size=2, color="blue"),
-            name="Data points",
         )
-
         layout = go.Layout(
             title=title,
             scene=dict(
@@ -103,9 +102,7 @@ def plot_3d(what, x, title, plotly=False):
             margin=dict(l=0, r=0, b=0, t=40),
             showlegend=False,
         )
-
         fig = go.Figure(data=[surface, scatter], layout=layout)
-
     else:
         ax.scatter(
             x[:, 0],
@@ -116,14 +113,15 @@ def plot_3d(what, x, title, plotly=False):
             marker="o",
             depthshade=False,
         )
-
-        ax.set_xlabel("X")
-        ax.set_ylabel("Y")
-        ax.set_zlabel("Z")
-        ax.set_xlim(0, 1)
-        ax.set_ylim(0, 1)
-        ax.set_zlim(0, 1)
-        ax.set_title(title)
+        ax.set(
+            xlabel="X",
+            ylabel="Y",
+            zlabel="Z",
+            xlim=(0, 1),
+            ylim=(0, 1),
+            zlim=(0, 1),
+            title=title,
+        )
         ax.view_init(elev=30, azim=25)
 
     return fig
