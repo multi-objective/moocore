@@ -12,6 +12,7 @@ Computation, pp. 465–472 (2012)]
  - [ ] Take a look at https://github.com/esa/pagmo2/blob/master/src/utils/multi_objective.cpp
  - [ ] Faster epsilon: https://github.com/mbuzdalov/orthant-search/blob/master/implementations/src/main/java/ru/ifmo/orthant/epsilon/OrthantImplementation.java
        and https://dl.acm.org/doi/pdf/10.1145/3205455.3205469 and http://www.cmap.polytechnique.fr/~nikolaus.hansen/proceedings/2016/GECCO/proceedings/p613.pdf
+ - [ ] Faster nondominated algorithm (is_nondominated, filter_dominated) for d>3: https://doi.org/10.1145/321906.321910 and https://github.com/TLDart/nondLib/blob/main/nondlib.hpp
  - [ ] 3D Nondominated sorting:
      Y. Nekrich. A fast algorithm for three-dimensional layers of maxima problem. In Algorithms and Data Structures, number 6844 in Lecture Notes in Computer Science, pages 607–618. 2011.
  - [X] pre-commit for R: https://lorenzwalthert.github.io/precommit/articles/ci.html
