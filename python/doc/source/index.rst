@@ -64,11 +64,17 @@ performance measures, performance assessment
 
 
 Benchmarks
-----------
+==========
 
 The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, and `jMetalPy`_. Other optimization packages are not included in the comparison because they are based on these packages so they are **at least as slow** as them. For example `Xopt`_ uses `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ uses `pymoo`_ internally, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.  We do not compare with the Bayesian optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and too slow to run the benchmarks in a reasonable time.
 
 Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>` whereas `jMetalPy`_ does not provide the :ref:`IGD+ indicator <igd_hausdorf>`. `BoTorch`_ provides neither of them.
+
+The source code for the benchmarks below can be found at https://github.com/multi-objective/moocore/tree/main/python/benchmarks .
+
+
+Exact computation of hypervolume
+--------------------------------
 
 The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D, 4D, 5D and 6D. As the plots show, `moocore`_ is 100 times faster than the other packages and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_.  `BoTorch`_ is not included for more than 4 objectives because it is tens of thousands of times slower than `moocore`_.
 
@@ -89,6 +95,31 @@ The following plots compare the speed of computing the :ref:`hypervolume indicat
    :width: 49%
 
 
+Approximation of the hypervolume
+--------------------------------
+
+The following plots compare the accuracy and speed of approximating the hypervolume with the various methods provided by :func:`moocore.hv_approx`. The plots show that method ``DZ2019-HW`` consistently produces the lowest approximation error, but it is also slower than method ``DZ2019-MC``. When the number of points increases, both methods are significantly faster than `pymoo`_.
+
+|hvapprox_bench-DTLZLinearShape-6d-values| |hvapprox_bench-DTLZLinearShape-6d-time|
+
+|hvapprox_bench-DTLZSphereShape-10d-values| |hvapprox_bench-DTLZSphereShape-10d-time|
+
+.. |hvapprox_bench-DTLZLinearShape-6d-values| image:: _static/hvapprox_bench-DTLZLinearShape.6d-values.png
+   :width: 49%
+
+.. |hvapprox_bench-DTLZLinearShape-6d-time| image:: _static/hvapprox_bench-DTLZLinearShape.6d-time.png
+   :width: 49%
+
+.. |hvapprox_bench-DTLZSphereShape-10d-values| image:: _static/hvapprox_bench-DTLZSphereShape.10d-values.png
+   :width: 49%
+
+.. |hvapprox_bench-DTLZSphereShape-10d-time| image:: _static/hvapprox_bench-DTLZSphereShape.10d-time.png
+   :width: 49%
+
+
+Identifying nondominated points
+-------------------------------
+
 The following plots compare the speed of finding nondominated solutions, equivalent to :func:`moocore.is_nondominated`, in 2D and 3D. We test both ``keep_weakly=True`` and ``keep_weakly=False`` (the latter is not supported by `pymoo`_). As the plots show, `moocore`_ is more than 100 times faster in 2D and 3D than the other packages.
 
 |wndom_bench-test2D-200k| |wndom_bench-ran3d-10k|
@@ -108,6 +139,9 @@ The following plots compare the speed of finding nondominated solutions, equival
    :width: 49%
 
 
+Epsilon and IGD+ indicators
+---------------------------
+
 The following plots compare the speed of computing the :ref:`epsilon indicator  <epsilon_metric>` metric and :ref:`IGD+ indicator <igd_hausdorf>`. Despite the algorithms for computing these metrics are relatively simple and easy to vectorize in Python, the `moocore`_ implementation is still 10 to 100 times faster.
 
 |pic5| |pic6|
@@ -118,8 +152,6 @@ The following plots compare the speed of computing the :ref:`epsilon indicator  
 .. |pic6| image:: _static/igd_plus_bench-ran.40000pts.3d-time.png
    :width: 48%
 
-
-The source code for the benchmarks above can be found at https://github.com/multi-objective/moocore/tree/main/python/benchmarks .
 
 
 .. _moocore: https://multi-objective.github.io/moocore/python/

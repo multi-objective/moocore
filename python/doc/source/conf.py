@@ -234,6 +234,7 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
 }
+intersphinx_timeout = 5
 
 # Set plotly renderer to capture _repr_html_ for sphinx-gallery
 try:

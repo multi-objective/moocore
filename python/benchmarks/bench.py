@@ -6,13 +6,26 @@ import moocore
 import timeit
 import cpuinfo
 
-timeit.template = """
+timeit_template_return_1_value = """
 def inner(_it, _timer{init}):
     {setup}
     _dt = float('inf')
     for _i in _it:
         _t0 = _timer()
         retval = {stmt}
+        _t1 = _timer()
+        _dt = min(_dt, _t1 - _t0)
+    return _dt, retval
+"""
+
+timeit_template_return_all_values = """
+def inner(_it, _timer{init}):
+    {setup}
+    _dt = float('inf')
+    retval = []
+    for _i in _it:
+        _t0 = _timer()
+        retval.append({stmt})
         _t1 = _timer()
         _dt = min(_dt, _t1 - _t0)
     return _dt, retval
@@ -39,6 +52,7 @@ def get_range(lenx, start, stop, step):
 
 
 def get_package_version(package):
+    package = package.split(maxsplit=1)[0]
     match package:
         case "moocore":
             from moocore import __version__ as version
@@ -62,7 +76,9 @@ def get_package_version(package):
 class Bench:
     cpu_model = cpuinfo.get_cpu_info()["brand_raw"]
 
-    def __init__(self, name, n, bench):
+    def __init__(
+        self, name, n, bench, report_values=None, return_all_values=False
+    ):
         self.name = name
         self.n = n
         self.bench = bench
@@ -71,15 +87,30 @@ class Bench:
             what: f"{what} ({get_package_version(what)})"
             for what in bench.keys()
         }
+        timeit.template = timeit_template_return_1_value
+        if report_values:
+            self.values = {k: [] for k in bench.keys()}
+            self.value_label = report_values
+            if return_all_values:
+                timeit.template = timeit_template_return_all_values
+        else:
+            self.values = None
+            self.value_label = None
 
     def keys(self):
         return self.bench.keys()
 
-    def __call__(self, what, maxrow, *args):
+    def __call__(self, what, n, *args, **kwargs):
+        # FIXME: Ideally, bench() would call fun for each value in self.n
+        assert n in self.n
         fun = self.bench[what]
-        duration, value = timeit.Timer(lambda: fun(*args)).timeit(number=3)
+        duration, value = timeit.Timer(lambda: fun(*args, **kwargs)).timeit(
+            number=3
+        )
         self.times[what] += [duration]
-        print(f"{self.name}:{maxrow}:{what}:{duration}")
+        if self.values is not None:
+            self.values[what] += [value]
+        print(f"{self.name}:{n}:{what}:{duration}")
         return value
 
     def plots(self, title, file_prefix):
@@ -103,24 +134,50 @@ class Bench:
         plt.suptitle(f"{title} for {self.name}", fontsize=12)
         plt.savefig(f"{file_prefix}_bench-{self.name}-time.png")
 
-        reltimes = {}
+        if "moocore" in self.keys():
+            reltimes = {}
+            for what in self.keys():
+                if what == "moocore":
+                    continue
+                reltimes["Rel_" + what] = (
+                    self.times[what] / self.times["moocore"]
+                )
+
+            df = (
+                pd.DataFrame(dict(n=self.n, **reltimes))
+                .set_index("n")
+                .rename(columns=self.versions)
+            )
+            df.plot(
+                grid=True,
+                style="o-",
+                title="",
+                xticks=df.index,
+                ylabel="Time relative to moocore",
+            )
+            plt.title(f"({self.cpu_model})", fontsize=10)
+            plt.suptitle(f"{title} for {self.name}", fontsize=12)
+            plt.savefig(f"{file_prefix}_bench-{self.name}-reltime.png")
+
+        if self.values is None:
+            return
+
         for what in self.keys():
-            if what == "moocore":
-                continue
-            reltimes["Rel_" + what] = self.times[what] / self.times["moocore"]
+            self.values[what] = np.asarray(self.values[what])
 
         df = (
-            pd.DataFrame(dict(n=self.n, **reltimes))
+            pd.DataFrame(dict(n=self.n, **self.values))
             .set_index("n")
             .rename(columns=self.versions)
         )
         df.plot(
             grid=True,
+            logy=True,
             style="o-",
             title="",
             xticks=df.index,
-            ylabel="Time relative to moocore",
+            ylabel=self.value_label,
         )
         plt.title(f"({self.cpu_model})", fontsize=10)
         plt.suptitle(f"{title} for {self.name}", fontsize=12)
-        plt.savefig(f"{file_prefix}_bench-{self.name}-reltime.png")
+        plt.savefig(f"{file_prefix}_bench-{self.name}-values.png")
