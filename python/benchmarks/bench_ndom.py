@@ -14,10 +14,14 @@ import matplotlib.pyplot as plt
 
 import torch
 from botorch.utils.multi_objective.pareto import (
-    is_non_dominated as botorch_is_non_dominated,
+    is_non_dominated as botorch_is_nondominated,
 )
 from pymoo.util.nds.non_dominated_sorting import (
     NonDominatedSorting as pymoo_NonDominatedSorting,
+)
+
+from desdeo.tools.non_dominated_sorting import (
+    non_dominated as desdeo_is_nondominated,
 )
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
@@ -30,6 +34,11 @@ files = {
 title = "is_non_dominated(keep_weakly=False)"
 file_prefix = "ndom"
 
+
+def bool2pos(x):
+    return np.nonzero(np.asarray(x))[0]
+
+
 names = files.keys()
 for name in names:
     x = moocore.get_dataset(files[name]["file"])[:, :-1]
@@ -39,60 +48,11 @@ for name in names:
         name=name,
         n=n,
         bench={
-            "moocore": lambda z: np.nonzero(
+            "moocore": lambda z: bool2pos(
                 moocore.is_nondominated(z, maximise=True, keep_weakly=False)
-            )[0],
-            "botorch": lambda z: np.nonzero(
-                np.asarray(botorch_is_non_dominated(z, deduplicate=True))
-            )[0],
-        },
-    )
-
-    values = {}
-    for maxrow in n:
-        z = x[:maxrow, :]
-        for what in bench.keys():
-            if what == "botorch":
-                # Exclude the conversion to torch from the timing.
-                zz = torch.from_numpy(z)
-            else:
-                zz = z
-            values[what] = bench(what, maxrow, zz)
-
-        # Check values
-        for what in bench.keys():
-            if what == "moocore":
-                continue
-            a = values["moocore"]
-            b = values[what]
-            assert np.array_equal(a, b), (
-                f"In {name}, maxrow={maxrow}, {what}={b}  not equal to moocore={a}"
-            )
-
-    del values
-    bench.plots(file_prefix=file_prefix, title=title)
-
-
-title = "is_non_dominated(keep_weakly=True)"
-file_prefix = "wndom"
-
-names = files.keys()
-for name in names:
-    x = moocore.get_dataset(files[name]["file"])[:, :-1]
-    n = get_range(len(x), *files[name]["range"])
-
-    bench = Bench(
-        name=name,
-        n=n,
-        bench={
-            "moocore": lambda z: np.nonzero(
-                moocore.is_nondominated(z, maximise=True, keep_weakly=True)
-            )[0],
-            "botorch": lambda z: np.nonzero(
-                np.asarray(botorch_is_non_dominated(z, deduplicate=False))
-            )[0],
-            "pymoo": lambda z: pymoo_NonDominatedSorting().do(
-                -z, only_non_dominated_front=True
+            ),
+            "botorch": lambda z: bool2pos(
+                botorch_is_nondominated(z, deduplicate=True)
             ),
         },
     )
@@ -114,8 +74,62 @@ for name in names:
                 continue
             a = values["moocore"]
             b = values[what]
-            assert np.allclose(a, b), (
-                f"In {name}, maxrow={maxrow}, {what}={b}  not equal to moocore={a}"
+            np.testing.assert_array_equal(
+                a,
+                b,
+                err_msg=f"In {name}, maxrow={maxrow}, {what}={b}  not equal to moocore={a}",
+            )
+
+    del values
+    bench.plots(file_prefix=file_prefix, title=title)
+
+
+title = "is_non_dominated(keep_weakly=True)"
+file_prefix = "wndom"
+
+names = files.keys()
+for name in names:
+    x = moocore.get_dataset(files[name]["file"])[:, :-1]
+    n = get_range(len(x), *files[name]["range"])
+
+    bench = Bench(
+        name=name,
+        n=n,
+        bench={
+            "moocore": lambda z: bool2pos(
+                moocore.is_nondominated(z, maximise=True, keep_weakly=True)
+            ),
+            "botorch": lambda z: bool2pos(
+                botorch_is_nondominated(z, deduplicate=False)
+            ),
+            "pymoo": lambda z, nds=pymoo_NonDominatedSorting(): nds.do(
+                -z, only_non_dominated_front=True
+            ),
+            "desdeo": lambda z: bool2pos(desdeo_is_nondominated(-z)),
+        },
+    )
+
+    values = {}
+    for maxrow in n:
+        z = x[:maxrow, :]
+        for what in bench.keys():
+            if what == "botorch":
+                # Exclude the conversion to torch from the timing.
+                zz = torch.from_numpy(z)
+            else:
+                zz = z
+            values[what] = bench(what, maxrow, zz)
+
+        # Check values
+        for what in bench.keys():
+            if what == "moocore":
+                continue
+            a = values["moocore"]
+            b = values[what]
+            np.testing.assert_allclose(
+                a,
+                b,
+                err_msg=f"In {name}, maxrow={maxrow}, {what}={b}  not equal to moocore={a}",
             )
 
     del values

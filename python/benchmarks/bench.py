@@ -67,6 +67,11 @@ def get_package_version(package):
         case "DEAP_er":
             # Requires version >= 0.2.0
             from deap_er import __version__ as version
+        case "desdeo":
+            # It does not provide __version__ !
+            from importlib.metadata import version as get_version
+
+            version = get_version("desdeo")
         case _:
             raise ValueError(f"unknown package {package}")
 

@@ -66,7 +66,7 @@ performance measures, performance assessment
 Benchmarks
 ==========
 
-The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, and `jMetalPy`_. Other optimization packages are not included in the comparison because they are based on these packages so they are **at least as slow** as them. For example `Xopt`_ uses `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ uses `pymoo`_ internally, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.  We do not compare with the Bayesian optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and too slow to run the benchmarks in a reasonable time.
+The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, and `jMetalPy`_. Other optimization packages are not included in the comparison because they are based on these packages for the functionality already benchmarked, so they are **at least as slow** as them. For example `Xopt`_ uses `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ already `moocore`_ for hypervolume and other quality metrics, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.  We do not compare with the Bayesian optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and too slow to run the benchmarks in a reasonable time.
 
 Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>` whereas `jMetalPy`_ does not provide the :ref:`IGD+ indicator <igd_hausdorf>`. `BoTorch`_ provides neither of them.
 
@@ -120,7 +120,7 @@ The following plots compare the accuracy and speed of approximating the hypervol
 Identifying nondominated points
 -------------------------------
 
-The following plots compare the speed of finding nondominated solutions, equivalent to :func:`moocore.is_nondominated`, in 2D and 3D. We test both ``keep_weakly=True`` and ``keep_weakly=False`` (the latter is not supported by `pymoo`_). As the plots show, `moocore`_ is more than 100 times faster in 2D and 3D than the other packages.
+The following plots compare the speed of finding nondominated solutions, equivalent to :func:`moocore.is_nondominated`, in 2D and 3D. We test both ``keep_weakly=True`` and ``keep_weakly=False`` (the latter is not supported by `pymoo`_ nor `DESDEO`_). Interestingly, `DESDEO`_ is significantly faster than `pymoo`_, despite the former using a naive Python implementation jit-compiled by `Numba`_ and the latter using CPython.  Nevertheless, As the plots show, `moocore`_ is 10 times faster than `DESDEO`_ and 100 times faster than the other packages.
 
 |wndom_bench-test2D-200k| |wndom_bench-ran3d-10k|
 
@@ -163,6 +163,7 @@ The following plots compare the speed of computing the :ref:`epsilon indicator  
 .. _pysamoo: https://anyoptimization.com/projects/pysamoo/
 .. _DESDEO: https://desdeo.readthedocs.io/en/latest/
 .. _trieste: https://secondmind-labs.github.io/trieste
+.. _Numba: https://numba.pydata.org/numba-doc/dev/index.html
 
 .. This is not really the index page, that is found in
    _templates/indexcontent.html The toctree content here will be added to the
