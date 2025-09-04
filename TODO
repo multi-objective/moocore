@@ -2,6 +2,9 @@
  - [ ] Merge eaf README
  - [ ] Merge hypervolume/trunk README
  - [ ] Merge hypervolume/Makefile README
+ - [ ] Coverage Error Sayin 2024: is this the same as R2 indicator?
+ - [ ] Appendix B of "The Hypervolume Indicator: Computational Problems
+and Algorithms" has more ND sets types: wave, cliff and hard.
  - [ ] Document logHYP: T. Friedrich, K. Bringmann, T. Voß, C. Igel. The Logarithmic Hypervolume Indicator. 11th ACM Foundations of Genetic Algorithms (FOGA), pages 81-92, 2009. https://hpi.de/friedrich/publications/all/Document/puma-friedrich/FriedrichBVI11.pdf/a839ddd47688611dcf92512ca010daf3.html?tx_extbibsonomycsl_publicationlist%5Baction%5D=view&tx_extbibsonomycsl_publicationlist%5Bpreview%5D=large&cHash=7cabd8bc9699c0ab3f88886a3f62976f
  - [ ] Document relation between hypervolume and attainment function.
  - [ ] R2 indicator: [Reinvestigating the R2 Indicator: Achieving Pareto Compliance by Integration](https://link.springer.com/chapter/10.1007/978-3-031-70085-9_13) [Brockhoff, D., Wagner, T., Trautmann, H.: On the properties of the R2 indicator. In: Proceedings of the 14th Annual Conference on Genetic and Evolutionary
