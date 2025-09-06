@@ -61,7 +61,7 @@ typedef struct avl_node_t {
 /* ---------------- Data Structures Functions --------------------------------*/
 
 static inline void
-print_x(dlnode_t * p)
+print_x(const dlnode_t * p)
 {
     assert(p != NULL);
     const double * x = p->x;
@@ -89,7 +89,7 @@ preprocessing(dlnode_t * list, size_t n)
     avl_tree_t tree;
     avl_init_tree(&tree, compare_tree_asc_y); // FIXME: cmp_double_asc_y_des_x
     avl_node_t * tnodes = malloc((n+2) * sizeof(*tnodes));
-
+    // FIXME: See hv3dplus preprocessing. We should insert the first point at the top.
     dlnode_t * p = list;
     avl_node_t * nodeaux = new_avl_node(p, tnodes);
     avl_insert_top(&tree, nodeaux);
@@ -111,19 +111,32 @@ preprocessing(dlnode_t * list, size_t n)
             nodeaux = nodeaux->next;
         const double * prev_x = node_point(nodeaux);
 
-        // FIXME: If two points are duplicates, both should contribute zero!
+        // FIXME: Can we detect duplicates here? If two points are duplicates,
+        // both should contribute zero!
         if (prev_x[1] == px[1] && prev_x[0] <= px[0]) {
             nodeaux = nodeaux->next;
         }
-        prev_x = node_point(nodeaux->prev);
+        avl_node_t * prev = nodeaux->prev;
+        prev_x = node_point(prev);
 
+        assert(prev_x[1] <= px[1]);
+        assert(prev_x[2] <= px[2]);
         if (prev_x[0] <= px[0] && prev_x[1] <= px[1] && prev_x[2] <= px[2]) {
-            // FIXME: We should set p->ndomr = 2 if the point is dominated by
-            // more than one point or dominated by something that was already
-            // dominated.
-            p->ndomr = 1;
-            assert(nodeaux->prev->dlnode->x == prev_x);
-            p->domr = nodeaux->prev->dlnode;
+            if (all_equal(prev_x, px, 3)) {
+                p->ndomr = 2;
+                remove_from_z(p);
+                prev->dlnode->ndomr = 2; // So we will skip it later.
+            } else if (prev->dlnode->ndomr >= 1 || node_point(prev->prev)[0] <= px[0]) {
+                // prev_x was already dominated or there is another point that dominates it.
+                p->ndomr = 2;
+                remove_from_z(p);
+            } else {
+                p->ndomr = 1;
+                assert(prev->dlnode->x == prev_x);
+                p->domr = prev->dlnode;
+                // FIXME: Do we need to insert this dominated point in the tree?
+                // FIXME: Dont we need to setup p->closest?
+            }
         } else {
             // Delete everything in the tree that is dominated by p.
             while (node_point(nodeaux)[0] >= px[0]) {
@@ -157,6 +170,15 @@ static int compare_point3d(const void *p1, const void* p2)
             return 1;
     }
     return 0;
+}
+
+static inline void
+set_cnext_to_closest(dlnode_t * p)
+{
+    p->cnext[0] = p->closest[0];
+    p->cnext[1] = p->closest[1];
+    assert(p->cnext[0]);
+    assert(p->cnext[1]);
 }
 
 /*
@@ -195,16 +217,19 @@ hvc_setup_cdllist(const double * data, size_t n, const double *ref)
     for (i = 0, j = 0; j < n; j++) {
         dlnode_t * p = list3 + i;
         p->x = scratch[j];
-#if HV_DIMENSION == 4
+#if HV_DIMENSION == 4 || HVC_ONLY
         p->ndomr = 0;
+#endif
+#if HV_DIMENSION == 4
         // Initialize it when debugging so it will crash if uninitialized.
         DEBUG1(p->closest[0] = p->closest[1] = NULL);
 #endif
         DEBUG1(p->cnext[0] = p->cnext[1] = NULL);
 #ifdef HVC_ONLY
         assert(list->next[0] == list+1);
-        p->closest[0] = p->cnext[0] = list+1;
-        p->closest[1] = p->cnext[1] = list;
+        p->closest[0] = list+1;
+        p->closest[1] = list;
+        set_cnext_to_closest(p);
 
         // FIXME: Is all this really needed? Test without it.
         p->head[0] = p->cnext[0]; //HVC-ONLY
@@ -212,8 +237,8 @@ hvc_setup_cdllist(const double * data, size_t n, const double *ref)
 
         p->area = 0; //HVC-ONLY
         p->volume = 0; //HVC-ONLY
+        // FIXME: Is this needed? We set it again in hvc3d_list()
         p->lastSlicez = p->x[2]; //HVC-ONLY
-        p->ndomr = 0;
         p->domr = NULL; //HVC-ONLY
 #endif
          // Link the list in order.
@@ -240,11 +265,7 @@ hvc_setup_cdllist(const double * data, size_t n, const double *ref)
 static void
 setup_nondominated_point(dlnode_t * p)
 {
-    p->cnext[0] = p->closest[0];
-    p->cnext[1] = p->closest[1];
-
-    assert(p->cnext[0]);
-    assert(p->cnext[1]);
+    set_cnext_to_closest(p);
     p->head[1] = p->cnext[0]->cnext[1];
     p->head[0] = p->cnext[1]->cnext[0];
 }
@@ -291,33 +312,31 @@ add_nondominated_point(dlnode_t * p)
 }
 
 
-static void setupDomPoint(dlnode_t * p)
+static void
+setup_dom_point(dlnode_t * p)
 {
-    p->cnext[0] = p->closest[0];
-    p->cnext[1] = p->closest[1];
-
+    set_cnext_to_closest(p);
     const dlnode_t * domr = p->domr;
-
     p->head[1] = (p->cnext[0]->cnext[1] == domr)
         ? domr->head[1] : p->cnext[0]->cnext[1];
-
     p->head[0] = (p->cnext[1]->cnext[0] == domr)
         ? domr->head[0] : p->cnext[1]->cnext[0];
 }
 
 
-static void addDomPoint(dlnode_t * p)
+static void add_dom_point(dlnode_t * p)
 {
     p->head[0] = p->cnext[0];
     p->head[1] = p->cnext[1];
 
-    if (p->cnext[0]->cnext[1] == p->domr)
-        p->domr->head[1] = p;
+    dlnode_t * domr = p->domr;
+    if (p->cnext[0]->cnext[1] == domr)
+        domr->head[1] = p;
     else
         p->cnext[0]->cnext[1] = p;
 
-    if (p->cnext[1]->cnext[0] == p->domr)
-        p->domr->head[0] = p;
+    if (p->cnext[1]->cnext[0] == domr)
+        domr->head[0] = p;
     else
         p->cnext[1]->cnext[0] = p;
 }
@@ -330,35 +349,35 @@ update_volume(dlnode_t * q, double z)
 }
 
 static void
-update_volume_simple(const double * px, dlnode_t * u, int i)
+update_volume_simple(const double * px, dlnode_t * q, int i)
 {
     const int j = 1 - i;
-    dlnode_t * q = u->cnext[j];
-    update_volume(q, px[2]);
-    while (px[j] < u->x[j]) {
-        q = u;
-        u = u->cnext[i];
+    update_volume(q->cnext[j], px[2]);
+    while (px[j] < q->x[j]) {
         update_volume(q, px[2]);
+        q = q->cnext[i];
     }
-    update_volume(u, px[2]);
+    update_volume(q, px[2]);
 }
+
 /*
- * Returns the area dominated by 'p', by sweeping points in ascending order of
- * coordinate 'i' (which is either 0 or 1, i.e., x or y), starting from
- * point 'q' and stopping when a point nondominated by 'p' and with coordinate
- * i¡ higher than that of 'p' on the (x,y)-plane is reached.
-*       p  - the point whose contributions in 2D is to be computed
-*       i - dimension used for sweeping points (in ascending order)
-*       q  - outer delimiter of p (with lower 'i'-coordinate value than p) from
-*            which to start the sweep.
-*       u  - The delimiter of p with lowest 'i'-coordinate which is not q. If p has
-*            inner delimiters, then u is the inner delimiter of p with lowest
-*            'i'-coordinate, otherwise, u is the outer delimiter with higher
-*            'i'-coordinate than p. (Note: u is given because of the cases for
-*            (which p has inner delimiter(s). When p does not have any inner delimiters
-*            then u=q->cnext[i], but this is not true when inner delimiters exist)
+  Returns the area dominated by 'p', by sweeping points in ascending order of
+  coordinate 'i' (which is either 0 or 1, i.e., x or y), starting from
+  point 'q' and stopping when a point nondominated by 'p' and with coordinate
+  i¡ higher than that of 'p' on the (x,y)-plane is reached.
+       p  - the point whose contributions in 2D is to be computed
+       i - dimension used for sweeping points (in ascending order)
+       q  - outer delimiter of p (with lower 'i'-coordinate value than p) from
+            which to start the sweep.
+       u  - The delimiter of p with lowest 'i'-coordinate which is not q. If p has
+            inner delimiters, then u is the inner delimiter of p with lowest
+            'i'-coordinate, otherwise, u is the outer delimiter with higher
+            'i'-coordinate than p. (Note: u is given because of the cases for
+            (which p has inner delimiter(s). When p does not have any inner delimiters
+            then u=q->cnext[i], but this is not true when inner delimiters exist)
 */
-static double computeAreaSimple(const double * p, const dlnode_t * q, const dlnode_t * u, int i)
+static double
+computeAreaSimple(const double * p, const dlnode_t * q, const dlnode_t * u, int i)
 {
     int j = 1 - i;
     double area = (q->x[j] - p[j]) * (u->x[i] - p[i]);
@@ -395,12 +414,13 @@ hvc3d_list(dlnode_t * list, bool considerDominated)
     dlnode_t * p = (list+1)->next[0];
     const dlnode_t * stop = list+2;
     while (p != stop) {
+        // FIXME: We do not need most of this for the first point. We could
+        // initialize area, p->area and p->volume directly.
         p->area = 0;
         p->volume = 0;
         p->lastSlicez = p->x[2];
 
-        if (p->ndomr < 1) {
-
+        if (p->ndomr < 1) { // p->ndomr == 0
             setup_nondominated_point(p);
             assert(p->head[1] == p->cnext[0]->cnext[1]);
             update_volume_simple(p->x, p->head[1], 1);
@@ -420,24 +440,24 @@ hvc3d_list(dlnode_t * list, bool considerDominated)
             add_nondominated_point(p);
 
         } else if (considerDominated && p->ndomr == 1) {
-            //if dominated points must be taken into account, then remove
-            //the area of their single dominating point that they dominate
-            // FIXME: This doesn't work.
+            // If dominated points must be taken into account, then remove the
+            // area of their single dominating point that they dominate.
+            assert(p->domr->ndomr == 0); // domr cannot be dominated.
             update_volume(p->domr, p->x[2]);
-            setupDomPoint(p);
-            p->domr->area -= computeAreaSimple(p->x, p->cnext[0], p->head[1], 1);
-
-            addDomPoint(p);
-
+            setup_dom_point(p);
+            p->domr->area -= computeAreaSimple(p->x, p->head[0], p->head[1], 1);
+            add_dom_point(p);
         }
+        assert(p->ndomr <= 1);
         assert(area > 0);
         /* It is possible to have two points with the same z-value, e.g.,
            (1,2,3) and (2,1,3). */
-        volume += area * (p->next[0]->x[2]- p->x[2]);
+        volume += area * (p->next[0]->x[2] - p->x[2]);
         p = p->next[0];
 
     }
     setup_nondominated_point(p);
+    // FIXME: p->head[1]->cnext[0] may be a sentinel, which is pointless to update.
     update_volume_simple(p->x, p->head[1], 1);
     return volume;
 }
@@ -450,6 +470,8 @@ save_contributions(double * hvc, const dlnode_t * list, const double * restrict 
     const dlnode_t * p = (list+1)->next[0];
     const dlnode_t * stop = list+2;
     while (p != stop) {
+        /* print_x(p); */
+        /* fprintf(stderr, "hvc = %g\n", p->volume); */
         hvc[(p->x - data)/3] = p->volume;
         p = p->next[0];
     }
@@ -461,6 +483,10 @@ hvc3d(double * restrict hvc, const double * restrict data, size_t n, const doubl
     // This function already calls preprocessing.
     dlnode_t * list = hvc_setup_cdllist(data, n, ref);
     bool considerDominated = true;
+    /* fprintf(stderr, "hvc[%d] = [", n); */
+    /* for(size_t i = 0; i < n; i++) */
+    /*     fprintf(stderr, "%g ", hvc[i]); */
+    /* fprintf(stderr, "]\n"); */
     double hv = hvc3d_list(list, considerDominated);
     save_contributions(hvc, list, data);
     free_cdllist(list);
