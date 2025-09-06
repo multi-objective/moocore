@@ -377,3 +377,26 @@ def test_hv_approx(dim):
     ## Precision goes down significantly with higher dimensions.
     signif = 4 if dim < 8 else 3 if dim < 10 else 2
     np.testing.assert_approx_equal(true_hv, appr_hv, significant=signif)
+
+
+def check_hvc(points, ref, err_msg):
+    hvc = moocore.hv_contributions(points, ref=ref)
+    hv_total = moocore.hypervolume(points, ref=ref)
+    true_hvc = hv_total - np.array(
+        [
+            moocore.hypervolume(np.delete(points, i, axis=0), ref=ref)
+            for i in range(len(points))
+        ]
+    )
+    assert_allclose(true_hvc, hvc, err_msg=err_msg)
+
+
+def test_hvc():
+    seed = np.random.default_rng().integers(2**32 - 2)
+    rng = np.random.default_rng(seed)
+    maximum = 100
+    nrows = 25
+    dim = 3
+    ref = np.full(dim, maximum + 1)
+    points = rng.integers(1, maximum, (nrows, dim))
+    check_hvc(points, ref, err_msg=f"seed={seed}: ")
