@@ -151,14 +151,19 @@ hvc_check(double hv_total, const double * restrict hvc,
     if (fabs(hv_total_tmp - hv_total) > tolerance) {
         fatal_error("hv_total = %g != hv_total_tmp = %g !", hv_total, hv_total_tmp);
     }
-    double * hvc_tmp = MOOCORE_MALLOC(size, double);
-    hv_1point_diffs(hvc_tmp, points, dim, size, ref, NULL, hv_total);
+    double * hvc_true = MOOCORE_MALLOC(size, double);
+    hv_1point_diffs(hvc_true, points, dim, size, ref, NULL, hv_total);
     for (size_t i = 0; i < size; i++) {
-        if (fabs(hvc[i] - hvc_tmp[i]) > tolerance) {
-            fatal_error("hvc[%zu] = %g != hvc_tmp[%zu] = %g !", i, hvc[i], i, hvc_tmp[i]);
+        if (fabs(hvc[i] - hvc_true[i]) > tolerance) {
+            fprintf(stderr, "%-22.15g", points[i * dim]);
+            for (int d = 1; d < dim; d++) {
+                fprintf(stderr, " %-22.15g", points[i * dim + d]);
+            }
+            fprintf(stderr, "\n");
+            fatal_error("hvc[%zu] = %g != hvc__true[%zu] = %g !", i, hvc[i], i, hvc_true[i]);
         }
     }
-    free (hvc_tmp);
+    free (hvc_true);
 }
 
 extern double
@@ -181,6 +186,9 @@ hv_contributions(double * restrict hvc, double * restrict points, int d, int n,
     dimension_t dim = (dimension_t) d;
     size_t size = (size_t) n;
     if (n == 0) return 0;
+    // We cannot rely on the caller and the functions below will skip points
+    // that do not dominate the reference point.
+    memset(hvc, 0, n * sizeof(double));
 
     double hv_total;
     if (dim == 2) {
