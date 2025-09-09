@@ -21,9 +21,10 @@
 Introduction
 ============
 
-The goal of **moocore** is to collect fast implementations of core mathematical functions and algorithms for multi-objective optimization. These functions include:
+The goal of **moocore** is to collect and document fast implementations of core mathematical functions and algorithms for multi-objective optimization. These functions include:
 
- * Identifying and filtering dominated vectors.
+ * Generate and transform nondominated sets.
+ * Identify and filter dominated vectors.
  * Quality metrics such as (weighted) hypervolume, epsilon, IGD, etc.
  * Computation of the Empirical Attainment Function. The empirical attainment function (EAF) describes the probabilistic
 distribution of the outcomes obtained by a stochastic algorithm in the
