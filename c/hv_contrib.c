@@ -29,9 +29,7 @@ hv_1point_diffs (double *hvc, double *points, dimension_t dim, size_t size, cons
     for (size_t i = 0; i < size; i++) {
         if (unlikely(keep_uevs && uev[i])) {
             hvc[i] = hv_total;
-        } else if (unlikely(!nondom[i] || !strongly_dominates(points + i * dim, ref, dim))) {
-            hvc[i] = 0.0;
-        } else {
+        } else if (nondom[i] && strongly_dominates(points + i * dim, ref, dim)) {
             memcpy(tmp, points + i * dim, sizeof(double) * dim);
             memcpy(points + i * dim, ref, sizeof(double) * dim);
             hvc[i] = hv_total - fpli_hv(points, dim, (int) size, ref);
@@ -54,12 +52,10 @@ hv_1point_diffs (double *hvc, double *points, dimension_t dim, size_t size, cons
    Returns -1 if something fails, >= 0 on success.
 */
 static double
-hvc2d(double * restrict hvc, const double * restrict data, size_t n, const double * restrict ref)
+hvc2d(double * restrict hvc, const double * restrict data, size_t n,
+      const double * restrict ref)
 {
     ASSUME(n > 0);
-    for (size_t k = 0; k < n; k++)
-        hvc[k] = 0;
-
     const double **p = generate_sorted_doublep_2d(data, &n, ref[0]);
     if (unlikely(n == 0)) return 0;
     if (unlikely(!p)) return -1;
@@ -99,10 +95,10 @@ hvc2d(double * restrict hvc, const double * restrict data, size_t n, const doubl
             double new_h = p[j][1] - prev[1];
             if (new_h < height) {
                 hvc[(prev - data) / 2] += (p[j][0] - prev[0]) * (height - new_h);
-            DEBUG2_PRINT("hvc[%lld] += %g * %g = %g\n",
-                         (long long) (prev - data) / 2,
-                         p[j][0] - prev[0], height - new_h,
-                         (p[j][0] - prev[0]) * (height - new_h));
+                DEBUG2_PRINT("hvc[%lld] += %g * %g = %g\n",
+                             (long long) (prev - data) / 2,
+                             p[j][0] - prev[0], height - new_h,
+                             (p[j][0] - prev[0]) * (height - new_h));
                 height = new_h;
             }
         } else if (prev[1] == p[j][1]) {
@@ -178,6 +174,9 @@ hv_contributions(double * restrict hvc, double * restrict points, int d, int n,
     dimension_t dim = (dimension_t) d;
     size_t size = (size_t) n;
     if (n == 0) return 0;
+    /* We cannot rely on the caller and the functions below will skip points
+       that do not dominate the reference point.  */
+    memset(hvc, 0, n * sizeof(double));
 
     double hv_total;
     if (dim == 2) {
