@@ -7,6 +7,17 @@
 #include "nondominated.h"
 #include "sort.h"
 
+static inline double
+hvc_1point_diff(const double * points, dimension_t dim, size_t size,
+                const double * ref, const double hv_total)
+{
+    const double tolerance = sqrt(DBL_EPSILON);
+    double hvc = hv_total - fpli_hv(points, dim, (int) size - 1, ref);
+    // Handle very small values.
+    hvc = (hvc >= tolerance) ? hvc : 0.0;
+    return hvc;
+}
+
 /* Given a list of points, compute the exclusive hypervolume contribution of
    point using the naive algorithm. That is, it removes one point at a time and
    calculates hv_total - hv_i, where hv_i is the hypervolume of the set minus
@@ -16,31 +27,35 @@
    one point.
 */
 static void
-hv_1point_diffs (double *hvc, double *points, dimension_t dim, size_t size, const double * ref,
-                 const bool * uev, const double hv_total)
+hvc_1point_diffs(double *hvc, double *points, dimension_t dim, size_t size,
+                 const double * ref, const bool * uev, const double hv_total)
 {
+    ASSUME(size > 1);
     bool keep_uevs = uev != NULL;
-    const double tolerance = sqrt(DBL_EPSILON);
     double * tmp = MOOCORE_MALLOC(dim, double);
     const bool * maximise = new_bool_maximise(dim, /*maximise_all=*/false);
     const bool * nondom = is_nondominated(points, dim, size, maximise,
                                           /*keep_weakly=*/false);
     free((void *) maximise);
-    for (size_t i = 0; i < size; i++) {
+    const double * const last = points + (size - 1) * dim;
+    for (size_t i = 0; i < size - 1; i++) {
         if (unlikely(keep_uevs && uev[i])) {
             hvc[i] = hv_total;
         } else if (nondom[i] && strongly_dominates(points + i * dim, ref, dim)) {
             memcpy(tmp, points + i * dim, sizeof(double) * dim);
-            memcpy(points + i * dim, ref, sizeof(double) * dim);
-            hvc[i] = hv_total - fpli_hv(points, dim, (int) size, ref);
-            // Handle very small values.
-            hvc[i] = fabs(hvc[i]) >= tolerance ? hvc[i] : 0.0;
-            assert(hvc[i] >= 0);
+            memcpy(points + i * dim, last, sizeof(double) * dim);
+            hvc[i] = hvc_1point_diff(points, dim, size, ref, hv_total);
             memcpy(points + i * dim, tmp, sizeof(double) * dim);
         }
     }
-    free((void *)nondom);
     free(tmp);
+    // Process the last point.
+    if (unlikely(keep_uevs && uev[size - 1])) {
+        hvc[size - 1] = hv_total;
+    } else if (nondom[size - 1] && strongly_dominates(last, ref, dim)) {
+        hvc[size - 1] = hvc_1point_diff(points, dim, size, ref, hv_total);
+    }
+    free((void *)nondom);
 }
 
 /* O(n log n) dimension-sweep algorithm.
@@ -148,7 +163,7 @@ hvc_check(double hv_total, const double * restrict hvc,
         fatal_error("hv_total = %g != hv_total_tmp = %g !", hv_total, hv_total_tmp);
     }
     double * hvc_tmp = MOOCORE_MALLOC(size, double);
-    hv_1point_diffs(hvc_tmp, points, dim, size, ref, NULL, hv_total);
+    hvc_1point_diffs(hvc_tmp, points, dim, size, ref, NULL, hv_total);
     for (size_t i = 0; i < size; i++) {
         if (fabs(hvc[i] - hvc_tmp[i]) > tolerance) {
             fatal_error("hvc[%zu] = %g != hvc_tmp[%zu] = %g !", i, hvc[i], i, hvc_tmp[i]);
@@ -174,6 +189,10 @@ hv_contributions(double * restrict hvc, double * restrict points, int d, int n,
     dimension_t dim = (dimension_t) d;
     size_t size = (size_t) n;
     if (n == 0) return 0;
+    if (n == 1) {
+        hvc[0] = fpli_hv(points, dim, (int) size, ref);
+        return hvc[0];
+    }
     /* We cannot rely on the caller and the functions below will skip points
        that do not dominate the reference point.  */
     memset(hvc, 0, n * sizeof(double));
@@ -184,7 +203,7 @@ hv_contributions(double * restrict hvc, double * restrict points, int d, int n,
         DEBUG1(hvc_check(hv_total, hvc, points, dim, size, ref));
     } else {
         hv_total = fpli_hv(points, dim, (int) size, ref);
-        hv_1point_diffs(hvc, points, dim, size, ref, NULL, hv_total);
+        hvc_1point_diffs(hvc, points, dim, size, ref, NULL, hv_total);
     }
     return hv_total;
 }
