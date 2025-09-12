@@ -8,8 +8,8 @@
 #include "sort.h"
 
 static inline double
-hvc_1point_diff(const double * points, dimension_t dim, size_t size,
-                const double * ref, const double hv_total)
+hvc_1point_diff(const double * restrict points, dimension_t dim, size_t size,
+                const double * restrict ref, const double hv_total)
 {
     const double tolerance = sqrt(DBL_EPSILON);
     double hvc = hv_total - fpli_hv(points, dim, (int) size - 1, ref);
@@ -27,16 +27,14 @@ hvc_1point_diff(const double * points, dimension_t dim, size_t size,
    one point.
 */
 static void
-hvc_1point_diffs(double *hvc, double *points, dimension_t dim, size_t size,
-                 const double * ref, const bool * uev, const double hv_total)
+hvc_1point_diffs(double * restrict hvc, double * restrict points, dimension_t dim, size_t size,
+                 const double * restrict ref, const bool * uev, const double hv_total)
 {
     ASSUME(size > 1);
     bool keep_uevs = uev != NULL;
     double * tmp = MOOCORE_MALLOC(dim, double);
-    const bool * maximise = new_bool_maximise(dim, /*maximise_all=*/false);
-    const bool * nondom = is_nondominated(points, dim, size, maximise,
-                                          /*keep_weakly=*/false);
-    free((void *) maximise);
+    const bool * nondom = is_nondominated_minimize(points, dim, size,
+                                                   /*keep_weakly=*/false);
     const double * const last = points + (size - 1) * dim;
     for (size_t i = 0; i < size - 1; i++) {
         if (unlikely(keep_uevs && uev[i])) {
@@ -188,14 +186,14 @@ hv_contributions(double * restrict hvc, double * restrict points, int d, int n,
     ASSUME(n >= 0);
     dimension_t dim = (dimension_t) d;
     size_t size = (size_t) n;
-    if (n == 0) return 0;
-    if (n == 1) {
+    if (size == 0) return 0;
+    if (size == 1) {
         hvc[0] = fpli_hv(points, dim, (int) size, ref);
         return hvc[0];
     }
     /* We cannot rely on the caller and the functions below will skip points
        that do not dominate the reference point.  */
-    memset(hvc, 0, n * sizeof(double));
+    memset(hvc, 0, size * sizeof(double));
 
     double hv_total;
     if (dim == 2) {

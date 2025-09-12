@@ -179,11 +179,10 @@ check_all_minimize_maximize(const signed char * restrict minmax, dimension_t dim
 
 /* Convert from bool vector to minmax vector.  */
 static inline signed char *
-minmax_from_bool(int nobj, const bool * restrict maximise)
+minmax_from_bool(dimension_t nobj, const bool * restrict maximise)
 {
-    // unsigned int to fix -Walloc-larger-than= warning.
-    signed char * minmax = malloc(sizeof(signed char) * (unsigned int) nobj);
-    for (int k = 0; k < nobj; k++) {
+    signed char * minmax = malloc(sizeof(signed char) * nobj);
+    for (dimension_t k = 0; k < nobj; k++) {
         minmax[k] = (maximise[k]) ? AGREE_MAXIMISE : AGREE_MINIMISE;
     }
     return minmax;
@@ -198,6 +197,29 @@ new_bool_maximise(dimension_t nobj, bool maximise_all)
     for (dimension_t k = 0; k < nobj; k++)
         maximise[k] = maximise_all;
     return maximise;
+}
+
+static inline const signed char *
+default_minmax(dimension_t nobj, signed char default_value)
+{
+    ASSUME(nobj > 0);
+    ASSUME(default_value == AGREE_MINIMISE || default_value == AGREE_MAXIMISE);
+    signed char * minmax = malloc(sizeof(signed char) * nobj);
+    for (dimension_t i = 0; i < nobj; i++)
+        minmax[i] = default_value;
+    return minmax;
+}
+
+static inline const signed char *
+minmax_minimise(dimension_t nobj)
+{
+    return default_minmax(nobj, AGREE_MINIMISE);
+}
+
+static inline const signed char *
+minmax_maximise(dimension_t nobj)
+{
+    return default_minmax(nobj, AGREE_MAXIMISE);
 }
 
 #endif 	    /* !MOOCORE_COMMON_H_ */

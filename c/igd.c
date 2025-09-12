@@ -133,7 +133,7 @@ do_file (const char *filename, double *reference, size_t reference_size,
     /* Default minmax if not set yet.  */
     bool free_minmax = false;
     if (minmax == NULL) {
-        minmax = maximise_all_flag ? minmax_maximise(nobj) : minmax_minimise(nobj);
+        minmax = maximise_all_flag ? minmax_maximise((dimension_t) nobj) : minmax_minimise((dimension_t) nobj);
         free_minmax = true;
     }
 
@@ -336,7 +336,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
     if (minmax == NULL) {
-        minmax = maximise_all_flag ? minmax_maximise(nobj) : minmax_minimise(nobj);
+        minmax = maximise_all_flag ? minmax_maximise((dimension_t) nobj) : minmax_minimise((dimension_t) nobj);
     }
     reference_size = filter_dominated_set(reference, nobj, reference_size, minmax);
 

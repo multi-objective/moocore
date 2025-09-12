@@ -46,30 +46,6 @@ int write_sets_filtered (FILE *outfile, const double *data, int ncols,
                          const int *cumsizes, int nruns,
                          const bool *write_p);
 
-
-static inline const signed char *
-default_minmax(int nobj, signed char default_value)
-{
-    ASSUME(nobj > 0);
-    ASSUME(default_value == AGREE_MINIMISE || default_value == AGREE_MAXIMISE);
-    signed char * minmax = malloc (sizeof(signed char) * nobj);
-    for (int i = 0; i < nobj; i++)
-        minmax[i] = default_value;
-    return minmax;
-}
-
-static inline const signed char *
-minmax_minimise(int nobj)
-{
-    return default_minmax(nobj, AGREE_MINIMISE);
-}
-
-static inline const signed char *
-minmax_maximise(int nobj)
-{
-    return default_minmax(nobj, AGREE_MAXIMISE);
-}
-
 static inline const signed char *
 read_minmax (const char *str, int *nobj_p)
 {

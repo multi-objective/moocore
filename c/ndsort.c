@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
 
     /* Default minmax if not set yet.  */
     if (minmax == NULL)
-        minmax = minmax_minimise(dim);
+        minmax = minmax_minimise((dimension_t) dim);
 
     if (verbose_flag) {
         printf ("# file: %s\n", filename);

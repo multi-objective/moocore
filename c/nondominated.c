@@ -344,6 +344,8 @@ process_file (const char *filename,
 
     handle_read_data_error(
         read_double_data (filename, &points, &nobj, &cumsizes, &nsets), filename);
+    ASSUME(nobj > 1 && nobj < 128);
+
     if (!filename)
         filename = stdin_name;
 
@@ -355,13 +357,13 @@ process_file (const char *filename,
     /* Default minmax if not set yet.  */
     bool free_minmax = false;
     if (minmax == NULL) {
-        minmax = maximise_all_flag ? minmax_maximise(nobj) : minmax_minimise(nobj);
+        minmax = maximise_all_flag ? minmax_maximise((dimension_t)nobj) : minmax_minimise((dimension_t)nobj);
         free_minmax = true;
     }
 
     double *minimum = NULL;
     double *maximum = NULL;
-    data_bounds (&minimum, &maximum, points, nobj, cumsizes[nsets - 1]);
+    data_bounds(&minimum, &maximum, points, nobj, cumsizes[nsets - 1]);
 
     if (verbose_flag >= 2)
         print_input_info (stderr, filename, nobj, cumsizes, nsets, minmax,

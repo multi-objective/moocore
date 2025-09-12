@@ -135,7 +135,7 @@ IGD (const double * restrict data, int nobj, int npoints,
      const double * restrict ref, int ref_size,
      const bool *  restrict maximise)
 {
-    const signed char *minmax = minmax_from_bool(nobj, maximise);
+    const signed char *minmax = minmax_from_bool((dimension_t) nobj, maximise);
     double value = IGD_minmax (nobj, minmax, data, npoints, ref, ref_size);
     free ((void *)minmax);
     return value;
@@ -178,7 +178,7 @@ _attr_maybe_unused static double
 IGD_plus (const double * restrict data, int nobj, int npoints, const double * restrict ref, int ref_size,
           const bool * restrict  maximise)
 {
-    const signed char *minmax = minmax_from_bool(nobj, maximise);
+    const signed char *minmax = minmax_from_bool((dimension_t) nobj, maximise);
     double value = IGD_plus_minmax (nobj, minmax, data, npoints, ref, ref_size);
     free ((void *)minmax);
     return(value);
@@ -208,7 +208,7 @@ avg_Hausdorff_dist (const double * restrict data, int nobj, int npoints,
                     const double * restrict ref, int ref_size,
                     const bool * restrict maximise, unsigned int p)
 {
-    const signed char * minmax = minmax_from_bool(nobj, maximise);
+    const signed char * minmax = minmax_from_bool((dimension_t) nobj, maximise);
     double value = avg_Hausdorff_dist_minmax (nobj, minmax, data, npoints, ref, ref_size, p);
     free ((void *)minmax);
     return(value);

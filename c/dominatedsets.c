@@ -264,7 +264,7 @@ pareto_better (int dim, const signed char *minmax,
         }
     }
 
-    int result2 = epsilon_additive_ind (dim, minmax, points_a, size_a, points_b, size_b);
+    int result2 = epsilon_additive_ind ((dimension_t) dim, minmax, points_a, size_a, points_b, size_b);
 
     DEBUG2 (
         printf ("result = %d, result2 = %d\n", result, result2);
@@ -392,7 +392,7 @@ int main(int argc, char *argv[])
 
     /* Default minmax if not set yet.  */
     if (minmax == NULL)
-        minmax = minmax_minimise(dim);
+        minmax = minmax_minimise((dimension_t) dim);
 
     /* Print filename substitutions.  */
     for (k = 0; k < numfiles; k++) {
