@@ -164,11 +164,11 @@ epsilon_mult_minmax (dimension_t dim, const signed char * restrict minmax,
 
     switch (check_all_minimize_maximize(minmax, dim)) {
       case AGREE_MINIMISE:
-          return epsilon_mult_minimize(dim, points_a, (size_t) size_a, points_b, (size_t) size_b);
+          return epsilon_mult_minimize(dim, points_a, size_a, points_b, size_b);
       case AGREE_MAXIMISE:
-          return epsilon_mult_maximize(dim, points_a, (size_t) size_a, points_b, (size_t) size_b);
+          return epsilon_mult_maximize(dim, points_a, size_a, points_b, size_b);
       default:
-          return epsilon_mult_minmax_(dim, minmax, points_a, (size_t) size_a, points_b, (size_t) size_b);
+          return epsilon_mult_minmax_(dim, minmax, points_a, size_a, points_b, size_b);
     }
 }
 
@@ -302,7 +302,7 @@ epsilon_additive (const double * restrict data, int nobj, int npoints,
     ASSUME(ref_size >= 0);
     dimension_t dim = (dimension_t) nobj;
     const signed char *minmax = minmax_from_bool(dim, maximise);
-    double value = epsilon_additive_minmax(dim, minmax, data, (size_t) npoints, ref, (size_t) ref_size);
+    double value = epsilon_additive_minmax(dim, minmax, data, npoints, ref, ref_size);
     free ((void *)minmax);
     return(value);
 }
@@ -317,7 +317,7 @@ epsilon_mult (const double * restrict data, int nobj, int npoints,
     ASSUME(ref_size >= 0);
     dimension_t dim = (dimension_t) nobj;
     const signed char *minmax = minmax_from_bool(dim, maximise);
-    double value = epsilon_mult_minmax (dim, minmax, data, (size_t) npoints, ref, ref_size);
+    double value = epsilon_mult_minmax (dim, minmax, data, npoints, ref, ref_size);
     free ((void *)minmax);
     return(value);
 }
