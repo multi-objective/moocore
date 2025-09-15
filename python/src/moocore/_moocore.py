@@ -311,7 +311,7 @@ def epsilon_additive(
     r"""Additive epsilon metric.
 
     The current implementation uses the naive algorithm that requires
-    :math:`O(n \cdot |A| \cdot |R|)`, where :math:`n` is the number of
+    :math:`O(m \cdot |A| \cdot |R|)`, where :math:`m` is the number of
     objectives (dimension of vectors), :math:`A` is the input set and :math:`R`
     is the reference set.
 
@@ -1105,7 +1105,7 @@ def is_nondominated(
     uses the well-known :math:`O(n \log n)` dimension-sweep algorithm
     :footcite:p:`KunLucPre1975jacm` for :math:`m \leq 3` and the naive
     :math:`O(m n^2)` algorithm for :math:`m \geq 4`. The best-known
-    :math:`O(n(\log_2 n)^{d-2})` algorithm for :math:`m \geq 4`
+    :math:`O(n(\log_2 n)^{m-2})` algorithm for :math:`m \geq 4`
     :footcite:p:`KunLucPre1975jacm` is not implemented yet.
 
 

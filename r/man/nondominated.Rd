@@ -52,7 +52,9 @@ which is also called nondominated sorting \citep{Deb02nsga2}.
 Given \eqn{n} points of dimension \eqn{m}, the current implementation uses
 the well-known \eqn{O(n \log n)} dimension-sweep algorithm
 \citep{KunLucPre1975jacm} for \eqn{m \leq 3} and the naive \eqn{O(m n^2)}
-algorithm for \eqn{m \geq 4}.
+algorithm for \eqn{m \geq 4}.  The best-known \eqn{O(n(\log_2 n)^{m-2})}
+algorithm for \eqn{m \geq 4} \citep{KunLucPre1975jacm} is not implemented
+yet.
 
 \code{pareto_rank()} is meant to be used like \code{rank()}, but it
 assigns ranks according to Pareto dominance. Duplicated points are kept on

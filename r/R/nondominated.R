@@ -28,7 +28,9 @@
 #' Given \eqn{n} points of dimension \eqn{m}, the current implementation uses
 #' the well-known \eqn{O(n \log n)} dimension-sweep algorithm
 #' \citep{KunLucPre1975jacm} for \eqn{m \leq 3} and the naive \eqn{O(m n^2)}
-#' algorithm for \eqn{m \geq 4}.
+#' algorithm for \eqn{m \geq 4}.  The best-known \eqn{O(n(\log_2 n)^{m-2})}
+#' algorithm for \eqn{m \geq 4} \citep{KunLucPre1975jacm} is not implemented
+#' yet.
 #'
 #' @doctest
 #' S = matrix(c(1,1,0,1,1,0,1,0), ncol = 2, byrow = TRUE)
