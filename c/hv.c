@@ -32,7 +32,6 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <float.h>
-#include <stdint.h>
 #include "common.h"
 #include "hv.h"
 #define HV_DIMENSION 4
