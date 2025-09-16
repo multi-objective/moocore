@@ -307,24 +307,24 @@ hvc_check(double hv_total, const double * restrict hvc,
           bool ignore_dominated)
 {
     const double tolerance = sqrt(DBL_EPSILON);
-    double hv_total_tmp = fpli_hv(points, dim, (int) size, ref);
-    if (fabs(hv_total_tmp - hv_total) > tolerance) {
-        fatal_error("hv_total = %g != hv_total_tmp = %g !", hv_total, hv_total_tmp);
+    double hv_total_true = fpli_hv(points, dim, (int) size, ref);
+    if (fabs(hv_total_true - hv_total) > tolerance) {
+        fatal_error("hv_total = %g != hv_total_true = %g !", hv_total, hv_total_true);
     }
-    double * hvc_tmp = MOOCORE_MALLOC(size, double);
+    double * hvc_true = MOOCORE_MALLOC(size, double);
     /* The functions below will skip points that do not dominate the reference point.  */
-    memset(hvc_tmp, 0, size * sizeof(double));
+    memset(hvc_true, 0, size * sizeof(double));
 
     if (ignore_dominated)
-        hvc_1point_diffs_nondom(hvc_tmp, points, dim, size, ref, NULL, hv_total);
+        hvc_1point_diffs_nondom(hvc_true, points, dim, size, ref, NULL, hv_total);
     else
-        hvc_1point_diffs(hvc_tmp, points, dim, size, ref, NULL, hv_total);
+        hvc_1point_diffs(hvc_true, points, dim, size, ref, NULL, hv_total);
     for (size_t i = 0; i < size; i++) {
-        if (fabs(hvc[i] - hvc_tmp[i]) > tolerance) {
-            fatal_error("hvc[%zu] = %g != hvc_tmp[%zu] = %g !", i, hvc[i], i, hvc_tmp[i]);
+        if (fabs(hvc[i] - hvc_true[i]) > tolerance) {
+            fatal_error("hvc[%zu] = %g != hvc_true[%zu] = %g !", i, hvc[i], i, hvc_true[i]);
         }
     }
-    free (hvc_tmp);
+    free(hvc_true);
 }
 
 /* Store the exclusive hypervolume contribution of each input point in hvc[],
