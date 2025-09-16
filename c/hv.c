@@ -182,7 +182,7 @@ fpli_hv4d_setup_cdllist(const fpli_dlnode_t * restrict pp,
             p->cnext[0] = NULL;
             p->cnext[1] = NULL;);
         // FIXME: Can we use pp->ignore to initialize p->ndomr?
-        p->ndomr = 0;
+        //p->ndomr = 0;
         // Link the list in order.
         q->next[d] = p;
         p->prev[d] = q;

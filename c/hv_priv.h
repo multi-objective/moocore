@@ -21,7 +21,8 @@ typedef struct dlnode {
     struct dlnode * cnext[2]; //current next
 #if HV_DIMENSION == 4
     struct dlnode * closest[2]; // closest[0] == cx, closest[1] == cy
-    unsigned int ndomr;    // number of dominators.
+    // FIXME: unused
+    //unsigned int ndomr;    // number of dominators.
 #endif
 } dlnode_t;
 
@@ -67,7 +68,7 @@ init_sentinel(dlnode_t * s, const double * x)
     // Initialize it when debugging so it will crash if uninitialized.
     DEBUG1(s->cnext[0] = s->cnext[1] = NULL);
 #if HV_DIMENSION == 4
-    s->ndomr = 0;
+    //s->ndomr = 0;
 #endif
 }
 
@@ -160,7 +161,7 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
         dlnode_t * p = list3 + i;
         p->x = scratch[j];
 #if HV_DIMENSION == 4
-        p->ndomr = 0;
+        //p->ndomr = 0;
         // Initialize it when debugging so it will crash if uninitialized.
         DEBUG1(p->closest[0] = p->closest[1] = NULL);
 #endif
