@@ -30,6 +30,9 @@ void warnprintf(const char *format,...) ATTRIBUTE_FORMAT_PRINTF(1, 2);
     } while(0)
 #endif // R_PACKAGE
 
+#define MOOCORE_STRINGIFY(name) #name
+#define MOOCORE_STRINGIFY_MACRO(macro) MOOCORE_STRINGIFY(macro)
+
 #include <stdbool.h>
 static inline void *
 moocore_malloc(size_t nmemb, size_t size, const char *file, int line)

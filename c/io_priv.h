@@ -4,9 +4,7 @@
 #include <string.h> /* for strerror() */
 #include <errno.h> /* for errno  */
 
-#define QUOTE(name) #name
-#define STR(macro) QUOTE(macro)
-#define objective_t_str STR(objective_t)
+#define objective_t_str MOOCORE_STRINGIFY_MACRO(objective_t)
 #ifndef fread_objective_t
 #error "fread_objective_t is not defined"
 #endif
