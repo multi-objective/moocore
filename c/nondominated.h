@@ -485,7 +485,10 @@ static inline size_t
 find_weak_nondominated_set_minimise(const double * restrict points, dimension_t dim,
                                     size_t size, bool * restrict nondom)
 {
+    ASSUME(dim >= 2);
+    ASSUME(dim <= 32);
     const signed char * minmax = minmax_minimise(dim);
+    ASSUME(minmax != NULL);
     size_t new_size = find_weak_nondominated_set(points, dim, size, minmax,
                                                  nondom);
     free((void *)minmax);
