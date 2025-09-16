@@ -22,8 +22,8 @@ typedef struct avl_node_t {
 static inline bool *
 nondom_init (size_t size)
 {
-    bool * nondom = malloc (sizeof(bool) * size);
-    for (size_t n = 0; n <  size; n++)
+    bool * nondom = malloc(sizeof(*nondom) * size);
+    for (size_t n = 0; n < size; n++)
         nondom[n] = true;
     return nondom;
 }
@@ -467,15 +467,27 @@ find_nondominated_set (const double *points, dimension_t dim, size_t size,
 }
 
 static inline size_t
-find_weak_nondominated_set (const double *points, int dim, size_t size,
-                            const signed char *minmax, bool *nondom)
+find_weak_nondominated_set(const double * points, dimension_t dim, size_t size,
+                           const signed char * minmax, bool * nondom)
 {
     ASSUME(dim >= 1);
     ASSUME(dim <= 32);
-    return find_nondominated_set_(points, (dimension_t) dim, size, minmax, AGREE_NONE, nondom,
+    return find_nondominated_set_(points, dim, size, minmax, AGREE_NONE, nondom,
                                   /* find_dominated_p = */false,
                                   /* keep_weakly = */true);
 }
+
+static inline size_t
+find_weak_nondominated_set_minimise(const double * points, dimension_t dim,
+                                    size_t size, bool * nondom)
+{
+    const signed char * minmax = minmax_minimise(dim);
+    size_t new_size = find_weak_nondominated_set(points, dim, size, minmax,
+                                                 nondom);
+    free ((void *)minmax);
+    return new_size;
+}
+
 
 static inline size_t
 get_nondominated_set (double **pareto_set_p,
@@ -546,7 +558,7 @@ is_nondominated_minmax(const double * data, dimension_t nobj, size_t npoint,
 }
 
 static inline bool *
-is_nondominated_minimize(const double * data, dimension_t nobj, size_t npoint,
+is_nondominated_minimise(const double * data, dimension_t nobj, size_t npoint,
                          bool keep_weakly)
 {
     const signed char * minmax = minmax_minimise(nobj);

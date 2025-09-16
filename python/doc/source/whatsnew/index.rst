@@ -7,6 +7,7 @@ What's new
 Version 0.1.9 (dev)
 -------------------
 
+- :func:`~moocore.hv_contributions` ignores dominated points by default. Set ``ignore_dominated=False`` to restore the previous behavior.
 - New function :func:`~moocore.any_dominated` to quickly detect if a set is
   nondominated.
 - New function :func:`~moocore.generate_ndset` to generate random nondominated

@@ -2,7 +2,7 @@
 void free(void *);
 int read_datasets(const char * filename, double **data_p, int *ncols_p, int *datasize_p);
 double fpli_hv(const double *data, int d, int n, const double *ref);
-void hv_contributions (double *hvc, double *points, int dim, int size, const double * ref);
+void hv_contributions(double *hvc, double *points, int dim, int size, const double * ref, bool ignore_dominated);
 double IGD (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);
 double IGD_plus (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);
 double avg_Hausdorff_dist (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise, unsigned int p);

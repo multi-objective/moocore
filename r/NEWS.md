@@ -1,5 +1,6 @@
 # moocore 0.1.9
 
+ * `hv_contributions()` ignores dominated points by default. Set `ignore_dominated=FALSE` to restore the previous behavior.
  * New function `any_dominated()`.
 
 # moocore 0.1.8

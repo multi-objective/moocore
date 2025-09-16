@@ -418,7 +418,11 @@ def hypervolume(
     -----
     For 2D and 3D, the algorithms used
     :footcite:p:`FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec` have :math:`O(n
-    \log n)` complexity, where :math:`n` is the number of input points.  The 3D case uses the HV3D\ :sup:`+` algorithm :footcite:p:`GueFon2017hv4d`, which has the same complexity as the HV3D algorithm :footcite:p:`FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec`, but it is faster in practice.
+    \log n)` complexity, where :math:`n` is the number of input points.  The 3D
+    case uses the HV3D\ :sup:`+` algorithm :footcite:p:`GueFon2017hv4d`, which
+    has the same complexity as the HV3D algorithm
+    :footcite:p:`FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec`, but it is
+    faster in practice.
 
     For 4D, the algorithm used is HV4D\ :sup:`+` :footcite:p:`GueFon2017hv4d`,
     which has :math:`O(n^2)` complexity.  Compared to the `original
@@ -670,22 +674,15 @@ def hv_contributions(
     /,
     ref: ArrayLike,
     maximise: bool | list[bool] = False,
+    ignore_dominated: bool = True,
 ) -> np.array:
     r"""Hypervolume contributions of a set of points.
 
     Computes the hypervolume contribution of each point of a set of points with
-    respect to a given reference point. The hypervolume contribution of point
-    :math:`\vec{p} \in X` is :math:`\text{hvc}(\vec{p}) = \text{hyp}(X) -
-    \text{hyp}(X \setminus \{\vec{p}\})`.  Dominated points have zero
-    contribution. However, a point that is dominated by a single (dominating)
-    point reduces the contribution of the latter, because removing the
-    dominating point makes the dominated one become nondominated.  Duplicated
-    points have zero contribution even if not dominated, because removing one
-    of the duplicates does not change the hypervolume of the remaining set.
-
-    The current implementation uses the :math:`O(n \log n)` dimension-sweep
-    algorithm for 2D and the naive algorithm that requires calculating the
-    hypervolume :math:`|X|+1` times for dimensions larger than 2.
+    respect to a given reference point. Duplicated and dominated points have
+    zero contribution.  By default, dominated points are ignored, that is, they
+    do not affect the contribution of other points.  See the Notes below for
+    more details.
 
     .. seealso:: For details about the hypervolume, see :ref:`hypervolume_metric`.
 
@@ -700,16 +697,61 @@ def hv_contributions(
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
         Also accepts a 1D numpy array with value 0/1 for each objective
+    ignore_dominated :
+        Whether dominated points are ignored when computing the contribution of nondominated points.
+        The value of this parameter has an effect on the return values only if the input contains dominated points.
+        Setting this to ``False`` slows down the computation significantly.
+        See the Notes below for a detailed explanation.
+
 
     Returns
     -------
         An array of floating-point values as long as the number of rows in ``x``.
         Each value is the contribution of the corresponding point in ``x``.
 
+
+    Notes
+    -----
+    The hypervolume contribution of point :math:`\vec{p} \in X` is defined as
+    :math:`\text{hvc}(\vec{p}) = \text{hyp}(X) - \text{hyp}(X \setminus
+    \{\vec{p}\})`.  This definition implies that duplicated points have zero
+    contribution even if not dominated, because removing one of the duplicates
+    does not change the hypervolume of the remaining set.  Moreover, dominated
+    points also have zero contribution.  However, a point that is dominated by
+    a single (dominating) nondominated point reduces the contribution of the
+    latter, because removing the dominating point makes the dominated one
+    become nondominated.
+
+    Handling this special case is non-trivial and makes the computation more
+    expensive, thus the default (``ignore_dominated=True``) ignores all
+    dominated points in the input, that is, their contribution is set to zero
+    and their presence does not affect the contribution of any other point.  Setting
+    ``ignore_dominated=False`` will consider dominated points according to the
+    mathematical definition given above, but the computation will be slower.
+
+    When the input only consists of mutually nondominated points, the value of
+    ``ignore_dominated`` does not change the result, but the default value is
+    significantly faster.
+
+    The current implementation uses the :math:`O(n \log n)` dimension-sweep
+    algorithm for 2D and the naive algorithm that requires calculating the
+    hypervolume :math:`|X|+1` times for dimensions larger than 2.
+
+
+
     Examples
     --------
     >>> x = np.array([[5, 1], [1, 5], [4, 2], [4, 4], [5, 1]])
-    >>> moocore.hv_contributions(x, ref=(6, 6))
+    >>> moocore.hv_contributions(x, ref=(6, 6), ignore_dominated=True)
+    ... ## Explanation:
+    ... # hvc[(5,1)] = 0 = duplicated
+    ... # hvc[(1,5)] = 3 = (4 - 1) * (6 - 5)
+    ... # hvc[(4,2)] = 3 = (5 - 4) * (5 - 2)
+    ... # hvc[(4,4)] = 0 = dominated
+    ... # hvc[(5,1)] = 0 = duplicated
+    array([0., 3., 3., 0., 0.])
+
+    >>> moocore.hv_contributions(x, ref=(6, 6), ignore_dominated=False)
     ... ## Explanation:
     ... # hvc[(5,1)] = 0 = duplicated
     ... # hvc[(1,5)] = 3 = (4 - 1) * (6 - 5)
@@ -717,7 +759,6 @@ def hv_contributions(
     ... # hvc[(4,4)] = 0 = dominated
     ... # hvc[(5,1)] = 0 = duplicated
     array([0., 3., 2., 0., 0.])
-
 
     >>> x = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
     >>> moocore.hv_contributions(x, ref=[10, 10])
@@ -749,7 +790,8 @@ def hv_contributions(
     hvc_p, _ = np1d_to_double_array(hvc)
     x_p, npoints, nobj = np2d_to_double_array(x)
     ref_buf = ffi.from_buffer("double []", ref)
-    lib.hv_contributions(hvc_p, x_p, nobj, npoints, ref_buf)
+    ignore_dominated = ffi.cast("bool", bool(ignore_dominated))
+    lib.hv_contributions(hvc_p, x_p, nobj, npoints, ref_buf, ignore_dominated)
     return hvc
 
 

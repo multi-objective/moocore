@@ -379,14 +379,15 @@ hypervolume_C(SEXP DATA, SEXP REFERENCE)
 }
 
 SEXP
-hv_contributions_C(SEXP DATA, SEXP REFERENCE)
+hv_contributions_C(SEXP DATA, SEXP REFERENCE, SEXP IGNORE_DOMINATED)
 {
     int nprotected = 0;
     SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
     SEXP_2_DOUBLE_VECTOR(REFERENCE, reference, reference_len);
     assert (nobj == reference_len);
+    bool ignore_dominated = SEXP_is_true(IGNORE_DOMINATED);
     new_real_vector(hv, npoint);
-    hv_contributions(hv, data, nobj, npoint, reference);
+    hv_contributions(hv, data, nobj, npoint, reference, ignore_dominated);
     UNPROTECT (nprotected);
     return Rexp(hv);
 }

@@ -103,26 +103,49 @@ hypervolume <- function(x, reference, maximise = FALSE)
 #' Hypervolume contribution of a set of points
 #'
 #' Computes the hypervolume contribution of each point of a set of points with
-#' respect to a given reference point.  The hypervolume contribution of point
-#' \eqn{\vec{p} \in X} is \eqn{\text{hvc}(\vec{p}) = \text{hyp}(X) -
-#' \text{hyp}(X \setminus \{\vec{p}\})}.  Dominated points have zero
-#' contribution. However, a point that is dominated by a single (dominating)
-#' point reduces the contribution of the latter, because removing the
-#' dominating point makes the dominated one become nondominated.  Duplicated
-#' points have zero contribution even if not dominated, because removing one of
-#' the duplicates does not change the hypervolume of the remaining set.
-#'
-#' The current implementation uses the \eqn{O(n\log n)} dimension-sweep
-#' algorithm for 2D and the naive algorithm that requires calculating the
-#' hypervolume \eqn{|X|+1} times for dimensions larger than 2.
-#'
-#' For details about the hypervolume, see [hypervolume()].
+#' respect to a given reference point. Duplicated and dominated points have
+#' zero contribution.  By default, dominated points are ignored, that is, they
+#' do not affect the contribution of other points.  See the Notes below for
+#' more details.  For details about the hypervolume, see [hypervolume()].
 #'
 #' @inheritParams hypervolume
+#'
+#' @param ignore_dominated `logical(1)`\cr Whether dominated points are ignored
+#'   when computing the contribution of nondominated points.  The value of this
+#'   parameter has an effect on the return values only if the input contains
+#'   dominated points. Setting this to `FALSE` slows down the computation
+#'   significantly.  See the Notes below for a detailed explanation.
 #'
 #' @return `numeric()`\cr A numerical vector
 #'
 #' @author Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
+#'
+#' @details
+#'
+#' The hypervolume contribution of point \eqn{\vec{p} \in X} is defined as
+#' \eqn{\text{hvc}(\vec{p}) = \text{hyp}(X) - \text{hyp}(X \setminus
+#' \{\vec{p}\})}.  This definition implies that duplicated points have zero
+#' contribution even if not dominated, because removing one of the duplicates
+#' does not change the hypervolume of the remaining set.  Moreover, dominated
+#' points also have zero contribution. However, a point that is dominated by a
+#' single (dominating) nondominated point reduces the contribution of the
+#' latter, because removing the dominating point makes the dominated one become
+#' nondominated.
+#'
+#' Handling this special case is non-trivial and makes the computation more
+#' expensive, thus the default (`ignore_dominated=TRUE`) ignores all dominated
+#' points in the input, that is, their contribution is set to zero and their
+#' presence does not affect the contribution of any other point.  Setting
+#' `ignore_dominated=FALSE` will consider dominated points according to the
+#' mathematical definition given above, but the computation will be slower.
+#'
+#' When the input only consists of mutually nondominated points, the value of
+#' `ignore_dominated` does not change the result, but the default value is
+#' significantly faster.
+#'
+#' The current implementation uses the \eqn{O(n\log n)} dimension-sweep
+#' algorithm for 2D and the naive algorithm that requires calculating the
+#' hypervolume \eqn{|X|+1} times for dimensions larger than 2.
 #'
 #' @seealso [hypervolume()]
 #'
@@ -132,16 +155,26 @@ hypervolume <- function(x, reference, maximise = FALSE)
 #'
 #' \insertRef{BeuFonLopPaqVah09:tec}{moocore}
 #'
-#' @examples
+#' @doctest
 #'
 #' x <- matrix(c(5,1, 1,5, 4,2, 4,4, 5,1), ncol=2, byrow=TRUE)
+#' @expect equal(c(0,3,3,0,0))
 #' hv_contributions(x, reference=c(6,6))
+#' # hvc[(5,1)] = 0 = duplicated
+#' # hvc[(1,5)] = 3 = (4 - 1) * (6 - 5)
+#' # hvc[(4,2)] = 3 = (5 - 4) * (5 - 2)
+#' # hvc[(4,4)] = 0 = dominated
+#' # hvc[(5,1)] = 0 = duplicated
+#'
+#' @expect equal(c(0,3,2,0,0))
+#' hv_contributions(x, reference=c(6,6), ignore_dominated = FALSE)
 #' # hvc[(5,1)] = 0 = duplicated
 #' # hvc[(1,5)] = 3 = (4 - 1) * (6 - 5)
 #' # hvc[(4,2)] = 2 = (5 - 4) * (4 - 2)
 #' # hvc[(4,4)] = 0 = dominated
 #' # hvc[(5,1)] = 0 = duplicated
 #'
+#' @omit
 #' data(SPEA2minstoptimeRichmond)
 #' # The second objective must be maximized
 #' # We calculate the hypervolume contribution of each point of the union of all sets.
@@ -156,7 +189,7 @@ hypervolume <- function(x, reference, maximise = FALSE)
 #'
 #' @export
 #' @concept metrics
-hv_contributions <- function(x, reference, maximise = FALSE)
+hv_contributions <- function(x, reference, maximise = FALSE, ignore_dominated = TRUE)
 {
   x <- as_double_matrix(x)
   nobjs <- ncol(x)
@@ -173,5 +206,6 @@ hv_contributions <- function(x, reference, maximise = FALSE)
   }
   .Call(hv_contributions_C,
     t(x),
-    as.double(reference))
+    as.double(reference),
+    as.logical(ignore_dominated))
 }

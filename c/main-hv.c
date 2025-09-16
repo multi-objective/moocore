@@ -69,7 +69,9 @@ OPTION_VERSION_STR
 "                     quotes, e.g., \"10 10 10\". If no reference point is  \n"
 "                     given, it is taken as max + 0.1 * (max - min) for each\n"
 "                     coordinate from the union of all input points.        \n"
-" -c, --contributions print the exclusive contribution of each input point. \n"
+" -c, --contributions print the exclusive contribution of each input point; \n"
+"                     weakly dominated points have zero contribution and do \n"
+"                     not change the contribution of nondominated points.   \n"
 " -s, --suffix=STRING Create an output file for each input file by appending\n"
 "                     this suffix. This is ignored when reading from stdin. \n"
 "                     If missing, output is sent to stdout.                 \n"
@@ -180,7 +182,9 @@ hv_file (const char *filename, double *reference,
         double volume, time_elapsed;
         if (contributions_flag) {
             hvc = realloc(hvc, (cumsizes[n] - cumsize) * sizeof(*hvc));
-            volume = hv_contributions(hvc, &data[nobj * cumsize], nobj, cumsizes[n] - cumsize, reference);
+            volume = hv_contributions(hvc, &data[nobj * cumsize], nobj,
+                                      cumsizes[n] - cumsize, reference,
+                                      /*ignore_dominated=*/true);
         } else {
             volume = fpli_hv(&data[nobj * cumsize], nobj, cumsizes[n] - cumsize, reference);
         }

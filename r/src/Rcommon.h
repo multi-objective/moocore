@@ -176,3 +176,9 @@ matrix_copy_dimnames(SEXP dest, const SEXP src)
     Rf_setAttrib(dest, R_DimNamesSymbol, dimnames);
     UNPROTECT(nprotected);
 }
+
+static inline bool
+SEXP_is_true(SEXP x)
+{
+    return TYPEOF(x) == LGLSXP && Rf_length(x) == 1 && LOGICAL(x)[0] == 1;
+}
