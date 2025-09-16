@@ -916,7 +916,7 @@ def hv_approx(
     # np.asarray to convert it to floating-point, otherwise if a user inputs
     # something like ref = np.array([10, 10]) then numpy would interpret it as
     # an int array.
-    data, data_copied = asarray_maybe_copy(data)
+    data = np.asarray(data, dtype=float)
     nobj = data.shape[1]
     ref = atleast_1d_of_length_n(np.array(ref, dtype=float), nobj)
     if nobj != ref.shape[0]:
@@ -1731,7 +1731,7 @@ def eaf(
     percentile_p, npercentiles = np1d_to_double_array(percentiles)
 
     # Get C pointers + matrix size for calling CFFI generated extension module
-    data_p, npoints, nobj = np2d_to_double_array(data)
+    data_p, _, nobj = np2d_to_double_array(data)
     eaf_npoints = ffi.new("int *")
     eaf_data_p = lib.eaf_compute_matrix(
         eaf_npoints,

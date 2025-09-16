@@ -144,9 +144,8 @@ lint.extend-select = [
   "UP",
 ]
 lint.ignore = [
-  "D203",  # one-blank-line-before-class
-  "D213",  # multi-line-summary-second-line
-  "PD901", # pandas-df-variable-name
+  "D203", # one-blank-line-before-class
+  "D213", # multi-line-summary-second-line
 ]
 
 lint.extend-per-file-ignores."*benchmarks*/*.py" = [
