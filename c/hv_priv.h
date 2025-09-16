@@ -151,13 +151,6 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     assert(list->next[d] == list + 1);
     assert(q->next[d] == list + 2);
     for (i = 0, j = 0; j < n; j++) {
-#if HV_DIMENSION == 4
-        if (weakly_dominates(q->x, scratch[j], dim)) {
-            /* print_point("q", q->x); */
-            /* print_point("i", scratch[j]); */
-            continue;
-        }
-#endif
         dlnode_t * p = list3 + i;
         p->x = scratch[j];
 #if HV_DIMENSION == 4
