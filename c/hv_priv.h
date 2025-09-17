@@ -1,3 +1,6 @@
+#ifndef _HV_PRIV_H
+#define _HV_PRIV_H
+
 #if !defined(HV_DIMENSION) || (HV_DIMENSION != 3 && HV_DIMENSION != 4)
 #error "HV_DIMENSION must be 3 or 4"
 #endif
@@ -14,7 +17,7 @@
 */
 
 typedef struct dlnode {
-    const double *x;            // point coordinates (objective vector).
+    const double * x;            // point coordinates (objective vector).
     struct dlnode * next[HV_DIMENSION - 2]; /* keeps the points sorted according to coordinates 2,3 and 4
                                 (in the case of 2 and 3, only the points swept by 4 are kept) */
     struct dlnode * prev[HV_DIMENSION - 2]; //keeps the points sorted according to coordinates 2 and 3 (except the sentinel 3)
@@ -223,3 +226,4 @@ compute_area_simple(const double * px, const dlnode_t * q, int i)
     }
     return area;
 }
+#endif // _HV_PRIV_H

@@ -309,7 +309,7 @@ hvc_check(double hv_total, const double * restrict hvc,
     const double tolerance = sqrt(DBL_EPSILON);
     double hv_total_true = fpli_hv(points, dim, (int) size, ref);
     if (fabs(hv_total_true - hv_total) > tolerance) {
-        fatal_error("hv_total = %g != hv_total_true = %g !", hv_total, hv_total_true);
+        fatal_error("hv_total = %-22.15g != hv_total_true = %-22.15g !", hv_total, hv_total_true);
     }
     double * hvc_true = MOOCORE_MALLOC(size, double);
     /* The functions below will skip points that do not dominate the reference point.  */
@@ -321,7 +321,12 @@ hvc_check(double hv_total, const double * restrict hvc,
         hvc_1point_diffs(hvc_true, points, dim, size, ref, NULL, hv_total);
     for (size_t i = 0; i < size; i++) {
         if (fabs(hvc[i] - hvc_true[i]) > tolerance) {
-            fatal_error("hvc[%zu] = %g != hvc_true[%zu] = %g !", i, hvc[i], i, hvc_true[i]);
+            fprintf(stderr, "%-22.15g", points[i * dim]);
+            for (dimension_t d = 1; d < dim; d++) {
+                fprintf(stderr, " %-22.15g", points[i * dim + d]);
+            }
+            fprintf(stderr, "\n");
+            fatal_error("hvc[%zu] = %-22.15g != hvc_true[%zu] = %-22.15g !", i, hvc[i], i, hvc_true[i]);
         }
     }
     free(hvc_true);

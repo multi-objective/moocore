@@ -62,6 +62,7 @@ cmp_double_asc_rev(const void * restrict p1, const void * restrict p2, dimension
     return 0;
 }
 
+// Lexicographic order of coordinates (z,y,x)
 static inline int
 cmp_double_asc_rev_3d(const void * restrict p1, const void * restrict p2)
 {
