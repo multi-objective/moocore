@@ -410,9 +410,9 @@ def hypervolume(
 
     See Also
     --------
-    Hypervolume : object-oriented interface.
+    Hypervolume : Object-oriented interface.
     RelativeHypervolume : Compute hypervolume relative to a reference set.
-
+    hv_contributions: Hypervolume contribution of individual points.
 
     Notes
     -----
@@ -739,6 +739,10 @@ def hv_contributions(
     complexity.  Otherwise, the implementation uses the naive algorithm that
     requires calculating the hypervolume :math:`|X|+1` times.
 
+
+    References
+    ----------
+    .. footbibliography::
 
     Examples
     --------
