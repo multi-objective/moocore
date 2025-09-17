@@ -324,7 +324,7 @@ hv2d(const double * restrict data, size_t n, const double * restrict ref)
     return hyperv;
 }
 
-double hv3d_plus(const double * restrict data, size_t n, const double * restrict ref);
+double hv3d(const double * restrict data, size_t n, const double * restrict ref);
 double hv4d(const double * restrict data, size_t n, const double * restrict ref);
 
 /*
@@ -339,7 +339,7 @@ double fpli_hv(const double * restrict data, int d, int npoints,
     ASSUME(d < 256);
     ASSUME(d > 1);
     if (d == 4) return hv4d(data, n, ref);
-    if (d == 3) return hv3d_plus(data, n, ref);
+    if (d == 3) return hv3d(data, n, ref);
     if (d == 2) return hv2d(data, n, ref);
     dimension_t dim = (dimension_t) d;
     fpli_dlnode_t * list = fpli_setup_cdllist(data, dim, &n, ref);

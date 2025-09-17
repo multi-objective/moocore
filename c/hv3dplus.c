@@ -113,7 +113,7 @@ preprocessing(dlnode_t * list, size_t n)
     while (p != stop) {
         const double * px = p->x;
         const double * prev_x;
-        // == 1 means that nodeaux goes before pj, so move to the next one.
+        // == 1 means that nodeaux goes before p, so move to the next one.
         if (avl_search_closest(&tree, px, &nodeaux) == 1) {
             prev_x = node_point(nodeaux);
             nodeaux = nodeaux->next;
@@ -132,7 +132,7 @@ preprocessing(dlnode_t * list, size_t n)
             remove_from_z(p);
         } else {
             assert(node_point(nodeaux)[1] >= px[1]);
-            // Delete everything in the tree that is dominated by pj.
+            // Delete everything in the tree that is dominated by p.
             while (node_point(nodeaux)[0] >= px[0]) {
                 assert(node_point(nodeaux)[1] >= px[1]);
                 nodeaux = nodeaux->next;
@@ -157,7 +157,7 @@ compute_area3d_simple(const double * px, const dlnode_t * q)
 }
 
 static double
-hv3dplus(dlnode_t * list)
+hv3dplus_list(dlnode_t * list)
 {
     restart_list_y(list);
     assert(list+2 == list->prev[0]);
@@ -184,10 +184,10 @@ hv3dplus(dlnode_t * list)
 }
 
 double
-hv3d_plus(const double * restrict data, size_t n, const double * restrict ref)
+hv3d(const double * restrict data, size_t n, const double * restrict ref)
 {
     dlnode_t * list = setup_cdllist(data, n, ref);
-    double hv = hv3dplus(list);
+    double hv = hv3dplus_list(list);
     free_cdllist(list);
     return hv;
 }
