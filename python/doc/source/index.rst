@@ -66,7 +66,7 @@ performance measures, performance assessment
 Benchmarks
 ==========
 
-The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, and `jMetalPy`_. Other optimization packages are not included in the comparison because they are based on these packages for the functionality benchmarked, so they are **at least as slow** as them. For example `Xopt`_ uses `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ already uses `moocore`_ for hypervolume and other quality metrics, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.  We do not compare with the Bayesian optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and too slow to run the benchmarks in a reasonable time.
+The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, and `jMetalPy`_. Other optimization packages are not included in the comparison because they are based on these packages for the functionality benchmarked, so they are **at least as slow** as them. For example `Xopt`_ and `BoFire`_ use `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ already uses `moocore`_ for hypervolume and other quality metrics, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.  We do not compare with the Bayesian optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and too slow to run the benchmarks in a reasonable time.
 
 Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>` whereas `jMetalPy`_ does not provide the :ref:`IGD+ indicator <igd_hausdorf>`. `BoTorch`_ provides neither of them.
 
@@ -98,7 +98,7 @@ The following plots compare the speed of finding nondominated solutions, equival
 Exact computation of hypervolume
 --------------------------------
 
-The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D, 4D, 5D and 6D. As the plots show, `moocore`_ is 100 times faster than the other packages and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_.  `BoTorch`_ is not included for more than 4 objectives because it is tens of thousands of times slower than `moocore`_.
+The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D, 4D, 5D and 6D. As the plots show, `moocore`_ is 100 times faster than the other packages and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_ and `BoFire`_.  `BoTorch`_ is not included for more than 4 objectives because it is tens of thousands of times slower than `moocore`_.
 
 |hv_bench-DTLZLinearShape-3d| |hv_bench-DTLZLinearShape-4d|
 
@@ -212,6 +212,7 @@ The following plots compare the speed of computing the :ref:`epsilon indicator  
 .. _jMetalPy: https://jmetal.github.io/jMetalPy/index.html
 .. _DEAP: https://deap.readthedocs.io/en/master/
 .. _Xopt: https://xopt.xopt.org/index.html
+.. _BoFire: https://experimental-design.github.io/bofire/
 .. _pysamoo: https://anyoptimization.com/projects/pysamoo/
 .. _DESDEO: https://desdeo.readthedocs.io/en/latest/
 .. _trieste: https://secondmind-labs.github.io/trieste
