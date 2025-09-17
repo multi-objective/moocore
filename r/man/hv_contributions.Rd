@@ -62,9 +62,7 @@ Otherwise, the implementation uses the naive algorithm that requires
 calculating the hypervolume \eqn{|X|+1} times.
 }
 \references{
-\insertRef{FonPaqLop06:hypervolume}{moocore}
-
-\insertRef{BeuFonLopPaqVah09:tec}{moocore}
+\insertAllCited{}
 }
 \seealso{
 \code{\link[=hypervolume]{hypervolume()}}

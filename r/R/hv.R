@@ -153,9 +153,7 @@ hypervolume <- function(x, reference, maximise = FALSE)
 #'
 #' @references
 #'
-#' \insertRef{FonPaqLop06:hypervolume}{moocore}
-#'
-#' \insertRef{BeuFonLopPaqVah09:tec}{moocore}
+#' \insertAllCited{}
 #'
 #' @doctest
 #'
