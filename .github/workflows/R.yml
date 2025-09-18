@@ -210,6 +210,9 @@ jobs:
           r-version: ${{ matrix.r }}
           use-public-rspm: true
 
+      - name: Install optipng
+        run: sudo apt-get install -y optipng
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           install-pandoc: true

@@ -18,6 +18,7 @@ TAGS
 ^\.pre-commit-config\.yaml$
 ^\.travis
 ^_pkgdown.yml
+^benchmarks.html
 ^codecov.yml
 ^config.status
 ^do.R$

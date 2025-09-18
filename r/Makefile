@@ -107,3 +107,6 @@ winbuild winbuild_:
 
 covr:
 	$(Reval) "Sys.setenv(NOT_CRAN='true');covr::report(covr::package_coverage(type='all', quiet=FALSE), browse=TRUE)"
+
+benchmarks:
+	$(Reval) "rmarkdown::render('vignettes/articles/benchmarks.Rmd', output_dir='./', params = list(run_benchmarks=TRUE))"

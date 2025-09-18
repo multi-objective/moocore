@@ -42,4 +42,4 @@ SystemRequirements: GNU make
 RdMacros: Rdpack
 Config/testthat/edition: 3
 Language: en-GB
-Config/Needs/website: rmarkdown, tidyr, dplyr, ggplot2, scales, Hmisc
+Config/Needs/website: rmarkdown, tidyr, dplyr, ggplot2, scales, Hmisc, data.table, ggplot2
