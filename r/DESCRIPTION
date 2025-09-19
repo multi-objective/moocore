@@ -22,7 +22,6 @@ Imports:
         Rdpack
 Suggests:
     doctest (>= 0.3.0),
-    knitr,
     spelling,
     testthat (>= 3.2.0),
     withr
@@ -42,4 +41,13 @@ SystemRequirements: GNU make
 RdMacros: Rdpack
 Config/testthat/edition: 3
 Language: en-GB
-Config/Needs/website: rmarkdown, tidyr, dplyr, ggplot2, scales, Hmisc, data.table, ggplot2
+Config/Needs/website:
+        Hmisc,
+        data.table,
+        dplyr,
+        ggplot2,
+        knitr,
+        kableExtra,
+        rmarkdown,
+        scales,
+        tidyr

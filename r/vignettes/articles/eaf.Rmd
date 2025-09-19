@@ -4,26 +4,25 @@ bibliography: REFERENCES.bib
 link-citations: true
 ---
 
-```{r, include = FALSE}
+```{r}
+#| include: false
+knitr::knit_hooks$set(optipng = knitr::hook_optipng)
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  optipng = "-quiet"
 )
 ```
 
-```{r setup}
-library(moocore)
-```
-
-The AUC of the EAF and the AOC (Hypervolume)
---------------------------------------------
+# The AUC of the EAF and the AOC (Hypervolume)
 
 The Area-Over-the-Curve (i.e., the hypervolume) of a set of nondominated sets
-is exactly the the Area-Under-the-Curve (AUC) of their corresponding EAF [@LopVerDreDoe2025], as
-this example shows.
+is exactly the the Area-Under-the-Curve (AUC) of their corresponding EAF
+[@LopVerDreDoe2025], as this example shows.
 
 
 ```{r auc}
+library(moocore)
 library(tidyr)
 library(ggplot2)
 
@@ -60,7 +59,7 @@ x <- tibble(r = runs, AOC = aocs, AUC=aucs) %>% pivot_longer(-r, names_to = "var
 #| fig.alt = "Plot of EAF AUC versus mean AOC with increasing number of sets."
 ggplot(x, aes(r, value, color=variable, linetype=variable)) +
   geom_line(linewidth=1.5) +
-  labs(x = "Number of sets", y = "Value", color = "", linetype="")
+  labs(x = "Number of sets", y = "Value", color = "", linetype = "")
 ```
 
 # References

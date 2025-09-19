@@ -8,7 +8,6 @@ params:
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteIndexEntry{Benchmarks}
-  %\VignetteEncoding{UTF-8}
 ---
 
 <style>
@@ -20,12 +19,13 @@ vignette: >
 </style>
 
 
-```{r, include = FALSE}
+```{r}
+#| include: false
 knitr::knit_hooks$set(optipng = knitr::hook_optipng)
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  optipng = '-o5 -quiet'
+  optipng = "-quiet"
 )
 run_benchmarks <- params$run_benchmarks
 ```
@@ -34,7 +34,8 @@ The following plots compare the performance of [`moocore`][moocore] against [`em
 
 <details><summary>Show benchmarking setup code</summary>
 
-```{r setup, class.source='fold-show'}
+```{r setup}
+#| class.source: 'fold-show'
 library(matrixStats)
 library(data.table)
 library(ggplot2)
@@ -76,7 +77,7 @@ benchmark_plot <- function (x, title = "", only_seconds=TRUE, ...) {
   if (only_seconds) {
     tall <- tall[unit=="seconds", ]
     ylab <- "CPU time (seconds)"
-    legend.position <- c(0.8, 0.15)
+    legend.position <- c(0.25, 0.9)
   } else {
     ylab <- "median line, min/max band"
     legend.position <- c(0.8, 0.625)
@@ -121,12 +122,17 @@ benchmark <- function(name, x, N, setup, expr.list, prefix, title) {
 ```
 </details>
 
-Identifying (non)dominated points
--------------------------------
+# Identifying (non)dominated points
 
 The following plots compare the speed of finding (non)dominated solutions, equivalent to `moocore::is_nondominated()`, in 2D and 3D. The plots show that [`moocore`][moocore] is always faster than [`bbotk`][bbotk].
 
-```{r ndom, fig.asp=0.8, fig.width=4.5, dpi=150, fig.show="hold", out.width = "50%", fig.align="default"}
+```{r ndom}
+#| fig.asp: 0.8
+#| fig.width: 4.5
+#| dpi: 150
+#| fig.show: 'hold'
+#| out.width :  '50%'
+#| fig.align: 'default'
 setup <- quote({
   stopifnot(nrow(x) >= N)
   z <- x[1:N, ]
@@ -151,12 +157,17 @@ for (name in names(files)) {
 ```
 
 
-Exact computation of hypervolume
---------------------------------
+# Exact computation of hypervolume
 
 The following plots compare the speed of computing the hypervolume indicator in 3D, 4D, 5D and 6D.
 
-```{r hv, fig.asp=0.8, fig.width=4.5, dpi=150, fig.show="hold", out.width="50%", fig.align="default" }
+```{r hv}
+#| fig.asp: 0.8
+#| fig.width: 4.5
+#| dpi: 150
+#| fig.show: 'hold'
+#| out.width: '50%'
+#| fig.align: 'default'
 setup <- quote({
   ref <- colMaxs(x, useNames = FALSE) + 1
   stopifnot(nrow(x) >= N)

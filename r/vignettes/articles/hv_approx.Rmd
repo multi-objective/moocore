@@ -4,10 +4,13 @@ bibliography: REFERENCES.bib
 link-citations: true
 ---
 
-```{r, include = FALSE}
+```{r}
+#| include: false
+knitr::knit_hooks$set(optipng = knitr::hook_optipng)
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  optipng = "-quiet"
 )
 ```
 
@@ -19,8 +22,7 @@ library(dplyr, warn.conflicts=FALSE)
 The following examples compare various ways of approximating the hypervolume of
 a nondominated set.
 
-Comparing HypE and DZ2019
--------------------------
+# Comparing HypE and DZ2019
 
 This example shows how to approximate the hypervolume metric of the `CPFs.txt`
 dataset using both `whv_hype()` (HypE), and `hv_approx()` (DZ2019) for several
@@ -81,7 +83,7 @@ cat(sep="\n", text)
 Next, we plot the results.
 
 
-```{r}
+```{r hype_dz2019}
 #| fig.alt = "Comparison of HypE and DZ2019 with increasing number of samples."
 library(ggplot2)
 library(scales)
@@ -95,15 +97,15 @@ ggplot(df, aes(samples, error, color=Method)) +
   theme_bw()
 ```
 
-Comparing Monte-Carlo and quasi-Monte-Carlo approximations
-----------------------------------------------------------
+# Comparing Monte-Carlo and quasi-Monte-Carlo approximations
 
 The quasi-Monte-Carlo approximation with `method=DZ2019-HW` is deterministic,
 but not monotonic on the number of samples. Nevertheless, it tends to be better
 than the Monte-Carlo approximation generated with `method=DZ2019-MC`, specially
 with large number of objectives.
 
-```{r}
+```{r dz2019_hw_vs_mc}
+#| fig.alt = "Comparison of Monte-Carlo and quasi-Monte-Carlo approximations."
 library(moocore)
 library(ggplot2)
 library(scales)

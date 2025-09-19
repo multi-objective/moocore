@@ -3,6 +3,7 @@
  * `hv_contributions()` ignores dominated points by default.  Set `ignore_dominated=FALSE` to restore the previous behavior.  The 3D case uses the HVC3D algorithm.
  * New function `any_dominated()`.
  * New article: "[Benchmarks](https://multi-objective.github.io/moocore/r/articles/benchmarks.html)"
+ * New article: "[Computing Multi-Objective Quality Metrics](https://multi-objective.github.io/moocore/r/articles/metrics.html)"
 
 # moocore 0.1.8
 

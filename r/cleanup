@@ -1,7 +1,10 @@
 #!/bin/sh
-rm -f  config.* confdefs.h tests/testthat/*.pdf \
-       src/*.o src/*.so src/symbols.rds \
-       inst/doc/*.blg inst/doc/*.bbl *-Ex.R benchmarks.html
+rm -f  \
+   *-Ex.R *.html config.* confdefs.h tests/testthat/*.pdf \
+   src/*.o src/*.so src/symbols.rds \
+   inst/doc/*.blg inst/doc/*.bbl \
+   vignettes/*.R vignettes/*.html \
+   vignettes/articles/*.R vignettes/articles/*.html \
 
 rm -rf autom4te.cache benchmarks_files
 find . -name '*.orig' -o -name '.Rhistory' -o -name '*.Rout' -print0 | xargs -0 rm -f
