@@ -104,7 +104,7 @@ plt.show()
 # both as equally good (epsilon is weakly Pareto compliant).
 #
 
-res = pd.DataFrame(
+pd.DataFrame(
     dict(
         A=[
             moocore.igd(A, ref),
@@ -123,5 +123,3 @@ res = pd.DataFrame(
     ),
     index=["IGD", "Hausdorff", "IGD+", "eps+", "HV"],
 )
-
-res
