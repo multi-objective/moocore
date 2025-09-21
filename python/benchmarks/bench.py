@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import moocore
 import timeit
 import cpuinfo
+import shutil
+import subprocess
 
 timeit_template_return_1_value = """
 def inner(_it, _timer{init}):
@@ -185,4 +187,9 @@ class Bench:
         )
         plt.title(f"({self.cpu_model})", fontsize=10)
         plt.suptitle(f"{title} for {self.name}", fontsize=12)
-        plt.savefig(f"{file_prefix}_bench-{self.name}-values.png")
+        png_file = f"{file_prefix}_bench-{self.name}-values.png"
+        plt.savefig(png_file)
+        # Optimize with optipng if available.
+        optipng = shutil.which("optipng")
+        if optipng:
+            subprocess.run([optipng, "-quiet", png_file])
