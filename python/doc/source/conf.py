@@ -34,6 +34,7 @@ year = date.today().year
 author = "Manuel López-Ibáñez and Fergus Rooney"
 copyright = f"2024-{year}, {author}"
 html_site_root = f"https://multi-objective.github.io/{project}/python/"
+github_url = f"https://github.com/multi-objective/{project}"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -55,6 +56,7 @@ extensions = [
     "sphinx.ext.autosummary",  # Create neat summary tables for modules/classes/methods etc
     "sphinx_copybutton",  # A small sphinx extension to add a "copy" button to code blocks.
     "sphinx.ext.mathjax",
+    "sphinx.ext.extlinks",
     # "sphinx.ext.autosectionlabel", DO NOT USE: causes duplicated labels.
     "sphinxcontrib.bibtex",
     "sphinx_gallery.gen_gallery",
@@ -67,6 +69,11 @@ copybutton_only_copy_prompt_lines = True
 copybutton_remove_prompts = True
 copybutton_copy_empty_lines = False
 
+
+extlinks = {
+    "issue": (github_url + "/issues/%s", "#%s"),
+    "pr": (github_url + "/pull/%s", "PR #%s"),
+}
 # -----------------------------------------------------------------------------
 # Autosummary
 # -----------------------------------------------------------------------------
@@ -141,7 +148,7 @@ html_theme = "pydata_sphinx_theme"
 
 html_theme_options = {
     "sidebar_includehidden": True,
-    "github_url": f"https://github.com/multi-objective/{project}",
+    "github_url": github_url,
     "collapse_navigation": True,
     "navigation_with_keys": False,
     "navbar_align": "left",
