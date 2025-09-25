@@ -4,7 +4,7 @@
  * New function `any_dominated()`.
  * New article: "[Benchmarks](https://multi-objective.github.io/moocore/r/articles/benchmarks.html)"
  * New article: "[Computing Multi-Objective Quality Metrics](https://multi-objective.github.io/moocore/r/articles/metrics.html)"
- * `is_nondominated()` and `any_dominated()` now handle single-objective inputs correctly (fixes #27).
+ * `is_nondominated()` and `any_dominated()` now handle single-objective inputs correctly (#27).
 
 # moocore 0.1.8
 
