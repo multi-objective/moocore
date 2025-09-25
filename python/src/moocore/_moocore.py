@@ -1204,10 +1204,24 @@ def is_nondominated(
 
     """
     data = np.asarray(data, dtype=float)
+    if len(data.shape) != 2:
+        raise ValueError("'data' must be a matrix")
+
     nrows, nobj = data.shape
     if nrows == 0:
         return np.array([], dtype=bool)
+
     maximise = _parse_maximise(maximise, nobj)
+
+    if nobj == 1:  # Handle single-objective inputs
+        if keep_weakly:
+            best = data.max() if maximise else data.min()
+            return (data == best).ravel()
+        else:
+            nondom = np.zeros(len(data), dtype=bool)
+            nondom[data.argmax() if maximise else data.argmin()] = True
+            return nondom
+
     data_p, npoints, nobj = np2d_to_double_array(data)
     npoints = ffi.cast("size_t", npoints)
     maximise_p = ffi.from_buffer("bool []", maximise)
@@ -1251,9 +1265,16 @@ def any_dominated(
         data = np.unique(data, axis=0)
 
     data = np.asarray(data, dtype=float)
+    if len(data.shape) != 2:
+        raise ValueError("'data' must be a matrix")
     nrows, nobj = data.shape
     if nrows == 0:
         raise ValueError("no points in the input data")
+    if nrows == 1:
+        return False
+    if nobj == 1:  # Handle single-objective inputs
+        # If there are more than one row, then something is dominated.
+        return True
 
     maximise = _parse_maximise(maximise, nobj)
     data_p, npoints, nobj = np2d_to_double_array(data)

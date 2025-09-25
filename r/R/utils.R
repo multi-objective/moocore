@@ -68,6 +68,22 @@ as_double_matrix <- function(x)
   x
 }
 
+# Same a as_double_matrix() but allow 1-column matrix.
+as_double_matrix_1 <- function(x)
+{
+  name <- deparse(substitute(x))   # FIXME: Only do this if there is an error.
+  if (length(dim(x)) != 2L)
+    stop("'", name, "' must be a data.frame or a matrix")
+  if (nrow(x) < 1L)
+    stop("not enough points (rows) in '", name, "'")
+  x <- as.matrix(x)
+  if (!is.numeric(x))
+    stop("'", name, "' must be numeric")
+  if (storage.mode(x) != "double")
+    storage.mode(x) <- "double"
+  x
+}
+
 is_wholenumber <- function(x, tol = .Machine$double.eps^0.5)
   is.finite(x) && abs(x - round(x)) < tol
 

@@ -77,8 +77,18 @@
 #' @concept dominance
 is_nondominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 {
-  x <- as_double_matrix(x)
+  x <- as_double_matrix_1(x)
   nobjs <- ncol(x)
+  if (nobjs == 1L) { # Handle single-objective
+    if (keep_weakly) {
+      best <- if (maximise) max(x) else min(x)
+      return(as.vector(x == best))
+    } else {
+      nondom <- logical(nrow(x))
+      nondom[if (maximise) which.max(x) else which.min(x)] <- TRUE
+      return(nondom)
+    }
+  }
   .Call(is_nondominated_C,
     t(x),
     rep_len(as.logical(maximise), nobjs),
@@ -98,10 +108,15 @@ filter_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 #' @export
 any_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 {
-  x <- as_double_matrix(x)
+  x <- as_double_matrix_1(x)
   if (keep_weakly)
     x <- x[!duplicated(x), , drop = FALSE]
+  nrows <- nrow(x)
+  if (nrows == 1L) return(FALSE)
   nobjs <- ncol(x)
+  # With a single-objective, if there are more than one row, then something is
+  # dominated.
+  if (nobjs == 1L) return(TRUE)
   .Call(any_dominated_C,
     t(x),
     rep_len(as.logical(maximise), nobjs))
