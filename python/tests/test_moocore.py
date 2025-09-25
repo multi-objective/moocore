@@ -6,17 +6,7 @@ from numpy.testing import (
     assert_allclose,
 )
 import math
-
 import moocore
-
-# FIXME: For some reason this stopped working!!!
-# def test_docstrings():
-#     import doctest
-#     doctest.FLOAT_EPSILON = 1e-9
-#     # Run doctests for "moocore" module and fail if one of the docstring tests is incorrect.
-#     failed, total = doctest.testmod(moocore, raise_on_error=True)
-#     assert failed == 0
-#     assert total > 0
 
 
 def test_read_datasets_data(test_datapath):
