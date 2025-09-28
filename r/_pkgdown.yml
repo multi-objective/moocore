@@ -1,9 +1,10 @@
-url: https://multi-objective.github.io/moocore/r/
+url: https://multi-objective.github.io/moocore/r
 
 repo:
   url:
     home: https://github.com/multi-objective/moocore/
     source: https://github.com/multi-objective/moocore/blob/HEAD/r/
+    issue: https://github.com/multi-objective/moocore/issues/
 
 template:
   bootstrap: 5
