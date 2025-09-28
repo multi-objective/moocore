@@ -28,6 +28,8 @@ _DATASETS_CHECKSUMS = {
     "DTLZLinearShape.8d.front.60pts.10": "ad1f23a6785025d13f364b925c8371389fbc42aaa5deba2ee7325330cb3528df",
     "ran.1000pts.3d.10": "45daca9bd1a6fd16cc4032853118713c3c05a42438642a74d2e85c074d279a62",
     "test2D-200k.inp.xz": "5e211ea67d228512bd27521fae63856c74694d0aa61fe077d5d37181623671ad",
+    "ran.40000pts.3d.1.xz": "69afefc93eb8e14f355a48b5e2dacc4f43d7fd01dfa7b4b4b3a35366a0504eba",
+    "DTLZLinearShape.4d.front.1000pts.10": "eedfd7c9db8632133301705aaa1c68b8e5e605f219fac44abd78521cd98f5e80",
 }
 
 
