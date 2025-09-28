@@ -66,6 +66,8 @@ def get_package_version(package):
             from jmetal import __version__ as version
         case "trieste":
             from trieste import __version__ as version
+        case "paretoset":
+            from paretoset import __version__ as version
         case "DEAP_er":
             # Requires version >= 0.2.0
             from deap_er import __version__ as version

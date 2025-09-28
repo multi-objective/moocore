@@ -11,7 +11,6 @@ import numpy as np
 import moocore
 import matplotlib.pyplot as plt
 
-
 import torch
 from botorch.utils.multi_objective.pareto import (
     is_non_dominated as botorch_is_nondominated,
@@ -23,6 +22,8 @@ from pymoo.util.nds.non_dominated_sorting import (
 from desdeo.tools.non_dominated_sorting import (
     non_dominated as desdeo_is_nondominated,
 )
+
+from paretoset import paretoset
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
 files = {
@@ -48,11 +49,12 @@ for name in names:
         name=name,
         n=n,
         bench={
-            "moocore": lambda z: bool2pos(
-                moocore.is_nondominated(z, maximise=True, keep_weakly=False)
+            "moocore": lambda z: moocore.is_nondominated(
+                z, maximise=True, keep_weakly=False
             ),
-            "botorch": lambda z: bool2pos(
-                botorch_is_nondominated(z, deduplicate=True)
+            "botorch": lambda z: botorch_is_nondominated(z, deduplicate=True),
+            "paretoset": lambda z: paretoset(
+                z, sense=z.shape[1] * ["max"], distinct=True, use_numba=True
             ),
         },
     )
@@ -101,6 +103,14 @@ for name in names:
             ),
             "botorch": lambda z: bool2pos(
                 botorch_is_nondominated(z, deduplicate=False)
+            ),
+            "paretoset": lambda z: bool2pos(
+                paretoset(
+                    z,
+                    sense=z.shape[1] * ["max"],
+                    distinct=False,
+                    use_numba=True,
+                )
             ),
             "pymoo": lambda z, nds=pymoo_NonDominatedSorting(): nds.do(
                 -z, only_non_dominated_front=True

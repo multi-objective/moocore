@@ -66,9 +66,9 @@ performance measures, performance assessment
 Benchmarks
 ==========
 
-The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, and `jMetalPy`_. Other Python packages are not included in the comparison because they are based on these packages for the functionality benchmarked, so they are **at least as slow** as them. For example `Xopt`_ and `BoFire`_ use `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ already uses `moocore`_ for hypervolume and other quality metrics, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.  We do not compare with the Bayesian optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and too slow to run the benchmarks in a reasonable time.
+The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, `DESDEO`_, `paretoset`_ and `jMetalPy`_. Other Python packages are not included in the comparison because they are based on these packages for the functionality benchmarked, so they are **at least as slow** as them. For example `Xopt`_ and `BoFire`_ use `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ already uses `moocore`_ for hypervolume and other quality metrics, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.  We do not compare with the Bayesian optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and too slow to run the benchmarks in a reasonable time.
 
-Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>` whereas `jMetalPy`_ does not provide the :ref:`IGD+ indicator <igd_hausdorf>`. `BoTorch`_ provides neither of them.
+Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>` whereas `jMetalPy`_ does not provide the :ref:`IGD+ indicator <igd_hausdorf>`. `BoTorch`_ provides neither of them. `paretoset`_ only identifies nondominated points.
 
 The source code for the benchmarks below can be found at https://github.com/multi-objective/moocore/tree/main/python/benchmarks .
 
@@ -76,7 +76,7 @@ The source code for the benchmarks below can be found at https://github.com/mult
 Identifying nondominated points
 -------------------------------
 
-The following plots compare the speed of finding nondominated solutions, equivalent to :func:`moocore.is_nondominated`, in 2D and 3D. We test both ``keep_weakly=True`` and ``keep_weakly=False`` (the latter is not supported by `pymoo`_ nor `DESDEO`_).  The plots show that `moocore`_ is 10 times faster than `DESDEO`_ and 100 times faster than the other packages.
+The following plots compare the speed of finding nondominated solutions, equivalent to :func:`moocore.is_nondominated`, in 2D and 3D. We test both ``keep_weakly=True`` and ``keep_weakly=False`` (the latter is not supported by `pymoo`_ nor `DESDEO`_).  The plots show that `moocore`_ is 10 times faster than `DESDEO`_ and `paretoset`_ and 100 times faster than the other packages.
 
 |wndom_bench-test2D-200k| |wndom_bench-ran3d-10k|
 
@@ -217,6 +217,7 @@ The following plots compare the speed of computing the :ref:`epsilon indicator  
 .. _DESDEO: https://desdeo.readthedocs.io/en/latest/
 .. _trieste: https://secondmind-labs.github.io/trieste
 .. _Numba: https://numba.pydata.org/numba-doc/dev/index.html
+.. _paretoset: https://github.com/tommyod/paretoset
 
 .. This is not really the index page, that is found in
    _templates/indexcontent.html The toctree content here will be added to the
