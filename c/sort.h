@@ -30,11 +30,12 @@ weakly_dominates(const double * restrict x, const double * restrict y, const dim
             return false;
     return true;
     */
-    // GCC 15 is not yet able to infer this from attribute ASSUME().
-    bool x_leq_y = (x[0] <= y[0]) & (x[1] <= y[1]);
+    // GCC 15 is not able to infer this initialization from ASSUME().
+    // unsigned instead of bool to help auto-vectorization.
+    unsigned x_leq_y = (x[0] <= y[0]) & (x[1] <= y[1]);
     for (dimension_t d = 2; d < dim; d++)
         x_leq_y &= (x[d] <= y[d]);
-    return x_leq_y;
+    return (bool) x_leq_y;
 }
 
 static inline bool
@@ -48,11 +49,12 @@ all_equal_double(const double * restrict x, const double * restrict y, dimension
 {
     ASSUME(dim >= 2);
     // The code below is written in a way that helps vectorization.
-    // GCC 15 is not yet able to infer this from attribute ASSUME().
-    bool x_eq_y = (x[0] == y[0]) & (x[1] == y[1]);
+    // GCC 15 is not able to infer this initialization from ASSUME().
+    // unsigned instead of bool to help auto-vectorization.
+    unsigned x_eq_y = (x[0] == y[0]) & (x[1] == y[1]);
     for (dimension_t d = 2; d < dim; d++)
         x_eq_y &= (x[d] == y[d]);
-    return x_eq_y;
+    return (bool) x_eq_y;
 }
 
 // ---------- Comparison functions (e.g, qsort). Return 'int' ----------------
