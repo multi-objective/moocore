@@ -56,27 +56,6 @@ force_agree_minimize(const double * restrict points, dimension_t dim, size_t siz
     return pnew;
 }
 
-static inline int
-cmp_double_asc_x_des_y(const void * restrict p1, const void * restrict p2)
-{
-    const double x1 = *(const double *)p1;
-    const double x2 = *(const double *)p2;
-    const double y1 = *((const double *)p1+1);
-    const double y2 = *((const double *)p2+1);
-    return (x1 < x2) ? -1: ((x1 > x2) ? 1 : (y1 > y2 ? -1 : 1));
-}
-
-static inline int
-cmp_double_asc_x_asc_y(const void * restrict p1, const void * restrict p2)
-{
-    const double x1 = *(const double *)p1;
-    const double x2 = *(const double *)p2;
-    const double y1 = *((const double *)p1+1);
-    const double y2 = *((const double *)p2+1);
-    return (x1 < x2) ? -1: ((x1 > x2) ? 1 : (y1 < y2 ? -1 : 1));
-}
-
-
 static inline const double **
 generate_sorted_pp_2d(const double *points, size_t size)
 {
@@ -84,7 +63,8 @@ generate_sorted_pp_2d(const double *points, size_t size)
     for (size_t k = 0; k < size; k++)
         p[k] = points + 2 * k;
 
-    qsort(p, size, sizeof(*p), &cmp_double_2d_asc);
+    // Sort in ascending lexicographic order from the last dimension.
+    qsort(p, size, sizeof(*p), &cmp_double_asc_rev_2d);
     return p;
 }
 
@@ -95,7 +75,8 @@ generate_sorted_pp_3d(const double *points, size_t size)
     for (size_t k = 0; k < size; k++)
         p[k] = points + 3 * k;
 
-    qsort(p, size, sizeof(*p), &cmp_double_3d_asc);
+    // Sort in ascending lexicographic order from the last dimension.
+    qsort(p, size, sizeof(*p), &cmp_double_asc_rev_3d);
     return p;
 }
 
