@@ -5,6 +5,7 @@
  * `hv_contributions()` gains a parameter `ignore_dominated`.  The 3D case uses the HVC3D algorithm implemented in `hvc3d()`.
  * In the output of `hv --contributions`, dominated points do not affect the
    contribution of nondominated points.
+ * `find_dominated_point_()` and `find_nondominated_set_()` are significantly faster due to several code optimizations.
 
 ## 0.16.6
 
