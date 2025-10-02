@@ -5,7 +5,7 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
-from bench import Bench, get_range
+from bench import Bench, get_geomrange
 
 import numpy as np
 import moocore
@@ -27,23 +27,35 @@ from paretoset import paretoset
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
 files = {
-    "test2D-200k": dict(file="test2D-200k.inp.xz", range=(2000, 20_000, 2000)),
-    "ran3d-10k": dict(file="ran.1000pts.3d.10", range=(1000, 10_000, 1000)),
+    # range are the (start, stop, num) parameters for np.geomspace()
+    "test2D-200k": dict(file="test2D-200k.inp.xz", range=(1000, 50_000, 10)),
+    "ran3d-40k": dict(file="ran.40000pts.3d.1.xz", range=(1000, 40_000, 10)),
+    "sphere-4d": dict(
+        generate=(30000, 4, "sphere", 42), range=(1000, 30000, 10)
+    ),
+    "sphere-5d": dict(
+        generate=(20000, 5, "sphere", 42), range=(1000, 20000, 10)
+    ),
 }
-
-
-title = "is_non_dominated(keep_weakly=False)"
-file_prefix = "ndom"
 
 
 def bool2pos(x):
     return np.nonzero(np.asarray(x))[0]
 
 
+def get_dataset(name):
+    if "generate" in files[name]:
+        n, d, method, seed = files[name]["generate"]
+        return moocore.generate_ndset(n, d, method=method, seed=seed)
+    return moocore.get_dataset(files[name]["file"])[:, :-1]
+
+
+title = "is_non_dominated(keep_weakly=False)"
+file_prefix = "ndom"
 names = files.keys()
 for name in names:
-    x = moocore.get_dataset(files[name]["file"])[:, :-1]
-    n = get_range(len(x), *files[name]["range"])
+    x = get_dataset(name)
+    n = get_geomrange(len(x), *files[name]["range"])
 
     bench = Bench(
         name=name,
@@ -83,7 +95,7 @@ for name in names:
             )
 
     del values
-    bench.plots(file_prefix=file_prefix, title=title)
+    bench.plots(file_prefix=file_prefix, title=title, log="xy")
 
 
 title = "is_non_dominated(keep_weakly=True)"
@@ -91,8 +103,8 @@ file_prefix = "wndom"
 
 names = files.keys()
 for name in names:
-    x = moocore.get_dataset(files[name]["file"])[:, :-1]
-    n = get_range(len(x), *files[name]["range"])
+    x = get_dataset(name)
+    n = get_geomrange(len(x), *files[name]["range"])
 
     bench = Bench(
         name=name,
@@ -143,6 +155,6 @@ for name in names:
             )
 
     del values
-    bench.plots(file_prefix=file_prefix, title=title)
+    bench.plots(file_prefix=file_prefix, title=title, log="xy")
 
 plt.show()

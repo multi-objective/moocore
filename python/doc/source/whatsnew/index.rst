@@ -14,7 +14,7 @@ Version 0.1.9 (dev)
   sets with different shapes.
 - New example :ref:`sphx_glr_auto_examples_plot_generate.py`.
 - :func:`~moocore.is_nondominated` and :func:`~moocore.any_dominated` now handle single-objective inputs correctly (:issue:`27`).
-
+- :func:`~moocore.is_nondominated` and :func:`~moocore.filter_dominated` are faster for dimensions larger than 3.
 
 Version 0.1.8 (15/07/2025)
 --------------------------

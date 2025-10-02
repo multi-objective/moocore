@@ -2,6 +2,7 @@ import pathlib
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FixedLocator, FixedFormatter
 import moocore
 import timeit
 import cpuinfo
@@ -53,6 +54,10 @@ def get_range(lenx, start, stop, step):
     return np.arange(start, min(stop, lenx) + 1, step)
 
 
+def get_geomrange(lenx, start, stop, num):
+    return np.geomspace(start, min(stop, lenx), num=num, dtype=int)
+
+
 def get_package_version(package):
     package = package.split(maxsplit=1)[0]
     match package:
@@ -68,6 +73,8 @@ def get_package_version(package):
             from trieste import __version__ as version
         case "paretoset":
             from paretoset import __version__ as version
+        case "nevergrad":
+            from nevergrad import __version__ as version
         case "DEAP_er":
             # Requires version >= 0.2.0
             from deap_er import __version__ as version
@@ -112,6 +119,7 @@ class Bench:
     def __call__(self, what, n, *args, **kwargs):
         # FIXME: Ideally, bench() would call fun for each value in self.n
         assert n in self.n
+        # FIXME: Allow passing a setup() function.
         fun = self.bench[what]
         duration, value = timeit.Timer(lambda: fun(*args, **kwargs)).timeit(
             number=3
@@ -122,23 +130,29 @@ class Bench:
         print(f"{self.name}:{n}:{what}:{duration}")
         return value
 
-    def plots(self, title, file_prefix):
+    def plots(self, title, file_prefix, log="y"):
         for what in self.keys():
             self.times[what] = np.asarray(self.times[what])
 
+        logx = "x" in log
+        logy = "y" in log
         df = (
             pd.DataFrame(dict(n=self.n, **self.times))
             .set_index("n")
             .rename(columns=self.versions)
         )
-        df.plot(
+        ax = df.plot(
             grid=True,
-            logy=True,
+            logx=logx,
+            logy=logy,
             style="o-",
             title="",
             xticks=df.index,
             ylabel="CPU time (seconds)",
         )
+        if logx:
+            ax.xaxis.set_major_locator(FixedLocator(df.index))
+            ax.xaxis.set_major_formatter(FixedFormatter(df.index))
         plt.title(f"({self.cpu_model})", fontsize=10)
         plt.suptitle(f"{title} for {self.name}", fontsize=12)
         plt.savefig(f"{file_prefix}_bench-{self.name}-time.png")
@@ -157,13 +171,18 @@ class Bench:
                 .set_index("n")
                 .rename(columns=self.versions)
             )
-            df.plot(
+            ax = df.plot(
                 grid=True,
+                logx=logx,
+                logy=False,  # Looks bad with logy
                 style="o-",
                 title="",
                 xticks=df.index,
                 ylabel="Time relative to moocore",
             )
+            if logx:
+                ax.xaxis.set_major_locator(FixedLocator(df.index))
+                ax.xaxis.set_major_formatter(FixedFormatter(df.index))
             plt.title(f"({self.cpu_model})", fontsize=10)
             plt.suptitle(f"{title} for {self.name}", fontsize=12)
             plt.savefig(f"{file_prefix}_bench-{self.name}-reltime.png")
@@ -181,7 +200,8 @@ class Bench:
         )
         df.plot(
             grid=True,
-            logy=True,
+            logx=logx,
+            logy=logy,
             style="o-",
             title="",
             xticks=df.index,

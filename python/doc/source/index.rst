@@ -66,7 +66,7 @@ performance measures, performance assessment
 Benchmarks
 ==========
 
-The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, `DESDEO`_, `paretoset`_ and `jMetalPy`_. Other Python packages are not included in the comparison because they are based on these packages for the functionality benchmarked, so they are **at least as slow** as them. For example `Xopt`_ and `BoFire`_ use `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ already uses `moocore`_ for hypervolume and other quality metrics, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.  We do not compare with the Bayesian optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and too slow to run the benchmarks in a reasonable time.
+The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, `DESDEO`_, `paretoset`_, `Nevergrad`_ and `jMetalPy`_. Other Python packages are not included in the comparison because they are based on these packages for the functionality benchmarked, so they are **at least as slow** as them. For example `Xopt`_ and `BoFire`_ use `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ already uses `moocore`_ for hypervolume and other quality metrics, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.  We do not compare with the Bayesian optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and too slow to run the benchmarks in a reasonable time.
 
 Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>` whereas `jMetalPy`_ does not provide the :ref:`IGD+ indicator <igd_hausdorf>`. `BoTorch`_ provides neither of them. `paretoset`_ only identifies nondominated points.
 
@@ -78,27 +78,45 @@ Identifying nondominated points
 
 The following plots compare the speed of finding nondominated solutions, equivalent to :func:`moocore.is_nondominated`, in 2D and 3D. We test both ``keep_weakly=True`` and ``keep_weakly=False`` (the latter is not supported by `pymoo`_ nor `DESDEO`_).  The plots show that `moocore`_ is 10 times faster than `DESDEO`_ and `paretoset`_ and 100 times faster than the other packages.
 
-|wndom_bench-test2D-200k| |wndom_bench-ran3d-10k|
+|wndom_bench-test2D-200k| |wndom_bench-ran3d-40k|
 
 .. |wndom_bench-test2D-200k| image:: _static/bench/wndom_bench-test2D-200k-time.png
    :width: 49%
 
-.. |wndom_bench-ran3d-10k| image:: _static/bench/wndom_bench-ran3d-10k-time.png
+.. |wndom_bench-ran3d-40k| image:: _static/bench/wndom_bench-ran3d-40k-time.png
    :width: 49%
 
-|ndom_bench-test2D-200k| |ndom_bench-ran3d-10k|
+|ndom_bench-test2D-200k| |ndom_bench-ran3d-40k|
 
 .. |ndom_bench-test2D-200k| image:: _static/bench/ndom_bench-test2D-200k-time.png
    :width: 49%
 
-.. |ndom_bench-ran3d-10k| image:: _static/bench/ndom_bench-ran3d-10k-time.png
+.. |ndom_bench-ran3d-40k| image:: _static/bench/ndom_bench-ran3d-40k-time.png
    :width: 49%
 
+For dimensions larger than 3, :func:`moocore.is_nondominated` still uses the
+naive :math:`O(m n^2)` algorithm.  Nevertheless, the plots show that `moocore`_ is still consistently faster than the other packages.
+
+|wndom_bench-sphere-4d| |wndom_bench-sphere-5d|
+
+.. |wndom_bench-sphere-4d| image:: _static/bench/wndom_bench-sphere-4d-time.png
+   :width: 49%
+
+.. |wndom_bench-sphere-5d| image:: _static/bench/wndom_bench-sphere-5d-time.png
+   :width: 49%
+
+|ndom_bench-sphere-4d| |ndom_bench-sphere-5d|
+
+.. |ndom_bench-sphere-4d| image:: _static/bench/ndom_bench-sphere-4d-time.png
+   :width: 49%
+
+.. |ndom_bench-sphere-5d| image:: _static/bench/ndom_bench-sphere-5d-time.png
+   :width: 49%
 
 Exact computation of hypervolume
 --------------------------------
 
-The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D, 4D, 5D and 6D. As the plots show, `moocore`_ is 100 times faster than the other packages and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_ and `BoFire`_.  `BoTorch`_ is not included for more than 4 objectives because it is tens of thousands of times slower than `moocore`_.
+The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D, 4D, 5D and 6D. As the plots show, `moocore`_ is 100 times faster than the other packages and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_ and `BoFire`_.  `BoTorch`_ is not included for more than 4 objectives because **it is tens of thousands of times slower** than `moocore`_. `Nevergrad`_ is not included for more than 5 objectives for the same reason.
 
 |hv_bench-DTLZLinearShape-3d| |hv_bench-DTLZLinearShape-4d|
 
@@ -218,6 +236,7 @@ The following plots compare the speed of computing the :ref:`epsilon indicator  
 .. _trieste: https://secondmind-labs.github.io/trieste
 .. _Numba: https://numba.pydata.org/numba-doc/dev/index.html
 .. _paretoset: https://github.com/tommyod/paretoset
+.. _Nevergrad: https://facebookresearch.github.io/nevergrad/
 
 .. This is not really the index page, that is found in
    _templates/indexcontent.html The toctree content here will be added to the

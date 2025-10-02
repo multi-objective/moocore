@@ -7,3 +7,4 @@ pymoo
 jmetal
 desdeo
 paretoset
+nevergrad

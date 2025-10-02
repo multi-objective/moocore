@@ -16,6 +16,9 @@ from botorch.utils.multi_objective.hypervolume import Hypervolume as botorch_HV
 import torch
 from pymoo.indicators.hv import Hypervolume as pymoo_HV
 from jmetal.core.quality_indicator import HyperVolume as jmetal_HV
+from nevergrad.optimization.multiobjective import HypervolumeIndicator as ng_HV
+
+
 # from trieste.acquisition.multi_objective import Pareto as trieste_Pareto
 # import tensorflow as tf
 
@@ -31,7 +34,7 @@ files = {
     ),
     "DTLZLinearShape.4d": dict(
         file=path_to_data + "DTLZLinearShape.4d.front.1000pts.10",
-        range=(300, 1500, 200),
+        range=(100, 1000, 150),
     ),
     "DTLZLinearShape.5d": dict(
         file=path_to_data + "DTLZLinearShape.5d.front.500pts.10",
@@ -49,7 +52,8 @@ file_prefix = "hv"
 names = files.keys()
 for name in names:
     x = read_datasets_and_filter_dominated(files[name]["file"])
-    ref = np.ones(x.shape[1])
+    dim = x.shape[1]
+    ref = np.ones(dim)
     n = get_range(len(x), *files[name]["range"])
 
     benchmarks = {
@@ -57,13 +61,16 @@ for name in names:
         "pymoo": lambda z, hv=pymoo_HV(ref_point=ref): hv(z),
         "jMetalPy": lambda z, hv=jmetal_HV(ref): hv.compute(z),
     }
-    if name not in ["DTLZLinearShape.5d", "DTLZLinearShape.6d"]:
+    if dim < 5:
         ## Trieste is hundreds of times slower than botorch. It is so slow that
         ## we cannot run the benchmark with the initial value of 500 points.
         # benchmarks["trieste"] = lambda z, tf_ref=tf.convert_to_tensor(ref): float(trieste_Pareto(z, already_non_dominated=True).hypervolume_indicator(tf_ref))
         benchmarks["botorch"] = lambda z, hv=botorch_HV(
             ref_point=torch.from_numpy(-ref)
         ): hv.compute(z)
+    if dim < 6:
+        # Nevergrad is too slow
+        benchmarks["nevergrad"] = lambda z, hv=ng_HV(ref): hv.compute(z)
 
     bench = Bench(name=name, n=n, bench=benchmarks)
     values = {}
