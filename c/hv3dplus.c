@@ -44,20 +44,20 @@ static double
 hv3dplus_list(dlnode_t * list)
 {
     restart_list_y(list);
-    assert(list+2 == list->prev[0]);
+    assert(list + 2 == list->prev[0]);
 
     double area = 0, volume = 0;
-    dlnode_t * p = (list+1)->next[0];
-    const dlnode_t * stop = list+2;
+    dlnode_t * p = (list + 1)->next[0];
+    const dlnode_t * stop = list + 2;
     while (p != stop) {
         area += compute_area3d_simple(p->x, p->cnext[0]);
         p->cnext[0]->cnext[1] = p;
         p->cnext[1]->cnext[0] = p;
-        ASSERT_OR_DO(
-            (p->next[0]->x[2] > p->x[2]) || (p->next[0]->x[0] < p->x[0]) || (p->next[0]->x[1] < p->x[1]),
-            print_x(p);
-            print_x(p->next[0]);
-            );
+        ASSERT_OR_DO((p->next[0]->x[2] > p->x[2]) ||
+                         (p->next[0]->x[0] < p->x[0]) ||
+                         (p->next[0]->x[1] < p->x[1]),
+                     print_x(p);
+                     print_x(p->next[0]););
         assert(area > 0);
         /* It is possible to have two points with the same z-value, e.g.,
            (1,2,3) and (2,1,3). */

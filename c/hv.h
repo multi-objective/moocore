@@ -25,9 +25,11 @@
 // C++ needs to know that types and declarations are C, not C++.
 BEGIN_C_DECLS
 
-MOOCORE_API double fpli_hv(const double *data, int d, int n, const double *ref);
-MOOCORE_API double hv_contributions(double *hvc, double *points, int dim, int size,
-                                    const double * ref, bool ignore_dominated);
+MOOCORE_API double fpli_hv(const double * data, int d, int n,
+                           const double * ref);
+MOOCORE_API double hv_contributions(double * hvc, double * points, int dim,
+                                    int size, const double * ref,
+                                    bool ignore_dominated);
 END_C_DECLS
 
 #endif // HV_H_

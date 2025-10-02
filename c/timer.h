@@ -15,7 +15,7 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
-typedef enum type_timer {REAL_TIME, VIRTUAL_TIME} TIMER_TYPE;
+typedef enum type_timer { REAL_TIME, VIRTUAL_TIME } TIMER_TYPE;
 void Timer_start(void);
 double Timer_elapsed_virtual(void);
 double Timer_elapsed_real(void);

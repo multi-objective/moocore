@@ -1,0 +1,75 @@
+---
+# Configuration for clang-format to match the existing C/C++ code style
+Language: Cpp
+BasedOnStyle: LLVM
+
+# Indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ContinuationIndentWidth: 4
+
+# Column limit
+ColumnLimit: 80
+
+# Brace style
+BreakBeforeBraces: Linux
+
+# Function style - return type on its own line
+AlwaysBreakAfterReturnType: TopLevelDefinitions
+
+# Pointer and reference alignment - space on both sides is most common
+PointerAlignment: Middle
+DerivePointerAlignment: false
+
+# Space style
+SpaceAfterCStyleCast: false
+SpaceBeforeParens: ControlStatements
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterForeachMacros: true
+  AfterFunctionDefinitionName: false
+  AfterFunctionDeclarationName: false
+  AfterIfMacros: true
+  AfterOverloadedOperator: false
+  BeforeNonEmptyParentheses: false
+
+# Preprocessor indentation - None to preserve current style
+IndentPPDirectives: None
+
+# Comment alignment
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 0
+SpacesBeforeTrailingComments: 1
+
+# Line breaks
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+
+# Includes
+SortIncludes: false
+
+# Bin packing
+BinPackParameters: true
+BinPackArguments: true
+AllowAllParametersOfDeclarationOnNextLine: true
+
+# Alignment
+AlignConsecutiveMacros:
+  Enabled: false
+AlignConsecutiveAssignments:
+  Enabled: false
+AlignConsecutiveDeclarations:
+  Enabled: false
+
+# Macro formatting - don't reformat multi-line macros
+AlignEscapedNewlines: Left
+
+# Other
+KeepEmptyLinesAtTheStartOfBlocks: true
+MaxEmptyLinesToKeep: 2
+ReflowComments: false

@@ -15,35 +15,49 @@ typedef uint8_t word_offset_t; // Offset within a 64 bit word
 static const size_t bit_array_word_size = sizeof(bit_array_word_t) * 8;
 
 static inline size_t
-bitset_index(const bit_array *b, size_t pos) { return(pos % (sizeof(*b)*8)); }
+bitset_index(const bit_array * b, size_t pos)
+{
+    return (pos % (sizeof(*b) * 8));
+}
 
 static inline size_t
-bitset_word(const bit_array *b, size_t pos) { return(pos / (sizeof(*b)*8)); }
+bitset_word(const bit_array * b, size_t pos)
+{
+    return (pos / (sizeof(*b) * 8));
+}
 
 static inline bit_array
-bitset_mask(size_t k) { return (bit_array)((bit_array)1 << k); }
-
-static inline void
-bit_array_set_one(bit_array * b, size_t i) {
-    b[bitset_word(b, i)] |= bitset_mask(bitset_index(b,i));
+bitset_mask(size_t k)
+{
+    return (bit_array)((bit_array)1 << k);
 }
 
 static inline void
-bit_array_set_zero(bit_array * b, size_t i) {
-    b[bitset_word(b,i)] &=~ bitset_mask(bitset_index(b,i));
+bit_array_set_one(bit_array * b, size_t i)
+{
+    b[bitset_word(b, i)] |= bitset_mask(bitset_index(b, i));
+}
+
+static inline void
+bit_array_set_zero(bit_array * b, size_t i)
+{
+    b[bitset_word(b, i)] &= ~bitset_mask(bitset_index(b, i));
 }
 
 static inline char
-bit_array_get(const bit_array * b, size_t i) {
-    return (b[bitset_word(b,i)] >> bitset_index(b,i)) & 0x1;
+bit_array_get(const bit_array * b, size_t i)
+{
+    return (b[bitset_word(b, i)] >> bitset_index(b, i)) & 0x1;
 }
 
 static inline size_t
-bit_nwords(size_t nbits) {
-    return  (nbits + bit_array_word_size - 1) / bit_array_word_size;
+bit_nwords(size_t nbits)
+{
+    return (nbits + bit_array_word_size - 1) / bit_array_word_size;
 }
 
-static inline size_t bit_array_bytesize(size_t n)
+static inline size_t
+bit_array_bytesize(size_t n)
 {
     return sizeof(bit_array_word_t) * bit_nwords(n);
 }
@@ -52,31 +66,32 @@ static inline bit_array *
 bit_array_alloc(size_t n)
 {
     //fprintf(stderr, "n= %ld, word_size = %ld size = %ld\n", n, bit_array_word_size, bit_nwords(n));
-    return (bit_array *) malloc(bit_array_bytesize(n));
+    return (bit_array *)malloc(bit_array_bytesize(n));
 }
 
 static inline bit_array *
 bit_array_calloc(size_t n)
 {
     //fprintf(stderr, "word_size = %ld size = %ld", bit_array_word_size, bit_nwords(n));
-    return (bit_array *) calloc(bit_nwords(n), sizeof(bit_array_word_t));
+    return (bit_array *)calloc(bit_nwords(n), sizeof(bit_array_word_t));
 }
 
 static inline bit_array *
-bit_array_realloc(bit_array *b, size_t n)
+bit_array_realloc(bit_array * b, size_t n)
 {
     //fprintf(stderr, "word_size = %ld size = %ld", bit_array_word_size, bit_nwords(n));
-    return (bit_array *) realloc(b, bit_array_bytesize(n));
+    return (bit_array *)realloc(b, bit_array_bytesize(n));
 }
 
 static inline void
-bit_array_zero_all(bit_array *b, size_t n)
+bit_array_zero_all(bit_array * b, size_t n)
 {
     memset(b, 0, sizeof(bit_array_word_t) * bit_nwords(n));
 }
 
 static inline void
-bit_array_set(bit_array * b, size_t i, bool x) {
+bit_array_set(bit_array * b, size_t i, bool x)
+{
     x ? bit_array_set_one(b, i) : bit_array_set_zero(b, i);
 }
 
@@ -84,21 +99,22 @@ bit_array_set(bit_array * b, size_t i, bool x) {
 static inline void
 bitset_check(const bit_array * restrict b, const bool * restrict ref, size_t n)
 {
-    for(size_t i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         if (bit_array_get(b, i) != ref[i]) {
-            fatal_error("bit_array_check_failed at %zu: %d != %d : %zu!\n",
-                        i, bit_array_get(b, i), ref[i], n);
+            fatal_error("bit_array_check_failed at %zu: %d != %d : %zu!\n", i,
+                        bit_array_get(b, i), ref[i], n);
         }
     }
 }
 static inline bit_array *
-bit_array_offset(bit_array *b, size_t k, size_t nbits)
+bit_array_offset(bit_array * b, size_t k, size_t nbits)
 {
     return b + k * bit_nwords(nbits);
 }
 
 static inline void
-bit_array_check (bit_array * restrict b, const bool * restrict ref, size_t n, size_t nbits)
+bit_array_check(bit_array * restrict b, const bool * restrict ref, size_t n,
+                size_t nbits)
 {
     for (size_t k = 0; k < n; k++) {
         // fprintf(stderr,"checking: k=%ld n=%ld, nbits=%ld offset=%ld\n",
@@ -108,14 +124,16 @@ bit_array_check (bit_array * restrict b, const bool * restrict ref, size_t n, si
 }
 
 static inline void
-bit_array_copy(bit_array * restrict dest, const bit_array * restrict src, size_t n) {
+bit_array_copy(bit_array * restrict dest, const bit_array * restrict src,
+               size_t n)
+{
     memcpy(dest, src, sizeof(bit_array_word_t) * bit_nwords(n));
 }
 
 #ifndef R_PACKAGE
 
 static inline void
-bit_array_fprintf(FILE *stream, bit_array *b, size_t n)
+bit_array_fprintf(FILE * stream, bit_array * b, size_t n)
 {
     for (size_t k = 0; k < n; k++) {
         fprintf(stream, "%d", bit_array_get(b, k) ? 1 : 0);

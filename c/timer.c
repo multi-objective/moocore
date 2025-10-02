@@ -46,13 +46,12 @@
  * Based on:
  * http://www.opengroup.org/onlinepubs/000095399/basedefs/sys/resource.h.html
  */
-#define RUSAGE_SELF     (1<<0)
-#define RUSAGE_CHILDREN (1<<1)
+#define RUSAGE_SELF (1 << 0)
+#define RUSAGE_CHILDREN (1 << 1)
 
-struct rusage
-{
-    struct timeval ru_utime;	/* user time used */
-    struct timeval ru_stime;	/* system time used */
+struct rusage {
+    struct timeval ru_utime; /* user time used */
+    struct timeval ru_stime; /* system time used */
 };
 
 /* Include only the minimum from windows.h */
@@ -62,17 +61,16 @@ struct rusage
 #include <windows.h>
 
 static void
-FILETIME_to_timeval (struct timeval *tv, FILETIME *ft)
+FILETIME_to_timeval(struct timeval * tv, FILETIME * ft)
 {
-    int64_t fulltime = ((((int64_t) ft->dwHighDateTime) << 32)
-                        | ((int64_t) ft->dwLowDateTime));
+    int64_t fulltime =
+        ((((int64_t)ft->dwHighDateTime) << 32) | ((int64_t)ft->dwLowDateTime));
     fulltime /= 10LL; /* 100-ns -> us */
-    tv->tv_sec  = (__typeof__(tv->tv_sec)) fulltime / 1000000L;
-    tv->tv_usec = (__typeof__(tv->tv_sec)) fulltime % 1000000L;
+    tv->tv_sec = (__typeof__(tv->tv_sec))fulltime / 1000000L;
+    tv->tv_usec = (__typeof__(tv->tv_sec))fulltime % 1000000L;
 }
 
-static int __cdecl
-getrusage(int who, struct rusage *r_usage)
+static int __cdecl getrusage(int who, struct rusage * r_usage)
 {
     FILETIME starttime;
     FILETIME exittime;
@@ -89,26 +87,23 @@ getrusage(int who, struct rusage *r_usage)
         return -1;
     }
 
-    if (GetProcessTimes (GetCurrentProcess (),
-                         &starttime, &exittime,
-                         &kerneltime, &usertime) == 0) {
+    if (GetProcessTimes(GetCurrentProcess(), &starttime, &exittime, &kerneltime,
+                        &usertime) == 0) {
         return -1;
     }
-    FILETIME_to_timeval (&r_usage->ru_stime, &kerneltime);
-    FILETIME_to_timeval (&r_usage->ru_utime, &usertime);
+    FILETIME_to_timeval(&r_usage->ru_stime, &kerneltime);
+    FILETIME_to_timeval(&r_usage->ru_utime, &usertime);
     return 0;
 }
 #endif
 
 #include "timer.h"
 
-#define TIMER_CPUTIME(X) ( (double)X.ru_utime.tv_sec  +         \
-                           (double)X.ru_stime.tv_sec  +         \
-                          ((double)X.ru_utime.tv_usec +         \
-                           (double)X.ru_stime.tv_usec ) * 1.0E-6)
+#define TIMER_CPUTIME(X)                                     \
+    ((double)X.ru_utime.tv_sec + (double)X.ru_stime.tv_sec + \
+     ((double)X.ru_utime.tv_usec + (double)X.ru_stime.tv_usec) * 1.0E-6)
 
-#define TIMER_WALLTIME(X)  ( (double)X.tv_sec +         \
-                             (double)X.tv_usec * 1.0E-6 )
+#define TIMER_WALLTIME(X) ((double)X.tv_sec + (double)X.tv_usec * 1.0E-6)
 
 static struct rusage res;
 static struct timeval tp;
@@ -122,12 +117,13 @@ static double stop_virtual_time, stop_real_time;
  *  to get the amount of time used by the backtracking routine.
  */
 
-void Timer_start(void)
+void
+Timer_start(void)
 {
-    gettimeofday (&tp, NULL );
-    real_time =   TIMER_WALLTIME(tp);
+    gettimeofday(&tp, NULL);
+    real_time = TIMER_WALLTIME(tp);
 
-    getrusage (RUSAGE_SELF, &res );
+    getrusage(RUSAGE_SELF, &res);
     virtual_time = TIMER_CPUTIME(res);
 }
 
@@ -135,17 +131,19 @@ void Timer_start(void)
  *  Return the time used in seconds (either
  *  REAL or VIRTUAL time, depending on ``type'').
  */
-double Timer_elapsed_virtual (void)
+double
+Timer_elapsed_virtual(void)
 {
-    getrusage (RUSAGE_SELF, &res);
+    getrusage(RUSAGE_SELF, &res);
     double timer_tmp_time = TIMER_CPUTIME(res) - virtual_time;
 
 #if DEBUG >= 4
-    if (timer_tmp_time  < 0.0) {
-        fprintf(stderr, "%s: Timer_elapsed(): warning: "
-                "negative increase in time ", __FILE__);
-        fprintf(stderr, "(%.6g - %.6g = ",
-                TIMER_CPUTIME(res) , virtual_time);
+    if (timer_tmp_time < 0.0) {
+        fprintf(stderr,
+                "%s: Timer_elapsed(): warning: "
+                "negative increase in time ",
+                __FILE__);
+        fprintf(stderr, "(%.6g - %.6g = ", TIMER_CPUTIME(res), virtual_time);
         fprintf(stderr, "%.6g)\n", timer_tmp_time);
     }
 #endif
@@ -153,18 +151,20 @@ double Timer_elapsed_virtual (void)
     return (timer_tmp_time < 0.0) ? 0 : timer_tmp_time;
 }
 
-double Timer_elapsed_real (void)
+double
+Timer_elapsed_real(void)
 {
 
-    gettimeofday (&tp, NULL);
+    gettimeofday(&tp, NULL);
     double timer_tmp_time = TIMER_WALLTIME(tp) - real_time;
 
 #if DEBUG >= 2
-    if (timer_tmp_time  < 0.0) {
-        fprintf(stderr, "%s: Timer_elapsed(): warning: "
-                "negative increase in time ", __FILE__);
-        fprintf(stderr, "(%.6g - %.6g = ",
-                TIMER_WALLTIME(tp) , real_time);
+    if (timer_tmp_time < 0.0) {
+        fprintf(stderr,
+                "%s: Timer_elapsed(): warning: "
+                "negative increase in time ",
+                __FILE__);
+        fprintf(stderr, "(%.6g - %.6g = ", TIMER_WALLTIME(tp), real_time);
         fprintf(stderr, "%.6g)\n", timer_tmp_time);
     }
 #endif
@@ -172,47 +172,53 @@ double Timer_elapsed_real (void)
     return (timer_tmp_time < 0.0) ? 0 : timer_tmp_time;
 }
 
-double Timer_elapsed( TIMER_TYPE type )
+double
+Timer_elapsed(TIMER_TYPE type)
 {
-    return (type == REAL_TIME)
-        ? Timer_elapsed_real ()
-        : Timer_elapsed_virtual ();
+    return (type == REAL_TIME) ? Timer_elapsed_real() : Timer_elapsed_virtual();
 }
 
-void Timer_stop(void)
+void
+Timer_stop(void)
 {
-    gettimeofday( &tp, NULL );
-    stop_real_time =  TIMER_WALLTIME(tp);
+    gettimeofday(&tp, NULL);
+    stop_real_time = TIMER_WALLTIME(tp);
 
-    getrusage( RUSAGE_SELF, &res );
+    getrusage(RUSAGE_SELF, &res);
     stop_virtual_time = TIMER_CPUTIME(res);
 }
 
-void Timer_continue(void)
+void
+Timer_continue(void)
 {
-    gettimeofday( &tp, NULL );
+    gettimeofday(&tp, NULL);
     double timer_tmp_time = TIMER_WALLTIME(tp) - stop_real_time;
 
 #if DEBUG >= 2
-    if (timer_tmp_time  < 0.0) {
-        fprintf(stderr, "%s: Timer_continue(): warning: "
+    if (timer_tmp_time < 0.0) {
+        fprintf(stderr,
+                "%s: Timer_continue(): warning: "
                 "negative increase in time (%.6g - %.6g = %.6g)\n",
                 __FILE__, TIMER_WALLTIME(tp), stop_real_time, timer_tmp_time);
     }
 #endif
 
-    if (timer_tmp_time > 0.0) real_time += timer_tmp_time;
+    if (timer_tmp_time > 0.0)
+        real_time += timer_tmp_time;
 
-    getrusage( RUSAGE_SELF, &res );
-    timer_tmp_time =  TIMER_CPUTIME(res) - stop_virtual_time;
+    getrusage(RUSAGE_SELF, &res);
+    timer_tmp_time = TIMER_CPUTIME(res) - stop_virtual_time;
 
 #if DEBUG >= 2
-    if (timer_tmp_time  < 0.0) {
-        fprintf(stderr, "%s: Timer_continue(): warning: "
+    if (timer_tmp_time < 0.0) {
+        fprintf(stderr,
+                "%s: Timer_continue(): warning: "
                 "negative increase in time (%.6g - %.6g = %.6g)\n",
-                __FILE__, TIMER_CPUTIME(res),stop_virtual_time,timer_tmp_time);
+                __FILE__, TIMER_CPUTIME(res), stop_virtual_time,
+                timer_tmp_time);
     }
 #endif
 
-    if (timer_tmp_time > 0.0) virtual_time += timer_tmp_time;
+    if (timer_tmp_time > 0.0)
+        virtual_time += timer_tmp_time;
 }

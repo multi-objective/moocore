@@ -6,23 +6,28 @@
 #include "pow_int.h"
 #include "rng.h"
 
-static inline long double fractl(long double x) { return x - truncl(x); }
+static inline long double
+fractl(long double x)
+{
+    return x - truncl(x);
+}
 
 #define ALMOST_ZERO_WEIGHT 1e-20
 
 #ifndef M_PIl
-# define M_PIl		3.141592653589793238462643383279502884L /* pi */
+#define M_PIl 3.141592653589793238462643383279502884L /* pi */
 #endif
 #ifndef M_PI_2l
-# define M_PI_2l	1.570796326794896619231321691639751442L /* pi/2 */
+#define M_PI_2l 1.570796326794896619231321691639751442L /* pi/2 */
 #endif
 #ifndef M_PI_4l
-# define M_PI_4l	0.785398163397448309615660845819875721L /* pi/4 */
+#define M_PI_4l 0.785398163397448309615660845819875721L /* pi/4 */
 #endif
 
 static double *
-transform_and_filter(const double * restrict data, dimension_t dim, size_t * restrict npoints_p,
-                     const double * restrict ref, const bool * restrict maximise)
+transform_and_filter(const double * restrict data, dimension_t dim,
+                     size_t * restrict npoints_p, const double * restrict ref,
+                     const bool * restrict maximise)
 {
     size_t npoints = *npoints_p;
     double * points = malloc(dim * npoints * sizeof(double));
@@ -43,15 +48,15 @@ transform_and_filter(const double * restrict data, dimension_t dim, size_t * res
     }
     *npoints_p = j;
     if (*npoints_p == 0) {
-        free (points);
+        free(points);
         return NULL;
     }
     return points;
 }
 
 static inline double
-get_expected_value(const double * restrict points, dimension_t dim, size_t npoints,
-                   const double * restrict w)
+get_expected_value(const double * restrict points, dimension_t dim,
+                   size_t npoints, const double * restrict w)
 {
     ASSUME(1 <= dim && dim <= 32);
     ASSUME(npoints >= 1);
@@ -75,8 +80,8 @@ get_expected_value(const double * restrict points, dimension_t dim, size_t npoin
    precision as possible.
 */
 static const long double sphere_area_div_2_pow_d[] = {
-    0.0L, // d = 0, value = 0.0
-    1.0L, // d = 1, value = 1.0
+    0.0L,                                                // d = 0, value = 0.0
+    1.0L,                                                // d = 1, value = 1.0
     0x1.921fb54442d18469898cc51701b839a252049c1115p+00L, // d = 2, value = 1.5707963267948966
     0x1.921fb54442d18469898cc51701b839a252049c1115p+00L, // d = 3, value = 1.5707963267948966
     0x1.3bd3cc9be45de5a4adc4d9b30118358e10acd47fc2p+00L, // d = 4, value = 1.2337005501361697
@@ -116,8 +121,8 @@ static const long double sphere_area_div_2_pow_d[] = {
    precision as possible.
 */
 static const long double sphere_area_div_2_pow_d_times_d[] = {
-    0.0L, // d = 0, value = 0.0
-    1.0L, // d = 1, value = 1.0
+    0.0L,                                                // d = 0, value = 0.0
+    1.0L,                                                // d = 1, value = 1.0
     0x1.921fb54442d18469898cc51701b839a252049c1115p-01L, // d = 2, value = 0.7853981633974483
     0x1.0c152382d73658465bb32e0f567ad116e158680b63p-01L, // d = 3, value = 0.5235987755982989
     0x1.3bd3cc9be45de5a4adc4d9b30118358e10acd47fc2p-02L, // d = 4, value = 0.30842513753404244
@@ -165,9 +170,10 @@ hv_approx_normal(const double * restrict data, int nobjs, int n,
     ASSUME(nobjs > 1);
     ASSUME(nobjs < 32);
     ASSUME(n >= 0);
-    const dimension_t dim = (dimension_t) nobjs;
-    size_t npoints = (size_t) n;
-    const double * points = transform_and_filter(data, dim, &npoints, ref, maximise);
+    const dimension_t dim = (dimension_t)nobjs;
+    size_t npoints = (size_t)n;
+    const double * points =
+        transform_and_filter(data, dim, &npoints, ref, maximise);
     if (points == NULL)
         return 0;
 
@@ -198,9 +204,10 @@ hv_approx_normal(const double * restrict data, int nobjs, int n,
     }
     free(w);
     free(rng);
-    free((void*)points);
+    free((void *)points);
     const long double c_m = sphere_area_div_2_pow_d_times_d[dim];
-    return STATIC_CAST(double, c_m * (expected / STATIC_CAST(long double, nsamples)));
+    return STATIC_CAST(double,
+                       c_m *(expected / STATIC_CAST(long double, nsamples)));
 }
 
 
@@ -209,37 +216,34 @@ construct_polar_a(dimension_t dim, uint_fast32_t nsamples)
 {
     ASSUME(1 <= dim && dim <= 32);
     // Step 1: find prime p such that dim <= eularfunction(p)/2 == (p-1)/2
-    static const dimension_t primes [] = {
-        1,  3,  5,  7, 11, 11, 13, 17, 17, 19,
-        23, 23, 29, 29, 29, 31, 37, 37, 37, 41,
-        41, 43, 47, 47, 53, 53, 53, 59, 59, 59,
-        61, 67, 67 };
+    static const dimension_t primes[] = {
+        1,  3,  5,  7,  11, 11, 13, 17, 17, 19, 23, 23, 29, 29, 29, 31, 37,
+        37, 37, 41, 41, 43, 47, 47, 53, 53, 53, 59, 59, 59, 61, 67, 67};
 
     const dimension_t p = primes[dim];
     DEBUG2_PRINT("construct_polar_a: prime: %u\n", (unsigned int)p);
 
     uint_fast32_t * a = malloc(dim * sizeof(uint_fast32_t));
     a[0] = 1;
-    DEBUG2_PRINT("construct_polar_a: a[%u] = %lu",
-                 (unsigned int) dim, (unsigned long) a[0]);
+    DEBUG2_PRINT("construct_polar_a: a[%u] = %lu", (unsigned int)dim,
+                 (unsigned long)a[0]);
     for (dimension_t k = 1; k < dim; k++) {
         long double temp = 2 * fabsl(cosl(2 * M_PIl * k / p));
         temp = fractl(temp);
         a[k] = STATIC_CAST(uint_fast32_t, llroundl(nsamples * temp));
-        DEBUG2_PRINT(", %lu", (unsigned long) a[k]);
+        DEBUG2_PRINT(", %lu", (unsigned long)a[k]);
     }
     DEBUG2_PRINT("\n");
     return a;
 }
 
 static void
-compute_polar_sample(long double * sample, dimension_t dim,
-                     uint_fast32_t i, uint_fast32_t nsamples,
-                     const uint_fast32_t * a)
+compute_polar_sample(long double * sample, dimension_t dim, uint_fast32_t i,
+                     uint_fast32_t nsamples, const uint_fast32_t * a)
 {
     ASSUME(i + 1 <= nsamples);
     if (i + 1 < nsamples) {
-        long double factor = (i+1) / STATIC_CAST(long double, nsamples);
+        long double factor = (i + 1) / STATIC_CAST(long double, nsamples);
         for (dimension_t k = 0; k < dim; k++) {
             long double val = (factor * a[k]);
             sample[k] = fractl(val);
@@ -317,111 +321,292 @@ int_of_power_of_sin_from_0_to_b(dimension_t m, double b)
     double sin_b, cos_b;
 
     switch (m) {
-      case 0:
-          return b;
-      case 1:
-          return 1 - cos(b);
-      case 2:
-          return 0.5*b - 0.25*sin(2*b);
-      case 3:
-          cos_b = cos(b);
-          return POW(cos_b, 3)/3 - cos_b + 2/3.;
-      case 4:
-          sin_b = sin(b); cos_b = cos(b);
-          return 0.375*b - cos_b*sin_b*(0.25*POW(sin_b, 2) + 0.375);
-      case 5:
-          cos_b = cos(b);
-          return 8/15. - cos_b*(POW(cos_b, 4)/5 - 2/3.*POW(cos_b, 2) + 1);
-      case 6:
-          sin_b = sin(b); cos_b = cos(b);
-          return 0.3125*b - cos_b*sin_b*(POW(sin_b, 4)/6 + (5/24.)*POW(sin_b, 2) + 0.3125);
-      case 7:
-          cos_b = cos(b);
-          return cos_b*(POW(cos_b, 6)/7 - 3/5.*POW(cos_b, 4) + POW(cos_b, 2) - 1) + 16/35.;
-      case 8:
-          sin_b = sin(b); cos_b = cos(b);
-          return 0.2734375*b - cos_b*sin_b*(0.125*POW(sin_b, 6) + (7/48.)*POW(sin_b, 4) + (35/192.)*POW(sin_b, 2) + 0.2734375);
-      case 9:
-          cos_b = cos(b);
-          return 128/315. - cos_b*(POW(cos_b, 8)/9. - 4/7.*POW(cos_b, 6) + (6/5.)*POW(cos_b, 4) - 4/3.*POW(cos_b, 2) + 1);
-      case 10:
-          sin_b = sin(b); cos_b = cos(b);
-          return 0.24609375*b - cos_b*sin_b*(POW(sin_b, 8)/10. + 9/80.*POW(sin_b, 6) + 21/160.*POW(sin_b, 4) + 0.1640625*POW(sin_b, 2) + 0.24609375);
-      case 11:
-          cos_b = cos(b);
-          return POW(cos_b, 11)/11. - 5/9.*POW(cos_b, 9) + (10/7.)*POW(cos_b, 7) - 2*POW(cos_b, 5) + (5/3.)*POW(cos_b, 3) - cos_b + 256/693.;
-      case 12:
-          sin_b = sin(b); cos_b = cos(b);
-          return 0.2255859375*b - cos_b*sin_b*(POW(sin_b, 10)/12 + 11/120.*POW(sin_b, 8) + 33/320.*POW(sin_b, 6) + 77/640.*POW(sin_b, 4) + 0.150390625*POW(sin_b, 2) + 0.2255859375);
-      case 13:
-          cos_b = cos(b);
-          return 1024/3003. -POW(cos_b, 13)/13. + (6/11.)*POW(cos_b, 11) - 5/3.*POW(cos_b, 9) + (20/7.)*POW(cos_b, 7) - 3*POW(cos_b, 5) + 2*POW(cos_b, 3) - cos_b;
-      case 14:
-          sin_b = sin(b); cos_b = cos(b);
-          return 0.20947265625*b - cos_b*sin_b*(POW(sin_b, 12)/14. + 13/168.*POW(sin_b, 10) + 143/1680.*POW(sin_b, 8) + 429/4480.*POW(sin_b, 6) + 143/1280.*POW(sin_b, 4) + 0.1396484375*POW(sin_b, 2) + 0.20947265625);
-      case 15:
-          cos_b = cos(b);
-          return POW(cos_b, 15)/15. - 7/13.*POW(cos_b, 13) + (21/11.)*POW(cos_b, 11) - 35/9.*POW(cos_b, 9) + 5*POW(cos_b, 7) - 21/5.*POW(cos_b, 5) + (7/3.)*POW(cos_b, 3) - cos_b + 2048/6435.;
-      case 16:
-          sin_b = sin(b); cos_b = cos(b);
-          return 0.196380615234375*b - cos_b*sin_b*(0.0625*POW(sin_b, 14) + 15/224.*POW(sin_b, 12) + 65/896.*POW(sin_b, 10) + 143/1792.*POW(sin_b, 8) + 1287/14336.*POW(sin_b, 6) + 0.104736328125*POW(sin_b, 4) + 0.13092041015625*POW(sin_b, 2) + 0.196380615234375);
-      case 17:
-          cos_b = cos(b);
-          return 32768/109395. - POW(cos_b, 17)/17. + (8/15.)*POW(cos_b, 15) - 28/13.*POW(cos_b, 13) + (56/11.)*POW(cos_b, 11) - 70/9.*POW(cos_b, 9) + 8*POW(cos_b, 7) - 28/5.*POW(cos_b, 5) + (8/3.)*POW(cos_b, 3) - cos_b;
-      case 18:
-          sin_b = sin(b); cos_b = cos(b);
-          return 0.1854705810546875*b - cos_b*sin_b*(POW(sin_b, 16)/18. + 17/288.*POW(sin_b, 14) + 85/1344.*POW(sin_b, 12) + 1105/16128.*POW(sin_b, 10) + 2431/32256.*POW(sin_b, 8) + 2431/28672.*POW(sin_b, 6) + 2431/24576.*POW(sin_b, 4) + 12155/98304.*POW(sin_b, 2) + 0.1854705810546875);
-      case 19:
-          cos_b = cos(b);
-          return POW(cos_b, 19)/19. - 9/17.*POW(cos_b, 17) + (12/5.)*POW(cos_b, 15) - 84/13.*POW(cos_b, 13) + (126/11.)*POW(cos_b, 11) - 14*POW(cos_b, 9) + 12*POW(cos_b, 7) - 36/5.*POW(cos_b, 5) + 3*POW(cos_b, 3) - cos_b + 65536/230945.;
-      case 20:
-          sin_b = sin(b); cos_b = cos(b);
-          return 0.17619705200195313*b - cos_b*sin_b*(POW(sin_b, 18)/20. + 19/360.*POW(sin_b, 16) + 323/5760.*POW(sin_b, 14) + 323/5376.*POW(sin_b, 12) + 4199/64512.*POW(sin_b, 10) + 46189/645120.*POW(sin_b, 8) + 46189/573440.*POW(sin_b, 6) + 46189/491520.*POW(sin_b, 4) + 46189/393216.*POW(sin_b, 2) + 0.17619705200195313);
-      case 21:
-          cos_b = cos(b);
-          return 262144/969969. -POW(cos_b, 21)/21 + (10/19.)*POW(cos_b, 19) - 45/17.*POW(cos_b, 17) + 8*POW(cos_b, 15) - 210/13.*POW(cos_b, 13) + (252/11.)*POW(cos_b, 11) - 70/3.*POW(cos_b, 9) + (120/7.)*POW(cos_b, 7) - 9*POW(cos_b, 5) + (10/3.)*POW(cos_b, 3) - cos_b;
-      case 22:
-          sin_b = sin(b); cos_b = cos(b);
-          return 0.16818809509277344*b - cos_b*sin_b*(
-              POW(sin_b, 20)/22. + 21/440.*POW(sin_b, 18) + 133/2640.*POW(sin_b, 16) + 2261/42240.*POW(sin_b, 14) + 323/5632.*POW(sin_b, 12) + 4199/67584.*POW(sin_b, 10)
-              + 4199/61440.*POW(sin_b, 8) + 12597/163840.*POW(sin_b, 6) + 29393/327680.*POW(sin_b, 4) + 0.11212539672851563*POW(sin_b, 2) + 0.16818809509277344);
-      case 23:
-          cos_b = cos(b);
-          return POW(cos_b, 23)/23 - 11/21.*POW(cos_b, 21) + (55/19.)*POW(cos_b, 19) - 165/17.*POW(cos_b, 17) + 22*POW(cos_b, 15) - 462/13.*POW(cos_b, 13) + 42*POW(cos_b, 11) - 110/3.*POW(cos_b, 9) + (165/7.)*POW(cos_b, 7) - 11*POW(cos_b, 5) + (11/3.)*POW(cos_b, 3) - cos_b + 524288/2028117.;
-      case 24:
-          sin_b = sin(b); cos_b = cos(b);
-          return 0.16118025779724121*b - cos_b*sin_b*(POW(sin_b, 22)/24. + 23/528.*POW(sin_b, 20) + 161/3520.*POW(sin_b, 18) + 3059/63360.*POW(sin_b, 16) + 52003/1013760.*POW(sin_b, 14) + 7429/135168.*POW(sin_b, 12) + 96577/1622016.*POW(sin_b, 10) + 96577/1474560.*POW(sin_b, 8) + 96577/1310720.*POW(sin_b, 6) + 676039/7864320.*POW(sin_b, 4) + 676039/6291456.*POW(sin_b, 2) + 0.16118025779724121);
-      case 25:
-          cos_b = cos(b);
-          return 4194304/16900975. - POW(cos_b, 25)/25. + (12/23.)*POW(cos_b, 23) - 22/7.*POW(cos_b, 21) + (220/19.)*POW(cos_b, 19) - 495/17.*POW(cos_b, 17) + (264/5.)*POW(cos_b, 15) - 924/13.*POW(cos_b, 13) + 72*POW(cos_b, 11) - 55*POW(cos_b, 9) + (220/7.)*POW(cos_b, 7) - 66/5.*POW(cos_b, 5) + 4*POW(cos_b, 3) - cos_b;
-      case 26:
-          sin_b = sin(b); cos_b = cos(b);
-          return 0.15498101711273193*b - cos_b*sin_b*(
-              POW(sin_b, 24)/26. + 25/624.*POW(sin_b, 22) + 575/13728.*POW(sin_b, 20) + 805/18304.*POW(sin_b, 18) + 15295/329472.*POW(sin_b, 16) + 260015/5271552.*POW(sin_b, 14)
-              + 185725/3514368.*POW(sin_b, 12) + 185725/3244032.*POW(sin_b, 10) + 37145/589824.*POW(sin_b, 8) + 0.070848464965820313*POW(sin_b, 6) + 260015/3145728.*POW(sin_b, 4) + 1300075/12582912.*POW(sin_b, 2) + 0.15498101711273193);
-      case 27:
-          cos_b = cos(b);
-          return POW(cos_b, 27)/27. - 13/25.*POW(cos_b, 25) + (78/23.)*POW(cos_b, 23) - 286/21.*POW(cos_b, 21) + (715/19.)*POW(cos_b, 19) - 1287/17.*POW(cos_b, 17) + (572/5.)*POW(cos_b, 15) - 132*POW(cos_b, 13) + 117*POW(cos_b, 11) - 715/9.*POW(cos_b, 9) + (286/7.)*POW(cos_b, 7) - 78/5.*POW(cos_b, 5) + (13/3.)*POW(cos_b, 3) - cos_b + 8388608/35102025.;
-      case 28:
-          sin_b = sin(b); cos_b = cos(b);
-          return 0.14944598078727722*b - cos_b*sin_b*(
-              POW(sin_b, 26)/28. + 27/728.*POW(sin_b, 24) + 225/5824.*POW(sin_b, 22) + 5175/128128.*POW(sin_b, 20) + 3105/73216.*POW(sin_b, 18) + 6555/146432.*POW(sin_b, 16) + 111435/2342912.*POW(sin_b, 14) + 1671525/32800768.*POW(sin_b, 12) + 557175/10092544.*POW(sin_b, 10) + 111435/1835008.*POW(sin_b, 8) + 1002915/14680064.*POW(sin_b, 6) + 0.079704523086547852*POW(sin_b, 4) + 0.099630653858184814*POW(sin_b, 2) + 0.14944598078727722);
-      case 29:
-          cos_b = cos(b);
-          return 33554432/145422675. - POW(cos_b, 29)/29 + (14/27.)*POW(cos_b, 27) - 91/25.*POW(cos_b, 25) + (364/23.)*POW(cos_b, 23) - 143/3.*POW(cos_b, 21) + (2002/19.)*POW(cos_b, 19) - 3003/17.*POW(cos_b, 17) + (1144/5.)*POW(cos_b, 15) - 231*POW(cos_b, 13) + 182*POW(cos_b, 11) - 1001/9.*POW(cos_b, 9) + 52*POW(cos_b, 7) - 91/5.*POW(cos_b, 5) + (14/3.)*POW(cos_b, 3) - cos_b;
-      case 30:
-          sin_b = sin(b); cos_b = cos(b);
-          return 0.14446444809436798*b - cos_b*sin_b*(
-              POW(sin_b, 28)/30. + 29/840.*POW(sin_b, 26) + 261/7280.*POW(sin_b, 24) + 435/11648.*POW(sin_b, 22) + 10005/256256.*POW(sin_b, 20) + 6003/146432.*POW(sin_b, 18) + 12673/292864.*POW(sin_b, 16) + 215441/4685824.*POW(sin_b, 14) + 3231615/65601536.*POW(sin_b, 12) + 1077205/20185088.*POW(sin_b, 10) + 215441/3670016.*POW(sin_b, 8) + 1938969/29360128.*POW(sin_b, 6) + 0.07704770565032959*POW(sin_b, 4) + 0.096309632062911987*POW(sin_b, 2) + 0.14446444809436798);
-      case 31:
-          cos_b = cos(b);
-          return POW(cos_b, 31)/31. - 15/29.*POW(cos_b, 29) + (35/9.)*POW(cos_b, 27) - 91/5.*POW(cos_b, 25) + (1365/23.)*POW(cos_b, 23) - 143*POW(cos_b, 21) + (5005/19.)*POW(cos_b, 19) - 6435/17.*POW(cos_b, 17) + 429*POW(cos_b, 15) - 385*POW(cos_b, 13) + 273*POW(cos_b, 11) - 455/3.*POW(cos_b, 9) + 65*POW(cos_b, 7) - 21*POW(cos_b, 5) + 5*POW(cos_b, 3) - cos_b + 67108864/300540195.;
-      case 32:
-          sin_b = sin(b); cos_b = cos(b);
-          return 0.13994993409141898*b - cos_b*sin_b*(
-              0.03125*POW(sin_b, 30) + 31/960.*POW(sin_b, 28) + 899/26880.*POW(sin_b, 26) + 8091/232960.*POW(sin_b, 24) + 13485/372736.*POW(sin_b, 22) + 310155/8200192.*POW(sin_b, 20) + 186093/4685824.*POW(sin_b, 18) + 392863/9371648.*POW(sin_b, 16) + 6678671/149946368.*POW(sin_b, 14) + 100180065/2099249152.*POW(sin_b, 12) + 33393355/645922816.*POW(sin_b, 10) + 6678671/117440512.*POW(sin_b, 8) + 60108039/939524096.*POW(sin_b, 6) + 0.07463996484875679*POW(sin_b, 4) + 0.093299956060945988*POW(sin_b, 2) + 0.13994993409141898);
-      default:
-          unreachable();
+    case 0:
+        return b;
+    case 1:
+        return 1 - cos(b);
+    case 2:
+        return 0.5 * b - 0.25 * sin(2 * b);
+    case 3:
+        cos_b = cos(b);
+        return POW(cos_b, 3) / 3 - cos_b + 2 / 3.;
+    case 4:
+        sin_b = sin(b);
+        cos_b = cos(b);
+        return 0.375 * b - cos_b * sin_b * (0.25 * POW(sin_b, 2) + 0.375);
+    case 5:
+        cos_b = cos(b);
+        return 8 / 15. -
+               cos_b * (POW(cos_b, 4) / 5 - 2 / 3. * POW(cos_b, 2) + 1);
+    case 6:
+        sin_b = sin(b);
+        cos_b = cos(b);
+        return 0.3125 * b -
+               cos_b * sin_b *
+                   (POW(sin_b, 4) / 6 + (5 / 24.) * POW(sin_b, 2) + 0.3125);
+    case 7:
+        cos_b = cos(b);
+        return cos_b * (POW(cos_b, 6) / 7 - 3 / 5. * POW(cos_b, 4) +
+                        POW(cos_b, 2) - 1) +
+               16 / 35.;
+    case 8:
+        sin_b = sin(b);
+        cos_b = cos(b);
+        return 0.2734375 * b -
+               cos_b * sin_b *
+                   (0.125 * POW(sin_b, 6) + (7 / 48.) * POW(sin_b, 4) +
+                    (35 / 192.) * POW(sin_b, 2) + 0.2734375);
+    case 9:
+        cos_b = cos(b);
+        return 128 / 315. -
+               cos_b * (POW(cos_b, 8) / 9. - 4 / 7. * POW(cos_b, 6) +
+                        (6 / 5.) * POW(cos_b, 4) - 4 / 3. * POW(cos_b, 2) + 1);
+    case 10:
+        sin_b = sin(b);
+        cos_b = cos(b);
+        return 0.24609375 * b -
+               cos_b * sin_b *
+                   (POW(sin_b, 8) / 10. + 9 / 80. * POW(sin_b, 6) +
+                    21 / 160. * POW(sin_b, 4) + 0.1640625 * POW(sin_b, 2) +
+                    0.24609375);
+    case 11:
+        cos_b = cos(b);
+        return POW(cos_b, 11) / 11. - 5 / 9. * POW(cos_b, 9) +
+               (10 / 7.) * POW(cos_b, 7) - 2 * POW(cos_b, 5) +
+               (5 / 3.) * POW(cos_b, 3) - cos_b + 256 / 693.;
+    case 12:
+        sin_b = sin(b);
+        cos_b = cos(b);
+        return 0.2255859375 * b -
+               cos_b * sin_b *
+                   (POW(sin_b, 10) / 12 + 11 / 120. * POW(sin_b, 8) +
+                    33 / 320. * POW(sin_b, 6) + 77 / 640. * POW(sin_b, 4) +
+                    0.150390625 * POW(sin_b, 2) + 0.2255859375);
+    case 13:
+        cos_b = cos(b);
+        return 1024 / 3003. - POW(cos_b, 13) / 13. +
+               (6 / 11.) * POW(cos_b, 11) - 5 / 3. * POW(cos_b, 9) +
+               (20 / 7.) * POW(cos_b, 7) - 3 * POW(cos_b, 5) +
+               2 * POW(cos_b, 3) - cos_b;
+    case 14:
+        sin_b = sin(b);
+        cos_b = cos(b);
+        return 0.20947265625 * b -
+               cos_b * sin_b *
+                   (POW(sin_b, 12) / 14. + 13 / 168. * POW(sin_b, 10) +
+                    143 / 1680. * POW(sin_b, 8) + 429 / 4480. * POW(sin_b, 6) +
+                    143 / 1280. * POW(sin_b, 4) + 0.1396484375 * POW(sin_b, 2) +
+                    0.20947265625);
+    case 15:
+        cos_b = cos(b);
+        return POW(cos_b, 15) / 15. - 7 / 13. * POW(cos_b, 13) +
+               (21 / 11.) * POW(cos_b, 11) - 35 / 9. * POW(cos_b, 9) +
+               5 * POW(cos_b, 7) - 21 / 5. * POW(cos_b, 5) +
+               (7 / 3.) * POW(cos_b, 3) - cos_b + 2048 / 6435.;
+    case 16:
+        sin_b = sin(b);
+        cos_b = cos(b);
+        return 0.196380615234375 * b -
+               cos_b * sin_b *
+                   (0.0625 * POW(sin_b, 14) + 15 / 224. * POW(sin_b, 12) +
+                    65 / 896. * POW(sin_b, 10) + 143 / 1792. * POW(sin_b, 8) +
+                    1287 / 14336. * POW(sin_b, 6) +
+                    0.104736328125 * POW(sin_b, 4) +
+                    0.13092041015625 * POW(sin_b, 2) + 0.196380615234375);
+    case 17:
+        cos_b = cos(b);
+        return 32768 / 109395. - POW(cos_b, 17) / 17. +
+               (8 / 15.) * POW(cos_b, 15) - 28 / 13. * POW(cos_b, 13) +
+               (56 / 11.) * POW(cos_b, 11) - 70 / 9. * POW(cos_b, 9) +
+               8 * POW(cos_b, 7) - 28 / 5. * POW(cos_b, 5) +
+               (8 / 3.) * POW(cos_b, 3) - cos_b;
+    case 18:
+        sin_b = sin(b);
+        cos_b = cos(b);
+        return 0.1854705810546875 * b -
+               cos_b * sin_b *
+                   (POW(sin_b, 16) / 18. + 17 / 288. * POW(sin_b, 14) +
+                    85 / 1344. * POW(sin_b, 12) +
+                    1105 / 16128. * POW(sin_b, 10) +
+                    2431 / 32256. * POW(sin_b, 8) +
+                    2431 / 28672. * POW(sin_b, 6) +
+                    2431 / 24576. * POW(sin_b, 4) +
+                    12155 / 98304. * POW(sin_b, 2) + 0.1854705810546875);
+    case 19:
+        cos_b = cos(b);
+        return POW(cos_b, 19) / 19. - 9 / 17. * POW(cos_b, 17) +
+               (12 / 5.) * POW(cos_b, 15) - 84 / 13. * POW(cos_b, 13) +
+               (126 / 11.) * POW(cos_b, 11) - 14 * POW(cos_b, 9) +
+               12 * POW(cos_b, 7) - 36 / 5. * POW(cos_b, 5) +
+               3 * POW(cos_b, 3) - cos_b + 65536 / 230945.;
+    case 20:
+        sin_b = sin(b);
+        cos_b = cos(b);
+        return 0.17619705200195313 * b -
+               cos_b * sin_b *
+                   (POW(sin_b, 18) / 20. + 19 / 360. * POW(sin_b, 16) +
+                    323 / 5760. * POW(sin_b, 14) +
+                    323 / 5376. * POW(sin_b, 12) +
+                    4199 / 64512. * POW(sin_b, 10) +
+                    46189 / 645120. * POW(sin_b, 8) +
+                    46189 / 573440. * POW(sin_b, 6) +
+                    46189 / 491520. * POW(sin_b, 4) +
+                    46189 / 393216. * POW(sin_b, 2) + 0.17619705200195313);
+    case 21:
+        cos_b = cos(b);
+        return 262144 / 969969. - POW(cos_b, 21) / 21 +
+               (10 / 19.) * POW(cos_b, 19) - 45 / 17. * POW(cos_b, 17) +
+               8 * POW(cos_b, 15) - 210 / 13. * POW(cos_b, 13) +
+               (252 / 11.) * POW(cos_b, 11) - 70 / 3. * POW(cos_b, 9) +
+               (120 / 7.) * POW(cos_b, 7) - 9 * POW(cos_b, 5) +
+               (10 / 3.) * POW(cos_b, 3) - cos_b;
+    case 22:
+        sin_b = sin(b);
+        cos_b = cos(b);
+        return 0.16818809509277344 * b -
+               cos_b * sin_b *
+                   (POW(sin_b, 20) / 22. + 21 / 440. * POW(sin_b, 18) +
+                    133 / 2640. * POW(sin_b, 16) +
+                    2261 / 42240. * POW(sin_b, 14) +
+                    323 / 5632. * POW(sin_b, 12) +
+                    4199 / 67584. * POW(sin_b, 10) +
+                    4199 / 61440. * POW(sin_b, 8) +
+                    12597 / 163840. * POW(sin_b, 6) +
+                    29393 / 327680. * POW(sin_b, 4) +
+                    0.11212539672851563 * POW(sin_b, 2) + 0.16818809509277344);
+    case 23:
+        cos_b = cos(b);
+        return POW(cos_b, 23) / 23 - 11 / 21. * POW(cos_b, 21) +
+               (55 / 19.) * POW(cos_b, 19) - 165 / 17. * POW(cos_b, 17) +
+               22 * POW(cos_b, 15) - 462 / 13. * POW(cos_b, 13) +
+               42 * POW(cos_b, 11) - 110 / 3. * POW(cos_b, 9) +
+               (165 / 7.) * POW(cos_b, 7) - 11 * POW(cos_b, 5) +
+               (11 / 3.) * POW(cos_b, 3) - cos_b + 524288 / 2028117.;
+    case 24:
+        sin_b = sin(b);
+        cos_b = cos(b);
+        return 0.16118025779724121 * b -
+               cos_b * sin_b *
+                   (POW(sin_b, 22) / 24. + 23 / 528. * POW(sin_b, 20) +
+                    161 / 3520. * POW(sin_b, 18) +
+                    3059 / 63360. * POW(sin_b, 16) +
+                    52003 / 1013760. * POW(sin_b, 14) +
+                    7429 / 135168. * POW(sin_b, 12) +
+                    96577 / 1622016. * POW(sin_b, 10) +
+                    96577 / 1474560. * POW(sin_b, 8) +
+                    96577 / 1310720. * POW(sin_b, 6) +
+                    676039 / 7864320. * POW(sin_b, 4) +
+                    676039 / 6291456. * POW(sin_b, 2) + 0.16118025779724121);
+    case 25:
+        cos_b = cos(b);
+        return 4194304 / 16900975. - POW(cos_b, 25) / 25. +
+               (12 / 23.) * POW(cos_b, 23) - 22 / 7. * POW(cos_b, 21) +
+               (220 / 19.) * POW(cos_b, 19) - 495 / 17. * POW(cos_b, 17) +
+               (264 / 5.) * POW(cos_b, 15) - 924 / 13. * POW(cos_b, 13) +
+               72 * POW(cos_b, 11) - 55 * POW(cos_b, 9) +
+               (220 / 7.) * POW(cos_b, 7) - 66 / 5. * POW(cos_b, 5) +
+               4 * POW(cos_b, 3) - cos_b;
+    case 26:
+        sin_b = sin(b);
+        cos_b = cos(b);
+        return 0.15498101711273193 * b -
+               cos_b * sin_b *
+                   (POW(sin_b, 24) / 26. + 25 / 624. * POW(sin_b, 22) +
+                    575 / 13728. * POW(sin_b, 20) +
+                    805 / 18304. * POW(sin_b, 18) +
+                    15295 / 329472. * POW(sin_b, 16) +
+                    260015 / 5271552. * POW(sin_b, 14) +
+                    185725 / 3514368. * POW(sin_b, 12) +
+                    185725 / 3244032. * POW(sin_b, 10) +
+                    37145 / 589824. * POW(sin_b, 8) +
+                    0.070848464965820313 * POW(sin_b, 6) +
+                    260015 / 3145728. * POW(sin_b, 4) +
+                    1300075 / 12582912. * POW(sin_b, 2) + 0.15498101711273193);
+    case 27:
+        cos_b = cos(b);
+        return POW(cos_b, 27) / 27. - 13 / 25. * POW(cos_b, 25) +
+               (78 / 23.) * POW(cos_b, 23) - 286 / 21. * POW(cos_b, 21) +
+               (715 / 19.) * POW(cos_b, 19) - 1287 / 17. * POW(cos_b, 17) +
+               (572 / 5.) * POW(cos_b, 15) - 132 * POW(cos_b, 13) +
+               117 * POW(cos_b, 11) - 715 / 9. * POW(cos_b, 9) +
+               (286 / 7.) * POW(cos_b, 7) - 78 / 5. * POW(cos_b, 5) +
+               (13 / 3.) * POW(cos_b, 3) - cos_b + 8388608 / 35102025.;
+    case 28:
+        sin_b = sin(b);
+        cos_b = cos(b);
+        return 0.14944598078727722 * b -
+               cos_b * sin_b *
+                   (POW(sin_b, 26) / 28. + 27 / 728. * POW(sin_b, 24) +
+                    225 / 5824. * POW(sin_b, 22) +
+                    5175 / 128128. * POW(sin_b, 20) +
+                    3105 / 73216. * POW(sin_b, 18) +
+                    6555 / 146432. * POW(sin_b, 16) +
+                    111435 / 2342912. * POW(sin_b, 14) +
+                    1671525 / 32800768. * POW(sin_b, 12) +
+                    557175 / 10092544. * POW(sin_b, 10) +
+                    111435 / 1835008. * POW(sin_b, 8) +
+                    1002915 / 14680064. * POW(sin_b, 6) +
+                    0.079704523086547852 * POW(sin_b, 4) +
+                    0.099630653858184814 * POW(sin_b, 2) + 0.14944598078727722);
+    case 29:
+        cos_b = cos(b);
+        return 33554432 / 145422675. - POW(cos_b, 29) / 29 +
+               (14 / 27.) * POW(cos_b, 27) - 91 / 25. * POW(cos_b, 25) +
+               (364 / 23.) * POW(cos_b, 23) - 143 / 3. * POW(cos_b, 21) +
+               (2002 / 19.) * POW(cos_b, 19) - 3003 / 17. * POW(cos_b, 17) +
+               (1144 / 5.) * POW(cos_b, 15) - 231 * POW(cos_b, 13) +
+               182 * POW(cos_b, 11) - 1001 / 9. * POW(cos_b, 9) +
+               52 * POW(cos_b, 7) - 91 / 5. * POW(cos_b, 5) +
+               (14 / 3.) * POW(cos_b, 3) - cos_b;
+    case 30:
+        sin_b = sin(b);
+        cos_b = cos(b);
+        return 0.14446444809436798 * b -
+               cos_b * sin_b *
+                   (POW(sin_b, 28) / 30. + 29 / 840. * POW(sin_b, 26) +
+                    261 / 7280. * POW(sin_b, 24) +
+                    435 / 11648. * POW(sin_b, 22) +
+                    10005 / 256256. * POW(sin_b, 20) +
+                    6003 / 146432. * POW(sin_b, 18) +
+                    12673 / 292864. * POW(sin_b, 16) +
+                    215441 / 4685824. * POW(sin_b, 14) +
+                    3231615 / 65601536. * POW(sin_b, 12) +
+                    1077205 / 20185088. * POW(sin_b, 10) +
+                    215441 / 3670016. * POW(sin_b, 8) +
+                    1938969 / 29360128. * POW(sin_b, 6) +
+                    0.07704770565032959 * POW(sin_b, 4) +
+                    0.096309632062911987 * POW(sin_b, 2) + 0.14446444809436798);
+    case 31:
+        cos_b = cos(b);
+        return POW(cos_b, 31) / 31. - 15 / 29. * POW(cos_b, 29) +
+               (35 / 9.) * POW(cos_b, 27) - 91 / 5. * POW(cos_b, 25) +
+               (1365 / 23.) * POW(cos_b, 23) - 143 * POW(cos_b, 21) +
+               (5005 / 19.) * POW(cos_b, 19) - 6435 / 17. * POW(cos_b, 17) +
+               429 * POW(cos_b, 15) - 385 * POW(cos_b, 13) +
+               273 * POW(cos_b, 11) - 455 / 3. * POW(cos_b, 9) +
+               65 * POW(cos_b, 7) - 21 * POW(cos_b, 5) + 5 * POW(cos_b, 3) -
+               cos_b + 67108864 / 300540195.;
+    case 32:
+        sin_b = sin(b);
+        cos_b = cos(b);
+        return 0.13994993409141898 * b -
+               cos_b * sin_b *
+                   (0.03125 * POW(sin_b, 30) + 31 / 960. * POW(sin_b, 28) +
+                    899 / 26880. * POW(sin_b, 26) +
+                    8091 / 232960. * POW(sin_b, 24) +
+                    13485 / 372736. * POW(sin_b, 22) +
+                    310155 / 8200192. * POW(sin_b, 20) +
+                    186093 / 4685824. * POW(sin_b, 18) +
+                    392863 / 9371648. * POW(sin_b, 16) +
+                    6678671 / 149946368. * POW(sin_b, 14) +
+                    100180065 / 2099249152. * POW(sin_b, 12) +
+                    33393355 / 645922816. * POW(sin_b, 10) +
+                    6678671 / 117440512. * POW(sin_b, 8) +
+                    60108039 / 939524096. * POW(sin_b, 6) +
+                    0.07463996484875679 * POW(sin_b, 4) +
+                    0.093299956060945988 * POW(sin_b, 2) + 0.13994993409141898);
+    default:
+        unreachable();
     }
 #undef POW
 }
@@ -434,7 +619,8 @@ static const long double int_power_of_sin_from_0_to_half_pi[] = {
 /* GCC on powerpc cannot fold some floating-point expressions involving IBM
    long double into constant initializers, unless -ffast-math is enabled.  See
    https://gcc.gnu.org/PR19779 */
-#if defined(__GNUC__) && (defined(__PPC__) || defined(__POWERPC__) || defined(__ppc__))
+#if defined(__GNUC__) && \
+    (defined(__PPC__) || defined(__POWERPC__) || defined(__ppc__))
     /* d =  3 */ 2. / 3.,
     /* d =  4 */ 3.L * M_PI / 16.L,
     /* d =  5 */ 8. / 15.,
@@ -545,14 +731,15 @@ compute_int_all(dimension_t dm1)
 }
 
 static void
-compute_theta(long double *theta, dimension_t dim, const long double *int_all)
+compute_theta(long double * theta, dimension_t dim, const long double * int_all)
 {
     ASSUME(dim >= 2);
     ASSUME(dim <= 32);
     for (dimension_t j = 0; j < dim - 1; j++) {
         // We multiply here because we computed 1 / int_all[j] before.
-        theta[j] = solve_inverse_int_of_power_sin(theta[j] * int_all[(dim - 2) - j],
-                                                  STATIC_CAST(dimension_t, (dim - j) - 2));
+        theta[j] = solve_inverse_int_of_power_sin(
+            theta[j] * int_all[(dim - 2) - j],
+            STATIC_CAST(dimension_t, (dim - j) - 2));
     }
 }
 
@@ -575,8 +762,8 @@ compute_hua_wang_direction(double * direction, dimension_t dim,
     for (k = 0; k < dim; k++) {
         // FIXME: Can direction[k] be negative? If not, then we don't need fabs().
         direction[k] = (fabs(direction[k]) <= ALMOST_ZERO_WEIGHT)
-            ? 1. / ALMOST_ZERO_WEIGHT
-            : 1. / direction[k];
+                           ? 1. / ALMOST_ZERO_WEIGHT
+                           : 1. / direction[k];
     }
 }
 
@@ -594,9 +781,10 @@ hv_approx_hua_wang(const double * restrict data, int nobjs, int n,
     ASSUME(nobjs > 1);
     ASSUME(nobjs < 32);
     ASSUME(n >= 0);
-    const dimension_t dim = (dimension_t) nobjs;
-    size_t npoints = (size_t) n;
-    const double * points = transform_and_filter(data, dim, &npoints, ref, maximise);
+    const dimension_t dim = (dimension_t)nobjs;
+    size_t npoints = (size_t)n;
+    const double * points =
+        transform_and_filter(data, dim, &npoints, ref, maximise);
     if (points == NULL)
         return 0;
 
@@ -617,9 +805,10 @@ hv_approx_hua_wang(const double * restrict data, int nobjs, int n,
         free(theta);
         free(w);
     }
-    free((void *) int_all);
-    free((void *) polar_a);
-    free((void*)points);
+    free((void *)int_all);
+    free((void *)polar_a);
+    free((void *)points);
     const long double c_m = sphere_area_div_2_pow_d_times_d[dim];
-    return STATIC_CAST(double, c_m * (expected / STATIC_CAST(long double, nsamples)));
+    return STATIC_CAST(double,
+                       c_m *(expected / STATIC_CAST(long double, nsamples)));
 }

@@ -5,7 +5,7 @@
 #error "HV_DIMENSION must be 3 or 4"
 #endif
 
-#include <float.h> // DBL_MAX
+#include <float.h>  // DBL_MAX
 #include <string.h> // memcpy
 #include "sort.h"
 
@@ -17,10 +17,14 @@
 */
 
 typedef struct dlnode {
-    const double * x;            // point coordinates (objective vector).
-    struct dlnode * next[HV_DIMENSION - 2]; /* keeps the points sorted according to coordinates 2,3 and 4
+    const double * x; // point coordinates (objective vector).
+    struct dlnode *
+        next[HV_DIMENSION -
+             2]; /* keeps the points sorted according to coordinates 2,3 and 4
                                 (in the case of 2 and 3, only the points swept by 4 are kept) */
-    struct dlnode * prev[HV_DIMENSION - 2]; //keeps the points sorted according to coordinates 2 and 3 (except the sentinel 3)
+    struct dlnode * prev
+        [HV_DIMENSION -
+         2]; //keeps the points sorted according to coordinates 2 and 3 (except the sentinel 3)
     struct dlnode * cnext[2]; //current next
 #if HV_DIMENSION == 4 || defined(HVC_ONLY)
     struct dlnode * closest[2]; // closest[0] == cx, closest[1] == cy
@@ -29,9 +33,9 @@ typedef struct dlnode {
 #endif
 #ifdef HVC_ONLY
     double area, volume;
-    double last_slice_z; // FIXME: Is this really needed?
+    double last_slice_z;     // FIXME: Is this really needed?
     struct dlnode * head[2]; // lowest (x, y)
-    bool ignore;    // hvc should be zero (duplicated or dominated)
+    bool ignore;             // hvc should be zero (duplicated or dominated)
 #endif
 } dlnode_t;
 
@@ -41,9 +45,9 @@ typedef struct dlnode {
 static inline void
 restart_list_y(dlnode_t * list)
 {
-    assert(list+1 == list->next[0]);
-    list->cnext[0] = list+1;
-    (list+1)->cnext[1] = list;
+    assert(list + 1 == list->next[0]);
+    list->cnext[0] = list + 1;
+    (list + 1)->cnext[1] = list;
 }
 
 #if HV_DIMENSION == 4 || defined(HVC_ONLY)
@@ -143,13 +147,13 @@ init_sentinels(dlnode_t * list, const double * ref)
     // Allocate the 3 sentinels of dimension dim.
     const double z[] = {
 #if HV_DIMENSION == 3
-        -DBL_MAX, ref[1], -DBL_MAX, // Sentinel 1
-        ref[0], -DBL_MAX, -DBL_MAX, // Sentinel 2
-        -DBL_MAX, -DBL_MAX, ref[2]  // Sentinel 2
+        -DBL_MAX, ref[1],   -DBL_MAX, // Sentinel 1
+        ref[0],   -DBL_MAX, -DBL_MAX, // Sentinel 2
+        -DBL_MAX, -DBL_MAX, ref[2]    // Sentinel 2
 #else
-        -DBL_MAX, ref[1], -DBL_MAX, -DBL_MAX, // Sentinel 1
-        ref[0], -DBL_MAX, -DBL_MAX, -DBL_MAX, // Sentinel 2
-        -DBL_MAX, -DBL_MAX, ref[2], ref[3]    // Sentinel 2
+        -DBL_MAX, ref[1],   -DBL_MAX, -DBL_MAX, // Sentinel 1
+        ref[0],   -DBL_MAX, -DBL_MAX, -DBL_MAX, // Sentinel 2
+        -DBL_MAX, -DBL_MAX, ref[2],   ref[3]    // Sentinel 2
 #endif
     };
 
@@ -162,15 +166,15 @@ init_sentinels(dlnode_t * list, const double * ref)
        to the 1st and 2nd coordinates, and for that list we need two sentinels
        to represent (-inf, ref[1]) and (ref[0], -inf). */
     reset_sentinels(list);
-    init_sentinel(list, x); // Sentinel 1
-    init_sentinel(list+1, x + HV_DIMENSION); // Sentinel 2
-    init_sentinel(list+2, x + 2 * HV_DIMENSION); // Sentinel 3
+    init_sentinel(list, x);                        // Sentinel 1
+    init_sentinel(list + 1, x + HV_DIMENSION);     // Sentinel 2
+    init_sentinel(list + 2, x + 2 * HV_DIMENSION); // Sentinel 3
 }
 
 static inline dlnode_t *
 new_cdllist(size_t n, const double * ref)
 {
-    dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(*list));
+    dlnode_t * list = (dlnode_t *)malloc((n + 3) * sizeof(*list));
     init_sentinels(list, ref);
     return list;
 }
@@ -179,11 +183,12 @@ new_cdllist(size_t n, const double * ref)
  * Setup circular double-linked list in each dimension
  */
 static inline dlnode_t *
-setup_cdllist(const double * restrict data, size_t n, const double * restrict ref)
+setup_cdllist(const double * restrict data, size_t n,
+              const double * restrict ref)
 {
     ASSUME(n >= 1);
     const dimension_t dim = HV_DIMENSION;
-    const double **scratch = malloc(n * sizeof(*scratch));
+    const double ** scratch = malloc(n * sizeof(*scratch));
     size_t i, j;
     for (i = 0, j = 0; j < n; j++) {
         /* Filter those points that do not strictly dominate the reference
@@ -196,14 +201,16 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     }
     n = i; // Update number of points.
     if (likely(n > 1))
-        qsort(scratch, n, sizeof(*scratch),
+        qsort(
+            scratch, n, sizeof(*scratch),
 #ifdef HVC_ONLY
-              // Lexicographic ordering ensures that we do not have dominated points in the AVL-tree.
-              cmp_double_asc_rev_3d
+            // Lexicographic ordering ensures that we do not have dominated points in the AVL-tree.
+            cmp_double_asc_rev_3d
 #else
-              (HV_DIMENSION == 3) ? cmp_double_asc_only_3d : cmp_double_asc_only_4d
+            (HV_DIMENSION == 3) ? cmp_double_asc_only_3d
+                                : cmp_double_asc_only_4d
 #endif
-            );
+        );
 
     dlnode_t * list = new_cdllist(n, ref);
     if (unlikely(n == 0)) {
@@ -212,9 +219,9 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     }
 
     const dimension_t d = HV_DIMENSION - 3; // index within the list.
-    assert(list->next[d] == list+1);
-    dlnode_t * q = list+1;
-    dlnode_t * list3 = list+3;
+    assert(list->next[d] == list + 1);
+    dlnode_t * q = list + 1;
+    dlnode_t * list3 = list + 3;
     assert(q->next[d] == list + 2);
     for (i = 0, j = 0; j < n; j++) {
         dlnode_t * p = list3 + i;
@@ -230,7 +237,7 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
         // Initialize it when debugging so it will crash if uninitialized.
         DEBUG1(p->head[0] = p->head[1] = NULL);
 #endif
-         // Link the list in order.
+        // Link the list in order.
         q->next[d] = p;
         p->prev[d] = q;
         q = p;
@@ -239,10 +246,10 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     n = i;
     free(scratch);
     assert((list3 + n - 1) == q);
-    assert(list+2 == list->prev[d]);
+    assert(list + 2 == list->prev[d]);
     // q = last point, q->next = s3, s3->prev = last point
-    q->next[d] = list+2;
-    (list+2)->prev[d] = q;
+    q->next[d] = list + 2;
+    (list + 2)->prev[d] = q;
 #if HV_DIMENSION == 3
     hv3d_preprocessing(list, n);
 #endif
@@ -252,7 +259,7 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
 static inline void
 free_cdllist(dlnode_t * list)
 {
-    free((void*) list->x); // Free sentinels.
+    free((void *)list->x); // Free sentinels.
     free(list);
 }
 
@@ -273,7 +280,8 @@ free_cdllist(dlnode_t * list)
         then u=q->cnext[i].
 */
 static inline double
-compute_area_simple(const double * px, const dlnode_t * q, const dlnode_t * u, uint_fast8_t i)
+compute_area_simple(const double * px, const dlnode_t * q, const dlnode_t * u,
+                    uint_fast8_t i)
 {
     ASSUME(i == 0 || i == 1);
     const uint_fast8_t j = 1 - i;

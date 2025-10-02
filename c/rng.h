@@ -35,8 +35,7 @@ rng_uniform(rng_state * rng, double low, double high)
 }
 
 
-double rng_standard_normal(rng_state *rng);
-void rng_bivariate_normal_fill(rng_state * rng,
-                               double mu1, double mu2,
+double rng_standard_normal(rng_state * rng);
+void rng_bivariate_normal_fill(rng_state * rng, double mu1, double mu2,
                                double sigma1, double sigma2, double rho,
-                               double *out, int n);
+                               double * out, int n);

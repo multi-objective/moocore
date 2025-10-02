@@ -31,9 +31,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <unistd.h>  // for getopt()
+#include <unistd.h> // for getopt()
 #include <getopt.h> // for getopt_long()
-#include <math.h>  // for INFINITY
+#include <math.h>   // for INFINITY
 
 #include "common.h"
 #include "hv.h"
@@ -42,57 +42,59 @@
 #define READ_INPUT_WRONG_INITIAL_DIM_ERRSTR "-o, --obj"
 #include "cmdline.h"
 
-static void usage(void)
+static void
+usage(void)
 {
     printf("\n"
-           "Usage: %s [OPTIONS] [FILE...]\n\n", program_invocation_short_name);
+           "Usage: %s [OPTIONS] [FILE...]\n\n",
+           program_invocation_short_name);
 
     printf(
-"Perform nondominated sorting in a list of points.                        \n\n"
+        "Perform nondominated sorting in a list of points.                     "
+        "   \n\n"
 
-"Options:\n"
-OPTION_HELP_STR
-OPTION_VERSION_STR
-" -v, --verbose       print some information (time, number of points, etc.) \n"
-OPTION_QUIET_STR
-//" -H, --hypervolume   use hypervolume contribution to break ties            \n"
-" -k, --keep-uevs     keep uniquely extreme values                          \n"
-" -r, --rank          don't break ties using hypervolume contribution       \n"
-OPTION_OBJ_STR
-"\n");
+        "Options:\n" OPTION_HELP_STR OPTION_VERSION_STR
+        " -v, --verbose       print some information (time, number of points, "
+        "etc.) \n" OPTION_QUIET_STR
+        //" -H, --hypervolume   use hypervolume contribution to break ties            \n"
+        " -k, --keep-uevs     keep uniquely extreme values                     "
+        "     \n"
+        " -r, --rank          don't break ties using hypervolume contribution  "
+        "     \n" OPTION_OBJ_STR "\n");
 }
 
 static bool verbose_flag = false;
 
 static void
-fprint_rank (FILE * stream, const int * rank, int size)
+fprint_rank(FILE * stream, const int * rank, int size)
 {
     int k;
     for (k = 0; k < size; k++) {
-        fprintf (stream, "%d\n", rank[k]);
+        fprintf(stream, "%d\n", rank[k]);
     }
 }
 
-static void fprint_vector_double (FILE * stream, const double * vec, int size)
+static void
+fprint_vector_double(FILE * stream, const double * vec, int size)
 {
     for (int k = 0; k < size; k++)
-        fprintf (stream, "%g\n", vec[k]);
+        fprintf(stream, "%g\n", vec[k]);
 }
 
 static bool *
-calculate_uev (bool *uev, const double *points, int dim, int size,
-               const double *lbound, const double *ubound)
+calculate_uev(bool * uev, const double * points, int dim, int size,
+              const double * lbound, const double * ubound)
 {
     if (uev == NULL) {
-        uev = malloc (sizeof(bool) * size);
+        uev = malloc(sizeof(bool) * size);
     }
 
     for (int j = 0; j < size; j++)
         uev[j] = false;
 
     for (int i = 0; i < dim; i++) {
-        assert (ubound[i] > -INFINITY);
-        assert (lbound[i] < INFINITY);
+        assert(ubound[i] > -INFINITY);
+        assert(lbound[i] < INFINITY);
         for (int j = 0; j < size; j++) {
             if (points[j * dim + i] == ubound[i]) {
                 uev[j] = true;
@@ -109,29 +111,30 @@ calculate_uev (bool *uev, const double *points, int dim, int size,
     return uev;
 }
 
-int main(int argc, char *argv[])
+int
+main(int argc, char * argv[])
 {
     int nsets = 0;
-    int *cumsizes = NULL;
-    double *points = NULL;
+    int * cumsizes = NULL;
+    double * points = NULL;
     int dim = 0;
-    const char *filename;
-    const signed char *minmax = NULL;
+    const char * filename;
+    const signed char * minmax = NULL;
     bool only_rank_flag = false;
-//    bool hypervolume_flag = false;
-//    bool keep_uevs_flag = false;
+    //    bool hypervolume_flag = false;
+    //    bool keep_uevs_flag = false;
 
     /* see the man page for getopt_long for an explanation of these fields */
     static const char short_options[] = "hVvqkro:";
     static const struct option long_options[] = {
-        {"help",       no_argument,       NULL, 'h'},
-        {"version",    no_argument,       NULL, 'V'},
-        {"verbose",    no_argument,       NULL, 'v'},
-        {"quiet",      no_argument,       NULL, 'q'},
-//        {"hypervolume",no_argument,       NULL, 'H'},
-        {"keep-uevs",  no_argument,       NULL, 'k'},
-        {"rank",       no_argument,       NULL, 'r'},
-        {"obj",        required_argument, NULL, 'o'},
+        {"help", no_argument, NULL, 'h'},
+        {"version", no_argument, NULL, 'V'},
+        {"verbose", no_argument, NULL, 'v'},
+        {"quiet", no_argument, NULL, 'q'},
+        //        {"hypervolume",no_argument,       NULL, 'H'},
+        {"keep-uevs", no_argument, NULL, 'k'},
+        {"rank", no_argument, NULL, 'r'},
+        {"obj", required_argument, NULL, 'o'},
 
         {NULL, 0, NULL, 0} /* marks end of list */
     };
@@ -139,8 +142,8 @@ int main(int argc, char *argv[])
 
     int opt; /* it's actually going to hold a char */
     int longopt_index;
-    while (0 < (opt = getopt_long(argc, argv, short_options,
-                                  long_options, &longopt_index))) {
+    while (0 < (opt = getopt_long(argc, argv, short_options, long_options,
+                                  &longopt_index))) {
         switch (opt) {
         case 'q': // --quiet
             verbose_flag = false;
@@ -155,8 +158,9 @@ int main(int argc, char *argv[])
             break;
 
         case 'k': // --keep-uevs
-//            keep_uevs_flag = true;
-            fprintf(stderr, "%s: --keep-uevs not implemented yet!\n",program_invocation_short_name);
+                  //            keep_uevs_flag = true;
+            fprintf(stderr, "%s: --keep-uevs not implemented yet!\n",
+                    program_invocation_short_name);
             exit(EXIT_FAILURE);
             break;
 
@@ -171,19 +175,18 @@ int main(int argc, char *argv[])
 
     int numfiles = argc - optind;
 
-    if (numfiles <= 0) {/* No input files: read stdin.  */
+    if (numfiles <= 0) { /* No input files: read stdin.  */
         filename = NULL;
     } else if (numfiles == 1) {
         filename = argv[optind];
     } else {
-        errprintf ("more than one input file not handled yet.");
+        errprintf("more than one input file not handled yet.");
         exit(EXIT_FAILURE);
     }
 
     /* FIXME: Instead of this strange call, create a wrapper read_data_robust. */
     handle_read_data_error(
-        read_double_data (filename, &points, &dim, &cumsizes, &nsets),
-        filename);
+        read_double_data(filename, &points, &dim, &cumsizes, &nsets), filename);
     if (!filename)
         filename = stdin_name;
 
@@ -192,31 +195,32 @@ int main(int argc, char *argv[])
 
     /* Default minmax if not set yet.  */
     if (minmax == NULL)
-        minmax = minmax_minimise((dimension_t) dim);
+        minmax = minmax_minimise((dimension_t)dim);
 
     if (verbose_flag) {
-        printf ("# file: %s\n", filename);
-        printf ("# points: %d\n", size);
+        printf("# file: %s\n", filename);
+        printf("# points: %d\n", size);
     }
 
-    int * rank = pareto_rank (points, dim, size);
+    int * rank = pareto_rank(points, dim, size);
 
     if (only_rank_flag) {
-        fprint_rank (stdout, rank, size);
+        fprint_rank(stdout, rank, size);
 
     } else {
-        bool *uev = NULL;
+        bool * uev = NULL;
         static const double upper_range = 0.9;
         static const double lower_range = 0.0;
 
-        double * order = malloc (sizeof(double) * size);
+        double * order = malloc(sizeof(double) * size);
         int max_rank = 0;
         for (int k = 0; k < size; k++) {
-            if (rank[k] > max_rank) max_rank = rank[k];
+            if (rank[k] > max_rank)
+                max_rank = rank[k];
             order[k] = rank[k];
         }
 
-        double * data = malloc (sizeof(double) * size * dim);
+        double * data = malloc(sizeof(double) * size * dim);
         double * lbound = malloc(sizeof(double) * dim);
         double * ubound = malloc(sizeof(double) * dim);
         double * ref = malloc(sizeof(double) * dim);
@@ -232,42 +236,46 @@ int main(int argc, char *argv[])
             }
             int data_size = 0;
             for (int k = 0; k < size; k++) {
-                if (rank[k] != i) continue;
-                const double *src = points + k * dim;
-                memcpy (data + data_size * dim, src, sizeof(double) * dim);
+                if (rank[k] != i)
+                    continue;
+                const double * src = points + k * dim;
+                memcpy(data + data_size * dim, src, sizeof(double) * dim);
                 data_size++;
                 for (int d = 0; d < dim; d++) {
-                    if (lbound[d] > src[d]) lbound[d] = src[d];
-                    if (ubound[d] < src[d]) ubound[d] = src[d];
+                    if (lbound[d] > src[d])
+                        lbound[d] = src[d];
+                    if (ubound[d] < src[d])
+                        ubound[d] = src[d];
                 }
             }
 
-            uev = calculate_uev (uev, data, dim, data_size, lbound, ubound);
+            uev = calculate_uev(uev, data, dim, data_size, lbound, ubound);
 
-            normalise (data, dim, data_size, minmax, AGREE_NONE,
-                       lower_range, upper_range,
-                       lbound, ubound);
+            normalise(data, dim, data_size, minmax, AGREE_NONE, lower_range,
+                      upper_range, lbound, ubound);
 
-            double *hvc = malloc(sizeof(double) * data_size);
-            hv_contributions(hvc, data, dim, data_size, ref, /*ignore_dominated=*/true);
+            double * hvc = malloc(sizeof(double) * data_size);
+            hv_contributions(hvc, data, dim, data_size, ref,
+                             /*ignore_dominated=*/true);
             /* FIXME: handle uevs: keep_uevs_flag ? uev : NULL);*/
             for (int k = 0, j = 0; k < size; k++) {
-                if (rank[k] != i) continue;
+                if (rank[k] != i)
+                    continue;
                 order[k] += (1 - hvc[j++]);
             }
-            free (hvc);
+            free(hvc);
         }
-        free (data);
-        free (lbound);
-        free (ubound);
-        free (ref);
-        fprint_vector_double (stdout, order, size);
-        free (order);
+        free(data);
+        free(lbound);
+        free(ubound);
+        free(ref);
+        fprint_vector_double(stdout, order, size);
+        free(order);
     }
 
-    free (rank);
-    free (cumsizes);
-    free (points);
-    free ((void *) minmax);
+    free(rank);
+    free(cumsizes);
+    free(points);
+    free((void *)minmax);
     return 0;
 }

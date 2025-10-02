@@ -60,19 +60,21 @@ add_nondominated_point(dlnode_t * p)
         p->cnext[1]->head[1] = p->cnext[1]->cnext[1];
     } else {
         dlnode_t * q = p->cnext[1]->head[1];
-        while (q->x[0] >= p->x[0]){
+        while (q->x[0] >= p->x[0]) {
             q = q->cnext[1];
         }
         p->cnext[1]->head[1] = q;
         q->cnext[0] = p;
     }
 
-    if (p->cnext[0]->cnext[1]->x[1] > p->x[1]
-        || (p->cnext[0]->cnext[1]->x[1] == p->x[1] && p->cnext[0]->cnext[1]->x[0] > p->x[0]))
+    if (p->cnext[0]->cnext[1]->x[1] > p->x[1] ||
+        (p->cnext[0]->cnext[1]->x[1] == p->x[1] &&
+         p->cnext[0]->cnext[1]->x[0] > p->x[0]))
         p->cnext[0]->cnext[1] = p;
 
-    if (p->cnext[1]->cnext[0]->x[0] > p->x[0]
-        || (p->cnext[1]->cnext[0]->x[0] == p->x[0] && p->cnext[1]->cnext[0]->x[1] > p->x[1]))
+    if (p->cnext[1]->cnext[0]->x[0] > p->x[0] ||
+        (p->cnext[1]->cnext[0]->x[0] == p->x[0] &&
+         p->cnext[1]->cnext[0]->x[1] > p->x[1]))
         p->cnext[1]->cnext[0] = p;
 }
 
@@ -111,10 +113,10 @@ update_volume_simple(const double * px, dlnode_t * q, uint_fast8_t i)
 static double
 hvc3d_list(dlnode_t * list)
 {
-    assert(list->next[0] == list+1);
-    assert(list->prev[0] == list+2);
-    dlnode_t * p = (list+1)->next[0];
-    const dlnode_t * stop = list+2;
+    assert(list->next[0] == list + 1);
+    assert(list->prev[0] == list + 2);
+    dlnode_t * p = (list + 1)->next[0];
+    const dlnode_t * stop = list + 2;
     if (p == stop)
         return 0;
 
@@ -143,12 +145,13 @@ hvc3d_list(dlnode_t * list)
         area += p->area;
 
         dlnode_t * q = p->cnext[0];
-        double x[] = { q->x[0], p->x[1] }; // join(p,q) - (x[2] is not important)
+        double x[] = {q->x[0], p->x[1]}; // join(p,q) - (x[2] is not important)
         //x[0] = q->x[0]; x[1] = p->x[1]; x[2] = p->x[2];
         q->area -= compute_area_simple(x, p->head[1], q->head[0], 0);
 
         q = p->cnext[1];
-        x[0] = p->x[0]; x[1] = q->x[1];
+        x[0] = p->x[0];
+        x[1] = q->x[1];
         q->area -= compute_area_simple(x, p->head[0], q->head[1], 1);
 
         add_nondominated_point(p);
@@ -161,13 +164,14 @@ hvc3d_list(dlnode_t * list)
     }
     setup_nondominated_point(p);
     // FIXME: p->head[1]->cnext[0] is always a sentinel, which is pointless to update.
-    assert(p->head[1]->cnext[0] == list+1);
+    assert(p->head[1]->cnext[0] == list + 1);
     update_volume_simple(p->x, p->head[1], 1);
     return volume;
 }
 
 static void
-save_contributions(double * hvc, const dlnode_t * list, const double * restrict data)
+save_contributions(double * hvc, const dlnode_t * list,
+                   const double * restrict data)
 {
     // FIXME: We could just loop over list+3 n times?
     // - We need to mark dominated points also as ignored.
@@ -179,21 +183,22 @@ save_contributions(double * hvc, const dlnode_t * list, const double * restrict 
             hvc[(p->x - data)/3] = p->volume;
     }
     */
-    assert(list+1 == list->next[0]);
-    const dlnode_t * p = (list+1)->next[0];
-    const dlnode_t * stop = list+2;
+    assert(list + 1 == list->next[0]);
+    const dlnode_t * p = (list + 1)->next[0];
+    const dlnode_t * stop = list + 2;
     while (p != stop) {
         /* print_x(p); */
         /* fprintf(stderr, "hvc = %g\n", p->volume); */
         if (!p->ignore)
-            hvc[(p->x - data)/3] = p->volume;
+            hvc[(p->x - data) / 3] = p->volume;
         p = p->next[0];
     }
 }
 
 /*  The caller must have initialized hvc to zero.  */
 double
-hvc3d(double * restrict hvc, const double * restrict data, size_t n, const double * restrict ref)
+hvc3d(double * restrict hvc, const double * restrict data, size_t n,
+      const double * restrict ref)
 {
     dlnode_t * list = setup_cdllist(data, n, ref);
     double hv = hvc3d_list(list);

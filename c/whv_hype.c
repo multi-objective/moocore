@@ -7,11 +7,15 @@
 #include <float.h>
 #include <math.h>
 
-enum hype_sample_dist_type { HYPE_DIST_UNIFORM, HYPE_DIST_EXPONENTIAL, HYPE_DIST_GAUSSIAN };
+enum hype_sample_dist_type {
+    HYPE_DIST_UNIFORM,
+    HYPE_DIST_EXPONENTIAL,
+    HYPE_DIST_GAUSSIAN
+};
 
 typedef struct hype_sample_dist hype_sample_dist;
 
-typedef double *(*hype_sample_fn)(hype_sample_dist *, int);
+typedef double * (*hype_sample_fn)(hype_sample_dist *, int);
 
 struct hype_sample_dist {
     enum hype_sample_dist_type type;
@@ -37,10 +41,8 @@ gaussian_dist_sample(hype_sample_dist * dist, int nsamples)
     /* FIXME: Dimo's paper uses a t vector instead of rho */
     double sigma_x = 0.25;
     double sigma_y = 0.25;
-    rng_bivariate_normal_fill(dist->rng,
-                              dist->mu[0], dist->mu[1],
-                              sigma_x, sigma_y, /*rho=*/1.0,
-                              samples, nsamples);
+    rng_bivariate_normal_fill(dist->rng, dist->mu[0], dist->mu[1], sigma_x,
+                              sigma_y, /*rho=*/1.0, samples, nsamples);
     /* FIXME: do we need to use the truncated distribution?
        samples[i * nobj + 0] = CLAMP(dist->mu[0] + x, 0.0, 1.0);
        samples[i * nobj + 1] = CLAMP(dist->mu[1] + y, 0.0, 1.0);
@@ -52,8 +54,8 @@ static double *
 exp_dist_sample(hype_sample_dist * dist, int nsamples)
 {
     const int nobj = 2;
-    const double *lower = dist->lower;
-    const double *range = dist->range;
+    const double * lower = dist->lower;
+    const double * range = dist->range;
 
     double * samples = malloc(sizeof(double) * nsamples * nobj);
     int n = (int)(0.5 * nsamples);
@@ -80,8 +82,8 @@ static double *
 uniform_dist_sample(hype_sample_dist * dist, int nsamples)
 {
     const int nobj = 2;
-    const double *lower = dist->lower;
-    const double *range = dist->range;
+    const double * lower = dist->lower;
+    const double * range = dist->range;
     rng_state * rng = dist->rng;
     double * samples = malloc(sizeof(double) * nsamples * nobj);
     for (int i = 0; i < nsamples; i++) {
@@ -110,9 +112,9 @@ hype_dist_new(uint32_t seed)
 }
 
 static hype_sample_dist *
-hype_dist_gaussian_new(uint32_t seed, const double *mu)
+hype_dist_gaussian_new(uint32_t seed, const double * mu)
 {
-    hype_sample_dist *dist = hype_dist_new(seed);
+    hype_sample_dist * dist = hype_dist_new(seed);
     dist->type = HYPE_DIST_GAUSSIAN;
     const int nobj = 2;
     dist->mu = malloc(sizeof(double) * nobj);
@@ -124,7 +126,7 @@ hype_dist_gaussian_new(uint32_t seed, const double *mu)
 static hype_sample_dist *
 hype_dist_exp_new(uint32_t seed, double mu)
 {
-    hype_sample_dist *dist = hype_dist_new(seed);
+    hype_sample_dist * dist = hype_dist_new(seed);
     dist->type = HYPE_DIST_EXPONENTIAL;
     dist->mu = malloc(sizeof(double) * 1);
     dist->mu[0] = mu;
@@ -135,7 +137,7 @@ hype_dist_exp_new(uint32_t seed, double mu)
 static hype_sample_dist *
 hype_dist_unif_new(uint32_t seed)
 {
-    hype_sample_dist *dist = hype_dist_new(seed);
+    hype_sample_dist * dist = hype_dist_new(seed);
     dist->type = HYPE_DIST_UNIFORM;
     dist->create_samples = uniform_dist_sample;
     return dist;
@@ -145,15 +147,16 @@ void
 hype_dist_free(hype_sample_dist * d)
 {
     rng_free(d->rng);
-    if (d->mu) free(d->mu);
+    if (d->mu)
+        free(d->mu);
     free(d->lower);
     free(d->range);
     free(d);
 }
 
 static double
-estimate_whv(const double *points, int npoints,
-             const double * samples, int nsamples)
+estimate_whv(const double * points, int npoints, const double * samples,
+             int nsamples)
 {
     const int nobj = 2;
     /* // compute alpha factor of HypE fitness: */
@@ -166,18 +169,19 @@ estimate_whv(const double *points, int npoints,
     unsigned int * dominated = calloc(nsamples, sizeof(unsigned int));
     bool * is_dominator = malloc(npoints * sizeof(bool));
     for (int s = 0; s < nsamples; s++) {
-        const double *sample = samples + s * nobj;
+        const double * sample = samples + s * nobj;
         // compute amount of dominators in p for each sample:
         for (int j = 0; j < npoints; j++) {
             bool dom = true;
-            const double *p = points + j * nobj;
+            const double * p = points + j * nobj;
             for (int d = 0; d < nobj; d++) {
                 if (sample[d] < p[d]) {
                     dom = false;
                     break;
                 }
             }
-            if (dom) dominated[s]++;
+            if (dom)
+                dominated[s]++;
             is_dominator[j] = dom;
         }
         // sum up alpha values of each dominated sample:
@@ -196,26 +200,27 @@ estimate_whv(const double *points, int npoints,
 }
 
 static double
-calculate_volume_between_points(const double *p1, const double * p2, int dim)
+calculate_volume_between_points(const double * p1, const double * p2, int dim)
 {
     double volume = 1.0;
-    for (int k = 0; k < dim; k++) volume *= (p2[k] - p1[k]);
+    for (int k = 0; k < dim; k++)
+        volume *= (p2[k] - p1[k]);
     return volume;
 }
 
 static void
-normalise01_inplace(double *points, int dim, int npoints,
-                    const double *lbound, const double *ubound)
+normalise01_inplace(double * points, int dim, int npoints,
+                    const double * lbound, const double * ubound)
 {
-    const signed char * minmax = minmax_minimise((dimension_t) dim);
-    normalise(points, dim, npoints, minmax, /*agree=*/-1, 0.0, 1.0,
-              lbound, ubound);
-    free((void *) minmax);
+    const signed char * minmax = minmax_minimise((dimension_t)dim);
+    normalise(points, dim, npoints, minmax, /*agree=*/-1, 0.0, 1.0, lbound,
+              ubound);
+    free((void *)minmax);
 }
 
 static double *
-normalise01(const double *points, int dim, int npoints,
-            const double *lbound, const double *ubound)
+normalise01(const double * points, int dim, int npoints, const double * lbound,
+            const double * ubound)
 {
     double * points2 = malloc(sizeof(double) * dim * npoints);
     memcpy(points2, points, sizeof(double) * dim * npoints);
@@ -225,9 +230,8 @@ normalise01(const double *points, int dim, int npoints,
 
 
 static double
-whv_hype_sample(const double *points, int npoints,
-                const double *ideal, const double *ref,
-                int nsamples, hype_sample_dist * dist)
+whv_hype_sample(const double * points, int npoints, const double * ideal,
+                const double * ref, int nsamples, hype_sample_dist * dist)
 {
     const int nobj = 2;
     const double * samples = dist->create_samples(dist, nsamples);
@@ -243,9 +247,8 @@ whv_hype_sample(const double *points, int npoints,
 }
 
 double
-whv_hype_estimate(const double *points, int npoints,
-                  const double *ideal, const double *ref,
-                  hype_sample_dist * dist, int nsamples)
+whv_hype_estimate(const double * points, int npoints, const double * ideal,
+                  const double * ref, hype_sample_dist * dist, int nsamples)
 {
     const int nobj = 2;
     /* FIXME: this modifies mu, it would be better to keep mu and use a copy */
@@ -257,9 +260,8 @@ whv_hype_estimate(const double *points, int npoints,
 }
 
 double
-whv_hype_unif(const double *points, int npoints,
-              const double *ideal, const double *ref,
-              int nsamples, uint32_t seed)
+whv_hype_unif(const double * points, int npoints, const double * ideal,
+              const double * ref, int nsamples, uint32_t seed)
 {
     hype_sample_dist * dist = hype_dist_unif_new(seed);
     double whv = whv_hype_sample(points, npoints, ideal, ref, nsamples, dist);
@@ -268,9 +270,8 @@ whv_hype_unif(const double *points, int npoints,
 }
 
 double
-whv_hype_expo(const double *points, int npoints,
-              const double *ideal, const double *ref,
-              int nsamples, uint32_t seed, double mu)
+whv_hype_expo(const double * points, int npoints, const double * ideal,
+              const double * ref, int nsamples, uint32_t seed, double mu)
 {
     hype_sample_dist * dist = hype_dist_exp_new(seed, mu);
     double whv = whv_hype_sample(points, npoints, ideal, ref, nsamples, dist);
@@ -279,9 +280,9 @@ whv_hype_expo(const double *points, int npoints,
 }
 
 double
-whv_hype_gaus(const double *points, int npoints,
-              const double *ideal, const double *ref,
-              int nsamples, uint32_t seed, const double *mu)
+whv_hype_gaus(const double * points, int npoints, const double * ideal,
+              const double * ref, int nsamples, uint32_t seed,
+              const double * mu)
 {
     hype_sample_dist * dist = hype_dist_gaussian_new(seed, mu);
     const int nobj = 2;

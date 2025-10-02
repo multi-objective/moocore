@@ -69,7 +69,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 double
-rng_standard_normal(rng_state *rng)
+rng_standard_normal(rng_state * rng)
 {
     for (;;) {
         /* r = e3n52sb8 */
@@ -78,7 +78,7 @@ rng_standard_normal(rng_state *rng)
         r >>= 8;
         int sign = r & 0x1;
         uint64_t rabs = (r >> 1) & 0x000fffffffffffff;
-        double x = (double) rabs * wi_double[idx];
+        double x = (double)rabs * wi_double[idx];
         if (sign & 0x1)
             x = -x;
         if (rabs < ki_double[idx])
@@ -86,26 +86,27 @@ rng_standard_normal(rng_state *rng)
         if (idx == 0) {
             for (;;) {
                 /* Switch to 1.0 - U to avoid log(0.0), see GH 13361 */
-                double xx = -ziggurat_nor_inv_r * log1p(-mt19937_next_double(rng));
+                double xx =
+                    -ziggurat_nor_inv_r * log1p(-mt19937_next_double(rng));
                 double yy = -log1p(-mt19937_next_double(rng));
                 if (yy + yy > xx * xx)
                     return ((rabs >> 8) & 0x1) ? -(ziggurat_nor_r + xx)
-                        : ziggurat_nor_r + xx;
+                                               : ziggurat_nor_r + xx;
             }
-        } else if (((fi_double[idx - 1] - fi_double[idx]) * mt19937_next_double(rng) +
+        } else if (((fi_double[idx - 1] - fi_double[idx]) *
+                        mt19937_next_double(rng) +
                     fi_double[idx]) < exp(-0.5 * x * x))
-                return x;
+            return x;
     }
 }
 
 void
-rng_bivariate_normal_fill(rng_state * rng,
-                          double mu1, double mu2,
+rng_bivariate_normal_fill(rng_state * rng, double mu1, double mu2,
                           double sigma1, double sigma2, double rho,
-                          double *out, int n)
+                          double * out, int n)
 {
     const double sigma2rho = sigma2 * rho;
-    const double nu = sigma2 * sqrt(1 - rho*rho);
+    const double nu = sigma2 * sqrt(1 - rho * rho);
     for (int i = 0; i < n; i++) {
         const double x1 = rng_standard_normal(rng);
         *out = mu1 + x1 * sigma1;

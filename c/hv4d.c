@@ -36,12 +36,10 @@
 // ---------- Data Structures Functions ---------------------------------------
 
 static inline void _attr_maybe_unused
-print_point(const char *s, const double * x)
+print_point(const char * s, const double * x)
 {
     fprintf(stderr, "%s: %g %g %g %g\n", s, x[0], x[1], x[2], x[4]);
 }
-
-
 
 
 // ------------ Update data structure -----------------------------------------
@@ -49,7 +47,9 @@ print_point(const char *s, const double * x)
 static inline void
 add_to_z(dlnode_t * new)
 {
-    new->next[0] = new->prev[0]->next[0]; //in case new->next[0] was removed for being dominated
+    new->next[0] =
+        new->prev[0]
+            ->next[0]; //in case new->next[0] was removed for being dominated
     new->next[0]->prev[0] = new;
     new->prev[0]->next[0] = new;
 }
@@ -57,13 +57,15 @@ add_to_z(dlnode_t * new)
 static inline bool
 lex_cmp_3d_102(const double * restrict a, const double * restrict b)
 {
-    return a[1] < b[1] || (a[1] == b[1] && (a[0] < b[0] || (a[0] == b[0] && a[2] < b[2])));
+    return a[1] < b[1] ||
+           (a[1] == b[1] && (a[0] < b[0] || (a[0] == b[0] && a[2] < b[2])));
 }
 
 static inline bool
 lex_cmp_3d_012(const double * restrict a, const double * restrict b)
 {
-    return a[0] < b[0] || (a[0] == b[0] && (a[1] < b[1] || (a[1] == b[1] && a[2] < b[2])));
+    return a[0] < b[0] ||
+           (a[0] == b[0] && (a[1] < b[1] || (a[1] == b[1] && a[2] < b[2])));
 }
 
 /*
@@ -74,26 +76,30 @@ lex_cmp_3d_012(const double * restrict a, const double * restrict b)
 static void
 update_links(dlnode_t * restrict list, dlnode_t * restrict new)
 {
-    assert(list+2 == list->prev[0]);
+    assert(list + 2 == list->prev[0]);
     const double * newx = new->x;
     dlnode_t * p = new->next[0];
     const double * px = p->x;
-    dlnode_t * stop = list+2;
+    dlnode_t * stop = list + 2;
     while (p != stop) {
         // px dominates newx (but not equal)
-        if (px[0] <= newx[0] && px[1] <= newx[1] && (px[0] < newx[0] || px[1] < newx[1]))
+        if (px[0] <= newx[0] && px[1] <= newx[1] &&
+            (px[0] < newx[0] || px[1] < newx[1]))
             return;
 
-        if (newx[0] <= px[0]){
+        if (newx[0] <= px[0]) {
             //new <= p
-            if (newx[1] <= px[1]){
+            if (newx[1] <= px[1]) {
                 assert(weakly_dominates(newx, px, 3));
                 //p->ndomr++;
                 remove_from_z(p);
-            } else if (newx[0] < px[0] && lex_cmp_3d_102(newx, p->closest[1]->x)) { // newx[1] > px[1]
+            } else if (newx[0] < px[0] &&
+                       lex_cmp_3d_102(newx,
+                                      p->closest[1]->x)) { // newx[1] > px[1]
                 p->closest[1] = new;
             }
-        } else if (newx[1] < px[1] && lex_cmp_3d_012(newx, p->closest[0]->x)) {//newx[0] > px[0]
+        } else if (newx[1] < px[1] &&
+                   lex_cmp_3d_012(newx, p->closest[0]->x)) { //newx[0] > px[0]
             p->closest[0] = new;
         }
         p = p->next[0];
@@ -102,24 +108,24 @@ update_links(dlnode_t * restrict list, dlnode_t * restrict new)
 }
 
 
-
 // This does what setupZandClosest does while reconstructing L at z = new->x[2].
 __attribute__((hot)) static bool
-restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict new)
+restart_base_setup_z_and_closest(dlnode_t * restrict list,
+                                 dlnode_t * restrict new)
 {
     const double * restrict newx = new->x;
     // FIXME: This is the most expensive function in the HV4D+ algorithm.
-    assert(list+1 == list->next[0]);
+    assert(list + 1 == list->next[0]);
     dlnode_t * closest1 = list;
-    dlnode_t * closest0 = list+1;
+    dlnode_t * closest0 = list + 1;
     const double * closest0x = closest0->x;
     const double * closest1x = closest1->x;
-    dlnode_t * p = list+1;
+    dlnode_t * p = list + 1;
     assert(p->next[0] == list->next[0]->next[0]);
     restart_list_y(list);
     while (true) {
         p = p->next[0];
-        const double * restrict px =  p->x;
+        const double * restrict px = p->x;
         // Help auto-vectorization.
         bool p_leq_new_0 = px[0] <= newx[0];
         bool p_leq_new_1 = px[1] <= newx[1];
@@ -141,10 +147,14 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
 
         // setup_z_and_closest
         assert(px[0] > newx[0] || px[1] > newx[1]);
-        if (px[1] < newx[1] && (px[0] < closest0x[0] || (px[0] == closest0x[0] && px[1] < closest0x[1]))) {
+        if (px[1] < newx[1] &&
+            (px[0] < closest0x[0] ||
+             (px[0] == closest0x[0] && px[1] < closest0x[1]))) {
             closest0 = p;
             closest0x = px;
-        } else if (px[0] < newx[0] && (px[1] < closest1x[1] || (px[1] == closest1x[1] && px[0] < closest1x[0]))) {
+        } else if (px[0] < newx[0] &&
+                   (px[1] < closest1x[1] ||
+                    (px[1] == closest1x[1] && px[0] < closest1x[0]))) {
             closest1 = p;
             closest1x = px;
         }
@@ -184,9 +194,9 @@ one_contribution_3d(dlnode_t * restrict new)
 
         set_cnext_to_closest(p);
 
-        if (px[0] < newx[0])  {
+        if (px[0] < newx[0]) {
             if (px[1] <= new->cnext[1]->x[1]) {
-                const double tmpx[] = { newx[0], px[1] };
+                const double tmpx[] = {newx[0], px[1]};
                 // if px[1] == new->cnext[1]->x[1] then area starts at 0.
                 area -= compute_area_no_inners(tmpx, new->cnext[1], 0);
                 p->cnext[1] = new->cnext[1];
@@ -195,7 +205,7 @@ one_contribution_3d(dlnode_t * restrict new)
             }
         } else if (px[1] < newx[1]) {
             if (px[0] <= new->cnext[0]->x[0]) {
-                const double tmpx[] = { px[0], newx[1] };
+                const double tmpx[] = {px[0], newx[1]};
                 // if px[0] == new->cnext[0]->x[0] then area starts at 0.
                 area -= compute_area_no_inners(tmpx, new->cnext[0], 1);
                 p->cnext[0] = new->cnext[0];
@@ -218,13 +228,13 @@ one_contribution_3d(dlnode_t * restrict new)
 double
 hv4dplusU(dlnode_t * list)
 {
-    assert(list+2 == list->prev[0]);
-    assert(list+2 == list->prev[1]);
-    assert(list+1 == list->next[1]);
+    assert(list + 2 == list->prev[0]);
+    assert(list + 2 == list->prev[1]);
+    assert(list + 1 == list->next[1]);
 
     double volume = 0, hv = 0;
-    dlnode_t * new = (list+1)->next[1];
-    dlnode_t * last = list+2;
+    dlnode_t * new = (list + 1)->next[1];
+    dlnode_t * last = list + 2;
     while (new != last) {
         if (restart_base_setup_z_and_closest(list, new)) {
             // new was not dominated by something else.
