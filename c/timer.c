@@ -6,11 +6,11 @@
 #include "config.h"
 #include <stddef.h>
 #if DEBUG >= 1
-#include <stdio.h>
+# include <stdio.h>
 #endif
 #include <sys/time.h> /* for struct timeval */
 #ifndef WIN32
-#include <sys/resource.h> /* for getrusage */
+# include <sys/resource.h> /* for getrusage */
 #else
 /*
   getrusage
@@ -46,8 +46,8 @@
  * Based on:
  * http://www.opengroup.org/onlinepubs/000095399/basedefs/sys/resource.h.html
  */
-#define RUSAGE_SELF (1 << 0)
-#define RUSAGE_CHILDREN (1 << 1)
+# define RUSAGE_SELF (1 << 0)
+# define RUSAGE_CHILDREN (1 << 1)
 
 struct rusage {
     struct timeval ru_utime; /* user time used */
@@ -55,10 +55,10 @@ struct rusage {
 };
 
 /* Include only the minimum from windows.h */
-#define WIN32_LEAN_AND_MEAN
-#include <errno.h>
-#include <stdint.h>
-#include <windows.h>
+# define WIN32_LEAN_AND_MEAN
+# include <errno.h>
+# include <stdint.h>
+# include <windows.h>
 
 static void
 FILETIME_to_timeval(struct timeval * tv, FILETIME * ft)
@@ -203,8 +203,7 @@ Timer_continue(void)
     }
 #endif
 
-    if (timer_tmp_time > 0.0)
-        real_time += timer_tmp_time;
+    if (timer_tmp_time > 0.0) real_time += timer_tmp_time;
 
     getrusage(RUSAGE_SELF, &res);
     timer_tmp_time = TIMER_CPUTIME(res) - stop_virtual_time;
@@ -219,6 +218,5 @@ Timer_continue(void)
     }
 #endif
 
-    if (timer_tmp_time > 0.0)
-        virtual_time += timer_tmp_time;
+    if (timer_tmp_time > 0.0) virtual_time += timer_tmp_time;
 }

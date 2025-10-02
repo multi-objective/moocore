@@ -109,26 +109,23 @@ rect_weighted_hv2d(double * data, int n, double * rectangles,
         assert(color >= 0);                         \
     } while (0)
 
-#define next_point()                                          \
-    do {                                                      \
-        top = p[1];                                           \
-        pk++;                                                 \
-        if (pk >= n || top == last_top || p[0] >= last_right) \
-            goto return_whv;                                  \
-        p += nobj;                                            \
-        print_point(pk, p, r, rect);                          \
+#define next_point()                                                           \
+    do {                                                                       \
+        top = p[1];                                                            \
+        pk++;                                                                  \
+        if (pk >= n || top == last_top || p[0] >= last_right) goto return_whv; \
+        p += nobj;                                                             \
+        print_point(pk, p, r, rect);                                           \
     } while (0)
     // We cannot use %zu for size_t because of MingW compiler.
     DEBUG2_PRINT("n = %lu\trectangles = %lu\n", (unsigned long)n,
                  (unsigned long)rectangles_nrow);
-    if (rectangles_nrow <= 0 || n <= 0)
-        return 0;
+    if (rectangles_nrow <= 0 || n <= 0) return 0;
 
     int old_rectangles_nrow = rectangles_nrow;
     rectangles = whv_preprocess_rectangles(rectangles, old_rectangles_nrow,
                                            reference, &rectangles_nrow);
-    if (rectangles_nrow == 0)
-        return 0;
+    if (rectangles_nrow == 0) return 0;
 
     const int nobj = 2;
     qsort(data, n, 2 * sizeof(*data), &cmp_data_y_desc);
@@ -177,8 +174,7 @@ rect_weighted_hv2d(double * data, int n, double * rectangles,
             } // else case #3: not dominated or already completed, skip
             // Next rectangle
             r++;
-            if (r >= rectangles_nrow)
-                break; // goto next_point;
+            if (r >= rectangles_nrow) break; // goto next_point;
             get_rectangle(r);
         } while (p[1] < upper1);
         // Also restart rectangles
@@ -191,8 +187,7 @@ rect_weighted_hv2d(double * data, int n, double * rectangles,
         } while (top == p[1] && p[1] >= upper1);
     }
 return_whv:
-    if (old_rectangles_nrow != rectangles_nrow)
-        free(rectangles);
+    if (old_rectangles_nrow != rectangles_nrow) free(rectangles);
 
     DEBUG2_PRINT("whv: %16.15g\n", whv);
     return whv;

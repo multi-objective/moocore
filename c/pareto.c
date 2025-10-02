@@ -40,7 +40,7 @@ point_2d_front_cmp(const void * a, const void * b)
    FIXME: Could we avoid creating a copy of the points? Yes, see find_nondominated_set_2d_()
 */
 #if DEBUG >= 2
-#include "io.h"
+# include "io.h"
 #endif
 static int *
 pareto_rank_2D(const double * points, int size)
@@ -56,7 +56,7 @@ pareto_rank_2D(const double * points, int size)
     }
 
 #if DEBUG >= 2
-#define PARETO_RANK_2D_DEBUG
+# define PARETO_RANK_2D_DEBUG
     double * help_0 = malloc(size * sizeof(double));
     double * help_1 = malloc(size * sizeof(double));
     int * help_i = malloc(size * sizeof(int));
@@ -159,8 +159,7 @@ pareto_rank_2D(const double * points, int size)
             }
         } while (f != n_front);
 
-        for (f = 0; f < n_front; f++)
-            free(front[f]);
+        for (f = 0; f < n_front; f++) free(front[f]);
         free(front);
         free(front_size);
 
@@ -224,14 +223,11 @@ pareto_rank(const double * points, int d, int size)
         for (int j = 0; j < size; j++) {
             assert(rank[j] <= level);
             /* is already dominated or belongs to a previous front? */
-            if (rank[j] != level - 1)
-                continue;
+            if (rank[j] != level - 1) continue;
 
             for (int k = 0; k < size; k++) {
-                if (k == j)
-                    continue;
-                if (rank[k] != level - 1)
-                    continue;
+                if (k == j) continue;
+                if (rank[k] != level - 1) continue;
                 const double * pj = points + j * dim;
                 const double * pk = points + k * dim;
                 bool j_leq_k = weakly_dominates(pj, pk, dim);

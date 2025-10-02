@@ -15,13 +15,13 @@ fractl(long double x)
 #define ALMOST_ZERO_WEIGHT 1e-20
 
 #ifndef M_PIl
-#define M_PIl 3.141592653589793238462643383279502884L /* pi */
+# define M_PIl 3.141592653589793238462643383279502884L /* pi */
 #endif
 #ifndef M_PI_2l
-#define M_PI_2l 1.570796326794896619231321691639751442L /* pi/2 */
+# define M_PI_2l 1.570796326794896619231321691639751442L /* pi/2 */
 #endif
 #ifndef M_PI_4l
-#define M_PI_4l 0.785398163397448309615660845819875721L /* pi/4 */
+# define M_PI_4l 0.785398163397448309615660845819875721L /* pi/4 */
 #endif
 
 static double *
@@ -37,14 +37,11 @@ transform_and_filter(const double * restrict data, dimension_t dim,
     for (i = 0, j = 0; i < npoints; i++) {
         for (k = 0; k < dim; k++) {
             points[j * dim + k] = ref[k] - data[i * dim + k];
-            if (maximise[k])
-                points[j * dim + k] = -points[j * dim + k];
+            if (maximise[k]) points[j * dim + k] = -points[j * dim + k];
             // Filter out dominated points (must be >0 in all objectives)
-            if (points[j * dim + k] <= 0)
-                break;
+            if (points[j * dim + k] <= 0) break;
         }
-        if (k == dim)
-            j++;
+        if (k == dim) j++;
     }
     *npoints_p = j;
     if (*npoints_p == 0) {
@@ -174,8 +171,7 @@ hv_approx_normal(const double * restrict data, int nobjs, int n,
     size_t npoints = (size_t)n;
     const double * points =
         transform_and_filter(data, dim, &npoints, ref, maximise);
-    if (points == NULL)
-        return 0;
+    if (points == NULL) return 0;
 
     rng_state * rng = rng_new(random_seed);
     double * w = malloc(dim * sizeof(double));
@@ -192,8 +188,7 @@ hv_approx_normal(const double * restrict data, int nobjs, int n,
                 w[k] = ALMOST_ZERO_WEIGHT;
         }
         double norm = 0.0;
-        for (k = 0; k < dim; k++)
-            norm += w[k] * w[k];
+        for (k = 0; k < dim; k++) norm += w[k] * w[k];
         norm = sqrt(norm);
         for (k = 0; k < dim; k++) {
             // 1 / (w[k] / norm) so we avoid the division when calculating the
@@ -249,8 +244,7 @@ compute_polar_sample(long double * sample, dimension_t dim, uint_fast32_t i,
             sample[k] = fractl(val);
         }
     } else { // Last point is always 0.
-        for (dimension_t k = 0; k < dim; k++)
-            sample[k] = 0.0;
+        for (dimension_t k = 0; k < dim; k++) sample[k] = 0.0;
     }
 }
 
@@ -717,8 +711,7 @@ compute_int_all(dimension_t dm1)
 
 #if DEBUG >= 1
     long double prod_int_all = int_all[0];
-    for (i = 1; i < dm1; i++)
-        prod_int_all *= int_all[i];
+    for (i = 1; i < dm1; i++) prod_int_all *= int_all[i];
     ASSUME(prod_int_all > 0);
     const long double S_value = sphere_area_div_2_pow_d[dm1 + 1];
     DEBUG2_PRINT("sphere / prod_int_all = %22.15Lg / %22.15Lg = %22.15Lg\n",
@@ -785,8 +778,7 @@ hv_approx_hua_wang(const double * restrict data, int nobjs, int n,
     size_t npoints = (size_t)n;
     const double * points =
         transform_and_filter(data, dim, &npoints, ref, maximise);
-    if (points == NULL)
-        return 0;
+    if (points == NULL) return 0;
 
     const long double * int_all = compute_int_all(dim - 1);
     const uint_fast32_t * polar_a = construct_polar_a(dim - 1, nsamples);

@@ -137,8 +137,7 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list,
             return false;
         }
 
-        if (!lexicographic_less_3d(px, newx))
-            break;
+        if (!lexicographic_less_3d(px, newx)) break;
 
         // reconstruct
         set_cnext_to_closest(p);
@@ -186,8 +185,7 @@ one_contribution_3d(dlnode_t * restrict new)
         px = p->x;
         volume += area * (px[2] - lastz);
 
-        if (px[0] <= newx[0] && px[1] <= newx[1])
-            return volume;
+        if (px[0] <= newx[0] && px[1] <= newx[1]) return volume;
 
         assert(px[0] > newx[0] || px[1] > newx[1]);
         assert(!weakly_dominates(px, p->next[0]->x, 4));

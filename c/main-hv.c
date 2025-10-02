@@ -127,8 +127,7 @@ hv_file(const char * filename, double * reference, double * maximum,
 
     handle_read_data_error(
         read_double_data(filename, &data, &nobj, &cumsizes, &nruns), filename);
-    if (!filename)
-        filename = stdin_name;
+    if (!filename) filename = stdin_name;
 
     if (filename != stdin_name && suffix) {
         outfilename = m_strcat(filename, suffix);
@@ -144,8 +143,7 @@ hv_file(const char * filename, double * reference, double * maximum,
         nruns = 1;
     }
 
-    if (verbose_flag >= 2)
-        printf("# file: %s\n", filename);
+    if (verbose_flag >= 2) printf("# file: %s\n", filename);
 
     bool needs_minimum = (minimum == NULL);
     if (needs_minimum) {
@@ -216,8 +214,7 @@ hv_file(const char * filename, double * reference, double * maximum,
         if (verbose_flag >= 2)
             fprintf(outfile, "# Time: %f seconds\n", time_elapsed);
     }
-    if (contributions_flag)
-        free(hvc);
+    if (contributions_flag) free(hvc);
     free(data);
     free(cumsizes);
 
@@ -318,7 +315,6 @@ main(int argc, char * argv[])
         free(maximum);
     }
 
-    if (reference)
-        free(reference);
+    if (reference) free(reference);
     return EXIT_SUCCESS;
 }

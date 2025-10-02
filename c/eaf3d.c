@@ -77,8 +77,7 @@ setup_cdllist(objective_t * data, int d, const int * cumsize, int nsets)
 
     int i, k;
     for (i = 0, k = 0; i < n; i++) {
-        if (i == cumsize[k])
-            k++;
+        if (i == cumsize[k]) k++;
 
         head[i + 1].set = k;
         // ->x points to the first coordinate of each point.
@@ -90,12 +89,10 @@ setup_cdllist(objective_t * data, int d, const int * cumsize, int nsets)
     head->x = NULL; // head contains no data
 
     dlnode_t ** scratch = malloc(n * sizeof(dlnode_t *));
-    for (i = 0; i < n; i++)
-        scratch[i] = head + i + 1;
+    for (i = 0; i < n; i++) scratch[i] = head + i + 1;
 
     // ->x points to the last coordinate of each point.
-    for (i = 0; i < n; i++)
-        scratch[i]->x--;
+    for (i = 0; i < n; i++) scratch[i]->x--;
 
     // Sort according to the last coordinate.
     qsort(scratch, n, sizeof(dlnode_t *), compare_node);
@@ -111,8 +108,7 @@ setup_cdllist(objective_t * data, int d, const int * cumsize, int nsets)
     head->prev = scratch[n - 1];
 
     // ->x points to the first coordinate.
-    for (i = 0; i < n; i++)
-        scratch[i]->x -= d - 1;
+    for (i = 0; i < n; i++) scratch[i]->x -= d - 1;
 
     free(scratch);
 
@@ -146,8 +142,7 @@ avl_search_closest_y(const avl_tree_t * avltree, const void * item,
     avl_node_t * node;
     int c;
 
-    if (!avlnode)
-        avlnode = &node;
+    if (!avlnode) avlnode = &node;
 
     node = avltree->top;
     if (!node) {
@@ -261,8 +256,7 @@ printlist_points_indic(avl_tree_t * avltree, int dim, int nruns, FILE * outfile,
             fprintf(outfile, (outfile == outfileindic) ? "\t" : "\n");
         }
         if (outfileindic) {
-            for (k = 0; k < nruns; k++)
-                dom_sets[k] = 0;
+            for (k = 0; k < nruns; k++) dom_sets[k] = 0;
             find_all_promoters(aux, dom_sets, nruns);
             fprintf(outfileindic, "%d", dom_sets[0]);
             for (k = 1; k < nruns; k++) {
@@ -298,8 +292,7 @@ printoutput(avl_tree_t ** level, int nset, int d, FILE ** outfile,
         }
 
         if (i < nlevels - 1) {
-            if (outfile)
-                fprintf(outfile[f], "\n");
+            if (outfile) fprintf(outfile[f], "\n");
             if (outfileindic &&
                 (outfile == NULL || outfile[f] != outfileindic[fi])) {
                 fprintf(outfileindic[fi], "\n");
@@ -392,8 +385,7 @@ add2set(avl_tree_t * tree, avl_node_t * prevnode, avl_node_t * tnode,
         objective_t * item)
 {
     avl_init_node(tnode, item);
-    if (node_point(prevnode)[0] == item[0])
-        prevnode = prevnode->prev;
+    if (node_point(prevnode)[0] == item[0]) prevnode = prevnode->prev;
     avl_insert_after(tree, prevnode, tnode);
 
     tnode = tnode->next;
@@ -685,8 +677,7 @@ eaf3df(removed_list_t * removed_list, dlnode_t * list, avl_tree_t ** set,
         }
 
         if (!mask[new->set]) {
-            if (start_at < (nset - 2))
-                start_at++;
+            if (start_at < (nset - 2)) start_at++;
             mask[new->set] = true;
         }
     }
@@ -855,8 +846,7 @@ eaf3d(objective_t * data, const int * cumsize, int nruns, const int * attlevel,
         avl_node_t * aux = output[k]->head;
         while (aux) {
             objective_t * val = aux->item;
-            for (int j = 0; j < nruns; j++)
-                attained[j] = 0;
+            for (int j = 0; j < nruns; j++) attained[j] = 0;
             find_all_promoters(aux, attained, nruns);
             eaf_store_point_3d(eaf[l], val[0], val[1], val[2], attained);
             aux = aux->next;

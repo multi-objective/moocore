@@ -29,8 +29,7 @@ static inline double
 rng_uniform(rng_state * rng, double low, double high)
 {
     assert(rng != NULL);
-    if (low >= high)
-        return low;
+    if (low >= high) return low;
     return low + (high - low) * rng_random(rng);
 }
 

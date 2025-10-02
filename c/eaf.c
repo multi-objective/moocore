@@ -27,11 +27,11 @@
 #include "eaf.h"
 
 #ifndef DEBUG
-#define DEBUG 0
+# define DEBUG 0
 #endif
 
 #ifndef DEBUG_POLYGONS
-#define DEBUG_POLYGONS 0
+# define DEBUG_POLYGONS 0
 #endif
 
 static int
@@ -95,8 +95,7 @@ eaf_delete(eaf_t * eaf)
 void
 eaf_free(eaf_t ** eaf, int nruns)
 {
-    for (int k = 0; k < nruns; k++)
-        eaf_delete(eaf[k]);
+    for (int k = 0; k < nruns; k++) eaf_delete(eaf[k]);
     free(eaf);
 }
 
@@ -185,8 +184,7 @@ eaf_print_line(FILE * coord_file, FILE * indic_file, FILE * diff_file,
         attained_left_right(attained, nruns / 2, nruns, &count1, &count2);
     }
 
-    if (diff_file)
-        fprintf(diff_file, "%d %d\n", count1, count2);
+    if (diff_file) fprintf(diff_file, "%d %d\n", count1, count2);
 }
 
 /* Print one attainment surface of the EAF.  */
@@ -307,8 +305,7 @@ eaf2d(const objective_t * data, const int * cumsize, int nruns,
     datax = malloc(ntotal * sizeof(objective_t *));
     datay = malloc(ntotal * sizeof(objective_t *));
 
-    for (k = 0; k < ntotal; k++)
-        datax[k] = datay[k] = data + nobj * k;
+    for (k = 0; k < ntotal; k++) datax[k] = datay[k] = data + nobj * k;
 
     DEBUG1(/* Sanity check. */
            for (k = 1; k < nruns; k++) assert(cumsize[k - 1] < cumsize[k]););
@@ -329,8 +326,7 @@ eaf2d(const objective_t * data, const int * cumsize, int nruns,
 
     runtab = malloc(ntotal * sizeof(int));
     for (k = 0, j = 0; k < ntotal; k++) {
-        if (k == cumsize[j])
-            j++;
+        if (k == cumsize[j]) j++;
         runtab[k] = j;
     }
 
@@ -352,8 +348,7 @@ eaf2d(const objective_t * data, const int * cumsize, int nruns,
         int y = 0;
 
         int nattained = 0;
-        for (k = 0; k < nruns; k++)
-            attained[k] = 0;
+        for (k = 0; k < nruns; k++) attained[k] = 0;
 
         /* Start at upper-left corner */
         int run = runtab[(datax[x] - data) / nobj];
@@ -367,19 +362,16 @@ eaf2d(const objective_t * data, const int * cumsize, int nruns,
                 x++;
                 if (datax[x][1] <= datay[y][1]) {
                     run = runtab[(datax[x] - data) / nobj];
-                    if (!attained[run])
-                        nattained++;
+                    if (!attained[run]) nattained++;
                     attained[run]++;
                 }
             }
 #if DEBUG > 1
-            for (k = 0; k < nruns; k++)
-                fprintf(stderr, "%d ", attained[k]);
+            for (k = 0; k < nruns; k++) fprintf(stderr, "%d ", attained[k]);
             fprintf(stderr, "\n");
 #endif
 
-            if (nattained < level)
-                continue;
+            if (nattained < level) continue;
 
             /* Now move down until desired attainment level is no
                longer reached.  */
@@ -393,8 +385,7 @@ eaf2d(const objective_t * data, const int * cumsize, int nruns,
                     if (datay[y][0] <= datax[x][0]) {
                         run = runtab[(datay[y] - data) / nobj];
                         attained[run]--;
-                        if (!attained[run])
-                            nattained--;
+                        if (!attained[run]) nattained--;
                     }
 #if DEBUG > 1
                     for (k = 0; k < nruns; k++)
@@ -424,16 +415,15 @@ eaf2d(const objective_t * data, const int * cumsize, int nruns,
 
 
 #if DEBUG_POLYGONS > 0
-#define PRINT_POINT(X, Y, C)             \
-    do {                                 \
-        fprintf(stdout, "PRINT_POINT:"); \
-        point2d_printf(stdout, X, Y);    \
-        if (C != INT_MIN)                \
-            fprintf(stdout, "\t%d", C);  \
-        fprintf(stdout, "\n");           \
-    } while (0)
+# define PRINT_POINT(X, Y, C)                          \
+     do {                                              \
+         fprintf(stdout, "PRINT_POINT:");              \
+         point2d_printf(stdout, X, Y);                 \
+         if (C != INT_MIN) fprintf(stdout, "\t%d", C); \
+         fprintf(stdout, "\n");                        \
+     } while (0)
 #else
-#define PRINT_POINT(X, Y, C) (void)0
+# define PRINT_POINT(X, Y, C) (void)0
 #endif
 
 static int
@@ -441,8 +431,7 @@ eaf_max_size(eaf_t * const * eaf, int nlevels)
 {
     size_t max_size = 0;
     for (int a = 0; a < nlevels; a++) {
-        if (max_size < eaf[a]->size)
-            max_size = eaf[a]->size;
+        if (max_size < eaf[a]->size) max_size = eaf[a]->size;
     }
     return (int)max_size;
 }
@@ -469,8 +458,7 @@ init_colors(int * color, const eaf_t * eaf, size_t eaf_size, int nruns)
 static const objective_t *
 next_polygon(const objective_t * src, int nobj, const objective_t * end)
 {
-    while (src < end && *src != objective_MIN)
-        src += nobj;
+    while (src < end && *src != objective_MIN) src += nobj;
     src += nobj;
     return src;
 }
@@ -486,10 +474,8 @@ min_max_in_objective(const objective_t * v, int nobj, int k,
     objective_t max = v[k];
     v += nobj;
     while (v[k] != objective_MIN) {
-        if (min > v[k])
-            min = v[k];
-        if (max < v[k])
-            max = v[k];
+        if (min > v[k]) min = v[k];
+        if (max < v[k]) max = v[k];
         v += nobj;
     }
     *min_ref = min;
@@ -518,8 +504,7 @@ polygon_dominates_any_point(const objective_t * a, const objective_t * b,
                             int nobj)
 {
     while (b[0] != objective_MIN) {
-        if (polygon_dominates_point(a, b, nobj))
-            return true;
+        if (polygon_dominates_point(a, b, nobj)) return true;
         b += nobj;
     }
     return false;
@@ -534,8 +519,7 @@ polygons_intersect(const objective_t * a, const objective_t * b, int nobj)
         min_max_in_objective(b, nobj, k, &min_b, &max_b);
         // If we can draw a line completely separating them in one axis, then
         // they don't intersect.
-        if (max_a <= min_b || max_b <= min_a)
-            return false;
+        if (max_a <= min_b || max_b <= min_a) return false;
     }
     // Two orthogonal polygons intersect if there is a corner of A that is
     // dominated by a corner of B and there is a corner of B that is dominated
@@ -615,9 +599,9 @@ eaf_compute_polygon(eaf_t ** eaf, int nobj, int nlevels)
 #define push_point(X, Y) push_point_color(X, Y, INT_MIN)
 
 #if DEBUG_POLYGONS > 0
-#define EXPENSIVE_CHECK_POLYGONS() eaf_check_polygons(polygon, nobj)
+# define EXPENSIVE_CHECK_POLYGONS() eaf_check_polygons(polygon, nobj)
 #else
-#define EXPENSIVE_CHECK_POLYGONS() (void)0
+# define EXPENSIVE_CHECK_POLYGONS() (void)0
 #endif
 
 #define polygon_close(COLOR)                                   \
@@ -657,8 +641,7 @@ eaf_compute_polygon(eaf_t ** eaf, int nobj, int nlevels)
             while (ka < eaf_a_size && kb < eaf_b_size) {
                 pka = eaf_point(a, ka);
                 pkb = eaf_point(b, kb);
-                if (pkb[0] != pka[0])
-                    break;
+                if (pkb[0] != pka[0]) break;
                 // They overlap in x, so we will skip kb, remember it.
                 topleft_y = pkb[1];
                 last_b = kb;
@@ -677,8 +660,7 @@ eaf_compute_polygon(eaf_t ** eaf, int nobj, int nlevels)
             }
 
             /* Everything in A was overlapping. */
-            if (ka == eaf_a_size)
-                break;
+            if (ka == eaf_a_size) break;
 
             objective_t prev_pka_y = topleft_y;
             int color_0 = color[ka];
@@ -689,8 +671,7 @@ eaf_compute_polygon(eaf_t ** eaf, int nobj, int nlevels)
                 while (kb < eaf_b_size) {
                     pkb = eaf_point(b, kb);
                     assert(pkb[0] > pka[0]);
-                    if (pkb[1] <= pka[1])
-                        break;
+                    if (pkb[1] <= pka[1]) break;
                     kb++;
                 }
                 assert(pka[1] < prev_pka_y);
@@ -899,8 +880,7 @@ eaf_compute_polygon_old(eaf_t ** eaf, int nobj, int nlevels)
                     const objective_t * pkb;
                     do {
                         pkb = eaf_point(b, kb);
-                        if (pkb[1] <= pka[1])
-                            break;
+                        if (pkb[1] <= pka[1]) break;
                         kb++;
                     } while (kb < eaf_b_size);
                     int save_last_b = kb - 1;
@@ -985,12 +965,13 @@ eaf_compute_rectangles(eaf_t ** eaf, int nobj, int nlevels)
 {
 #define eaf_point(A, K) (eaf[(A)]->data + (K) * nobj)
 #if 0
-#define printf_points(ka, kb, pka, pkb)                                        \
-    printf("%4d: pa[%d]=(" point_printf_format ", " point_printf_format        \
-           "), pb[%d] = (" point_printf_format ", " point_printf_format ")\n", \
-           __LINE__, ka, pka[0], pka[1], kb, pkb[0], pkb[1])
+# define printf_points(ka, kb, pka, pkb)                                 \
+     printf("%4d: pa[%d]=(" point_printf_format ", " point_printf_format \
+            "), pb[%d] = (" point_printf_format ", " point_printf_format \
+            ")\n",                                                       \
+            __LINE__, ka, pka[0], pka[1], kb, pkb[0], pkb[1])
 #else
-#define printf_points(ka, kb, pka, pkb)
+# define printf_points(ka, kb, pka, pkb)
 #endif
     int nruns = eaf[0]->nruns;
 
@@ -1006,8 +987,7 @@ eaf_compute_rectangles(eaf_t ** eaf, int nobj, int nlevels)
         const int a = b - 1;
         const int eaf_a_size = (int)eaf[a]->size;
         const int eaf_b_size = (int)eaf[b]->size;
-        if (eaf_a_size == 0 || eaf_b_size == 0)
-            continue;
+        if (eaf_a_size == 0 || eaf_b_size == 0) continue;
 
         // FIXME: Skip points with color 0?
         init_colors(color, eaf[a], eaf_a_size, nruns);
@@ -1024,8 +1004,7 @@ eaf_compute_rectangles(eaf_t ** eaf, int nobj, int nlevels)
                                   color[ka]);
                 top = pkb[1];
                 kb++;
-                if (kb >= eaf_b_size)
-                    goto close_eaf;
+                if (kb >= eaf_b_size) goto close_eaf;
                 pkb = eaf_point(b, kb);
                 printf_points(ka, kb, pka, pkb);
             }
@@ -1038,16 +1017,14 @@ eaf_compute_rectangles(eaf_t ** eaf, int nobj, int nlevels)
             }
             top = pka[1];
             ka++;
-            if (ka >= eaf_a_size)
-                goto next_eaf;
+            if (ka >= eaf_a_size) goto next_eaf;
             pka = eaf_point(a, ka);
             printf_points(ka, kb, pka, pkb);
 
             if (pkb[1] == top) { // pkb was not above but equal to previous pka
                 // Move to next pkb
                 kb++;
-                if (kb >= eaf_b_size)
-                    goto close_eaf;
+                if (kb >= eaf_b_size) goto close_eaf;
                 pkb = eaf_point(b, kb);
                 printf_points(ka, kb, pka, pkb);
             }
@@ -1060,8 +1037,7 @@ eaf_compute_rectangles(eaf_t ** eaf, int nobj, int nlevels)
                           color[ka]);
             top = pka[1];
             ka++;
-            if (ka >= eaf_a_size)
-                break;
+            if (ka >= eaf_a_size) break;
             pka = eaf_point(a, ka);
             printf_points(ka, kb, pka, pkb);
         }

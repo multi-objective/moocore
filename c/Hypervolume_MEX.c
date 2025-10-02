@@ -121,8 +121,8 @@
 #include "mex.h"
 
 #if !defined(TRUE) || !defined(FALSE)
-#define TRUE 1
-#define FALSE 0
+# define TRUE 1
+# define FALSE 0
 #endif
 
 
@@ -235,13 +235,11 @@ data_maximum(double * data, int nobj, int rows)
 
     vector = MALLOC(nobj * sizeof(double));
 
-    for (k = 0; k < nobj; k++)
-        vector[k] = data[k];
+    for (k = 0; k < nobj; k++) vector[k] = data[k];
 
     for (r = 1; r < rows; r++) {
         for (n = 0; n < nobj; n++, k++) {
-            if (vector[n] < data[k])
-                vector[n] = data[k];
+            if (vector[n] < data[k]) vector[n] = data[k];
         }
     }
     return vector;
@@ -279,8 +277,7 @@ mexFunction(int nlhs, mxArray * plhs[], int nrhs, const mxArray * prhs[])
     data = MALLOC(nobj * popsize * sizeof(double));
     k = 0;
     for (i = 0; i < popsize; i++)
-        for (j = 0; j < nobj; j++)
-            data[k++] = MatLab_Obj[i + j * popsize];
+        for (j = 0; j < nobj; j++) data[k++] = MatLab_Obj[i + j * popsize];
     /*
     #ifdef DEBUG
         k = 0;

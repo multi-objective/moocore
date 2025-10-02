@@ -34,8 +34,9 @@ SpaceBeforeParensOptions:
   AfterOverloadedOperator: false
   BeforeNonEmptyParentheses: false
 
-# Preprocessor indentation - None to preserve current style
-IndentPPDirectives: None
+# Preprocessor indentation - AfterHash to allow spaces after # for nesting
+IndentPPDirectives: AfterHash
+PPIndentWidth: 1
 
 # Comment alignment
 AlignTrailingComments:
@@ -45,8 +46,8 @@ SpacesBeforeTrailingComments: 1
 
 # Line breaks
 AllowShortFunctionsOnASingleLine: None
-AllowShortIfStatementsOnASingleLine: Never
-AllowShortLoopsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLoopsOnASingleLine: true
 AllowShortBlocksOnASingleLine: Never
 AllowShortCaseLabelsOnASingleLine: false
 

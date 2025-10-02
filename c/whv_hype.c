@@ -147,8 +147,7 @@ void
 hype_dist_free(hype_sample_dist * d)
 {
     rng_free(d->rng);
-    if (d->mu)
-        free(d->mu);
+    if (d->mu) free(d->mu);
     free(d->lower);
     free(d->range);
     free(d);
@@ -180,8 +179,7 @@ estimate_whv(const double * points, int npoints, const double * samples,
                     break;
                 }
             }
-            if (dom)
-                dominated[s]++;
+            if (dom) dominated[s]++;
             is_dominator[j] = dom;
         }
         // sum up alpha values of each dominated sample:
@@ -203,8 +201,7 @@ static double
 calculate_volume_between_points(const double * p1, const double * p2, int dim)
 {
     double volume = 1.0;
-    for (int k = 0; k < dim; k++)
-        volume *= (p2[k] - p1[k]);
+    for (int k = 0; k < dim; k++) volume *= (p2[k] - p1[k]);
     return volume;
 }
 

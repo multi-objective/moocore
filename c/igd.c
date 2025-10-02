@@ -114,8 +114,7 @@ do_file(const char * filename, double * reference, size_t reference_size,
 
     handle_read_data_error(
         read_double_data(filename, &data, &nobj, &cumsizes, &nruns), filename);
-    if (!filename)
-        filename = stdin_name;
+    if (!filename) filename = stdin_name;
 
     char * outfilename = NULL;
     FILE * outfile = stdout;
@@ -149,8 +148,8 @@ do_file(const char * filename, double * reference, size_t reference_size,
            use __VA_OPT__ in the future when more compilers support it:
            https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html */
 #if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 #endif
 #define print_value_if(IF, WHAT, ...)                        \
     do {                                                     \
@@ -195,7 +194,7 @@ do_file(const char * filename, double * reference, size_t reference_size,
         print_value_if(hausdorff, avg_Hausdorff_dist_minmax, exponent_p);
 #undef print_value_if
 #if defined(__clang__)
-#pragma clang diagnostic pop
+# pragma clang diagnostic pop
 #endif
         //time_elapsed = Timer_elapsed_virtual ();
         fprintf(outfile, "\n");
@@ -211,8 +210,7 @@ do_file(const char * filename, double * reference, size_t reference_size,
     }
     free(data);
     free(cumsizes);
-    if (free_minmax)
-        free((void *)minmax);
+    if (free_minmax) free((void *)minmax);
     *nobj_p = nobj;
 }
 

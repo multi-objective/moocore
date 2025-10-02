@@ -95,19 +95,15 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         }
     }
     n = i - 1;
-    if (unlikely(n == 0))
-        goto finish;
+    if (unlikely(n == 0)) goto finish;
 
     fpli_dlnode_t ** scratch = malloc(n * sizeof(fpli_dlnode_t *));
-    for (i = 0; i < n; i++)
-        scratch[i] = head + i + 1;
+    for (i = 0; i < n; i++) scratch[i] = head + i + 1;
 
     for (int k = d - 1; k >= 0; k--) {
-        for (i = 0; i < n; i++)
-            scratch[i]->x--;
+        for (i = 0; i < n; i++) scratch[i]->x--;
         int j = k - STOP_DIMENSION;
-        if (j < 0)
-            continue;
+        if (j < 0) continue;
         qsort(scratch, n, sizeof(fpli_dlnode_t *), compare_node);
         head->next[j] = scratch[0];
         scratch[0]->prev[j] = head;
@@ -122,8 +118,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     free(scratch);
 
     // FIXME: This should not be necessary.
-    for (i = 0; i < d_stop; i++)
-        head->area[i] = 0;
+    for (i = 0; i < d_stop; i++) head->area[i] = 0;
 
 finish:
     *size = n;
@@ -146,8 +141,7 @@ static void delete(fpli_dlnode_t * restrict nodep, dimension_t dim,
         dimension_t d = i - STOP_DIMENSION;
         nodep->prev[d]->next[d] = nodep->next[d];
         nodep->next[d]->prev[d] = nodep->prev[d];
-        if (bound[d] > nodep->x[i])
-            bound[d] = nodep->x[i];
+        if (bound[d] > nodep->x[i]) bound[d] = nodep->x[i];
     }
 }
 
@@ -160,8 +154,7 @@ reinsert(fpli_dlnode_t * restrict nodep, dimension_t dim,
         dimension_t d = i - STOP_DIMENSION;
         nodep->prev[d]->next[d] = nodep;
         nodep->next[d]->prev[d] = nodep;
-        if (bound[d] > nodep->x[i])
-            bound[d] = nodep->x[i];
+        if (bound[d] > nodep->x[i]) bound[d] = nodep->x[i];
     }
 }
 
@@ -203,8 +196,7 @@ one_point_hv(const double * restrict x, const double * restrict ref,
              dimension_t d)
 {
     double hv = ref[0] - x[0];
-    for (dimension_t i = 1; i < d; i++)
-        hv *= (ref[i] - x[i]);
+    for (dimension_t i = 1; i < d; i++) hv *= (ref[i] - x[i]);
     return hv;
 }
 
@@ -232,8 +224,7 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
     const dimension_t d_stop = dim - STOP_DIMENSION;
     fpli_dlnode_t * p1 = list->prev[d_stop];
     for (fpli_dlnode_t * pp = p1; pp->x; pp = pp->prev[d_stop]) {
-        if (pp->ignore < dim)
-            pp->ignore = 0;
+        if (pp->ignore < dim) pp->ignore = 0;
     }
     fpli_dlnode_t * p0 = list;
     /* Delete all points x[dim] > bound[d_stop].  In case of repeated
@@ -247,8 +238,7 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
         p0 = p1;
         p1 = p1->prev[d_stop];
         c--;
-        if (c == 1)
-            break;
+        if (c == 1) break;
     }
 
     double hyperv = 0;
@@ -289,8 +279,7 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
             } else {
                 hypera = hv_recursive(list, list4d, dim - 1, c, ref, bound);
             }
-            if (hypera <= p1->prev[d_stop]->area[d_stop])
-                p1->ignore = dim;
+            if (hypera <= p1->prev[d_stop]->area[d_stop]) p1->ignore = dim;
         }
         p1->area[d_stop] = hypera;
         if (p0->x == NULL) {
@@ -310,10 +299,8 @@ static double
 hv2d(const double * restrict data, size_t n, const double * restrict ref)
 {
     const double ** p = generate_sorted_doublep_2d(data, &n, ref[0]);
-    if (unlikely(n == 0))
-        return 0;
-    if (unlikely(!p))
-        return -1;
+    if (unlikely(n == 0)) return 0;
+    if (unlikely(!p)) return -1;
 
     double hyperv = 0;
     double prev_j = ref[1];
@@ -346,16 +333,12 @@ fpli_hv(const double * restrict data, int d, int npoints,
         const double * restrict ref)
 {
     size_t n = (size_t)npoints;
-    if (unlikely(n == 0))
-        return 0.0;
+    if (unlikely(n == 0)) return 0.0;
     ASSUME(d < 256);
     ASSUME(d > 1);
-    if (d == 4)
-        return hv4d(data, n, ref);
-    if (d == 3)
-        return hv3d(data, n, ref);
-    if (d == 2)
-        return hv2d(data, n, ref);
+    if (d == 4) return hv4d(data, n, ref);
+    if (d == 3) return hv3d(data, n, ref);
+    if (d == 2) return hv2d(data, n, ref);
     dimension_t dim = (dimension_t)d;
     fpli_dlnode_t * list = fpli_setup_cdllist(data, dim, &n, ref);
     double hyperv;
@@ -369,8 +352,7 @@ fpli_hv(const double * restrict data, int d, int npoints,
         ASSUME(d_stop > 1 &&
                d_stop < 255); // Silence -Walloc-size-larger-than= warning
         double * bound = malloc(d_stop * sizeof(double));
-        for (dimension_t i = 0; i < d_stop; i++)
-            bound[i] = -DBL_MAX;
+        for (dimension_t i = 0; i < d_stop; i++) bound[i] = -DBL_MAX;
         dlnode_t * list4d = new_cdllist(n, ref);
         hyperv = hv_recursive(list, list4d, dim - 1, n, ref, bound);
         free_cdllist(list4d);

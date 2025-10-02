@@ -42,17 +42,17 @@ hv3d_preprocessing(dlnode_t * list, size_t n)
 {
     // FIXME: Can we unify these two paths to always use either ->cnext or ->closest?
 #ifdef HVC_ONLY
-#define set_delimiters(DLNODE, DEM0, DEM1) \
-    do {                                   \
-        (DLNODE)->closest[0] = (DEM0);     \
-        (DLNODE)->closest[1] = (DEM1);     \
-    } while (false)
+# define set_delimiters(DLNODE, DEM0, DEM1) \
+     do {                                   \
+         (DLNODE)->closest[0] = (DEM0);     \
+         (DLNODE)->closest[1] = (DEM1);     \
+     } while (false)
 #else
-#define set_delimiters(DLNODE, DEM0, DEM1) \
-    do {                                   \
-        (DLNODE)->cnext[0] = (DEM0);       \
-        (DLNODE)->cnext[1] = (DEM1);       \
-    } while (false)
+# define set_delimiters(DLNODE, DEM0, DEM1) \
+     do {                                   \
+         (DLNODE)->cnext[0] = (DEM0);       \
+         (DLNODE)->cnext[1] = (DEM1);       \
+     } while (false)
 #endif
 
     ASSUME(n >= 1);

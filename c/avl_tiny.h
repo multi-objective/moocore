@@ -157,8 +157,7 @@ avl_insert_before(avl_tree_t * avltree, avl_node_t * node, avl_node_t * newnode)
         return avltree->tail ? avl_insert_after(avltree, avltree->tail, newnode)
                              : avl_insert_top(avltree, newnode);
 
-    if (node->left)
-        return avl_insert_after(avltree, node->prev, newnode);
+    if (node->left) return avl_insert_after(avltree, node->prev, newnode);
 
     assert(node);
     assert(!node->left);
@@ -191,8 +190,7 @@ avl_insert_after(avl_tree_t * avltree, avl_node_t * node, avl_node_t * newnode)
                    ? avl_insert_before(avltree, avltree->head, newnode)
                    : avl_insert_top(avltree, newnode);
 
-    if (node->right)
-        return avl_insert_before(avltree, node->next, newnode);
+    if (node->right) return avl_insert_before(avltree, node->next, newnode);
 
     assert(node);
     assert(!node->right);
@@ -246,8 +244,7 @@ avl_unlink_node(avl_tree_t * avltree, avl_node_t * avlnode)
     right = avlnode->right;
     if (!left) {
         *superparent = right;
-        if (right)
-            right->parent = parent;
+        if (right) right->parent = parent;
         balnode = parent;
     } else if (!right) {
         *superparent = left;
@@ -260,8 +257,7 @@ avl_unlink_node(avl_tree_t * avltree, avl_node_t * avlnode)
         } else {
             balnode = subst->parent;
             balnode->right = subst->left;
-            if (balnode->right)
-                balnode->right->parent = balnode;
+            if (balnode->right) balnode->right->parent = balnode;
             subst->left = left;
             left->parent = subst;
         }
@@ -305,8 +301,7 @@ avl_rebalance(avl_tree_t * avltree, avl_node_t * avlnode)
             child = avlnode->left;
             if (L_DEPTH(child) >= R_DEPTH(child)) {
                 avlnode->left = child->right;
-                if (avlnode->left)
-                    avlnode->left->parent = avlnode;
+                if (avlnode->left) avlnode->left->parent = avlnode;
                 child->right = avlnode;
                 avlnode->parent = child;
                 *superparent = child;
@@ -316,17 +311,13 @@ avl_rebalance(avl_tree_t * avltree, avl_node_t * avlnode)
             } else {
                 gchild = child->right;
                 avlnode->left = gchild->right;
-                if (avlnode->left)
-                    avlnode->left->parent = avlnode;
+                if (avlnode->left) avlnode->left->parent = avlnode;
                 child->right = gchild->left;
-                if (child->right)
-                    child->right->parent = child;
+                if (child->right) child->right->parent = child;
                 gchild->right = avlnode;
-                if (gchild->right)
-                    gchild->right->parent = gchild;
+                if (gchild->right) gchild->right->parent = gchild;
                 gchild->left = child;
-                if (gchild->left)
-                    gchild->left->parent = gchild;
+                if (gchild->left) gchild->left->parent = gchild;
                 *superparent = gchild;
                 gchild->parent = parent;
                 avlnode->depth = CALC_DEPTH(avlnode);
@@ -338,8 +329,7 @@ avl_rebalance(avl_tree_t * avltree, avl_node_t * avlnode)
             child = avlnode->right;
             if (R_DEPTH(child) >= L_DEPTH(child)) {
                 avlnode->right = child->left;
-                if (avlnode->right)
-                    avlnode->right->parent = avlnode;
+                if (avlnode->right) avlnode->right->parent = avlnode;
                 child->left = avlnode;
                 avlnode->parent = child;
                 *superparent = child;
@@ -349,17 +339,13 @@ avl_rebalance(avl_tree_t * avltree, avl_node_t * avlnode)
             } else {
                 gchild = child->left;
                 avlnode->right = gchild->left;
-                if (avlnode->right)
-                    avlnode->right->parent = avlnode;
+                if (avlnode->right) avlnode->right->parent = avlnode;
                 child->left = gchild->right;
-                if (child->left)
-                    child->left->parent = child;
+                if (child->left) child->left->parent = child;
                 gchild->left = avlnode;
-                if (gchild->left)
-                    gchild->left->parent = gchild;
+                if (gchild->left) gchild->left->parent = gchild;
                 gchild->right = child;
-                if (gchild->right)
-                    gchild->right->parent = gchild;
+                if (gchild->right) gchild->right->parent = gchild;
                 *superparent = gchild;
                 gchild->parent = parent;
                 avlnode->depth = CALC_DEPTH(avlnode);

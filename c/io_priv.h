@@ -6,12 +6,12 @@
 
 #define objective_t_str MOOCORE_STRINGIFY_MACRO(objective_t)
 #ifndef fread_objective_t
-#error "fread_objective_t is not defined"
+# error "fread_objective_t is not defined"
 #endif
 
 /* allocate ~512kB at once, allowing for malloc overhead */
 #ifndef IO_SLAB_SIZE
-#define IO_SLAB_SIZE (512 * 1024 - 32)
+# define IO_SLAB_SIZE (512 * 1024 - 32)
 #endif
 #define DATA_INC (IO_SLAB_SIZE / sizeof(objective_t))
 #define CUMSIZE_INC (128)
@@ -166,8 +166,7 @@ read_data_finish:
     *cumsizes_p = cumsizes;
     *data_p = data;
 
-    if (instream != stdin)
-        fclose(instream);
+    if (instream != stdin) fclose(instream);
 
     return errorcode;
 }

@@ -77,8 +77,7 @@ fprint_rank(FILE * stream, const int * rank, int size)
 static void
 fprint_vector_double(FILE * stream, const double * vec, int size)
 {
-    for (int k = 0; k < size; k++)
-        fprintf(stream, "%g\n", vec[k]);
+    for (int k = 0; k < size; k++) fprintf(stream, "%g\n", vec[k]);
 }
 
 static bool *
@@ -89,8 +88,7 @@ calculate_uev(bool * uev, const double * points, int dim, int size,
         uev = malloc(sizeof(bool) * size);
     }
 
-    for (int j = 0; j < size; j++)
-        uev[j] = false;
+    for (int j = 0; j < size; j++) uev[j] = false;
 
     for (int i = 0; i < dim; i++) {
         assert(ubound[i] > -INFINITY);
@@ -187,15 +185,13 @@ main(int argc, char * argv[])
     /* FIXME: Instead of this strange call, create a wrapper read_data_robust. */
     handle_read_data_error(
         read_double_data(filename, &points, &dim, &cumsizes, &nsets), filename);
-    if (!filename)
-        filename = stdin_name;
+    if (!filename) filename = stdin_name;
 
     const int size = cumsizes[0] = cumsizes[nsets - 1];
     nsets = 1;
 
     /* Default minmax if not set yet.  */
-    if (minmax == NULL)
-        minmax = minmax_minimise((dimension_t)dim);
+    if (minmax == NULL) minmax = minmax_minimise((dimension_t)dim);
 
     if (verbose_flag) {
         printf("# file: %s\n", filename);
@@ -215,8 +211,7 @@ main(int argc, char * argv[])
         double * order = malloc(sizeof(double) * size);
         int max_rank = 0;
         for (int k = 0; k < size; k++) {
-            if (rank[k] > max_rank)
-                max_rank = rank[k];
+            if (rank[k] > max_rank) max_rank = rank[k];
             order[k] = rank[k];
         }
 
@@ -225,8 +220,7 @@ main(int argc, char * argv[])
         double * ubound = malloc(sizeof(double) * dim);
         double * ref = malloc(sizeof(double) * dim);
 
-        for (int d = 0; d < dim; d++)
-            ref[d] = 1.0;
+        for (int d = 0; d < dim; d++) ref[d] = 1.0;
 
         max_rank = 1;
         for (int i = 1; i <= max_rank; i++) {
@@ -236,16 +230,13 @@ main(int argc, char * argv[])
             }
             int data_size = 0;
             for (int k = 0; k < size; k++) {
-                if (rank[k] != i)
-                    continue;
+                if (rank[k] != i) continue;
                 const double * src = points + k * dim;
                 memcpy(data + data_size * dim, src, sizeof(double) * dim);
                 data_size++;
                 for (int d = 0; d < dim; d++) {
-                    if (lbound[d] > src[d])
-                        lbound[d] = src[d];
-                    if (ubound[d] < src[d])
-                        ubound[d] = src[d];
+                    if (lbound[d] > src[d]) lbound[d] = src[d];
+                    if (ubound[d] < src[d]) ubound[d] = src[d];
                 }
             }
 
@@ -259,8 +250,7 @@ main(int argc, char * argv[])
                              /*ignore_dominated=*/true);
             /* FIXME: handle uevs: keep_uevs_flag ? uev : NULL);*/
             for (int k = 0, j = 0; k < size; k++) {
-                if (rank[k] != i)
-                    continue;
+                if (rank[k] != i) continue;
                 order[k] += (1 - hvc[j++]);
             }
             free(hvc);

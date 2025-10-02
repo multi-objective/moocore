@@ -68,3 +68,4 @@ repos:
       - id: clang-format
         types_or: [c, c++]
         files: ^c/
+        exclude: ^c/(pow_int\.h|avl\.(c|h)|mt19937/.*)

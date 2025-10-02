@@ -3,10 +3,10 @@
 
 #include "config.h"
 #ifndef R_PACKAGE
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
+# include <stdlib.h>
+# include <stdio.h>
+# include <string.h>
+# include <assert.h>
 #endif
 
 #include "common.h"
@@ -103,8 +103,7 @@ read_bitvector(const char * str, int * nobj_p)
             return NULL;
 
     bool * vec = malloc(sizeof(bool) * len);
-    for (size_t i = 0; i < len; i++)
-        vec[i] = (str[i] == '1');
+    for (size_t i = 0; i < len; i++) vec[i] = (str[i] == '1');
 
     *nobj_p = (int)len;
     return vec;

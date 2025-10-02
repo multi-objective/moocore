@@ -16,8 +16,7 @@ strongly_dominates(const double * restrict x, const double * restrict y,
 {
     ASSUME(dim >= 2);
     for (dimension_t d = 0; d < dim; d++)
-        if (x[d] >= y[d])
-            return false;
+        if (x[d] >= y[d]) return false;
     return true;
 }
 
@@ -35,8 +34,7 @@ weakly_dominates(const double * restrict x, const double * restrict y,
     // GCC 15 is not able to infer this initialization from ASSUME().
     // unsigned instead of bool to help auto-vectorization.
     unsigned x_leq_y = (x[0] <= y[0]) & (x[1] <= y[1]);
-    for (dimension_t d = 2; d < dim; d++)
-        x_leq_y &= (x[d] <= y[d]);
+    for (dimension_t d = 2; d < dim; d++) x_leq_y &= (x[d] <= y[d]);
     return (bool)x_leq_y;
 }
 
@@ -56,8 +54,7 @@ all_equal_double(const double * restrict x, const double * restrict y,
     // GCC 15 is not able to infer this initialization from ASSUME().
     // unsigned instead of bool to help auto-vectorization.
     unsigned x_eq_y = (x[0] == y[0]) & (x[1] == y[1]);
-    for (dimension_t d = 2; d < dim; d++)
-        x_eq_y &= (x[d] == y[d]);
+    for (dimension_t d = 2; d < dim; d++) x_eq_y &= (x[d] == y[d]);
     return (bool)x_eq_y;
 }
 
@@ -73,10 +70,8 @@ cmp_double_asc_rev(const void * restrict p1, const void * restrict p2,
     const double * restrict x1 = *((const double **)p1);
     const double * restrict x2 = *((const double **)p2);
     for (int i = dim - 1; i >= 0; i--) {
-        if (x1[i] < x2[i])
-            return -1;
-        if (x1[i] > x2[i])
-            return 1;
+        if (x1[i] < x2[i]) return -1;
+        if (x1[i] > x2[i]) return 1;
     }
     return 0;
 }

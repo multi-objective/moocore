@@ -72,7 +72,7 @@ usage(void)
         "Options:\n" OPTION_HELP_STR OPTION_VERSION_STR
         " -v, --verbose        print some information (time, number of points, "
         "etc.).\n" OPTION_QUIET_STR " -a, --additive       epsilon additive "
-                                    "value %s.                       \n"
+        "value %s.                       \n"
         " -m, --multiplicative epsilon multiplicative value %s.                "
         " \n"
         " -r, --reference FILE file that contains the reference set            "
@@ -98,8 +98,7 @@ do_file(const char * filename, double * reference, size_t reference_size,
 
     handle_read_data_error(
         read_double_data(filename, &data, &nobj, &cumsizes, &nruns), filename);
-    if (!filename)
-        filename = stdin_name;
+    if (!filename) filename = stdin_name;
 
     if (!additive_flag &&
         !all_positive(data, cumsizes[nruns - 1], (dimension_t)nobj)) {
@@ -135,8 +134,7 @@ do_file(const char * filename, double * reference, size_t reference_size,
         free_minmax = true;
     }
 
-    if (verbose_flag)
-        printf("# file: %s\n", filename);
+    if (verbose_flag) printf("# file: %s\n", filename);
 
     for (int n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
         // double time_elapsed = 0;
@@ -169,8 +167,7 @@ do_file(const char * filename, double * reference, size_t reference_size,
     }
     free(data);
     free(cumsizes);
-    if (free_minmax)
-        free((void *)minmax);
+    if (free_minmax) free((void *)minmax);
     *nobj_p = nobj;
 }
 

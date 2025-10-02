@@ -79,10 +79,8 @@ rng_standard_normal(rng_state * rng)
         int sign = r & 0x1;
         uint64_t rabs = (r >> 1) & 0x000fffffffffffff;
         double x = (double)rabs * wi_double[idx];
-        if (sign & 0x1)
-            x = -x;
-        if (rabs < ki_double[idx])
-            return x; /* 99.3% of the time return here */
+        if (sign & 0x1) x = -x;
+        if (rabs < ki_double[idx]) return x; /* 99.3% of the time return here */
         if (idx == 0) {
             for (;;) {
                 /* Switch to 1.0 - U to avoid log(0.0), see GH 13361 */

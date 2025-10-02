@@ -4,12 +4,12 @@
 #include "io.h"
 
 #ifndef CMDLINE_COPYRIGHT_YEARS
-#define CMDLINE_COPYRIGHT_YEARS "2007-2025"
+# define CMDLINE_COPYRIGHT_YEARS "2007-2025"
 #endif
 
 #ifndef CMDLINE_AUTHORS
-#define CMDLINE_AUTHORS \
-    "Manuel Lopez-Ibanez  <manuel.lopez-ibanez@manchester.ac.uk>\n"
+# define CMDLINE_AUTHORS \
+     "Manuel Lopez-Ibanez  <manuel.lopez-ibanez@manchester.ac.uk>\n"
 #endif
 
 #define OPTION_HELP_STR " -h, --help          print this summary and exit;\n"
@@ -39,14 +39,14 @@ static void
 version(void)
 {
 #if defined(DEBUG) && DEBUG >= 1
-#define DEBUG_LEVEL_STR " [DEBUG=" MOOCORE_STRINGIFY_MACRO(DEBUG) "]"
+# define DEBUG_LEVEL_STR " [DEBUG=" MOOCORE_STRINGIFY_MACRO(DEBUG) "]"
 #else
-#define DEBUG_LEVEL_STR ""
+# define DEBUG_LEVEL_STR ""
 #endif
 #ifdef MARCH
-#define OPTIMISED_FOR_STR " (optimised for " MARCH ")"
+# define OPTIMISED_FOR_STR " (optimised for " MARCH ")"
 #else
-#define OPTIMISED_FOR_STR ""
+# define OPTIMISED_FOR_STR ""
 #endif
     printf("%s version " VERSION OPTIMISED_FOR_STR DEBUG_LEVEL_STR "\n\n",
            program_invocation_short_name);
@@ -61,7 +61,7 @@ version(void)
 }
 
 #ifndef READ_INPUT_WRONG_INITIAL_DIM_ERRSTR
-#define READ_INPUT_WRONG_INITIAL_DIM_ERRSTR "-r, --reference"
+# define READ_INPUT_WRONG_INITIAL_DIM_ERRSTR "-r, --reference"
 #endif
 
 static inline void
@@ -72,8 +72,7 @@ handle_read_data_error(int err, const char * filename)
         break;
 
     case READ_INPUT_FILE_EMPTY:
-        if (!filename)
-            filename = stdin_name;
+        if (!filename) filename = stdin_name;
         errprintf("%s: no input data.", filename);
         exit(EXIT_FAILURE);
 
@@ -109,8 +108,7 @@ read_reference_set(double ** reference_p, const char * filename, int * nobj_p)
     handle_read_data_error(
         read_double_data(filename, &reference, &nobj, &cumsizes, &nruns),
         filename);
-    if (!filename)
-        filename = stdin_name;
+    if (!filename) filename = stdin_name;
     reference_size = (size_t)cumsizes[nruns - 1];
     free(cumsizes);
     *nobj_p = nobj;
@@ -150,8 +148,7 @@ read_point(char * str, int * nobj)
         free(point);
         return NULL;
     }
-    if (k < size)
-        point = realloc(point, k * sizeof(double));
+    if (k < size) point = realloc(point, k * sizeof(double));
     *nobj = k - 1;
     return point;
 }
@@ -161,8 +158,7 @@ robust_read_point(char * restrict optarg, int * nobj,
                   const char * restrict errmsg)
 {
     double * point = read_point(optarg, nobj);
-    if (point == NULL)
-        fatal_error(errmsg, optarg);
+    if (point == NULL) fatal_error(errmsg, optarg);
     return point;
 }
 
@@ -179,24 +175,20 @@ data_bounds(double ** minimum_p, double ** maximum_p, const double * data,
     double * minimum = *minimum_p;
     if (minimum == NULL) {
         minimum = malloc(nobj * sizeof(double));
-        for (k = 0; k < nobj; k++)
-            minimum[k] = INFINITY;
+        for (k = 0; k < nobj; k++) minimum[k] = INFINITY;
         *minimum_p = minimum;
     }
     double * maximum = *maximum_p;
     if (maximum == NULL) {
         maximum = malloc(nobj * sizeof(double));
-        for (k = 0; k < nobj; k++)
-            maximum[k] = -INFINITY;
+        for (k = 0; k < nobj; k++) maximum[k] = -INFINITY;
         *maximum_p = maximum;
     }
 
     for (int r = 0, n = 0; r < rows; r++) {
         for (k = 0; k < nobj; k++, n++) {
-            if (maximum[k] < data[n])
-                maximum[k] = data[n];
-            if (minimum[k] > data[n])
-                minimum[k] = data[n];
+            if (maximum[k] < data[n]) maximum[k] = data[n];
+            if (minimum[k] > data[n]) minimum[k] = data[n];
         }
     }
 }
@@ -220,8 +212,7 @@ m_strcat(const char * a, const char * b)
 {
     size_t dest_len = strlen(a) + strlen(b) + 1;
     char * dest = malloc(sizeof(char) * dest_len);
-    if (unlikely(dest == NULL))
-        return NULL;
+    if (unlikely(dest == NULL)) return NULL;
     strcpy(dest, a);
     strcat(dest, b);
     return dest;
@@ -247,8 +238,7 @@ parse_cmdline_minmax(const signed char * minmax, const char * optarg,
 {
     int tmp_nobj = 0, nobj = *nobj_p;
 
-    if (minmax != NULL)
-        free((void *)minmax);
+    if (minmax != NULL) free((void *)minmax);
     minmax = read_minmax(optarg, &tmp_nobj);
     if (minmax == NULL) {
         errprintf("invalid argument '%s' for -o, --obj"

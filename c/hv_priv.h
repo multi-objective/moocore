@@ -2,7 +2,7 @@
 #define _HV_PRIV_H
 
 #if !defined(HV_DIMENSION) || (HV_DIMENSION != 3 && HV_DIMENSION != 4)
-#error "HV_DIMENSION must be 3 or 4"
+# error "HV_DIMENSION must be 3 or 4"
 #endif
 
 #include <float.h>  // DBL_MAX
@@ -80,7 +80,7 @@ print_x(const dlnode_t * p)
 }
 
 #if HV_DIMENSION == 3
-#include "hv3d_priv.h"
+# include "hv3d_priv.h"
 #endif // HV_DIMENSION == 3
 
 // ------------------------ Circular double-linked list ----------------------

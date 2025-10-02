@@ -23,8 +23,7 @@ static inline bool *
 nondom_init(size_t size)
 {
     bool * nondom = malloc(size * sizeof(*nondom));
-    for (size_t n = 0; n < size; n++)
-        nondom[n] = true;
+    for (size_t n = 0; n < size; n++) nondom[n] = true;
     return nondom;
 }
 
@@ -41,8 +40,7 @@ force_agree_minimize(const double * restrict points, dimension_t dim,
             break;
         }
     }
-    if (no_copy)
-        return points;
+    if (no_copy) return points;
 
     double * pnew = malloc(dim * size * sizeof(*pnew));
     memcpy(pnew, points, dim * size * sizeof(*pnew));
@@ -60,8 +58,7 @@ static inline const double **
 generate_sorted_pp_2d(const double * points, size_t size)
 {
     const double ** p = malloc(size * sizeof(*p));
-    for (size_t k = 0; k < size; k++)
-        p[k] = points + 2 * k;
+    for (size_t k = 0; k < size; k++) p[k] = points + 2 * k;
 
     // Sort in ascending lexicographic order from the last dimension.
     qsort(p, size, sizeof(*p), &cmp_double_asc_rev_2d);
@@ -72,8 +69,7 @@ static inline const double **
 generate_sorted_pp_3d(const double * points, size_t size)
 {
     const double ** p = malloc(size * sizeof(*p));
-    for (size_t k = 0; k < size; k++)
-        p[k] = points + 3 * k;
+    for (size_t k = 0; k < size; k++) p[k] = points + 3 * k;
 
     // Sort in ascending lexicographic order from the last dimension.
     qsort(p, size, sizeof(*p), &cmp_double_asc_rev_3d);
@@ -210,8 +206,7 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
                 /* Map the order in p[], which is sorted, to the original order
                    in points. */
                 pos_last_dom = (pj - points) / 3;
-                if (find_dominated_p)
-                    goto early_end;
+                if (find_dominated_p) goto early_end;
                 nondom[pos_last_dom] = false;
                 n_nondom--;
             } else {
@@ -238,8 +233,7 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
             /* Map the order in p[], which is sorted, to the original order
                in points. */
             pos_last_dom = (pj - points) / 3;
-            if (find_dominated_p)
-                goto early_end;
+            if (find_dominated_p) goto early_end;
             nondom[pos_last_dom] = false;
             n_nondom--;
         }
@@ -301,8 +295,7 @@ find_dominated_point_agree_none(const double * restrict points, dimension_t dim,
 
             /* As soon as j_leq_k and k_leq_j become false, neither k or j will
                be removed, so skip the rest.  */
-            if (!(dom_k | dom_j))
-                continue;
+            if (!(dom_k | dom_j)) continue;
 
             assert(dom_k ^ dom_j); // At least one but not both can be removed.
 
@@ -337,8 +330,7 @@ find_dominated_point_agree_min(const double * restrict points, dimension_t dim,
 
             /* As soon as j_leq_k and k_leq_j become false, neither k or j will
                be removed, so skip the rest.  */
-            if (!(dom_k | dom_j))
-                continue;
+            if (!(dom_k | dom_j)) continue;
 
             assert(dom_k ^ dom_j); // At least one but not both can be removed.
 
@@ -373,8 +365,7 @@ find_dominated_point_agree_max(const double * restrict points, dimension_t dim,
 
             /* As soon as j_leq_k and k_leq_j become false, neither k or j will
                be removed, so skip the rest.  */
-            if (!(dom_k | dom_j))
-                continue;
+            if (!(dom_k | dom_j)) continue;
 
             assert(dom_k ^ dom_j); // At least one but not both can be removed.
 
@@ -395,8 +386,7 @@ find_nondominated_set_agree_none(const double * restrict points,
     for (size_t k = 1; k < size; k++) {
         for (size_t j = 0; j < k; j++) {
             assert(nondom[k]);
-            if (!nondom[j])
-                continue;
+            if (!nondom[j]) continue;
 
             const double * restrict pk = points + k * dim;
             const double * restrict pj = points + j * dim;
@@ -416,8 +406,7 @@ find_nondominated_set_agree_none(const double * restrict points,
 
             /* As soon as j_leq_k and k_leq_j become false, neither k or j will
                be removed, so skip the rest.  */
-            if (!(dom_k | dom_j))
-                continue;
+            if (!(dom_k | dom_j)) continue;
 
             assert(dom_k ^ dom_j); // At least one but not both can be removed.
 
@@ -444,8 +433,7 @@ find_nondominated_set_agree_min(const double * restrict points, dimension_t dim,
     for (size_t k = 1; k < size; k++) {
         for (size_t j = 0; j < k; j++) {
             assert(nondom[k]);
-            if (!nondom[j])
-                continue;
+            if (!nondom[j]) continue;
 
             const double * restrict pk = points + k * dim;
             const double * restrict pj = points + j * dim;
@@ -465,8 +453,7 @@ find_nondominated_set_agree_min(const double * restrict points, dimension_t dim,
 
             /* As soon as j_leq_k and k_leq_j become false, neither k or j will
                be removed, so skip the rest.  */
-            if (!(dom_k | dom_j))
-                continue;
+            if (!(dom_k | dom_j)) continue;
 
             assert(dom_k ^ dom_j); // At least one but not both can be removed.
 
@@ -493,8 +480,7 @@ find_nondominated_set_agree_max(const double * restrict points, dimension_t dim,
     for (size_t k = 1; k < size; k++) {
         for (size_t j = 0; j < k; j++) {
             assert(nondom[k]);
-            if (!nondom[j])
-                continue;
+            if (!nondom[j]) continue;
 
             const double * restrict pk = points + k * dim;
             const double * restrict pj = points + j * dim;
@@ -515,8 +501,7 @@ find_nondominated_set_agree_max(const double * restrict points, dimension_t dim,
 
             /* As soon as j_leq_k and k_leq_j become false, neither k or j will
                be removed, so skip the rest.  */
-            if (!(dom_k | dom_j))
-                continue;
+            if (!(dom_k | dom_j)) continue;
 
             assert(dom_k ^ dom_j); // At least one but not both can be removed.
 
@@ -542,8 +527,7 @@ find_dominated_point_(const double * restrict points, dimension_t dim,
                       signed char agree, const bool keep_weakly)
 {
     ASSUME(minmax != NULL);
-    if (size < 2)
-        return size;
+    if (size < 2) return size;
 
     ASSUME(dim >= 2);
     if (dim <= 3) {
@@ -555,8 +539,7 @@ find_dominated_point_(const double * restrict points, dimension_t dim,
         } else {
             res = find_dominated_3d_(pp, size, keep_weakly);
         }
-        if (pp != points)
-            free((void *)pp);
+        if (pp != points) free((void *)pp);
         return res;
     }
 
@@ -588,8 +571,7 @@ find_nondominated_set_(const double * restrict points, dimension_t dim,
 {
     ASSUME(minmax != NULL);
     ASSUME(nondom != NULL);
-    if (size < 2)
-        return size;
+    if (size < 2) return size;
 
     ASSUME(dim >= 2);
     if (dim <= 3) {
@@ -601,8 +583,7 @@ find_nondominated_set_(const double * restrict points, dimension_t dim,
         } else {
             res = find_nondominated_set_3d_(pp, size, nondom, keep_weakly);
         }
-        if (pp != points)
-            free((void *)pp);
+        if (pp != points) free((void *)pp);
         return res;
     }
 
@@ -723,8 +704,7 @@ get_nondominated_set(double ** pareto_set_p, const double * points, int dim,
     if (new_size < size) {
         size_t n = 0, k = 0;
         do {
-            while (!nondom[n])
-                n++;
+            while (!nondom[n]) n++;
             memcpy(pareto_set + dim * k, points + dim * n,
                    sizeof(points[0]) * dim);
             k++;
@@ -753,8 +733,7 @@ filter_dominated_set(double * restrict points, int dim, size_t size,
 
     if (new_size < size) {
         size_t k = 0;
-        while (nondom[k])
-            k++; // Find first dominated.
+        while (nondom[k]) k++; // Find first dominated.
         size_t n = k;
         while (k < new_size) {
             do {

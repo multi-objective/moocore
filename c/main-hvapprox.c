@@ -82,7 +82,7 @@ usage(void)
         "distribution;    \n"
         "                     2: Hua-Wang deterministic sampling (default).    "
         "     \n" OPTION_SEED_STR "                     Only method=1.         "
-                                  "                               \n"
+        "                               \n"
         "\n");
 }
 
@@ -116,8 +116,7 @@ hvapprox_file(const char * filename, double * reference, double * maximum,
 
     handle_read_data_error(
         read_double_data(filename, &data, &nobj, &cumsizes, &nruns), filename);
-    if (!filename)
-        filename = stdin_name;
+    if (!filename) filename = stdin_name;
 
     if (filename != stdin_name && suffix) {
         outfilename = m_strcat(filename, suffix);
@@ -133,8 +132,7 @@ hvapprox_file(const char * filename, double * reference, double * maximum,
         nruns = 1;
     }
 
-    if (verbose_flag >= 2)
-        printf("# file: %s\n", filename);
+    if (verbose_flag >= 2) printf("# file: %s\n", filename);
 
     bool needs_minimum = (minimum == NULL);
     if (needs_minimum) {
@@ -324,8 +322,7 @@ main(int argc, char * argv[])
     }
 
     if (seed == 0) {
-        if (hv_approx_method == DZ2019_MC)
-            seed = (uint32_t)time(NULL);
+        if (hv_approx_method == DZ2019_MC) seed = (uint32_t)time(NULL);
     } else if (hv_approx_method == DZ2019_HW) {
         fatal_error("cannot use --seed with --method=2");
     }
@@ -369,7 +366,6 @@ main(int argc, char * argv[])
         free(maximum);
     }
 
-    if (reference)
-        free(reference);
+    if (reference) free(reference);
     return EXIT_SUCCESS;
 }

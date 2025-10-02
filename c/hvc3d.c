@@ -117,8 +117,7 @@ hvc3d_list(dlnode_t * list)
     assert(list->prev[0] == list + 2);
     dlnode_t * p = (list + 1)->next[0];
     const dlnode_t * stop = list + 2;
-    if (p == stop)
-        return 0;
+    if (p == stop) return 0;
 
     restart_list_y(list);
     // Process the first point.
@@ -189,8 +188,7 @@ save_contributions(double * hvc, const dlnode_t * list,
     while (p != stop) {
         /* print_x(p); */
         /* fprintf(stderr, "hvc = %g\n", p->volume); */
-        if (!p->ignore)
-            hvc[(p->x - data) / 3] = p->volume;
+        if (!p->ignore) hvc[(p->x - data) / 3] = p->volume;
         p = p->next[0];
     }
 }

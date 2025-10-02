@@ -30,22 +30,22 @@
 #define OBJECTIVE_TYPE_INT 0
 #define OBJECTIVE_TYPE_DOUBLE 1
 #ifndef OBJECTIVE_TYPE
-#define OBJECTIVE_TYPE OBJECTIVE_TYPE_DOUBLE
+# define OBJECTIVE_TYPE OBJECTIVE_TYPE_DOUBLE
 #endif
 #if OBJECTIVE_TYPE == OBJECTIVE_TYPE_DOUBLE
-#define objective_t double
-#define objective_MAX INFINITY
-#define objective_MIN -INFINITY
-#define fread_objective_t fread_double
-#define read_objective_t_data read_double_data
+# define objective_t double
+# define objective_MAX INFINITY
+# define objective_MIN -INFINITY
+# define fread_objective_t fread_double
+# define read_objective_t_data read_double_data
 #elif OBJECTIVE_TYPE == OBJECTIVE_TYPE_INT
-#define objective_t int
-#define objective_MAX INT_MAX
-#define objective_MIN INT_MIN
-#define fread_objective_t fread_int
-#define read_objective_t_data read_int_data
+# define objective_t int
+# define objective_MAX INT_MAX
+# define objective_MIN INT_MIN
+# define fread_objective_t fread_int
+# define read_objective_t_data read_int_data
 #else
-#error "Unknown OBJECTIVE_TYPE= value"
+# error "Unknown OBJECTIVE_TYPE= value"
 #endif
 
 #include "bit_array.h"
@@ -76,8 +76,7 @@ static inline int
 eaf_totalpoints(eaf_t ** eaf, int n)
 {
     int totalpoints = 0;
-    for (int k = 0; k < n; k++)
-        totalpoints += (int)eaf[k]->size;
+    for (int k = 0; k < n; k++) totalpoints += (int)eaf[k]->size;
     return totalpoints;
 }
 
@@ -123,11 +122,9 @@ attained_left_right(const bit_array * attained, int division, int total,
     int k;
 
     for (k = 0; k < division; k++)
-        if (bit_array_get(attained, k))
-            count_l++;
+        if (bit_array_get(attained, k)) count_l++;
     for (k = division; k < total; k++)
-        if (bit_array_get(attained, k))
-            count_r++;
+        if (bit_array_get(attained, k)) count_r++;
 
     *count_left = count_l;
     *count_right = count_r;
@@ -136,8 +133,7 @@ attained_left_right(const bit_array * attained, int division, int total,
 static inline double
 level2percentile(int level, int n)
 {
-    if (level == n)
-        return 100.;
+    if (level == n) return 100.;
     return ((double)level * 100.0) / (double)n;
 }
 
@@ -150,8 +146,7 @@ percentile2level(double p, int n)
 
     assert(level <= n);
     assert(level >= 0);
-    if (level < 1)
-        level = 1;
+    if (level < 1) level = 1;
     return level;
 }
 
@@ -166,8 +161,7 @@ levels_from_percentiles(const double * percentile, int nlevels, int nruns)
     } else {
         assert(nlevels == nruns);
         level = malloc(sizeof(int) * nruns);
-        for (int k = 0; k < nruns; k++)
-            level[k] = k + 1;
+        for (int k = 0; k < nruns; k++) level[k] = k + 1;
     }
     return level;
 }
@@ -176,8 +170,7 @@ _attr_maybe_unused static void
 all_percentiles(double * percentiles, int n_sets)
 {
     const double x = 100.0 / (double)n_sets;
-    for (int i = 1; i <= n_sets; i++)
-        percentiles[i - 1] = i * x;
+    for (int i = 1; i <= n_sets; i++) percentiles[i - 1] = i * x;
 }
 
 void eaf2matrix_R(double * rmat, eaf_t * const * eaf, int nobj, int totalpoints,

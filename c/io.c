@@ -48,10 +48,8 @@ skip_trailing_whitespace(FILE * instream)
         c = fgetc(instream);
     } while (c == ' ' || c == '\t' || unlikely(c == '\r'));
 
-    if (c == '\n')
-        return 1;
-    if (unlikely(c == EOF))
-        return EOF;
+    if (c == '\n') return 1;
+    if (unlikely(c == EOF)) return EOF;
     ungetc(c, instream); // Push the non-whitespace character back
     return 0;
 }
@@ -61,26 +59,20 @@ static inline int
 skip_comment_line(FILE * instream)
 {
     int c = skip_trailing_whitespace(instream);
-    if (c == 1)
-        return 1;
-    if (unlikely(c == EOF))
-        return EOF;
+    if (c == 1) return 1;
+    if (unlikely(c == EOF)) return EOF;
 
     c = fgetc(instream);
     if (unlikely(c == '#')) {
         do { // Skip the rest of the line
             c = fgetc(instream);
-            if (c == '\n')
-                return 1;
-            if (unlikely(c == EOF))
-                return EOF;
+            if (c == '\n') return 1;
+            if (unlikely(c == EOF)) return EOF;
         } while (true);
     }
 
-    if (c == '\n')
-        return 1;
-    if (unlikely(c == EOF))
-        return EOF;
+    if (c == '\n') return 1;
+    if (unlikely(c == EOF)) return EOF;
 
     ungetc(c, instream); // Not a comment, push back
     return 0;
@@ -95,8 +87,7 @@ fread_double(FILE * instream, double * number)
         c = fgetc(instream);
     } while (c == ' ' || c == '\t' || c == '\r');
 
-    if (unlikely(c == EOF))
-        return EOF;
+    if (unlikely(c == EOF)) return EOF;
 
     char buffer[128];
     size_t i = 0;
@@ -104,20 +95,16 @@ fread_double(FILE * instream, double * number)
         buffer[i] = (char)c;
         i++;
         c = fgetc(instream);
-        if (isspace(c) || unlikely(c == EOF))
-            break;
-        if (unlikely(i == sizeof(buffer) - 1))
-            return 0; // Number is too long.
+        if (isspace(c) || unlikely(c == EOF)) break;
+        if (unlikely(i == sizeof(buffer) - 1)) return 0; // Number is too long.
     } while (true);
 
-    if (c == '\n')
-        ungetc(c, instream); // Push back newlines
+    if (c == '\n') ungetc(c, instream); // Push back newlines
 
     buffer[i] = '\0';
     char * endptr;
     *number = strtod(buffer, &endptr);
-    if (unlikely(endptr == buffer))
-        return 0; // Invalid conversion
+    if (unlikely(endptr == buffer)) return 0; // Invalid conversion
 
     return 1; // Success !
 }
@@ -131,8 +118,7 @@ fread_int(FILE * instream, int * number)
         c = fgetc(instream);
     } while (c == ' ' || c == '\t' || c == '\r');
 
-    if (c == EOF)
-        return EOF;
+    if (c == EOF) return EOF;
 
     char buffer[64];
     size_t i = 0;
@@ -140,24 +126,19 @@ fread_int(FILE * instream, int * number)
         buffer[i] = (char)c;
         i++;
         c = fgetc(instream);
-        if (isspace(c) || c == EOF)
-            break;
-        if (i == sizeof(buffer) - 1)
-            return 0; // Number is too long.
+        if (isspace(c) || c == EOF) break;
+        if (i == sizeof(buffer) - 1) return 0; // Number is too long.
     } while (true);
 
-    if (c == '\n')
-        ungetc(c, instream); // Push back newlines.
+    if (c == '\n') ungetc(c, instream); // Push back newlines.
 
     buffer[i] = '\0';
 
     char * endptr;
     long value = strtol(buffer, &endptr, /*base=*/10);
-    if (endptr == buffer)
-        return 0; // Invalid conversion.
+    if (endptr == buffer) return 0; // Invalid conversion.
 
-    if (value < INT_MIN || value > INT_MAX)
-        return 0; // Out of range.
+    if (value < INT_MIN || value > INT_MAX) return 0; // Out of range.
 
     *number = (int)value;
     return 1; // Success !
@@ -188,8 +169,7 @@ read_datasets(const char * filename, double ** data_p, int * ncols_p,
     int * cumsizes = NULL;
     int nsets = 0, nobjs = 0;
     int error = read_double_data(filename, &data, &nobjs, &cumsizes, &nsets);
-    if (unlikely(error))
-        return error;
+    if (unlikely(error)) return error;
 
     int ncols = nobjs + 1; // For the column 'set'
     int nrows = cumsizes[nsets - 1];
@@ -203,8 +183,7 @@ read_datasets(const char * filename, double ** data_p, int * ncols_p,
         }
         newdata[i * ncols + nobjs] = (double)set;
         i++;
-        if (i == cumsizes[set - 1])
-            set++;
+        if (i == cumsizes[set - 1]) set++;
     }
     free(data);
     free(cumsizes);
@@ -235,8 +214,7 @@ void
 vector_int_fprintf(FILE * stream, const int * vector, int size)
 {
     ASSUME(size > 0);
-    for (int k = 0; k < size; k++)
-        fprintf(stream, "%d ", vector[k]);
+    for (int k = 0; k < size; k++) fprintf(stream, "%d ", vector[k]);
 }
 
 void
@@ -253,8 +231,7 @@ write_sets(FILE * outfile, const double * data, int ncols, const int * cumsizes,
     ASSUME(nruns > 0);
     for (int set = 0; set < nruns; set++) {
         ASSUME(cumsizes[set] >= 0);
-        if (set > 0)
-            fprintf(outfile, "\n");
+        if (set > 0) fprintf(outfile, "\n");
         for (; size < cumsizes[set]; size++) {
             vector_fprintf(outfile, &data[ncols * size], ncols);
             fprintf(outfile, "\n");
@@ -271,8 +248,7 @@ write_sets_filtered(FILE * outfile, const double * data, int ncols,
     ASSUME(nruns > 0);
     for (int set = 0; set < nruns; set++) {
         ASSUME(cumsizes[set] >= 0);
-        if (set > 0)
-            fprintf(outfile, "\n");
+        if (set > 0) fprintf(outfile, "\n");
         for (; size < cumsizes[set]; size++) {
             if (write_p[size]) {
                 vector_fprintf(outfile, &data[ncols * size], ncols);

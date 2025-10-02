@@ -50,7 +50,7 @@
 #include <float.h>
 #include <math.h>
 #ifndef INFINITY
-#define INFINITY (HUGE_VAL)
+# define INFINITY (HUGE_VAL)
 #endif
 #include <stdint.h>
 #include "common.h"
@@ -62,8 +62,7 @@ gd_common(int dim, const signed char * restrict minmax,
           const double * restrict points_r, int size_r, bool plus, bool psize,
           uint_fast8_t p)
 {
-    if (size_a == 0)
-        return INFINITY;
+    if (size_a == 0) return INFINITY;
     ASSUME(size_a > 0);
     ASSUME(size_r > 0);
     ASSUME(dim >= 2);
@@ -75,8 +74,7 @@ gd_common(int dim, const signed char * restrict minmax,
         for (int r = 0; r < size_r; r++) {
             double dist = 0.0;
             for (int d = 0; d < dim; d++) {
-                if (minmax[d] == 0)
-                    continue;
+                if (minmax[d] == 0) continue;
                 double a_d = points_a[a * dim + d];
                 double r_d = points_r[r * dim + d];
                 double diff =
@@ -89,8 +87,7 @@ gd_common(int dim, const signed char * restrict minmax,
             // We should calculate here the sqrt() of the Euclidean, however
             // that would not change which one is the minimum, so we compute it
             // outside the loop, which is faster.
-            if (dist < min_dist)
-                min_dist = dist;
+            if (dist < min_dist) min_dist = dist;
         }
         // Here we calculate the actual Euclidean distance.
         if (p == 1)

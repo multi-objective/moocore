@@ -2,8 +2,8 @@
 #define __CVECTOR_H__
 
 #ifndef cvector_assert
-#include <assert.h>
-#define cvector_assert(X) assert(X)
+# include <assert.h>
+# define cvector_assert(X) assert(X)
 #endif
 
 #include <stdbool.h>
@@ -11,7 +11,7 @@
 
 // This warning is buggy in GCC 12.
 #if defined(__GNUC__) && __GNUC__ == 12
-#pragma GCC diagnostic ignored "-Wuse-after-free"
+# pragma GCC diagnostic ignored "-Wuse-after-free"
 #endif
 
 #define vector_define(VECTOR_TYPE, BASE_TYPE)                                \

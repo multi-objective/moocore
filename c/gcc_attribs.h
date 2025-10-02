@@ -2,7 +2,7 @@
 #define GCC_ATTRIBUTES
 
 #if !defined(__GNUC__) && !defined(__clang__) && !defined(__ICC)
-#define __attribute__(x) /* Elide __attribute__ */
+# define __attribute__(x) /* Elide __attribute__ */
 #endif
 
 /* When passing the -Wunused flag, entities that are unused by the program may
@@ -15,7 +15,7 @@
    variable, a function or method, a function parameter, an enumeration, an
    enumerator, a non-static data member, or a label. */
 #ifndef _attr_maybe_unused
-#define _attr_maybe_unused __attribute__((unused))
+# define _attr_maybe_unused __attribute__((unused))
 #endif
 
 /* Calls to functions whose return value is not affected by changes to the
@@ -34,9 +34,9 @@
    data that might change from data that cannot, const functions should never
    take pointer or, in C++, reference arguments.  */
 #if defined(__GNUC__) || defined(__clang__) || defined(__ICC)
-#define _attr_const_func __attribute__((const))
+# define _attr_const_func __attribute__((const))
 #else
-#define _attr_const_func
+# define _attr_const_func
 #endif
 
 /* The pure attribute prohibits a function from modifying the state of the
@@ -57,7 +57,7 @@
    non-volatile memory, even if it changes in between successive invocations of
    the function.  */
 #ifndef __pure_func
-#define __pure_func __attribute__((__pure__))
+# define __pure_func __attribute__((__pure__))
 #endif
 
 /* The noreturn keyword tells the compiler to assume that function cannot
@@ -65,14 +65,14 @@
    ever did return. This makes slightly better code. More importantly, it helps
    avoid spurious warnings of uninitialized variables. */
 #ifndef __noreturn
-#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202301L
+# if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202301L
 // gcc 15-, LLVM clang 19- and Apple clang 17
-#define __noreturn [[noreturn]]
-#elif defined(_MSC_VER) && _MSC_VER >= 1200
-#define __noreturn __declspec(noreturn)
-#else
-#define __noreturn __attribute__((__noreturn__))
-#endif
+#  define __noreturn [[noreturn]]
+# elif defined(_MSC_VER) && _MSC_VER >= 1200
+#  define __noreturn __declspec(noreturn)
+# else
+#  define __noreturn __attribute__((__noreturn__))
+# endif
 #endif
 
 /* The malloc attribute is used to tell the compiler that a function
@@ -84,69 +84,69 @@
    it to the new pointer) after the function returns a non-NULL
    value.  */
 #ifndef __malloc
-#define __malloc __attribute__((__malloc__))
+# define __malloc __attribute__((__malloc__))
 #endif
 
 /* The warn_unused_result attribute causes a warning to be emitted if
    a caller of the function with this attribute does not use its
    return value.  */
 #ifndef __must_check
-#define __must_check __attribute__((__warn_unused_result__))
+# define __must_check __attribute__((__warn_unused_result__))
 #endif
 
 /* The deprecated attribute results in a warning if the function is
    used anywhere in the source file.  */
 #ifndef __deprecated
-#define __deprecated __attribute__((__deprecated__))
+# define __deprecated __attribute__((__deprecated__))
 #endif
 
 /* FIXME: add the explanation from the GCC documentation to each attribute. */
 #ifndef __used
-#define __used __attribute__((__used__))
+# define __used __attribute__((__used__))
 #endif
 #ifndef __packed
-#define __packed __attribute__((__packed__))
+# define __packed __attribute__((__packed__))
 #endif
 
 #if defined(__GNUC__) || defined(__clang__) || defined(__ICC)
-#define _attr_aligned(x) __attribute__((aligned(x)))
+# define _attr_aligned(x) __attribute__((aligned(x)))
 #elif defined(_MSC_VER)
-#define _attr_aligned(x) __declspec(align(x))
+# define _attr_aligned(x) __declspec(align(x))
 #else
-#define _attr_aligned(x)
+# define _attr_aligned(x)
 #endif
 
 
 #if (defined(__GNUC__) && __GNUC__ >= 3) || defined(__clang__)
-#define likely(x) __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(!!(x), 0)
+# define likely(x) __builtin_expect(!!(x), 1)
+# define unlikely(x) __builtin_expect(!!(x), 0)
 #elif (defined(__cplusplus) && __cplusplus >= 202002L) || \
     (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
-#define likely(x) (x) [[likely]]
-#define unlikely(x) (x) [[unlikely]]
+# define likely(x) (x) [[likely]]
+# define unlikely(x) (x) [[unlikely]]
 #else
-#define likely(x) (x)
-#define unlikely(x) (x)
+# define likely(x) (x)
+# define unlikely(x) (x)
 #endif
 
 #ifdef _MSC_VER
-#define __force_inline__ __forceinline
+# define __force_inline__ __forceinline
 #elif defined(__GNUC__) || defined(__clang__)
-#define __force_inline__ __attribute__((always_inline)) inline
+# define __force_inline__ __attribute__((always_inline)) inline
 #elif defined(_MS_VER) || defined(WIN32)
-#define __force_inline__ __ForceInline
+# define __force_inline__ __ForceInline
 #else
-#define __force_inline__ inline
+# define __force_inline__ inline
 #endif
 
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L // C99
 /* "restrict" is a known keyword */
 #elif defined(__GNUC__) || defined(__clang__) // GCC or Clang
-#define restrict __restrict__
+# define restrict __restrict__
 #elif defined(_MSC_VER) // MSVC
-#define restrict __restrict
+# define restrict __restrict
 #else // Fallback
-#define restrict
+# define restrict
 #endif
 
 /*
@@ -154,12 +154,12 @@
    The correct format archetype to use for MinGW varies.
 */
 #ifdef __MINGW_PRINTF_FORMAT // Defined by MinGW in stdio.h
-#define ATTRIBUTE_FORMAT_PRINTF_ARCHETYPE __MINGW_PRINTF_FORMAT
+# define ATTRIBUTE_FORMAT_PRINTF_ARCHETYPE __MINGW_PRINTF_FORMAT
 #elif defined(__MINGW__) || defined(__MINGW32__) || defined(__MINGW64__)
 // Otherwise, __gnu_printf__ is a good default for MinGW.
-#define ATTRIBUTE_FORMAT_PRINTF_ARCHETYPE __gnu_printf__
+# define ATTRIBUTE_FORMAT_PRINTF_ARCHETYPE __gnu_printf__
 #else
-#define ATTRIBUTE_FORMAT_PRINTF_ARCHETYPE __printf__
+# define ATTRIBUTE_FORMAT_PRINTF_ARCHETYPE __printf__
 #endif
 
 #define ATTRIBUTE_FORMAT_PRINTF(STRING_INDEX, FIRST_TO_CHECK)                  \
@@ -168,30 +168,30 @@
 
 #ifndef INTERNAL_ASSUME
 // C++ standard attribute
-#if defined(__has_cpp_attribute)
-#if __has_cpp_attribute(assume) >= 202207L
-#define INTERNAL_ASSUME(EXPR) [[assume(EXPR)]]
-#endif
-#endif
+# if defined(__has_cpp_attribute)
+#  if __has_cpp_attribute(assume) >= 202207L
+#   define INTERNAL_ASSUME(EXPR) [[assume(EXPR)]]
+#  endif
+# endif
 #endif
 
 #ifndef INTERNAL_ASSUME
 // C++ standard attribute
-#if defined(__clang__)
-#define INTERNAL_ASSUME(EXPR) __builtin_assume(EXPR)
-#elif defined(_MSC_VER)
-#define INTERNAL_ASSUME(EXPR) __assume(EXPR)
-#elif defined(__GNUC__) && __GNUC__ >= 13
-#define INTERNAL_ASSUME(EXPR) __attribute__((__assume__(EXPR)))
-#else
-#define INTERNAL_ASSUME(EXPR) ((void)0)
-#endif
+# if defined(__clang__)
+#  define INTERNAL_ASSUME(EXPR) __builtin_assume(EXPR)
+# elif defined(_MSC_VER)
+#  define INTERNAL_ASSUME(EXPR) __assume(EXPR)
+# elif defined(__GNUC__) && __GNUC__ >= 13
+#  define INTERNAL_ASSUME(EXPR) __attribute__((__assume__(EXPR)))
+# else
+#  define INTERNAL_ASSUME(EXPR) ((void)0)
+# endif
 #endif
 
 
 /* Allow to redefine assert, for example, for R packages */
 #ifndef assert
-#include <assert.h>
+# include <assert.h>
 #endif
 #define ASSUME(EXPR)           \
     do {                       \
@@ -201,18 +201,18 @@
 
 /* unreachable() is sometimes defined by stddef.h */
 #ifndef unreachable
-#if defined(__GNUC__) || defined(__clang__)
-#define unreachable() __builtin_unreachable()
-#elif defined(_MSC_VER) // MSVC
-#define unreachable() __assume(0)
-#else
-#include <stdlib.h>
-#define unreachable() \
-    do {              \
-        assert(0);    \
-        abort();      \
-    } while (0)
-#endif
+# if defined(__GNUC__) || defined(__clang__)
+#  define unreachable() __builtin_unreachable()
+# elif defined(_MSC_VER) // MSVC
+#  define unreachable() __assume(0)
+# else
+#  include <stdlib.h>
+#  define unreachable() \
+      do {              \
+          assert(0);    \
+          abort();      \
+      } while (0)
+# endif
 #endif
 
 #endif /* GCC_ATTRIBUTES */

@@ -21,8 +21,7 @@ eafdiff_compute_rectangles(int * eaf_npoints, double * data, int nobj,
     double * result = malloc(sizeof(double) * nrow * ncol);
     const double * p_xy = vector_objective_begin(&rects->xy);
     for (int k = 0; k < nrow; k++) {
-        for (int i = 0; i < ncol - 1; i++, p_xy++)
-            result[k * ncol + i] = *p_xy;
+        for (int i = 0; i < ncol - 1; i++, p_xy++) result[k * ncol + i] = *p_xy;
         double color = vector_int_at(&rects->col, k);
         // Each color is within [0, nruns / 2] or [-nruns / 2, 0]
         result[k * ncol + ncol - 1] = intervals * color / (double)division;

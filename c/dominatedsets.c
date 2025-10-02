@@ -85,8 +85,7 @@ static inline size_t
 x_strnlen(const char * s, size_t maxlen)
 {
     size_t len = 0;
-    while (len < maxlen && s[len] != '\0')
-        len++;
+    while (len < maxlen && s[len] != '\0') len++;
     return len;
 }
 
@@ -97,10 +96,9 @@ x_strndup(const char * s, size_t n)
     size_t len = x_strnlen(s, n); // Find length up to n or end of string
     char * new_str =
         malloc(len + 1); // Allocate memory (+1 for null terminator)
-    if (unlikely(new_str == NULL))
-        return NULL;         // malloc failed
-    memcpy(new_str, s, len); // Copy the string up to len
-    new_str[len] = '\0';     // Null-terminate
+    if (unlikely(new_str == NULL)) return NULL; // malloc failed
+    memcpy(new_str, s, len);                    // Copy the string up to len
+    new_str[len] = '\0';                        // Null-terminate
     return new_str;
 }
 
@@ -175,8 +173,7 @@ print_results(char ** filenames, int numfiles, int * nruns, int ** results)
     for (k = 0; k < numfiles; k++) {
         int rank = 0;
         for (j = 0; j < numfiles; j++) {
-            if (k == j)
-                continue;
+            if (k == j) continue;
             rank += results[j][k];
         }
         printf(" %3d", rank);
@@ -234,8 +231,7 @@ set_dominates(int dim, const signed char * minmax, const double * points_x,
                 break;
             }
         }
-        if (!x_weakly_dominates_y)
-            break;
+        if (!x_weakly_dominates_y) break;
     }
 
     if (!x_weakly_dominates_y)
@@ -383,8 +379,7 @@ main(int argc, char * argv[])
     }
 
     /* Default minmax if not set yet.  */
-    if (minmax == NULL)
-        minmax = minmax_minimise((dimension_t)dim);
+    if (minmax == NULL) minmax = minmax_minimise((dimension_t)dim);
 
     /* Print filename substitutions.  */
     for (k = 0; k < numfiles; k++) {
@@ -402,8 +397,7 @@ main(int argc, char * argv[])
     /* Print some info about input files.  */
     for (k = 0; k < numfiles; k++) {
         printf("# %s: %d (%d", filenames[k], nruns[k], cumsizes[k][0]);
-        for (n = 1; n < nruns[k]; n++)
-            printf(", %d", cumsizes[k][n]);
+        for (n = 1; n < nruns[k]; n++) printf(", %d", cumsizes[k][n]);
         printf(")\n");
     }
 
@@ -441,8 +435,7 @@ main(int argc, char * argv[])
 
     for (k = 0; k < numfiles; k++) {
         results[k] = (int *)(results + numfiles) + k * numfiles;
-        for (j = 0; j < numfiles; j++)
-            results[k][j] = -1;
+        for (j = 0; j < numfiles; j++) results[k][j] = -1;
     }
 
     for (k = 0; k < numfiles; k++)

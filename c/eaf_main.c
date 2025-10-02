@@ -413,8 +413,7 @@ main(int argc, char * argv[])
         fprintf(stderr, "# sets: %d\n", nruns);
         fprintf(stderr, "# points: %d\n", cumsizes[nruns - 1]);
         fprintf(stderr, "# calculating levels:");
-        for (k = 0; k < nlevels; k++)
-            fprintf(stderr, " %d", level[k]);
+        for (k = 0; k < nlevels; k++) fprintf(stderr, " %d", level[k]);
         fprintf(stderr, "\n");
     }
 
@@ -426,8 +425,7 @@ main(int argc, char * argv[])
     } else {
         eaf_print(eaf, nobj, nlevels, coord_file, indic_file, diff_file);
         fclose(coord_file);
-        if (indic_file && indic_file != coord_file)
-            fclose(indic_file);
+        if (indic_file && indic_file != coord_file) fclose(indic_file);
         if (diff_file && diff_file != coord_file && diff_file != indic_file)
             fclose(diff_file);
     }

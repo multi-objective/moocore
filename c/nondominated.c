@@ -117,19 +117,16 @@ read_range(char * str, double * lower, double * upper)
     char * endp;
 
     *lower = strtod(str, &endp);
-    if (str == endp)
-        return false;
+    if (str == endp) return false;
     str = endp;
 
     *upper = strtod(str, &endp);
-    if (str == endp)
-        return false;
+    if (str == endp) return false;
     str = endp;
 
     // not end of string: error
     while (*str != '\0') {
-        if (!isspace(*str))
-            return false;
+        if (!isspace(*str)) return false;
         str++;
     }
 
@@ -140,8 +137,7 @@ static inline bool
 any_less_than(const double * a, const double * b, int nobj)
 {
     for (int d = 0; d < nobj; d++)
-        if (a[d] < b[d])
-            return true;
+        if (a[d] < b[d]) return true;
 
     return false;
 }
@@ -154,8 +150,7 @@ logarithm_scale(double * points, int nobj, int size, const bool * logarithm)
     assert(logarithm);
 
     for (d = 0; d < nobj; d++) {
-        if (!logarithm[d])
-            continue;
+        if (!logarithm[d]) continue;
         for (k = 0; k < size; k++)
             points[k * nobj + d] = log10(points[k * nobj + d]);
     }
@@ -179,20 +174,17 @@ force_bounds(double * points, int nobj, int * cumsizes, int nsets,
     }
 
     if (outbounds_found < 0) {
-        if (verbose_flag >= 2)
-            fprintf(stderr, "# out of bounds: 0\n");
+        if (verbose_flag >= 2) fprintf(stderr, "# out of bounds: 0\n");
         free(outbounds);
         return false;
     }
 
     int * ssizes = malloc(sizeof(int) * nsets);
     ssizes[0] = cumsizes[0];
-    for (k = 1; k < nsets; k++)
-        ssizes[k] = cumsizes[k] - cumsizes[k - 1];
+    for (k = 1; k < nsets; k++) ssizes[k] = cumsizes[k] - cumsizes[k - 1];
 
     /* Find the set of the first out-of-bounds point.  */
-    for (k = 0; outbounds_found >= cumsizes[k]; k++)
-        ;
+    for (k = 0; outbounds_found >= cumsizes[k]; k++);
 
     /* Delete it.  */
     ssizes[k]--;
@@ -211,12 +203,10 @@ force_bounds(double * points, int nobj, int * cumsizes, int nsets,
         }
     }
 
-    if (verbose_flag >= 2)
-        fprintf(stderr, "# out of bounds: %d\n", n2 - n);
+    if (verbose_flag >= 2) fprintf(stderr, "# out of bounds: %d\n", n2 - n);
 
     cumsizes[0] = ssizes[0];
-    for (k = 1; k < nsets; k++)
-        cumsizes[k] = ssizes[k] + cumsizes[k - 1];
+    for (k = 1; k < nsets; k++) cumsizes[k] = ssizes[k] + cumsizes[k - 1];
 
     free(ssizes);
     free(outbounds);
@@ -360,8 +350,7 @@ process_file(const char * filename, const signed char * minmax, int * nobj_p,
         filename);
     ASSUME(nobj > 1 && nobj < 128);
 
-    if (!filename)
-        filename = stdin_name;
+    if (!filename) filename = stdin_name;
 
     if (union_flag) {
         cumsizes[0] = cumsizes[nsets - 1];
@@ -419,8 +408,7 @@ process_file(const char * filename, const signed char * minmax, int * nobj_p,
         memcpy(log_ubound, ubound, sizeof(double) * nobj);
 
         for (int d = 0; d < nobj; d++) {
-            if (!logarithm[d])
-                continue;
+            if (!logarithm[d]) continue;
             log_lbound[d] = log10(lbound[d]);
             log_ubound[d] = log10(ubound[d]);
             logarithm_flag = true;
@@ -482,21 +470,16 @@ process_file(const char * filename, const signed char * minmax, int * nobj_p,
 
     free(points);
     free(cumsizes);
-    if (free_minmax)
-        free((void *)minmax);
-    if (nondom)
-        free(nondom);
-    if (log_lbound)
-        free(log_lbound);
-    if (log_ubound)
-        free(log_ubound);
+    if (free_minmax) free((void *)minmax);
+    if (nondom) free(nondom);
+    if (log_lbound) free(log_lbound);
+    if (log_ubound) free(log_ubound);
 
     *minimum_p = minimum;
     *maximum_p = maximum;
     *nobj_p = nobj;
 
-    if (verbose_flag >= 2)
-        fprintf(stderr, "#\n");
+    if (verbose_flag >= 2) fprintf(stderr, "#\n");
 
     return dominated_found;
 }
@@ -682,10 +665,8 @@ main(int argc, char * argv[])
            must be calculated as we process the files.  */
         if (lower_bound && upper_bound)
             for (int n = 0; n < nobj; n++) {
-                if (minimum[n] > tmp_minimum[n])
-                    minimum[n] = tmp_minimum[n];
-                if (maximum[n] < tmp_maximum[n])
-                    maximum[n] = tmp_maximum[n];
+                if (minimum[n] > tmp_minimum[n]) minimum[n] = tmp_minimum[n];
+                if (maximum[n] < tmp_maximum[n]) maximum[n] = tmp_maximum[n];
             }
         free(tmp_minimum);
         free(tmp_maximum);

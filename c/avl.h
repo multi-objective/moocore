@@ -52,17 +52,17 @@ typedef int (*avl_compare_t)(const void *, const void *);
 typedef void (*avl_freeitem_t)(void *);
 
 typedef struct avl_node_t {
-    struct avl_node_t * next;
-    struct avl_node_t * prev;
-    struct avl_node_t * parent;
-    struct avl_node_t * left;
-    struct avl_node_t * right;
-    void * item;
+	struct avl_node_t *next;
+	struct avl_node_t *prev;
+	struct avl_node_t *parent;
+	struct avl_node_t *left;
+	struct avl_node_t *right;
+	void *item;
 #ifdef AVL_COUNT
-    unsigned int count;
+	unsigned int count;
 #endif
 #ifdef AVL_DEPTH
-    unsigned char depth;
+	unsigned char depth;
 #endif
     /* The following members are necessary only to determine the attainment indicators.
      * set - set of the input point responsible for the promotion of this point
@@ -76,31 +76,30 @@ typedef struct avl_node_t {
      * any point equal to itself.
      */
     int set;
-    struct avl_node_t * promoter;
-    struct avl_node_t * remover;
-    struct avl_node_t * equal;
+    struct avl_node_t *promoter;
+    struct avl_node_t *remover;
+    struct avl_node_t *equal;
 } avl_node_t;
 
 typedef struct avl_tree_t {
-    avl_node_t * head;
-    avl_node_t * tail;
-    avl_node_t * top;
-    avl_compare_t cmp;
-    avl_freeitem_t freeitem;
+	avl_node_t *head;
+	avl_node_t *tail;
+	avl_node_t *top;
+	avl_compare_t cmp;
+	avl_freeitem_t freeitem;
 } avl_tree_t;
 
 /* Initializes a new tree for elements that will be ordered using
  * the supplied strcmp()-like function.
  * Returns the value of avltree (even if it's NULL).
  * O(1) */
-extern avl_tree_t * avl_init_tree(avl_tree_t * avltree, avl_compare_t,
-                                  avl_freeitem_t);
+extern avl_tree_t *avl_init_tree(avl_tree_t *avltree, avl_compare_t, avl_freeitem_t);
 
 /* Allocates and initializes a new tree for elements that will be
  * ordered using the supplied strcmp()-like function.
  * Returns NULL if memory could not be allocated.
  * O(1) */
-extern avl_tree_t * avl_alloc_tree(avl_compare_t, avl_freeitem_t);
+extern avl_tree_t *avl_alloc_tree(avl_compare_t, avl_freeitem_t);
 
 /* Frees the entire tree efficiently. Nodes will be free()d.
  * If the tree's freeitem is not NULL it will be invoked on every item.
@@ -119,36 +118,34 @@ extern void avl_free_nodes(avl_tree_t *);
 
 /* Initializes memory for use as a node. Returns NULL if avlnode is NULL.
  * O(1) */
-extern avl_node_t * avl_init_node(avl_node_t * avlnode, void * item);
+extern avl_node_t *avl_init_node(avl_node_t *avlnode, void *item);
 
 /* Insert an item into the tree and return the new node.
  * Returns NULL and sets errno if memory for the new node could not be
  * allocated or if the node is already in the tree (EEXIST).
  * O(lg n) */
-extern avl_node_t * avl_insert(avl_tree_t *, void * item);
+extern avl_node_t *avl_insert(avl_tree_t *, void *item);
 
 /* Insert a node into the tree and return it.
  * Returns NULL if the node is already in the tree.
  * O(lg n) */
-extern avl_node_t * avl_insert_node(avl_tree_t *, avl_node_t *);
+extern avl_node_t *avl_insert_node(avl_tree_t *, avl_node_t *);
 
 /* Insert a node in an empty tree. If avlnode is NULL, the tree will be
  * cleared and ready for re-use.
  * If the tree is not empty, the old nodes are left dangling.
  * O(1) */
-extern avl_node_t * avl_insert_top(avl_tree_t *, avl_node_t * avlnode);
+extern avl_node_t *avl_insert_top(avl_tree_t *, avl_node_t *avlnode);
 
 /* Insert a node before another node. Returns the new node.
  * If old is NULL, the item is appended to the tree.
  * O(lg n) */
-extern avl_node_t * avl_insert_before(avl_tree_t *, avl_node_t * old,
-                                      avl_node_t * new);
+extern avl_node_t *avl_insert_before(avl_tree_t *, avl_node_t *old, avl_node_t *new);
 
 /* Insert a node after another node. Returns the new node.
  * If old is NULL, the item is prepended to the tree.
  * O(lg n) */
-extern avl_node_t * avl_insert_after(avl_tree_t *, avl_node_t * old,
-                                     avl_node_t * new);
+extern avl_node_t *avl_insert_after(avl_tree_t *, avl_node_t *old, avl_node_t *new);
 
 /* Deletes a node from the tree. Returns immediately if the node is NULL.
  * The item will not be free()d regardless of the tree's freeitem handler.
@@ -160,19 +157,19 @@ extern void avl_unlink_node(avl_tree_t *, avl_node_t *);
  * If the tree's freeitem is not NULL, it is invoked on the item.
  * If it is, returns the item.
  * O(lg n) */
-extern void * avl_delete_node(avl_tree_t *, avl_node_t *);
+extern void *avl_delete_node(avl_tree_t *, avl_node_t *);
 
 /* Searches for an item in the tree and deletes it if found.
  * If the tree's freeitem is not NULL, it is invoked on the item.
  * If it is, returns the item.
  * O(lg n) */
-extern void * avl_delete(avl_tree_t *, const void * item);
+extern void *avl_delete(avl_tree_t *, const void *item);
 
 /* If exactly one node is moved in memory, this will fix the pointers
  * in the tree that refer to it. It must be an exact shallow copy.
  * Returns the pointer to the old position.
  * O(1) */
-extern avl_node_t * avl_fixup_node(avl_tree_t *, avl_node_t * new);
+extern avl_node_t *avl_fixup_node(avl_tree_t *, avl_node_t *new);
 
 /* Searches for a node with the key closest (or equal) to the given item.
  * If avlnode is not NULL, *avlnode will be set to the node found or NULL
@@ -181,13 +178,12 @@ extern avl_node_t * avl_fixup_node(avl_tree_t *, avl_node_t * new);
  *    0  if the returned node is equal or if the tree is empty
  *    1  if the returned node is smaller
  * O(lg n) */
-extern int avl_search_closest(const avl_tree_t *, const void * item,
-                              avl_node_t ** avlnode);
+extern int avl_search_closest(const avl_tree_t *, const void *item, avl_node_t **avlnode);
 
 /* Searches for the item in the tree and returns a matching node if found
  * or NULL if not.
  * O(lg n) */
-extern avl_node_t * avl_search(const avl_tree_t *, const void * item);
+extern avl_node_t *avl_search(const avl_tree_t *, const void *item);
 
 #ifdef AVL_COUNT
 /* Returns the number of nodes in the tree.
@@ -197,7 +193,7 @@ extern unsigned int avl_count(const avl_tree_t *);
 /* Searches a node by its rank in the list. Counting starts at 0.
  * Returns NULL if the index exceeds the number of nodes in the tree.
  * O(lg n) */
-extern avl_node_t * avl_at(const avl_tree_t *, unsigned int);
+extern avl_node_t *avl_at(const avl_tree_t *, unsigned int);
 
 /* Returns the rank of a node in the list. Counting starts at 0.
  * O(lg n) */

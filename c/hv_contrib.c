@@ -85,8 +85,7 @@ hvc_1point_diffs_nondom(double * restrict hvc, double * restrict points,
     double * tmp_point = MOOCORE_MALLOC(dim, double);
     if (new_size < size) {
         // Move all dominated points beyond new_size.
-        while (nondom[first])
-            first++; // Find first dominated.
+        while (nondom[first]) first++; // Find first dominated.
         size_t k = first;
         size_t last = size;
         while (k < new_size) {
@@ -153,15 +152,12 @@ hvc2d(double * restrict hvc, const double * restrict data, size_t n,
 {
     ASSUME(n > 0);
     const double ** p = generate_sorted_doublep_2d(data, &n, ref[0]);
-    if (unlikely(n == 0))
-        return 0;
-    if (unlikely(!p))
-        return -1;
+    if (unlikely(n == 0)) return 0;
+    if (unlikely(!p)) return -1;
 
     size_t j = 0;
     // Find first point below the reference point.
-    while (j < n && p[j][1] >= ref[1])
-        j++;
+    while (j < n && p[j][1] >= ref[1]) j++;
     if (unlikely(j == n)) {
         free(p);
         return 0;
@@ -240,15 +236,12 @@ hvc2d_nondom(double * restrict hvc, const double * restrict data, size_t n,
 {
     ASSUME(n > 0);
     const double ** p = generate_sorted_doublep_2d(data, &n, ref[0]);
-    if (unlikely(n == 0))
-        return 0;
-    if (unlikely(!p))
-        return -1;
+    if (unlikely(n == 0)) return 0;
+    if (unlikely(!p)) return -1;
 
     size_t j = 0;
     // Find first point below the reference point.
-    while (j < n && p[j][1] >= ref[1])
-        j++;
+    while (j < n && p[j][1] >= ref[1]) j++;
     if (unlikely(j == n)) {
         free(p);
         return 0;
@@ -361,8 +354,7 @@ hv_contributions(double * restrict hvc, double * restrict points, int d, int n,
     ASSUME(n >= 0);
     dimension_t dim = (dimension_t)d;
     size_t size = (size_t)n;
-    if (size == 0)
-        return 0;
+    if (size == 0) return 0;
     if (size == 1) {
         hvc[0] = fpli_hv(points, dim, (int)size, ref);
         return hvc[0];
