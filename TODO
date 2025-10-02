@@ -1,6 +1,6 @@
  - [ ] Replace AVL code
  - [ ] Merge eaf README
- - [ ] Merge hypervolume/trunk README
+ - [x] Merge hypervolume/trunk README
  - [ ] Merge hypervolume/Makefile README
  - [ ] Coverage Error Sayin 2024: is this the same as R2 indicator?
  - [ ] Appendix B of "The Hypervolume Indicator: Computational Problems

@@ -1,7 +1,7 @@
 /*************************************************************************
 
- Calculates the number of Pareto sets from one file that
- dominate the Pareto sets of the other files.
+ Calculates the number of sets from one file that dominate the sets of the
+ other files.
 
  ---------------------------------------------------------------------
 
@@ -60,8 +60,7 @@ static void usage(void)
            "Usage: %s [OPTIONS] [FILE...]\n\n", program_invocation_short_name);
 
     printf(
-"Calculates the number of Pareto sets from one file that                    \n"
-"dominate the Pareto sets of the other files.                             \n\n"
+"Calculates the number of sets from one file that dominate the sets of the other files.\n\n"
 
 "Options:\n"
 OPTION_HELP_STR

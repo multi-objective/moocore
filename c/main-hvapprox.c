@@ -47,7 +47,7 @@ static void usage(void)
 
     printf(
 "Approximate the hypervolume value of each input set of each FILE. \n"
-"The approximation uses Monte-Carlo sampling, thus gets more accurate with larger\n"
+"The approximation uses (quasi-)Monte-Carlo sampling, thus gets more accurate with larger\n"
 "values of --nsamples. With no FILE, or when FILE is -, read standard input.\n\n"
 
 "Options:\n"

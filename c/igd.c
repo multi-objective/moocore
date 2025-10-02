@@ -76,7 +76,7 @@ static void usage(void)
            program_invocation_short_name, program_invocation_short_name);
 
     printf(
-"Calculates the inverted generational distance (IGD) measure for the Pareto sets given as input\n\n"
+"Calculates quality metrics related to the generational distance (GD, IGD, IGD+, avg Hausdorff distance).\n\n"
 
 "Options:\n"
 OPTION_HELP_STR

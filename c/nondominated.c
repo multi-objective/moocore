@@ -61,8 +61,7 @@ static void usage(void)
            program_invocation_short_name, program_invocation_short_name);
 
     printf(
-"Obtain information and perform some operations on the nondominated sets "
-"given as input. \n\n"
+"Check dominance, filter and transform the sets given as input.\n\n"
 
 "Options:\n"
 OPTION_HELP_STR

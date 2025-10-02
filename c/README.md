@@ -39,24 +39,270 @@ Compilation
 
 We recommend that you compile specifically for your architecture using GCC option `-march=`. The default compilation is done with:
 
-    make nondominated
+    make all
 
-This uses the option `"-march=native"`. If your GCC version does not support `"native"`, you can give an explicit architecture:
+This uses the option `"-march=native"`. If your GCC version does not support `"native"`, you can give an explicit architecture, e.g.,
 
-    make nondominated march=x86-64
+    make all MARCH=x86-64-v2
 
 See the [GCC manual](https://gcc.gnu.org/onlinedocs/gcc/Submodel-Options.html** for the names of the architectures supported by your version of GCC.
+
+You can compile the code with various runtime checks enabled using the option `DEBUG=1`.  This will slow down the code significantly.
+
+The build system will try to pick good compiler flags for you, but if you need to, you can override them by passing the option `OPT_CFLAGS`. For example, to disable compiler optimization and enabled debug symbols, you could run:
+
+    make all OPT_CFLAGS="-O0 -g"
+
+
+If you do not want to see the command line of each compiler
+invocation, pass `S=1` to `make`.
+
+
+Embedding (shared library)
+==================================
+
+Most functions are implemented in headers such as `nondominated.h`. For other functions, it is possible to build a shared library for embedding the code into your own C/C++ programs:
+
+    make shlibs
+
+Functions exported by the library are marked with `MOOCORE_API`.
 
 
 Command-line executables
 ========================
 
-**TODO**: *This section is incomplete, please help us to complete it.*
+Input format
+------------
+
+All command-line tools can read the input as a filename in the command line:
+
+    hv datafile
+
+or from standard input:
+
+    cat datafile | hv
+
+In an input file, each point is given in a separate line, and each coordinate
+within a line is separated by whitespace. An empty line denotes a separate
+set. Most tools have an `--union` option that ignores those empty lines.  All
+tools assume that all objectives must be minimized but this can be changed via
+options `--maximise` or `--obj=`.  Also, maximization objectives may be
+multiplied by -1 to convert them to minimization (see the option `--agree` of `nondominated`).
+
 
 nondominated
 ------------
 
-Obtain information and perform filtering operations on the nondominated sets given as input.
+Check dominance, filter and transform the sets given as input.
+
+```
+Usage:
+       nondominated [OPTIONS] [FILES]
+       nondominated [OPTIONS] < [INPUT] > [OUTPUT]
+
+Options:
+ -h, --help          print this summary and exit;
+     --version       print version number (and compilation flags) and exit;
+ -v, --verbose       print some extra information;
+ -q, --quiet         print as little as possible;
+     --no-check      do not check nondominance of sets (faster but unsafe);
+ -o, --obj=[+|-]...  specify whether each objective should be minimised (-)
+                     or maximised (+). By default all are minimised;
+     --maximise      all objectives must be maximised;
+ -u, --upper-bound POINT defines an upper bound to check, e.g. "10 5 30";
+ -l, --lower-bound POINT defines a lower bound to check;
+ -U, --union         consider each file as a whole approximation set,
+                     (by default, approximation sets are separated by an
+                     empty line within a file);
+ -s, --suffix=STRING suffix to add to output files. Default is "_dat".
+                     The empty string means overwrite the input file.
+                     This is ignored when reading from stdin because output
+                     is sent to stdout.
+
+ The following options OVERWRITE output files:
+ -a, --agree=<max|min> transform objectives so all are maximised (or
+                       minimised). See also the option --obj.
+ -f, --filter        check and filter out dominated points;
+ -b, --force-bound   remove points that do not satisfy the bounds;
+ -n, --normalise RANGE normalise all objectives to a range, e.g., "1 2".
+                       If bounds are given with -l and -u, they are used
+                       for the normalisation.
+ -L, --log=[1|0]...  specify whether each objective should be transformed
+                     to logarithmic scale (1) or not (0).
+```
+
+hv
+--
+
+Computes the exact hypervolume. A reference point can be given by the option `-r`.
+
+    hv -r "10 10 10" data
+
+If no reference point is given, the default is `maximum + 0.1 * (maximum - minimum)`, where the maximum and minimum values are calculated for each
+coordinate from the union of all input points.
+
+For other options, check the output of `hv --help`.
+
+
+hvapprox
+--------
+
+Approximate the hypervolume value of each input set of each input file.  The
+approximation uses (quasi-)Monte-Carlo sampling, thus gets more accurate with
+larger values of `--nsamples`. With no file, or when file is `-`, read standard
+input.
+
+```
+Usage: hvapprox [OPTIONS] [FILE...]
+       hvapprox [OPTIONS] < [INPUT] > [OUTPUT]
+
+Options:
+ -h, --help          print this summary and exit;
+     --version       print version number (and compilation flags) and exit;
+ -v, --verbose       print some information (time, maximum, etc).
+ -q, --quiet         print just the hypervolume (as opposed to --verbose).
+ -u, --union         treat all input sets within a FILE as a single set.
+ -r, --reference=POINT use POINT as reference point. POINT must be within
+                     quotes, e.g., "10 10 10". If no reference point is
+                     given, it is taken as max + 0.1 * (max - min) for each
+                     coordinate from the union of all input points.
+ -s, --suffix=STRING Create an output file for each input file by appending
+                     this suffix. This is ignored when reading from stdin.
+                     If missing, output is sent to stdout.
+ -n, --nsamples=N    Number of Monte-Carlo samples (N is a positive integer).
+ -m, --method=M      1: Monte-Carlo sampling using normal distribution;
+                     2: Hua-Wang deterministic sampling (default).
+ -S, --seed=SEED     Seed of the random number generator (positive integer).
+                     Only method=1.
+```
+
+epsilon
+-------
+
+Calculates the epsilon measure for the sets given as input.
+
+```
+Usage:
+       epsilon [OPTIONS] [FILES]
+       epsilon [OPTIONS] < [INPUT] > [OUTPUT]
+
+Options:
+ -h, --help          print this summary and exit;
+     --version       print version number (and compilation flags) and exit;
+ -v, --verbose        print some information (time, number of points, etc.).
+ -q, --quiet         print as little as possible;
+ -a, --additive       epsilon additive value (default).
+ -m, --multiplicative epsilon multiplicative value .
+ -r, --reference FILE file that contains the reference set
+ -o, --obj=[+|-]...  specify whether each objective should be minimised (-)
+                     or maximised (+). By default all are minimised;
+     --maximise      all objectives must be maximised;
+ -s, --suffix=STRING  Create an output file for each input file by appending
+                      this suffix. This is ignored when reading from stdin.
+                      If missing, output is sent to stdout.
+```
+
+igd
+---
+
+Calculates quality metrics related to the generational distance (GD, IGD, IGD+, avg Hausdorff distance).
+
+```
+Usage:
+       igd [OPTIONS] [FILES]
+       igd [OPTIONS] < [INPUT] > [OUTPUT]
+
+
+Options:
+ -h, --help          print this summary and exit;
+     --version       print version number (and compilation flags) and exit;
+ -v, --verbose       print some information (time, number of points, etc.)
+ -q, --quiet         print as little as possible;
+   , --gd            report classical GD
+   , --igd           report classical IGD
+   , --gd-p          report GD_p (p=1 by default)
+   , --igd-p         (default) report IGD_p (p=1 by default)
+   , --igd-plus      report IGD+
+   , --hausdorff     report avg Hausdorff distance = max (GD_p, IGD_p)
+ -a, --all           compute everything
+ -p,                 exponent that averages the distances
+ -r, --reference FILE file that contains the reference set
+ -o, --obj=[+|-]...  specify whether each objective should be minimised (-)
+                     or maximised (+). By default all are minimised;
+     --maximise      all objectives must be maximised;
+ -s, --suffix=STRING Create an output file for each input file by appending
+                     this suffix. This is ignored when reading from stdin.
+                     If missing, output is sent to stdout.
+```
+
+eaf
+---
+
+Computes the empirical attainment function (EAF) of all input files.
+With no file, or when file is `-`, read standard input.
+
+```
+Usage:  eaf [OPTIONS] [FILE...]
+
+Options:
+ -h, --help          print this summary and exit;
+     --version       print version number (and compilation flags) and exit;
+ -v, --verbose       print some information (time, input points, output
+                     points, etc) in stderr. Default is --quiet
+ -o, --output FILE   write output to FILE instead of standard output.
+ -q, --quiet         print just the EAF (as opposed to --verbose)
+ -b, --best          compute best attainment surface
+ -m, --median        compute median attainment surface
+ -w, --worst         compute worst attainment surface
+ -p, --percentile REAL compute the given percentile of the EAF
+ -l, --level  LEVEL    compute the given level of the EAF
+ -i[FILE], --indices[=FILE]  write attainment indices to FILE.
+                     If FILE is '-', print to stdout.
+                     If FILE is missing use the same file as for output.
+ -d[FILE], --diff[=FILE] write difference between half of runs to FILE.
+                     If FILE is '-', print to stdout.
+                     If FILE is missing use the same file as for output.
+        , --polygons Write EAF as R polygons.
+```
+
+dominatedsets
+-------------
+
+Calculates the number of sets from one file that dominate the sets of the other
+files.
+
+```
+Usage: dominatedsets [OPTIONS] [FILE...]
+
+Options:
+ -h, --help          print this summary and exit;
+     --version       print version number (and compilation flags) and exit;
+ -v, --verbose       print some information (time, number of points, etc.)
+ -q, --quiet         print as little as possible;
+ -p, --percentages   print results also as percentages.
+     --no-check      do not check nondominance of sets (faster but unsafe).
+ -o, --obj=[+|-]...  specify whether each objective should be minimised (-)
+                     or maximised (+). By default all are minimised;
+```
+
+ndsort
+------
+
+Perform nondominated sorting in a list of points.
+
+```
+Usage: ndsort [OPTIONS] [FILE...]
+
+Options:
+ -h, --help          print this summary and exit;
+     --version       print version number (and compilation flags) and exit;
+ -v, --verbose       print some information (time, number of points, etc.)
+ -q, --quiet         print as little as possible;
+ -k, --keep-uevs     keep uniquely extreme values
+ -r, --rank          don't break ties using hypervolume contribution
+ -o, --obj=[+|-]...  specify whether each objective should be minimised (-)
+                     or maximised (+). By default all are minimised;
+```
 
 Testsuite
 =========
@@ -73,6 +319,7 @@ make -C moocore/c/ test
 # Timing
 make -C moocore/c/ time
 ```
+
 
 
 

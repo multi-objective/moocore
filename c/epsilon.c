@@ -66,7 +66,7 @@ static void usage(void)
            program_invocation_short_name, program_invocation_short_name);
 
     printf(
-"Calculates the epsilon measure for the Pareto sets given as input\n\n"
+"Calculates the epsilon measure for the sets given as input\n\n"
 
 "Options:\n"
 OPTION_HELP_STR
