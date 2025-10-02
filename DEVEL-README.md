@@ -37,3 +37,26 @@ How to extend the R API
 =======================
 
 Extending the R API requires adding a C wrapper function that converts from R types to C types and export that C function to R. See [`Rmoocore.c`](https://github.com/multi-objective/moocore/blob/main/r/src/Rmoocore.c) and [`init.h`](https://github.com/multi-objective/moocore/blob/main/r/src/init.h)
+
+
+Code Formatting
+===============
+
+C/C++ Code
+----------
+
+C/C++ code in the `c/` directory is automatically formatted using `clang-format` via pre-commit hooks.
+
+The formatting style is configured in `.clang-format` and aims to match the existing code style:
+- 4-space indentation
+- K&R style (function return type on separate line)
+- 80-character column limit
+- Space on both sides of pointer declarations (e.g., `type * name`)
+
+To manually format C/C++ files:
+
+```bash
+clang-format -i c/*.c c/*.h
+```
+
+The pre-commit hook will automatically format C/C++ files when you commit changes.
