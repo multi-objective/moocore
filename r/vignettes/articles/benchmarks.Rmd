@@ -41,13 +41,16 @@ library(data.table)
 library(ggplot2)
 library(moocore)
 
+geomspace <- function(start, stop, num)
+  round(exp(seq(log(start), log(stop), length.out = num)), 0)
+
 get_dataset <- function(filename, filter=FALSE) {
   cat("Get file '", filename, "'\n")
   destfile <- system.file(file.path("extdata", filename), package="moocore")
   if (destfile == "") {
     destfile <- file.path("../../../testsuite/data", filename)
     if (!file.exists(destfile)) {
-      destfile <- local_tempfile()
+      destfile <- withr::local_tempfile()
       base_url <- "https://github.com/multi-objective/testsuite/raw/refs/heads/main/data/"
       utils::download.file(paste0(base_url, filename), destfile, quiet = FALSE)
     }
@@ -124,7 +127,8 @@ benchmark <- function(name, x, N, setup, expr.list, prefix, title) {
 
 # Identifying (non)dominated points
 
-The following plots compare the speed of finding (non)dominated solutions, equivalent to `moocore::is_nondominated()`, in 2D and 3D. The plots show that [`moocore`][moocore] is always faster than [`bbotk`][bbotk].
+The following plots compare the speed of finding (non)dominated solutions, equivalent to `moocore::is_nondominated()`, in 2D, 3D, 4D and 10D.
+The plots show that [`moocore`][moocore] is always faster than [`bbotk`][bbotk].
 
 ```{r ndom}
 #| fig.asp: 0.8
@@ -144,8 +148,10 @@ expr.list <- list(
   bbotk = quote(bbotk::is_dominated(tz)))
 
 files <- list(
-  "test2D-200k"=list(dataset="test2D-200k.inp.xz", N=seq(2000, 20000, 2000)),
-  "ran3d-10k"=list(dataset="ran.1000pts.3d.10", N=seq(1000, 10000, 1000))
+  "test2D-200k"=list(dataset="test2D-200k.inp.xz", N=geomspace(1000, 50000, 10)),
+  "ran3d-40k"=list(dataset="ran.40000pts.3d.1.xz", N=geomspace(1000, 40000, 10)),
+  "ran4d"=list(dataset="ran.9000pts.4d.10.xz", N=geomspace(1000, 30000, 10)),
+  "rmnk-10d"=list(dataset="rmnk_0.0_10_16_1_0_random_search_1.txt.xz", N=geomspace(1000, 20000, 10))
 )
 
 for (name in names(files)) {
