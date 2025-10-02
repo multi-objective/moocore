@@ -61,6 +61,9 @@ for name in names:
         "pymoo": lambda z, hv=pymoo_HV(ref_point=ref): hv(z),
         "jMetalPy": lambda z, hv=jmetal_HV(ref): hv.compute(z),
     }
+    if dim < 6:
+        # Nevergrad is too slow
+        benchmarks["nevergrad"] = lambda z, hv=ng_HV(ref): hv.compute(z)
     if dim < 5:
         ## Trieste is hundreds of times slower than botorch. It is so slow that
         ## we cannot run the benchmark with the initial value of 500 points.
@@ -68,9 +71,6 @@ for name in names:
         benchmarks["botorch"] = lambda z, hv=botorch_HV(
             ref_point=torch.from_numpy(-ref)
         ): hv.compute(z)
-    if dim < 6:
-        # Nevergrad is too slow
-        benchmarks["nevergrad"] = lambda z, hv=ng_HV(ref): hv.compute(z)
 
     bench = Bench(name=name, n=n, bench=benchmarks)
     values = {}
