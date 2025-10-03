@@ -11,8 +11,8 @@ Fast implementation of mathematical operations and performance metrics for multi
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://multi-objective.github.io/moocore/r/}
-  \item \url{https://github.com/multi-objective/moocore/}
+  \item \url{https://multi-objective.github.io/moocore/r}
+  \item \url{https://github.com/multi-objective/moocore}
   \item Report bugs at \url{https://github.com/multi-objective/moocore/issues}
 }
 
