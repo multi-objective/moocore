@@ -27,15 +27,16 @@ transform_and_filter(const double * restrict data, dimension_t dim, size_t * res
     size_t npoints = *npoints_p;
     double * points = malloc(dim * npoints * sizeof(double));
     size_t i, j;
-    dimension_t k;
     // Transform points (ref - points)
     for (i = 0, j = 0; i < npoints; i++) {
+        double * restrict p = points + j * dim;
+        dimension_t k;
         for (k = 0; k < dim; k++) {
-            points[j * dim + k] = ref[k] - data[i * dim + k];
+            p[k] = ref[k] - data[i * dim + k];
             if (maximise[k])
-                points[j * dim + k] = -points[j * dim + k];
+                p[k] = -p[k];
             // Filter out dominated points (must be >0 in all objectives)
-            if (points[j * dim + k] <= 0)
+            if (p[k] <= 0)
                 break;
         }
         if (k == dim)
@@ -43,7 +44,7 @@ transform_and_filter(const double * restrict data, dimension_t dim, size_t * res
     }
     *npoints_p = j;
     if (*npoints_p == 0) {
-        free (points);
+        free(points);
         return NULL;
     }
     return points;
@@ -54,13 +55,14 @@ get_expected_value(const double * restrict points, dimension_t dim, size_t npoin
                    const double * restrict w)
 {
     ASSUME(1 <= dim && dim <= 32);
-    ASSUME(npoints >= 1);
+    ASSUME(npoints > 0);
     // points >= 0 && w >=0 so max_s_w cannot be < 0.
     double max_s_w = 0;
     for (size_t i = 0; i < npoints; i++) {
-        double min_ratio = points[i * dim + 0] * w[0];
+        const double * restrict p = points + i * dim;
+        double min_ratio = p[0] * w[0];
         for (dimension_t k = 1; k < dim; k++) {
-            double ratio = points[i * dim + k] * w[k];
+            double ratio = p[k] * w[k];
             min_ratio = MIN(min_ratio, ratio);
         }
         max_s_w = MAX(max_s_w, min_ratio);
@@ -172,7 +174,7 @@ hv_approx_normal(const double * restrict data, int nobjs, int n,
         return 0;
 
     rng_state * rng = rng_new(random_seed);
-    double * w = malloc(dim * sizeof(double));
+    double * w = malloc(dim * sizeof(*w));
     double expected = 0.0;
     // Monte Carlo sampling.
     for (uint_fast32_t j = 0; j < nsamples; j++) {
@@ -180,13 +182,15 @@ hv_approx_normal(const double * restrict data, int nobjs, int n,
         // Generate random weights in positive orthant.
         // Reference: Marsaglia, G. (1972). "Choosing a Point from the Surface
         // of a Sphere". Annals of Mathematical Statistics. 43 (2): 645-646.
+        for (k = 0; k < dim; k++)
+            w[k] = rng_standard_normal(rng);
         for (k = 0; k < dim; k++) {
-            w[k] = fabs(rng_standard_normal(rng));
-            if (w[k] <= ALMOST_ZERO_WEIGHT) // Avoid division by zero later.
+            w[k] = fabs(w[k]);
+            if (w[k] < ALMOST_ZERO_WEIGHT) // Avoid division by zero later.
                 w[k] = ALMOST_ZERO_WEIGHT;
         }
-        double norm = 0.0;
-        for (k = 0; k < dim; k++)
+        double norm = w[0] * w[0];
+        for (k = 1; k < dim; k++)
             norm += w[k] * w[k];
         norm = sqrt(norm);
         for (k = 0; k < dim; k++) {
@@ -218,7 +222,7 @@ construct_polar_a(dimension_t dim, uint_fast32_t nsamples)
     const dimension_t p = primes[dim];
     DEBUG2_PRINT("construct_polar_a: prime: %u\n", (unsigned int)p);
 
-    uint_fast32_t * a = malloc(dim * sizeof(uint_fast32_t));
+    uint_fast32_t * a = malloc(dim * sizeof(*a));
     a[0] = 1;
     DEBUG2_PRINT("construct_polar_a: a[%u] = %lu",
                  (unsigned int) dim, (unsigned long) a[0]);
@@ -233,15 +237,15 @@ construct_polar_a(dimension_t dim, uint_fast32_t nsamples)
 }
 
 static void
-compute_polar_sample(long double * sample, dimension_t dim,
+compute_polar_sample(long double * restrict sample, dimension_t dim,
                      uint_fast32_t i, uint_fast32_t nsamples,
-                     const uint_fast32_t * a)
+                     const uint_fast32_t * restrict a)
 {
     ASSUME(i + 1 <= nsamples);
     if (i + 1 < nsamples) {
         long double factor = (i+1) / STATIC_CAST(long double, nsamples);
         for (dimension_t k = 0; k < dim; k++) {
-            long double val = (factor * a[k]);
+            long double val = factor * a[k];
             sample[k] = fractl(val);
         }
     } else { // Last point is always 0.
@@ -545,7 +549,8 @@ compute_int_all(dimension_t dm1)
 }
 
 static void
-compute_theta(long double *theta, dimension_t dim, const long double *int_all)
+compute_theta(long double * restrict theta, dimension_t dim,
+              const long double * restrict int_all)
 {
     ASSUME(dim >= 2);
     ASSUME(dim <= 32);
@@ -557,8 +562,8 @@ compute_theta(long double *theta, dimension_t dim, const long double *int_all)
 }
 
 static void
-compute_hua_wang_direction(double * direction, dimension_t dim,
-                           const long double * theta)
+compute_hua_wang_direction(double * restrict direction, dimension_t dim,
+                           const long double * restrict theta)
 {
     ASSUME(dim >= 2);
     ASSUME(dim <= 32);
