@@ -43,14 +43,14 @@ transform_and_filter(const double * restrict data, dimension_t dim, size_t * res
             j++;
     }
     *npoints_p = j;
-    if (*npoints_p == 0) {
+    if (j == 0) {
         free(points);
         return NULL;
     }
     return points;
 }
 
-static inline double
+_attr_const_func static inline double
 get_expected_value(const double * restrict points, dimension_t dim, size_t npoints,
                    const double * restrict w)
 {
@@ -314,7 +314,7 @@ for n, integral in results.items():
     c_code = custom_ccode(integral)
     print(f'case {n}:\n    return {c_code};')
 ``` */
-static double
+_attr_const_func static double
 int_of_power_of_sin_from_0_to_b(dimension_t m, double b)
 {
 #define POW fast_pow_uint_max32
@@ -504,7 +504,7 @@ static const long double int_power_of_sin_from_0_to_half_pi[] = {
 };
 
 // Solve inverse integral of power of sin.
-static long double
+_attr_const_func static long double
 solve_inverse_int_of_power_sin(long double theta, dimension_t dim)
 {
     long double x = M_PI_2l;
@@ -610,8 +610,8 @@ hv_approx_hua_wang(const double * restrict data, int nobjs, int n,
     double expected = 0.0;
     // FIXME: OpenMP: #pragma omp parallel
     {
-        long double * theta = malloc((dim - 1) * sizeof(long double));
-        double * w = malloc(dim * sizeof(double));
+        long double * theta = malloc((dim - 1) * sizeof(*theta));
+        double * w = malloc(dim * sizeof(*w));
         // FIXME: Add OpenMP: #pragma omp for reduction(+:expected)
         for (uint_fast32_t j = 0; j < nsamples; j++) {
             compute_polar_sample(theta, dim - 1, j, nsamples, polar_a);

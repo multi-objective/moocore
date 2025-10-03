@@ -7,9 +7,7 @@ WARN_CFLAGS = -pedantic -Wall -Wextra -Wvla -Wconversion -Wno-sign-conversion -W
 ifeq ($(DEBUG), 0)
   SANITIZERS ?=
   OPT_CFLAGS ?= -DNDEBUG -O3 -flto
-# Options -funroll-loops -ffast-math -msse -mfpmath=sse improve performance but are not portable.
-# Options -fstandard-precision=fast -ftree-vectorize are not well supported
-# in some versions/architectures.
+  # -ffinite-math-only  -fno-signed-zeros allows further vectorization.
 else
   SANITIZERS ?= -fsanitize=undefined -fsanitize=address -fsanitize=float-cast-overflow -fsanitize=float-divide-by-zero
   OPT_CFLAGS ?= -g3 -O0

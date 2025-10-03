@@ -136,16 +136,16 @@ epsilon_mult_minmax_ (dimension_t dim, const signed char * restrict minmax,
                     epsilon_temp =  1;
 
                 ASSUME(epsilon_temp >= 0);
-                epsilon_max = MAX (epsilon_max, epsilon_temp);
+                epsilon_max = MAX(epsilon_max, epsilon_temp);
             }
             if (epsilon_max <= epsilon) {
                 skip_max = true;
                 break;
             }
-            epsilon_min = MIN (epsilon_min, epsilon_max);
+            epsilon_min = MIN(epsilon_min, epsilon_max);
         }
         if (skip_max) continue;
-        epsilon = MAX (epsilon, epsilon_min);
+        epsilon = MAX(epsilon, epsilon_min);
     }
     return epsilon;
 }
@@ -180,7 +180,6 @@ epsilon_additive_minimize(dimension_t dim,
     ASSUME(dim >= 2);
     ASSUME(dim <= 32);
     size_t a, b;
-    dimension_t d;
     double epsilon = -INFINITY;
     for (b = 0; b < size_b; b++) {
         bool skip_max = false;
@@ -189,7 +188,7 @@ epsilon_additive_minimize(dimension_t dim,
             double epsilon_max = points_a[a * dim + 0] - points_b[b * dim + 0];
             if (epsilon_max >= epsilon_min)
                 continue;
-            for (d = 1; d < dim; d++) {
+            for (dimension_t d = 1; d < dim; d++) {
                 double epsilon_temp = points_a[a * dim + d] - points_b[b * dim + d];
                 epsilon_max = MAX(epsilon_max, epsilon_temp);
             }
@@ -197,7 +196,7 @@ epsilon_additive_minimize(dimension_t dim,
                 skip_max = true;
                 break;
             }
-            epsilon_min = MIN (epsilon_min, epsilon_max);
+            epsilon_min = MIN(epsilon_min, epsilon_max);
         }
         if (skip_max) continue;
         epsilon = MAX(epsilon, epsilon_min);
