@@ -339,10 +339,16 @@ any_dominated_C(SEXP DATA, SEXP MAXIMISE)
     SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
     assert (nobj == maximise_len);
 
+    if (unlikely(npoint == 1))
+        return Rf_ScalarLogical(0);
+    // With a single-objective, if there are more than one row, then something
+    // is dominated.
+    if (unlikely(nobj == 1))
+        return Rf_ScalarLogical(1);
+
     size_t res = find_weakly_dominated_point(data, nobj, (size_t) npoint, maximise);
     free (maximise);
     UNPROTECT(nprotected);
-
     return Rf_ScalarLogical((res < npoint) ? 1 : 0);
 }
 
