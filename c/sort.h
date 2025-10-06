@@ -11,31 +11,31 @@
 */
 
 static inline bool
-strongly_dominates(const double * restrict x, const double * restrict y, dimension_t dim)
+strongly_dominates(const double * restrict a, const double * restrict b, dimension_t dim)
 {
     ASSUME(dim >= 2);
     for (dimension_t d = 0; d < dim; d++)
-        if (x[d] >= y[d])
+        if (a[d] >= b[d])
             return false;
     return true;
 }
 
 static inline bool
-weakly_dominates(const double * restrict x, const double * restrict y, const dimension_t dim)
+weakly_dominates(const double * restrict a, const double * restrict b, const dimension_t dim)
 {
     ASSUME(dim >= 2);
     /* The code below is a vectorized version of this code:
     for (dimension_t d = 0; d < dim; d++)
-        if (x[d] > y[d])
+        if (a[d] > b[d])
             return false;
     return true;
     */
     // GCC 15 is not able to infer this initialization from ASSUME().
     // unsigned instead of bool to help auto-vectorization.
-    unsigned x_leq_y = (x[0] <= y[0]) & (x[1] <= y[1]);
+    unsigned a_leq_b = (a[0] <= b[0]) & (a[1] <= b[1]);
     for (dimension_t d = 2; d < dim; d++)
-        x_leq_y &= (x[d] <= y[d]);
-    return (bool) x_leq_y;
+        a_leq_b &= (a[d] <= b[d]);
+    return (bool) a_leq_b;
 }
 
 static inline bool
@@ -45,16 +45,16 @@ lexicographic_less_3d(const double * restrict a, const double * restrict b)
 }
 
 static inline bool
-all_equal_double(const double * restrict x, const double * restrict y, dimension_t dim)
+all_equal_double(const double * restrict a, const double * restrict b, dimension_t dim)
 {
     ASSUME(dim >= 2);
     // The code below is written in a way that helps vectorization.
     // GCC 15 is not able to infer this initialization from ASSUME().
     // unsigned instead of bool to help auto-vectorization.
-    unsigned x_eq_y = (x[0] == y[0]) & (x[1] == y[1]);
+    unsigned a_eq_b = (a[0] == b[0]) & (a[1] == b[1]);
     for (dimension_t d = 2; d < dim; d++)
-        x_eq_y &= (x[d] == y[d]);
-    return (bool) x_eq_y;
+        a_eq_b &= (a[d] == b[d]);
+    return (bool) a_eq_b;
 }
 
 // ---------- Comparison functions (e.g, qsort). Return 'int' ----------------
@@ -63,97 +63,97 @@ all_equal_double(const double * restrict x, const double * restrict y, dimension
 typedef int (*cmp_fun_t)(const void *, const void *);
 
 static inline int
-cmp_double_asc_rev(const void * restrict p1, const void * restrict p2, dimension_t dim)
+cmp_double_asc_rev(const void * restrict pa, const void * restrict pb, dimension_t dim)
 {
-    const double * restrict x1 = *((const double **)p1);
-    const double * restrict x2 = *((const double **)p2);
+    const double * restrict a = *((const double **)pa);
+    const double * restrict b = *((const double **)pb);
     for (int i = dim - 1; i >= 0; i--) {
-        if (x1[i] < x2[i])
+        if (a[i] < b[i])
             return -1;
-        if (x1[i] > x2[i])
+        if (a[i] > b[i])
             return 1;
     }
     return 0;
 }
 
 static inline int
-cmp_double_asc_rev_2d(const void * restrict p1, const void * restrict p2)
+cmp_double_asc_rev_2d(const void * restrict pa, const void * restrict pb)
 {
-    return cmp_double_asc_rev(p1, p2, 2);
+    return cmp_double_asc_rev(pa, pb, 2);
 }
 
 // Lexicographic order of coordinates (z,y,x)
 static inline int
-cmp_double_asc_rev_3d(const void * restrict p1, const void * restrict p2)
+cmp_double_asc_rev_3d(const void * restrict pa, const void * restrict pb)
 {
-    return cmp_double_asc_rev(p1, p2, 3);
+    return cmp_double_asc_rev(pa, pb, 3);
 }
 
 static inline int
-cmp_double_asc_rev_4d(const void * restrict p1, const void * restrict p2)
+cmp_double_asc_rev_4d(const void * restrict pa, const void * restrict pb)
 {
-    return cmp_double_asc_rev(p1, p2, 4);
+    return cmp_double_asc_rev(pa, pb, 4);
 }
 
 static inline int
-cmp_double_asc_only_dim(const void * restrict p1, const void * restrict p2, dimension_t dim)
+cmp_double_asc_only_dim(const void * restrict pa, const void * restrict pb, dimension_t dim)
 {
-    const double x1 = *(*(const double **)p1 + dim);
-    const double x2 = *(*(const double **)p2 + dim);
-    return (x1 < x2) ? -1 : (x1 > x2 ? 1 : 0);
+    const double a = *(*(const double **)pa + dim);
+    const double b = *(*(const double **)pb + dim);
+    return (a < b) ? -1 : (a > b ? 1 : 0);
 }
 
 static inline int
-cmp_double_asc_only_3d(const void * restrict p1, const void * restrict p2)
+cmp_double_asc_only_3d(const void * restrict pa, const void * restrict pb)
 {
-    return cmp_double_asc_only_dim(p1,p2, 2);
+    return cmp_double_asc_only_dim(pa, pb, 2);
 }
 
 static inline int
-cmp_double_asc_only_4d(const void * restrict p1, const void * restrict p2)
+cmp_double_asc_only_4d(const void * restrict pa, const void * restrict pb)
 {
-    return cmp_double_asc_only_dim(p1,p2, 3);
+    return cmp_double_asc_only_dim(pa, pb, 3);
 }
 
 static inline int
-cmp_double_asc_y_des_x(const void * restrict p1, const void * restrict p2)
+cmp_double_asc_y_des_x(const void * restrict pa, const void * restrict pb)
 {
-    const double x1 = *(const double *)p1;
-    const double x2 = *(const double *)p2;
-    const double y1 = *((const double *)p1+1);
-    const double y2 = *((const double *)p2+1);
-    return (y1 < y2) ? -1: ((y1 > y2) ? 1 : (x1 > x2 ? -1 : 1));
+    const double ax = *(const double *)pa;
+    const double bx = *(const double *)pb;
+    const double ay = *((const double *)pa + 1);
+    const double by = *((const double *)pb + 1);
+    return (ay < by) ? -1: ((ay > by) ? 1 : (ax > bx ? -1 : 1));
 }
 
 static inline int
-cmp_double_asc_x_asc_y(const void * restrict p1, const void * restrict p2)
+cmp_double_asc_x_asc_y(const void * restrict pa, const void * restrict pb)
 {
-    const double x1 = *(const double *)p1;
-    const double x2 = *(const double *)p2;
-    const double y1 = *((const double *)p1+1);
-    const double y2 = *((const double *)p2+1);
-    return (x1 < x2) ? -1: ((x1 > x2) ? 1 : (y1 < y2 ? -1 : 1));
+    const double ax = *(const double *)pa;
+    const double bx = *(const double *)pb;
+    const double ay = *((const double *)pa + 1);
+    const double by = *((const double *)pb + 1);
+    return (ax < bx) ? -1: ((ax > bx) ? 1 : (ay < by ? -1 : 1));
 }
 
 static inline int
-cmp_double_asc_x_des_y(const void * restrict p1, const void * restrict p2)
+cmp_double_asc_x_des_y(const void * restrict pa, const void * restrict pb)
 {
-    const double x1 = *(const double *)p1;
-    const double x2 = *(const double *)p2;
-    const double y1 = *((const double *)p1+1);
-    const double y2 = *((const double *)p2+1);
-    return (x1 < x2) ? -1: ((x1 > x2) ? 1 : (y1 > y2 ? -1 : 1));
+    const double ax = *(const double *)pa;
+    const double bx = *(const double *)pb;
+    const double ay = *((const double *)pa + 1);
+    const double by = *((const double *)pb + 1);
+    return (ax < bx) ? -1: ((ax > bx) ? 1 : (ay > by ? -1 : 1));
 }
 
 static inline int
-cmp_doublep_x_asc_y_asc(const void * restrict p1, const void * restrict p2)
+cmp_doublep_x_asc_y_asc(const void * restrict pa, const void * restrict pb)
 {
-    const double x1 = **(const double **)p1;
-    const double x2 = **(const double **)p2;
-    const double y1 = *(*(const double **)p1 + 1);
-    const double y2 = *(*(const double **)p2 + 1);
-    return (x1 < x2) ? -1 : ((x1 > x2) ? 1 :
-                             ((y1 < y2) ? -1 : ((y1 > y2) ? 1 : 0)));
+    const double ax = **(const double **)pa;
+    const double bx = **(const double **)pb;
+    const double ay = *(*(const double **)pa + 1);
+    const double by = *(*(const double **)pb + 1);
+    return (ax < bx) ? -1 : ((ax > bx) ? 1 :
+                             ((ay < by) ? -1 : ((ay > by) ? 1 : 0)));
 }
 
 static inline const double **
