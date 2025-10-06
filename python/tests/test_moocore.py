@@ -384,7 +384,7 @@ def check_hvc(points, ref, err_msg):
     assert_allclose(true_hvc, hvc, err_msg=err_msg)
 
 
-@pytest.mark.parametrize("dim", range(2, 4))
+@pytest.mark.parametrize("dim", range(2, 5))
 def test_hvc(dim):
     seed = np.random.default_rng().integers(2**32 - 2)
     rng = np.random.default_rng(seed)
@@ -393,3 +393,24 @@ def test_hvc(dim):
     ref = np.full(dim, maximum + 1)
     points = rng.integers(1, maximum, (nrows, dim))
     check_hvc(points, ref, err_msg=f"dim={dim}, seed={seed}: ")
+
+
+@pytest.mark.parametrize("dim", range(2, 5))
+def test_pareto_rank(dim):
+    seed = np.random.default_rng().integers(2**32 - 2)
+    rng = np.random.default_rng(seed)
+    nrows = 25
+    points = rng.random(size=(nrows, dim))
+    ranks = moocore.pareto_rank(points)
+    r_max = ranks.max()
+    r = 1
+    while True:
+        nondom = moocore.is_nondominated(points)
+        assert_array_equal(
+            ranks == r, nondom, err_msg=f"dim={dim}, seed={seed}: "
+        )
+        if r == r_max:
+            break
+        points = points[~nondom]
+        ranks = ranks[ranks > r]
+        r += 1
