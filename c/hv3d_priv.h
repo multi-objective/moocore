@@ -47,6 +47,8 @@ hv3d_preprocessing(dlnode_t * list, size_t n)
         (DLNODE)->closest[1] = (DEM1);                                       \
     } while(false)
 #else
+    // In HV3D+ closest is ONLY used to initialize cnext, so closest is not
+    // needed in every node.
 # define set_delimiters(DLNODE, DEM0, DEM1) do {                             \
         (DLNODE)->cnext[0] = (DEM0);                                         \
         (DLNODE)->cnext[1] = (DEM1);                                         \
