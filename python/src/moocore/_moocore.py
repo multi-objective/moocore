@@ -1497,14 +1497,15 @@ def pareto_rank(
 
     The function :func:`pareto_rank` is meant to be used like
     :func:`numpy.argsort`, but it assigns indexes according to Pareto
-    dominance, where rank 0 indicates those #' solutions not dominated by any
+    dominance, where rank 0 indicates those solutions not dominated by any
     other solution in the input set. Duplicated points are kept on the same
     front. The resulting ranking can be used to partition points into different
     lists or arrays, each of them being mutually nondominated
     :footcite:p:`Deb02nsga2`.
 
     With 2 dimensions, the code uses the :math:`O(n \log n)` algorithm by
-    :footcite:t:`Jen03`.
+    :footcite:t:`Jen03`. With higher dimensions, it uses the naive
+    :math:`O(n^3)` algorithm.
 
     Parameters
     ----------

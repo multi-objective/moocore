@@ -60,7 +60,8 @@ yet.
 ranks according to Pareto dominance, where rank 1 indicates those
 solutions not dominated by any other solution in the input set.
 Duplicated points are kept on the same front.  When \code{ncol(data) == 2}, the
-code uses the \eqn{O(n \log n)} algorithm by \citet{Jen03}.
+code uses the \eqn{O(n \log n)} algorithm by \citet{Jen03}.  With higher
+dimensions, it uses the naive \eqn{O(n^3)} algorithm.
 }
 \references{
 \insertAllCited{}
