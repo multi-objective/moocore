@@ -6,6 +6,7 @@
  * In the output of `hv --contributions`, dominated points do not affect the
    contribution of nondominated points.
  * `find_dominated_point_()` and `find_nondominated_set_()` are significantly faster due to several code optimizations.
+ * `pareto_rank()` returns 0-based ranks.
 
 ## 0.16.6
 

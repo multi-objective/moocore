@@ -832,7 +832,6 @@ agree_normalise (double *data, int nobj, int npoint,
     free ((void *)minmax);
 }
 
-int * pareto_rank (const double *points, int dim, int size);
-
+int * pareto_rank(const double * restrict points, size_t size, int dim) _attr_malloc;
 
 #endif /* NONDOMINATED_H */

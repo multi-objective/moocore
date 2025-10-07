@@ -17,3 +17,9 @@ test_that("pareto", {
   test_pareto_rank("ALG_2_dat.xz")
   test_pareto_rank("spherical-250-10-3d.txt")
 })
+
+test_that("pareto_rank() 1D", {
+  x <- matrix(c(0.2, 0.1, 0.2, 0.5, 0.3), ncol = 1L)
+  expect_equal(pareto_rank(x), c(2, 1, 2, 4, 3))
+  expect_equal(pareto_rank(x, maximise=TRUE), c(3, 4, 3, 1, 2))
+})

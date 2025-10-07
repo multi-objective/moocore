@@ -127,10 +127,11 @@ any_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 #'   the number of rows of `data`, where each value gives the rank of each
 #'   point.
 #'
-#' @details `pareto_rank()` is meant to be used like `rank()`, but it
-#'   assigns ranks according to Pareto dominance. Duplicated points are kept on
-#'   the same front. When `ncol(data) == 2`, the code uses the \eqn{O(n
-#'   \log n)} algorithm by \citet{Jen03}.
+#' @details `pareto_rank()` is meant to be used like `rank()`, but it assigns
+#'   ranks according to Pareto dominance, where rank 1 indicates those
+#'   solutions not dominated by any other solution in the input set.
+#'   Duplicated points are kept on the same front.  When `ncol(data) == 2`, the
+#'   code uses the \eqn{O(n \log n)} algorithm by \citet{Jen03}.
 #'
 #' @references
 #'
@@ -139,7 +140,14 @@ any_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 #' @export
 pareto_rank <- function(x, maximise = FALSE)
 {
-  x <- as_double_matrix(x)
+  x <- as_double_matrix_1(x)
+  if (ncol(x) == 1L) { # Handle single-objective
+    x <- as.vector(x)
+    if (maximise)
+      x <- -x
+    # FIXME: Can we do this faster?
+    return(match(x, sort(unique(x))))
+  }
   x <- transform_maximise(x, maximise)
   .Call(pareto_ranking_C, t(x))
 }

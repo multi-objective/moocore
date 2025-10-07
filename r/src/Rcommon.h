@@ -33,17 +33,17 @@
 #define new_real_matrix(VAR, DIM1, DIM2)                                       \
     SEXP Rexp_##VAR;                                                           \
     PROTECT_PLUS(Rexp_##VAR = Rf_allocMatrix(REALSXP, (DIM1), (DIM2)));        \
-    double *VAR = REAL(Rexp_##VAR)
+    double * VAR = REAL(Rexp_##VAR)
 
 #define new_real_vector(VAR, DIM)                                             \
     SEXP Rexp_##VAR;                                                          \
     PROTECT_PLUS(Rexp_##VAR = Rf_allocVector(REALSXP, (DIM)));                \
-    double *VAR = REAL(Rexp_##VAR)
+    double * VAR = REAL(Rexp_##VAR)
 
 #define new_int_vector(VAR, DIM)                                               \
     SEXP Rexp_##VAR;                                                           \
     PROTECT_PLUS(Rexp_##VAR = Rf_allocVector(INTSXP, (DIM)));                  \
-    int *VAR = INTEGER(Rexp_##VAR)
+    int * VAR = INTEGER(Rexp_##VAR)
 
 #define new_string_vector(VAR, DIM)                                            \
     SEXP Rexp_##VAR; int Rexp_##VAR##_len = 0;                                 \
@@ -60,7 +60,7 @@
 #define new_logical_vector(VAR, DIM)                                           \
     SEXP Rexp_##VAR;                                                           \
     PROTECT_PLUS(Rexp_##VAR = Rf_allocVector(LGLSXP, (DIM)));                  \
-    int *VAR = LOGICAL(Rexp_##VAR)
+    int * VAR = LOGICAL(Rexp_##VAR)
 
 #define list_len(VAR) Rexp_##VAR##_len
 

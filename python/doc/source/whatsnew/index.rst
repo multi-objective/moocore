@@ -13,7 +13,8 @@ Version 0.1.9 (dev)
 - New function :func:`~moocore.generate_ndset` to generate random nondominated
   sets with different shapes.
 - New example :ref:`sphx_glr_auto_examples_plot_generate.py`.
-- :func:`~moocore.is_nondominated` and :func:`~moocore.any_dominated` now handle single-objective inputs correctly (:issue:`27`).
+- :func:`~moocore.is_nondominated`, :func:`~moocore.any_dominated`, :func:`~moocore.pareto_rank` now handle single-objective inputs correctly (:issue:`27`, :issue:`29`).
+- Ranks returned by :func:`~moocore.pareto_rank` are 0-based.
 - :func:`~moocore.is_nondominated` and :func:`~moocore.filter_dominated` are faster for dimensions larger than 3.
 
 Version 0.1.8 (15/07/2025)

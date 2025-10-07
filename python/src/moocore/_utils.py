@@ -22,9 +22,9 @@ def unique_nosort(array, **kwargs):
     return uniq[index.argsort()]
 
 
-def np2d_to_double_array(x):
-    nrows = ffi.cast("int", x.shape[0])
-    ncols = ffi.cast("int", x.shape[1])
+def np2d_to_double_array(x, ctype_shape=("int", "int")):
+    nrows = ffi.cast(ctype_shape[0], x.shape[0])
+    ncols = ffi.cast(ctype_shape[1], x.shape[1])
     # FIXME: This may cause an unexpected copy. Make this an assert and force
     # the caller to enforce it if needed.
     x = np.ascontiguousarray(x)
@@ -32,18 +32,20 @@ def np2d_to_double_array(x):
     return x, nrows, ncols
 
 
-def np1d_to_double_array(x):
-    size = ffi.cast("int", x.shape[0])
-    x = np.ascontiguousarray(x)
-    x = ffi.from_buffer("double []", x)
+def np1d_to_c_array(x, ctype_data, ctype_size):
+    size = ffi.cast(ctype_size, x.shape[0])
+    ctype_dtype = np.intc() if ctype_data == "int" else None
+    x = np.ascontiguousarray(x, dtype=ctype_dtype)
+    x = ffi.from_buffer(ctype_data + "[]", x)
     return x, size
 
 
-def np1d_to_int_array(x):
-    size = ffi.cast("int", x.shape[0])
-    x = np.ascontiguousarray(x, dtype=np.intc())
-    x = ffi.from_buffer("int []", x)
-    return x, size
+def np1d_to_double_array(x, ctype_size="int"):
+    return np1d_to_c_array(x, ctype_data="double", ctype_size=ctype_size)
+
+
+def np1d_to_int_array(x, ctype_size="int"):
+    return np1d_to_c_array(x, ctype_data="int", ctype_size=ctype_size)
 
 
 def atleast_1d_of_length_n(x, n):

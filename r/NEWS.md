@@ -4,7 +4,7 @@
  * New function `any_dominated()`.
  * New article: "[Benchmarks](https://multi-objective.github.io/moocore/r/articles/benchmarks.html)"
  * New article: "[Computing Multi-Objective Quality Metrics](https://multi-objective.github.io/moocore/r/articles/metrics.html)"
- * `is_nondominated()` and `any_dominated()` now handle single-objective inputs correctly (#27).
+ * `is_nondominated()`, `any_dominated()` and `pareto_rank()` now handle single-objective inputs correctly (#27) (#29).
  * `is_nondominated()` and `filter_dominated()` are faster for dimensions larger than 3.
 
 # moocore 0.1.8

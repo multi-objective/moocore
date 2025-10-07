@@ -1222,8 +1222,9 @@ def is_nondominated(
             nondom[data.argmax() if maximise else data.argmin()] = True
             return nondom
 
-    data_p, npoints, nobj = np2d_to_double_array(data)
-    npoints = ffi.cast("size_t", npoints)
+    data_p, npoints, nobj = np2d_to_double_array(
+        data, ctype_shape=("size_t", "int")
+    )
     maximise_p = ffi.from_buffer("bool []", maximise)
     keep_weakly = ffi.cast("bool", bool(keep_weakly))
     nondom = lib.is_nondominated(data_p, nobj, npoints, maximise_p, keep_weakly)
@@ -1277,8 +1278,9 @@ def any_dominated(
         return True
 
     maximise = _parse_maximise(maximise, nobj)
-    data_p, npoints, nobj = np2d_to_double_array(data)
-    npoints = ffi.cast("size_t", npoints)
+    data_p, npoints, nobj = np2d_to_double_array(
+        data, ctype_shape=("size_t", "int")
+    )
     maximise_p = ffi.from_buffer("bool []", maximise)
     res = lib.find_weakly_dominated_point(data_p, nobj, npoints, maximise_p)
     return res < nrows
@@ -1495,9 +1497,11 @@ def pareto_rank(
 
     The function :func:`pareto_rank` is meant to be used like
     :func:`numpy.argsort`, but it assigns indexes according to Pareto
-    dominance. Duplicated points are kept on the same front. The resulting
-    ranking can be used to partition points into different lists or arrays,
-    each of them being mutually nondominated :footcite:p:`Deb02nsga2`.
+    dominance, where rank 0 indicates those #' solutions not dominated by any
+    other solution in the input set. Duplicated points are kept on the same
+    front. The resulting ranking can be used to partition points into different
+    lists or arrays, each of them being mutually nondominated
+    :footcite:p:`Deb02nsga2`.
 
     With 2 dimensions, the code uses the :math:`O(n \log n)` algorithm by
     :footcite:t:`Jen03`.
@@ -1514,7 +1518,7 @@ def pareto_rank(
 
     Returns
     -------
-        An integer vector of the same length as the number of rows of ``data``, where each value gives the Pareto rank of each point (lower is better).
+        An integer vector of the same length as the number of rows of ``data`` with values within ``[0, len(data) - 1]``, where each value gives the Pareto rank of each point (lower is better).
 
     References
     ----------
@@ -1525,12 +1529,12 @@ def pareto_rank(
     >>> x = moocore.get_dataset("input1.dat")[:, :2]
     >>> ranks = moocore.pareto_rank(x)
     >>> ranks
-    array([ 5,  9,  1, 12,  1,  4,  8,  2,  4,  1,  9,  5,  6,  5, 12,  5,  5,
-            6,  8,  4,  9, 13,  9, 10,  6, 11,  7,  3,  8,  4, 11,  8,  3,  6,
-            3,  8,  2,  3, 10,  1, 12,  7,  8, 11, 14,  4,  7,  4,  1, 10, 10,
-            1,  3, 14,  2,  7,  8,  7,  7, 11,  5, 14,  7,  9, 13, 14,  5,  9,
-            6,  2, 13, 11,  4,  9, 10,  7,  8,  7,  7, 10,  6,  3,  4,  5,  8,
-            4,  9,  4,  3, 11,  2,  3, 13,  2,  3, 10,  5,  3,  6,  3],
+    array([ 4,  8,  0, 11,  0,  3,  7,  1,  3,  0,  8,  4,  5,  4, 11,  4,  4,
+            5,  7,  3,  8, 12,  8,  9,  5, 10,  6,  2,  7,  3, 10,  7,  2,  5,
+            2,  7,  1,  2,  9,  0, 11,  6,  7, 10, 13,  3,  6,  3,  0,  9,  9,
+            0,  2, 13,  1,  6,  7,  6,  6, 10,  4, 13,  6,  8, 12, 13,  4,  8,
+            5,  1, 12, 10,  3,  8,  9,  6,  7,  6,  6,  9,  5,  2,  3,  4,  7,
+            3,  8,  3,  2, 10,  1,  2, 12,  1,  2,  9,  4,  2,  5,  2],
           dtype=int32)
 
     We can now split the original set into a list of nondominated sets ordered by Pareto rank:
@@ -1548,14 +1552,24 @@ def pareto_rank(
     data, data_copied = asarray_maybe_copy(data)
     nrows, nobj = data.shape
     maximise = _parse_maximise(maximise, nobj)
+
+    if nobj == 1:
+        data = data.ravel()
+        if maximise:
+            data = -data
+        # FIXME: Can we do the same faster?
+        return np.unique(data, return_inverse=True)[1]
+
     if maximise.any():
         # FIXME: Do this in C.
         if not data_copied:
             data = data.copy()
         data[:, maximise] = -data[:, maximise]
 
-    data_p, npoints, nobj = np2d_to_double_array(data)
-    ranks = lib.pareto_rank(data_p, nobj, npoints)
+    data_p, npoints, nobj = np2d_to_double_array(
+        data, ctype_shape=("size_t", "int")
+    )
+    ranks = lib.pareto_rank(data_p, npoints, nobj)
     ranks = ffi.buffer(ranks, nrows * ffi.sizeof("int"))
     ranks = np.frombuffer(ranks, dtype=np.intc())
     assert len(ranks) == nrows

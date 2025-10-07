@@ -1,16 +1,22 @@
 /* From stdlib.h */
 void free(void *);
+
+/* io.h */
 int read_datasets(const char * filename, double **data_p, int *ncols_p, int *datasize_p);
+/* hv.h */
 double fpli_hv(const double *data, int d, int n, const double *ref);
 void hv_contributions(double *hvc, double *points, int dim, int size, const double * ref, bool ignore_dominated);
+
 double IGD (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);
 double IGD_plus (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);
 double avg_Hausdorff_dist (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise, unsigned int p);
 double epsilon_additive (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);
 double epsilon_mult (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);
+
+/* nondominated.h */
 size_t find_weakly_dominated_point(const double * points, int dim, size_t size, const bool * maximise);
 bool * is_nondominated (const double * data, int nobj, size_t npoint, const bool * maximise, bool keep_weakly);
-int * pareto_rank (const double *points, int dim, int size);
+int * pareto_rank(const double * points, size_t size, int dim);
 void agree_normalise (double *data, int nobj, int npoint, const bool * maximise,
                       const double lower_range, const double upper_range, const double *lbound, const double *ubound);
 double * eaf_compute_matrix (int *eaf_npoints, double * data, int nobj, const int *cumsizes,

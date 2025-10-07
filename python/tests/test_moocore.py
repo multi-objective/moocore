@@ -403,7 +403,7 @@ def test_pareto_rank(dim):
     points = rng.random(size=(nrows, dim))
     ranks = moocore.pareto_rank(points)
     r_max = ranks.max()
-    r = 1
+    r = 0
     while True:
         nondom = moocore.is_nondominated(points)
         assert_array_equal(

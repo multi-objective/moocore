@@ -359,13 +359,11 @@ pareto_ranking_C(SEXP DATA)
     /* We transpose the matrix before calling this function. */
     SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
 
-    /* FIXME: How to assign directly? */
-    new_int_vector (rank, npoint);
-    int * rank2 = pareto_rank(data, nobj, npoint);
-    for (int i = 0; i < npoint; i++) {
-        rank[i] = rank2[i];
-    }
-    free (rank2);
+    new_int_vector(rank, npoint);
+    int * restrict rank2 = pareto_rank(data, npoint, nobj);
+    for (int i = 0; i < npoint; i++)
+        rank[i] = rank2[i] + 1; // pareto_rank returns 0-based ranks.
+    free(rank2);
     UNPROTECT(nprotected);
     return Rexp(rank);
 }

@@ -56,10 +56,11 @@ algorithm for \eqn{m \geq 4}.  The best-known \eqn{O(n(\log_2 n)^{m-2})}
 algorithm for \eqn{m \geq 4} \citep{KunLucPre1975jacm} is not implemented
 yet.
 
-\code{pareto_rank()} is meant to be used like \code{rank()}, but it
-assigns ranks according to Pareto dominance. Duplicated points are kept on
-the same front. When \code{ncol(data) == 2}, the code uses the \eqn{O(n
-  \log n)} algorithm by \citet{Jen03}.
+\code{pareto_rank()} is meant to be used like \code{rank()}, but it assigns
+ranks according to Pareto dominance, where rank 1 indicates those
+solutions not dominated by any other solution in the input set.
+Duplicated points are kept on the same front.  When \code{ncol(data) == 2}, the
+code uses the \eqn{O(n \log n)} algorithm by \citet{Jen03}.
 }
 \references{
 \insertAllCited{}
