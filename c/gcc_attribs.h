@@ -83,8 +83,8 @@
    long as the old pointer is never referred to (including comparing
    it to the new pointer) after the function returns a non-NULL
    value.  */
-#ifndef __malloc
-# define __malloc	__attribute__((__malloc__))
+#ifndef _attr_malloc
+# define _attr_malloc	__attribute__((__malloc__))
 #endif
 
 /* The warn_unused_result attribute causes a warning to be emitted if
