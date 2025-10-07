@@ -52,6 +52,7 @@ The following projects currently use `moocore`:
  - [`jMetalPy`](https://jmetalpy.readthedocs.io/en/develop/)
  - [`pymoo`](https://pymoo.org/)
  - [`Liger`](https://www.ide.uk/project-liger)
+ - [`DESDEO`](https://github.com/industrial-optimization-group/DESDEO/)
 
 
 [c-build-badge]: https://github.com/multi-objective/moocore/actions/workflows/C.yml/badge.svg?event=push
