@@ -429,9 +429,9 @@ int main(int argc, char *argv[])
             int size = 0;
             for (n = 0; n < nruns[k]; n++) {
                 size_t failed_pos
-                    = find_dominated_point (&points[k][dim * size], dim,
-                                            cumsizes[k][n] - size, minmax);
-                if (failed_pos < SIZE_MAX) {
+                    = find_dominated_point(&points[k][dim * size], dim,
+                                           cumsizes[k][n] - size, minmax);
+                if (failed_pos < (size_t)(cumsizes[k][n] - size)) {
                     fprintf (stderr,
                              "%s: %s: set %d: point %zu is dominated.\n",
                              program_invocation_short_name,

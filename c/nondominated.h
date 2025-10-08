@@ -59,7 +59,7 @@ force_agree_minimize(const double * restrict points, dimension_t dim, size_t siz
 static inline const double **
 generate_sorted_pp_2d(const double *points, size_t size)
 {
-    const double **p = malloc (size * sizeof(*p));
+    const double ** p = malloc(size * sizeof(*p));
     for (size_t k = 0; k < size; k++)
         p[k] = points + 2 * k;
 
@@ -71,7 +71,7 @@ generate_sorted_pp_2d(const double *points, size_t size)
 static inline const double **
 generate_sorted_pp_3d(const double *points, size_t size)
 {
-    const double **p = malloc (size * sizeof(*p));
+    const double ** p = malloc(size * sizeof(*p));
     for (size_t k = 0; k < size; k++)
         p[k] = points + 3 * k;
 
@@ -82,8 +82,8 @@ generate_sorted_pp_3d(const double *points, size_t size)
 
 
 /*
-  Stop as soon as one dominated point is found and return its position (or
-  SIZE_MAX if no dominated point found).
+  Stop as soon as one dominated point is found and return its position (or size
+  if no dominated point found).
 
 */
 static inline size_t
@@ -91,8 +91,8 @@ find_dominated_2d_(const double *points, size_t size, const bool keep_weakly)
 {
     ASSUME(size >= 2);
     const double **p = generate_sorted_pp_2d(points, size);
-    // SIZE_MAX means "no dominated solution found".
-    size_t pos_first_dom = SIZE_MAX, k = 0, j = 1;
+    // size means "no dominated solution found".
+    size_t pos_first_dom = size, k = 0, j = 1;
     do {
         if (p[k][0] > p[j][0]) {
             k = j;
@@ -160,9 +160,7 @@ find_nondominated_set_2d_(const double * restrict points, size_t size,
 
 static inline size_t
 find_nondominated_set_3d_helper(const double * restrict points, size_t size,
-                                bool * restrict nondom,
-                                const bool find_dominated_p,
-                                const bool keep_weakly)
+                                bool * restrict nondom, const bool keep_weakly)
 {
     ASSUME (size >= 2);
     const double **p = generate_sorted_pp_3d(points, size);
@@ -174,13 +172,12 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
     node->item = p[0];
     avl_insert_top(&tree, node);
 
-    const double sentinel[2] = { INFINITY, INFINITY };
+    const double sentinel[] = { INFINITY, -INFINITY };
     (++node)->item = sentinel;
     avl_insert_after(&tree, node - 1, node);
-    const avl_node_t * end = node;
 
-    // In this context, SIZE_MAX means "no dominated solution found".
-    size_t pos_last_dom = SIZE_MAX, n_nondom = size, j = 1;
+    // In this context, size means "no dominated solution found".
+    size_t pos_last_dom = size, n_nondom = size, j = 1;
     const double * prev = p[0];
     do {
         const double * pj = p[j];
@@ -188,11 +185,10 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
             avl_node_t * nodeaux;
             // == 1 means that nodeaux goes before pj, so move to the next one.
             if (avl_search_closest(&tree, pj, &nodeaux) == 1) {
-                assert(nodeaux != end);
                 prev = nodeaux->item;
+                assert(prev[0] != sentinel[0]);
                 nodeaux = nodeaux->next;
             } else {
-                assert(nodeaux->prev != end);
                 // nodeaux goes after pj
                 prev = nodeaux->prev ? nodeaux->prev->item : NULL;
             }
@@ -201,6 +197,7 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
             // If pj[0] == point[0], then pj[1] < point[1]
             assert(pj[0] < point[0] || pj[1] < point[1]);
 
+            // FIXME: Avoid the check for prev here.
             if (prev && prev[1] <= pj[1]) { // pj is dominated by a point in the tree.
                 assert(prev[0] <= pj[0]);
                 // It cannot be a duplicate because we already handled them above.
@@ -208,14 +205,14 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
                 /* Map the order in p[], which is sorted, to the original order
                    in points. */
                 pos_last_dom = (pj - points) / 3;
-                if (find_dominated_p)
+                if (!nondom)
                     goto early_end;
                 nondom[pos_last_dom] = false;
                 n_nondom--;
             } else {
                 // Delete everything in the tree that is dominated by pj.
-                while (nodeaux != end && pj[1] <= point[1]) {
-                    assert(pj[0] <= nodeaux->item[0]);
+                while (pj[1] <= point[1]) {
+                    assert(pj[0] <= point[0]);
                     nodeaux = nodeaux->next;
                     point = nodeaux->item;
                     /* FIXME: A possible speed up is to delete without
@@ -230,12 +227,13 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
         else if (!keep_weakly // we don't keep duplicates;
                  // or it is not a duplicate, so it is non-weakly dominated;
                  || prev[0] != pj[0] || prev[1] != pj[1] || prev[2] != pj[2]
-                 // or the prev was dominated, then this one is also dominated.
+                 // or prev was dominated, then this one is also dominated.
                  || pos_last_dom == (size_t) ((prev - points) / 3)) {
+            // FIXME: This code is duplicated above. Avoid the duplication.
             /* Map the order in p[], which is sorted, to the original order
                in points. */
             pos_last_dom = (pj - points) / 3;
-            if (find_dominated_p)
+            if (!nondom)
                 goto early_end;
             nondom[pos_last_dom] = false;
             n_nondom--;
@@ -247,14 +245,14 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
 early_end:
     free(tnodes);
     free(p);
-    return find_dominated_p ? pos_last_dom : n_nondom;
+    return nondom ? n_nondom : pos_last_dom;
 }
 
 static inline size_t
 find_dominated_3d_(const double * points, size_t size, const bool keep_weakly)
 {
     return find_nondominated_set_3d_helper(points, size, /* nondom=*/NULL,
-                                           /*find_dominated_p=*/true, keep_weakly);
+                                           keep_weakly);
 }
 
 /*
@@ -262,10 +260,10 @@ find_dominated_3d_(const double * points, size_t size, const bool keep_weakly)
    nondominated points.
 */
 static inline size_t
-find_nondominated_set_3d_(const double * points, size_t size, bool * nondom, const bool keep_weakly)
+find_nondominated_set_3d_(const double * restrict points, size_t size, bool * restrict nondom, const bool keep_weakly)
 {
-    return find_nondominated_set_3d_helper(points, size, nondom,
-                                           /*find_dominated_p=*/false, keep_weakly);
+    ASSUME(nondom != NULL);
+    return find_nondominated_set_3d_helper(points, size, nondom, keep_weakly);
 }
 
 static inline size_t
