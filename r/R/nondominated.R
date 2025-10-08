@@ -1,7 +1,7 @@
 #' Identify, remove and rank dominated points according to Pareto optimality
 #'
-#' Identify nondominated points with `is_nondominated()` and remove dominated
-#' ones with `filter_dominated()`.
+#' Identify nondominated points with [is_nondominated()] and remove dominated
+#' ones with [filter_dominated()].
 #'
 #' @rdname nondominated
 #'
@@ -98,14 +98,15 @@ is_nondominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 
 #' @rdname nondominated
 #' @concept dominance
-#' @return `filter_dominated` returns a matrix or data.frame with only mutually nondominated points.
+#' @return [filter_dominated()] returns a matrix or data.frame with only mutually nondominated points.
 #' @export
 filter_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
   x[is_nondominated(x, maximise = maximise, keep_weakly = keep_weakly), , drop = FALSE]
 
 #' @rdname nondominated
 #' @concept dominance
-#' @return `any_dominated` returns `TRUE` if `x` contains any (weakly-)dominated points, `FALSE` otherwise.
+#' @description  [any_dominated()] quickly detects if a set contains any dominated point.
+#' @return [any_dominated()] returns `TRUE` if `x` contains any (weakly-)dominated points, `FALSE` otherwise.
 #' @export
 any_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 {
@@ -118,16 +119,16 @@ any_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
     rep_len(as.logical(maximise), nobjs))
 }
 
-#' @description `pareto_rank()` ranks points according to Pareto-optimality,
+#' @description [pareto_rank()] ranks points according to Pareto-optimality,
 #'   which is also called nondominated sorting \citep{Deb02nsga2}.
 #'
 #' @rdname nondominated
 #' @concept dominance
-#' @return `pareto_rank()` returns an integer vector of the same length as
+#' @return [pareto_rank()] returns an integer vector of the same length as
 #'   the number of rows of `data`, where each value gives the rank of each
 #'   point.
 #'
-#' @details `pareto_rank()` is meant to be used like `rank()`, but it assigns
+#' @details [pareto_rank()] is meant to be used like `rank()`, but it assigns
 #'   ranks according to Pareto dominance, where rank 1 indicates those
 #'   solutions not dominated by any other solution in the input set.
 #'   Duplicated points are kept on the same front.  When `ncol(data) == 2`, the

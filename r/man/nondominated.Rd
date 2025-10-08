@@ -33,19 +33,21 @@ version.}
 as the number of rows of \code{data}, where \code{TRUE} means that the
 point is not dominated by any other point.
 
-\code{filter_dominated} returns a matrix or data.frame with only mutually nondominated points.
+\code{\link[=filter_dominated]{filter_dominated()}} returns a matrix or data.frame with only mutually nondominated points.
 
-\code{any_dominated} returns \code{TRUE} if \code{x} contains any (weakly-)dominated points, \code{FALSE} otherwise.
+\code{\link[=any_dominated]{any_dominated()}} returns \code{TRUE} if \code{x} contains any (weakly-)dominated points, \code{FALSE} otherwise.
 
-\code{pareto_rank()} returns an integer vector of the same length as
+\code{\link[=pareto_rank]{pareto_rank()}} returns an integer vector of the same length as
 the number of rows of \code{data}, where each value gives the rank of each
 point.
 }
 \description{
-Identify nondominated points with \code{is_nondominated()} and remove dominated
-ones with \code{filter_dominated()}.
+Identify nondominated points with \code{\link[=is_nondominated]{is_nondominated()}} and remove dominated
+ones with \code{\link[=filter_dominated]{filter_dominated()}}.
 
-\code{pareto_rank()} ranks points according to Pareto-optimality,
+\code{\link[=any_dominated]{any_dominated()}} quickly detects if a set contains any dominated point.
+
+\code{\link[=pareto_rank]{pareto_rank()}} ranks points according to Pareto-optimality,
 which is also called nondominated sorting \citep{Deb02nsga2}.
 }
 \details{
@@ -56,7 +58,7 @@ algorithm for \eqn{m \geq 4}.  The best-known \eqn{O(n(\log_2 n)^{m-2})}
 algorithm for \eqn{m \geq 4} \citep{KunLucPre1975jacm} is not implemented
 yet.
 
-\code{pareto_rank()} is meant to be used like \code{rank()}, but it assigns
+\code{\link[=pareto_rank]{pareto_rank()}} is meant to be used like \code{rank()}, but it assigns
 ranks according to Pareto dominance, where rank 1 indicates those
 solutions not dominated by any other solution in the input set.
 Duplicated points are kept on the same front.  When \code{ncol(data) == 2}, the
