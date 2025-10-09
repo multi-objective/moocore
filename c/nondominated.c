@@ -202,27 +202,21 @@ force_bounds (double *points, int nobj, int *cumsizes, int nsets,
 }
 
 static bool
-check_nondominated (const char * filename, const double *points,
-                    int nobj, const int *cumsizes, int nruns,
-                    const signed char *minmax, const signed char agree,
-                    bool **nondom_p)
+check_dominated(const char * filename, const double *points,
+                 int nobj, const int *cumsizes, int nruns,
+                 const signed char *minmax, const signed char agree,
+                 bool * restrict nondom)
 {
-    bool *nondom = nondom_p ? *nondom_p : NULL;
-    bool free_nondom = false;
-    if (nondom == NULL) {
-        free_nondom = true;
-        nondom = nondom_init (cumsizes[nruns - 1]);
-    }
-
     bool first_time = true;
     bool dominated_found = false;
     int filename_len = (int) MAX(strlen(filename), strlen("filename"));
     for (int n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
         size_t old_size = cumsizes[n] - cumsize;
-        size_t new_size
-            = find_nondominated_set_agree (&points[nobj * cumsize], nobj,
-                                           old_size, minmax, agree,
-                                           &nondom[cumsize]);
+        size_t new_size = (nondom == NULL)
+            ? find_dominated_point_agree(&points[nobj * cumsize], nobj, old_size, minmax, agree)
+            : find_nondominated_set_agree(&points[nobj * cumsize], nobj,
+                                          old_size, minmax, agree,
+                                          &nondom[cumsize]);
 
         if (verbose_flag >= 2) {
             if (first_time) {
@@ -249,12 +243,6 @@ check_nondominated (const char * filename, const double *points,
                          __FILE__, __LINE__);
         }
     }
-
-    if (nondom_p)
-        *nondom_p = nondom;
-    else if (free_nondom)
-        free(nondom);
-
     return dominated_found;
 }
 
@@ -333,7 +321,6 @@ process_file (const char *filename,
               bool check_minimum, bool check_maximum, bool maximise_all_flag,
               const bool *logarithm)
 {
-    bool *nondom = NULL;
     bool logarithm_flag = false;
 
     double *points = NULL;
@@ -424,11 +411,12 @@ process_file (const char *filename,
                    lrange, urange, lbound, ubound);
 
     bool dominated_found = false;
+    bool * nondom = (filter_flag) ? nondom_init(cumsizes[nsets - 1]) : NULL;
     /* Check sets.  */
     if (check_flag || filter_flag)
         dominated_found =
-            check_nondominated (filename, points, nobj, cumsizes, nsets,
-                                minmax, agree, filter_flag ? &nondom : NULL);
+            check_dominated(filename, points, nobj, cumsizes, nsets,
+                            minmax, agree, nondom);
 
     if (verbose_flag >= 2)
         fprintf (stderr, "# nondominated: %s\n",
@@ -467,9 +455,9 @@ process_file (const char *filename,
     free (points);
     free (cumsizes);
     if (free_minmax) free( (void *) minmax);
-    if (nondom) free (nondom);
-    if (log_lbound) free (log_lbound);
-    if (log_ubound) free (log_ubound);
+    if (nondom) free(nondom);
+    if (log_lbound) free(log_lbound);
+    if (log_ubound) free(log_ubound);
 
     *minimum_p = minimum;
     *maximum_p = maximum;
