@@ -80,6 +80,36 @@ generate_sorted_pp_3d(const double *points, size_t size)
     return p;
 }
 
+static inline size_t
+find_nondominated_2d_helper_(const double * restrict points, size_t size,
+                             bool * restrict nondom, const bool keep_weakly)
+{
+    ASSUME(size >= 2);
+    const double **p = generate_sorted_pp_2d(points, size);
+    // returning size means "no dominated solution found".
+    size_t n_nondom = size, k = 0, j = 1;
+    // When compiling with -O3, GCC is able to create two versions of this loop
+    // and move keep_weakly out.
+    do {
+        if (p[k][0] > p[j][0]) {
+            k = j;
+        } else if (!keep_weakly || p[k][0] != p[j][0] || p[k][1] != p[j][1]) {
+            size_t pos_first_dom = (p[j] - points) / 2;
+            if (nondom == NULL) {
+                // In this context, it means "position of the first dominated solution found".
+                n_nondom = pos_first_dom;
+                goto early_end;
+            }
+            nondom[pos_first_dom] = false;
+            n_nondom--;
+        }
+        j++;
+    } while (j < size);
+
+early_end:
+    free(p);
+    return n_nondom;
+}
 
 /*
   Stop as soon as one dominated point is found and return its position (or size
@@ -89,24 +119,7 @@ generate_sorted_pp_3d(const double *points, size_t size)
 static inline size_t
 find_dominated_2d_(const double *points, size_t size, const bool keep_weakly)
 {
-    ASSUME(size >= 2);
-    const double **p = generate_sorted_pp_2d(points, size);
-    // size means "no dominated solution found".
-    size_t pos_first_dom = size, k = 0, j = 1;
-    do {
-        if (p[k][0] > p[j][0]) {
-            k = j;
-        } else if (!keep_weakly || p[k][0] != p[j][0] || p[k][1] != p[j][1]) {
-            // In this context, it means "position of the first dominated solution found".
-            pos_first_dom = (p[j] - points) / 2;
-            goto early_end;
-        }
-        j++;
-    } while (j < size);
-
-early_end:
-    free(p);
-    return pos_first_dom;
+    return find_nondominated_2d_helper_(points, size, /*nondom=*/NULL, keep_weakly);
 }
 
 
@@ -125,26 +138,10 @@ static inline size_t
 find_nondominated_set_2d_(const double * restrict points, size_t size,
                           bool * restrict nondom, const bool keep_weakly)
 {
-    ASSUME(size >= 2);
-    // When compiling with -O3, GCC is able to create two versions of this loop
-    // and move keep_weakly out.
-    const double **p = generate_sorted_pp_2d(points, size);
-    size_t n_nondom = size, k = 0, j = 1;
-    do {
-        if (p[k][0] > p[j][0]) {
-            k = j;
-        } else if (!keep_weakly || p[k][0] != p[j][0] || p[k][1] != p[j][1]) {
-            /* Map the order in p[], which is sorted, to the original order
-               in points. */
-            nondom[(p[j] - points) / 2] = false;
-            n_nondom--;
-        }
-        j++;
-    } while (j < size);
-
-    free(p);
-    return n_nondom;
+    ASSUME(nondom != NULL);
+    return find_nondominated_2d_helper_(points, size, nondom, keep_weakly);
 }
+
 
 /*
    3D dimension-sweep algorithm by H. T. Kung, F. Luccio, and F. P. Preparata.
@@ -205,7 +202,7 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
                 /* Map the order in p[], which is sorted, to the original order
                    in points. */
                 pos_last_dom = (pj - points) / 3;
-                if (!nondom)
+                if (nondom == NULL)
                     goto early_end;
                 nondom[pos_last_dom] = false;
                 n_nondom--;
@@ -233,7 +230,7 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
             /* Map the order in p[], which is sorted, to the original order
                in points. */
             pos_last_dom = (pj - points) / 3;
-            if (!nondom)
+            if (nondom == NULL)
                 goto early_end;
             nondom[pos_last_dom] = false;
             n_nondom--;
@@ -245,7 +242,7 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
 early_end:
     free(tnodes);
     free(p);
-    return nondom ? n_nondom : pos_last_dom;
+    return (nondom == NULL) ? pos_last_dom : n_nondom;
 }
 
 static inline size_t
@@ -525,7 +522,7 @@ find_dominated_point_(const double * restrict points, dimension_t dim, size_t si
 
     ASSUME(dim >= 2);
     if (dim <= 3) {
-        const double *pp = force_agree_minimize (points, dim, size, minmax, agree);
+        const double *pp = force_agree_minimize(points, dim, size, minmax, agree);
         size_t res;
         if (dim == 2) {
             res = find_dominated_2d_(pp, size, keep_weakly);
