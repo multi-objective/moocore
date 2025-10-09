@@ -95,7 +95,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     if (unlikely(n == 0))
         goto finish;
 
-    fpli_dlnode_t **scratch = malloc(n * sizeof(fpli_dlnode_t*));
+    fpli_dlnode_t **scratch = malloc(n * sizeof(*scratch));
     for (i = 0; i < n; i++)
         scratch[i] = head + i + 1;
 
@@ -105,7 +105,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         int j = k - STOP_DIMENSION;
         if (j < 0)
             continue;
-        qsort(scratch, n, sizeof(fpli_dlnode_t*), compare_node);
+        qsort(scratch, n, sizeof(*scratch), compare_node);
         head->next[j] = scratch[0];
         scratch[0]->prev[j] = head;
         for (i = 1; i < n; i++) {

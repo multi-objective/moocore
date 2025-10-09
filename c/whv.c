@@ -115,9 +115,9 @@ rect_weighted_hv2d(double *data, int n, double * rectangles,
         return 0;
 
     const int nobj = 2;
-    qsort (data, n, 2 * sizeof(*data), &cmp_data_y_desc);
-    qsort (rectangles, rectangles_nrow, (nobj * 2 + 1) * sizeof(*rectangles),
-           &cmp_rectangles_y_desc);
+    qsort(data, n, 2 * sizeof(*data), &cmp_data_y_desc);
+    qsort(rectangles, rectangles_nrow, (nobj * 2 + 1) * sizeof(*rectangles),
+          &cmp_rectangles_y_desc);
 
     double whv = 0.0;
     int r = 0;

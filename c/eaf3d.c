@@ -85,7 +85,7 @@ setup_cdllist(objective_t *data, int d, const int *cumsize, int nsets)
     }
     head->x = NULL; // head contains no data
 
-    dlnode_t **scratch = malloc(n * sizeof(dlnode_t*));
+    dlnode_t **scratch = malloc(n * sizeof(*scratch));
     for (i = 0; i < n; i++)
         scratch[i] = head + i + 1;
 
@@ -94,7 +94,7 @@ setup_cdllist(objective_t *data, int d, const int *cumsize, int nsets)
         scratch[i]->x--;
 
     // Sort according to the last coordinate.
-    qsort(scratch, n, sizeof(dlnode_t*), compare_node);
+    qsort(scratch, n, sizeof(*scratch), compare_node);
 
     head->next = scratch[0];
 
