@@ -640,8 +640,8 @@ is_nondominated(const double * restrict data, int nobj, size_t npoint,
 }
 
 static inline void
-agree_objectives (double *points, int dim, int size,
-                  const signed char *minmax, const signed char agree)
+agree_objectives (double * restrict points, int dim, int size,
+                  const signed char * restrict minmax, const signed char agree)
 {
     for (int d = 0; d < dim; d++)
         if ((agree > 0 && minmax[d] < 0)
@@ -652,14 +652,13 @@ agree_objectives (double *points, int dim, int size,
 
 
 static inline void
-normalise (double *points, int dim, int size,
-           const signed char *minmax, signed char agree,
-           const double lower_range, const double upper_range,
-           const double *lbound, const double *ubound)
+normalise(double * restrict points, int dim, int size,
+          const signed char * restrict minmax, signed char agree,
+          const double lower_range, const double upper_range,
+          const double * restrict lbound, const double * restrict ubound)
 {
     const double range = upper_range - lower_range;
-
-    double *diff = malloc (dim * sizeof(double));
+    double * diff = malloc(dim * sizeof(*diff));
     int k, d;
     for (d = 0; d < dim; d++) {
         diff[d] = ubound[d] - lbound[d];
@@ -668,7 +667,7 @@ normalise (double *points, int dim, int size,
     }
 
     for (k = 0; k < size; k++) {
-        double *p = points + k * dim;
+        double * p = points + k * dim;
         for (d = 0; d < dim; d++)
             if ((agree > 0 && minmax[d] < 0)
                 || (agree < 0 && minmax[d] > 0))
@@ -677,19 +676,19 @@ normalise (double *points, int dim, int size,
                 p[d] = lower_range + range * (p[d] - lbound[d]) / diff[d];
     }
 
-    free (diff);
+    free(diff);
 }
 
 _attr_maybe_unused static void
-agree_normalise (double *data, int nobj, int npoint,
-                 const bool * maximise,
+agree_normalise (double * restrict data, int nobj, int npoint,
+                 const bool * restrict maximise,
                  const double lower_range, const double upper_range,
-                 const double *lbound, const double *ubound)
+                 const double * restrict lbound, const double * restrict ubound)
 {
     const signed char * minmax = minmax_from_bool((dimension_t)nobj, maximise);
     // We have to make the objectives agree before normalisation.
     // FIXME: Do normalisation and agree in one step.
-    agree_objectives (data, nobj, npoint, minmax, AGREE_MINIMISE);
+    agree_objectives(data, nobj, npoint, minmax, AGREE_MINIMISE);
     normalise(data, nobj, npoint, minmax, AGREE_MINIMISE,
               lower_range, upper_range, lbound, ubound);
     free ((void *)minmax);
