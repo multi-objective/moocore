@@ -177,7 +177,7 @@
 // C++ standard attribute
 # if defined(__clang__)
 #  define INTERNAL_ASSUME(EXPR) __builtin_assume(EXPR)
-# elif defined(_MSC_VER)
+# elif defined(_MSC_VER) || defined(__ICC)
 #  define INTERNAL_ASSUME(EXPR) __assume(EXPR)
 # elif defined(__GNUC__) && __GNUC__ >= 13
 #  define INTERNAL_ASSUME(EXPR) __attribute__((__assume__(EXPR)))
@@ -203,6 +203,17 @@
 #  include <stdlib.h>
 #  define unreachable() do { assert(0); abort(); } while(0)
 # endif
+#endif
+
+
+#define PRAGMA(m_token_sequence) _Pragma(#m_token_sequence)
+
+#ifdef __ICC
+#define PRAGMA_ASSUME_NO_VECTOR_DEPENDENCY PRAGMA(ivdep)
+#elif defined(__GNUC__)  && __GNUC__ >= 5
+#define PRAGMA_ASSUME_NO_VECTOR_DEPENDENCY PRAGMA(GCC ivdep)
+#else
+#define PRAGMA_ASSUME_NO_VECTOR_DEPENDENCY
 #endif
 
 #endif /* GCC_ATTRIBUTES */

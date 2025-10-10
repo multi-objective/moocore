@@ -134,6 +134,19 @@ static void fpli_free_cdllist(fpli_dlnode_t * head)
     free(head);
 }
 
+static inline void
+update_bound(double * restrict bound, const double * restrict x, dimension_t dim)
+{
+    ASSUME(dim > STOP_DIMENSION);
+    const double * restrict y = x + STOP_DIMENSION;
+
+    PRAGMA_ASSUME_NO_VECTOR_DEPENDENCY // We need this to avoid a wasteful alias check.
+    for (dimension_t d = 0; d < dim - STOP_DIMENSION; d++) {
+        if (bound[d] > y[d])
+            bound[d] = y[d];
+    }
+}
+
 static void
 delete(fpli_dlnode_t * restrict nodep, dimension_t dim, double * restrict bound)
 {
@@ -142,9 +155,8 @@ delete(fpli_dlnode_t * restrict nodep, dimension_t dim, double * restrict bound)
         dimension_t d = i - STOP_DIMENSION;
         nodep->prev[d]->next[d] = nodep->next[d];
         nodep->next[d]->prev[d] = nodep->prev[d];
-        if (bound[d] > nodep->x[i])
-            bound[d] = nodep->x[i];
     }
+    update_bound(bound, nodep->x, dim);
 }
 
 static void
@@ -155,9 +167,8 @@ reinsert(fpli_dlnode_t * restrict nodep, dimension_t dim, double * restrict boun
         dimension_t d = i - STOP_DIMENSION;
         nodep->prev[d]->next[d] = nodep;
         nodep->next[d]->prev[d] = nodep;
-        if (bound[d] > nodep->x[i])
-            bound[d] = nodep->x[i];
     }
+    update_bound(bound, nodep->x, dim);
 }
 
 static void
@@ -208,12 +219,27 @@ one_point_hv(const double * restrict x, const double * restrict ref, dimension_t
 double hv4dplusU(dlnode_t * list);
 
 static double
-fpli_hv4d(fpli_dlnode_t *list, dlnode_t * restrict list4d, size_t c)
+fpli_hv4d(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d, size_t c)
 {
     ASSUME(c > 1);
     fpli_hv4d_setup_cdllist(list->next[0], list4d, c);
     double hv = hv4dplusU(list4d);
     return hv;
+}
+
+static inline void
+update_area(double * restrict area, const double * restrict x,
+            const double * restrict ref, dimension_t dim)
+{
+    ASSUME(dim > STOP_DIMENSION);
+    area[0] = one_point_hv(x, ref, STOP_DIMENSION);
+    const double * restrict ref_d = ref + STOP_DIMENSION;
+    const double * restrict x_d = x + STOP_DIMENSION;
+    // Split into two loops to help the vectorizer.
+    for (dimension_t d = 0; d < dim - STOP_DIMENSION; d++)
+        area[d + 1] = (ref_d[d] - x_d[d]);
+    for (dimension_t d = 0; d < dim - STOP_DIMENSION; d++)
+        area[d + 1] *= area[d];
 }
 
 static double
@@ -253,9 +279,7 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
             * (p1->x[dim] - p1->prev[d_stop]->x[dim]);
     } else {
         ASSUME(c == 1);
-        p1->area[0] = one_point_hv(p1->x, ref, STOP_DIMENSION);
-        for (dimension_t i = STOP_DIMENSION; i < dim; i++)
-            p1->area[i + 1 - STOP_DIMENSION] = p1->area[i - STOP_DIMENSION] * (ref[i] - p1->x[i]);
+        update_area(p1->area, p1->x, ref, dim);
         p1->vol[d_stop] = 0;
         if (p0->x == NULL) {
             return p1->area[d_stop] * (ref[dim] - p1->x[dim]);
@@ -352,7 +376,7 @@ double fpli_hv(const double * restrict data, int d, int npoints,
     } else {
         const dimension_t d_stop = dim - STOP_DIMENSION;
         ASSUME(d_stop > 1 && d_stop < 255); // Silence -Walloc-size-larger-than= warning
-        double * bound = malloc(d_stop * sizeof(double));
+        double * bound = malloc(d_stop * sizeof(*bound));
         for (dimension_t i = 0; i < d_stop; i++)
             bound[i] = -DBL_MAX;
         dlnode_t * list4d = new_cdllist(n, ref);
