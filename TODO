@@ -1,6 +1,5 @@
  - [ ] Replace AVL code
  - [ ] Merge eaf README
- - [x] Merge hypervolume/trunk README
  - [ ] Merge hypervolume/Makefile README
  - [ ] Coverage Error Sayin 2024: is this the same as R2 indicator?
  - [ ] Appendix B of "The Hypervolume Indicator: Computational Problems
@@ -11,11 +10,11 @@ and Algorithms" has more ND sets types: wave, cliff and hard.
 Computation, pp. 465–472 (2012)]
  - [ ] archiving: https://github.com/CMA-ES/moarchiving
  - [ ] Convert code from https://github.com/fieldsend/multiobjective_data_structures
- - [x] hv2d contributions
  - [ ] Take a look at https://github.com/esa/pagmo2/blob/master/src/utils/multi_objective.cpp
  - [ ] Faster epsilon: https://github.com/mbuzdalov/orthant-search/blob/master/implementations/src/main/java/ru/ifmo/orthant/epsilon/OrthantImplementation.java
        and https://dl.acm.org/doi/pdf/10.1145/3205455.3205469 and http://www.cmap.polytechnique.fr/~nikolaus.hansen/proceedings/2016/GECCO/proceedings/p613.pdf
- - [ ] Faster nondominated algorithm (is_nondominated, filter_dominated) for d>3: https://doi.org/10.1145/321906.321910 and https://github.com/TLDart/nondLib/blob/main/nondlib.hpp
+ - [ ] A Fast Incremental BSP Tree Archive for Non-dominated Points: https://doi.org/10.1007/978-3-319-54157-0_18
+ - [ ] Faster nondominated algorithm (is_nondominated, filter_dominated) for d>3: https://doi.org/10.1145/321906.321910 and https://github.com/TLDart/nondLib/blob/main/nondlib.hpp <https://dl.acm.org/doi/10.1145/3449726.3462737> <https://dl.acm.org/doi/pdf/10.1145/358841.358850>
  - [ ] Faster nondominated sorting: https://github.com/mbuzdalov/non-dominated-sorting       https://github.com/KernelA/nds-py
      - Tree partitioning by Gustavson/Syberfeldt
      - [Merge non-dominated sorting](https://github.com/jMetal/jMetal/blob/main/jmetal-core/src/main/java/org/uma/jmetal/util/ranking/impl/MergeNonDominatedSortRanking.java
@@ -23,6 +22,8 @@ Computation, pp. 465–472 (2012)]
      - Jensen-style divide-and-conquer with small-size subroutines:
  - [ ] 3D Nondominated sorting:
      Y. Nekrich. A fast algorithm for three-dimensional layers of maxima problem. In Algorithms and Data Structures, number 6844 in Lecture Notes in Computer Science, pages 607–618. 2011.
+ - [x] Merge hypervolume/trunk README
+ - [x] hv2d contributions
  - [X] pre-commit for R: https://lorenzwalthert.github.io/precommit/articles/ci.html
  - [X] create moocore R package
  - [X] create moocore Python package
