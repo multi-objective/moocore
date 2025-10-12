@@ -163,7 +163,7 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
     const double **p = generate_sorted_pp_3d(points, size);
 
     avl_tree_t tree;
-    avl_init_tree(&tree, cmp_double_asc_x_asc_y);
+    avl_init_tree(&tree, cmp_pdouble_asc_x_asc_y_nonzero);
     avl_node_t * tnodes = malloc((size+1) * sizeof(*tnodes));
     avl_node_t * node = tnodes;
     node->item = p[0];

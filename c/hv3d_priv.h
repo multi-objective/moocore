@@ -60,7 +60,7 @@ hv3d_preprocessing(dlnode_t * list, size_t n)
     assert(list+2 == list->prev[0]);
 
     avl_tree_t tree;
-    avl_init_tree(&tree, cmp_double_asc_y_des_x);
+    avl_init_tree(&tree, cmp_pdouble_asc_y_des_x_nonzero);
     avl_node_t * tnodes = malloc((n+2) * sizeof(*tnodes));
 
     // At the top we insert the first point, which is never dominated.

@@ -305,7 +305,7 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
                   --------------------------------------*/
                 hypera = fpli_hv4d(list, list4d, c);
             } else {
-                hypera = hv_recursive(list, list4d, dim-1, c, ref, bound);
+                hypera = hv_recursive(list, list4d, dim - 1, c, ref, bound);
             }
             if (hypera <= p1->prev[d_stop]->area[d_stop])
                 p1->ignore = dim;

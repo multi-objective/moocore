@@ -63,17 +63,26 @@ all_equal_double(const double * restrict a, const double * restrict b, dimension
 typedef int (*cmp_fun_t)(const void *, const void *);
 
 static inline int
+cmp_double_asc(double a, double b)
+{
+    // Generates branchless code, thus faster than:
+    // return a < b ? -1 : (a > b ? 1 : 0);
+    return (a > b) - (a < b); //
+}
+
+static inline int
 cmp_double_asc_rev(const void * restrict pa, const void * restrict pb, dimension_t dim)
 {
     const double * restrict a = *((const double **)pa);
     const double * restrict b = *((const double **)pb);
-    for (int i = dim - 1; i >= 0; i--) {
-        if (a[i] < b[i])
-            return -1;
-        if (a[i] > b[i])
-            return 1;
+    ASSUME(dim >= 2);
+    int i = dim - 1;
+    int res = cmp_double_asc(a[i], b[i]);
+    while (!res && i > 0) {
+        i--;
+        res = cmp_double_asc(a[i], b[i]);
     }
-    return 0;
+    return res;
 }
 
 static inline int
@@ -100,7 +109,7 @@ cmp_double_asc_only_dim(const void * restrict pa, const void * restrict pb, dime
 {
     const double a = *(*(const double **)pa + dim);
     const double b = *(*(const double **)pb + dim);
-    return (a < b) ? -1 : (a > b ? 1 : 0);
+    return cmp_double_asc(a, b);
 }
 
 static inline int
@@ -116,44 +125,57 @@ cmp_double_asc_only_4d(const void * restrict pa, const void * restrict pb)
 }
 
 static inline int
-cmp_double_asc_y_des_x(const void * restrict pa, const void * restrict pb)
+cmp_pdouble_asc_y_des_x_nonzero(const void * restrict pa, const void * restrict pb)
 {
     const double ax = *(const double *)pa;
     const double bx = *(const double *)pb;
     const double ay = *((const double *)pa + 1);
     const double by = *((const double *)pb + 1);
-    return (ay < by) ? -1: ((ay > by) ? 1 : (ax > bx ? -1 : 1));
+    int cmp = cmp_double_asc(ay, by);
+    return cmp ? cmp : (ax > bx ? -1 : 1);
 }
 
 static inline int
-cmp_double_asc_x_asc_y(const void * restrict pa, const void * restrict pb)
+cmp_pdouble_asc_x_asc_y_nonzero(const void * restrict pa, const void * restrict pb)
 {
     const double ax = *(const double *)pa;
     const double bx = *(const double *)pb;
     const double ay = *((const double *)pa + 1);
     const double by = *((const double *)pb + 1);
-    return (ax < bx) ? -1: ((ax > bx) ? 1 : (ay < by ? -1 : 1));
+    int cmp = cmp_double_asc(ax, bx);
+    return cmp ? cmp : (ay < by ? -1 : 1);
 }
 
 static inline int
-cmp_double_asc_x_des_y(const void * restrict pa, const void * restrict pb)
+cmp_pdouble_asc_x_des_y_nonzero(const void * restrict pa, const void * restrict pb)
 {
     const double ax = *(const double *)pa;
     const double bx = *(const double *)pb;
     const double ay = *((const double *)pa + 1);
     const double by = *((const double *)pb + 1);
-    return (ax < bx) ? -1: ((ax > bx) ? 1 : (ay > by ? -1 : 1));
+    int cmp = cmp_double_asc(ax, bx);
+    return cmp ? cmp : (ay > by ? -1 : 1);
 }
 
 static inline int
-cmp_doublep_x_asc_y_asc(const void * restrict pa, const void * restrict pb)
+cmp_double_asc_x_asc_y(double ax, double ay, double bx, double by)
+{
+    // Faster than:
+    // return (ax < bx) ? -1 : ((ax > bx) ? 1 :
+    //                          ((ay < by) ? -1 : ((ay > by) ? 1 : 0)));
+    int cmpx = (ax > bx) - (ax < bx);
+    int cmpy = (ay > by) - (ay < by);
+    return cmpx ? cmpx : cmpy;
+}
+
+static inline int
+cmp_pdouble_x_asc_y_asc(const void * restrict pa, const void * restrict pb)
 {
     const double ax = **(const double **)pa;
     const double bx = **(const double **)pb;
     const double ay = *(*(const double **)pa + 1);
     const double by = *(*(const double **)pb + 1);
-    return (ax < bx) ? -1 : ((ax > bx) ? 1 :
-                             ((ay < by) ? -1 : ((ay > by) ? 1 : 0)));
+    return cmp_double_asc_x_asc_y(ax, ay, bx, by);
 }
 
 static inline const double **
@@ -175,7 +197,7 @@ generate_sorted_doublep_2d(const double * restrict points,
     if (unlikely(n == 0)) {
         free(p);
     } else {
-        qsort(p, n, sizeof(*p), cmp_doublep_x_asc_y_asc);
+        qsort(p, n, sizeof(*p), cmp_pdouble_x_asc_y_asc);
     }
 
     *size = n;
