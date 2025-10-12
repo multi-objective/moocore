@@ -41,26 +41,51 @@ all_positive(const double * restrict points, size_t size, dimension_t dim)
    This also means that the computation of the multiplicative version
    for negative values doesn't make sense.
  */
+
 static inline double
-epsilon_mult_minimize(dimension_t dim,
-                      const double * restrict points_a, size_t size_a,
-                      const double * restrict points_b, size_t size_b)
+eps_value_(bool do_ratio, double a, double b)
 {
-    ASSUME(dim >= 2);
-    ASSUME(dim <= 32);
-    double epsilon = 0;
+    return do_ratio ? a / b : a - b;
+}
+
+static inline double
+epsilon_helper_(bool do_mult, const enum objs_agree_t agree,
+                const signed char * restrict minmax, dimension_t dim,
+                const double * restrict points_a, size_t size_a,
+                const double * restrict points_b, size_t size_b)
+{
+    ASSUME(2 <= dim && dim <= 32);
+    ASSUME(agree == AGREE_MINIMISE || agree == AGREE_MAXIMISE || agree == AGREE_NONE);
+    ASSUME(minmax == NULL || agree != AGREE_NONE);
+    double epsilon = do_mult ? 0 : -INFINITY;
     for (size_t b = 0; b < size_b; b++) {
         bool skip_max = false;
         double epsilon_min = INFINITY;
         const double * restrict pb = &points_b[b * dim];
         for (size_t a = 0; a < size_a; a++) {
             const double * restrict pa = &points_a[a * dim];
-            double epsilon_max = pa[0] / pb[0];
-            if (epsilon_max >= epsilon_min)
-                continue;
-            for (dimension_t d = 1; d < dim; d++) {
-                double epsilon_temp = pa[d] / pb[d];
-                epsilon_max = MAX(epsilon_max, epsilon_temp);
+            double epsilon_max;
+            if (agree == AGREE_NONE) {
+                epsilon_max = MAX(minmax[0] * eps_value_(do_mult, pb[0], pa[0]),
+                                  minmax[1] * eps_value_(do_mult, pb[1], pa[1]));
+                if (epsilon_max >= epsilon_min)
+                    continue;
+                for (dimension_t d = 2; d < dim; d++) {
+                    double epsilon_temp = minmax[d] * eps_value_(do_mult, pb[d], pa[d]);
+                    epsilon_max = MAX(epsilon_max, epsilon_temp);
+                }
+            } else {
+                epsilon_max = (agree == AGREE_MINIMISE)
+                    ? MAX(eps_value_(do_mult, pa[0], pb[0]), eps_value_(do_mult, pa[1], pb[1]))
+                    : MAX(eps_value_(do_mult, pb[0], pa[0]), eps_value_(do_mult, pb[1], pa[1]));
+                if (epsilon_max >= epsilon_min)
+                    continue;
+                for (dimension_t d = 2; d < dim; d++) {
+                    double epsilon_temp = (agree == AGREE_MINIMISE)
+                        ? eps_value_(do_mult, pa[d], pb[d])
+                        : eps_value_(do_mult, pb[d], pa[d]);
+                    epsilon_max = MAX(epsilon_max, epsilon_temp);
+                }
             }
             if (epsilon_max <= epsilon) {
                 skip_max = true;
@@ -75,74 +100,9 @@ epsilon_mult_minimize(dimension_t dim,
 }
 
 static inline double
-epsilon_mult_maximize(dimension_t dim,
-                      const double * restrict points_a, size_t size_a,
-                      const double * restrict points_b, size_t size_b)
-{
-    ASSUME(dim >= 2);
-    ASSUME(dim <= 32);
-    double epsilon = 0;
-    for (size_t b = 0; b < size_b; b++) {
-        bool skip_max = false;
-        double epsilon_min = INFINITY;
-        const double * restrict pb = &points_b[b * dim];
-        for (size_t a = 0; a < size_a; a++) {
-            const double * restrict pa = &points_a[a * dim];
-            double epsilon_max = pb[0] / pa[0];
-            if (epsilon_max >= epsilon_min)
-                continue;
-            for (dimension_t d = 1; d < dim; d++) {
-                double epsilon_temp = pb[d] / pa[d];
-                epsilon_max = MAX(epsilon_max, epsilon_temp);
-            }
-            if (epsilon_max <= epsilon) {
-                skip_max = true;
-                break;
-            }
-            epsilon_min = MIN(epsilon_min, epsilon_max);
-        }
-        if (skip_max) continue;
-        epsilon = MAX(epsilon, epsilon_min);
-    }
-    return epsilon;
-}
-
-static inline double
-epsilon_mult_minmax_ (dimension_t dim, const signed char * restrict minmax,
-                     const double * restrict points_a, size_t size_a,
-                     const double * restrict points_b, size_t size_b)
-{
-    double epsilon = 0;
-    for (size_t b = 0; b < size_b; b++) {
-        bool skip_max = false;
-        double epsilon_min = INFINITY;
-        const double * restrict pb = &points_b[b * dim];
-        for (size_t a = 0; a < size_a; a++) {
-            const double * restrict pa = &points_a[a * dim];
-            double epsilon_max = minmax[0] * pb[0] / pa[0];
-            if (epsilon_max >= epsilon_min)
-                continue;
-            for (dimension_t d = 1; d < dim; d++) {
-                double epsilon_temp = minmax[d] * pb[d] / pa[d];
-                ASSUME(epsilon_temp >= 0);
-                epsilon_max = MAX(epsilon_max, epsilon_temp);
-            }
-            if (epsilon_max <= epsilon) {
-                skip_max = true;
-                break;
-            }
-            epsilon_min = MIN(epsilon_min, epsilon_max);
-        }
-        if (skip_max) continue;
-        epsilon = MAX(epsilon, epsilon_min);
-    }
-    return epsilon;
-}
-
-static inline double
-epsilon_mult_minmax (dimension_t dim, const signed char * restrict minmax,
-                     const double * restrict points_a, size_t size_a,
-                     const double * restrict points_b, size_t size_b)
+epsilon_mult_minmax(const signed char * restrict minmax, dimension_t dim,
+                    const double * restrict points_a, size_t size_a,
+                    const double * restrict points_b, size_t size_b)
 {
 #if DEBUG >= 1
     if (!all_positive(points_a, size_a, dim) || !all_positive(points_b, size_b, dim)) {
@@ -150,157 +110,61 @@ epsilon_mult_minmax (dimension_t dim, const signed char * restrict minmax,
         return INFINITY;
     }
 #endif
-
+    // This forces the compiler to generate three specialized versions of the function.
     switch (check_all_minimize_maximize(minmax, dim)) {
       case AGREE_MINIMISE:
-          return epsilon_mult_minimize(dim, points_a, size_a, points_b, size_b);
+          return epsilon_helper_(/* do_mult=*/true, AGREE_MINIMISE, /*minmax=*/NULL, dim, points_a, size_a, points_b, size_b);
       case AGREE_MAXIMISE:
-          return epsilon_mult_maximize(dim, points_a, size_a, points_b, size_b);
+          return epsilon_helper_(/* do_mult=*/true, AGREE_MAXIMISE, /*minmax=*/NULL, dim, points_a, size_a, points_b, size_b);
       default:
-          return epsilon_mult_minmax_(dim, minmax, points_a, size_a, points_b, size_b);
+          return epsilon_helper_(/* do_mult=*/true, AGREE_NONE, minmax, dim, points_a, size_a, points_b, size_b);
     }
 }
 
 static inline double
-epsilon_additive_minimize(dimension_t dim,
-                          const double * restrict points_a, size_t size_a,
-                          const double * restrict points_b, size_t size_b)
-{
-    ASSUME(dim >= 2);
-    ASSUME(dim <= 32);
-    double epsilon = -INFINITY;
-    for (size_t b = 0; b < size_b; b++) {
-        bool skip_max = false;
-        double epsilon_min = INFINITY;
-        const double * restrict pb = &points_b[b * dim];
-        for (size_t a = 0; a < size_a; a++) {
-            const double * restrict pa = &points_a[a * dim];
-            double epsilon_max = pa[0] - pb[0];
-            if (epsilon_max >= epsilon_min)
-                continue;
-            for (dimension_t d = 1; d < dim; d++) {
-                double epsilon_temp = pa[d] - pb[d];
-                epsilon_max = MAX(epsilon_max, epsilon_temp);
-            }
-            if (epsilon_max <= epsilon) {
-                skip_max = true;
-                break;
-            }
-            epsilon_min = MIN(epsilon_min, epsilon_max);
-        }
-        if (skip_max) continue;
-        epsilon = MAX(epsilon, epsilon_min);
-    }
-    return epsilon;
-}
-
-static inline double
-epsilon_additive_maximize(dimension_t dim,
-                          const double * restrict points_a, size_t size_a,
-                          const double * restrict points_b, size_t size_b)
-{
-    ASSUME(dim >= 2);
-    ASSUME(dim <= 32);
-    double epsilon = -INFINITY;
-    for (size_t b = 0; b < size_b; b++) {
-        bool skip_max = false;
-        double epsilon_min = INFINITY;
-        const double * restrict pb = &points_b[b * dim];
-        for (size_t a = 0; a < size_a; a++) {
-            const double * restrict pa = &points_a[a * dim];
-            double epsilon_max = pb[0] - pa[0];
-            if (epsilon_max >= epsilon_min)
-                continue;
-            for (dimension_t d = 1; d < dim; d++) {
-                double epsilon_temp = pb[d] - pa[d];
-                epsilon_max = MAX(epsilon_max, epsilon_temp);
-            }
-            if (epsilon_max <= epsilon) {
-                skip_max = true;
-                break;
-            }
-            epsilon_min = MIN(epsilon_min, epsilon_max);
-        }
-        if (skip_max) continue;
-        epsilon = MAX(epsilon, epsilon_min);
-    }
-    return epsilon;
-}
-
-static inline double
-epsilon_additive_minmax_(dimension_t dim, const signed char * restrict minmax,
-                         const double * restrict points_a, size_t size_a,
-                         const double * restrict points_b, size_t size_b)
-{
-    double epsilon = -INFINITY;
-    for (size_t b = 0; b < size_b; b++) {
-        bool skip_max = false;
-        double epsilon_min = INFINITY;
-        const double * restrict pb = &points_b[b * dim];
-        for (size_t a = 0; a < size_a; a++) {
-            const double * restrict pa = &points_a[a * dim];
-            double epsilon_max = minmax[0] * (pb[0] - pa[0]);
-            if (epsilon_max >= epsilon_min)
-                continue;
-            for (dimension_t d = 1; d < dim; d++) {
-                double epsilon_temp = minmax[d] * (pb[d] - pa[d]);
-                epsilon_max = MAX(epsilon_max, epsilon_temp);
-            }
-            if (epsilon_max <= epsilon) {
-                skip_max = true;
-                break;
-            }
-            epsilon_min = MIN(epsilon_min, epsilon_max);
-        }
-        if (skip_max) continue;
-        epsilon = MAX(epsilon, epsilon_min);
-    }
-    return epsilon;
-}
-
-static inline double
-epsilon_additive_minmax(dimension_t dim, const signed char * restrict minmax,
+epsilon_additive_minmax(const signed char * restrict minmax, dimension_t dim,
                         const double * restrict points_a, size_t size_a,
                         const double * restrict points_b, size_t size_b)
 {
+    // This forces the compiler to generate three specialized versions of the function.
     switch (check_all_minimize_maximize(minmax, dim)) {
       case AGREE_MINIMISE:
-          return epsilon_additive_minimize(dim, points_a, size_a, points_b, size_b);
+          return epsilon_helper_(/* do_mult=*/false, AGREE_MINIMISE, /*minmax=*/NULL, dim, points_a, size_a, points_b, size_b);
       case AGREE_MAXIMISE:
-          return epsilon_additive_maximize(dim, points_a, size_a, points_b, size_b);
+          return epsilon_helper_(/* do_mult=*/false, AGREE_MAXIMISE, /*minmax=*/NULL, dim, points_a, size_a, points_b, size_b);
       default:
-          return epsilon_additive_minmax_(dim, minmax, points_a, size_a, points_b, size_b);
+          return epsilon_helper_(/* do_mult=*/false, AGREE_NONE, minmax, dim, points_a, size_a, points_b, size_b);
     }
 }
 
 _attr_maybe_unused static double
-epsilon_additive (const double * restrict data, int nobj, int npoints,
-                  const double * restrict ref, int ref_size,
-                  const bool * restrict maximise)
+epsilon_additive(const double * restrict data, int nobj, int npoints,
+                 const double * restrict ref, int ref_size,
+                 const bool * restrict maximise)
 {
     ASSUME(nobj >= 2);
     ASSUME(npoints >= 0);
     ASSUME(ref_size >= 0);
     dimension_t dim = (dimension_t) nobj;
     const signed char *minmax = minmax_from_bool(dim, maximise);
-    double value = epsilon_additive_minmax(dim, minmax, data, npoints, ref, ref_size);
+    double value = epsilon_additive_minmax(minmax, dim, data, npoints, ref, ref_size);
     free ((void *)minmax);
-    return(value);
+    return value;
 }
 
 _attr_maybe_unused static double
-epsilon_mult (const double * restrict data, int nobj, int npoints,
-              const double * restrict ref, int ref_size,
-              const bool * restrict maximise)
+epsilon_mult(const double * restrict data, int nobj, int npoints,
+             const double * restrict ref, int ref_size,
+             const bool * restrict maximise)
 {
     ASSUME(nobj >= 2);
     ASSUME(npoints >= 0);
     ASSUME(ref_size >= 0);
     dimension_t dim = (dimension_t) nobj;
-    const signed char *minmax = minmax_from_bool(dim, maximise);
-    double value = epsilon_mult_minmax (dim, minmax, data, npoints, ref, ref_size);
+    const signed char * minmax = minmax_from_bool(dim, maximise);
+    double value = epsilon_mult_minmax(minmax, dim, data, npoints, ref, ref_size);
     free ((void *)minmax);
-    return(value);
+    return value;
 }
 
 /* FIXME: this can be done much faster. For example, the diff needs to
@@ -311,9 +175,9 @@ epsilon_additive_ind (dimension_t dim, const signed char * restrict minmax,
                       const double * restrict points_b, size_t size_b)
 {
     double eps_ab = epsilon_additive_minmax(
-        dim, minmax, points_a, size_a, points_b, size_b);
+        minmax, dim, points_a, size_a, points_b, size_b);
     double eps_ba = epsilon_additive_minmax(
-        dim, minmax, points_b, size_b, points_a, size_a);
+        minmax, dim, points_b, size_b, points_a, size_a);
 
     DEBUG2(printf ("eps_ab = %g, eps_ba = %g\n", eps_ab, eps_ba));
 

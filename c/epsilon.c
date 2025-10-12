@@ -135,12 +135,12 @@ do_file (const char *filename, double *reference, size_t reference_size,
         // double time_elapsed = 0;
         //Timer_start ();
         double epsilon = (additive_flag)
-            ? epsilon_additive_minmax (dim,  minmax,
-                                       &data[nobj * cumsize], cumsizes[n] - cumsize,
-                                       reference, reference_size)
-            : epsilon_mult_minmax (dim,  minmax,
-                                   &data[nobj * cumsize], cumsizes[n] - cumsize,
-                                   reference, reference_size);
+            ? epsilon_additive_minmax(minmax, dim,
+                                      &data[nobj * cumsize], cumsizes[n] - cumsize,
+                                      reference, reference_size)
+            : epsilon_mult_minmax(minmax, dim,
+                                  &data[nobj * cumsize], cumsizes[n] - cumsize,
+                                  reference, reference_size);
         //        time_elapsed = Timer_elapsed_virtual ();
         fprintf (outfile, indicator_printf_format "\n", epsilon);
         if ((additive_flag && epsilon < 0) || (!additive_flag && epsilon < 1)) {
