@@ -207,7 +207,7 @@ default_minmax(dimension_t nobj, signed char default_value)
 {
     ASSUME(nobj > 0);
     ASSUME(default_value == AGREE_MINIMISE || default_value == AGREE_MAXIMISE);
-    signed char * minmax = malloc(sizeof(signed char) * nobj);
+    signed char * minmax = malloc(sizeof(*minmax) * nobj);
     for (dimension_t i = 0; i < nobj; i++)
         minmax[i] = default_value;
     return minmax;
