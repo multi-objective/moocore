@@ -77,11 +77,10 @@ package-dir = { "" = "src" }
 
 [tool.cibuildwheel]
 skip = [
-  "pp*",                   # Disable building PyPy wheels on all platforms
-  "*-musllinux_aarch64",
-  "cp38-musllinux_x86_64",
-  "*-win32",
-  "*-manylinux_i686",      # Skip 32-bit builds
+  "pp*",       # Disable building PyPy wheels on all platforms
+  "*_ppc64le",
+  "*_s390x",
+  "*_i686",    # Skip 32-bit builds
 ]
 build-verbosity = 2
 # Will cause the wheel to be installed with these groups of dependencies
@@ -89,10 +88,7 @@ test-groups = [ "test" ]
 test-command = [
   "pytest --doctest-modules --doctest-continue-on-failure {package}/tests {package}/src/moocore/_moocore.py",
 ]
-# skip tests on emulated architectures, as they are very slow
-# skip tests on *-macosx_arm64 , as cibuildwheel does not support tests on arm64 (yet)
-# skip tests on *-musllinux*" since llvmlite and numba do not provide musllinux wheels
-test-skip = "*-*linux_{aarch64,ppc64le,s390x} *-macosx_arm64 *-musllinux*"
+test-skip = "*-*linux_{aarch64,ppc64le,s390x}"
 
 [tool.cibuildwheel.linux]
 archs = [
