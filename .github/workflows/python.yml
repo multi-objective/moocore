@@ -201,8 +201,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # FIXME: add windows-11-arm and ubuntu-24.04-arm
+        # https://github.com/scipy/scipy/blob/6b79a4dec1f9ca2db4e49c328d04d293880991c6/.github/workflows/wheels.yml#L78
         # macos-14 is apple silicon
-        os: [ubuntu-latest, windows-latest, macos-14]
+        os: [ubuntu-22.04, windows-2025, macos-14]
         python-version: ['3.10']
         CIBW_ARCHS_MACOS: ['universal2']
 
@@ -218,7 +220,7 @@ jobs:
         if: runner.os == 'Linux'
         uses: docker/setup-qemu-action@v3
         with:
-          platforms: all
+          platforms: arm64
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.23.3
