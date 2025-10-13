@@ -16,6 +16,8 @@ repos:
       - id: deps-in-desc
         args: [--root=r/]
         exclude: '(do\.R|vignettes/articles/.+\.Rmd)'
+      - id: roxygenize
+        args: [--root=<R package root>]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -41,11 +43,13 @@ repos:
     rev: "1.6.0"
     hooks:
       - id: tox-ini-fmt
+
   - repo: https://github.com/tox-dev/pyproject-fmt
     rev: "v2.6.0"
     hooks:
       - id: pyproject-fmt
         additional_dependencies: ["tox>=4.12.1"]
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
     rev: v0.13.0
@@ -58,6 +62,7 @@ repos:
         args: [ --fix, --exit-non-zero-on-fix ]
         types_or: [ python, pyi, jupyter ]
         require_serial: true
+
   - repo: https://github.com/sphinx-contrib/sphinx-lint
     rev: v1.0.0
     hooks:
