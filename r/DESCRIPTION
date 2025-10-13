@@ -46,8 +46,10 @@ Config/Needs/website:
         data.table,
         dplyr,
         ggplot2,
-        knitr,
+        htmltools,
         kableExtra,
+        knitr,
+        plotly,
         rmarkdown,
         scales,
         tidyr
