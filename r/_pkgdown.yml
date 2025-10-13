@@ -42,7 +42,7 @@ reference:
     contents: has_concept("metrics")
   - title: Computing the Empirical Attainment Function
     contents: has_concept("eaf")
-  - title: Read/Write/Transform datasets
+  - title: Read / Write / Transform / Generate datasets
     contents:
       - read_datasets
       - write_datasets
@@ -50,5 +50,6 @@ reference:
       - rbind_datasets
       - transform_maximise
       - as_double_matrix
+      - generate_ndset
   - title: Datasets
     contents: has_keyword("datasets")

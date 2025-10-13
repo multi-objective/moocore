@@ -989,34 +989,31 @@ def generate_ndset(
         Numpy-compatible RNG. ``None`` uses the equivalent of a random seed
         (see :func:`numpy.random.default_rng`).
     integer:
-        Return integer values.
+        If ``True``, return integer-valued points.
 
     Returns
     -------
-        A 2D nondominated array.
+        A numeric matrix of size :math:`n \times d` containing nondominated points.
 
     Notes
     -----
-    The methods available are:
+    The available methods are:
 
     * ``"simplex"``, ``"linear"`` or ``"L"``: Uniformly samples points on the
       standard simplex.
 
     * ``"concave-sphere"``, ``"sphere"`` or ``"C"``: Uniformly samples points
-      on the positive orthant of the hyper-sphere, which is concave for
-      minimisation problems.
+      on the positive orthant of the hyper-sphere (concave for minimisation).
 
-    * ``"convex-sphere"`` or ``"X"``: Equivalent to ``1. -
-      generate_ndset("concave-sphere", n, d, seed)``, which is convex for
-      minimisation problems.
+    * ``"convex-sphere"`` or ``"X"``: Equivalent to ``1 - generate_ndset(...,
+      method="concave-sphere")``, which is convex for minimisation problems.
 
-    * ``"convex-simplex"``: Equivalent to ``generate_ndset("concave-sphere", n,
-      d, seed) ** 4``, which is convex for minimisation problems. Such a set
-      cannot be obtained by any affine transformation of a subset of the
-      hyper-sphere.
+    * ``"convex-simplex"``: Equivalent to ``generate_ndset(..., method="concave-sphere") ** 4``,
+      which is convex for minimisation problems. Such a set cannot be obtained
+      by any affine transformation of a subset of the hyper-sphere.
 
-    Method ``"simplex"`` uniformly samples points on the standard simplex.  The
-    standard :math:`(d-1)`-simplex is defined by :math:`\{\vec{x}\in
+    Method ``"simplex"`` uniformly samples points on the standard
+    :math:`(d-1)`-simplex defined by :math:`\{\vec{x}\in
     \mathbb{R}_+^d : \sum_{i=1}^d x_i = 1\}`.  This shape of nondominated set
     is also called ``"linear"`` in the literature
     :footcite:p:`LacKlaFon2017box`.  Each point :math:`\vec{z} \in (0,1)^d
@@ -1045,15 +1042,15 @@ def generate_ndset(
     :footcite:t:`LacKlaFon2017box`, does not result in a uniform sampling when
     projected onto the surface of the hyper-sphere.
 
-    Method ``"convex-sphere"`` is quivalent to ``1. -
-    generate_ndset("concave-sphere", n, d, seed)``, which is convex for
-    minimisation problems.  It corresponds to translating points from the
-    negative orthant of the hyper-sphere to the positive orthant.
+    Method ``"convex-sphere"`` is quivalent to ``1 - generate_ndset(...,
+    method="concave-sphere")``, which is convex for minimisation problems.  It
+    corresponds to translating points from the negative orthant of the
+    hyper-sphere to the positive orthant.
 
-    Method ``"convex-simplex"`` is equivalent to
-    ``generate_ndset("concave-sphere", n, d, seed)**4``, which is convex for
-    minimisation problems.  The corresponding surface is equivalent to a
-    simplex curved towards the origin.
+    Method ``"convex-simplex"`` is equivalent to ``generate_ndset(...,
+    method="concave-sphere")**4``, which is convex for minimisation problems.
+    The corresponding surface is equivalent to a simplex curved towards the
+    origin.
 
 
 
@@ -1126,8 +1123,8 @@ def generate_ndset(
             raise ValueError(f"unknown method={method}")
 
     while True:
-        # Due to rounding or bad luck, we may actually have dominated points.
         x = sample()
+        # Due to rounding or bad luck, we may actually have dominated points.
         if not any_dominated(x):
             if not integer:
                 return x
