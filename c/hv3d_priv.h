@@ -16,13 +16,13 @@ typedef struct avl_node_t {
 #include "avl_tiny.h"
 
 static inline const double *
-node_point(const avl_node_t *node)
+node_point(const avl_node_t * restrict node)
 {
     return node->item;
 }
 
 static inline avl_node_t *
-new_avl_node(dlnode_t * p, avl_node_t * node)
+new_avl_node(dlnode_t * restrict p, avl_node_t * restrict node)
 {
     node->dlnode = p;
     node->item = p->x;
