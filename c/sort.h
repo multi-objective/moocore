@@ -71,6 +71,17 @@ cmp_double_asc(double a, double b)
 }
 
 static inline int
+cmp_double_asc_x_asc_y(double ax, double ay, double bx, double by)
+{
+    // Faster than:
+    // return (ax < bx) ? -1 : ((ax > bx) ? 1 :
+    //                          ((ay < by) ? -1 : ((ay > by) ? 1 : 0)));
+    int cmpx = (ax > bx) - (ax < bx);
+    int cmpy = (ay > by) - (ay < by);
+    return cmpx ? cmpx : cmpy;
+}
+
+static inline int
 cmp_double_asc_rev(const void * restrict pa, const void * restrict pb, dimension_t dim)
 {
     const double * restrict a = *((const double **)pa);
@@ -158,17 +169,6 @@ cmp_pdouble_asc_x_des_y_nonzero(const void * restrict pa, const void * restrict 
 }
 
 static inline int
-cmp_double_asc_x_asc_y(double ax, double ay, double bx, double by)
-{
-    // Faster than:
-    // return (ax < bx) ? -1 : ((ax > bx) ? 1 :
-    //                          ((ay < by) ? -1 : ((ay > by) ? 1 : 0)));
-    int cmpx = (ax > bx) - (ax < bx);
-    int cmpy = (ay > by) - (ay < by);
-    return cmpx ? cmpx : cmpy;
-}
-
-static inline int
 cmp_pdouble_x_asc_y_asc(const void * restrict pa, const void * restrict pb)
 {
     const double ax = **(const double **)pa;
@@ -203,6 +203,5 @@ generate_sorted_doublep_2d(const double * restrict points,
     *size = n;
     return p;
 }
-
 
 #endif 	    /* !SORT_H_ */
