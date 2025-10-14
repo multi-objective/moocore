@@ -158,6 +158,16 @@ cmp_pdouble_asc_x_asc_y_nonzero(const void * restrict pa, const void * restrict 
 }
 
 static inline int
+cmp_pdouble_asc_x_asc_y(const void * restrict pa, const void * restrict pb)
+{
+    const double ax = *(const double *)pa;
+    const double bx = *(const double *)pb;
+    const double ay = *((const double *)pa + 1);
+    const double by = *((const double *)pb + 1);
+    return cmp_double_asc_x_asc_y(ax, ay, bx, by);
+}
+
+static inline int
 cmp_pdouble_asc_x_des_y_nonzero(const void * restrict pa, const void * restrict pb)
 {
     const double ax = *(const double *)pa;
@@ -169,7 +179,7 @@ cmp_pdouble_asc_x_des_y_nonzero(const void * restrict pa, const void * restrict 
 }
 
 static inline int
-cmp_pdouble_x_asc_y_asc(const void * restrict pa, const void * restrict pb)
+cmp_ppdouble_asc_x_asc_y(const void * restrict pa, const void * restrict pb)
 {
     const double ax = **(const double **)pa;
     const double bx = **(const double **)pb;
@@ -197,7 +207,7 @@ generate_sorted_doublep_2d(const double * restrict points,
     if (unlikely(n == 0)) {
         free(p);
     } else {
-        qsort(p, n, sizeof(*p), cmp_pdouble_x_asc_y_asc);
+        qsort(p, n, sizeof(*p), cmp_ppdouble_asc_x_asc_y);
     }
 
     *size = n;
