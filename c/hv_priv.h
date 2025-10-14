@@ -39,7 +39,7 @@ typedef struct dlnode {
 
 // Link sentinels (-inf ref[1] -inf) and (ref[0] -inf -inf).
 static inline void
-restart_list_y(dlnode_t * list)
+restart_list_y(dlnode_t * restrict list)
 {
     assert(list+1 == list->next[0]);
     list->cnext[0] = list+1;
@@ -48,7 +48,7 @@ restart_list_y(dlnode_t * list)
 
 #if HV_DIMENSION == 4 || defined(HVC_ONLY)
 static inline void
-set_cnext_to_closest(dlnode_t * p)
+set_cnext_to_closest(dlnode_t * restrict p)
 {
     p->cnext[0] = p->closest[0];
     p->cnext[1] = p->closest[1];
@@ -58,7 +58,7 @@ set_cnext_to_closest(dlnode_t * p)
 #endif
 
 static inline void
-remove_from_z(dlnode_t * old)
+remove_from_z(dlnode_t * restrict old)
 {
     old->prev[0]->next[0] = old->next[0];
     old->next[0]->prev[0] = old->prev[0];
@@ -81,7 +81,7 @@ print_x(const dlnode_t * p)
 
 // ------------------------ Circular double-linked list ----------------------
 static inline void
-reset_sentinels(dlnode_t * list)
+reset_sentinels(dlnode_t * restrict list)
 {
     dlnode_t * restrict s1 = list;
     dlnode_t * restrict s2 = list + 1;
@@ -122,7 +122,7 @@ reset_sentinels(dlnode_t * list)
 }
 
 static inline void
-init_sentinel(dlnode_t * s, const double * x)
+init_sentinel(dlnode_t * restrict s, const double * restrict x)
 {
     s->x = x;
     // Initialize it when debugging so it will crash if uninitialized.
@@ -138,7 +138,7 @@ init_sentinel(dlnode_t * s, const double * x)
 }
 
 static void
-init_sentinels(dlnode_t * list, const double * ref)
+init_sentinels(dlnode_t * restrict list, const double * restrict ref)
 {
     // Allocate the 3 sentinels of dimension dim.
     const double z[] = {
@@ -168,7 +168,7 @@ init_sentinels(dlnode_t * list, const double * ref)
 }
 
 static inline dlnode_t *
-new_cdllist(size_t n, const double * ref)
+new_cdllist(size_t n, const double * restrict ref)
 {
     dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(*list));
     init_sentinels(list, ref);
@@ -250,7 +250,7 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
 }
 
 static inline void
-free_cdllist(dlnode_t * list)
+free_cdllist(dlnode_t * restrict list)
 {
     free((void*) list->x); // Free sentinels.
     free(list);
