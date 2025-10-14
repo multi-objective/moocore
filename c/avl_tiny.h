@@ -67,7 +67,7 @@ static void avl_rebalance(avl_tree_t *, avl_node_t *);
 #define R_DEPTH(n)     (NODE_DEPTH((n)->right))
 #define CALC_DEPTH(n)  (unsigned char)((L_DEPTH(n)>R_DEPTH(n)?L_DEPTH(n):R_DEPTH(n)) + 1)
 
-static int avl_check_balance(const avl_node_t *avlnode) {
+static int avl_check_balance(const avl_node_t * restrict avlnode) {
 	int d = R_DEPTH(avlnode) - L_DEPTH(avlnode);
 	return d < -1 ? -1 : d > 1 ? 1 : 0;
 }
