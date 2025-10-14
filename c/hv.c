@@ -40,21 +40,20 @@
 #define STOP_DIMENSION 3 /* default: stop on dimension 4 */
 
 typedef struct fpli_dlnode {
-    const double *x;              /* The data vector              */
-    struct fpli_dlnode **next;         /* Next-node vector             */
-    struct fpli_dlnode **prev;         /* Previous-node vector         */
-    double *area;                 /* Area */
-    double *vol;                  /* Volume */
-    dimension_t ignore;           /* Restricts dim to be 255.  */
+    const double * restrict x;         // point vector
+    struct fpli_dlnode **next;         // next-node vector
+    struct fpli_dlnode **prev;         // previous-node vector
+    double * restrict area;            // partial area
+    double * restrict vol;             // partial volume
+    dimension_t ignore;                // [0, 255]
 } fpli_dlnode_t;
 
 
-static int compare_node(const void *p1, const void* p2)
+static int compare_node(const void * restrict p1, const void * restrict p2)
 {
-    const double x1 = *((*(const fpli_dlnode_t **)p1)->x);
-    const double x2 = *((*(const fpli_dlnode_t **)p2)->x);
-
-    return (x1 < x2) ? -1 : (x1 > x2) ? 1 : 0;
+    const double * restrict x1 = (*(const fpli_dlnode_t **)p1)->x;
+    const double * restrict x2 = (*(const fpli_dlnode_t **)p2)->x;
+    return cmp_double_asc(*x1, *x2);
 }
 
 /*
@@ -68,10 +67,10 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     ASSUME(d > STOP_DIMENSION);
     dimension_t d_stop = d - STOP_DIMENSION;
     size_t n = *size;
-    fpli_dlnode_t *head = malloc ((n+1) * sizeof(*head));
-    head->next = malloc(2 * d_stop * (n+1) * sizeof(fpli_dlnode_t*));
+    fpli_dlnode_t * head = malloc ((n+1) * sizeof(*head));
+    head->next = malloc(2 * d_stop * (n+1) * sizeof(*head));
     head->prev = head->next + d_stop * (n+1);
-    head->area = malloc(2 * d_stop * (n+1) * sizeof(double));
+    head->area = malloc(2 * d_stop * (n+1) * sizeof(*data));
     head->vol = head->area + d_stop * (n+1);
     head->x = NULL; /* head contains no data */
     head->ignore = 0;  /* should never get used */
