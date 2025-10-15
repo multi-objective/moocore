@@ -155,6 +155,10 @@ find_nondominated_set_2d_(const double * restrict points, size_t size,
    Duplicated points may be removed in any order due to qsort not being stable.
 */
 
+static inline void
+print_point(const double * p) {
+    printf("%g %g %g", p[0], p[1], p[2]);
+}
 static inline size_t
 find_nondominated_set_3d_helper(const double * restrict points, size_t size,
                                 bool * restrict nondom, const bool keep_weakly)
@@ -163,7 +167,7 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
     const double **p = generate_sorted_pp_3d(points, size);
 
     avl_tree_t tree;
-    avl_init_tree(&tree, cmp_pdouble_asc_x_asc_y_nonzero);
+    avl_init_tree(&tree, cmp_pdouble_asc_x_nonzero);
     avl_node_t * tnodes = malloc((size+1) * sizeof(*tnodes));
     avl_node_t * node = tnodes;
     node->item = p[0];
@@ -177,38 +181,36 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
     size_t pos_last_dom = size, n_nondom = size, j = 1;
     const double * prev = p[0];
     do {
-        const double * pj = p[j];
+        const double * restrict pj = p[j];
+        // printf("pj: "); print_point(pj); printf("\n");
+        bool dominated;
         if (prev[0] > pj[0] || prev[1] > pj[1]) {
             avl_node_t * nodeaux;
-            // == 1 means that nodeaux goes before pj, so move to the next one.
-            if (avl_search_closest(&tree, pj, &nodeaux) == 1) {
+            int res = avl_search_closest(&tree, pj, &nodeaux);
+            assert(res != 0);
+            if (res > 0) { // nodeaux goes before pj
                 prev = nodeaux->item;
                 assert(prev[0] != sentinel[0]);
-                nodeaux = nodeaux->next;
-            } else {
-                // nodeaux goes after pj
-                prev = nodeaux->prev ? nodeaux->prev->item : NULL;
-            }
-            const double * point = nodeaux->item;
-            assert(pj[0] <= point[0]);
-            // If pj[0] == point[0], then pj[1] < point[1]
-            assert(pj[0] < point[0] || pj[1] < point[1]);
-
-            // FIXME: Avoid the check for prev here.
-            if (prev && prev[1] <= pj[1]) { // pj is dominated by a point in the tree.
                 assert(prev[0] <= pj[0]);
-                // It cannot be a duplicate because we already handled them above.
-                assert(prev[0] != pj[0] || prev[1] != pj[1] || prev[2] != pj[2]);
-                /* Map the order in p[], which is sorted, to the original order
-                   in points. */
-                pos_last_dom = (pj - points) / 3;
-                if (nondom == NULL)
-                    goto early_end;
-                nondom[pos_last_dom] = false;
-                n_nondom--;
+                dominated = prev[1] <= pj[1];
+                // printf("res > 0: prev: "); print_point(prev); printf("\n");
+                nodeaux = nodeaux->next;
+            } else if (nodeaux->prev) {// nodeaux goes after pj, so move to the next one.
+                prev = nodeaux->prev->item;
+                assert(prev[0] != sentinel[0]);
+                assert(prev[0] <= pj[0]);
+                dominated = prev[1] <= pj[1];
+                // printf("res < 0: prev: "); print_point(prev); printf("\n");
             } else {
+                dominated = false;
+            }
+
+            if (!dominated) { // pj is NOT dominated by a point in the tree.
+                const double * point = nodeaux->item;
+                assert(pj[0] <= point[0]);
                 // Delete everything in the tree that is dominated by pj.
                 while (pj[1] <= point[1]) {
+                    // printf("delete point: "); print_point(point); printf("\n");
                     assert(pj[0] <= point[0]);
                     nodeaux = nodeaux->next;
                     point = nodeaux->item;
@@ -217,18 +219,23 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
                        rebalance. */
                     avl_unlink_node(&tree, nodeaux->prev);
                 }
+                // printf("insert before point: "); print_point(point); printf("\n");
                 (++node)->item = pj;
                 avl_insert_before(&tree, nodeaux, node);
             }
-        } // Handle duplicates and points that are dominated by the immediate previous one.
-        else if (!keep_weakly // we don't keep duplicates;
-                 // or it is not a duplicate, so it is non-weakly dominated;
-                 || prev[0] != pj[0] || prev[1] != pj[1] || prev[2] != pj[2]
-                 // or prev was dominated, then this one is also dominated.
-                 || pos_last_dom == (size_t) ((prev - points) / 3)) {
-            // FIXME: This code is duplicated above. Avoid the duplication.
-            /* Map the order in p[], which is sorted, to the original order
-               in points. */
+        } else {
+            // Handle duplicates and points that are dominated by the immediate
+            // previous one.
+            dominated = !keep_weakly // We don't keep duplicates;
+                // or it is not a duplicate, so it is non-weakly dominated;
+                || prev[0] != pj[0] || prev[1] != pj[1] || prev[2] != pj[2]
+                // or prev was dominated, then this one is also dominated.
+                || pos_last_dom == (size_t) ((prev - points) / 3);
+            // printf("dom by prev: "); print_point(prev); printf("\n");
+        }
+        if (dominated) { // pj is dominated by a point in the tree or by prev.
+            /* Map the order in p[], which is sorted, to the original order in
+               points. */
             pos_last_dom = (pj - points) / 3;
             if (nondom == NULL)
                 goto early_end;

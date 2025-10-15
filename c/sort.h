@@ -136,6 +136,14 @@ cmp_double_asc_only_4d(const void * restrict pa, const void * restrict pb)
 }
 
 static inline int
+cmp_pdouble_asc_x_nonzero(const void * restrict pa, const void * restrict pb)
+{
+    const double ax = *(const double *)pa;
+    const double bx = *(const double *)pb;
+    return ax < bx ? -1 : 1;
+}
+
+static inline int
 cmp_pdouble_asc_y_des_x_nonzero(const void * restrict pa, const void * restrict pb)
 {
     const double ax = *(const double *)pa;
@@ -147,17 +155,6 @@ cmp_pdouble_asc_y_des_x_nonzero(const void * restrict pa, const void * restrict 
 }
 
 static inline int
-cmp_pdouble_asc_x_asc_y_nonzero(const void * restrict pa, const void * restrict pb)
-{
-    const double ax = *(const double *)pa;
-    const double bx = *(const double *)pb;
-    const double ay = *((const double *)pa + 1);
-    const double by = *((const double *)pb + 1);
-    int cmp = cmp_double_asc(ax, bx);
-    return cmp ? cmp : (ay < by ? -1 : 1);
-}
-
-static inline int
 cmp_pdouble_asc_x_asc_y(const void * restrict pa, const void * restrict pb)
 {
     const double ax = *(const double *)pa;
@@ -165,17 +162,6 @@ cmp_pdouble_asc_x_asc_y(const void * restrict pa, const void * restrict pb)
     const double ay = *((const double *)pa + 1);
     const double by = *((const double *)pb + 1);
     return cmp_double_asc_x_asc_y(ax, ay, bx, by);
-}
-
-static inline int
-cmp_pdouble_asc_x_des_y_nonzero(const void * restrict pa, const void * restrict pb)
-{
-    const double ax = *(const double *)pa;
-    const double bx = *(const double *)pb;
-    const double ay = *((const double *)pa + 1);
-    const double by = *((const double *)pb + 1);
-    int cmp = cmp_double_asc(ax, bx);
-    return cmp ? cmp : (ay > by ? -1 : 1);
 }
 
 static inline int
