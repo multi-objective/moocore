@@ -130,7 +130,7 @@ class Bench:
         print(f"{self.name}:{n}:{what}:{duration}")
         return value
 
-    def plots(self, title, file_prefix, log="y"):
+    def plots(self, title, file_prefix, log="y", relative=False):
         for what in self.keys():
             self.times[what] = np.asarray(self.times[what])
 
@@ -157,7 +157,7 @@ class Bench:
         plt.suptitle(f"{title} for {self.name}", fontsize=12)
         plt.savefig(f"{file_prefix}_bench-{self.name}-time.png")
 
-        if "moocore" in self.keys():
+        if relative and "moocore" in self.keys():
             reltimes = {}
             for what in self.keys():
                 if what == "moocore":
