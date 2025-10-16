@@ -14,10 +14,13 @@ repos:
       - id: no-print-statement
       - id: no-debug-statement
       - id: deps-in-desc
-        args: [--root=r/]
+        args: [--root=./r/]
         exclude: '(do\.R|vignettes/articles/.+\.Rmd)'
       - id: roxygenize
-        args: [--root=<R package root>]
+        args: [--root=./r/]
+        additional_dependencies:
+          - doctest
+          - Rdpack
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
