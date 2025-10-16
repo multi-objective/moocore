@@ -1024,9 +1024,9 @@ def generate_ndset(
     :footcite:p:`RubMel1998simulation`.  Values sampled from the exponential
     distribution are guaranteed to be positive.
 
-    Sampling from either the standard normal distribution, as suggested by
-    :footcite:t:`GueFonPaq2021hv`, or the uniform distribution, as suggested by
-    :footcite:t:`LacKlaFon2017box`, does not produce a uniform distribution
+    Sampling from either the standard normal distribution
+    :footcite:p:`GueFonPaq2021hv` or the uniform distribution
+    :footcite:p:`LacKlaFon2017box` does not produce a uniform distribution
     when projected into the simplex.
 
     Method ``"concave-sphere"`` uniformly samples points on the positive
@@ -1038,8 +1038,8 @@ def generate_ndset(
     :math:`z_i = \frac{|x_i|}{\|\vec{x}\|_2}`
     :footcite:p:`Muller1959sphere`. The absolute value in the numerator ensures
     that points are sampled on the positive orthant of the hyper-sphere.
-    Sampling from the uniform distribution, as suggested by
-    :footcite:t:`LacKlaFon2017box`, does not result in a uniform sampling when
+    Sampling from the uniform distribution :footcite:p:`LacKlaFon2017box`
+    does not result in a uniform sampling when
     projected onto the surface of the hyper-sphere.
 
     Method ``"convex-sphere"`` is quivalent to ``1 - generate_ndset(...,

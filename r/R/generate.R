@@ -42,10 +42,9 @@
 #' \eqn{z_i = x_i / \sum_{i=1}^d x_i} \citep{RubMel1998simulation}.  Values
 #' sampled from the exponential distribution are guaranteed to be positive.
 #'
-#' Sampling from either the standard normal distribution, as suggested by
-#' \citet{GueFonPaq2021hv}, or the uniform distribution, as suggested by
-#' \citet{LacKlaFon2017box}, does not produce a uniform distribution when
-#' projected into the simplex.
+#' Sampling from either the standard normal distribution
+#' \citep{GueFonPaq2021hv} or the uniform distribution \citep{LacKlaFon2017box}
+#' does not produce a uniform distribution when projected into the simplex.
 #'
 #' Method `"concave-sphere"` uniformly samples points on the positive orthant
 #' of the hyper-sphere, which is concave when all objectives are minimised.
@@ -55,8 +54,8 @@
 #' then dividing each value by the l2-norm of the vector, \eqn{z_i =
 #' \frac{|x_i|}{\|\vec{x}\|_2}} \citep{Muller1959sphere}. The absolute value in
 #' the numerator ensures that points are sampled on the positive orthant of the
-#' hyper-sphere.  Sampling from the uniform distribution, as suggested by
-#' \citet{LacKlaFon2017box}, does not result in a uniform sampling when
+#' hyper-sphere.  Sampling from the uniform distribution
+#' \citep{LacKlaFon2017box} does not result in a uniform sampling when
 #' projected onto the surface of the hyper-sphere.
 #'
 #' Method `"convex-sphere"` is quivalent to `1 - generate_ndset(...,
