@@ -17,7 +17,7 @@ repos:
         args: [--root=r/]
         exclude: '(do\.R|vignettes/articles/.+\.Rmd)'
       - id: roxygenize
-        args: [--root=<R package root>]
+        args: [--root=r/]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
