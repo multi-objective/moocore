@@ -40,22 +40,21 @@ dependencies = [
   "platformdirs",
 ]
 
-urls.Documentation = "https://multi-objective.github.io/moocore/python/"
-urls.Homepage = "https://multi-objective.github.io/moocore/python/"
-urls.Source = "https://github.com/multi-objective/moocore/"
-urls.Tracker = "https://github.com/multi-objective/moocore/issues"
-
-[dependency-groups]
-dev = [ "ruff>=0.11.2" ]
-test = [ "pandas>=2", "pytest>7", "seaborn", { include-group = "coverage" } ]
-docs = [
+optional-dependencies.coverage = [
+  "coverage[toml]",
+  "gcovr",
+]
+optional-dependencies.dev = [ "pre-commit>=3.3.2", "ruff>=0.11.2", "tox>=4.6.2" ]
+optional-dependencies.docs = [
   "ipykernel",
   "ipywidgets",
   "jupyter",
   "jupyterlab",
   "kaleido",
+  "pandas>=2",
   "plotly",
   "pydata-sphinx-theme>=0.16",
+  "seaborn",
   "sphinx>=6",
   "sphinx-autodoc-typehints",
   "sphinx-copybutton",
@@ -64,8 +63,14 @@ docs = [
   "sphinxcontrib-bibtex",
   "sphinxcontrib-napoleon",
 ]
-
-coverage = [ "coverage[toml]", "gcovr" ]
+optional-dependencies.test = [
+  "pandas>=2",
+  "pytest>7",
+]
+urls.Documentation = "https://multi-objective.github.io/moocore/python/"
+urls.Homepage = "https://multi-objective.github.io/moocore/python/"
+urls.Source = "https://github.com/multi-objective/moocore/"
+urls.Tracker = "https://github.com/multi-objective/moocore/issues"
 
 [tool.setuptools]
 zip-safe = false
