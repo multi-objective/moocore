@@ -88,8 +88,8 @@ skip = [
   "*_i686",    # Skip 32-bit builds
 ]
 build-verbosity = 2
-# Will cause the wheel to be installed with these groups of dependencies
-test-groups = [ "test" ]
+# Will cause the wheel to be installed with these optional-dependencies
+test-extras = [ "test" ]
 test-command = [
   "pytest --doctest-modules --doctest-continue-on-failure {package}/tests {package}/src/moocore/_moocore.py",
 ]

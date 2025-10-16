@@ -20,7 +20,7 @@ pre-commit:
 	pre-commit run -a
 
 docdeps:
-	python3 -m pip install -r requirements_dev.txt --disable-pip-version-check --quiet
+	python3 -m pip install .[docs] --disable-pip-version-check --quiet
 
 show:
 	$(MAKE) -C doc show
