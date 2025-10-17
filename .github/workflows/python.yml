@@ -95,6 +95,7 @@ jobs:
         run: python3 -m build
         working-directory: python
 
+        # This is needed for publishing to PyPI
       - name: Publish artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -130,13 +131,8 @@ jobs:
         run: python3 -m build
         working-directory: python
 
-      - name: install the package
-        run: python3 -m pip install .
-        working-directory: python
-
-      - name: install the doc build requirements
-        run: |
-          python3 -m pip install .[docs]
+      - name: Install the package and the doc build requirements
+        run: python3 -m pip install .[docs]
         working-directory: python
 
       - name: Build the docs 🔧
@@ -160,7 +156,6 @@ jobs:
     name: Coverage ${{ matrix.os }} (${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
     strategy:
-      # When set to true, GitHub cancels all in-progress jobs if any matrix job fails.
       matrix:
         os: [ubuntu-latest]
         python-version: ['3.10']
