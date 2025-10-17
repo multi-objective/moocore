@@ -47,9 +47,6 @@ sources = [
 sources = [sources_path + f for f in sources]
 
 
-is_windows = platform.system() == "Windows"
-
-
 def get_config():
     from distutils.core import Distribution
     from distutils.sysconfig import get_config_vars
@@ -64,8 +61,8 @@ def uses_msvc():
     return config.try_compile('#ifndef _MSC_VER\n#error "not MSVC"\n#endif')
 
 
-# Try to detect cross-compilation.
-def _get_target_platform(arch_flags, default):
+def _get_target_platform():
+    arch_flags = os.environ.get("ARCHFLAGS", "")
     flags = [f for f in arch_flags.split(" ") if f.strip() != ""]
     try:
         pos = flags.index("-arch")
@@ -74,9 +71,14 @@ def _get_target_platform(arch_flags, default):
     except ValueError:
         pass
 
-    return default
+    return platform.machine()
 
 
+is_windows = platform.system() == "Windows"
+target_platform = _get_target_platform()
+is_x86_64 = target_platform in ("i686", "x86", "x86_64", "AMD64")
+
+# Compiler flags.
 MSVC_CFLAGS = ["/GL", "/O2", "/GS-", "/wd4996"]
 MSVC_LDFLAGS = ["/LTCG"]
 GCC_CFLAGS = ["-flto", "-O3"]
@@ -86,17 +88,14 @@ extra_link_args = []
 if is_windows and uses_msvc():
     extra_compile_args.extend(MSVC_CFLAGS)
     extra_link_args.extend(MSVC_LDFLAGS)
+    if is_x86_64:
+        extra_compile_args.append("/arch:AVX")
 else:
     extra_compile_args.extend(GCC_CFLAGS)
     extra_link_args.extend(GCC_CFLAGS)
-    target_platform = _get_target_platform(
-        os.environ.get("ARCHFLAGS", ""), platform.machine()
-    )
-    # Optimized version requires SSE2 extensions. They have been around since
-    # 2001 so we try to compile it on every recent-ish x86.
-    sse2 = target_platform in ("i686", "x86", "x86_64", "AMD64")
-    if sse2:
-        extra_compile_args.append("-msse2")
+    # Compile for sufficiently old x86-64 architecture.
+    if is_x86_64:
+        extra_compile_args.append("-march=x86-64-v2")
 
 cflags = os.environ.get("CFLAGS", "")
 if cflags != "":
