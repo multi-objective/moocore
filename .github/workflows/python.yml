@@ -216,12 +216,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
 
-      - name: Setup LLVM for Windows ARM64
+      - name: Setup LLVM for Windows ARM64 (NOT WORKING/FIXME)
         if: ${{ matrix.os == 'windows-11-arm' }}
         uses: ./.github/windows_arm64_steps
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.23.3
+        uses: pypa/cibuildwheel@v3.2.1
         with:
           package-dir: python
           output-dir: wheelhouse
