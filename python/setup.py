@@ -3,17 +3,19 @@ from setuptools import setup
 from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
 
 
-class bdist_wheel_abi_none(_bdist_wheel):
+class bdist_wheel_abi3(_bdist_wheel):
     def finalize_options(self):
         _bdist_wheel.finalize_options(self)
-        self.root_is_pure = False
-
-    def get_tag(self):
-        _python, _abi, plat = _bdist_wheel.get_tag(self)
-        return "py3", "none", plat
+        # Automatically detect py_limited_api from extension modules
+        if not self.py_limited_api:
+            for ext in self.distribution.ext_modules or []:
+                if getattr(ext, "py_limited_api", False):
+                    # Use cp310 as the minimum Python version for abi3
+                    self.py_limited_api = "cp310"
+                    break
 
 
 setup(
     cffi_modules=["src/moocore/_ffi_build.py:ffibuilder"],
-    cmdclass={"bdist_wheel": bdist_wheel_abi_none},
+    cmdclass={"bdist_wheel": bdist_wheel_abi3},
 )

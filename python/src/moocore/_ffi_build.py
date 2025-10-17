@@ -118,7 +118,8 @@ ffibuilder.set_source(
     sources=sources,
     include_dirs=[libmoocore_path],
     extra_compile_args=extra_compile_args,
-    extra_link_args=extra_compile_args,
+    extra_link_args=extra_link_args,
+    py_limited_api=True,
 )
 
 if __name__ == "__main__":
