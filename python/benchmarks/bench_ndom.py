@@ -65,7 +65,7 @@ for name in names:
                 z, maximise=True, keep_weakly=False
             ),
             "botorch": lambda z: botorch_is_nondominated(z, deduplicate=True),
-            "paretoset": lambda z: paretoset(
+            "paretoset (numba)": lambda z: paretoset(
                 z, sense=z.shape[1] * ["max"], distinct=True, use_numba=True
             ),
         },
@@ -116,7 +116,7 @@ for name in names:
             "botorch": lambda z: bool2pos(
                 botorch_is_nondominated(z, deduplicate=False)
             ),
-            "paretoset": lambda z: bool2pos(
+            "paretoset (numba)": lambda z: bool2pos(
                 paretoset(
                     z,
                     sense=z.shape[1] * ["max"],
