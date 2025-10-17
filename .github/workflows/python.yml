@@ -205,8 +205,12 @@ jobs:
         # https://github.com/numpy/numpy-release/blob/main/.github/workflows/wheels.yml
         # macos-14 is Apple Silicon (arm64), but we build an universal2 wheel.
         # The configuration of cibuildwheel can be found in pyproject.toml
-        os: [ubuntu-22.04, ubuntu-22.04-arm, windows-2025, windows-11-arm, macos-14]
+        os: [ubuntu-22.04, ubuntu-22.04-arm, windows-2025, macos-14]
         python-version: ['3.10']
+        include:
+          # 3.11 is the earliest version on windows-arm
+          - os: windows-11-arm
+            python-version: "3.11"
 
     steps:
       - uses: actions/checkout@v5
