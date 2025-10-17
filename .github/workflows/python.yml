@@ -202,10 +202,11 @@ jobs:
       matrix:
         # FIXME: add windows-11-arm and ubuntu-24.04-arm
         # https://github.com/scipy/scipy/blob/6b79a4dec1f9ca2db4e49c328d04d293880991c6/.github/workflows/wheels.yml#L78
-        # macos-14 is apple silicon
-        os: [ubuntu-22.04, windows-2025, macos-14]
+        # https://github.com/numpy/numpy-release/blob/main/.github/workflows/wheels.yml
+        # macos-14 is Apple Silicon (arm64), but we build an universal2 wheel.
+        # The configuration of cibuildwheel can be found in pyproject.toml
+        os: [ubuntu-22.04, ubuntu-22.04-arm, windows-2025, macos-14]
         python-version: ['3.10']
-        CIBW_ARCHS_MACOS: ['universal2']
 
     steps:
       - uses: actions/checkout@v5
@@ -215,17 +216,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Set up QEMU
-        if: runner.os == 'Linux'
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
-
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.23.3
-        env:
-          CIBW_ARCHS_MACOS: ${{ matrix.CIBW_ARCHS_MACOS }}
-          CIBW_TEST_SKIP: ${{ matrix.CIBW_TEST_SKIP }}
         with:
           package-dir: python
           output-dir: wheelhouse
