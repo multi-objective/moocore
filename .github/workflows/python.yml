@@ -98,7 +98,7 @@ jobs:
       - name: Publish artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: moocore-wheels-${{ matrix.os }}-${{ matrix.python-version }}
+          name: moocore-wheels-sdist-${{ matrix.os }}-${{ matrix.python-version }}
           path: python/dist/*.tar.gz
 
   build-doc:
@@ -205,7 +205,7 @@ jobs:
         # https://github.com/numpy/numpy-release/blob/main/.github/workflows/wheels.yml
         # macos-14 is Apple Silicon (arm64), but we build an universal2 wheel.
         # The configuration of cibuildwheel can be found in pyproject.toml
-        os: [ubuntu-22.04, ubuntu-22.04-arm, windows-2025, macos-14]
+        os: [ubuntu-22.04, ubuntu-22.04-arm, windows-2025, windows-11-arm, macos-14]
         python-version: ['3.10']
 
     steps:
@@ -215,6 +215,11 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Setup LLVM for Windows ARM64
+        if: ${{ matrix.os == 'windows-11-arm' }}
+        uses: ./.github/windows_arm64_steps
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.23.3
