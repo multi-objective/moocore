@@ -1,10 +1,11 @@
+botorch
 cpuinfo
+desdeo
+jmetal
+matplotlib
+nevergrad
+numba
 numpy
 pandas
-matplotlib
-botorch
-pymoo
-jmetal
-desdeo
 paretoset
-nevergrad
+pymoo
