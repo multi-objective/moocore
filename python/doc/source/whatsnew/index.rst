@@ -7,15 +7,20 @@ What's new
 Version 0.1.9 (dev)
 -------------------
 
-- :func:`~moocore.hv_contributions` ignores dominated points by default.  Set ``ignore_dominated=False`` to restore the previous behavior.  The 3D case uses the HVC3D algorithm.
+- :func:`~moocore.hv_contributions` ignores dominated points by default.
+  Set ``ignore_dominated=False`` to restore the previous behavior.
+  The 3D case uses the HVC3D algorithm.
 - New function :func:`~moocore.any_dominated` to quickly detect if a set is
   nondominated.
 - New function :func:`~moocore.generate_ndset` to generate random nondominated
   sets with different shapes.
 - New example :ref:`sphx_glr_auto_examples_plot_generate.py`.
-- :func:`~moocore.is_nondominated`, :func:`~moocore.any_dominated`, :func:`~moocore.pareto_rank` now handle single-objective inputs correctly (:issue:`27`, :issue:`29`).
+- :func:`~moocore.is_nondominated`, :func:`~moocore.any_dominated`,
+  :func:`~moocore.pareto_rank` now handle single-objective inputs correctly (:issue:`27`, :issue:`29`).
 - Ranks returned by :func:`~moocore.pareto_rank` are 0-based.
 - :func:`~moocore.is_nondominated` and :func:`~moocore.filter_dominated` are faster for dimensions larger than 3.
+- ``moocore`` wheels are now built for ``aarch64`` (ARM64) in Linux and Windows.
+  See the `installation instructions <https://github.com/multi-objective/moocore/tree/main/python#install>`_.
 
 Version 0.1.8 (15/07/2025)
 --------------------------
