@@ -95,10 +95,11 @@ jobs:
         run: python3 -m build
         working-directory: python
 
+        # This is needed for publishing to PyPI
       - name: Publish artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: moocore-wheels-${{ matrix.os }}-${{ matrix.python-version }}
+          name: moocore-wheels-sdist-${{ matrix.os }}-${{ matrix.python-version }}
           path: python/dist/*.tar.gz
 
   build-doc:
@@ -130,13 +131,8 @@ jobs:
         run: python3 -m build
         working-directory: python
 
-      - name: install the package
-        run: python3 -m pip install .
-        working-directory: python
-
-      - name: install the doc build requirements
-        run: |
-          python3 -m pip install .[docs]
+      - name: Install the package and the doc build requirements
+        run: python3 -m pip install .[docs]
         working-directory: python
 
       - name: Build the docs 🔧
@@ -160,7 +156,6 @@ jobs:
     name: Coverage ${{ matrix.os }} (${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
     strategy:
-      # When set to true, GitHub cancels all in-progress jobs if any matrix job fails.
       matrix:
         os: [ubuntu-latest]
         python-version: ['3.10']
@@ -207,6 +202,10 @@ jobs:
         # The configuration of cibuildwheel can be found in pyproject.toml
         os: [ubuntu-22.04, ubuntu-22.04-arm, windows-2025, macos-14]
         python-version: ['3.10']
+        include:
+          # 3.11 is the earliest version on windows-arm
+          - os: windows-11-arm
+            python-version: "3.11"
 
     steps:
       - uses: actions/checkout@v5
@@ -215,6 +214,11 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Setup LLVM for Windows ARM64
+        if: ${{ matrix.os == 'windows-11-arm' }}
+        uses: ./.github/windows_arm64_steps
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.23.3
