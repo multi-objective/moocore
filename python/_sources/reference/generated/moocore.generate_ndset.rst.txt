@@ -1,0 +1,12 @@
+﻿generate\_ndset
+===============
+
+.. currentmodule:: moocore
+
+.. autofunction:: generate_ndset
+
+.. _sphx_glr_backref_moocore.generate_ndset:
+
+.. minigallery:: moocore.generate_ndset
+   :add-heading: Gallery examples
+   :heading-level: -
