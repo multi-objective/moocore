@@ -82,10 +82,10 @@ package-dir = { "" = "src" }
 
 [tool.cibuildwheel]
 skip = [
-  "pp*",       # Disable building PyPy wheels on all platforms
   "*_ppc64le",
   "*_s390x",
   "*_i686",    # Skip 32-bit builds
+  "cp314t-*",  # Skip free-threaded builds
 ]
 build-verbosity = 2
 # Will cause the wheel to be installed with these optional-dependencies
@@ -93,14 +93,14 @@ test-extras = [ "test" ]
 test-command = [
   "pytest --doctest-modules --doctest-continue-on-failure {package}/tests {package}/src/moocore/_moocore.py",
 ]
-test-skip = "*-*linux_{aarch64,ppc64le,s390x}"
+#test-skip = "*-*linux_{aarch64,ppc64le,s390x}"
 
 [tool.cibuildwheel.linux]
-archs = [
-  "x86_64",
-  #  "aarch64", FAILS doctests
-]
+archs = [ "native" ]
 manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+musllinux-x86_64-image = "musllinux_1_2"
+musllinux-aarch64-image = "musllinux_1_2"
 # Use abi3audit to catch issues with Limited API wheels
 repair-wheel-command = [
   "auditwheel repair -w {dest_dir} {wheel}",
@@ -108,9 +108,7 @@ repair-wheel-command = [
 ]
 
 [tool.cibuildwheel.windows]
-archs = [
-  "AMD64",
-]
+archs = [ "native" ]
 # Use delvewheel on windows
 before-build = "pip install delvewheel"
 repair-wheel-command = [
@@ -119,9 +117,7 @@ repair-wheel-command = [
 ]
 
 [tool.cibuildwheel.macos]
-archs = [
-  "universal2",
-]
+archs = [ "universal2" ]
 repair-wheel-command = [
   "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}",
   #  "pipx run abi3audit --verbose --strict --report {wheel}",
