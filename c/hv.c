@@ -37,12 +37,12 @@
 #define HV_DIMENSION 4
 #include "hv_priv.h"
 
-#define STOP_DIMENSION 3 /* default: stop on dimension 4 */
+#define STOP_DIMENSION 3 // default: stop on dimension 4.
 
 typedef struct fpli_dlnode {
     const double * restrict x;         // point vector
-    struct fpli_dlnode **next;         // next-node vector
-    struct fpli_dlnode **prev;         // previous-node vector
+    struct fpli_dlnode ** next;        // next-node vector
+    struct fpli_dlnode ** prev;        // previous-node vector
     double * restrict area;            // partial area
     double * restrict vol;             // partial volume
     dimension_t ignore;                // [0, 255]
@@ -67,8 +67,9 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     ASSUME(d > STOP_DIMENSION);
     dimension_t d_stop = d - STOP_DIMENSION;
     size_t n = *size;
-    fpli_dlnode_t * head = malloc ((n+1) * sizeof(*head));
-    head->next = malloc(2 * d_stop * (n+1) * sizeof(*head));
+    fpli_dlnode_t * head = malloc((n+1) * sizeof(*head));
+    // Allocate single blocks of memory as much as possible.
+    head->next = malloc(2 * d_stop * (n+1) * sizeof(head));
     head->prev = head->next + d_stop * (n+1);
     head->area = malloc(2 * d_stop * (n+1) * sizeof(*data));
     head->vol = head->area + d_stop * (n+1);
@@ -150,8 +151,7 @@ static void
 delete(fpli_dlnode_t * restrict nodep, dimension_t dim, double * restrict bound)
 {
     ASSUME(dim > STOP_DIMENSION);
-    for (dimension_t i = STOP_DIMENSION; i < dim; i++) {
-        dimension_t d = i - STOP_DIMENSION;
+    for (dimension_t d = 0; d < dim - STOP_DIMENSION; d++) {
         nodep->prev[d]->next[d] = nodep->next[d];
         nodep->next[d]->prev[d] = nodep->prev[d];
     }
@@ -162,8 +162,7 @@ static void
 reinsert(fpli_dlnode_t * restrict nodep, dimension_t dim, double * restrict bound)
 {
     ASSUME(dim > STOP_DIMENSION);
-    for (dimension_t i = STOP_DIMENSION; i < dim; i++) {
-        dimension_t d = i - STOP_DIMENSION;
+    for (dimension_t d = 0; d < dim - STOP_DIMENSION; d++) {
         nodep->prev[d]->next[d] = nodep;
         nodep->next[d]->prev[d] = nodep;
     }
