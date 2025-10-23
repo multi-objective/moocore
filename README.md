@@ -4,7 +4,7 @@
 |Homepage | Code | Build status | Coverage | Package | Downloads |
 | :---: | :---: | :---: | :---: | :---: | :---: |
 | [**C library**][c-moocore-homepage] | [GitHub][c-moocore-github] |[![Build status][c-build-badge]][c-build-link]| |
-| [**R package**][r-moocore-homepage] | [GitHub][r-moocore-github] |[![Build status][r-build-badge]][r-build-link]|[![Code Coverage][r-coverage-badge]][r-coverage-link]|[![CRAN version](https://www.r-pkg.org/badges/version-last-release/moocore)][r-moocore-cran] [![CRAN Status](https://badges.cranchecks.info/worst/moocore.svg)][r-moocore-cran-results]|[![CRAN Downloads](https://cranlogs.r-pkg.org/badges/grand-total/moocore)][r-moocore-cran]|
+| [**R package**][r-moocore-homepage] | [GitHub][r-moocore-github] |[![Build status][r-build-badge]][r-build-link] [![r-universe build status][r-universe-build-badge]][r-universe-build-link]|[![Code Coverage][r-coverage-badge]][r-coverage-link]|[![CRAN version](https://www.r-pkg.org/badges/version-last-release/moocore)][r-moocore-cran] [![CRAN Status](https://badges.cranchecks.info/worst/moocore.svg)][r-moocore-cran-results] [![r-universe version][r-universe-version-badge]][r-universe-version]|[![CRAN Downloads](https://cranlogs.r-pkg.org/badges/grand-total/moocore)][r-moocore-cran]|
 | [**Python package**][py-moocore-homepage] | [GitHub][py-moocore-github] |[![Build status][py-build-badge]][py-build-link]|[![Code Coverage][py-coverage-badge]][py-coverage-link]|[![PyPI - Version](https://img.shields.io/pypi/v/moocore)][py-moocore-pypi]|[![PyPI - Downloads](https://img.shields.io/pypi/dm/moocore?color=blue)][py-moocore-pypi-stats]|
 
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/multi-objective/moocore/main.svg)](https://results.pre-commit.ci/latest/github/multi-objective/moocore/main)
@@ -75,5 +75,9 @@ The following projects currently use `moocore`:
 [r-moocore-cran-results]: https://cran.r-project.org/web/checks/check_results_moocore.html
 [r-moocore-github]: https://github.com/multi-objective/moocore/tree/main/r#readme
 [r-moocore-homepage]: https://multi-objective.github.io/moocore/r/
+[r-universe-build-badge]: https://github.com/r-universe/multi-objective/actions/workflows/build.yml/badge.svg
+[r-universe-build-link]: https://github.com/r-universe/multi-objective/actions/workflows/build.yml
+[r-universe-version]: https://multi-objective.r-universe.dev/moocore
+[r-universe-version-badge]: https://multi-objective.r-universe.dev/badges/moocore
 [testsuite-badge]: https://github.com/multi-objective/testsuite/actions/workflows/moocore.yml/badge.svg?event=push
 [testsuite-link]: https://github.com/multi-objective/testsuite/actions/workflows/moocore.yml

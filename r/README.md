@@ -7,8 +7,8 @@
 [![CRAN Downloads](https://cranlogs.r-pkg.org/badges/grand-total/moocore)][r-moocore-cran]
 [![R build status][r-build-badge]][r-build-link]
 [![coverage][r-coverage-badge]][r-coverage-link]
-[![r-universe version](https://multi-objective.r-universe.dev/badges/moocore)](https://multi-objective.r-universe.dev/moocore)
-[![r-universe build status](https://github.com/r-universe/multi-objective/actions/workflows/build.yml/badge.svg)](https://github.com/r-universe/multi-objective/actions/workflows/build.yml)
+[![r-universe version][r-universe-version-badge]][r-universe-version]
+[![r-universe build status][r-universe-build-badge]][r-universe-build-link]
 <!-- badges: end -->
 
 [ [**Homepage**][r-moocore-homepage] ]
@@ -144,3 +144,7 @@ this work so I can mention them to my funding agent and tenure committee.
 [r-moocore-cran]: https://cran.r-project.org/package=moocore
 [r-moocore-github]: https://github.com/multi-objective/moocore/tree/main/r#readme
 [r-moocore-homepage]: https://multi-objective.github.io/moocore/r/
+[r-universe-build-badge]: https://github.com/r-universe/multi-objective/actions/workflows/build.yml/badge.svg
+[r-universe-build-link]: https://github.com/r-universe/multi-objective/actions/workflows/build.yml
+[r-universe-version]: https://multi-objective.r-universe.dev/moocore
+[r-universe-version-badge]: https://multi-objective.r-universe.dev/badges/moocore
