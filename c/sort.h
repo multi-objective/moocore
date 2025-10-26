@@ -179,7 +179,7 @@ generate_sorted_doublep_2d(const double * restrict points,
                            size_t * restrict size, const double ref0)
 {
     size_t n = *size;
-    const double **p = malloc(n * sizeof(*p));
+    const double **p = (const double **) malloc(n * sizeof(*p));
     size_t j = 0;
     for (size_t k = 0; k < n; k++) {
         /* There is no point in checking p[k][1] < ref[1] here because the
