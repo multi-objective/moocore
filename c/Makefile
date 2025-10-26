@@ -8,6 +8,7 @@ S=
 ifneq ($(findstring $(MAKEFLAGS),s),s)
   ifdef S
     QUIET_CC   = @echo '   ' CC $@;
+    QUIET_CXX  = @echo '   ' CXX $@;
     QUIET_AR   = @echo '   ' AR $@;
     QUIET_LINK = @echo '   ' LINK $@;
     QUIET_RM   = @echo '   ' RM $@;
@@ -113,6 +114,7 @@ HDRS =  avl.h                                                                \
 DIST_OTHER_FILES =  git_version *.mk
 DIST_ROOT_FILES = Makefile README.md LICENSE
 OBJS  = $(SRCS:.c=.o)
+OBJS := $(OBJS:.cpp=.o)
 
 EXE_LDFLAGS=-lm
 
@@ -171,6 +173,9 @@ default: $(EXE_FILES)
 all: clean
 	$(MAKE) default
 
+%.o : %.cpp
+	$(QUIET_CXX)$(CXX) $(CPPFLAGS) $(EXE_CFLAGS) $(CFLAGS) -c -o $@ $<
+
 %.o : %.c
 	$(QUIET_CC)$(CC) $(CPPFLAGS) $(EXE_CFLAGS) $(CFLAGS) -c -o $@ $<
 
@@ -185,7 +190,7 @@ $(BINDIR)/hv$(EXE): main-hv.o timer.o $(LIBHV_OBJS)
 $(BINDIR)/hvapprox$(EXE): main-hvapprox.o timer.o hvapprox.o rng.o mt19937/mt19937.o
 $(BINDIR)/igd$(EXE): igd.o
 $(BINDIR)/ndsort$(EXE): ndsort.o pareto.o $(LIBHV_OBJS)
-$(BINDIR)/nondominated$(EXE): nondominated.o
+$(BINDIR)/nondominated$(EXE): nondominated.o timer.o
 
 $(EXE_FILES): cmdline.o io.o
 	$(call MKDIR, $(BINDIR)/)
@@ -264,7 +269,7 @@ mex: Hypervolume_MEX.c $(LIBHV_OBJS)
 	$(call ECHO,---> You can use 'make mex MEXFLAGS="-O -std=c99"' to pass flags to mex. Code compiled by mex is less optimized (slower) than the default 'hv' command-line program <---)
 	$(MEX) -v $(MEXFLAGS) -std=c99 $^
 
-DIST_SRC_FILES = $(DIST_OTHER_FILES) $(OBJS:.o=.c) $(HDRS)
+DIST_SRC_FILES = $(DIST_OTHER_FILES) $(SRCS) $(HDRS)
 DIST_SRC:= moocore-$(VERSION)-src
 dist: DEBUG=0
 dist: CDEBUG=
