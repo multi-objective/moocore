@@ -28,8 +28,9 @@
 #include <limits.h> // LONG_MAX
 #include <inttypes.h> // PRIu32
 
-#include "hvapprox.h"
 #include "timer.h"
+#include "nondominated.h"
+#include "hvapprox.h"
 #define CMDLINE_COPYRIGHT_YEARS "2025"
 #define CMDLINE_AUTHORS "Manuel Lopez-Ibanez <manuel.lopez-ibanez@manchester.ac.uk>\n"
 #include "cmdline.h"

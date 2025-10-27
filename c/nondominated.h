@@ -19,6 +19,76 @@ typedef struct avl_node_t {
 
 #include "avl_tiny.h"
 
+enum objs_agree_t { AGREE_MINIMISE = -1, AGREE_NONE = 0, AGREE_MAXIMISE = 1 };
+
+static inline enum objs_agree_t
+check_all_minimize_maximize(const signed char * restrict minmax, dimension_t dim)
+{
+    bool all_minimize = true, all_maximize = true;
+    for (dimension_t d = 0; d < dim; d++) {
+        if (minmax[d] < 0) {
+            all_maximize = false;
+        } else if (minmax[d] > 0) {
+            all_minimize = false;
+        } else {
+            all_minimize = false;
+            all_maximize = false;
+            break;
+        }
+    }
+    assert(!all_maximize || !all_minimize);
+    if (all_minimize) return AGREE_MINIMISE;
+    if (all_maximize) return AGREE_MAXIMISE;
+    return AGREE_NONE;
+}
+
+/* Convert from bool vector to minmax vector.  */
+static inline signed char *
+minmax_from_bool(const bool * restrict maximise, dimension_t nobj)
+{
+    ASSUME(nobj > 0 && nobj < 128);
+    signed char * minmax = malloc(nobj * sizeof(*minmax));
+    for (dimension_t k = 0; k < nobj; k++) {
+        minmax[k] = maximise[k] ? AGREE_MAXIMISE : AGREE_MINIMISE;
+    }
+    return minmax;
+}
+
+static inline bool *
+new_bool_maximise(dimension_t nobj, bool maximise_all)
+{
+    ASSUME(nobj > 0 && nobj < 128);
+    bool * maximise = malloc(nobj * sizeof(*maximise));
+    for (dimension_t k = 0; k < nobj; k++)
+        maximise[k] = maximise_all;
+    return maximise;
+}
+
+static inline const signed char *
+default_minmax(dimension_t nobj, signed char default_value)
+{
+    ASSUME(nobj > 0 && nobj < 128);
+    ASSUME(default_value == AGREE_MINIMISE || default_value == AGREE_MAXIMISE);
+    signed char * minmax = malloc(nobj * sizeof(*minmax));
+    for (dimension_t i = 0; i < nobj; i++)
+        minmax[i] = default_value;
+    return minmax;
+}
+
+static inline const signed char *
+minmax_minimise(dimension_t nobj)
+{
+    return default_minmax(nobj, AGREE_MINIMISE);
+}
+
+static inline const signed char *
+minmax_maximise(dimension_t nobj)
+{
+    return default_minmax(nobj, AGREE_MAXIMISE);
+}
+
+// FIXME: It would be more efficient to default to false (using calloc) and
+// change to true.
 static inline bool *
 nondom_init (size_t size)
 {
@@ -470,8 +540,7 @@ find_dominated_point_agree(const double * restrict points, int dim, size_t size,
                            const signed char * restrict minmax,
                            enum objs_agree_t agree)
 {
-    ASSUME(dim >= 2);
-    ASSUME(dim <= 32);
+    ASSUME(dim >= 2 && dim <= 32);
     return find_dominated_point_(points, (dimension_t) dim, size, minmax,
                                  agree, /* keep_weakly = */false);
 }
@@ -480,8 +549,7 @@ static inline size_t
 find_dominated_point(const double * restrict points, int dim, size_t size,
                      const signed char * restrict minmax)
 {
-    ASSUME(dim >= 2);
-    ASSUME(dim <= 32);
+    ASSUME(dim >= 2 && dim <= 32);
     return find_dominated_point_(points, (dimension_t) dim, size, minmax,
                                  AGREE_NONE, /* keep_weakly = */false);
 }
@@ -490,9 +558,8 @@ static inline size_t
 find_weakly_dominated_point(const double * restrict points, int dim, size_t size,
                             const bool * restrict maximise)
 {
-    ASSUME(dim >= 2);
-    ASSUME(dim <= 32);
-    const signed char * minmax = minmax_from_bool((dimension_t) dim, maximise);
+    ASSUME(dim >= 2 && dim <= 32);
+    const signed char * minmax = minmax_from_bool(maximise, (dimension_t) dim);
     size_t pos = find_dominated_point_(points, (dimension_t) dim, size, minmax,
                                        AGREE_NONE, /* keep_weakly = */false);
     free((void *)minmax);
@@ -504,8 +571,7 @@ find_nondominated_set_agree(const double * restrict points, int dim, size_t size
                             const signed char * restrict minmax, const signed char agree,
                             bool * restrict nondom)
 {
-    ASSUME(dim >= 2);
-    ASSUME(dim <= 32);
+    ASSUME(dim >= 2 && dim <= 32);
     ASSUME(agree == AGREE_MINIMISE || agree == AGREE_MAXIMISE || agree == AGREE_NONE);
     return find_nondominated_set_(points, (dimension_t) dim, size, minmax,
                                   (enum objs_agree_t) agree, nondom,
@@ -516,8 +582,7 @@ static inline size_t
 find_nondominated_set(const double * restrict points, dimension_t dim, size_t size,
                       const signed char * restrict minmax, bool * restrict nondom)
 {
-    ASSUME(dim >= 2);
-    ASSUME(dim <= 32);
+    ASSUME(dim >= 2 && dim <= 32);
     size_t new_size = find_nondominated_set_(
         points, dim, size, minmax, AGREE_NONE, nondom,
         /* keep_weakly = */false);
@@ -639,9 +704,8 @@ _attr_maybe_unused static bool *
 is_nondominated(const double * restrict data, int nobj, size_t npoint,
                 const bool * restrict maximise, bool keep_weakly)
 {
-    ASSUME(nobj >= 2);
-    ASSUME(nobj <= 32);
-    const signed char * minmax = minmax_from_bool((dimension_t) nobj, maximise);
+    ASSUME(nobj >= 2 && nobj <= 32);
+    const signed char * minmax = minmax_from_bool(maximise, (dimension_t) nobj);
     bool * nondom = is_nondominated_minmax(data, (dimension_t) nobj, npoint,
                                            minmax, keep_weakly);
     free((void *)minmax);
@@ -693,7 +757,7 @@ agree_normalise (double * restrict data, int nobj, int npoint,
                  const double lower_range, const double upper_range,
                  const double * restrict lbound, const double * restrict ubound)
 {
-    const signed char * minmax = minmax_from_bool((dimension_t)nobj, maximise);
+    const signed char * minmax = minmax_from_bool(maximise, (dimension_t)nobj);
     // We have to make the objectives agree before normalisation.
     // FIXME: Do normalisation and agree in one step.
     agree_objectives(data, nobj, npoint, minmax, AGREE_MINIMISE);

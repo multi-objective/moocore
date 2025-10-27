@@ -1236,7 +1236,7 @@ def any_dominated(
 ) -> bool:
     r"""Test whether the input data contains any (weakly-)dominated point.
 
-    This function is equivalent to ``np.logical_not(moocore.is_nondominated(x)).any()``, but faster.
+    This function is equivalent to ``np.logical_not(moocore.is_nondominated(x)).any()``, but significantly faster.
 
     .. seealso:: For details about parameters and the calculation, see :func:`is_nondominated`.
 
@@ -1246,7 +1246,7 @@ def any_dominated(
 
     Examples
     --------
-    >>> S = np.array([[1, 1], [0, 1], [1, 0], [1, 0]])
+    >>> S = np.array([[1, 1], [1, 0], [0, 1], [1, 0]])
     >>> moocore.is_nondominated(S)
     array([False,  True,  True, False])
     >>> moocore.any_dominated(S)

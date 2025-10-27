@@ -9,6 +9,7 @@
 #define INFINITY (HUGE_VAL)
 #endif
 #include "common.h"
+#include "nondominated.h" // minmax_from_bool
 
 static inline bool
 all_positive(const double * restrict points, size_t size, dimension_t dim)
@@ -146,7 +147,7 @@ epsilon_additive(const double * restrict data, int nobj, int npoints,
     ASSUME(npoints >= 0);
     ASSUME(ref_size >= 0);
     dimension_t dim = (dimension_t) nobj;
-    const signed char *minmax = minmax_from_bool(dim, maximise);
+    const signed char * minmax = minmax_from_bool(maximise, dim);
     double value = epsilon_additive_minmax(minmax, dim, data, npoints, ref, ref_size);
     free ((void *)minmax);
     return value;
@@ -161,7 +162,7 @@ epsilon_mult(const double * restrict data, int nobj, int npoints,
     ASSUME(npoints >= 0);
     ASSUME(ref_size >= 0);
     dimension_t dim = (dimension_t) nobj;
-    const signed char * minmax = minmax_from_bool(dim, maximise);
+    const signed char * minmax = minmax_from_bool(maximise, dim);
     double value = epsilon_mult_minmax(minmax, dim, data, npoints, ref, ref_size);
     free ((void *)minmax);
     return value;
