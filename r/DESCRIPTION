@@ -27,7 +27,7 @@ Suggests:
     withr
 License: LGPL (>= 2.1)
 Copyright: file COPYRIGHTS
-URL: https://multi-objective.github.io/moocore/r, https://github.com/multi-objective/moocore
+URL: https://multi-objective.github.io/moocore/r/, https://github.com/multi-objective/moocore
 BugReports: https://github.com/multi-objective/moocore/issues
 LazyLoad: true
 LazyData: true
