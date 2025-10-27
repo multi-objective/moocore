@@ -310,18 +310,29 @@ normalise_C(SEXP DATA, SEXP RANGE, SEXP LBOUND, SEXP UBOUND, SEXP MAXIMISE)
     return R_NilValue;
 }
 
+static inline double *
+matrix_malloc_and_transpose(const double * restrict rdata, size_t npoint, size_t nobj)
+{
+    double * data = malloc(npoint * nobj * sizeof(*data));
+    // We go from column-major (R) to row-major (C), so we have to switch the arguments.
+    matrix_transpose_double(data, rdata, nobj, npoint);
+    return data;
+}
+
 SEXP
 is_nondominated_C(SEXP DATA, SEXP MAXIMISE, SEXP KEEP_WEAKLY)
 {
     int nprotected = 0;
-    /* We transpose the matrix before calling this function. */
-    SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
+    // We DO NOT transpose the matrix before calling this function.
+    SEXP_2_DOUBLE_MATRIX(DATA, rdata, npoint, nobj);
     SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
     SEXP_2_LOGICAL(KEEP_WEAKLY, keep_weakly);
-    assert (nobj == maximise_len);
+    assert(nobj == maximise_len);
 
-    bool * bool_is_nondom = is_nondominated(data, nobj, (size_t) npoint, maximise, keep_weakly);
-    free (maximise);
+    double * data = matrix_malloc_and_transpose(rdata, npoint, nobj);
+    bool * bool_is_nondom = is_nondominated(data, nobj, npoint, maximise, keep_weakly);
+    free(data);
+    free(maximise);
 
     new_logical_vector (is_nondom, npoint);
     bool_2_logical_vector(is_nondom, bool_is_nondom, npoint);
@@ -334,10 +345,10 @@ SEXP
 any_dominated_C(SEXP DATA, SEXP MAXIMISE)
 {
     int nprotected = 0;
-    /* We transpose the matrix before calling this function. */
-    SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
+    // We DO NOT transpose the matrix before calling this function.
+    SEXP_2_DOUBLE_MATRIX(DATA, rdata, npoint, nobj);
     SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
-    assert (nobj == maximise_len);
+    assert(nobj == maximise_len);
 
     if (unlikely(npoint == 1))
         return Rf_ScalarLogical(0);
@@ -346,8 +357,10 @@ any_dominated_C(SEXP DATA, SEXP MAXIMISE)
     if (unlikely(nobj == 1))
         return Rf_ScalarLogical(1);
 
+    double * data = matrix_malloc_and_transpose(rdata, npoint, nobj);
     size_t res = find_weakly_dominated_point(data, nobj, (size_t) npoint, maximise);
-    free (maximise);
+    free(data);
+    free(maximise);
     UNPROTECT(nprotected);
     return Rf_ScalarLogical((res < npoint) ? 1 : 0);
 }

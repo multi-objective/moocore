@@ -91,7 +91,7 @@ is_nondominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
     }
   }
   .Call(is_nondominated_C,
-    t(x),
+    x,
     rep_len(as.logical(maximise), nobjs),
     as.logical(keep_weakly))
 }
@@ -115,7 +115,7 @@ any_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
     x <- x[!duplicated(x), , drop = FALSE]
   nobjs <- ncol(x)
   .Call(any_dominated_C,
-    t(x),
+    x,
     rep_len(as.logical(maximise), nobjs))
 }
 
