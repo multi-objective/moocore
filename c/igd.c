@@ -49,8 +49,8 @@
 #include <unistd.h>  // for getopt()
 #include <getopt.h> // for getopt_long()
 
-#include "igd.h"
 #include "nondominated.h"
+#include "igd.h"
 
 #define CMDLINE_COPYRIGHT_YEARS "2016-2024"
 #define CMDLINE_AUTHORS "Manuel Lopez-Ibanez  <manuel.lopez-ibanez@manchester.ac.uk>\n" \

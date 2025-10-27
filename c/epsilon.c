@@ -47,11 +47,10 @@
 #include <unistd.h>  // for getopt()
 #include <getopt.h> // for getopt_long()
 
-#include "epsilon.h"
 #include "nondominated.h"
+#include "epsilon.h"
 
 #include "cmdline.h"
-
 
 static bool verbose_flag = false;
 static bool additive_flag = true;
