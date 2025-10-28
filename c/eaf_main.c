@@ -183,8 +183,6 @@ int main(int argc, char *argv[])
     FILE *indic_file = NULL;
     FILE *diff_file = NULL;
 
-    int option;
-    int longopt_index;
     /* see the man page for getopt_long for an explanation of these fields */
     static const char short_options[] = "hVvqbmwl:p:o:i::d::P";
     static const struct option long_options[] = {
@@ -207,88 +205,86 @@ int main(int argc, char *argv[])
         {NULL, 0, NULL, 0} /* marks end of list */
     };
 #define MAX_LEVELS 50
-    int *level = malloc(MAX_LEVELS * sizeof(int));
+    int * level = malloc(MAX_LEVELS * sizeof(*level));
     int nlevels = 0;
-    double *percentile = malloc(MAX_LEVELS * sizeof(double));
+    double * percentile = malloc(MAX_LEVELS * sizeof(*percentile));
     int npercentiles = 0;
 
     set_program_invocation_short_name(argv[0]);
 
+    int option;
+    int longopt_index;
     while (0 < (option = getopt_long(argc, argv, short_options,
                                      long_options, &longopt_index))) {
         switch (option) {
-        case 'l':
-            assert(nlevels < MAX_LEVELS);
-            nlevels += read_ints(level + nlevels, optarg);
-            break;
+          case 'l':
+              assert(nlevels < MAX_LEVELS);
+              nlevels += read_ints(level + nlevels, optarg);
+              break;
 
-        case 'p':
-            assert(npercentiles < MAX_LEVELS);
-            npercentiles += read_doubles(percentile + npercentiles, optarg);
-            break;
+          case 'p':
+              assert(npercentiles < MAX_LEVELS);
+              npercentiles += read_doubles(percentile + npercentiles, optarg);
+              break;
 
-        case 'o':
-	    if (!strcmp(optarg,"-")) {
-		coord_file = stdout;
-                coord_filename = NULL;
-            } else
-                coord_filename = optarg;
-	    break;
+          case 'o':
+              if (!strcmp(optarg,"-")) {
+                  coord_file = stdout;
+                  coord_filename = NULL;
+              } else
+                  coord_filename = optarg;
+              break;
 
-	case 'i':
-            if (!optarg) {
-                indic_file = stdin; /* Overwrite with coord_file later. */
-                indic_filename = NULL;
-            }
-	    else if (!strcmp(optarg,"-")) {
-		indic_file = stdout;
-                indic_filename = NULL;
-            }
-            else {
-                indic_filename = optarg;
-            }
-	    break;
+          case 'i':
+              if (!optarg) {
+                  indic_file = stdin; /* Overwrite with coord_file later. */
+                  indic_filename = NULL;
+              } else if (!strcmp(optarg,"-")) {
+                  indic_file = stdout;
+                  indic_filename = NULL;
+              } else {
+                  indic_filename = optarg;
+              }
+              break;
 
-	case 'd':
-            if (!optarg) {
-                diff_file = stdin; /* Overwrite with coord_file later. */
-                diff_filename = NULL;
-            }
-	    else if (!strcmp(optarg,"-")) {
-		diff_file = stdout;
-                diff_filename = NULL;
-            }
-            else {
-                diff_filename = optarg;
-            }
-	    break;
+          case 'd':
+              if (!optarg) {
+                  diff_file = stdin; /* Overwrite with coord_file later. */
+                  diff_filename = NULL;
+              } else if (!strcmp(optarg,"-")) {
+                  diff_file = stdout;
+                  diff_filename = NULL;
+              } else {
+                  diff_filename = optarg;
+              }
+              break;
 
-        case 'b':
-            best_flag = true;
-            break;
+          case 'b':
+              best_flag = true;
+              break;
 
-        case 'm':
-            median_flag = true;
-            break;
+          case 'm':
+              median_flag = true;
+              break;
 
-        case 'w':
-            worst_flag = true;
-            break;
+          case 'w':
+              worst_flag = true;
+              break;
 
-        case 'P':
-            polygon_flag = true;
-            break;
+          case 'P':
+              polygon_flag = true;
+              break;
 
-        case 'q': // --quiet
-            verbose_flag = false;
-            break;
+          case 'q': // --quiet
+              verbose_flag = false;
+              break;
 
-        case 'v': // --verbose
-            verbose_flag = true;
-            break;
+          case 'v': // --verbose
+              verbose_flag = true;
+              break;
 
-        default:
-            default_cmdline_handler(option);
+          default:
+              default_cmdline_handler(option);
         }
     }
 
