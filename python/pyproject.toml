@@ -40,6 +40,21 @@ dependencies = [
   "platformdirs",
 ]
 
+optional-dependencies.benchmarks = [
+  "botorch",
+  "cpuinfo",
+  "desdeo",
+  "jmetal",
+  "matplotlib",
+  "nevergrad",
+  "numba",
+  "numpy",
+  "pandas",
+  "pandas>=2",
+  "paretoset",
+  "pymoo",
+]
+
 optional-dependencies.coverage = [
   "coverage[toml]",
   "gcovr",
