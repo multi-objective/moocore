@@ -168,6 +168,40 @@ def test_igd():
     assert_igd(x, ref, 0.8660254037844386)
 
 
+@pytest.mark.parametrize("dim", range(0, 3))
+def test_is_nondominated_keep_weakly(dim):
+    def check_keep_weakly(x, true_ndom, true_wndom):
+        true_ndom = np.array(true_ndom)
+        true_wndom = np.array(true_wndom)
+
+        test_is_ndom = moocore.is_nondominated(x)
+        assert_array_equal(test_is_ndom, true_ndom)
+        test_filter = moocore.filter_dominated(x)
+        assert_array_equal(test_filter, x[true_ndom, :])
+        test_is_weak_ndom = moocore.is_nondominated(x, keep_weakly=True)
+        assert_array_equal(test_is_weak_ndom, true_wndom)
+        test_weak_filter = moocore.filter_dominated(x, keep_weakly=True)
+        assert_array_equal(test_weak_filter, x[true_wndom, :])
+
+    x = np.array(
+        [[2, 0], [1, 1], [3, 0], [2, 0], [1, 2], [3, 0], [0, 2], [1, 1], [1, 1]]
+    )
+    check_keep_weakly(
+        x=np.append(x, np.zeros((len(x), dim)), axis=1),
+        true_ndom=[True, True, False, False, False, False, True, False, False],
+        true_wndom=[True, True, False, True, False, False, True, True, True],
+    )
+
+    x = np.array(
+        [[1, 0, 1], [1, 1, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0], [1, 1, 1]]
+    )
+    check_keep_weakly(
+        x=np.append(x, np.zeros((len(x), dim)), axis=1),
+        true_ndom=[True, False, True, False, True, False],
+        true_wndom=[True, False, True, True, True, False],
+    )
+
+
 def test_is_nondominated(test_datapath):
     X = moocore.get_dataset("input1.dat")
     subset = X[X[:, 2] == 3, :2]
@@ -175,37 +209,6 @@ def test_is_nondominated(test_datapath):
     assert_array_equal(
         non_dominated,
         [False, False, False, False, True, False, True, True, False, True],
-    )
-    T = np.array(
-        [[2, 0], [1, 1], [3, 0], [2, 0], [1, 2], [3, 0], [0, 2], [1, 1], [1, 1]]
-    )
-    non_dominated = T[moocore.is_nondominated(T)]
-    assert_array_equal(
-        # The order of duplicates is not stable.
-        non_dominated[np.lexsort(non_dominated[:, ::-1].T), :],
-        [[0, 2], [1, 1], [2, 0]],
-    )
-    non_dominated_weak = moocore.is_nondominated(T, keep_weakly=True)
-    assert_array_equal(
-        non_dominated_weak,
-        [True, True, False, True, False, False, True, True, True],
-    )
-
-    T = np.array(
-        [[1, 0, 1], [1, 1, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0], [1, 1, 1]]
-    )
-    non_dominated = T[moocore.is_nondominated(T)]
-    assert_array_equal(
-        # The order of duplicates is not stable.
-        non_dominated[np.lexsort(non_dominated[:, ::-1].T), :],
-        np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]]),
-    )
-    non_dominated_weak = T[moocore.is_nondominated(T, keep_weakly=True)]
-    expct_nondom_weak = np.array([[1, 0, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0]])
-
-    assert_array_equal(non_dominated_weak, expct_nondom_weak)
-    assert_array_equal(
-        moocore.filter_dominated(T, keep_weakly=True), expct_nondom_weak
     )
 
     x = np.array(

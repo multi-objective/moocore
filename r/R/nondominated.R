@@ -13,9 +13,7 @@
 #'   objectives or a vector of logical values, with one value per objective.
 #'
 #' @param keep_weakly `logical(1)`\cr If `FALSE`, return `FALSE` for any
-#'   duplicates of nondominated points.  Which of the duplicates is identified
-#'   as nondominated is unspecified due to the sorting not being stable in this
-#'   version.
+#'   duplicates of nondominated points, except the last one.
 #'
 #' @return [is_nondominated()] returns a logical vector of the same length
 #'   as the number of rows of `data`, where `TRUE` means that the

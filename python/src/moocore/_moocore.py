@@ -1163,9 +1163,7 @@ def is_nondominated(
         Either a single boolean value that applies to all objectives or a list of boolean values, with one value per objective.
         Also accepts a 1D numpy array with value 0/1 for each objective.
     keep_weakly:
-        If ``False``, return ``False`` for any duplicates of nondominated points.
-        Which of the duplicates is identified as nondominated is unspecified
-        due to the sorting not being stable in this version.
+        If ``False``, return ``False`` for any duplicates of nondominated points except the first one.
 
     Returns
     -------

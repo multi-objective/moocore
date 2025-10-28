@@ -7,6 +7,7 @@
    contribution of nondominated points.
  * `find_dominated_point_()` and `find_nondominated_set_()` are significantly faster due to several code optimizations.
  * `pareto_rank()` returns 0-based ranks.
+ * `find_dominated_point_()` and `find_nondominated_set_()` are now stable in 2D and 3D with `!keep_weakly`, that is, only the first of duplicated points is marked as nondominated.
 
 ## 0.16.6
 

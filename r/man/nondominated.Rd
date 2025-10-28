@@ -24,9 +24,7 @@ instead of minimised. Either a single logical value that applies to all
 objectives or a vector of logical values, with one value per objective.}
 
 \item{keep_weakly}{\code{logical(1)}\cr If \code{FALSE}, return \code{FALSE} for any
-duplicates of nondominated points.  Which of the duplicates is identified
-as nondominated is unspecified due to the sorting not being stable in this
-version.}
+duplicates of nondominated points, except the last one.}
 }
 \value{
 \code{\link[=is_nondominated]{is_nondominated()}} returns a logical vector of the same length

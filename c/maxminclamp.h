@@ -19,10 +19,17 @@
             __typeof__(_x__) _xmin__ = (xmin);                                 \
             __typeof__(_x__) _xmax__ = (xmax);                                 \
             _x__ <= _xmin__ ? _xmin__ : _x__ >= _xmax__ ? _xmax__ : _x__; })
+
 #else
 #define MAX(x,y) ((x) > (y) ? (x) : (y))
 #define MIN(x,y) ((x) < (y) ? (x) : (y))
 #define CLAMP(x, xmin, xmax) (MAX((xim), (MIN((x), (xmax)))))
 #endif
+
+#define SWAP(x,y) do {                                                         \
+        __typeof__(x) _tmp__ = (x);                                            \
+        (void) (&x == &y);                                                     \
+        x = y;                                                                 \
+        y = _tmp__; } while(false)
 
 #endif // _MAXMINCLAMP_H_
