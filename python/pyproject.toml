@@ -80,6 +80,9 @@ package-dir = { "" = "src" }
 "*" = [ "*.c", "*.h" ]
 "moocore.data" = [ "*.txt", "*.dat", "*.xz", "*.csv", "*.10" ]
 
+[tool.distutils.bdist_wheel]
+py_limited_api = "cp310"
+
 [tool.cibuildwheel]
 skip = [
   "*_ppc64le",
