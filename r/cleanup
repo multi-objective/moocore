@@ -8,3 +8,4 @@ rm -f  \
 
 rm -rf autom4te.cache benchmarks_files
 find . -name '*.orig' -o -name '.Rhistory' -o -name '*.Rout' -print0 | xargs -0 rm -f
+rm -f src/libmoocore/*.o

@@ -37,6 +37,9 @@ help :
 install: build
 	cd $(BINDIR) && R CMD INSTALL $(INSTALL_FLAGS) $(PACKAGE)_$(PACKAGEVERSION).tar.gz
 
+quick-install: clean
+	R CMD INSTALL --no-docs $(PACKAGEDIR)
+
 setup:
 	Rscript -e 'if(!require(devtools)) install.packages(c("devtools", "xfun")); devtools::install_deps(upgrade="never")'
 
@@ -108,6 +111,6 @@ winbuild winbuild_:
 covr:
 	$(Reval) "Sys.setenv(NOT_CRAN='true');covr::report(covr::package_coverage(type='all', quiet=FALSE), browse=TRUE)"
 
-benchmarks:
+benchmarks: quick-install
 	$(RM) ./vignettes/articles/bench/*.rds
 	$(Reval) "rmarkdown::render('vignettes/articles/benchmarks.Rmd', output_dir='./', params = list(run_benchmarks=TRUE))"
