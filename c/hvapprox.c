@@ -50,7 +50,8 @@ transform_and_filter(const double * restrict data, dimension_t dim, size_t * res
     return points;
 }
 
-_attr_const_func static inline double
+_attr_optimize_finite_math // Required so that GCC will vectorize the inner loop.
+static inline double
 get_expected_value(const double * restrict points, dimension_t dim, size_t npoints,
                    const double * restrict w)
 {
@@ -153,6 +154,16 @@ static const long double sphere_area_div_2_pow_d_times_d[] = {
     0x1.20c62c2f2d7f4a970cb97b8e179a6943fd21ba7509p-50L, // d = 32, value = 1.001886461636272e-15
 };
 
+static double
+euclidean_norm(const double * restrict w, dimension_t dim)
+{
+    ASSUME(dim >= 2 && dim <= 32);
+    double norm = (w[0] * w[0]) + (w[1] * w[1]);
+    for (dimension_t k = 2; k < dim; k++)
+        norm += w[k] * w[k];
+    return sqrt(norm);
+}
+
 /* Hypervolume approximation DZ2019-MC.
 
    Jingda Deng, Qingfu Zhang (2019). “Approximating Hypervolume and Hypervolume
@@ -178,22 +189,17 @@ hv_approx_normal(const double * restrict data, int nobjs, int n,
     double expected = 0.0;
     // Monte Carlo sampling.
     for (uint_fast32_t j = 0; j < nsamples; j++) {
-        dimension_t k;
         // Generate random weights in positive orthant.
         // Reference: Marsaglia, G. (1972). "Choosing a Point from the Surface
         // of a Sphere". Annals of Mathematical Statistics. 43 (2): 645-646.
-        for (k = 0; k < dim; k++)
+        for (dimension_t k = 0; k < dim; k++)
             w[k] = rng_standard_normal(rng);
-        for (k = 0; k < dim; k++) {
+        for (dimension_t k = 0; k < dim; k++) {
             w[k] = fabs(w[k]);
-            if (w[k] < ALMOST_ZERO_WEIGHT) // Avoid division by zero later.
-                w[k] = ALMOST_ZERO_WEIGHT;
+            w[k] = MAX(w[k], ALMOST_ZERO_WEIGHT); // Avoid division by zero later.
         }
-        double norm = w[0] * w[0];
-        for (k = 1; k < dim; k++)
-            norm += w[k] * w[k];
-        norm = sqrt(norm);
-        for (k = 0; k < dim; k++) {
+        double norm = euclidean_norm(w, dim);
+        for (dimension_t k = 0; k < dim; k++) {
             // 1 / (w[k] / norm) so we avoid the division when calculating the
             // ratio below.
             w[k] = norm / w[k];

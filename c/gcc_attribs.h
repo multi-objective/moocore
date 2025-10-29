@@ -216,4 +216,12 @@
 #define PRAGMA_ASSUME_NO_VECTOR_DEPENDENCY
 #endif
 
+// Earlier versions miscompile with this attribute.
+#if defined(__GNUC__)  && __GNUC__ >= 13 && defined(__OPTIMIZE__)
+#define _attr_optimize_finite_math                                             \
+    __attribute__((optimize("no-signed-zeros", "finite-math-only")))
+#else
+#define _attr_optimize_finite_math /* nothing */
+#endif
+
 #endif /* GCC_ATTRIBUTES */
