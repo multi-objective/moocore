@@ -6,8 +6,6 @@
 #include "pow_int.h"
 #include "rng.h"
 
-static inline long double fractl(long double x) { return x - truncl(x); }
-
 #define ALMOST_ZERO_WEIGHT 1e-20
 
 #ifndef M_PIl
@@ -20,9 +18,15 @@ static inline long double fractl(long double x) { return x - truncl(x); }
 # define M_PI_4l	0.785398163397448309615660845819875721L /* pi/4 */
 #endif
 
+// Returns fractional part. Equivalent to modfl(x, &dummy) but slightly faster.
+_attr_const_func
+static inline long double fractl(long double x) { return x - truncl(x); }
+
+
 static double *
-transform_and_filter(const double * restrict data, dimension_t dim, size_t * restrict npoints_p,
-                     const double * restrict ref, const bool * restrict maximise)
+transform_and_filter(const double * restrict data, size_t * restrict npoints_p,
+                     dimension_t dim, const double * restrict ref,
+                     const bool * restrict maximise)
 {
     size_t npoints = *npoints_p;
     double * points = malloc(dim * npoints * sizeof(double));
@@ -30,11 +34,10 @@ transform_and_filter(const double * restrict data, dimension_t dim, size_t * res
     // Transform points (ref - points)
     for (i = 0, j = 0; i < npoints; i++) {
         double * restrict p = points + j * dim;
+        const double * restrict src = data + i * dim;
         dimension_t k;
         for (k = 0; k < dim; k++) {
-            p[k] = ref[k] - data[i * dim + k];
-            if (maximise[k])
-                p[k] = -p[k];
+            p[k] = maximise[k] ? (src[k] - ref[k]) : (ref[k] - src[k]);
             // Filter out dominated points (must be >0 in all objectives)
             if (p[k] <= 0)
                 break;
@@ -52,8 +55,8 @@ transform_and_filter(const double * restrict data, dimension_t dim, size_t * res
 
 _attr_optimize_finite_math // Required so that GCC will vectorize the inner loop.
 static inline double
-get_expected_value(const double * restrict points, dimension_t dim, size_t npoints,
-                   const double * restrict w)
+get_expected_value(const double * restrict points, size_t npoints,
+                   dimension_t dim, const double * restrict w)
 {
     ASSUME(1 <= dim && dim <= 32);
     ASSUME(npoints > 0);
@@ -175,12 +178,11 @@ hv_approx_normal(const double * restrict data, int nobjs, int n,
                  const double * restrict ref, const bool * restrict maximise,
                  uint_fast32_t nsamples, uint32_t random_seed)
 {
-    ASSUME(nobjs > 1);
-    ASSUME(nobjs < 32);
+    ASSUME(nobjs > 1 && nobjs < 32);
     ASSUME(n >= 0);
     const dimension_t dim = (dimension_t) nobjs;
     size_t npoints = (size_t) n;
-    const double * points = transform_and_filter(data, dim, &npoints, ref, maximise);
+    const double * points = transform_and_filter(data, &npoints, dim, ref, maximise);
     if (points == NULL)
         return 0;
 
@@ -204,7 +206,7 @@ hv_approx_normal(const double * restrict data, int nobjs, int n,
             // ratio below.
             w[k] = norm / w[k];
         }
-        expected += get_expected_value(points, dim, npoints, w);
+        expected += get_expected_value(points, npoints, dim, w);
     }
     free(w);
     free(rng);
@@ -602,12 +604,11 @@ hv_approx_hua_wang(const double * restrict data, int nobjs, int n,
                    const double * restrict ref, const bool * restrict maximise,
                    uint_fast32_t nsamples)
 {
-    ASSUME(nobjs > 1);
-    ASSUME(nobjs < 32);
+    ASSUME(nobjs > 1 && nobjs < 32);
     ASSUME(n >= 0);
     const dimension_t dim = (dimension_t) nobjs;
     size_t npoints = (size_t) n;
-    const double * points = transform_and_filter(data, dim, &npoints, ref, maximise);
+    const double * points = transform_and_filter(data, &npoints, dim, ref, maximise);
     if (points == NULL)
         return 0;
 
@@ -623,7 +624,7 @@ hv_approx_hua_wang(const double * restrict data, int nobjs, int n,
             compute_polar_sample(theta, dim - 1, j, nsamples, polar_a);
             compute_theta(theta, dim, int_all);
             compute_hua_wang_direction(w, dim, theta);
-            expected += get_expected_value(points, dim, npoints, w);
+            expected += get_expected_value(points, npoints, dim, w);
         }
         free(theta);
         free(w);
