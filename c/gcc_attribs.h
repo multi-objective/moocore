@@ -56,9 +56,12 @@
    definition than the const attribute: pure allows the function to read any
    non-volatile memory, even if it changes in between successive invocations of
    the function.  */
-#ifndef __pure_func
-# define __pure_func __attribute__((__pure__))
+#if defined(__GNUC__) || defined(__clang__ ) || defined(__ICC)
+#  define _attr_pure_func __attribute__((pure))
+#else
+#  define _attr_pure_func
 #endif
+
 
 /* The noreturn keyword tells the compiler to assume that function cannot
    return. It can then optimize without regard to what would happen if fatal

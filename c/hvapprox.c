@@ -157,7 +157,7 @@ static const long double sphere_area_div_2_pow_d_times_d[] = {
     0x1.20c62c2f2d7f4a970cb97b8e179a6943fd21ba7509p-50L, // d = 32, value = 1.001886461636272e-15
 };
 
-static double
+_attr_pure_func static double
 euclidean_norm(const double * restrict w, dimension_t dim)
 {
     ASSUME(dim >= 2 && dim <= 32);
