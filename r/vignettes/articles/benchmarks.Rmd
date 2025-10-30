@@ -50,7 +50,8 @@ get_dataset <- function(filename, filter=FALSE) {
   if (destfile == "") {
     destfile <- file.path("../../../testsuite/data", filename)
     if (!file.exists(destfile)) {
-      destfile <- withr::local_tempfile()
+      fileext <- if (endsWith(destfile, ".xz")) ".xz" else ""
+      destfile <- withr::local_tempfile(fileext = fileext)
       base_url <- "https://github.com/multi-objective/testsuite/raw/refs/heads/main/data/"
       utils::download.file(paste0(base_url, filename), destfile, quiet = FALSE)
     }
@@ -188,7 +189,7 @@ expr.list <- list(
 files <- list(
   "DTLZLinearShape.3d"=list(
     dataset = "DTLZLinearShape.3d.front.1000pts.10",
-    N = seq(1000, 5000, 500)),
+    N = seq(1000, 6000, 1000)),
   "DTLZLinearShape.4d"=list(
     dataset = "DTLZLinearShape.4d.front.1000pts.10",
     N = seq(700, 1500, 100)),
@@ -196,7 +197,7 @@ files <- list(
     dataset = "DTLZLinearShape.5d.front.500pts.10",
     N = seq(400, 1000, 100)),
   "DTLZLinearShape.6d"=list(
-    dataset = "DTLZLinearShape.6d.front.700pts.10",
+    dataset = "DTLZLinearShape.6d.front.700pts.10.xz",
     N = seq(200, 700, 100))
 )
 for (name in names(files)) {
