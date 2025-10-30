@@ -274,4 +274,7 @@ static inline void default_cmdline_handler(int opt)
     }
 }
 
+_attr_const_func
+static inline const char * bool2str(bool b) { return b ? "TRUE" : "FALSE"; }
+
 #endif // !CMDLINE_H

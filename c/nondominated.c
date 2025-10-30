@@ -411,16 +411,15 @@ process_file (const char *filename,
                    lrange, urange, lbound, ubound);
 
     bool dominated_found = false;
-    bool * nondom = (filter_flag) ? nondom_init(cumsizes[nsets - 1]) : NULL;
-    /* Check sets.  */
+    // With verbose we print the number of nondominated.
+    bool * nondom = (filter_flag || verbose_flag) ? nondom_init(cumsizes[nsets - 1]) : NULL;
+    // Check sets.
     if (check_flag || filter_flag)
-        dominated_found =
-            check_dominated(filename, points, nobj, cumsizes, nsets,
-                            minmax, agree, nondom);
+        dominated_found = check_dominated(filename, points, nobj, cumsizes,
+                                          nsets, minmax, agree, nondom);
 
     if (verbose_flag >= 2)
-        fprintf (stderr, "# nondominated: %s\n",
-                 dominated_found ? "FALSE" : "TRUE");
+        fprintf (stderr, "# nondominated: %s\n", bool2str(!dominated_found));
 
     /* Write out nondominated sets.  */
     if (filter_flag || agree || normalise_flag || force_bounds_flag
@@ -667,7 +666,7 @@ int main(int argc, char *argv[])
         printf ("# Total maximum:");
         vector_printf (maximum, nobj);
         printf ("\n");
-        printf ("# Nondominated: %s\n", dominated_found ? "FALSE": "TRUE");
+        printf ("# Nondominated: %s\n", bool2str(!dominated_found));
     }
     free(minimum);
     free(maximum);
