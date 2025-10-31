@@ -8,7 +8,7 @@
  * New article: "[Sampling Random Nondominated Sets](https://multi-objective.github.io/moocore/r/articles/generate.html)"
  * `is_nondominated()`, `any_dominated()` and `pareto_rank()` now handle single-objective inputs correctly (#27) (#29).
  * `is_nondominated()` and `filter_dominated()` are faster for dimensions larger than 3.
- * `is_nondominated()` and `filter_dominated()` are now stable in 2D and 3D with `!keep_weakly`, that is, only the first of duplicated points is marked as nondominated.
+ * `is_nondominated()` and `filter_dominated()` are now stable in 2D and 3D with `keep_weakly=FALSE`, that is, only the first of duplicated points is marked as nondominated.
 
 # moocore 0.1.8
 
