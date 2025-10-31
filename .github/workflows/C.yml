@@ -31,16 +31,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # macos-13 is an intel runner, macos-14 is apple silicon
+        # macos-15-intel is an intel runner, macos-14 is apple silicon
         os: [ubuntu-22.04, windows-latest]
         cc: [ gcc ]
         cxx: [ g++ ]
         include:
-          - { os: macos-13, cc: clang, cxx: clang++ }
-          - { os: macos-13, cc: gcc-12, cxx: g++-12 }
           - { os: macos-14, cc: clang, cxx: clang++ }
           - { os: macos-14, cc: gcc-13, cxx: g++-13 }
           - { os: ubuntu-24.04, cc: gcc-14, cxx: g++-14 }
+          - { os: macos-15-intel, cc: clang, cxx: clang++ }
+          - { os: macos-15-intel, cc: gcc-15, cxx: g++-15 }
 
     env:
       CC: ${{ matrix.cc }}
