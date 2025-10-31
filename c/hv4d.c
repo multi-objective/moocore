@@ -75,11 +75,11 @@ static void
 update_links(dlnode_t * restrict list, dlnode_t * restrict new)
 {
     assert(list+2 == list->prev[0]);
-    const double * newx = new->x;
+    const double newx[] = { new->x[0], new->x[1], new->x[2] };
     dlnode_t * p = new->next[0];
-    const double * px = p->x;
-    dlnode_t * stop = list+2;
+    const dlnode_t * stop = list+2;
     while (p != stop) {
+        const double * px = p->x;
         // px dominates newx (but not equal)
         if (px[0] <= newx[0] && px[1] <= newx[1] && (px[0] < newx[0] || px[1] < newx[1]))
             return;
@@ -93,69 +93,78 @@ update_links(dlnode_t * restrict list, dlnode_t * restrict new)
             } else if (newx[0] < px[0] && lex_cmp_3d_102(newx, p->closest[1]->x)) { // newx[1] > px[1]
                 p->closest[1] = new;
             }
-        } else if (newx[1] < px[1] && lex_cmp_3d_012(newx, p->closest[0]->x)) {//newx[0] > px[0]
+        } else if (newx[1] < px[1] && lex_cmp_3d_012(newx, p->closest[0]->x)) { //newx[0] > px[0]
             p->closest[0] = new;
         }
         p = p->next[0];
-        px = p->x;
     }
 }
 
 
 
 // This does what setupZandClosest does while reconstructing L at z = new->x[2].
-__attribute__((hot)) static bool
+_attr_optimize_finite_math
+__attribute__((hot))
+static bool
 restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict new)
 {
-    const double * restrict newx = new->x;
     // FIXME: This is the most expensive function in the HV4D+ algorithm.
+    const double newx[] = { new->x[0], new->x[1], new->x[2], new->x[3] };
     assert(list+1 == list->next[0]);
-    dlnode_t * closest1 = list;
     dlnode_t * closest0 = list+1;
+    dlnode_t * closest1 = list;
     const double * closest0x = closest0->x;
     const double * closest1x = closest1->x;
-    dlnode_t * p = list+1;
-    assert(p->next[0] == list->next[0]->next[0]);
+    dlnode_t * p = (list+1)->next[0];
+    assert(p == list->next[0]->next[0]);
     restart_list_y(list);
     while (true) {
-        p = p->next[0];
         const double * restrict px =  p->x;
         // Help auto-vectorization.
-        bool p_leq_new_0 = px[0] <= newx[0];
-        bool p_leq_new_1 = px[1] <= newx[1];
-        bool p_leq_new_2 = px[2] <= newx[2];
+        bool p_lt_new_0 = px[0] < newx[0];
+        bool p_lt_new_1 = px[1] < newx[1];
+        bool p_lt_new_2 = px[2] < newx[2];
+        bool p_eq_new_0 = px[0] == newx[0];
+        bool p_eq_new_1 = px[1] == newx[1];
+        bool p_eq_new_2 = px[2] == newx[2];
+        bool p_leq_new_0 = p_lt_new_0 | p_eq_new_0;
+        bool p_leq_new_1 = p_lt_new_1 | p_eq_new_1;
+        bool p_leq_new_2 = p_lt_new_2 | p_eq_new_2;
 
-        if (p_leq_new_0 & p_leq_new_1 & p_leq_new_2) {
+        // if (weakly_dominates(px, newx, 3)) { // Slower
+        if (unlikely(p_leq_new_0 & p_leq_new_1 & p_leq_new_2)) {
             //new->ndomr++;
             assert(weakly_dominates(px, newx, 4));
             return false;
         }
 
-        if (!lexicographic_less_3d(px, newx))
-            break;
+        //if (!lexicographic_less_3d(px, newx)) { // Slower
+        if (!(p_lt_new_2 || (p_eq_new_2 && (p_lt_new_1 || (p_eq_new_1 && p_leq_new_0))))) {
+            new->closest[0] = closest0;
+            new->closest[1] = closest1;
+            new->prev[0] = p->prev[0];
+            new->next[0] = p;
+            return true;
+        }
 
-        // reconstruct
+        // FIXME: Can we move reconstruct() after setup_z_and_closest() ?
+        // reconstruct()
         set_cnext_to_closest(p);
         p->cnext[0]->cnext[1] = p;
         p->cnext[1]->cnext[0] = p;
 
-        // setup_z_and_closest
-        assert(px[0] > newx[0] || px[1] > newx[1]);
-        if (px[1] < newx[1] && (px[0] < closest0x[0] || (px[0] == closest0x[0] && px[1] < closest0x[1]))) {
+        // setup_z_and_closest()
+        ASSUME(!p_leq_new_0 || !p_leq_new_1);
+        if (p_lt_new_1 && (px[0] < closest0x[0] || (px[0] == closest0x[0] && px[1] < closest0x[1]))) {
             closest0 = p;
             closest0x = px;
-        } else if (px[0] < newx[0] && (px[1] < closest1x[1] || (px[1] == closest1x[1] && px[0] < closest1x[0]))) {
+        } else if (p_lt_new_0 && (px[1] < closest1x[1] || (px[1] == closest1x[1] && px[0] < closest1x[0]))) {
             closest1 = p;
             closest1x = px;
         }
+        p = p->next[0];
     }
-
-    new->closest[0] = closest0;
-    new->closest[1] = closest1;
-
-    new->prev[0] = p->prev[0];
-    new->next[0] = p;
-    return true;
+    unreachable();
 }
 
 // FIXME: This is very similar to the loop in hvc3d_list() but it doesn't use p->last_slice_z
@@ -167,19 +176,17 @@ one_contribution_3d(dlnode_t * restrict new)
     // if newx[0] == new->cnext[0]->x[0], the first area is zero
     double area = compute_area_no_inners(newx, new->cnext[0], 1);
     double volume = 0;
-    dlnode_t * p = new;
-    const double * px = p->x;
-    assert(!weakly_dominates(p->next[0]->x, newx, 4));
+    double lastz = newx[2];
+    dlnode_t * p = new->next[0];
+    assert(!weakly_dominates(p->x, newx, 4));
     while (true) {
-        double lastz = px[2];
-        p = p->next[0];
-        px = p->x;
+        const double * px = p->x;
         volume += area * (px[2] - lastz);
 
         if (px[0] <= newx[0] && px[1] <= newx[1])
             return volume;
 
-        assert(px[0] > newx[0] || px[1] > newx[1]);
+        ASSUME(px[0] > newx[0] || px[1] > newx[1]);
         assert(!weakly_dominates(px, p->next[0]->x, 4));
 
         set_cnext_to_closest(p);
@@ -209,8 +216,10 @@ one_contribution_3d(dlnode_t * restrict new)
             p->cnext[1]->cnext[0] = p;
             p->cnext[0]->cnext[1] = p;
         }
+        lastz = px[2];
+        p = p->next[0];
     }
-    return volume;
+    unreachable();
 }
 
 /* Compute the hypervolume indicator in d=4 by iteratively computing the one
