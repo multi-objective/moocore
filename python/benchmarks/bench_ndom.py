@@ -5,11 +5,11 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
-from bench import Bench, get_geomrange
-
 import numpy as np
 import moocore
 import matplotlib.pyplot as plt
+
+from bench import Bench, get_geomrange
 
 import torch
 from botorch.utils.multi_objective.pareto import (
@@ -157,4 +157,6 @@ for name in names:
     del values
     bench.plots(file_prefix=file_prefix, title=title, log="xy")
 
-plt.show()
+
+if "__file__" not in globals():  # Running interactively.
+    plt.show()

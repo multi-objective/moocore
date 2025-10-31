@@ -98,4 +98,5 @@ for name in names:
     del values
     bench.plots(file_prefix=file_prefix, title=title)
 
-plt.show()
+if "__file__" not in globals():  # Running interactively.
+    plt.show()
