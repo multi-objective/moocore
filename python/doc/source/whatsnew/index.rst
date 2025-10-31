@@ -4,8 +4,8 @@
 What's new
 **********
 
-Version 0.1.9 (dev)
--------------------
+Version 0.1.9 (31/10/2025)
+--------------------------
 
 - :func:`~moocore.hv_contributions` ignores dominated points by default.
   Set ``ignore_dominated=False`` to restore the previous behavior.

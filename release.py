@@ -119,6 +119,8 @@ def main():
         update_package_version("python/pyproject.toml", "version", replace=version)
         replace_dev_with_date("python/doc/source/whatsnew/index.rst", version)
         update_news_md("r/NEWS.md", version)
+        print("*** If happy with the changes, then do:")
+        print(f"git ci -a -m 'Prepare to release v{version}'")
 
 
 if __name__ == "__main__":
