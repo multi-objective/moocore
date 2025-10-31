@@ -9,21 +9,19 @@ import numpy as np
 import moocore
 import pathlib
 import matplotlib.pyplot as plt
-import timeit
+import timeit  # time_hv_exact
 
 from bench import (
     Bench,
     read_datasets_and_filter_dominated,
     get_range,
-    timeit_template_return_1_value,
+    timeit_template_return_1_value,  # time_hv_exact
 )
 
 from pymoo.indicators.hv.monte_carlo import (
     ApproximateMonteCarloHypervolume as pymoo_hvapprox,
 )
 
-
-timeit.template = timeit_template_return_1_value
 # See https://github.com/multi-objective/testsuite/tree/main/data
 path_to_data = "../../testsuite/data/"
 assert pathlib.Path(path_to_data).expanduser().exists()
@@ -40,12 +38,12 @@ files = {
         range=(100, 1000, 100),
     ),
     "DTLZLinearShape.6d": dict(
-        file="DTLZLinearShape.6d.front.700pts.10",
+        file="DTLZLinearShape.6d.front.700pts.10.xz",
         ref=1,
         range=(50, 600, 50),
     ),
     "DTLZSphereShape.6d": dict(
-        file="DTLZSphereShape.6d.front.500pts.10",
+        file="DTLZSphereShape.6d.front.500pts.10.xz",
         ref=1.1,
         range=(50, 600, 50),
     ),
@@ -76,6 +74,17 @@ def relerror(true, approx):
     return abs(true - approx) / true
 
 
+def time_hv_exact(name, maxrow, z, ref):
+    tmp_template = timeit.template
+    timeit.template = timeit_template_return_1_value
+    duration, exact = timeit.Timer(
+        lambda: moocore.hypervolume(z, ref=ref)
+    ).timeit(number=1)
+    timeit.template = tmp_template
+    print(f"{name}:{maxrow}:exact:{duration}")
+    return exact
+
+
 title = "HV approximation"
 file_prefix = "hvapprox"
 names = files.keys()
@@ -101,10 +110,7 @@ for name in names:
     res = {}
     for maxrow in n:
         z = x[:maxrow, :]
-        duration, exact = timeit.Timer(
-            lambda: moocore.hypervolume(z, ref=ref)
-        ).timeit(number=1)
-        print(f"{name}:{maxrow}:exact:{duration}")
+        exact = time_hv_exact(name, maxrow, z, ref)
         for what in bench.keys():
             res[what] = bench(what, maxrow, z, exact=exact)
 
