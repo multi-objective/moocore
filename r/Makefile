@@ -62,10 +62,13 @@ closeversion:
 
 releasebuild: clean
 	@$(MAKE) gendoc
+	cd $(BINDIR) && $(RM) $(PACKAGE)_$(PACKAGEVERSION).tar.gz
+	git stash push -a
 	cp .Rbuildignore .Rbuildignore.backup
 	cat .Rbuildignore.cran >> .Rbuildignore
 	cd $(BINDIR) &&	R CMD build $(PACKAGEDIR) && tar -atvf $(PACKAGE)_$(PACKAGEVERSION).tar.gz
 	mv .Rbuildignore.backup .Rbuildignore
+	git stash pop
 	Rscript --vanilla do.R info "$(BINDIR)/$(PACKAGE)_$(PACKAGEVERSION).tar.gz"
 
 releasecheck:
