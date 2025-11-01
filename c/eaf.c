@@ -563,7 +563,7 @@ eaf_check_polygons(eaf_polygon_t *p, int nobj)
                 polygon_print(pi, nobj);
                 polygon_print(pj, nobj);
 #endif
-                assert(!polygons_intersect(pi, pj, nobj));
+                assert(false);
             }
             pj = next_polygon(pj, nobj, end);
         }
