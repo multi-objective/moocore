@@ -1186,7 +1186,7 @@ def is_nondominated(
     --------
     >>> S = np.array([[1, 1], [0, 1], [1, 0], [1, 0]])
     >>> moocore.is_nondominated(S)
-    array([False,  True,  True, False])
+    array([False,  True, False,  True])
     >>> moocore.filter_dominated(S)
     array([[0, 1],
            [1, 0]])
@@ -1246,7 +1246,7 @@ def any_dominated(
     --------
     >>> S = np.array([[1, 1], [1, 0], [0, 1], [1, 0]])
     >>> moocore.is_nondominated(S)
-    array([False,  True,  True, False])
+    array([False, False,  True,  True])
     >>> moocore.any_dominated(S)
     True
     >>> moocore.any_dominated(moocore.filter_dominated(S))
