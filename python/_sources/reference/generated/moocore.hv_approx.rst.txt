@@ -1,0 +1,12 @@
+﻿hv\_approx
+==========
+
+.. currentmodule:: moocore
+
+.. autofunction:: hv_approx
+
+.. _sphx_glr_backref_moocore.hv_approx:
+
+.. minigallery:: moocore.hv_approx
+   :add-heading: Gallery examples
+   :heading-level: -
