@@ -23,6 +23,7 @@ from ._utils import (
     np1d_to_int_array,
     atleast_1d_of_length_n,
     is_integer_value,
+    _get_seed_for_c,
 )
 
 ## The CFFI library is used to create C bindings.
@@ -938,11 +939,7 @@ def hv_approx(
         raise ValueError(f"nsamples must be an integer value: {nsamples}")
     nsamples = ffi.cast("uint_fast32_t", nsamples)
     if method == "DZ2019-MC":
-        if not is_integer_value(seed):
-            seed = np.random.default_rng(seed).integers(
-                2**32 - 2, dtype=np.uint32
-            )
-        seed = ffi.cast("uint32_t", seed)
+        seed = _get_seed_for_c(seed)
         hv = lib.hv_approx_normal(
             data_p, nobj, npoints, ref, maximise, nsamples, seed
         )
@@ -2545,14 +2542,11 @@ def whv_hype(
         ref[maximise] = -ref[maximise]
         ideal[maximise] = -ideal[maximise]
 
-    if not is_integer_value(seed):
-        seed = np.random.default_rng(seed).integers(2**32 - 2, dtype=np.uint32)
-
     data_p, npoints, nobj = np2d_to_double_array(data)
     ref = ffi.from_buffer("double []", ref)
     ideal = ffi.from_buffer("double []", ideal)
     # FIXME: Check ranges.
-    seed = ffi.cast("uint32_t", seed)
+    seed = _get_seed_for_c(seed)
     nsamples = ffi.cast("int", nsamples)
 
     if dist == "uniform":

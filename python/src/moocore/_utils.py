@@ -71,3 +71,9 @@ def is_integer_value(n):
         return False
     except TypeError:
         return False
+
+
+def _get_seed_for_c(seed):
+    if not is_integer_value(seed):
+        seed = np.random.default_rng(seed).integers(2**32 - 2, dtype=np.uint32)
+    return ffi.cast("uint32_t", seed)
