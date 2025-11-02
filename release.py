@@ -111,6 +111,8 @@ def main():
         update_package_version(
             "python/pyproject.toml", "version", replace=args.dev + ".dev0"
         )
+        print("*** If happy with the changes, then do:")
+        print(f"git ci -a -m 'Start development of v{version}'")
     else:
         print(f"Current version is: {version}")
         print("Preparing for release")
