@@ -145,11 +145,13 @@ init_sentinels(dlnode_t * restrict list, const double * restrict ref)
 #if HV_DIMENSION == 3
         -DBL_MAX, ref[1], -DBL_MAX, // Sentinel 1
         ref[0], -DBL_MAX, -DBL_MAX, // Sentinel 2
-        -DBL_MAX, -DBL_MAX, ref[2]  // Sentinel 2
-#else
+        -DBL_MAX, -DBL_MAX, ref[2]  // Sentinel 3
+#elif HV_DIMENSION == 4
         -DBL_MAX, ref[1], -DBL_MAX, -DBL_MAX, // Sentinel 1
         ref[0], -DBL_MAX, -DBL_MAX, -DBL_MAX, // Sentinel 2
-        -DBL_MAX, -DBL_MAX, ref[2], ref[3]    // Sentinel 2
+        -DBL_MAX, -DBL_MAX, ref[2], ref[3]    // Sentinel 3
+#else
+#  error "Unknown HV_DIMENSION"
 #endif
     };
 
