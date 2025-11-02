@@ -79,5 +79,5 @@ The following projects currently use `moocore`:
 [r-universe-build-link]: https://github.com/r-universe/multi-objective/actions/workflows/build.yml
 [r-universe-version]: https://multi-objective.r-universe.dev/moocore
 [r-universe-version-badge]: https://multi-objective.r-universe.dev/badges/moocore
-[testsuite-badge]: https://github.com/multi-objective/testsuite/actions/workflows/moocore.yml/badge.svg?event=push
+[testsuite-badge]: https://github.com/multi-objective/testsuite/actions/workflows/moocore.yml/badge.svg
 [testsuite-link]: https://github.com/multi-objective/testsuite/actions/workflows/moocore.yml

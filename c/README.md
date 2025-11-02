@@ -348,5 +348,5 @@ See the [LICENSE](/LICENSE) and [COPYRIGHTS](/r/inst/COPYRIGHTS) files.
 [r-moocore-cran]: https://cran.r-project.org/package=moocore
 [r-moocore-github]: https://github.com/multi-objective/moocore/tree/main/r#readme
 [r-moocore-homepage]: https://multi-objective.github.io/moocore/r/
-[testsuite-badge]: https://github.com/multi-objective/testsuite/actions/workflows/moocore.yml/badge.svg?event=push
+[testsuite-badge]: https://github.com/multi-objective/testsuite/actions/workflows/moocore.yml/badge.svg
 [testsuite-link]: https://github.com/multi-objective/testsuite/actions/workflows/moocore.yml
