@@ -372,18 +372,32 @@ def test_hv_approx(dim):
     np.testing.assert_approx_equal(true_hv, appr_hv, significant=signif)
 
 
+def test_hv_approx_default_seed():
+    x = np.full((1, 5), 0.5)
+    ref = np.full(5, 0.0)
+    true_hv = moocore.hypervolume(x, ref=ref, maximise=True)
+    appr_hv = moocore.hv_approx(
+        x, ref=ref, method="DZ2019-MC", seed=None, maximise=True
+    )
+    ## Precision goes down significantly with higher dimensions.
+    signif = 2
+    np.testing.assert_approx_equal(true_hv, appr_hv, significant=signif)
+
+
 def check_hvc(points, ref, err_msg):
     hvc = moocore.hv_contributions(points, ref=ref)
-    nondom = moocore.is_nondominated(points, keep_weakly=True)
-    points = points[nondom, :]
-    hv_total = moocore.hypervolume(points, ref=ref)
-    true_hvc = np.zeros(len(nondom))
-    true_hvc[nondom] = hv_total - np.array(
+    is_nondom = moocore.is_nondominated(points, keep_weakly=True)
+    nondom = points[is_nondom, :]
+    hv_total = moocore.hypervolume(nondom, ref=ref)
+    true_hvc = np.zeros(len(is_nondom))
+    true_hvc[is_nondom] = hv_total - np.array(
         [
-            moocore.hypervolume(np.delete(points, i, axis=0), ref=ref)
-            for i in range(len(points))
+            moocore.hypervolume(np.delete(nondom, i, axis=0), ref=ref)
+            for i in range(len(nondom))
         ]
     )
+    assert_allclose(true_hvc, hvc, err_msg=err_msg)
+    hvc = moocore.hv_contributions(-points, ref=-ref, maximise=True)
     assert_allclose(true_hvc, hvc, err_msg=err_msg)
 
 
