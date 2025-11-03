@@ -14,11 +14,12 @@
 static inline bool
 all_positive(const double * restrict points, size_t size, dimension_t dim)
 {
-    ASSUME(dim <= 32);
-    for (size_t a = 0; a < size; a++)
-        for (dimension_t d = 0; d < dim; d++)
-            if (points[a * dim + d] <= 0)
-                return false;
+    ASSUME(size > 0);
+    ASSUME(1 <= dim && dim <= 32);
+    const size_t len = size * dim;
+    for (size_t a = 0; a < len; a++)
+        if (points[a] <= 0)
+            return false;
 
     return true;
 }
@@ -43,19 +44,19 @@ all_positive(const double * restrict points, size_t size, dimension_t dim)
    for negative values doesn't make sense.
  */
 
-static inline double
-eps_value_(bool do_ratio, double a, double b)
-{
-    return do_ratio ? a / b : a - b;
-}
 
+_attr_optimize_finite_math
 static inline double
 epsilon_helper_(bool do_mult, const enum objs_agree_t agree,
                 const signed char * restrict minmax, dimension_t dim,
                 const double * restrict points_a, size_t size_a,
                 const double * restrict points_b, size_t size_b)
 {
+// Converting this macro to an inline function hinders vectorization.
+#define eps_value_(X,Y) (do_mult ? ((X) / (Y)) : ((X) - (Y)))
+
     ASSUME(2 <= dim && dim <= 32);
+    ASSUME(size_a > 0 && size_b > 0);
     ASSUME(agree == AGREE_MINIMISE || agree == AGREE_MAXIMISE || agree == AGREE_NONE);
     ASSUME(minmax == NULL || agree != AGREE_NONE);
     double epsilon = do_mult ? 0 : -INFINITY;
@@ -65,29 +66,25 @@ epsilon_helper_(bool do_mult, const enum objs_agree_t agree,
         const double * restrict pb = &points_b[b * dim];
         for (size_t a = 0; a < size_a; a++) {
             const double * restrict pa = &points_a[a * dim];
-            double epsilon_max;
-            if (agree == AGREE_NONE) {
-                epsilon_max = MAX(minmax[0] * eps_value_(do_mult, pb[0], pa[0]),
-                                  minmax[1] * eps_value_(do_mult, pb[1], pa[1]));
-                if (epsilon_max >= epsilon_min)
-                    continue;
-                for (dimension_t d = 2; d < dim; d++) {
-                    double epsilon_temp = minmax[d] * eps_value_(do_mult, pb[d], pa[d]);
-                    epsilon_max = MAX(epsilon_max, epsilon_temp);
-                }
-            } else {
-                epsilon_max = (agree == AGREE_MINIMISE)
-                    ? MAX(eps_value_(do_mult, pa[0], pb[0]), eps_value_(do_mult, pa[1], pb[1]))
-                    : MAX(eps_value_(do_mult, pb[0], pa[0]), eps_value_(do_mult, pb[1], pa[1]));
-                if (epsilon_max >= epsilon_min)
-                    continue;
-                for (dimension_t d = 2; d < dim; d++) {
-                    double epsilon_temp = (agree == AGREE_MINIMISE)
-                        ? eps_value_(do_mult, pa[d], pb[d])
-                        : eps_value_(do_mult, pb[d], pa[d]);
-                    epsilon_max = MAX(epsilon_max, epsilon_temp);
-                }
+            double epsilon_max = (agree == AGREE_NONE)
+                ? MAX(minmax[0] * eps_value_(pb[0], pa[0]),
+                      minmax[1] * eps_value_(pb[1], pa[1]))
+                : ((agree == AGREE_MINIMISE)
+                   ? MAX(eps_value_(pa[0], pb[0]), eps_value_(pa[1], pb[1]))
+                   : MAX(eps_value_(pb[0], pa[0]), eps_value_(pb[1], pa[1])));
+
+            if (epsilon_max >= epsilon_min)
+                continue;
+
+            for (dimension_t d = 2; d < dim; d++) {
+                double epsilon_temp = (agree == AGREE_NONE)
+                    ? minmax[d] * eps_value_(pb[d], pa[d])
+                    : ((agree == AGREE_MINIMISE)
+                       ? eps_value_(pa[d], pb[d])
+                       : eps_value_(pb[d], pa[d]));
+                epsilon_max = MAX(epsilon_max, epsilon_temp);
             }
+
             if (epsilon_max <= epsilon) {
                 skip_max = true;
                 break;
@@ -100,6 +97,63 @@ epsilon_helper_(bool do_mult, const enum objs_agree_t agree,
     return epsilon;
 }
 
+_attr_optimize_finite_math
+static inline double
+epsilon_mult_agree_none(const signed char * restrict minmax, dimension_t dim,
+                        const double * restrict points_a, size_t size_a,
+                        const double * restrict points_b, size_t size_b)
+{
+    return epsilon_helper_(/* do_mult=*/true, AGREE_NONE, minmax, dim, points_a, size_a, points_b, size_b);
+}
+
+_attr_optimize_finite_math
+static inline double
+epsilon_mult_agree_min(dimension_t dim,
+                        const double * restrict points_a, size_t size_a,
+                        const double * restrict points_b, size_t size_b)
+{
+    return epsilon_helper_(/* do_mult=*/true, AGREE_MINIMISE, /*minmax=*/NULL, dim, points_a, size_a, points_b, size_b);
+}
+
+_attr_optimize_finite_math
+static inline double
+epsilon_mult_agree_max(dimension_t dim,
+                        const double * restrict points_a, size_t size_a,
+                        const double * restrict points_b, size_t size_b)
+{
+    return epsilon_helper_(/* do_mult=*/true, AGREE_MAXIMISE, /*minmax=*/NULL, dim, points_a, size_a, points_b, size_b);
+}
+
+
+_attr_optimize_finite_math
+static inline double
+epsilon_addi_agree_none(const signed char * restrict minmax, dimension_t dim,
+                        const double * restrict points_a, size_t size_a,
+                        const double * restrict points_b, size_t size_b)
+{
+    return epsilon_helper_(/* do_mult=*/false, AGREE_NONE, minmax, dim, points_a, size_a, points_b, size_b);
+}
+
+_attr_optimize_finite_math
+static inline double
+epsilon_addi_agree_min(dimension_t dim,
+                        const double * restrict points_a, size_t size_a,
+                        const double * restrict points_b, size_t size_b)
+{
+    return epsilon_helper_(/* do_mult=*/false, AGREE_MINIMISE, /*minmax=*/NULL, dim, points_a, size_a, points_b, size_b);
+}
+
+_attr_optimize_finite_math
+static inline double
+epsilon_addi_agree_max(dimension_t dim,
+                        const double * restrict points_a, size_t size_a,
+                        const double * restrict points_b, size_t size_b)
+{
+    return epsilon_helper_(/* do_mult=*/false, AGREE_MAXIMISE, /*minmax=*/NULL, dim, points_a, size_a, points_b, size_b);
+}
+
+
+_attr_optimize_finite_math
 static inline double
 epsilon_mult_minmax(const signed char * restrict minmax, dimension_t dim,
                     const double * restrict points_a, size_t size_a,
@@ -114,14 +168,15 @@ epsilon_mult_minmax(const signed char * restrict minmax, dimension_t dim,
     // This forces the compiler to generate three specialized versions of the function.
     switch (check_all_minimize_maximize(minmax, dim)) {
       case AGREE_MINIMISE:
-          return epsilon_helper_(/* do_mult=*/true, AGREE_MINIMISE, /*minmax=*/NULL, dim, points_a, size_a, points_b, size_b);
+          return epsilon_mult_agree_min(dim, points_a, size_a, points_b, size_b);
       case AGREE_MAXIMISE:
-          return epsilon_helper_(/* do_mult=*/true, AGREE_MAXIMISE, /*minmax=*/NULL, dim, points_a, size_a, points_b, size_b);
+          return epsilon_mult_agree_max(dim, points_a, size_a, points_b, size_b);
       default:
-          return epsilon_helper_(/* do_mult=*/true, AGREE_NONE, minmax, dim, points_a, size_a, points_b, size_b);
+          return epsilon_mult_agree_none(minmax, dim, points_a, size_a, points_b, size_b);
     }
 }
 
+_attr_optimize_finite_math
 static inline double
 epsilon_additive_minmax(const signed char * restrict minmax, dimension_t dim,
                         const double * restrict points_a, size_t size_a,
@@ -130,11 +185,11 @@ epsilon_additive_minmax(const signed char * restrict minmax, dimension_t dim,
     // This forces the compiler to generate three specialized versions of the function.
     switch (check_all_minimize_maximize(minmax, dim)) {
       case AGREE_MINIMISE:
-          return epsilon_helper_(/* do_mult=*/false, AGREE_MINIMISE, /*minmax=*/NULL, dim, points_a, size_a, points_b, size_b);
+          return epsilon_addi_agree_min(dim, points_a, size_a, points_b, size_b);
       case AGREE_MAXIMISE:
-          return epsilon_helper_(/* do_mult=*/false, AGREE_MAXIMISE, /*minmax=*/NULL, dim, points_a, size_a, points_b, size_b);
+          return epsilon_addi_agree_max(dim, points_a, size_a, points_b, size_b);
       default:
-          return epsilon_helper_(/* do_mult=*/false, AGREE_NONE, minmax, dim, points_a, size_a, points_b, size_b);
+          return epsilon_addi_agree_none(minmax, dim, points_a, size_a, points_b, size_b);
     }
 }
 
