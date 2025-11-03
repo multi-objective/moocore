@@ -143,7 +143,7 @@ do_file (const char *filename, double *reference, size_t reference_size,
         //        time_elapsed = Timer_elapsed_virtual ();
         fprintf (outfile, indicator_printf_format "\n", epsilon);
         if ((additive_flag && epsilon < 0) || (!additive_flag && epsilon < 1)) {
-            errprintf ("%s: some points are not  dominated by the reference set",
+            errprintf ("%s: some points are not dominated by the reference set",
                        filename);
             exit (EXIT_FAILURE);
         }/*
