@@ -29,7 +29,7 @@ transform_and_filter(const double * restrict data, size_t * restrict npoints_p,
                      const bool * restrict maximise)
 {
     size_t npoints = *npoints_p;
-    double * points = malloc(dim * npoints * sizeof(double));
+    double * points = malloc(dim * npoints * sizeof(*points));
     size_t i, j;
     // Transform points (ref - points)
     for (i = 0, j = 0; i < npoints; i++) {
@@ -54,14 +54,14 @@ transform_and_filter(const double * restrict data, size_t * restrict npoints_p,
 }
 
 _attr_optimize_finite_math // Required so that GCC will vectorize the inner loop.
-static inline double
+static double
 get_expected_value(const double * restrict points, size_t npoints,
                    dimension_t dim, const double * restrict w)
 {
     ASSUME(1 <= dim && dim <= 32);
     ASSUME(npoints > 0);
     // points >= 0 && w >=0 so max_s_w cannot be < 0.
-    double max_s_w = 0;
+    double max_s_w = -INFINITY;
     for (size_t i = 0; i < npoints; i++) {
         const double * restrict p = points + i * dim;
         double min_ratio = p[0] * w[0];
@@ -71,6 +71,7 @@ get_expected_value(const double * restrict points, size_t npoints,
         }
         max_s_w = MAX(max_s_w, min_ratio);
     }
+    ASSUME(max_s_w >= 0);
     return pow_uint(max_s_w, dim);
 }
 
@@ -160,7 +161,7 @@ static const long double sphere_area_div_2_pow_d_times_d[] = {
 _attr_pure_func static double
 euclidean_norm(const double * restrict w, dimension_t dim)
 {
-    ASSUME(dim >= 2 && dim <= 32);
+    ASSUME(2 <= dim && dim <= 32);
     double norm = (w[0] * w[0]) + (w[1] * w[1]);
     for (dimension_t k = 2; k < dim; k++)
         norm += w[k] * w[k];
@@ -530,8 +531,6 @@ solve_inverse_int_of_power_sin(long double theta, dimension_t dim)
 static long double *
 compute_int_all(dimension_t dm1)
 {
-    ASSUME(dm1 >= 1);
-    ASSUME(dm1 < 32);
     long double * int_all = malloc(dm1 * sizeof(long double));
     dimension_t i;
     DEBUG2_PRINT("int_all[%u] =", (unsigned int)dm1);
@@ -560,8 +559,7 @@ static void
 compute_theta(long double * restrict theta, dimension_t dim,
               const long double * restrict int_all)
 {
-    ASSUME(dim >= 2);
-    ASSUME(dim <= 32);
+    ASSUME(2 <= dim && dim <= 32);
     for (dimension_t j = 0; j < dim - 1; j++) {
         // We multiply here because we computed 1 / int_all[j] before.
         theta[j] = solve_inverse_int_of_power_sin(theta[j] * int_all[(dim - 2) - j],
@@ -573,8 +571,7 @@ static void
 compute_hua_wang_direction(double * restrict direction, dimension_t dim,
                            const long double * restrict theta)
 {
-    ASSUME(dim >= 2);
-    ASSUME(dim <= 32);
+    ASSUME(2 <= dim && dim <= 32);
     dimension_t k, j;
     direction[0] = STATIC_CAST(double, sinl(theta[0]));
     for (k = 1; k < dim - 1; k++)
