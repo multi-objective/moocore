@@ -2,7 +2,7 @@
 # define LIBMOOCORE_CONFIG_H_
 
 #ifndef R_PACKAGE
-# if defined(_WIN32) && !(defined(__MINGW__) || defined(__MINGW32__) || defined(__MINGW64__))
+# if (defined(_WIN32) || defined(__CYGWIN__)) && !(defined(__MINGW__) || defined(__MINGW32__) || defined(__MINGW64__))
 #  ifndef MOOCORE_STATIC_LIB
 #   ifdef MOOCORE_SHARED_LIB
 #    define MOOCORE_API extern __declspec(dllexport)
