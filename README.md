@@ -53,6 +53,8 @@ The following projects currently use `moocore`:
  - [`pymoo`](https://pymoo.org/)
  - [`Liger`](https://www.ide.uk/project-liger)
  - [`DESDEO`](https://github.com/industrial-optimization-group/DESDEO/)
+ - [QuantumAnnealingMOO](https://github.com/andrew-d-king/QuantumAnnealingMOO) (D-Wave Quantum Inc)
+
 
 
 [c-build-badge]: https://github.com/multi-objective/moocore/actions/workflows/C.yml/badge.svg?event=push
