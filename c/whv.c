@@ -75,12 +75,12 @@ double
 rect_weighted_hv2d(double *data, int n, double * rectangles,
                    int rectangles_nrow, const double * reference)
 {
-#define print_point(k, p, r, rect)                                             \
-    DEBUG2_PRINT("%d: p[%lu] = (%16.15g, %16.15g)"                                 \
+#define debug_print_point(k, p, r, rect)                                       \
+    DEBUG2_PRINT("%d: p[%lu] = (%16.15g, %16.15g)"                             \
                  "\trectangle[%lu] = (%16.15g, %16.15g, %16.15g, %16.15g)\n",  \
                  __LINE__, (unsigned long) k, p[0], p[1], (unsigned long) r, rect[0], rect[1], rect[2], rect[3])
 
-#define print_rect(r, rect)                                                    \
+#define debug_print_rect(r, rect)                                              \
     DEBUG2_PRINT("%d: rectangle[%lu] = (%16.15g, %16.15g, %16.15g, %16.15g, %16.15g)\n", \
                  __LINE__, (unsigned long) r, rect[0], rect[1], rect[2], rect[3], rect[4])
 
@@ -90,10 +90,10 @@ rect_weighted_hv2d(double *data, int n, double * rectangles,
         rect = rectangles + (ROW) * (nobj * 2 + 1);                            \
         lower0= rect[0]; lower1= rect[1]; upper0= rect[2]; upper1= rect[3];    \
         color = rect[4];                                                       \
-        print_rect(ROW, rect);                                                 \
-        assert(lower0 < upper0);                                           \
-        assert(lower1 < upper1);                                           \
-        assert(color >= 0);                                                \
+        debug_print_rect(ROW, rect);                                           \
+        assert(lower0 < upper0);                                               \
+        assert(lower1 < upper1);                                               \
+        assert(color >= 0);                                                    \
     } while(0)
 
 #define next_point() do {                                                      \
@@ -102,8 +102,9 @@ rect_weighted_hv2d(double *data, int n, double * rectangles,
         if (pk >= n || top == last_top || p[0] >= last_right)                  \
             goto return_whv;                                                   \
         p += nobj;                                                             \
-        print_point(pk, p, r, rect);                                           \
+        debug_print_point(pk, p, r, rect);                                     \
     } while(0)
+
     // We cannot use %zu for size_t because of MingW compiler.
     DEBUG2_PRINT("n = %lu\trectangles = %lu\n", (unsigned long)n, (unsigned long)rectangles_nrow);
     if (rectangles_nrow <= 0 || n <= 0) return 0;
@@ -128,7 +129,7 @@ rect_weighted_hv2d(double *data, int n, double * rectangles,
 
     const double *p = data;
     int pk = 0;
-    print_point(pk, p, r, rect);
+    debug_print_point(pk, p, r, rect);
     double top = upper1;
     // lowest_upper1;
     const double last_top = rectangles[rectangles_nrow * (nobj * 2 + 1) - 2];
