@@ -170,6 +170,19 @@ reinsert(fpli_dlnode_t * restrict nodep, dimension_t dim, double * restrict boun
 }
 
 static void
+reinsert_dom(fpli_dlnode_t * restrict nodep, dimension_t dim)
+{
+    ASSUME(dim > STOP_DIMENSION);
+    for (dimension_t d = 0; d < dim - STOP_DIMENSION; d++) {
+        fpli_dlnode_t * p = nodep->prev[d];
+        p->next[d] = nodep;
+        nodep->next[d]->prev[d] = nodep;
+        nodep->area[d] = p->area[d];
+        nodep->vol[d] = p->vol[d] + p->area[d] * (nodep->x[d + STOP_DIMENSION] - p->x[d + STOP_DIMENSION]);
+    }
+}
+
+static void
 fpli_hv4d_setup_cdllist(const fpli_dlnode_t * restrict pp,
                         dlnode_t * restrict list, size_t n _attr_maybe_unused)
 {
@@ -260,7 +273,8 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
     /* Delete all points x[dim] > bound[d_stop].  In case of repeated
        coordinates, delete also all points x[dim] == bound[d_stop] except
        one.  */
-    while (p1->x[dim] > bound[d_stop] || p1->prev[d_stop]->x[dim] >= bound[d_stop]) {
+    while (p1->x[dim] > bound[d_stop]
+           || p1->prev[d_stop]->x[dim] >= bound[d_stop]) {
         // FIXME: Instead of deleting each point, unlink the start and end
         // nodes after the loop.
         delete(p1, dim, bound);
