@@ -260,7 +260,8 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
     /* Delete all points x[dim] > bound[d_stop].  In case of repeated
        coordinates, delete also all points x[dim] == bound[d_stop] except
        one.  */
-    while (p1->x[dim] > bound[d_stop] || p1->prev[d_stop]->x[dim] >= bound[d_stop]) {
+    while (p1->x[dim] > bound[d_stop]
+           || p1->prev[d_stop]->x[dim] >= bound[d_stop]) {
         // FIXME: Instead of deleting each point, unlink the start and end
         // nodes after the loop.
         delete(p1, dim, bound);
@@ -279,11 +280,13 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
         ASSUME(c == 1);
         update_area(p1->area, p1->x, ref, dim);
         p1->vol[d_stop] = 0;
-        if (p0->x == NULL) {
+        assert(p0->x != NULL);
+        /* if (p0->x == NULL)
             return p1->area[d_stop] * (ref[dim] - p1->x[dim]);
-        }
+        */
         hyperv = p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
-        bound[d_stop] = p0->x[dim];
+        // FIXME: This is never used.
+        // bound[d_stop] = p0->x[dim];
         reinsert(p0, dim, bound);
         c++;
         p1 = p0;
@@ -310,11 +313,13 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
         }
         p1->area[d_stop] = hypera;
         if (p0->x == NULL) {
+            bound[d_stop] = p1->x[dim];
             hyperv += hypera * (ref[dim] - p1->x[dim]);
             return hyperv;
         }
         hyperv += hypera * (p0->x[dim] - p1->x[dim]);
-        bound[d_stop] = p0->x[dim];
+        // FIXME: This is never used.
+        // bound[d_stop] = p0->x[dim];
         reinsert(p0, dim, bound);
         c++;
         p1 = p0;
