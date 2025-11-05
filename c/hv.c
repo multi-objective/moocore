@@ -284,7 +284,8 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
             return p1->area[d_stop] * (ref[dim] - p1->x[dim]);
         */
         hyperv = p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
-        bound[d_stop] = p0->x[dim];
+        // FIXME: This is never used.
+        // bound[d_stop] = p0->x[dim];
         reinsert(p0, dim, bound);
         c++;
         p1 = p0;
@@ -311,11 +312,13 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
         }
         p1->area[d_stop] = hypera;
         if (p0->x == NULL) {
+            bound[d_stop] = p1->x[dim];
             hyperv += hypera * (ref[dim] - p1->x[dim]);
             return hyperv;
         }
         hyperv += hypera * (p0->x[dim] - p1->x[dim]);
-        bound[d_stop] = p0->x[dim];
+        // FIXME: This is never used.
+        // bound[d_stop] = p0->x[dim];
         reinsert(p0, dim, bound);
         c++;
         p1 = p0;
