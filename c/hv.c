@@ -297,12 +297,8 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
             break;
     }
 
-    double hyperv = 0;
-    if (c > 1) {
-        hyperv = p1->prev[d_stop]->vol[d_stop] + p1->prev[d_stop]->area[d_stop]
-            * (p1->x[dim] - p1->prev[d_stop]->x[dim]);
-    } else {
-        ASSUME(c == 1);
+    double hyperv;
+    if (c == 1) {
         update_area(p1->area, p1->x, ref, dim);
         p1->vol[d_stop] = 0;
         assert(p0->x != NULL);
@@ -310,12 +306,18 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
             return p1->area[d_stop] * (ref[dim] - p1->x[dim]);
         */
         hyperv = p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
-        // FIXME: This is never used.
+        // FIXME: This is never used?
         // bound[d_stop] = p0->x[dim];
         reinsert(p0, dim, bound);
         c++;
         p1 = p0;
         p0 = p0->next[d_stop];
+    } else {
+        ASSUME(c > 1);
+        hyperv = p1->prev[d_stop]->vol[d_stop] + p1->prev[d_stop]->area[d_stop]
+            * (p1->x[dim] - p1->prev[d_stop]->x[dim]);
+        assert(p0 != p1->prev[d_stop]);
+        // p0->x may be NULL here and thus we may return below.
     }
 
     assert(c > 1);
@@ -354,7 +356,7 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
             return hyperv;
         }
         hyperv += hypera * (p0->x[dim] - p1->x[dim]);
-        // FIXME: This is never used.
+        // FIXME: This is never used?
         // bound[d_stop] = p0->x[dim];
         reinsert(p0, dim, bound);
         c++;
@@ -399,8 +401,7 @@ double fpli_hv(const double * restrict data, int d, int npoints,
 {
     size_t n = (size_t) npoints;
     if (unlikely(n == 0)) return 0.0;
-    ASSUME(d < 256);
-    ASSUME(d > 1);
+    ASSUME(d > 1 && d < 256);
     if (d == 4) return hv4d(data, n, ref);
     if (d == 3) return hv3d(data, n, ref);
     if (d == 2) return hv2d(data, n, ref);
@@ -422,9 +423,11 @@ double fpli_hv(const double * restrict data, int d, int npoints,
         hyperv = hv_recursive(list, list4d, dim - 1, n, ref, bound);
         free_cdllist(list4d);
         free(bound);
-        /* fprintf(stderr, "count_ignore_1 = %zu\n", count_ignore_1); */
-        /* fprintf(stderr, "count_ignore_2 = %zu\n", count_ignore_2); */
-        /* fprintf(stderr, "count_ignore_3 = %zu\n", count_ignore_3); */
+#ifdef HV_COUNTERS
+        fprintf(stderr, "count_ignore_1 = %zu\n", count_ignore_1);
+        fprintf(stderr, "count_ignore_2 = %zu\n", count_ignore_2);
+        fprintf(stderr, "count_ignore_3 = %zu\n", count_ignore_3);
+#endif
     }
     /* Clean up.  */
     fpli_free_cdllist(list);
