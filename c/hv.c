@@ -148,15 +148,22 @@ update_bound(double * restrict bound, const double * restrict x, dimension_t dim
 }
 
 static void
-delete(fpli_dlnode_t * restrict nodep, dimension_t dim, double * restrict bound)
+delete_dom(fpli_dlnode_t * restrict nodep, dimension_t dim)
 {
     ASSUME(dim > STOP_DIMENSION);
     for (dimension_t d = 0; d < dim - STOP_DIMENSION; d++) {
         nodep->prev[d]->next[d] = nodep->next[d];
         nodep->next[d]->prev[d] = nodep->prev[d];
     }
+}
+
+static void
+delete(fpli_dlnode_t * restrict nodep, dimension_t dim, double * restrict bound)
+{
+    delete_dom(nodep, dim);
     update_bound(bound, nodep->x, dim);
 }
+
 
 static void
 reinsert(fpli_dlnode_t * restrict nodep, dimension_t dim, double * restrict bound)
@@ -175,10 +182,11 @@ reinsert_dom(fpli_dlnode_t * restrict nodep, dimension_t dim)
     ASSUME(dim > STOP_DIMENSION);
     for (dimension_t d = 0; d < dim - STOP_DIMENSION; d++) {
         fpli_dlnode_t * p = nodep->prev[d];
-        p->next[d] = nodep;
+        nodep->prev[d]->next[d] = nodep;
         nodep->next[d]->prev[d] = nodep;
         nodep->area[d] = p->area[d];
-        nodep->vol[d] = p->vol[d] + p->area[d] * (nodep->x[d + STOP_DIMENSION] - p->x[d + STOP_DIMENSION]);
+        const dimension_t i = d + STOP_DIMENSION;
+        nodep->vol[d] = p->vol[d] + p->area[d] * (nodep->x[i] - p->x[i]);
     }
 }
 
@@ -253,6 +261,10 @@ update_area(double * restrict area, const double * restrict x,
         area[d + 1] *= area[d];
 }
 
+static size_t count_ignore_1 = 0,
+    count_ignore_2 = 0,
+    count_ignore_3 = 0;
+
 static double
 hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
              dimension_t dim, size_t c,
@@ -264,12 +276,12 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
        General case for dimensions higher than 4D
        ------------------------------------------------------ */
     const dimension_t d_stop = dim - STOP_DIMENSION;
-    fpli_dlnode_t *p1 = list->prev[d_stop];
-    for (fpli_dlnode_t *pp = p1; pp->x; pp = pp->prev[d_stop]) {
+    fpli_dlnode_t * p1 = list->prev[d_stop];
+    for (fpli_dlnode_t * pp = p1; pp->x; pp = pp->prev[d_stop]) {
         if (pp->ignore < dim)
             pp->ignore = 0;
     }
-    fpli_dlnode_t *p0 = list;
+    fpli_dlnode_t * p0 = list;
     /* Delete all points x[dim] > bound[d_stop].  In case of repeated
        coordinates, delete also all points x[dim] == bound[d_stop] except
        one.  */
@@ -308,9 +320,12 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
 
     assert(c > 1);
     while (true) {
+        // FIXME: This is not true in the first iteration if c > 1 previously.
+        // assert(p0 == p1->prev[d_stop]);
         p1->vol[d_stop] = hyperv;
         double hypera;
         if (p1->ignore >= dim) {
+            count_ignore_1++;
             hypera = p1->prev[d_stop]->area[d_stop];
         } else {
             if (dim - 1 == STOP_DIMENSION) {
@@ -321,8 +336,16 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
             } else {
                 hypera = hv_recursive(list, list4d, dim - 1, c, ref, bound);
             }
-            if (hypera <= p1->prev[d_stop]->area[d_stop])
+            /* At this point, p1 is the point with the highest value in
+               dimension dim in the list: If it is dominated in dimension
+               dim-1, then it is also dominated in dimension dim. */
+            if (p1->ignore == (dim - 1)) {
+                count_ignore_2++;
                 p1->ignore = dim;
+            } else if (hypera <= p1->prev[d_stop]->area[d_stop]) {
+                count_ignore_3++;
+                p1->ignore = dim;
+            }
         }
         p1->area[d_stop] = hypera;
         if (p0->x == NULL) {
@@ -399,6 +422,9 @@ double fpli_hv(const double * restrict data, int d, int npoints,
         hyperv = hv_recursive(list, list4d, dim - 1, n, ref, bound);
         free_cdllist(list4d);
         free(bound);
+        /* fprintf(stderr, "count_ignore_1 = %zu\n", count_ignore_1); */
+        /* fprintf(stderr, "count_ignore_2 = %zu\n", count_ignore_2); */
+        /* fprintf(stderr, "count_ignore_3 = %zu\n", count_ignore_3); */
     }
     /* Clean up.  */
     fpli_free_cdllist(list);
