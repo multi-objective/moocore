@@ -21,7 +21,7 @@ Version 0.1.9 (31/10/2025)
 - :func:`~moocore.is_nondominated` and :func:`~moocore.filter_dominated` are faster for dimensions larger than 3.
 - ``moocore`` wheels are now built for ``aarch64`` (ARM64) in Linux and Windows.
   See the `installation instructions <https://github.com/multi-objective/moocore/tree/main/python#install>`_.
-- :func:`~moocore.is_nondominated` and :func:`moocore.filter_dominated` are now stable in 2D and 3D with ``!keep_weakly``, that is, only the first of duplicated points is marked as nondominated.
+- :func:`~moocore.is_nondominated` and :func:`~moocore.filter_dominated` are now stable in 2D and 3D with ``!keep_weakly``, that is, only the first of duplicated points is marked as nondominated.
 
 
 Version 0.1.8 (15/07/2025)
