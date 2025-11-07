@@ -17,7 +17,7 @@
 */
 
 typedef struct dlnode {
-    const double * x;            // point coordinates (objective vector).
+    const double * restrict x;            // point coordinates (objective vector).
     struct dlnode * next[HV_DIMENSION - 2]; /* keeps the points sorted according to coordinates 2,3 and 4
                                 (in the case of 2 and 3, only the points swept by 4 are kept) */
     struct dlnode * prev[HV_DIMENSION - 2]; //keeps the points sorted according to coordinates 2 and 3 (except the sentinel 3)
