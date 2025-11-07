@@ -226,15 +226,6 @@ fpli_hv4d_setup_cdllist(const fpli_dlnode_t * restrict pp,
     (list+2)->prev[d] = q;
 }
 
-static double
-one_point_hv(const double * restrict x, const double * restrict ref, dimension_t d)
-{
-    double hv = ref[0] - x[0];
-    for (dimension_t i = 1; i < d; i++)
-        hv *= (ref[i] - x[i]);
-    return hv;
-}
-
 double hv4dplusU(dlnode_t * list);
 
 static double
@@ -243,6 +234,15 @@ fpli_hv4d(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d, size_t c)
     ASSUME(c > 1);
     fpli_hv4d_setup_cdllist(list->next[0], list4d, c);
     double hv = hv4dplusU(list4d);
+    return hv;
+}
+
+static double
+one_point_hv(const double * restrict x, const double * restrict ref, dimension_t d)
+{
+    double hv = ref[0] - x[0];
+    for (dimension_t i = 1; i < d; i++)
+        hv *= (ref[i] - x[i]);
     return hv;
 }
 
@@ -270,8 +270,15 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
              dimension_t dim, size_t c,
              const double * restrict ref, double * restrict bound)
 {
-    ASSUME(dim > STOP_DIMENSION);
     ASSUME(c > 1);
+    ASSUME(dim >= STOP_DIMENSION);
+    if (dim == STOP_DIMENSION) {
+        /*---------------------------------------
+          base case of dimension 4
+          --------------------------------------*/
+        return fpli_hv4d(list, list4d, c);
+    }
+    ASSUME(dim > STOP_DIMENSION);
     /* ------------------------------------------------------
        General case for dimensions higher than 4D
        ------------------------------------------------------ */
@@ -281,17 +288,19 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
         if (pp->ignore < dim)
             pp->ignore = 0;
     }
+    fpli_dlnode_t * p1_prev = p1->prev[d_stop];
     fpli_dlnode_t * p0 = list;
     /* Delete all points x[dim] > bound[d_stop].  In case of repeated
        coordinates, delete also all points x[dim] == bound[d_stop] except
        one.  */
     while (p1->x[dim] > bound[d_stop]
-           || p1->prev[d_stop]->x[dim] >= bound[d_stop]) {
+           || p1_prev->x[dim] >= bound[d_stop]) {
         // FIXME: Instead of deleting each point, unlink the start and end
         // nodes after the loop.
         delete(p1, dim, bound);
         p0 = p1;
         p1 = p1->prev[d_stop];
+        p1_prev = p1->prev[d_stop];
         c--;
         if (c == 1)
             break;
@@ -311,12 +320,14 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
         reinsert(p0, dim, bound);
         c++;
         p1 = p0;
+        p1_prev = p0->prev[d_stop];
         p0 = p0->next[d_stop];
     } else {
         ASSUME(c > 1);
-        hyperv = p1->prev[d_stop]->vol[d_stop] + p1->prev[d_stop]->area[d_stop]
-            * (p1->x[dim] - p1->prev[d_stop]->x[dim]);
-        assert(p0 != p1->prev[d_stop]);
+        hyperv = p1_prev->vol[d_stop] + p1_prev->area[d_stop]
+            * (p1->x[dim] - p1_prev->x[dim]);
+        assert(p0 != p1_prev);
+        assert(p0 == p1->next[d_stop]);
         // p0->x may be NULL here and thus we may return below.
     }
 
@@ -324,27 +335,21 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
     while (true) {
         // FIXME: This is not true in the first iteration if c > 1 previously.
         // assert(p0 == p1->prev[d_stop]);
+        assert(p1_prev == p1->prev[d_stop]);
         p1->vol[d_stop] = hyperv;
         double hypera;
         if (p1->ignore >= dim) {
             count_ignore_1++;
-            hypera = p1->prev[d_stop]->area[d_stop];
+            hypera = p1_prev->area[d_stop];
         } else {
-            if (dim - 1 == STOP_DIMENSION) {
-                /*---------------------------------------
-                  base case of dimension 4
-                  --------------------------------------*/
-                hypera = fpli_hv4d(list, list4d, c);
-            } else {
-                hypera = hv_recursive(list, list4d, dim - 1, c, ref, bound);
-            }
+            hypera = hv_recursive(list, list4d, dim - 1, c, ref, bound);
             /* At this point, p1 is the point with the highest value in
                dimension dim in the list: If it is dominated in dimension
                dim-1, then it is also dominated in dimension dim. */
             if (p1->ignore == (dim - 1)) {
                 count_ignore_2++;
                 p1->ignore = dim;
-            } else if (hypera <= p1->prev[d_stop]->area[d_stop]) {
+            } else if (hypera <= p1_prev->area[d_stop]) {
                 count_ignore_3++;
                 p1->ignore = dim;
             }
@@ -361,6 +366,7 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
         reinsert(p0, dim, bound);
         c++;
         p1 = p0;
+        p1_prev = p0->prev[d_stop];
         p0 = p0->next[d_stop];
     }
 }
