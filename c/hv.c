@@ -99,12 +99,13 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     for (i = 0; i < n; i++)
         scratch[i] = head + i + 1;
 
-    for (int k = d-1; k >= 0; k--) {
+    for (int k = d - 1; k >= 0; k--) {
         for (i = 0; i < n; i++)
             scratch[i]->x--;
         int j = k - STOP_DIMENSION;
         if (j < 0)
             continue;
+        // Sort each dimension independently.
         qsort(scratch, n, sizeof(*scratch), compare_node);
         head->next[j] = scratch[0];
         scratch[0]->prev[j] = head;
@@ -166,13 +167,19 @@ delete(fpli_dlnode_t * restrict nodep, dimension_t dim, double * restrict bound)
 
 
 static void
-reinsert(fpli_dlnode_t * restrict nodep, dimension_t dim, double * restrict bound)
+reinsert_nobound(fpli_dlnode_t * restrict nodep, dimension_t dim)
 {
     ASSUME(dim > STOP_DIMENSION);
     for (dimension_t d = 0; d < dim - STOP_DIMENSION; d++) {
         nodep->prev[d]->next[d] = nodep;
         nodep->next[d]->prev[d] = nodep;
     }
+}
+
+static void
+reinsert(fpli_dlnode_t * restrict nodep, dimension_t dim, double * restrict bound)
+{
+    reinsert_nobound(nodep, dim);
     update_bound(bound, nodep->x, dim);
 }
 
@@ -372,6 +379,77 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
 }
 
 static double
+hv_anyd(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
+        dimension_t dim, size_t c,
+        const double * restrict ref, double * restrict bound)
+{
+    ASSUME(c > 1);
+    ASSUME(dim > STOP_DIMENSION);
+    /* ------------------------------------------------------
+       General case for dimensions higher than 4D
+       ------------------------------------------------------ */
+    const dimension_t d_stop = dim - STOP_DIMENSION;
+    fpli_dlnode_t * p1 = list->prev[d_stop];
+    // FIXME: This should be the initial state of the list when building it.
+    // Delete all points in dimensions < dim.
+    do {
+        delete_dom(p1, dim);
+        p1 = p1->prev[d_stop];
+        c--;
+    } while (c > 1);
+
+    update_area(p1->area, p1->x, ref, dim);
+    p1->vol[d_stop] = 0;
+    fpli_dlnode_t * p0 = p1->next[d_stop];
+    assert(p0->x != NULL);
+    double hyperv = p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
+    // FIXME: This is never used?
+    // bound[d_stop] = p0->x[dim];
+    reinsert_nobound(p0, dim);
+    p1 = p0;
+    fpli_dlnode_t * p1_prev = p0->prev[d_stop];
+    p0 = p0->next[d_stop];
+    c++;
+
+    assert(c > 1);
+    while (true) {
+        // FIXME: This is not true in the first iteration if c > 1 previously.
+        //assert(p0 == p1->prev[d_stop]);
+        assert(p1_prev == p1->prev[d_stop]);
+        p1->vol[d_stop] = hyperv;
+        assert(p1->ignore == 0);
+        double hypera = hv_recursive(list, list4d, dim - 1, c, ref, bound);
+        /* At this point, p1 is the point with the highest value in
+           dimension dim in the list: If it is dominated in dimension
+           dim-1, then it is also dominated in dimension dim. */
+        if (p1->ignore == (dim - 1)) {
+            count_ignore_2++;
+            p1->ignore = dim;
+        } else if (hypera <= p1_prev->area[d_stop]) {
+            count_ignore_3++;
+            p1->ignore = dim;
+        }
+        p1->area[d_stop] = hypera;
+        if (p0->x == NULL) {
+            // Updating the bound is useless here.
+            // bound[d_stop] = p1->x[dim];
+            hyperv += hypera * (ref[dim] - p1->x[dim]);
+            return hyperv;
+        }
+        hyperv += hypera * (p0->x[dim] - p1->x[dim]);
+        // FIXME: This is never used?
+        // bound[d_stop] = p0->x[dim];
+        // FIXME: Does updating the bound here matters?
+        reinsert(p0, dim, bound);
+        p1 = p0;
+        p1_prev = p0->prev[d_stop];
+        p0 = p0->next[d_stop];
+        c++;
+    }
+}
+
+
+static double
 hv2d(const double * restrict data, size_t n, const double * restrict ref)
 {
     const double **p = generate_sorted_doublep_2d(data, &n, ref[0]);
@@ -426,7 +504,7 @@ double fpli_hv(const double * restrict data, int d, int npoints,
         for (dimension_t i = 0; i < d_stop; i++)
             bound[i] = -DBL_MAX;
         dlnode_t * list4d = new_cdllist(n, ref);
-        hyperv = hv_recursive(list, list4d, dim - 1, n, ref, bound);
+        hyperv = hv_anyd(list, list4d, dim - 1, n, ref, bound);
         free_cdllist(list4d);
         free(bound);
 #ifdef HV_COUNTERS
