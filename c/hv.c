@@ -269,9 +269,8 @@ update_area(double * restrict area, const double * restrict x,
         area[d + 1] *= area[d];
 }
 
-static size_t count_ignore_1 = 0,
-    count_ignore_2 = 0,
-    count_ignore_3 = 0;
+#define HV_COUNTERS
+static size_t debug_counter[6] = { 0 };
 
 static double
 hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
@@ -332,6 +331,7 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
         p0 = p0->next[d_stop];
     } else {
         ASSUME(c > 1);
+        debug_counter[0]++;
         hyperv = p1_prev->vol[d_stop] + p1_prev->area[d_stop]
             * (p1->x[dim] - p1_prev->x[dim]);
         assert(p0 != p1_prev);
@@ -347,18 +347,18 @@ hv_recursive(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
         p1->vol[d_stop] = hyperv;
         double hypera;
         if (p1->ignore >= dim) {
-            count_ignore_1++;
+            debug_counter[1]++;
             hypera = p1_prev->area[d_stop];
         } else {
             hypera = hv_recursive(list, list4d, dim - 1, c, ref, bound);
             /* At this point, p1 is the point with the highest value in
                dimension dim in the list: If it is dominated in dimension
                dim-1, then it is also dominated in dimension dim. */
-            if (p1->ignore == (dim - 1)) {
-                count_ignore_2++;
+            if (p1->ignore == dim - 1) {
+                debug_counter[2]++;
                 p1->ignore = dim;
             } else if (hypera <= p1_prev->area[d_stop]) {
-                count_ignore_3++;
+                debug_counter[3]++;
                 p1->ignore = dim;
             }
         }
@@ -423,11 +423,11 @@ hv_anyd(fpli_dlnode_t * restrict list, dlnode_t * restrict list4d,
         /* At this point, p1 is the point with the highest value in
            dimension dim in the list: If it is dominated in dimension
            dim-1, then it is also dominated in dimension dim. */
-        if (p1->ignore == (dim - 1)) {
-            count_ignore_2++;
+        if (p1->ignore == dim - 1) {
+            debug_counter[4]++;
             p1->ignore = dim;
         } else if (hypera <= p1_prev->area[d_stop]) {
-            count_ignore_3++;
+            debug_counter[5]++;
             p1->ignore = dim;
         }
         p1->area[d_stop] = hypera;
@@ -509,9 +509,9 @@ double fpli_hv(const double * restrict data, int d, int npoints,
         free_cdllist(list4d);
         free(bound);
 #ifdef HV_COUNTERS
-        fprintf(stderr, "count_ignore_1 = %zu\n", count_ignore_1);
-        fprintf(stderr, "count_ignore_2 = %zu\n", count_ignore_2);
-        fprintf(stderr, "count_ignore_3 = %zu\n", count_ignore_3);
+        for (size_t i = 0; i < sizeof(debug_counter)/sizeof(size_t); i++) {
+            fprintf(stderr, "debug_counter[%zu] = %zu\n", i, debug_counter[i]);
+        }
 #endif
     }
     /* Clean up.  */
