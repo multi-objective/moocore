@@ -132,7 +132,7 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
         bool p_leq_new_2 = p_lt_new_2 | p_eq_new_2;
 
         // if (weakly_dominates(px, newx, 3)) { // Slower
-        if (unlikely(p_leq_new_0 & p_leq_new_1 & p_leq_new_2)) {
+        if (p_leq_new_0 & p_leq_new_1 & p_leq_new_2) {
             //new->ndomr++;
             assert(weakly_dominates(px, newx, 4));
             return false;
@@ -243,6 +243,8 @@ hv4dplusU(dlnode_t * list)
             add_to_z(new);
             update_links(list, new);
         }
+        // FIXME: It new was dominated, can we accumulate the height and update
+        // hv later?
         double height = new->next[1]->x[3] - new->x[3];
         assert(height >= 0);
         hv += volume * height;
