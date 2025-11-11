@@ -73,8 +73,8 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     head->prev = head->next + d_stop * (n+1);
     head->area = malloc(2 * d_stop * (n+1) * sizeof(*data));
     head->vol = head->area + d_stop * (n+1);
-    head->x = NULL; /* head contains no data */
-    head->ignore = 0;  /* should never get used */
+    head->x = NULL; // head contains no data
+    head->ignore = 0;  // should never get used
 
     size_t i = 1;
     for (size_t j = 0; j < n; j++) {
@@ -82,7 +82,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
            point.  This is needed to assure that the points left are only those
            that are needed to calculate the hypervolume. */
         if (likely(strongly_dominates(data + j * d, ref, d))) {
-            head[i].x = data + (j+1) * d; /* this will be fixed a few lines below... */
+            head[i].x = data + (j+1) * d; // this will be fixed a few lines below...
             head[i].ignore = 0;
             head[i].next = head->next + i * d_stop;
             head[i].prev = head->prev + i * d_stop;
@@ -99,12 +99,11 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     for (i = 0; i < n; i++)
         scratch[i] = head + i + 1;
 
-    for (int k = d-1; k >= 0; k--) {
+    for (int j = d_stop - 1; j >= 0; j--) {
+        // We shift x because qsort cannot take the dimension to sort as an argument.
         for (i = 0; i < n; i++)
             scratch[i]->x--;
-        int j = k - STOP_DIMENSION;
-        if (j < 0)
-            continue;
+        // Sort each dimension independently.
         qsort(scratch, n, sizeof(*scratch), compare_node);
         head->next[j] = scratch[0];
         scratch[0]->prev[j] = head;
@@ -115,6 +114,9 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         scratch[n-1]->next[j] = head;
         head->prev[j] = scratch[n-1];
     }
+    // Reset x to point to the first objective.
+    for (i = 0; i < n; i++)
+        scratch[i]->x -= STOP_DIMENSION;
 
     free(scratch);
 
