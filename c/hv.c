@@ -99,12 +99,10 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     for (i = 0; i < n; i++)
         scratch[i] = head + i + 1;
 
-    for (int k = d - 1; k >= 0; k--) {
+    for (int j = d_stop - 1; j >= 0; j--) {
+        // We shift x because qsort cannot take the dimension to sort as an argument.
         for (i = 0; i < n; i++)
             scratch[i]->x--;
-        int j = k - STOP_DIMENSION;
-        if (j < 0)
-            continue;
         // Sort each dimension independently.
         qsort(scratch, n, sizeof(*scratch), compare_node);
         head->next[j] = scratch[0];
@@ -116,6 +114,9 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         scratch[n-1]->next[j] = head;
         head->prev[j] = scratch[n-1];
     }
+    // Reset x to point to the first objective.
+    for (i = 0; i < n; i++)
+        scratch[i]->x -= STOP_DIMENSION;
 
     free(scratch);
 
