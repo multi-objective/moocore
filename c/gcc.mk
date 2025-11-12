@@ -7,7 +7,11 @@ WARN_CFLAGS = -pedantic -Wall -Wextra -Wvla -Wconversion -Wno-sign-conversion -W
 ifeq ($(DEBUG), 0)
   SANITIZERS ?=
   OPT_CFLAGS ?= -DNDEBUG -O3 -flto
-  # -ffinite-math-only  -fno-signed-zeros allows further vectorization.
+  # GCC options that improve performance:
+  # -ffinite-math-only -fno-signed-zeros
+  # GCC options that may or may not improve performance:
+  # -ftree-loop-im -ftree-loop-ivcanon -fivopts -ftree-vectorize -funroll-loops -fipa-pta
+  #
 else
   SANITIZERS ?= -fsanitize=undefined -fsanitize=address -fsanitize=float-cast-overflow -fsanitize=float-divide-by-zero
   OPT_CFLAGS ?= -g3 -O0
