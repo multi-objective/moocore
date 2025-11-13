@@ -12,15 +12,25 @@
 // ----------------------- Data Structure -------------------------------------
 
 /*
-  With HV_DIMENSION==3, we have 'struct dlnode * next[1]' instead of 'struct dlnode * next'.
-  The compiler should be able to remove the extra indirection.
 */
 
 typedef struct dlnode {
-    const double * restrict x;            // point coordinates (objective vector).
+    const double * restrict x;  // point coordinates (objective vector).
+#ifdef HV_RECURSIVE
+    // In the recursive algorithm, the number of dimensions is not known in
+    // advance, so next and prev cannot be fixed-size arrays.
+    struct dlnode ** r_next;       // next-node vector for dimensions 5 and above.
+    struct dlnode ** r_prev;       // previous-node vector for dimensions 5 and above.
+    double * restrict area;      // partial area for dimensions 4 and above.
+    double * restrict vol;       // partial volume for dimensions 4 and above.
+#endif
+    /* With HV_DIMENSION==3, we have 'struct dlnode * next[1]' instead of
+       'struct dlnode * next'.  GCC -O3 is able to remove the extra
+       indirection, so it is not worth having a special case.  */
     struct dlnode * next[HV_DIMENSION - 2]; /* keeps the points sorted according to coordinates 2,3 and 4
-                                (in the case of 2 and 3, only the points swept by 4 are kept) */
+                                               (in the case of 2 and 3, only the points swept by 4 are kept) */
     struct dlnode * prev[HV_DIMENSION - 2]; //keeps the points sorted according to coordinates 2 and 3 (except the sentinel 3)
+
     struct dlnode * cnext[2]; //current next
 #if HV_DIMENSION == 4 || defined(HVC_ONLY)
     struct dlnode * closest[2]; // closest[0] == cx, closest[1] == cy
@@ -31,8 +41,9 @@ typedef struct dlnode {
     double area, volume;
     double last_slice_z; // FIXME: Is this really needed?
     struct dlnode * head[2]; // lowest (x, y)
-    bool ignore;    // hvc should be zero (duplicated or dominated)
 #endif
+    // In hvc this is used as a boolean (duplicated or dominated)
+    dimension_t ignore;          // [0, 255]
 } dlnode_t;
 
 // ------------ Update data structure -----------------------------------------
@@ -80,8 +91,9 @@ print_x(const dlnode_t * p)
 #endif // HV_DIMENSION == 3
 
 // ------------------------ Circular double-linked list ----------------------
+
 static inline void
-reset_sentinels(dlnode_t * restrict list)
+reset_sentinels_3d(dlnode_t * restrict list)
 {
     dlnode_t * restrict s1 = list;
     dlnode_t * restrict s2 = list + 1;
@@ -89,33 +101,41 @@ reset_sentinels(dlnode_t * restrict list)
 
     s1->next[0] = s2;
     s1->prev[0] = s3;
-#if HV_DIMENSION == 4 || defined(HVC_ONLY)
-    s1->closest[0] = s2;
-    s1->closest[1] = s1;
-#endif
-#if HV_DIMENSION == 4
-    s1->next[1] = s2;
-    s1->prev[1] = s3;
-#endif
 
     s2->next[0] = s3;
     s2->prev[0] = s1;
-#if HV_DIMENSION == 4 || defined(HVC_ONLY)
-    s2->closest[0] = s2;
-    s2->closest[1] = s1;
-#endif
-#if HV_DIMENSION == 4
-    s2->next[1] = s3;
-    s2->prev[1] = s1;
-#endif
 
     s3->next[0] = s1;
     s3->prev[0] = s2;
+
 #if HV_DIMENSION == 4 || defined(HVC_ONLY)
+    s1->closest[0] = s2;
+    s1->closest[1] = s1;
+
+    s2->closest[0] = s2;
+    s2->closest[1] = s1;
+
     s3->closest[0] = s2;
     s3->closest[1] = s1;
 #endif
+}
+
+static inline void
+reset_sentinels(dlnode_t * restrict list)
+{
+    reset_sentinels_3d(list);
+
 #if HV_DIMENSION == 4
+    dlnode_t * restrict s1 = list;
+    dlnode_t * restrict s2 = list + 1;
+    dlnode_t * restrict s3 = list + 2;
+
+    s1->next[1] = s2;
+    s1->prev[1] = s3;
+
+    s2->next[1] = s3;
+    s2->prev[1] = s1;
+
     s3->next[1] = s1;
     s3->prev[1] = s2;
 #endif
