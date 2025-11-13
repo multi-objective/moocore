@@ -96,6 +96,7 @@ HDRS =  avl.h                                                                \
         hvapprox.h                                                           \
         hv_priv.h                                                            \
         hv3d_priv.h                                                          \
+        hv4d_priv.h                                                          \
         igd.h                                                                \
         io.h                                                                 \
         io_priv.h                                                            \
