@@ -227,4 +227,10 @@
 #define _attr_optimize_finite_math /* nothing */
 #endif
 
+#ifdef __SANITIZE_ADDRESS__
+# include <sanitizer/asan_interface.h>
+#else
+# define ASAN_POISON_MEMORY_REGION(addr, size) ((void) (addr), (void) (size))
+#endif
+
 #endif /* GCC_ATTRIBUTES */
