@@ -14,5 +14,9 @@ test_that("Doctest: is_nondominated", {
   expect_equal(any_dominated(S), TRUE)
   expect_equal(any_dominated(S, keep_weakly = TRUE), TRUE)
   expect_equal(any_dominated(filter_dominated(S)), FALSE)
+  three_fronts = matrix(c(1, 2, 3, 3, 1, 2, 2, 3, 1, 10, 20, 30, 30, 10, 20, 20,
+    30, 10, 100, 200, 300, 300, 100, 200, 200, 300, 100), ncol = 3, byrow = TRUE)
+  expect_equal(pareto_rank(three_fronts), c(1, 1, 1, 2, 2, 2, 3, 3, 3))
+  split.data.frame(three_fronts, pareto_rank(three_fronts))
 })
 

@@ -53,6 +53,20 @@
 #' @expect equal(FALSE)
 #' any_dominated(filter_dominated(S))
 #'
+#' three_fronts = matrix(c(1, 2, 3,
+#'                         3, 1, 2,
+#'                         2, 3, 1,
+#'                         10, 20, 30,
+#'                         30, 10, 20,
+#'                         20, 30, 10,
+#'                         100, 200, 300,
+#'                         300, 100, 200,
+#'                         200, 300, 100), ncol=3, byrow=TRUE)
+#' @expect equal(c(1,1,1,2,2,2,3,3,3))
+#' pareto_rank(three_fronts)
+#'
+#' split.data.frame(three_fronts, pareto_rank(three_fronts))
+#'
 #' @omit
 #' path_A1 <- file.path(system.file(package="moocore"),"extdata","ALG_1_dat.xz")
 #' set <- read_datasets(path_A1)[,1:2]
@@ -129,9 +143,13 @@ any_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 #' @details [pareto_rank()] is meant to be used like `rank()`, but it assigns
 #'   ranks according to Pareto dominance, where rank 1 indicates those
 #'   solutions not dominated by any other solution in the input set.
-#'   Duplicated points are kept on the same front.  When `ncol(data) == 2`, the
-#'   code uses the \eqn{O(n \log n)} algorithm by \citet{Jen03}.  With higher
-#'   dimensions, it uses the naive \eqn{O(n^3)} algorithm.
+#'   Duplicated points are kept on the same front. The resulting ranking can be
+#'   used to partition points into a list of matrices, each matrix representing
+#'   a nondominated front (see examples below)
+#'
+#'   When `ncol(data) == 2`, the code uses the \eqn{O(n \log n)} algorithm by
+#'   \citet{Jen03}.  With higher dimensions, it uses the naive \eqn{O(n^3)}
+#'   algorithm.
 #'
 #' @references
 #'
