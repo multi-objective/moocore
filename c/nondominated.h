@@ -617,9 +617,9 @@ find_weak_nondominated_set_minimise(const double * restrict points, dimension_t 
 
 
 static inline size_t
-get_nondominated_set (double **pareto_set_p,
-                      const double *points, int dim, size_t size,
-                      const signed char *minmax)
+get_nondominated_set(double **pareto_set_p,
+                     const double * restrict points, int dim, size_t size,
+                     const signed char * restrict minmax)
 {
     ASSUME(dim >= 2 && dim <= 32);
 
@@ -658,7 +658,7 @@ filter_dominated_set(double * restrict points, int dim, size_t size,
         size_t k = 0;
         while (nondom[k]) k++; // Find first dominated.
         size_t n = k;
-        while (k < new_size) {
+        while (k < new_size) { // Otherwise, all the nondominated are at the top.
             do {
                 n++;
             } while (!nondom[n]); // Find next nondominated.
