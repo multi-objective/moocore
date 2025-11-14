@@ -54,7 +54,16 @@ naive :math:`O(m n^2)` algorithm.  Nevertheless, the plots show that `moocore`_ 
 Nondominated Sorting (Pareto ranking)
 -------------------------------------
 
-Nondominated sorting (or Pareto ranking) assigns a rank to each point according to Pareto-optimality. It can be used to split a set of points into layers of nondominated fronts.  For more details, see :func:`moocore.pareto_rank`. With 2 dimensions, `moocore`_ uses a :math:`O(n \log n)` algorithm. As the plots show, this makes `moocore`_ significantly faster than `paretoset`_, `pymoo`_ and `DESDEO`_. with higher dimensions, `moocore`_ uses the naive :math:`O(n^3)` algorithm, similar to `paretoset`_ and `DESDEO`_ (if the latter are compiled with `Numba`_). In these benchmarks points are sampled uniformly at random within the hyper-cube.
+Nondominated sorting (or Pareto ranking) assigns a rank to each point according
+to Pareto-optimality. It can be used to split a set of points into layers of
+nondominated fronts.  For more details, see :func:`moocore.pareto_rank`. This
+function in `moocore`_ uses a :math:`O(n \log n)` algorithm for 2 dimensions
+and a :math:`O(k\cdot n\log n)` algorithm for 3 dimensions.  As the plots show,
+this makes `moocore`_ significantly faster than `paretoset`_, `pymoo`_ and
+`DESDEO`_.  With higher dimensions, `moocore`_ uses the naive :math:`O(k m
+n^2)` algorithm, similar to `paretoset`_ and `DESDEO`_ (if the latter are
+compiled with `Numba`_). In these benchmarks points are sampled uniformly at
+random within the hyper-cube.
 
 |ndsort_bench-ran-2d| |ndsort_bench-ran-3d|
 

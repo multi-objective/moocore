@@ -8,7 +8,7 @@ Version 0.2.0 (development)
 ---------------------------
 
 - New :ref:`bench-ndsort` benchmarks.
-
+- :func:`~moocore.pareto_rank` is faster in 3D.
 
 Version 0.1.10 (24/11/2025)
 ---------------------------

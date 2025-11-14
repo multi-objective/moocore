@@ -1,3 +1,7 @@
+# moocore 0.2.0
+
+ * `pareto_rank()` is faster in 3D.
+
 # moocore 0.1.10
 
  * `mooocore` now requires R >= 4.1.
