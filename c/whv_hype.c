@@ -1,6 +1,4 @@
 #include "whv_hype.h"
-#undef DEBUG
-#define DEBUG 1
 #include "common.h"
 #include "nondominated.h"
 #include "rng.h"
