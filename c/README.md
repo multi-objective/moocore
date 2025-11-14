@@ -68,6 +68,38 @@ Most functions are implemented in headers such as `nondominated.h`. For other fu
 Functions exported by the library are marked with `MOOCORE_API`.
 
 
+Testsuite
+=========
+
+The **moocore** executables are validated using a [comprehensive testsuite](https://github.com/multi-objective/testsuite). Running the testsuite requires [Python](https://www.python.org/downloads/) `>= 3.10` and additional Python packages (see [`testsuite/requirements.txt`](https://github.com/multi-objective/testsuite/blob/main/requirements.txt)).  To run the testsuite yourself, follow these steps:
+
+```bash
+# Download moocore
+git clone https://github.com/multi-objective/moocore moocore
+# Download the testsuite
+git clone https://github.com/multi-objective/testsuite moocore/testsuite
+# Install required python packages
+python3 -m pip install -r testsuite/requirements.txt
+# Testing
+make -C moocore/c/ test
+# Timing
+make -C moocore/c/ time
+```
+
+Under `moocore/c/`, `make test` will compile the code with `DEBUG=1 SANTIZERS="" OPT_CFLAGS="-Og -g3"`. This is useful for debugging failures.
+
+`make time` will compile the code with `DEBUG=0 SANITIZERS="" OPT_CLAGS="-O3 -ftlo -march=native"`. This is useful for benchmarking code and making sure compiler optimizations do not break anything.
+
+Neither `make test` nor `make time` recompile the code that has not been modified. So you can compile the code first with your preferred compiler flags and then run the testsuite. For example, if you compile with `make all DEBUG=1`, the code will be compiler with several [sanitizers](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003daddress) enabled. You can then call `make test` to run the testsuite with the sanitizers enabled.  This is much slower, but very helpful to track crashes.
+
+Under `c/` there are various targets to run only parts of the testsuite, for example:
+
+    make test-hv
+    make test-nondominated
+    ...
+
+
+
 Command-line executables
 ========================
 
@@ -303,38 +335,6 @@ Options:
  -o, --obj=[+|-]...  specify whether each objective should be minimised (-)
                      or maximised (+). By default all are minimised;
 ```
-
-Testsuite
-=========
-
-The **moocore** executables are validated using a [comprehensive testsuite](https://github.com/multi-objective/testsuite). Running the testsuite requires [Python](https://www.python.org/downloads/) `>= 3.10` and additional Python packages (see [`testsuite/requirements.txt`](https://github.com/multi-objective/testsuite/blob/main/requirements.txt)).  To run the testsuite yourself, follow these steps:
-
-```bash
-# Download moocore
-git clone https://github.com/multi-objective/moocore moocore
-# Download the testsuite
-git clone https://github.com/multi-objective/testsuite moocore/testsuite
-# Install required python packages
-python3 -m pip install -r testsuite/requirements.txt
-# Testing
-make -C moocore/c/ test
-# Timing
-make -C moocore/c/ time
-```
-
-Under `moocore/c/`, `make test` will compile the code with `DEBUG=1 SANTIZERS="" OPT_CFLAGS="-Og -g3"`. This is useful for debugging failures.
-
-`make time` will compile the code with `DEBUG=0 SANITIZERS="" OPT_CLAGS="-O3 -ftlo -march=native"`. This is useful for benchmarking code and making sure compiler optimizations do not break anything.
-
-Neither `make test` nor `make time` recompile the code that has not been modified. So you can compile the code first with your preferred compiler flags and then run the testsuite. For example, if you compile with `make all DEBUG=1`, the code will be compiler with several [sanitizers](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003daddress) enabled. You can then call `make test` to run the testsuite with the sanitizers enabled.  This is much slower, but very helpful to track crashes.
-
-Under `c/` there are various targets to run only parts of the testsuite, for example:
-
-    make test-hv
-    make test-nondominated
-    ...
-
-
 
 License
 ========
