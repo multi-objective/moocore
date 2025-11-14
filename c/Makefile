@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------
 #  Makefile for moocore
 #-----------------------------------------------------------------------
-VERSION = 0.17.0$(REVISION)
+VERSION = 0.18$(REVISION)
 
 S=
 ## Quiet / verbose output:
@@ -158,10 +158,10 @@ EXE_CFLAGS += $(SANITIZERS) $(OPT_CFLAGS) $(MARCH_FLAGS) $(WARN_CFLAGS) \
 
 
 # List of test target base names
-TEST_NAMES := eaf nondominated hv hvapprox igd epsilon dominatedsets
+TEST_NAMES := eaf nondominated hv hvapprox igd epsilon dominatedsets ndsort
 TEST_TARGETS := $(addprefix test-,$(TEST_NAMES))
 TIME_TARGETS := $(addprefix time-,$(TEST_NAMES))
-ALL_NAMES := $(TEST_NAMES) ndsort
+ALL_NAMES := $(TEST_NAMES)
 
 EXE_FILES := $(addsuffix $(EXE), $(addprefix $(BINDIR)/,$(ALL_NAMES)))
 

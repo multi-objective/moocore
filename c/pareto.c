@@ -1,5 +1,131 @@
 #include "nondominated.h"
 
+#if DEBUG >= 2
+#include "io.h"
+#endif
+
+/**
+   Nondominated sorting in 23 in O(k * n log n), where k is the number of fronts.
+*/
+
+static int *
+pareto_rank_3d(const double * restrict points, size_t size)
+{
+    const bool keep_weakly = true;
+    int * rank = calloc(size, sizeof(*rank));
+    int front = 0;
+
+    ASSUME(size >= 2);
+    const double **p = generate_sorted_pp_3d(points, size);
+
+    avl_tree_t tree;
+    avl_init_tree(&tree, cmp_pdouble_asc_x_nonzero);
+    avl_node_t * tnodes = malloc((size+1) * sizeof(*tnodes));
+    while (true) {
+        avl_node_t * node = tnodes;
+        node->item = p[0];
+        avl_insert_top(&tree, node);
+
+        const double sentinel[] = { INFINITY, -INFINITY };
+        (++node)->item = sentinel;
+        avl_insert_after(&tree, node - 1, node);
+
+        // In this context, size means "no dominated solution found".
+        size_t pos_last_dom = size, n_nondom = size, j = 1;
+        const double * restrict pk = p[0];
+        do {
+            const double * restrict pj = p[j];
+            // printf("pj: "); print_point(pj); printf("\n");
+            bool dominated;
+            if (pk[0] > pj[0] || pk[1] > pj[1]) {
+                avl_node_t * nodeaux;
+                int res = avl_search_closest(&tree, pj, &nodeaux);
+                assert(res != 0);
+                if (res > 0) { // nodeaux goes before pj
+                    const double * restrict prev = nodeaux->item;
+                    assert(prev[0] != sentinel[0]);
+                    assert(prev[0] <= pj[0]);
+                    dominated = prev[1] <= pj[1];
+                    // printf("res > 0: prev: "); print_point(prev); printf("\n");
+                    nodeaux = nodeaux->next;
+                } else if (nodeaux->prev) {// nodeaux goes after pj, so move to the next one.
+                    const double * restrict prev = nodeaux->prev->item;
+                    assert(prev[0] != sentinel[0]);
+                    assert(prev[0] <= pj[0]);
+                    dominated = prev[1] <= pj[1];
+                    // printf("res < 0: prev: "); print_point(prev); printf("\n");
+                } else {
+                    dominated = false;
+                }
+
+                if (!dominated) { // pj is NOT dominated by a point in the tree.
+                    const double * restrict point = nodeaux->item;
+                    assert(pj[0] <= point[0]);
+                    // Delete everything in the tree that is dominated by pj.
+                    while (pj[1] <= point[1]) {
+                        // printf("delete point: "); print_point(point); printf("\n");
+                        assert(pj[0] <= point[0]);
+                        nodeaux = nodeaux->next;
+                        point = nodeaux->item;
+                        /* FIXME: A possible speed up is to delete without
+                           rebalancing the tree because avl_insert_before() will
+                           rebalance. */
+                        avl_unlink_node(&tree, nodeaux->prev);
+                    }
+                    // printf("insert before point: "); print_point(point); printf("\n");
+                    (++node)->item = pj;
+                    avl_insert_before(&tree, nodeaux, node);
+                }
+            } else {
+                // Handle duplicates and points that are dominated by the immediate
+                // previous one.
+                const bool k_eq_j = (pk[0] == pj[0]) & (pk[1] == pj[1]) & (pk[2] == pj[2]);
+                dominated = !keep_weakly;
+                if (dominated) { // We don't keep duplicates;
+                    if (unlikely(k_eq_j) && pj < pk) // Only the first duplicated point is kept.
+                        SWAP(pk, pj);
+                } else { // or it is not a duplicate, so it is non-weakly dominated;
+                    dominated = likely(!k_eq_j)
+                        // or pk was dominated, then this one is also dominated.
+                        || pos_last_dom == (size_t) ((pk - points) / 3);
+                }
+                // printf("dom by prev: "); print_point(prev); printf("\n");
+            }
+            if (dominated) { // pj is dominated by a point in the tree or by prev.
+                /* Map the order in p[], which is sorted, to the original order in
+                   points. */
+                pos_last_dom = (pj - points) / 3;
+                assert(rank[pos_last_dom] == front);
+                rank[pos_last_dom]++;
+                n_nondom--;
+            } else {
+                pk = pj;
+            }
+            j++;
+        } while (j < size);
+
+        if (n_nondom == size) {
+            free(tnodes);
+            free(p);
+            return rank;
+        }
+
+        size_t k = 0;
+        assert(rank[(p[k] - points) / 3] == front);
+        size_t n = k;
+        while (k < (size - n_nondom)) {
+            do {
+                n++;
+            } while (rank[(p[n] - points) / 3] == front);
+            p[k] = p[n];
+            k++;
+        }
+        front++;
+        avl_clear_tree(&tree);
+        size -= n_nondom;
+    }
+}
+
 /*
    Nondominated sorting in 2D in O(n log n) from:
 
@@ -7,11 +133,9 @@
    EAs: The NSGA-II and other algorithms. IEEE Transactions on
    Evolutionary Computation, 7(5):503–515, 2003.
 */
-#if DEBUG >= 2
-#include "io.h"
-#endif
+
 static int *
-pareto_rank_2D (const double * points, size_t size)
+pareto_rank_2d(const double * restrict points, size_t size)
 {
     const int dim = 2;
     const double ** p = malloc(size * sizeof(*p));
@@ -205,13 +329,20 @@ pareto_rank(const double * restrict points, size_t size, int d)
 {
     ASSUME(d >= 2 && d <= 32);
     dimension_t dim = (dimension_t) d;
-    if (size <= 0)
+    if (unlikely(size <= 0))
         return NULL;
-    if (dim == 2) {
-        int * rank = pareto_rank_2D(points, size);
-        DEBUG1(check_pareto_rank(rank, points, size, 2));
+    if (unlikely(size == 1))
+        return (int *) calloc(1, sizeof(int));
+
+    if (unlikely(dim == 3)) {
+        int * rank = pareto_rank_3d(points, size);
+        DEBUG1(check_pareto_rank(rank, points, size, dim));
         return rank;
     }
-
+    if (unlikely(dim == 2)) {
+        int * rank = pareto_rank_2d(points, size);
+        DEBUG1(check_pareto_rank(rank, points, size, dim));
+        return rank;
+    }
     return pareto_rank_naive(points, size, dim);
 }
