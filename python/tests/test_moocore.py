@@ -417,3 +417,47 @@ def test_pareto_rank(dim):
         points = points[~nondom]
         ranks = ranks[ranks > r]
         r += 1
+
+
+def check_nondominated_sorting_fronts(x, expected):
+    ranks = moocore.pareto_rank(np.array(x))
+    fronts = [(g == ranks) for g in np.unique(ranks)]
+    assert len(fronts) == len(expected)
+    assert_array_equal(fronts, np.array(expected))
+
+
+def test_nondominated_sorting_simple():
+    three_fronts = [
+        [1, 2, 3],
+        [3, 1, 2],
+        [2, 3, 1],
+        [10, 20, 30],
+        [30, 10, 20],
+        [20, 30, 10],
+        [100, 200, 300],
+        [300, 100, 200],
+        [200, 300, 100],
+    ]
+    three_fronts_expected = [
+        [*(3 * [True]), *(6 * [False])],
+        [*(3 * [False]), *(3 * [True]), *(3 * [False])],
+        [*(6 * [False]), *(3 * [True])],
+    ]
+
+    check_nondominated_sorting_fronts(three_fronts, three_fronts_expected)
+
+    # Should result in one front
+    one_front = [[1, 2, 3], [3, 1, 2], [2, 3, 1]]
+    one_front_expected = [3 * [True]]
+    check_nondominated_sorting_fronts(one_front, one_front_expected)
+
+    # Should result in 5 fronts (one for each solution)
+    five_fronts = [[1, 1, 1], [2, 2, 2], [3, 3, 3], [4, 4, 4], [5, 5, 5]]
+    five_fronts_expected = [
+        [True, False, False, False, False],
+        [False, True, False, False, False],
+        [False, False, True, False, False],
+        [False, False, False, True, False],
+        [False, False, False, False, True],
+    ]
+    check_nondominated_sorting_fronts(five_fronts, five_fronts_expected)

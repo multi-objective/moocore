@@ -1493,10 +1493,10 @@ def pareto_rank(
     The function :func:`pareto_rank` is meant to be used like
     :func:`numpy.argsort`, but it assigns indexes according to Pareto
     dominance, where rank 0 indicates those solutions not dominated by any
-    other solution in the input set. Duplicated points are kept on the same
-    front. The resulting ranking can be used to partition points into different
+    other solution in the input set.  Duplicated points are kept on the same
+    front.  The resulting ranking can be used to partition points into different
     lists or arrays, each of them being mutually nondominated
-    :footcite:p:`Deb02nsga2`.
+    :footcite:p:`Deb02nsga2` (see examples below).
 
     With 2 dimensions, the code uses the :math:`O(n \log n)` algorithm by
     :footcite:t:`Jen03`. With higher dimensions, it uses the naive
@@ -1535,13 +1535,13 @@ def pareto_rank(
 
     We can now split the original set into a list of nondominated sets ordered by Pareto rank:
 
-    >>> paretos = [x.compress((g == ranks), axis=0) for g in np.unique(ranks)]
-    >>> len(paretos)
+    >>> fronts = [x.compress((g == ranks), axis=0) for g in np.unique(ranks)]
+    >>> len(fronts)
     14
 
     The first element is the set of points not dominated by anything else:
 
-    >>> np.array_equal(paretos[0], moocore.filter_dominated(x))
+    >>> np.array_equal(fronts[0], moocore.filter_dominated(x))
     True
 
     """
