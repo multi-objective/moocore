@@ -227,7 +227,7 @@ hv4dplusU(dlnode_t * list)
     dlnode_t * newp = (list+1)->next[1];
     const dlnode_t * last = list+2;
     while (newp != last) {
-        if (restart_base_setup_z_and_closest(list, newp)) {
+        if (newp->ignore < 3 && restart_base_setup_z_and_closest(list, newp)) {
             // newp was not dominated by something else.
             double new_v = one_contribution_3d(newp);
             assert(new_v > 0);

@@ -245,6 +245,7 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
         p->x = scratch[j];
         DEBUG1(p->cnext[0] = p->cnext[1] = NULL);
 #if HV_DIMENSION == 4 || defined(HVC_ONLY)
+        p->ignore = false;
         //p->ndomr = 0;
         // Initialize it when debugging so it will crash if uninitialized.
         DEBUG1(p->closest[0] = p->closest[1] = NULL);
