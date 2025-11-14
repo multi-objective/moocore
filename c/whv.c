@@ -1,6 +1,4 @@
 #include "whv.h"
-#undef DEBUG
-#define DEBUG 1
 #include "common.h"
 #include <float.h>
 

@@ -119,6 +119,11 @@ avl_init_tree(avl_tree_t *rc, avl_compare_t cmp) {
 /* Reinitializes the tree structure for reuse. Nothing is free()d.
  * Compare and freeitem functions are left alone.
  * O(1) */
+static inline void
+avl_clear_tree(avl_tree_t *avltree) {
+	avltree->top = avltree->head = avltree->tail = NULL;
+}
+
 static void
 avl_clear_node(avl_node_t *newnode) {
 	newnode->left = newnode->right = NULL;
