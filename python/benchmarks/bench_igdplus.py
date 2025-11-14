@@ -13,6 +13,9 @@ import pathlib
 import matplotlib.pyplot as plt
 
 from pymoo.indicators.igd_plus import IGDPlus as pymoo_IGDplus
+## FIXME: Currently DESDEO is a thousand times slower than moocore, so it is not worth running it.
+# from desdeo.tools.indicators_unary import igd_plus_indicator as desdeo_igd_plus
+
 
 path_to_data = "../../testsuite/data/"
 if not pathlib.Path(path_to_data).expanduser().exists():
@@ -41,6 +44,8 @@ for name in names:
         bench={
             "moocore": lambda z, ref=ref: moocore.igd_plus(z, ref=ref),
             "pymoo": lambda z, ind=pymoo_IGDplus(ref): ind(z),
+            # FIXME: Currently DESDEO is a thousand times slower than moocore, so it is not worth running it.
+            # "desdeo": lambda z, ref=ref: desdeo_igd_plus(z, reference_set=ref).igd_plus,
         },
     )
 

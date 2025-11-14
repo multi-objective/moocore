@@ -183,7 +183,7 @@ Approximating the hypervolume becomes more useful for dimensions higher than 5, 
 Epsilon and IGD+ indicators
 ---------------------------
 
-The following plots compare the speed of computing the :ref:`epsilon indicator  <epsilon_metric>` metric and :ref:`IGD+ indicator <igd_hausdorf>`. Although  the algorithms for computing these metrics are relatively simple and easy to vectorize in Python, the `moocore`_ implementation is still 10 to 100 times faster.
+The following plots compare the speed of computing the :ref:`epsilon indicator  <epsilon_metric>` metric and :ref:`IGD+ indicator <igd_hausdorf>`. Although  the algorithms for computing these metrics are relatively simple and easy to vectorize in Python, the `moocore`_ implementation is still 10 to 100 times faster. The implementation of IGD+ in `DESDEO`_ is almost a thousand times **slower**  than `moocore`_, so it is not included in the benchmarks below.
 
 |pic5| |pic6|
 
