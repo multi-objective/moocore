@@ -66,13 +66,15 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     dlnode_t * head = malloc((n+1) * sizeof(*head));
     // Allocate single blocks of memory as much as possible.
     // We need space in r_next and r_prev for dimension 5 and above (d_stop - 1).
-    head->r_next = malloc(2 * (d_stop - 1) * (n+1) * sizeof(head));
+    head->r_next = malloc(4 * (d_stop - 1) * (n+1) * sizeof(head));
     head->r_prev = head->r_next + (d_stop - 1) * (n+1);
     // We only need space in area and vol for dimension 4 and above.
     head->area = malloc(2 * d_stop * (n+1) * sizeof(*data));
     head->vol = head->area + d_stop * (n+1);
     head->x = NULL; // head contains no data
     head->ignore = 0;  // should never get used
+    head->ignore_next = head->r_next + 2 * (d_stop - 1) * (n+1);
+    head->ignore_prev = head->r_next + 3 * (d_stop - 1) * (n+1);
 
     // Reserve space for the sentinels.
     dlnode_t * list4d = new_cdllist(0, ref);
@@ -93,6 +95,8 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
             head[i].r_prev = head->r_prev + i * (d_stop - 1);
             head[i].area = head->area + i * d_stop;
             head[i].vol = head->vol + i * d_stop;
+            head[i].ignore_next = head->ignore_next + i * (d_stop - 1);
+            head[i].ignore_prev = head->ignore_prev + i * (d_stop - 1);
             i++;
         }
     }
@@ -275,12 +279,26 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
     assert(d_stop > 0);
     // d_stop - 1 is dimension 5 in r_prev and r_next.
     dlnode_t * p1 = list->r_prev[d_stop - 1];
+    list->ignore_next[d_stop] = list->ignore_prev[d_stop] = list;
     for (dlnode_t * pp = p1; pp->x; pp = pp->r_prev[d_stop - 1]) {
         if (pp->ignore < dim)
             pp->ignore = 0;
+        else{ // move dominated points from "list" to "ignore vector"
+            if(pp->x[dim] > bound[d_stop]
+                    || pp->r_prev[d_stop-1]->x[dim] >= bound[d_stop]) {
+                assert(my_c > 1);
+                pp->ignore_prev[d_stop] = list->ignore_prev[d_stop];
+                pp->ignore_prev[d_stop]->ignore_next[d_stop] = pp;
+                list->ignore_prev[d_stop] = pp;
+                pp->ignore_next[d_stop] = list;
+
+                delete(pp, dim, bound);
+            }
+        }
     }
     dlnode_t * p1_prev = p1->r_prev[d_stop - 1];
     dlnode_t * p0 = list;
+    dlnode_t *ip = NULL;
     /* Delete all points x[dim] > bound[d_stop].  In case of repeated
        coordinates, delete also all points x[dim] == bound[d_stop] except
        one.  */
@@ -288,7 +306,9 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
            || p1_prev->x[dim] >= bound[d_stop]) {
         // FIXME: Instead of deleting each point, unlink the start and end
         // nodes after the loop.
-        delete(p1, dim, bound);
+        if(p1->ignore < dim){
+            delete(p1, dim, bound);
+        }// else: skip dominated points (they were already deleted)
         p0 = p1;
         p1 = p1->r_prev[d_stop - 1];
         p1_prev = p1->r_prev[d_stop - 1];
@@ -308,8 +328,10 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
         hyperv = p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
         // FIXME: This is never used?
         // bound[d_stop] = p0->x[dim];
-        reinsert(p0, dim, bound);
-        c++;
+        if(p0->ignore < dim){
+            reinsert(p0, dim, bound);
+            c++;
+        }// else: postpone reinsertion of dominated points
         p1 = p0;
         p1_prev = p0->r_prev[d_stop - 1];
         p0 = p0->r_next[d_stop - 1];
@@ -323,7 +345,7 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
         // p0->x may be NULL here and thus we may return below.
     }
 
-    assert(c > 1);
+    // assert(c > 1); // AG: this is no longer true (because the reinsert of p0 in line 332 will be postponed if p0->ignore >= dim)
     while (true) {
         // FIXME: This is not true in the first iteration if c > 1 previously.
         // assert(p0 == p1->r_prev[d_stop - 1]);
@@ -350,13 +372,22 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
         if (p0->x == NULL) {
             bound[d_stop] = p1->x[dim];
             hyperv += hypera * (ref[dim] - p1->x[dim]);
+            // reinsert dominated points (in inverse order of "ignore vector")
+            ip = list->ignore_prev[d_stop];
+            while(ip != list){
+                reinsert(ip, dim, bound);
+                ip = ip->ignore_prev[d_stop];
+                //c++;
+            }
             return hyperv;
         }
         hyperv += hypera * (p0->x[dim] - p1->x[dim]);
         // FIXME: This is never used?
         // bound[d_stop] = p0->x[dim];
-        reinsert(p0, dim, bound);
-        c++;
+	if (p0->ignore < dim) {
+        	reinsert(p0, dim, bound);
+        	c++;
+	}// else: postpone reinsertion of dominated points
         p1 = p0;
         p1_prev = p0->r_prev[d_stop - 1];
         p0 = p0->r_next[d_stop - 1];

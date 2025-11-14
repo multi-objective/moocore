@@ -23,6 +23,8 @@ typedef struct dlnode {
     struct dlnode ** r_prev;       // previous-node vector for dimensions 5 and above.
     double * restrict area;      // partial area for dimensions 4 and above.
     double * restrict vol;       // partial volume for dimensions 4 and above.
+    struct dlnode ** ignore_next; // next-ignore-node vector for dimensions 5 and above.
+    struct dlnode ** ignore_prev; // prev-ignore-node vector for dimensions 5 and above.
 #endif
     /* With HV_DIMENSION==3, we have 'struct dlnode * next[1]' instead of
        'struct dlnode * next'.  GCC -O3 is able to remove the extra
