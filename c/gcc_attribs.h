@@ -223,8 +223,11 @@
 #if defined(__GNUC__)  && __GNUC__ >= 13 && defined(__OPTIMIZE__)
 #define _attr_optimize_finite_math                                             \
     __attribute__((optimize("no-signed-zeros", "finite-math-only")))
+#define _attr_optimize_finite_and_associative_math                             \
+    __attribute__((optimize("no-signed-zeros", "finite-math-only", "no-trapping-math", "associative-math")))
 #else
-#define _attr_optimize_finite_math /* nothing */
+#define _attr_optimize_finite_math                 /* nothing */
+#define _attr_optimize_finite_and_associative_math /* nothing */
 #endif
 
 #ifdef __SANITIZE_ADDRESS__

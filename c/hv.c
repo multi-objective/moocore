@@ -228,6 +228,7 @@ fpli_hv4d(dlnode_t * restrict list, size_t c _attr_maybe_unused)
     return hv;
 }
 
+_attr_optimize_finite_and_associative_math // Required for auto-vectorization: https://gcc.gnu.org/PR122687
 static double
 one_point_hv(const double * restrict x, const double * restrict ref, dimension_t d)
 {
