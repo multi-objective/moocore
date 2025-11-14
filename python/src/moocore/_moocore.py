@@ -1495,9 +1495,11 @@ def pareto_rank(
     lists or arrays, each of them being mutually nondominated
     :footcite:p:`Deb02nsga2` (see examples below).
 
-    With 2 dimensions, the code uses the :math:`O(n \log n)` algorithm by
-    :footcite:t:`Jen03`. With higher dimensions, it uses the naive
-    :math:`O(n^3)` algorithm.
+    For 2D points, the code uses the :math:`O(n \log n)` algorithm by
+    :footcite:t:`Jen03`. For 3D points, it uses a :math:`O(k \cdot n \log n)`
+    algorithm, where :math:`k` is the number of fronts in the output.  With
+    higher dimensions, it uses the naive :math:`O(k m n^2)` algorithm, where
+    :math:`m` is the number of dimensions.
 
     Parameters
     ----------

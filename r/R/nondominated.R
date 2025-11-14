@@ -147,9 +147,11 @@ any_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 #'   used to partition points into a list of matrices, each matrix representing
 #'   a nondominated front (see examples below)
 #'
-#'   When `ncol(data) == 2`, the code uses the \eqn{O(n \log n)} algorithm by
-#'   \citet{Jen03}.  With higher dimensions, it uses the naive \eqn{O(n^3)}
-#'   algorithm.
+#'   Let \eqn{m} be the number of dimensions, i.e., `ncol(data)2`. With
+#'   \eqn{m=2}, the code uses the \eqn{O(n \log n)} algorithm by \citet{Jen03}.
+#'   When \eqn{m=3}, it uses a \eqn{O(k\cdot n \log n)} algorithm,
+#'   where \eqn{k} is the number of fronts in the output.  With higher
+#'   dimensions, it uses the naive \eqn{O(k m n^2)} algorithm.
 #'
 #' @references
 #'
