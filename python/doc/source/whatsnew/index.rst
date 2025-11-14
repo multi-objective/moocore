@@ -4,6 +4,12 @@
 What's new
 **********
 
+Version 0.2.0 (development)
+---------------------------
+
+- New :ref:`bench-ndsort` benchmarks.
+
+
 Version 0.1.9 (31/10/2025)
 --------------------------
 
