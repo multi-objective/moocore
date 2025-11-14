@@ -117,7 +117,8 @@ DIST_ROOT_FILES = Makefile README.md LICENSE
 OBJS  = $(SRCS:.c=.o)
 OBJS := $(OBJS:.cpp=.o)
 
-EXE_LDFLAGS=-lm
+LDLIBS=-lm
+EXE_LDFLAGS=$(LDLIBS)
 
 include gitversion.mk
 
@@ -136,12 +137,12 @@ SHLIB_LDFLAGS = -shared
 # Platform-specific linker flags
 ifeq ($(uname_S),Linux)
   SHLIB_CFLAGS += -fPIC
-  SHLIB_LDFLAGS += -lm -Wl,--no-undefined
+  SHLIB_LDFLAGS += $(LDLIBS) -Wl,--no-undefined
   SHLIB_EXT=so
 endif
 ifeq ($(uname_S),Darwin)
   SHLIB_CFLAGS += -fPIC
-  SHLIB_LDFLAGS += -lm
+  SHLIB_LDFLAGS += $(LDLIBS)
   SHLIB_EXT=dylib
 endif
 ifeq ($(uname_S),Windows)
@@ -196,7 +197,7 @@ $(BINDIR)/nondominated$(EXE): nondominated.o timer.o
 $(EXE_FILES): cmdline.o io.o
 	$(call MKDIR, $(BINDIR)/)
 	$(call ECHO,--> Building $@ version $(VERSION) <---)
-	$(QUIET_LINK)$(CC) -o $@ $^ $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS)
+	$(QUIET_LINK)$(CC) -o $@ $^ $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS) $(LDFLAGS)
 
 dominatedsets.o: cmdline.h io.h nondominated.h
 eaf_main.o: cmdline.h io.h eaf.h
