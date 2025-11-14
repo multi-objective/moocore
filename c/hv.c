@@ -286,7 +286,6 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
         else{ // move dominated points from "list" to "ignore vector"
             if(pp->x[dim] > bound[d_stop]
                     || pp->r_prev[d_stop-1]->x[dim] >= bound[d_stop]) {
-                assert(my_c > 1);
                 pp->ignore_prev[d_stop] = list->ignore_prev[d_stop];
                 pp->ignore_prev[d_stop]->ignore_next[d_stop] = pp;
                 list->ignore_prev[d_stop] = pp;
