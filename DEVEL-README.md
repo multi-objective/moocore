@@ -24,6 +24,32 @@ How to release
 1. `git ci -a -m "Start development of v{NEW_VERSION}"`
 
 
+Building the code
+=================
+
+C code
+-----
+
+See [*Compilation*](https://github.com/multi-objective/moocore/tree/main/c#compilation) to compile the C code under `c/`.
+
+R and Python packages
+---------------------
+
+Under `r/` or `python/`, the commands `make build` and `make install` will build and install the R and Python packages.
+
+
+Testing
+========
+
+The C code and the Python and R packages have their own testsuites. See [C testsuite](https://github.com/multi-objective/moocore/tree/main/c#testsuite) to setup and run the C testsuite.
+
+The Python and R testsuites are run automatically via Github Actions for every push and pull request. You can run then manually by running `make test` under `r/` or `python/`.
+
+You can run all testsuites at once by executing at the top-level:
+
+    make test
+
+
 How to extend the Python API
 ============================
 
