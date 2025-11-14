@@ -1,3 +1,7 @@
+# moocore 0.2.0
+
+ * `pareto_rank()` is faster in 3D.
+
 # moocore 0.1.9
 
  * `hv_contributions()` ignores dominated points by default.  Set `ignore_dominated=FALSE` to restore the previous behavior.  The 3D case uses the HVC3D algorithm.
