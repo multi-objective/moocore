@@ -1,0 +1,12 @@
+﻿normalise
+=========
+
+.. currentmodule:: moocore
+
+.. autofunction:: normalise
+
+.. _sphx_glr_backref_moocore.normalise:
+
+.. minigallery:: moocore.normalise
+   :add-heading: Gallery examples
+   :heading-level: -
