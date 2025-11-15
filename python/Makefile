@@ -26,10 +26,10 @@ show:
 	$(MAKE) -C doc show
 
 doc:
-	$(MAKE) -C doc clean html
+	$(MAKE) -C doc html
 
 fastdoc:
-	$(MAKE) -C doc clean html-noplot
+	$(MAKE) -C doc html-noplot
 
 clean:
 	$(MAKE) -C doc clean
