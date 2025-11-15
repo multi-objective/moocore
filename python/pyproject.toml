@@ -186,7 +186,6 @@ lint.pycodestyle.max-line-length = 80
 lint.pydocstyle.convention = "numpy"
 
 [tool.pytest.ini_options]
+faulthandler_timeout = 10
 doctest_optionflags = "NUMBER"
-addopts = [
-  "--import-mode=importlib",
-]
+addopts = [ "--import-mode=importlib", "--durations=5", "--durations-min=1.0" ]
