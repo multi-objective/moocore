@@ -12,6 +12,8 @@ import os
 import platform
 from cffi import FFI
 
+DEBUG = 0  # Compile in debug mode.
+
 libmoocore_h = "src/moocore/libmoocore.h"
 sources_path = "src/moocore/libmoocore/"
 headers = """
@@ -82,20 +84,20 @@ is_x86_64 = target_platform in ("i686", "x86", "x86_64", "AMD64")
 MSVC_CFLAGS = ["/GL", "/O2", "/GS-", "/wd4996", "/DMOOCORE_SHARED_LIB"]
 MSVC_LDFLAGS = ["/LTCG"]
 GCC_CFLAGS = ["-O3", "-flto"]
+if is_x86_64:
+    # Compile for sufficiently old x86-64 architecture.
+    MSVC_CFLAGS += ["/arch:AVX"]
+    MSVC_LDFLAGS += ["/arch:AVX"]
+    GCC_CFLAGS += ["-march=x86-64-v2"]
 
 extra_compile_args = []
 extra_link_args = []
 if is_windows and uses_msvc():
     extra_compile_args.extend(MSVC_CFLAGS)
     extra_link_args.extend(MSVC_LDFLAGS)
-    if is_x86_64:
-        extra_compile_args.append("/arch:AVX")
 else:
     extra_compile_args.extend(GCC_CFLAGS)
     extra_link_args.extend(GCC_CFLAGS)
-    # Compile for sufficiently old x86-64 architecture.
-    if is_x86_64:
-        extra_compile_args.append("-march=x86-64-v2")
 
 cflags = os.environ.get("CFLAGS", "")
 if cflags != "":
@@ -111,11 +113,15 @@ libmoocore_path = os.path.join(file_path, "libmoocore")
 with open(libmoocore_h) as f:
     ffibuilder.cdef(f.read())
 
+# This is not done automatically by ffibuilder.compile(debug=True) !
+undef_macros = ["NDEBUG"] if DEBUG >= 1 else []
 
 ffibuilder.set_source(
     "moocore._libmoocore",
     headers,
     sources=sources,
+    define_macros=[("DEBUG", str(DEBUG))],
+    undef_macros=undef_macros,
     include_dirs=[libmoocore_path],
     extra_compile_args=extra_compile_args,
     extra_link_args=extra_link_args,
@@ -123,4 +129,4 @@ ffibuilder.set_source(
 )
 
 if __name__ == "__main__":
-    ffibuilder.compile(verbose=True)
+    ffibuilder.compile(verbose=True, debug=bool(DEBUG))
