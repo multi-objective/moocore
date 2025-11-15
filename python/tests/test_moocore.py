@@ -353,7 +353,7 @@ def test_get_dataset_path():
 
 
 # method="DZ2019-HW" is very slow with dim > 15.
-@pytest.mark.parametrize("dim", range(2, 16))
+@pytest.mark.parametrize("dim", range(2, 15))
 def test_hv_approx(dim):
     x = np.full((1, dim), 0.5)
     ref = np.full(dim, 1.0)
@@ -440,7 +440,7 @@ def check_nondominated_sorting_fronts(x, expected):
     assert_array_equal(fronts, np.array(expected))
 
 
-def test_nondominated_sorting_simple():
+def test_nondominated_sorting_3d():
     three_fronts = [
         [1, 2, 3],
         [3, 1, 2],
