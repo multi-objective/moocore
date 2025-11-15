@@ -22,15 +22,17 @@
  *  nobjs : number of objectives, also the number of columns.
  */
 int
-read_objective_t_data (const char *filename, objective_t **data_p,
-                       int *nobjs_p, int **cumsizes_p, int *nsets_p)
+read_objective_t_data(const char * restrict filename,
+                      objective_t ** restrict data_p,
+                      int * restrict nobjs_p, int ** restrict cumsizes_p,
+                      int * restrict nsets_p)
 {
-    int nobjs = *nobjs_p;        /* number of objectives (and columns).  */
-    int *cumsizes = *cumsizes_p; /* cumulative sizes of data sets.       */
-    int nsets    = *nsets_p;     /* number of data sets.                 */
-    objective_t *data = *data_p;
+    objective_t * restrict data = *data_p;
+    int * restrict cumsizes = *cumsizes_p; // Cumulative sizes of data sets.
+    int nobjs = *nobjs_p;  // Number of objectives (and columns).
+    int nsets = *nsets_p;  // Number of data sets.
 
-    FILE *instream;
+    FILE * instream;
 
     if (filename == NULL) {
         instream = stdin;
@@ -52,8 +54,8 @@ read_objective_t_data (const char *filename, objective_t **data_p,
 
     /* If size is equal to zero, this is equivalent to free().
        That is, reinitialize the data structures.  */
-    data = realloc (data, datasize * sizeof(objective_t));
-    cumsizes = realloc (cumsizes, sizessize * sizeof(int));
+    data = realloc (data, datasize * sizeof(*data));
+    cumsizes = realloc (cumsizes, sizessize * sizeof(*cumsizes));
 
     /* skip over leading whitespace, comments and empty lines.  */
     int retval;			/* return value for fscanf */
@@ -73,18 +75,17 @@ read_objective_t_data (const char *filename, objective_t **data_p,
 
     do {
         /* beginning of data set */
-	if ((size_t) nsets == sizessize) {
+        if ((size_t) nsets == sizessize) {
             sizessize += CUMSIZE_INC;
-            cumsizes = realloc(cumsizes, sizessize * sizeof(int));
+            cumsizes = realloc(cumsizes, sizessize * sizeof(*cumsizes));
         }
 
-	cumsizes[nsets] = (nsets == 0) ? 0 : cumsizes[nsets - 1];
+        cumsizes[nsets] = (nsets == 0) ? 0 : cumsizes[nsets - 1];
 
         do {
             /* beginning of row */
-	    column = 0;
-
-	    do {
+            column = 0;
+            do {
                 /* new column */
                 column++;
                 objective_t number;
@@ -116,10 +117,10 @@ read_objective_t_data (const char *filename, objective_t **data_p,
 
                 /* skip possible trailing whitespace */
                 retval = skip_trailing_whitespace(instream);
-	    } while (retval == 0);
+            } while (retval == 0);
 
-	    if (!nobjs)
-		nobjs = column;
+            if (!nobjs)
+                nobjs = column;
             else if (likely(column == nobjs))
                 ; /* OK */
             else if (unlikely(cumsizes[0] == 0)) { /* just finished first row.  */
@@ -134,15 +135,15 @@ read_objective_t_data (const char *filename, objective_t **data_p,
                            filename, line, column, nobjs);
                 errorcode = ERROR_COLUMNS;
                 goto read_data_finish;
- 	    }
-	    cumsizes[nsets]++;
+            }
+            cumsizes[nsets]++;
 
             /* look for an empty line */
             line++;
             retval = skip_comment_line (instream);
-	} while (retval == 0);
+        } while (retval == 0);
 
-	nsets++; /* new data set */
+        nsets++; /* new data set */
         DEBUG2_PRINT("%s: set %d, read %d rows\n",
                      filename, nsets, cumsizes[nsets - 1]);
         /* skip over successive empty lines */
@@ -154,8 +155,8 @@ read_objective_t_data (const char *filename, objective_t **data_p,
     } while (retval != EOF); /* faster than !feof() */
 
     /* adjust to real size (saves memory but probably slower).  */
-    data = realloc (data, ntotal * sizeof(objective_t));
-    cumsizes = realloc (cumsizes, nsets * sizeof(int));
+    data = realloc (data, ntotal * sizeof(*data));
+    cumsizes = realloc (cumsizes, nsets * sizeof(*cumsizes));
 
 read_data_finish:
 
