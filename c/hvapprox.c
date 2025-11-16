@@ -567,26 +567,46 @@ compute_theta(long double * restrict theta, dimension_t dim,
     }
 }
 
+/*
+  FIXME: This function is not vectorized well because it uses "long double"
+  and because vectorization requires -funsafe-math-optimizations
+*/
+static void
+compute_sin_cos_theta(const long double * restrict theta, dimension_t dm1,
+                      double * restrict sin_theta, double * restrict cos_theta)
+{
+    for (size_t k = 0; k < dm1; k++) {
+        cos_theta[k] = STATIC_CAST(double, theta[k]);
+        sin_theta[k] = sin(cos_theta[k]);
+        cos_theta[k] = cos(cos_theta[k]);
+    }
+}
+
+/**
+   w_0 = \prod_{k=0}^{dim - 1} sin(theta_k)
+   w_j = cos(theta_{dim - j - 1}) * \prod_{k=0}^{dim - j - 1} sin(theta_k)
+
+*/
 static void
 compute_hua_wang_direction(double * restrict direction, dimension_t dim,
-                           const long double * restrict theta)
+                           const double * restrict sin_theta, const double * restrict cos_theta)
 {
     ASSUME(2 <= dim && dim <= 32);
-    dimension_t k, j;
-    direction[0] = STATIC_CAST(double, sinl(theta[0]));
-    for (k = 1; k < dim - 1; k++)
-        direction[0] *= STATIC_CAST(double, sinl(theta[k]));
-    for (j = 1; j < dim; j++) {
-        direction[j] = STATIC_CAST(double, cosl(theta[dim - j - 1]));
-        for (k = 0; k < dim - j - 1; k++) {
-            direction[j] *= STATIC_CAST(double, sinl(theta[k]));
-        }
-    }
-    for (k = 0; k < dim; k++) {
-        // FIXME: Can direction[k] be negative? If not, then we don't need fabs().
-        direction[k] = (fabs(direction[k]) <= ALMOST_ZERO_WEIGHT)
+    dimension_t j;
+    for (j = 0; j < dim - 1; j++)
+        direction[j] = sin_theta[0];
+    for (j = dim - 2; j > 0; j--)
+        direction[j - 1] = sin_theta[dim - j - 1] * direction[j];
+    for (j = 1; j < dim - 1; j++)
+        direction[j] *= cos_theta[dim - j - 1];
+    direction[dim - 1] = cos_theta[0];
+
+    for (j = 0; j < dim; j++) {
+        assert(direction[j] >= 0);
+        // FIXME: Can direction[j] be negative? If not, then we don't need fabs().
+        direction[j] = (fabs(direction[j]) <= ALMOST_ZERO_WEIGHT)
             ? 1. / ALMOST_ZERO_WEIGHT
-            : 1. / direction[k];
+            : 1. / direction[j];
     }
 }
 
@@ -615,15 +635,20 @@ hv_approx_hua_wang(const double * restrict data, int nobjs, int n,
     // FIXME: OpenMP: #pragma omp parallel
     {
         long double * theta = malloc((dim - 1) * sizeof(*theta));
+        double * sin_theta = malloc((dim - 1) * sizeof(*sin_theta));
+        double * cos_theta = malloc((dim - 1) * sizeof(*cos_theta));
         double * w = malloc(dim * sizeof(*w));
         // FIXME: Add OpenMP: #pragma omp for reduction(+:expected)
         for (uint_fast32_t j = 0; j < nsamples; j++) {
             compute_polar_sample(theta, dim - 1, j, nsamples, polar_a);
             compute_theta(theta, dim, int_all);
-            compute_hua_wang_direction(w, dim, theta);
+            compute_sin_cos_theta(theta, dim - 1, sin_theta, cos_theta);
+            compute_hua_wang_direction(w, dim, sin_theta, cos_theta);
             expected += get_expected_value(points, npoints, dim, w);
         }
         free(theta);
+        free(sin_theta);
+        free(cos_theta);
         free(w);
     }
     free((void *) int_all);
