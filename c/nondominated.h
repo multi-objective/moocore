@@ -410,17 +410,15 @@ find_nondominated_set_agree_(const double * restrict points, dimension_t dim, si
 
             assert(dom_k ^ dom_j); // At least one but not both can be removed.
 
-            if (unlikely(nondom == NULL)) {
-                return dom_k ? k : j;
-            }
-            if (dom_j) {
-                assert(nondom[j]);
-                nondom[j] = false;
-                new_size--;
+            size_t last_dom_pos = dom_j ? j : k;
+            if (unlikely(nondom == NULL))
+                return last_dom_pos;
+
+            new_size--; // Something dominated.
+            assert(nondom[last_dom_pos]);
+            nondom[last_dom_pos] = false;
+            if (dom_j)
                 break;
-            }
-            nondom[k] = false;
-            new_size--;
         }
     }
     return new_size;
