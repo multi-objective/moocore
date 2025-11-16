@@ -15,8 +15,8 @@ pareto_rank_3d(const double * restrict points, size_t size)
 {
     ASSUME(size >= 2);
     const size_t orig_size = size;
-
     const bool keep_weakly = true;
+
     int * rank = calloc(size, sizeof(*rank));
     int front = 0;
 
@@ -285,38 +285,36 @@ pareto_rank_2d(const double * restrict points, size_t size)
    Evolutionary Computation, 7(5):503–515, 2003.
 */
 static int *
-pareto_rank_naive (const double * points, size_t size, dimension_t dim)
+pareto_rank_naive(const double * restrict points, size_t size, dimension_t dim)
 {
+    ASSUME(dim >= 2);
     ASSUME(size >= 2);
     const size_t orig_size = size;
     const bool keep_weakly = true;
     int * rank = calloc(size, sizeof(*rank));
-    int front = 0;
+    int front = 1;
 
-    bool * nondom = malloc(size * sizeof(*nondom));
+    bool * dominated = calloc(size, sizeof(*dominated));
     const double ** p = malloc(size * sizeof(*p));
     for (size_t k = 0; k < size; k++)
         p[k] = points + dim * k;
 
     while (true) {
         ASSUME(size >= 2);
-        for (size_t k = 0; k < size; k++)
-            nondom[k] = true;
-
         size_t new_size = size;
         size_t min_k = 0, last_dom_pos = orig_size;
         for (size_t j = 1; j < size; j++) {
             const double * restrict pj = p[j];
             size_t k = min_k;
-            assert(nondom[j]);
-            while (!nondom[k])
+            assert(!dominated[j]);
+            while (dominated[k])
                 k++;
             min_k = k;
             ASSUME(k < j);
-            ASSUME(nondom[k]);
+            ASSUME(!dominated[k]);
             for (; k < j; k++) {
-                assert(nondom[j]);
-                if (!nondom[k]) continue;
+                assert(!dominated[j]);
+                if (dominated[k]) continue;
 
                 const double * restrict pk = p[k];
                 // Use unsigned instead of bool to allow auto-vectorization.
@@ -337,11 +335,11 @@ pareto_rank_naive (const double * points, size_t size, dimension_t dim)
                 if (!(dom_k | dom_j)) continue;
 
                 assert(dom_k ^ dom_j); // At least one but not both can be removed.
-                new_size--; // Something dominated
+                new_size--; // Something dominated.
 
                 last_dom_pos = (dom_j) ? j : k;
-                assert(nondom[last_dom_pos]);
-                nondom[last_dom_pos] = false;
+                assert(!dominated[last_dom_pos]);
+                dominated[last_dom_pos] = true;
                 if (dom_j) break;
             }
         }
@@ -352,24 +350,26 @@ pareto_rank_naive (const double * points, size_t size, dimension_t dim)
             if (size == 1) {
                 assert(last_dom_pos < orig_size);
                 // Update the only dominated point.
-                rank[(p[last_dom_pos] - points) / dim] = front + 1;
+                rank[(p[last_dom_pos] - points) / dim] = front;
             }
-            free(nondom);
+            free(dominated);
             free(p);
             return rank;
         }
         size_t k = 0;
-        while (!nondom[k]) k++; // Find first nondominated
+        while (dominated[k]) k++; // Find first nondominated
         for (size_t n = k; k < size; k++) {
             do { // Find next dominated
                 n++;
-            } while (nondom[n]);
+            } while (!dominated[n]);
             p[k] = p[n];
         }
         // Update ranks. Everything still in list p goes to the next front.
-        front++;
         for (k = 0; k < size; k++)
             rank[(p[k] - points) / dim] = front;
+        for (k = 0; k < size; k++)
+            dominated[k] = false;
+        front++;
     }
 }
 
