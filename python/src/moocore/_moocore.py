@@ -49,7 +49,7 @@ class ReadDatasetsError(Exception):
         "ERROR_COLUMNS",
     )
 
-    def __init__(self, error_code):
+    def __init__(self, error_code: int):
         self.error = error_code
         self.message = self._error_strings[abs(error_code)]
         super().__init__(self.message)
@@ -151,7 +151,7 @@ def read_datasets(filename: str | os.PathLike | StringIO) -> np.ndarray:
     return np.frombuffer(data_buf).reshape((-1, ncols_p[0]))
 
 
-def _parse_maximise(maximise, nobj: int):
+def _parse_maximise(maximise, nobj: int) -> np.ndarray:
     """Convert maximise array or single bool to ndarray format."""
     return atleast_1d_of_length_n(maximise, nobj).astype(bool)
 
@@ -160,7 +160,12 @@ def _all_positive(x: ArrayLike) -> bool:
     return x.min() > 0
 
 
-def _unary_refset_common(data, ref, maximise, check_all_positive=False):
+def _unary_refset_common(
+    data: ArrayLike,
+    ref: ArrayLike,
+    maximise: bool | list[bool],
+    check_all_positive: bool = False,
+):
     # Convert to numpy.array in case the user provides a list.  We use
     # np.asarray(dtype=float) to convert it to floating-point, otherwise if a user inputs
     # something like ref = np.array([10, 10]) then numpy would interpret it as
@@ -355,7 +360,9 @@ def epsilon_additive(
     )
 
 
-def epsilon_mult(data, /, ref, *, maximise: bool | list[bool] = False) -> float:
+def epsilon_mult(
+    data: ArrayLike, /, ref: ArrayLike, *, maximise: bool | list[bool] = False
+) -> float:
     """Multiplicative epsilon metric.
 
     .. warning::
@@ -374,7 +381,7 @@ def epsilon_mult(data, /, ref, *, maximise: bool | list[bool] = False) -> float:
     return lib.epsilon_mult(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
 
 
-def _hypervolume(data: ArrayLike, ref: ArrayLike):
+def _hypervolume(data: ArrayLike, ref: ArrayLike) -> float:
     data_p, npoints, nobj = np2d_to_double_array(data)
     ref_buf = ffi.from_buffer("double []", ref)
     hv = lib.fpli_hv(data_p, nobj, npoints, ref_buf)
