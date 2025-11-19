@@ -72,7 +72,7 @@ print_x(const dlnode_t * p)
 {
     assert(p != NULL);
     const double * x = p->x;
-    fprintf(stderr, "x: %g %g %g\n", x[0], x[1], x[2]);
+    DEBUG1_PRINT("x: %g %g %g\n", x[0], x[1], x[2]);
 }
 
 #if HV_DIMENSION == 3

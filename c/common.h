@@ -5,9 +5,13 @@
 #ifdef R_PACKAGE
 #define R_NO_REMAP
 #include <R.h>
-#define assert(EXP)                                                       \
-    do { if (unlikely(!(EXP))) { Rf_error("error: assertion failed: '%s' at %s:%d", \
-                                #EXP, __FILE__, __LINE__);}} while(0)
+#ifdef NDEBUG
+# define assert(EXP) ((void)0)
+#else
+# define assert(EXP) do { if (unlikely(!(EXP)))                                \
+            Rf_error("error: assertion failed: '%s' at %s:%d",                 \
+                     #EXP, __FILE__, __LINE__);} while(0)
+#endif
 #include "gcc_attribs.h"
 #define fatal_error(...) Rf_error(__VA_ARGS__)
 #define moocore_perror(...) Rf_error(__VA_ARGS__)
