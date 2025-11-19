@@ -81,7 +81,7 @@
 #define SEXP_2_DOUBLE_VECTOR_MAYBE_NULL(S, I, N, IS_NULL)                      \
     if (!IS_NULL) CHECK_ARG_IS_NUMERIC_VECTOR(S);                              \
     double *I = (IS_NULL) ? NULL : REAL(S);                                    \
-    R_len_t N = (IS_NULL) ? 0 : Rf_length(S);
+    _attr_maybe_unused R_len_t N = (IS_NULL) ? 0 : Rf_length(S);
 
 #define SEXP_2_DOUBLE_VECTOR(S, I, N) SEXP_2_DOUBLE_VECTOR_MAYBE_NULL(S, I, N, false)
 #define SEXP_2_DOUBLE_VECTOR_OR_NULL(S, I, N) SEXP_2_DOUBLE_VECTOR_MAYBE_NULL(S, I, N, Rf_isNull(S))
