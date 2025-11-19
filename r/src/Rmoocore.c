@@ -291,7 +291,7 @@ SEXP
 normalise_C(SEXP DATA, SEXP RANGE, SEXP LBOUND, SEXP UBOUND, SEXP MAXIMISE)
 {
     int nprotected = 0;
-    /* We transpose the matrix before calling this function. */
+    // We transpose the matrix before calling this function.
     SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
     SEXP_2_DOUBLE_VECTOR(RANGE, range, range_len);
     SEXP_2_DOUBLE_VECTOR(LBOUND, lbound, lbound_len);
