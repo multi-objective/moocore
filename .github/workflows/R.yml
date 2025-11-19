@@ -46,8 +46,7 @@ jobs:
         os: [ ubuntu-22.04, windows-latest, macos-15-intel, macos-14 ]
         r: [ release ]
         include:
-          # Use 4.0 to check with rtools40's older compiler
-          - { os: windows-latest, r: '4.0' }
+          - { os: windows-latest, r: '4.1' }
           # Use latest ubuntu to make it easier to install dependencies
           - { os: ubuntu-24.04, r: 'devel', http-user-agent: 'release' }
     env:

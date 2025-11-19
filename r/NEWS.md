@@ -1,3 +1,7 @@
+# moocore 0.1.10
+
+ * `mooocore` now requires R >= 4.1.
+
 # moocore 0.1.9
 
  * `hv_contributions()` ignores dominated points by default.  Set `ignore_dominated=FALSE` to restore the previous behavior.  The 3D case uses the HVC3D algorithm.
