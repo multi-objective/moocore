@@ -47,6 +47,12 @@ files = {
 }
 
 
+def check_values(a, b, what, n, name):
+    assert np.isclose(a, b), (
+        f"In {name}, maxrow={n}, {what}={b}  not equal to moocore={a}"
+    )
+
+
 title = "HV computation"
 file_prefix = "hv"
 names = files.keys()
@@ -72,30 +78,20 @@ for name in names:
             ref_point=torch.from_numpy(-ref)
         ): hv.compute(z)
 
-    bench = Bench(name=name, n=n, bench=benchmarks)
-    values = {}
+    bench = Bench(
+        name=name,
+        n=n,
+        # Exclude the conversion to torch from the timing.
+        setup={"botorch": lambda z: torch.from_numpy(-z)},
+        # elif what == "trieste":
+        #     zz = tf.convert_to_tensor(z)
+        bench=benchmarks,
+        check=check_values,
+    )
+
     for maxrow in n:
-        z = x[:maxrow, :]
-        for what in bench.keys():
-            if what == "botorch":
-                zz = torch.from_numpy(-z)
-            # elif what == "trieste":
-            #     zz = tf.convert_to_tensor(z)
-            else:
-                zz = z
-            values[what] = bench(what, maxrow, zz)
+        values = bench(maxrow, x[:maxrow, :])
 
-        # Check values
-        for what in bench.keys():
-            if what == "moocore":
-                continue
-            a = values["moocore"]
-            b = values[what]
-            assert np.isclose(a, b), (
-                f"In {name}, maxrow={maxrow}, {what}={b}  not equal to moocore={a}"
-            )
-
-    del values
     bench.plots(file_prefix=file_prefix, title=title)
 
 if "__file__" not in globals():  # Running interactively.

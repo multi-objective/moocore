@@ -5,7 +5,7 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
-from bench import Bench, read_data
+from bench import Bench, read_data, check_float_values
 
 import numpy as np
 import moocore
@@ -43,25 +43,12 @@ for name in names:
             "moocore": lambda z, ref=ref: moocore.epsilon_additive(z, ref=ref),
             "jMetalPy": lambda z, eps=jmetal_EPS(ref): eps.compute(z),
         },
+        check=check_float_values,
     )
 
-    values = {}
     for maxrow in n:
-        z = x[:maxrow, :]
-        for what in bench.keys():
-            values[what] = bench(what, maxrow, z)
+        values = bench(maxrow, x[:maxrow, :])
 
-        # Check values
-        for what in bench.keys():
-            if what == "moocore":
-                continue
-            a = values["moocore"]
-            b = values[what]
-            assert np.isclose(a, b), (
-                f"In {name}, maxrow={maxrow}, {what}={b}  not equal to moocore={a}"
-            )
-
-    del values
     bench.plots(file_prefix=file_prefix, title=title)
 
 if "__file__" not in globals():  # Running interactively.

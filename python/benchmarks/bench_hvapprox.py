@@ -107,14 +107,11 @@ for name in names:
     bench = Bench(
         name=name, n=n, bench=benchmarks, report_values="HV Relative Error"
     )
-    res = {}
     for maxrow in n:
         z = x[:maxrow, :]
         exact = time_hv_exact(name, maxrow, z, ref)
-        for what in bench.keys():
-            res[what] = bench(what, maxrow, z, exact=exact)
+        res = bench(maxrow, z, exact=exact)
 
-    del res
     bench.plots(file_prefix=file_prefix, title=title)
 
 if "__file__" not in globals():  # Running interactively.

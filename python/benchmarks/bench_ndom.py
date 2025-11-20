@@ -25,6 +25,8 @@ from desdeo.tools.non_dominated_sorting import (
 
 from paretoset import paretoset
 
+from seqme.core.rank import is_pareto_front as seqme_is_pareto_front
+
 # See https://github.com/multi-objective/testsuite/tree/main/data
 files = {
     # range are the (start, stop, num) parameters for np.geomspace()
@@ -50,6 +52,18 @@ def get_dataset(name):
     return moocore.get_dataset(files[name]["file"])[:, :-1]
 
 
+# Exclude the conversion to torch from the timing.
+setup = {"botorch": lambda z: torch.from_numpy(z)}
+
+
+def check_values(a, b, what, n, name):
+    np.testing.assert_allclose(
+        a,
+        b,
+        err_msg=f"In {name}, maxrow={n}, {what}={b}  not equal to moocore={a}",
+    )
+
+
 title = "is_non_dominated(keep_weakly=False)"
 file_prefix = "ndom"
 names = files.keys()
@@ -60,6 +74,7 @@ for name in names:
     bench = Bench(
         name=name,
         n=n,
+        setup=setup,
         bench={
             "moocore": lambda z: moocore.is_nondominated(
                 z, maximise=True, keep_weakly=False
@@ -69,38 +84,17 @@ for name in names:
                 z, sense=z.shape[1] * ["max"], distinct=True, use_numba=True
             ),
         },
+        check=check_values,
     )
 
-    values = {}
     for maxrow in n:
-        z = x[:maxrow, :]
-        for what in bench.keys():
-            if what == "botorch":
-                # Exclude the conversion to torch from the timing.
-                zz = torch.from_numpy(z)
-            else:
-                zz = z
-            values[what] = bench(what, maxrow, zz)
+        values = bench(maxrow, x[:maxrow, :])
 
-        # Check values
-        for what in bench.keys():
-            if what == "moocore":
-                continue
-            a = values["moocore"]
-            b = values[what]
-            np.testing.assert_array_equal(
-                a,
-                b,
-                err_msg=f"In {name}, maxrow={maxrow}, {what}={b}  not equal to moocore={a}",
-            )
-
-    del values
     bench.plots(file_prefix=file_prefix, title=title, log="xy")
 
 
 title = "is_non_dominated(keep_weakly=True)"
 file_prefix = "wndom"
-
 names = files.keys()
 for name in names:
     x = get_dataset(name)
@@ -109,6 +103,7 @@ for name in names:
     bench = Bench(
         name=name,
         n=n,
+        setup=setup,
         bench={
             "moocore": lambda z: bool2pos(
                 moocore.is_nondominated(z, maximise=True, keep_weakly=True)
@@ -128,33 +123,16 @@ for name in names:
                 -z, only_non_dominated_front=True
             ),
             "desdeo": lambda z: bool2pos(desdeo_is_nondominated(-z)),
+            "seqme": lambda z: bool2pos(
+                seqme_is_pareto_front(-z, assume_unique_lexsorted=True)
+            ),
         },
+        check=check_values,
     )
 
-    values = {}
     for maxrow in n:
-        z = x[:maxrow, :]
-        for what in bench.keys():
-            if what == "botorch":
-                # Exclude the conversion to torch from the timing.
-                zz = torch.from_numpy(z)
-            else:
-                zz = z
-            values[what] = bench(what, maxrow, zz)
+        values = bench(maxrow, x[:maxrow, :])
 
-        # Check values
-        for what in bench.keys():
-            if what == "moocore":
-                continue
-            a = values["moocore"]
-            b = values[what]
-            np.testing.assert_allclose(
-                a,
-                b,
-                err_msg=f"In {name}, maxrow={maxrow}, {what}={b}  not equal to moocore={a}",
-            )
-
-    del values
     bench.plots(file_prefix=file_prefix, title=title, log="xy")
 
 

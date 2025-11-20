@@ -78,22 +78,35 @@ def get_package_version(package):
         case "DEAP_er":
             # Requires version >= 0.2.0
             from deap_er import __version__ as version
-        case "desdeo":
+        case "desdeo" | "seqme":
             # It does not provide __version__ !
             from importlib.metadata import version as get_version
 
-            version = get_version("desdeo")
+            version = get_version(package)
         case _:
             raise ValueError(f"unknown package {package}")
 
     return version
 
 
+def check_float_values(a, b, what, n, name):
+    assert np.isclose(a, b), (
+        f"In {name}, maxrow={n}, {what}={b}  not equal to moocore={a}"
+    )
+
+
 class Bench:
     cpu_model = cpuinfo.get_cpu_info()["brand_raw"]
 
     def __init__(
-        self, name, n, bench, report_values=None, return_all_values=False
+        self,
+        name,
+        n,
+        bench,
+        setup=None,
+        check=None,
+        report_values=None,
+        return_all_values=False,
     ):
         self.name = name
         self.n = n
@@ -112,14 +125,20 @@ class Bench:
         else:
             self.values = None
             self.value_label = None
+        self.setup = setup
+        self.check = check
 
     def keys(self):
         return self.bench.keys()
 
-    def __call__(self, what, n, *args, **kwargs):
-        # FIXME: Ideally, bench() would call fun for each value in self.n
-        assert n in self.n
-        # FIXME: Allow passing a setup() function.
+    def bench1(self, what, n, *args, **kwargs):
+        if self.setup:
+            if isinstance(self.setup, dict):
+                setup = self.setup.get(what)
+                if setup:
+                    args = (setup(*args, **kwargs),)
+                    kwargs = {}
+
         fun = self.bench[what]
         duration, value = timeit.Timer(lambda: fun(*args, **kwargs)).timeit(
             number=3
@@ -129,6 +148,22 @@ class Bench:
             self.values[what] += [value]
         print(f"{self.name}:{n}:{what}:{duration}")
         return value
+
+    def __call__(self, n, *args, **kwargs):
+        # FIXME: Ideally, bench() would call fun for each value in self.n
+        assert n in self.n
+        values = {
+            what: self.bench1(what, n, *args, **kwargs) for what in self.keys()
+        }
+        if self.check:
+            a = values["moocore"]
+            for what in self.keys():
+                if what == "moocore":
+                    continue
+                b = values[what]
+                self.check(a, b, what=what, n=n, name=self.name)
+
+        return values
 
     def plots(self, title, file_prefix, log="y", relative=False):
         for what in self.keys():

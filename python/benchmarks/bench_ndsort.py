@@ -57,27 +57,16 @@ for name in names:
             "pymoo": lambda z, nds=pymoo_NDS(): nds.do(z, return_rank=True)[1],
             "desdeo": lambda z: desdeo_nds(z).argmax(axis=0),
         },
+        check=lambda a, b, what, n, name: np.testing.assert_array_equal(
+            a,
+            b,
+            err_msg=f"In {name}, maxrow={n}, {what}={b}  not equal to moocore={a}",
+        ),
     )
 
-    values = {}
     for maxrow in n:
-        z = x[:maxrow, :]
-        for what in bench.keys():
-            values[what] = bench(what, maxrow, z)
+        values = bench(maxrow, x[:maxrow, :])
 
-        # Check values
-        for what in bench.keys():
-            if what == "moocore":
-                continue
-            a = values["moocore"]
-            b = values[what]
-            np.testing.assert_array_equal(
-                a,
-                b,
-                err_msg=f"In {name}, maxrow={maxrow}, {what}={b}  not equal to moocore={a}",
-            )
-
-    del values
     bench.plots(file_prefix=file_prefix, title=title, log="xy")
 
 if "__file__" not in globals():  # Running interactively.
