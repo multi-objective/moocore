@@ -181,7 +181,7 @@ fread_int(FILE *instream, int *number)
 
 /* Convenience wrapper to read_double_data used by Python's moocore.  */
 int
-read_datasets(const char * filename, double **data_p, int *ncols_p, int *datasize_p)
+read_datasets(const char * filename, double ** restrict data_p, int * restrict ncols_p, int * restrict datasize_p)
 {
     double * data = NULL;
     int * cumsizes = NULL;
@@ -225,13 +225,13 @@ vector_fprintf (FILE *stream, const double * vector, int size)
 }
 
 void
-vector_printf (const double *vector, int size)
+vector_printf (const double * vector, int size)
 {
     vector_fprintf (stdout, vector, size);
 }
 
 void
-vector_int_fprintf (FILE *stream, const int * vector, int size)
+vector_int_fprintf (FILE * stream, const int * vector, int size)
 {
     ASSUME(size > 0);
     for (int k = 0; k < size; k++)
@@ -239,14 +239,14 @@ vector_int_fprintf (FILE *stream, const int * vector, int size)
 }
 
 void
-vector_int_printf (const int *vector, int size)
+vector_int_printf (const int * vector, int size)
 {
     vector_int_fprintf (stdout, vector, size);
 }
 
 int
-write_sets (FILE *outfile, const double *data, int ncols,
-            const int *cumsizes, int nruns)
+write_sets(FILE * outfile, const double * restrict data, int ncols,
+           const int * restrict cumsizes, int nruns)
 {
     int size = 0;
     ASSUME(nruns > 0);
@@ -263,8 +263,8 @@ write_sets (FILE *outfile, const double *data, int ncols,
 }
 
 int
-write_sets_filtered (FILE *outfile, const double *data, int ncols,
-                     const int *cumsizes, int nruns, const bool *write_p)
+write_sets_filtered (FILE *outfile, const double * restrict data, int ncols,
+                     const int * restrict cumsizes, int nruns, const bool * restrict write_p)
 {
     int size = 0;
     ASSUME(nruns > 0);
