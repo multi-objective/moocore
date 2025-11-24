@@ -362,7 +362,7 @@ find_nondominated_set_agree_(const double * restrict points, dimension_t dim, si
 {
     ASSUME(dim > 3);
     ASSUME(agree == AGREE_MINIMISE || agree == AGREE_MAXIMISE || agree == AGREE_NONE);
-    ASSUME(minmax == NULL || agree != AGREE_NONE);
+    assert((agree == AGREE_NONE) == (minmax != NULL));
     size_t new_size = size;
     size_t min_k = 0;
     for (size_t j = 1; j < size; j++) {
