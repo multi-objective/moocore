@@ -1,6 +1,7 @@
 # moocore 0.1.10
 
  * `mooocore` now requires R >= 4.1.
+ * `is_nondominated()`: Fix wrong assert (#38).
 
 # moocore 0.1.9
 

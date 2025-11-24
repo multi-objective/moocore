@@ -4,6 +4,11 @@
 What's new
 **********
 
+Version 0.1.10 (24/11/2025)
+---------------------------
+
+- :func:`~moocore.is_nondominated`: Fix wrong assert (:issue:`38`).
+
 Version 0.1.9 (31/10/2025)
 --------------------------
 
