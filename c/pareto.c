@@ -169,7 +169,7 @@ pareto_rank_2d(const double * restrict points, size_t size)
     fprintf(stderr, "\n[1]  : "); vector_fprintf (stderr, help_1, size);
 #endif
 
-    // Sort in ascending lexicographic order from the first dimension.
+    // Sort in ascending lexicographic order from the second dimension.
     qsort(p, size, sizeof(*p), cmp_double_asc_rev_2d);
 
 #ifdef PARETO_RANK_2D_DEBUG
@@ -185,43 +185,44 @@ pareto_rank_2d(const double * restrict points, size_t size)
 #endif
 
     int * rank = malloc(size * sizeof(*rank));
-    const double ** front_last = malloc(size * sizeof(*front_last));
+    double * front_last = malloc(size * sizeof(*front_last));
     int n_front = 0;
-    front_last[0] = p[0];
+    front_last[0] = p[0][0];
     rank[(p[0] - points) / dim] = 0; // The first point is in the first front.
+    int last_rank = 0;
     for (size_t k = 1; k < size; k++) {
-        const double * pk = p[k];
-        const double * plast = front_last[n_front];
-        if (pk[0] < plast[0]) {
+        const double * restrict pk = p[k];
+        // Duplicated points are kept in the same front.
+        if (pk[0] == p[k-1][0] && pk[1] == p[k-1][1]) {
+            rank[(pk - points) / dim] = last_rank;
+            continue;
+        }
+        const double plast = front_last[n_front];
+        if (pk[0] < plast) {
             int low = 0;
-            int high = n_front + 1;
-            do {
-                int mid = low + (high - low) / 2;
-                assert (mid <= n_front);
-                const double * pmid = front_last[mid];
-                if (pk[0] < pmid[0])
-                    high = mid;
-                else if (pk[0] > pmid[0] || (pk[0] == pmid[0] && pk[1] > pmid[1]))
-                    low = mid + 1;
-                else { // Duplicated points are assigned to the same front.
-                    low = mid;
-                    break;
-                }
-            } while (low < high);
-            assert (low <= n_front);
-            assert (pk[0] < front_last[low][0]
-                    || (pk[0] == front_last[low][0]
-                        && pk[1] == front_last[low][1]));
-            front_last[low] = pk;
-            rank[(pk - points)/dim] = low;
-        } else if (pk[0] == plast[0] && pk[1] == plast[1]) {
-            front_last[n_front] = pk;
-            rank[(pk - points)/dim] = n_front;
+            if (n_front > 0) {
+                int high = n_front + 1;
+                do {
+                    int mid = low + (high - low) / 2;
+                    assert(mid <= n_front);
+                    const double pmid = front_last[mid];
+                    // FIXME: When mid == n_front, then pk[0] < pmid, so avoid this test.
+                    if (pk[0] < pmid)
+                        high = mid;
+                    else {
+                        low = mid + 1;
+                    }
+                } while (low < high);
+            }
+            assert(low <= n_front);
+            assert(pk[0] < front_last[low]);
+            last_rank = low;
         } else {
             n_front++;
-            front_last[n_front] = pk;
-            rank[(pk - points)/dim] = n_front;
+            last_rank = n_front;
         }
+        front_last[last_rank] = pk[0];
+        rank[(pk - points)/dim] = last_rank;
     }
     free(front_last);
 #ifdef PARETO_RANK_2D_DEBUG
