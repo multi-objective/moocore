@@ -12,7 +12,8 @@ import os
 import platform
 from cffi import FFI
 
-DEBUG = 0  # Compile in debug mode.
+# Compile in debug mode.
+DEBUG = int(os.environ.get("MOOCORE_DEBUG", "0"))
 
 libmoocore_h = "src/moocore/libmoocore.h"
 sources_path = "src/moocore/libmoocore/"
