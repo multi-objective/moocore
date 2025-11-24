@@ -135,6 +135,13 @@ jobs:
         run: python3 -m pip install .[docs]
         working-directory: python
 
+      - name: Cache intersphinx inventories
+        uses: actions/cache@v4
+        with:
+          path: python/doc/_build/doctrees/
+          key: intersphinx-${{ hashFiles('python/doc/source/conf.py') }}
+          restore-keys: intersphinx-
+
       - name: Build the docs 🔧
         run: |
           make -C doc html
