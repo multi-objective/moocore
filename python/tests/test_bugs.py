@@ -8,7 +8,7 @@ import moocore
 
 def test_bug27():
     """Invalid output of is_nondominated() with single-objective inputs."""
-    x = np.asarray([[0.5], [0.6], [0.3], [0.1], [0.0], [0.9], [0.0]])
+    x = np.array([[0.5], [0.6], [0.3], [0.1], [0.0], [0.9], [0.0]])
 
     assert_array_equal(
         moocore.is_nondominated(x),
@@ -50,3 +50,28 @@ def test_bug29():
     x = [[0.2], [0.1], [0.2], [0.5], [0.3]]
     assert_array_equal(moocore.pareto_rank(x), [1, 0, 1, 3, 2])
     assert_array_equal(moocore.pareto_rank(x, maximise=True), [2, 3, 2, 0, 1])
+
+
+def test_bug38():
+    """Unexpected behavior of is_nondominated with 4+ objectives."""
+    x = np.array([[0, 0, 0, 0], [1, 1, 1, 1]])
+    assert_array_equal(
+        moocore.is_nondominated(x, maximise=[False, True, True, True]),
+        [True, True],
+    )
+    assert_array_equal(
+        moocore.is_nondominated(x, maximise=[True, False, True, True]),
+        [True, True],
+    )
+    assert_array_equal(
+        moocore.is_nondominated(x, maximise=[True, True, False, True]),
+        [True, True],
+    )
+    assert_array_equal(
+        moocore.is_nondominated(x, maximise=[True, True, True, False]),
+        [True, True],
+    )
+    assert_array_equal(
+        moocore.is_nondominated(x, maximise=False), [True, False]
+    )
+    assert_array_equal(moocore.is_nondominated(x, maximise=True), [False, True])
