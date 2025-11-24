@@ -239,9 +239,10 @@ intersphinx_mapping = {
     "nx-guides": ("https://networkx.org/nx-guides/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
     "python": ("https://docs.python.org/3/", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+    "scipy": ("https://scipy.github.io/devdocs/", None),
 }
-intersphinx_timeout = 5
+intersphinx_timeout = 15  # seconds
+intersphinx_cache_limit = 90  # days
 
 # Set plotly renderer to capture _repr_html_ for sphinx-gallery
 try:
