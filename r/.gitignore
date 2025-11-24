@@ -10,6 +10,7 @@ R/TAGS
 autom4te.cache
 benchmarks.html
 config.status
+cran-comments.md
 docs
 git_version
 inst/doc
