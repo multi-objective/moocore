@@ -58,7 +58,7 @@ epsilon_helper_(bool do_mult, const enum objs_agree_t agree,
     ASSUME(2 <= dim && dim <= 32);
     ASSUME(size_a > 0 && size_b > 0);
     ASSUME(agree == AGREE_MINIMISE || agree == AGREE_MAXIMISE || agree == AGREE_NONE);
-    ASSUME(minmax == NULL || agree != AGREE_NONE);
+    assert((agree == AGREE_NONE) == (minmax != NULL));
     double epsilon = do_mult ? 0 : -INFINITY;
     for (size_t b = 0; b < size_b; b++) {
         bool skip_max = false;
