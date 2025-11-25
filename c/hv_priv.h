@@ -15,7 +15,7 @@
 */
 
 typedef struct dlnode {
-    const double * restrict x;  // point coordinates (objective vector).
+    /*const*/ double * restrict x;  // point coordinates (objective vector).
 #ifdef HV_RECURSIVE
     // In the recursive algorithm, the number of dimensions is not known in
     // advance, so next and prev cannot be fixed-size arrays.
@@ -32,6 +32,7 @@ typedef struct dlnode {
     struct dlnode * prev[HV_DIMENSION - 2]; //keeps the points sorted according to coordinates 2 and 3 (except the sentinel 3)
 
     struct dlnode * cnext[2]; //current next
+    double * x_aux;  // point coordinates (objective vector).
 #if HV_DIMENSION == 4 || defined(HVC_ONLY)
     struct dlnode * closest[2]; // closest[0] == cx, closest[1] == cy
     // FIXME: unused
