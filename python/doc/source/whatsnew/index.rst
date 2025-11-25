@@ -4,6 +4,12 @@
 What's new
 **********
 
+Version 0.3.0 (development)
+---------------------------
+
+- :func:`~moocore.hypervolume` is significantly faster for more than four dimensions (Andreia P. Guerreiro).
+
+
 Version 0.2.0 (10/01/2026)
 ---------------------------
 
