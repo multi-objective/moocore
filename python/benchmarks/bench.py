@@ -8,6 +8,7 @@ import timeit
 import cpuinfo
 import shutil
 import subprocess
+import importlib
 
 timeit_template_return_1_value = """
 def inner(_it, _timer{init}):
@@ -61,32 +62,16 @@ def get_geomrange(lenx, start, stop, num):
 def get_package_version(package):
     package = package.split(maxsplit=1)[0]
     match package:
-        case "moocore":
-            from moocore import __version__ as version
-        case "botorch":
-            from botorch import __version__ as version
-        case "pymoo":
-            from pymoo import __version__ as version
         case "jMetalPy":
-            from jmetal import __version__ as version
-        case "trieste":
-            from trieste import __version__ as version
-        case "paretoset":
-            from paretoset import __version__ as version
-        case "nevergrad":
-            from nevergrad import __version__ as version
+            package = "jmetal"
         case "DEAP_er":
-            # Requires version >= 0.2.0
-            from deap_er import __version__ as version
-        case "desdeo" | "seqme":
-            # It does not provide __version__ !
-            from importlib.metadata import version as get_version
+            package = "deap_er"
 
-            version = get_version(package)
-        case _:
-            raise ValueError(f"unknown package {package}")
-
-    return version
+    module = importlib.import_module(package)
+    if hasattr(module, "__version__"):
+        return getattr(module, "__version__")
+    # It does not provide __version__ !
+    return importlib.metadata.version(package)
 
 
 def check_float_values(a, b, what, n, name):
