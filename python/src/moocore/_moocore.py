@@ -1502,6 +1502,18 @@ def pareto_rank(
     lists or arrays, each of them being mutually nondominated
     :footcite:p:`Deb02nsga2` (see examples below).
 
+    More formally, given a finite set of points :math:`X \subset \mathbb{R}^m`, the
+    rank of a point :math:`x \in X` is defined as:
+
+    .. math::
+       \operatorname{rank}(x) = r \iff x \in F^c_{r} \land \nexists y \in F^c_{r}, y \prec x
+
+    where :math:`y \prec x` means that :math:`y` dominates :math:`x` according to Pareto
+    optimality, :math:`F^c_r = X \setminus \bigcup_{i=0}^{r-1} F_i`
+    and :math:`F_r = \{x \in X \land \operatorname{rank}(x) = r\}`.  The sets
+    :math:`F_c`, with :math:`c=0,1,\dots,k-1`, partition :math:`X` into :math:`k`
+    `fronts`, that is, mutually nondominated subsets of :math:`X`.
+
     For 2D points, the code uses the :math:`O(n \log n)` algorithm by
     :footcite:t:`Jen03`. For 3D points, it uses a :math:`O(k \cdot n \log n)`
     algorithm, where :math:`k` is the number of fronts in the output.  With

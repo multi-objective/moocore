@@ -147,11 +147,22 @@ any_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 #'   used to partition points into a list of matrices, each matrix representing
 #'   a nondominated front (see examples below)
 #'
-#'   Let \eqn{m} be the number of dimensions, i.e., `ncol(data)2`. With
-#'   \eqn{m=2}, the code uses the \eqn{O(n \log n)} algorithm by \citet{Jen03}.
-#'   When \eqn{m=3}, it uses a \eqn{O(k\cdot n \log n)} algorithm,
-#'   where \eqn{k} is the number of fronts in the output.  With higher
-#'   dimensions, it uses the naive \eqn{O(k m n^2)} algorithm.
+#'   More formally, given a finite set of points \eqn{X \subset \mathbb{R}^m},
+#'   the rank of a point \eqn{x \in X} is defined as:
+#'
+#'   \deqn{\operatorname{rank}(x) = r \iff x \in F^c_{r} \land \nexists y \in F^c_{r}, y \prec x}
+#'
+#'   where \eqn{y \prec x} means that \eqn{y} dominates \eqn{x} according to
+#'   Pareto optimality, \eqn{F^c_r = X \setminus \bigcup_{i=1}^{r-1} F_i} and
+#'   \eqn{F_r = \{x \in X \land \operatorname{rank}(x) = r\}}.  The sets
+#'   \eqn{F_c}, with \eqn{c=1,\dots,k}, partition \eqn{X} into \eqn{k}
+#'   *fronts*, that is, mutually nondominated subsets of \eqn{X}.
+#'
+#'   Let \eqn{m} be the number of dimensions. With \eqn{m=2}, i.e.,
+#'   `ncol(data)=2`, the code uses the \eqn{O(n \log n)} algorithm by
+#'   \citet{Jen03}.  When \eqn{m=3}, it uses a \eqn{O(k\cdot n \log n)}
+#'   algorithm, where \eqn{k} is the number of fronts in the output.  With
+#'   higher dimensions, it uses the naive \eqn{O(k m n^2)} algorithm.
 #'
 #' @references
 #'
