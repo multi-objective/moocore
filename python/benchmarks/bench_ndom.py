@@ -5,6 +5,7 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
+import gc
 import numpy as np
 import moocore
 import matplotlib.pyplot as plt
@@ -26,6 +27,8 @@ from desdeo.tools.non_dominated_sorting import (
 from paretoset import paretoset
 
 from seqme.core.rank import is_pareto_front as seqme_is_pareto_front
+
+from fast_pareto import is_pareto_front as fast_pareto_is_pf
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
 files = {
@@ -88,8 +91,9 @@ for name in names:
     )
 
     for maxrow in n:
-        values = bench(maxrow, x[:maxrow, :])
+        bench(maxrow, x[:maxrow, :])
 
+    gc.collect()
     bench.plots(file_prefix=file_prefix, title=title, log="xy")
 
 
@@ -126,13 +130,17 @@ for name in names:
             "seqme": lambda z: bool2pos(
                 seqme_is_pareto_front(-z, assume_unique_lexsorted=True)
             ),
+            "fast_pareto": lambda z: bool2pos(
+                fast_pareto_is_pf(-z, assume_unique_lexsorted=False)
+            ),
         },
         check=check_values,
     )
 
     for maxrow in n:
-        values = bench(maxrow, x[:maxrow, :])
+        bench(maxrow, x[:maxrow, :])
 
+    gc.collect()
     bench.plots(file_prefix=file_prefix, title=title, log="xy")
 
 

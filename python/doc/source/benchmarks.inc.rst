@@ -1,9 +1,9 @@
 Benchmarks
 ==========
 
-The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, `DESDEO`_, `paretoset`_, `Nevergrad`_ and `jMetalPy`_. Other Python packages are not included in the comparison because they are based on these packages for the functionality benchmarked, so they are **at least as slow** as them. For example `Xopt`_ and `BoFire`_ use `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ already uses `moocore`_ for hypervolume and other quality metrics, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.  We do not compare with the Bayesian optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and too slow to run the benchmarks in a reasonable time.
+The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, `DESDEO`_, `paretoset`_, `Nevergrad`_, `jMetalPy`_, `seqme`_ and `fast-pareto`_.  Other Python packages are not included in the comparison because they are based on these packages for the functionality benchmarked, so they are **at least as slow** as them. For example `Xopt`_ and `BoFire`_ use `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ already uses `moocore`_ for hypervolume and other quality metrics, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.  We do not compare with the Bayesian optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and too slow to run the benchmarks in a reasonable time.
 
-Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>` whereas `jMetalPy`_ does not provide the :ref:`IGD+ indicator <igd_hausdorf>`. `BoTorch`_ provides neither of them. `paretoset`_ only identifies nondominated points.
+Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>` whereas `jMetalPy`_ does not provide the :ref:`IGD+ indicator <igd_hausdorf>`. `BoTorch`_ provides neither of them. `paretoset`_ and `fast-pareto`_ only identify nondominated points.
 
 The source code for the benchmarks below can be found at https://github.com/multi-objective/moocore/tree/main/python/benchmarks .
 
@@ -11,7 +11,7 @@ The source code for the benchmarks below can be found at https://github.com/mult
 Identifying nondominated points
 -------------------------------
 
-The following plots compare the speed of finding nondominated solutions, equivalent to :func:`moocore.is_nondominated`, in 2D and 3D. We test both ``keep_weakly=True`` and ``keep_weakly=False`` (the latter is not supported by `pymoo`_ nor `DESDEO`_).  The plots show that `moocore`_ is 10 times faster than `DESDEO`_ and `paretoset`_ and 100 times faster than the other packages.
+The following plots compare the speed of finding nondominated solutions, equivalent to :func:`moocore.is_nondominated`, in 2D and 3D. We test both ``keep_weakly=True`` and ``keep_weakly=False`` (the latter is only supported by `botorch`_ and `paretoset`_).  The plots show that `moocore`_ is 10 times faster than `DESDEO`_ and `paretoset`_ and 100 times faster than the other packages. `fast-pareto`_ claims to implement a :math:`O(n\log n)` algorithm for 3D, but the benchmarks below indicate a :math:`O(n^2)` complexity, similar to other packages and significantly slower than `moocore`_.
 
 |wndom_bench-test2D-200k| |wndom_bench-ran3d-40k|
 
@@ -30,7 +30,8 @@ The following plots compare the speed of finding nondominated solutions, equival
    :width: 49%
 
 For dimensions larger than 3, :func:`moocore.is_nondominated` still uses the
-naive :math:`O(m n^2)` algorithm.  Nevertheless, the plots show that `moocore`_ is still consistently faster than the other packages.
+naive :math:`O(m n^2)` algorithm.  Nevertheless, the plots show that `moocore`_
+is still consistently faster than the other packages. `fast-pareto`_ claims to be using a :math:`O(n\log^{m-2} n)` algorithm, but the benchmarks suggest that it is also using a :math:`O(m n^2)` algorithm, although slower than most other packages and almost 10 times slower than `moocore`_.
 
 |wndom_bench-sphere-4d| |wndom_bench-sphere-5d|
 
@@ -196,15 +197,17 @@ The following plots compare the speed of computing the :ref:`epsilon indicator  
 
 
 .. _moocore: https://multi-objective.github.io/moocore/python/
-.. _pymoo: https://pymoo.org/
-.. _BoTorch: https://botorch.org/
-.. _jMetalPy: https://jmetal.github.io/jMetalPy/index.html
-.. _DEAP: https://deap.readthedocs.io/en/master/
-.. _Xopt: https://xopt.xopt.org/index.html
 .. _BoFire: https://experimental-design.github.io/bofire/
-.. _pysamoo: https://anyoptimization.com/projects/pysamoo/
+.. _BoTorch: https://botorch.org/
+.. _DEAP: https://deap.readthedocs.io/en/master/
 .. _DESDEO: https://desdeo.readthedocs.io/en/latest/
-.. _trieste: https://secondmind-labs.github.io/trieste
-.. _Numba: https://numba.pydata.org/numba-doc/dev/index.html
-.. _paretoset: https://github.com/tommyod/paretoset
 .. _Nevergrad: https://facebookresearch.github.io/nevergrad/
+.. _Numba: https://numba.pydata.org/numba-doc/dev/index.html
+.. _Xopt: https://xopt.xopt.org/index.html
+.. _fast-pareto: https://github.com/nabenabe0928/fast-pareto
+.. _jMetalPy: https://jmetal.github.io/jMetalPy/index.html
+.. _paretoset: https://github.com/tommyod/paretoset
+.. _pymoo: https://pymoo.org/
+.. _pysamoo: https://anyoptimization.com/projects/pysamoo/
+.. _seqme: https://seqme.readthedocs.io
+.. _trieste: https://secondmind-labs.github.io/trieste

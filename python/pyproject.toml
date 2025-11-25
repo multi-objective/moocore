@@ -45,15 +45,16 @@ optional-dependencies.benchmarks = [
   "botorch",
   "cpuinfo",
   "desdeo",
+  "fast-pareto",
   "jmetal",
   "matplotlib",
   "nevergrad",
   "numba",
   "numpy",
-  "pandas",
   "pandas>=2",
   "paretoset",
   "pymoo",
+  "seqme",
 ]
 
 optional-dependencies.coverage = [
