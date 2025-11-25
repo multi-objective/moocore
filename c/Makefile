@@ -99,6 +99,7 @@ HDRS =  avl.h                                                                \
         hv_priv.h                                                            \
         hv3d_priv.h                                                          \
         hv4d_priv.h                                                          \
+        hvc4d_priv.h                                                         \
         igd.h                                                                \
         io.h                                                                 \
         io_priv.h                                                            \
@@ -206,7 +207,7 @@ eaf.o: eaf.h io.h bit_array.h cvector.h
 eaf3d.o: eaf.h io.h bit_array.h cvector.h avl.h
 eaf_main.o: cmdline.h io.h eaf.h bit_array.h cvector.h
 epsilon.o: cmdline.h io.h epsilon.h nondominated.h sort.h avl_tiny.h
-hv.o: hv.h hv_priv.h hv4d_priv.h sort.h libmoocore-config.h
+hv.o: hv.h hv_priv.h hvc4d_priv.h sort.h libmoocore-config.h
 hv3dplus.o: hv_priv.h sort.h hv3d_priv.h avl_tiny.h
 hv4d.o: hv4d_priv.h hv_priv.h sort.h
 hv_contrib.o: hv.h libmoocore-config.h nondominated.h sort.h avl_tiny.h

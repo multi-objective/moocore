@@ -35,7 +35,7 @@
 #include "common.h"
 #include "hv.h"
 #define HV_RECURSIVE
-#include "hv4d_priv.h"
+#include "hvc4d_priv.h"
 
 #define STOP_DIMENSION 3 // stop on dimension 4.
 #define MAX_ROWS_HV_INEX 15
@@ -64,7 +64,11 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     dimension_t d_stop = d - STOP_DIMENSION;
     size_t n = *size;
 
-    dlnode_t * head = malloc((n+1) * sizeof(*head));
+    // Reserve space for main CDLL used by hv_recursive() and for the auxiliary
+    // list used by onec4dplusU().  The main CDLL will store all points + 1
+    // sentinel.  The auxiliary list will store at most n - 1 points + 1
+    // sentinel.
+    dlnode_t * head = malloc((n + 1 + n) * sizeof(*head));
     size_t i = 1;
     for (size_t j = 0; j < n; j++) {
         /* Filters those points that do not strictly dominate the reference
@@ -85,9 +89,10 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     // We need space in r_next and r_prev for dimension 5 and above (d_stop - 1).
     head->r_next = malloc(2 * (d_stop - 1) * (n+1) * sizeof(head));
     head->r_prev = head->r_next + (d_stop - 1) * (n+1);
-    // We only need space in area and vol for dimension 4 and above.
-    head->area = malloc(2 * d_stop * (n+1) * sizeof(*data));
-    head->vol = head->area + d_stop * (n+1);
+    // We only need space in area and vol for dimension 4 and above (d-stop).
+    // Also reserve space for n-1 auxiliary 3D points used by onec4dplusU().
+    head->area = malloc((2 * d_stop * n + 3 * (n-1)) * sizeof(*data));
+    head->vol = head->area + d_stop * n;
     head->x = NULL; // head contains no data
     head->ignore = 0;  // should never get used
 
@@ -96,7 +101,13 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     // Link head and list4d; head is not used by HV4D, so next[0] and prev[0]
     // should remain untouched.
     head->next[0] = list4d;
-    head->prev[0] = list4d; // Save it twice so we can use assert() later.
+
+    // Setup the auxiliary list used in onec4dplusU().
+    dlnode_t * list_aux = head + n + 1;
+    // Setup the auxiliary 3D points used in onec4dplusU().
+    list_aux->vol = head->vol + d_stop * n;
+    head->prev[0] = list_aux;
+    list_aux->next[0] = list4d;
 
     for (i = 1; i <= n; i++) {
         // Shift x because qsort() cannot take the dimension to sort as an argument.
@@ -104,33 +115,24 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         head[i].ignore = 0;
         head[i].r_next = head->r_next + i * (d_stop - 1);
         head[i].r_prev = head->r_prev + i * (d_stop - 1);
-        head[i].area = head->area + i * d_stop;
-        head[i].vol = head->vol + i * d_stop;
+        head[i].area = head->area + (i - 1) * d_stop;
+        head[i].vol = head->vol + (i - 1) * d_stop;
     }
+    // Make sure they are not used.
+    head->area = NULL;
+    head->vol = NULL;
 
     dlnode_t ** scratch = malloc(n * sizeof(*scratch));
     for (i = 0; i < n; i++)
         scratch[i] = head + 1 + i;
 
-    int j = d_stop - 2;
-    while (true) {
+    for (int j = d_stop - 2; j >= 0; j--) {
         /* FIXME: replace qsort() by something better:
            https://github.com/numpy/x86-simd-sort
            https://github.com/google/highway/tree/52a2d98d07852c5d69284e175666e5f8cc7d8285/hwy/contrib/sort
          */
         // Sort each dimension independently.
         qsort(scratch, n, sizeof(*scratch), compare_node);
-        if (j == -1) {
-            (list4d+1)->next[1] = scratch[0];
-            scratch[0]->prev[1] = list4d+1;
-            for (i = 1; i < n; i++) {
-                scratch[i-1]->next[1] = scratch[i];
-                scratch[i]->prev[1] = scratch[i-1];
-            }
-            scratch[n-1]->next[1] = list4d+2;
-            (list4d+2)->prev[1] = scratch[n-1];
-            break;
-        }
         head->r_next[j] = scratch[0];
         scratch[0]->r_prev[j] = head;
         for (i = 1; i < n; i++) {
@@ -139,20 +141,33 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         }
         scratch[n-1]->r_next[j] = head;
         head->r_prev[j] = scratch[n-1];
-        j--;
         // Consider next objective (in reverse order).
         for (i = 1; i <= n; i++)
             head[i].x--;
     }
-    // Reset x to point to the first objective.
-    for (i = 1; i <= n; i++)
-        head[i].x -= STOP_DIMENSION;
 
+    for (int j = 1; j >= 0; j--) {
+        // Sort each dimension independently.
+        qsort(scratch, n, sizeof(*scratch), compare_node);
+        (list4d+1)->next[j] = scratch[0];
+        scratch[0]->prev[j] = list4d+1;
+        for (i = 1; i < n; i++) {
+            scratch[i-1]->next[j] = scratch[i];
+            scratch[i]->prev[j] = scratch[i-1];
+        }
+        scratch[n-1]->next[j] = list4d+2;
+        (list4d+2)->prev[j] = scratch[n-1];
+        if (j > 0) {
+            // Consider next objective (in reverse order).
+            for (i = 1; i <= n; i++)
+                head[i].x--;
+        } else {
+            // Reset x to point to the first objective.
+            for (i = 1; i <= n; i++)
+                head[i].x -= STOP_DIMENSION - 1;
+        }
+    }
     free(scratch);
-
-    // Make sure it is not used.
-    ASAN_POISON_MEMORY_REGION(head->area, sizeof(*data) * d_stop);
-    ASAN_POISON_MEMORY_REGION(head->vol, sizeof(*data) * d_stop);
 
 finish:
     *size = n;
@@ -161,11 +176,11 @@ finish:
 
 static void fpli_free_cdllist(dlnode_t * head)
 {
-    assert(head->next[0] == head->prev[0]);
+    assert(head->next[0] == head->prev[0]->next[0]);
     free_cdllist(head->next[0]); // free 4D sentinels
     free(head->r_next);
-    free(head->area);
-    free(head);
+    free(head[1].area); // Free ->area, ->vol and list_aux->vol (x_aux used by 4D basecase).
+    free(head); // Free main CDLL and list_aux (4D basecase).
 }
 
 static inline void
@@ -181,6 +196,34 @@ update_bound(double * restrict bound, const double * restrict x, dimension_t dim
 }
 
 static void
+delete_4d(dlnode_t * restrict nodep)
+{
+    nodep->prev[1]->next[1] = nodep->next[1];
+    nodep->next[1]->prev[1] = nodep->prev[1];
+}
+
+static void
+delete_3d(dlnode_t * restrict nodep)
+{
+    nodep->prev[0]->next[0] = nodep->next[0];
+    nodep->next[0]->prev[0] = nodep->prev[0];
+}
+
+static void
+reinsert_4d(dlnode_t * restrict nodep)
+{
+    nodep->prev[1]->next[1] = nodep;
+    nodep->next[1]->prev[1] = nodep;
+}
+
+static void
+reinsert_3d(dlnode_t * restrict nodep)
+{
+    nodep->prev[0]->next[0] = nodep;
+    nodep->next[0]->prev[0] = nodep;
+}
+
+static void
 delete_dom(dlnode_t * restrict nodep, dimension_t dim)
 {
     ASSUME(dim > STOP_DIMENSION);
@@ -190,9 +233,8 @@ delete_dom(dlnode_t * restrict nodep, dimension_t dim)
         nodep->r_prev[d]->r_next[d] = nodep->r_next[d];
         nodep->r_next[d]->r_prev[d] = nodep->r_prev[d];
     }
-    // Dimension 4.
-    nodep->prev[1]->next[1] = nodep->next[1];
-    nodep->next[1]->prev[1] = nodep->prev[1];
+    delete_4d(nodep);
+    delete_3d(nodep);
 }
 
 static void
@@ -213,9 +255,8 @@ reinsert_nobound(dlnode_t * restrict nodep, dimension_t dim)
         nodep->r_prev[d]->r_next[d] = nodep;
         nodep->r_next[d]->r_prev[d] = nodep;
     }
-    // Dimension 4.
-    nodep->prev[1]->next[1] = nodep;
-    nodep->next[1]->prev[1] = nodep;
+    reinsert_4d(nodep);
+    reinsert_3d(nodep);
 }
 
 static void
@@ -226,15 +267,14 @@ reinsert(dlnode_t * restrict nodep, dimension_t dim, double * restrict bound)
 }
 
 static double
-fpli_hv4d(dlnode_t * restrict list, size_t c _attr_maybe_unused)
+fpli_onec4d(dlnode_t * restrict list, size_t c _attr_maybe_unused, dlnode_t * restrict the_point)
 {
     ASSUME(c > 1);
-    assert(list->next[0] == list->prev[0]);
+    assert(list->next[0] == list->prev[0]->next[0]);
     dlnode_t * restrict list4d = list->next[0];
-    // hv4dplusU() will change the sentinels for 3D, so we need to reset them.
-    reset_sentinels_3d(list4d);
-    double hv = hv4dplusU(list4d);
-    return hv;
+    dlnode_t * restrict list_aux = list->prev[0];
+    double contrib = onec4dplusU(list4d, list_aux, the_point);
+    return contrib;
 }
 
 _attr_optimize_finite_and_associative_math // Required for auto-vectorization: https://gcc.gnu.org/PR122687
@@ -246,14 +286,6 @@ one_point_hv(const double * restrict x, const double * restrict ref, dimension_t
     for (dimension_t i = 0; i < d; i++)
         hv *= (ref[i] - x[i]);
     return hv;
-}
-
-_attr_optimize_finite_and_associative_math
-static inline void
-upper_bound(double * restrict dest, const double * restrict a, const double * restrict b, dimension_t dim)
-{
-    for (dimension_t i = 0; i < dim; i++)
-        dest[i] = MAX(a[i], b[i]);
 }
 
 _attr_optimize_finite_and_associative_math
@@ -429,7 +461,9 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
             ASSUME(dim - 1 >= STOP_DIMENSION);
             if (dim - 1 == STOP_DIMENSION) {
                 // base case of dimension 4.
-                hypera = fpli_hv4d(list, c);
+                hypera = fpli_onec4d(list, c, p1);
+                // hypera only has the contribution of p1.
+                hypera += p1_prev->area[d_stop];
             } else {
                 hypera = hv_recursive(list, dim - 1, c, ref, bound);
             }
@@ -505,7 +539,9 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
         ASSUME(dim - 1 >= STOP_DIMENSION);
         if (dim - 1 == STOP_DIMENSION) {
             // base case of dimension 4.
-            hypera = fpli_hv4d(list, c);
+            hypera = fpli_onec4d(list, c, p1);
+            // hypera only has the contribution of p1.
+            hypera += p1_prev->area[d_stop];
         } else {
             hypera = hv_recursive(list, dim - 1, c, ref, bound);
         }

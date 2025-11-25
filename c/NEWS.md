@@ -2,6 +2,8 @@
 
 ## 0.19
 
+ * `fpli_hv()` calculates 4D contributions as the base case, which is
+   significantly faster for more than four dimensions. (Andreia P. Guerreiro)
 
 ## 0.18
 
