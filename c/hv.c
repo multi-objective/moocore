@@ -73,6 +73,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     head->vol = head->area + d_stop * (n+1);
     head->x = NULL; // head contains no data
     head->ignore = 0;  // should never get used
+    head->x_aux = malloc(3*(n+1) * sizeof(double));
 
     // Reserve space for the sentinels.
     dlnode_t * list4d = new_cdllist(0, ref);
@@ -93,6 +94,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
             head[i].r_prev = head->r_prev + i * (d_stop - 1);
             head[i].area = head->area + i * d_stop;
             head[i].vol = head->vol + i * d_stop;
+            head[i].x_aux = head->x_aux + i * 3;
             i++;
         }
     }
@@ -135,8 +137,12 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         }
     }
     // Reset x to point to the first objective.
-    for (i = 0; i < n; i++)
+    size_t l;
+    for (i = 0; i < n; i++){
         scratch[i]->x -= STOP_DIMENSION;
+        for(l = 0; l < 3; l++)
+            scratch[i]->x_aux[l] = scratch[i]->x[l];
+    }
 
     free(scratch);
 
@@ -152,6 +158,7 @@ finish:
 static void fpli_free_cdllist(dlnode_t * head)
 {
     assert(head->next[0] == head->prev[0]);
+    free(head->x_aux);
     free_cdllist(head->next[0]); // free 4D sentinels
     free(head->r_next);
     free(head->area);
@@ -230,6 +237,18 @@ fpli_hv4d(dlnode_t * restrict list, size_t c _attr_maybe_unused)
 
 _attr_optimize_finite_and_associative_math // Required for auto-vectorization: https://gcc.gnu.org/PR122687
 static double
+fpli_onec4d(dlnode_t * restrict list, size_t c _attr_maybe_unused, dlnode_t *the_point)
+{
+    ASSUME(c > 1);
+    assert(list->next[0] == list->prev[0]);
+    dlnode_t * restrict list4d = list->next[0];
+    // hv4dplusU() will change the sentinels for 3D, so we need to reset them.
+    reset_sentinels_3d(list4d);
+    double contrib = onec4dplusU(list4d, the_point);
+    return contrib;
+}
+
+static double
 one_point_hv(const double * restrict x, const double * restrict ref, dimension_t d)
 {
     double hv = ref[0] - x[0];
@@ -258,7 +277,7 @@ _attr_maybe_unused static size_t debug_counter[6] = { 0 };
 
 static double
 hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
-             const double * restrict ref, double * restrict bound)
+             const double * restrict ref, double * restrict bound, dlnode_t * the_point)
 {
     ASSUME(c > 1);
     ASSUME(dim >= STOP_DIMENSION);
@@ -266,7 +285,7 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
         /*---------------------------------------
           base case of dimension 4
           --------------------------------------*/
-        return fpli_hv4d(list, c);
+        return fpli_onec4d(list, c, the_point);
     }
     ASSUME(dim > STOP_DIMENSION);
     /* ------------------------------------------------------
@@ -335,7 +354,10 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
             DEBUG1(debug_counter[1]++);
             hypera = p1_prev->area[d_stop];
         } else {
-            hypera = hv_recursive(list, dim - 1, c, ref, bound);
+            hypera = hv_recursive(list, dim - 1, c, ref, bound, p1);
+            if(dim - 1 == STOP_DIMENSION){ //hypera only has the contribution of p1
+                hypera += p1_prev->area[d_stop];
+            }
             /* At this point, p1 is the point with the highest value in
                dimension dim in the list: If it is dominated in dimension
                dim-1, then it is also dominated in dimension dim. */
@@ -408,7 +430,10 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
         assert(p1_prev == p1->r_prev[d_stop - 1]);
         p1->vol[d_stop] = hyperv;
         assert(p1->ignore == 0);
-        double hypera = hv_recursive(list, dim - 1, c, ref, bound);
+        double hypera = hv_recursive(list, dim - 1, c, ref, bound, p1);
+        if(dim - 1 == STOP_DIMENSION){ //hypera only has the contribution of p1
+            hypera += p1_prev->area[d_stop];
+        }
         /* At this point, p1 is the point with the highest value in
            dimension dim in the list: If it is dominated in dimension
            dim-1, then it is also dominated in dimension dim. */

@@ -245,4 +245,95 @@ hv4dplusU(dlnode_t * list)
     return hv;
 }
 
+static restore_points(dlnode_t * list, dlnode_t * last){
+    dlnode_t * newp = (list+1)->next[1];
+    while(newp != last){
+        for(int i = 0; i < 3; i++){
+            newp->x[i] = newp->x_aux[i];
+        }
+        newp = newp->next[1];
+    }
+}
+
+/* Compute the hv contribution of "the_point" in d=4 by iteratively computing the one contribution problem in d=3. */
+static double
+onec4dplusU(dlnode_t * list, dlnode_t * the_point)
+{
+    if(the_point->ignore >= 3){
+        return 0;
+    }
+
+    assert(list+2 == list->prev[0]);
+    assert(list+2 == list->prev[1]);
+    assert(list+1 == list->next[1]);
+
+    double volume = 0, hv = 0;
+    dlnode_t * newp = (list+1)->next[1];
+    const dlnode_t * last = list+2;
+
+    the_point->closest[0] = list+1;
+    the_point->closest[1] = list;
+
+    //PART 1: Setup 3D base (TODO: improve)
+    while (newp != last && newp->x[3] <= the_point->x[3]) {
+        if(newp != the_point && newp->ignore < 3){
+
+            if(newp->x[0] <= the_point->x[0] && newp->x[1] <= the_point->x[1] && newp->x[2] <= the_point->x[2]){
+                the_point->ignore = 3;
+                restore_points(list, newp);
+                return 0;
+            }
+
+            for(int i = 0; i < 3; i++){
+                newp->x[i] = (newp->x[i] >= the_point->x[i]) ? newp->x[i] : the_point->x[i];
+            }
+
+            if (restart_base_setup_z_and_closest(list, newp)) {
+                add_to_z(newp);
+                update_links(list, newp);
+            }
+        }
+        newp = newp->next[1];
+    }
+
+    restart_base_setup_z_and_closest(list, the_point);
+    double the_point_v = one_contribution_3d(the_point);
+    assert(the_point_v > 0);
+    volume = the_point_v;
+    double height = newp->x[3] - the_point->x[3];
+    assert(height >= 0);
+    hv = volume * height;
+
+    // PART 2: Update the 3D contribution
+    while (newp != last &&
+            (newp->x[0] > the_point->x[0] || newp->x[1] > the_point->x[1] || newp->x[2] > the_point->x[2])) {
+
+        if (newp != the_point && newp->ignore < 3){
+            for(int i = 0; i < 3; i++){
+                newp->x[i] = (newp->x[i] >= the_point->x[i]) ? newp->x[i] : the_point->x[i];
+            }
+            if (restart_base_setup_z_and_closest(list, newp)) {
+
+                // newp was not dominated by something else.
+                double newp_v = one_contribution_3d(newp);
+                assert(newp_v > 0);
+                volume -= newp_v;
+
+                add_to_z(newp);
+                update_links(list, newp);
+            }
+        }
+        // FIXME: It newp was dominated, can we accumulate the height and update
+        // hv later?
+        height = newp->next[1]->x[3] - newp->x[3];
+        assert(height >= 0);
+        hv += volume * height;
+
+        newp = newp->next[1];
+    }
+
+    restore_points(list, newp);
+    return hv;
+}
+
 #endif // _HV4D_PRIV_H
