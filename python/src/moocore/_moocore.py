@@ -465,7 +465,7 @@ def hypervolume(
     :math:`O(m 2^{n})` time and :math:`O(n\cdot m)` space complexity, where
     :math:`m` is the dimension of the points, but it is very fast for such
     small sets.  For larger number of points, it uses a recursive algorithm
-    :footcite:p:`FonPaqLop06:hypervolume` with HV4D\ :sup:`+` as the base case,
+    :footcite:p:`FonPaqLop06:hypervolume` that computes 4D contributions :footcite:p:`GueFon2017hv4d` as the base case,
     resulting in a :math:`O(n^{m-2})` time complexity and :math:`O(n)` space
     complexity in the worst-case.  Experimental results show that the pruning
     techniques used may reduce the time complexity even further.  The original
