@@ -88,7 +88,7 @@ random within the hyper-cube.
 Exact computation of hypervolume
 --------------------------------
 
-The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D, 4D, 5D and 6D. As the plots show, `moocore`_ is 100 times faster than the other packages and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_ and `BoFire`_.  `BoTorch`_ is not included for more than 4 objectives because **it is tens of thousands of times slower** than `moocore`_. `Nevergrad`_ is not included for more than 5 objectives for the same reason.
+The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D, 4D, 5D and 6D. As the plots show, `moocore`_ is 100 times faster than the other packages and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_ and `BoFire`_.  `BoTorch`_ and `fast-pareto`_ is not included for more than 3 objectives because **they are tens of thousands of times slower** than `moocore`_.  `Nevergrad`_ is not included for more than 5 objectives for the same reason.
 
 |hv_bench-DTLZLinearShape-3d| |hv_bench-DTLZLinearShape-4d|
 
