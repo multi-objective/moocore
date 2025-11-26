@@ -269,25 +269,29 @@ onec4dplusU(dlnode_t * list, dlnode_t * the_point)
     assert(list+2 == list->prev[1]);
     assert(list+1 == list->next[1]);
 
-    double volume = 0, hv = 0;
     dlnode_t * newp = (list+1)->next[1];
     const dlnode_t * last = list+2;
 
     the_point->closest[0] = list+1;
     the_point->closest[1] = list;
 
-    //PART 1: Setup 3D base (TODO: improve)
-    while (newp != last && newp->x[3] <= the_point->x[3]) {
-        if(newp != the_point && newp->ignore < 3){
+    const double * the_point_x = the_point->x;
 
-            if(newp->x[0] <= the_point->x[0] && newp->x[1] <= the_point->x[1] && newp->x[2] <= the_point->x[2]){
+    // PART 1: Setup 3D base (TODO: improve)
+    while (newp != last && newp->x[3] <= the_point_x[3]) {
+        // MANUEL: When can newp be equal to the_point?
+        if (newp != the_point && newp->ignore < 3){
+
+            if (newp->x[0] <= the_point_x[0] && newp->x[1] <= the_point_x[1] && newp->x[2] <= the_point_x[2]){
                 the_point->ignore = 3;
                 restore_points(list, newp);
                 return 0;
             }
 
+            // FIXME: This modifies ->x[], why?
             for (int i = 0; i < 3; i++){
-                newp->x[i] = (newp->x[i] >= the_point->x[i]) ? newp->x[i] : the_point->x[i];
+                // MANUEL: so basically: if (newp->x[i] < the_point_x[i]) newp->x[i] = the_point_x[i];
+                newp->x[i] = (newp->x[i] >= the_point_x[i]) ? newp->x[i] : the_point_x[i];
             }
 
             if (restart_base_setup_z_and_closest(list, newp)) {
@@ -299,20 +303,21 @@ onec4dplusU(dlnode_t * list, dlnode_t * the_point)
     }
 
     restart_base_setup_z_and_closest(list, the_point);
-    double the_point_v = one_contribution_3d(the_point);
-    assert(the_point_v > 0);
-    volume = the_point_v;
-    double height = newp->x[3] - the_point->x[3];
+    double volume = one_contribution_3d(the_point);
+    assert(volume > 0);
+    double height = newp->x[3] - the_point_x[3];
     assert(height >= 0);
-    hv = volume * height;
+    double hv = volume * height;
 
     // PART 2: Update the 3D contribution
     while (newp != last &&
-            (newp->x[0] > the_point->x[0] || newp->x[1] > the_point->x[1] || newp->x[2] > the_point->x[2])) {
+            (newp->x[0] > the_point_x[0] || newp->x[1] > the_point_x[1] || newp->x[2] > the_point_x[2])) {
 
-        if (newp != the_point && newp->ignore < 3){
+        if (newp != the_point && newp->ignore < 3) {
+            // FIXME: This modifies ->x[], why?
             for(int i = 0; i < 3; i++){
-                newp->x[i] = (newp->x[i] >= the_point->x[i]) ? newp->x[i] : the_point->x[i];
+                // MANUEL: so basically: if (newp->x[i] < the_point_x[i]) newp->x[i] = the_point_x[i];
+                newp->x[i] = (newp->x[i] >= the_point_x[i]) ? newp->x[i] : the_point_x[i];
             }
             if (restart_base_setup_z_and_closest(list, newp)) {
 
