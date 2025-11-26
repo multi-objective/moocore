@@ -261,6 +261,7 @@ restore_points(dlnode_t * list, dlnode_t * last)
 static inline double
 onec4dplusU(dlnode_t * list, dlnode_t * the_point)
 {
+    // MANUEL: It would be better to move this check to hv.c to avoid calling reset_sentinels_3d. You can add an assert here.
     if (the_point->ignore >= 3) {
         return 0;
     }
@@ -313,6 +314,9 @@ onec4dplusU(dlnode_t * list, dlnode_t * the_point)
     while (newp != last &&
             (newp->x[0] > the_point_x[0] || newp->x[1] > the_point_x[1] || newp->x[2] > the_point_x[2])) {
 
+        // MANUEL: I think newp cannot be equal to the_point here. If it was
+        // equal, we would have exited the loop.
+        assert(newp != the_point); //
         if (newp != the_point && newp->ignore < 3) {
             // FIXME: This modifies ->x[], why?
             for(int i = 0; i < 3; i++){
