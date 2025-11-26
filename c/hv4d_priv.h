@@ -245,10 +245,12 @@ hv4dplusU(dlnode_t * list)
     return hv;
 }
 
-static restore_points(dlnode_t * list, dlnode_t * last){
+static inline void
+restore_points(dlnode_t * list, dlnode_t * last)
+{
     dlnode_t * newp = (list+1)->next[1];
-    while(newp != last){
-        for(int i = 0; i < 3; i++){
+    while (newp != last) {
+        for (int i = 0; i < 3; i++) {
             newp->x[i] = newp->x_aux[i];
         }
         newp = newp->next[1];
@@ -256,10 +258,10 @@ static restore_points(dlnode_t * list, dlnode_t * last){
 }
 
 /* Compute the hv contribution of "the_point" in d=4 by iteratively computing the one contribution problem in d=3. */
-static double
+static inline double
 onec4dplusU(dlnode_t * list, dlnode_t * the_point)
 {
-    if(the_point->ignore >= 3){
+    if (the_point->ignore >= 3) {
         return 0;
     }
 
@@ -284,7 +286,7 @@ onec4dplusU(dlnode_t * list, dlnode_t * the_point)
                 return 0;
             }
 
-            for(int i = 0; i < 3; i++){
+            for (int i = 0; i < 3; i++){
                 newp->x[i] = (newp->x[i] >= the_point->x[i]) ? newp->x[i] : the_point->x[i];
             }
 
