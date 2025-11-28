@@ -250,8 +250,11 @@ restore_points(dlnode_t * list, dlnode_t * last)
 {
     dlnode_t * newp = (list+1)->next[1];
     while (newp != last) {
-        for (int i = 0; i < 3; i++) {
-            newp->x[i] = newp->x_aux[i];
+        // MANUEL: We only modify the points that are not ignored.
+        if (newp->ignore < 3) {
+            for (int i = 0; i < 3; i++) {
+                newp->x[i] = newp->x_aux[i];
+            }
         }
         newp = newp->next[1];
     }
