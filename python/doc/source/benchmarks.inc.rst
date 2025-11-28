@@ -7,6 +7,7 @@ Not all packages provide the same functionality. For example, `pymoo`_ does not 
 
 The source code for the benchmarks below can be found at https://github.com/multi-objective/moocore/tree/main/python/benchmarks .
 
+.. _bench-ndom:
 
 Identifying nondominated points
 -------------------------------
@@ -83,7 +84,7 @@ random within the hyper-cube.
    :width: 49%
 
 
-
+.. _bench-hv:
 
 Exact computation of hypervolume
 --------------------------------
@@ -109,6 +110,7 @@ For 3D, `Optuna`_ uses a :math:`O(n^2)` algorithm, while `moocore` uses the best
 .. |hv_bench-DTLZLinearShape-6d| image:: _static/bench/hv_bench-DTLZLinearShape.6d-time.png
    :width: 49%
 
+.. _bench-hvapprox:
 
 Approximation of the hypervolume
 --------------------------------

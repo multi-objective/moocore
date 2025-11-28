@@ -400,6 +400,8 @@ def hypervolume(
 
     .. seealso:: For details about the hypervolume, see :ref:`hypervolume_metric`.
 
+       See :ref:`Benchmarking the exact computation of hypervolume <bench-hv>`.
+
     Parameters
     ----------
     data :
@@ -831,6 +833,8 @@ def hv_approx(
 
     .. seealso:: For details of the calculation, see the Notes section below.
 
+       See :ref:`Benchmarks: Approximation of the hypervolume <bench-hvapprox>`.
+
 
     Parameters
     ----------
@@ -1156,6 +1160,7 @@ def is_nondominated(
     :math:`O(n(\log_2 n)^{m-2})` algorithm for :math:`m \geq 4`
     :footcite:p:`KunLucPre1975jacm` is not implemented yet.
 
+    .. seealso:: :ref:`Benchmarks of identifying nondominated points <bench-ndom>`.
 
     Parameters
     ----------
@@ -1502,7 +1507,25 @@ def pareto_rank(
     lists or arrays, each of them being mutually nondominated
     :footcite:p:`Deb02nsga2` (see examples below).
 
-    More formally, given a finite set of points :math:`X \subset \mathbb{R}^m`, the
+    .. seealso:: :ref:`Benchmarks of nondominated Sorting (Pareto ranking) <bench-ndsort>`.
+
+    Parameters
+    ----------
+    data :
+        Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
+        If the array is created from the :func:`read_datasets()` function, remove the last column.
+    maximise :
+        Whether the objectives must be maximised instead of minimised.
+        Either a single boolean value that applies to all objectives or a list of boolean values, with one value per objective.
+        Also accepts a 1d numpy array with value 0/1 for each objective.
+
+    Returns
+    -------
+        An integer vector of the same length as the number of rows of ``data`` with values within ``[0, len(data) - 1]``, where each value gives the Pareto rank of each point (lower is better).
+
+    Notes
+    -----
+    Given a finite set of points :math:`X \subset \mathbb{R}^m`, the
     rank of a point :math:`x \in X` is defined as:
 
     .. math::
@@ -1519,20 +1542,6 @@ def pareto_rank(
     algorithm, where :math:`k` is the number of fronts in the output.  With
     higher dimensions, it uses the naive :math:`O(k m n^2)` algorithm, where
     :math:`m` is the number of dimensions.
-
-    Parameters
-    ----------
-    data :
-        Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
-        If the array is created from the :func:`read_datasets()` function, remove the last column.
-    maximise :
-        Whether the objectives must be maximised instead of minimised.
-        Either a single boolean value that applies to all objectives or a list of boolean values, with one value per objective.
-        Also accepts a 1d numpy array with value 0/1 for each objective.
-
-    Returns
-    -------
-        An integer vector of the same length as the number of rows of ``data`` with values within ``[0, len(data) - 1]``, where each value gives the Pareto rank of each point (lower is better).
 
     References
     ----------
