@@ -277,13 +277,14 @@ onec4dplusU(dlnode_t * list, dlnode_t * the_point)
     the_point->closest[1] = list;
 
     const double * the_point_x = the_point->x;
-
+    // MANUEL: I added this because I think we cannot (and should not) call this function with an empty list.
+    assert(newp != last);
     // PART 1: Setup 3D base (TODO: improve)
     while (newp != last && newp->x[3] <= the_point_x[3]) {
         // MANUEL: When can newp be equal to the_point?
         if (newp != the_point && newp->ignore < 3){
 
-            if (newp->x[0] <= the_point_x[0] && newp->x[1] <= the_point_x[1] && newp->x[2] <= the_point_x[2]){
+            if (weakly_dominates(newp->x, the_point_x, 3)) {
                 the_point->ignore = 3;
                 restore_points(list, newp);
                 return 0;
@@ -307,7 +308,8 @@ onec4dplusU(dlnode_t * list, dlnode_t * the_point)
     double volume = one_contribution_3d(the_point);
     assert(volume > 0);
     double height = newp->x[3] - the_point_x[3];
-    assert(height >= 0);
+    // It cannot be zero because we exited the loop above.
+    assert(height > 0);
     double hv = volume * height;
 
     // PART 2: Update the 3D contribution
