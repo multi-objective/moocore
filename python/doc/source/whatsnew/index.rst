@@ -7,6 +7,7 @@ What's new
 Version 0.2.0 (development)
 ---------------------------
 
+- Optuna is now included in the benchmarks.
 - New :ref:`bench-ndsort` benchmarks.
 - :func:`~moocore.pareto_rank` is faster in 3D.
 

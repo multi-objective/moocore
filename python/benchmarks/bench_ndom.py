@@ -25,10 +25,10 @@ from desdeo.tools.non_dominated_sorting import (
 )
 
 from paretoset import paretoset
-
 from seqme.core.rank import is_pareto_front as seqme_is_pareto_front
-
 from fast_pareto import is_pareto_front as fast_pareto_is_pf
+from optuna.study._multi_objective import _is_pareto_front as optuna_is_pf
+
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
 files = {
@@ -67,36 +67,6 @@ def check_values(a, b, what, n, name):
     )
 
 
-title = "is_non_dominated(keep_weakly=False)"
-file_prefix = "ndom"
-names = files.keys()
-for name in names:
-    x = get_dataset(name)
-    n = get_geomrange(len(x), *files[name]["range"])
-
-    bench = Bench(
-        name=name,
-        n=n,
-        setup=setup,
-        bench={
-            "moocore": lambda z: moocore.is_nondominated(
-                z, maximise=True, keep_weakly=False
-            ),
-            "botorch": lambda z: botorch_is_nondominated(z, deduplicate=True),
-            "paretoset (numba)": lambda z: paretoset(
-                z, sense=z.shape[1] * ["max"], distinct=True, use_numba=True
-            ),
-        },
-        check=check_values,
-    )
-
-    for maxrow in n:
-        bench(maxrow, x[:maxrow, :])
-
-    gc.collect()
-    bench.plots(file_prefix=file_prefix, title=title, log="xy")
-
-
 title = "is_non_dominated(keep_weakly=True)"
 file_prefix = "wndom"
 names = files.keys()
@@ -133,6 +103,9 @@ for name in names:
             "fast_pareto": lambda z: bool2pos(
                 fast_pareto_is_pf(-z, assume_unique_lexsorted=False)
             ),
+            "optuna": lambda z: bool2pos(
+                optuna_is_pf(-z, assume_unique_lexsorted=False)
+            ),
         },
         check=check_values,
     )
@@ -143,6 +116,35 @@ for name in names:
     gc.collect()
     bench.plots(file_prefix=file_prefix, title=title, log="xy")
 
+
+title = "is_non_dominated(keep_weakly=False)"
+file_prefix = "ndom"
+names = files.keys()
+for name in names:
+    x = get_dataset(name)
+    n = get_geomrange(len(x), *files[name]["range"])
+
+    bench = Bench(
+        name=name,
+        n=n,
+        setup=setup,
+        bench={
+            "moocore": lambda z: moocore.is_nondominated(
+                z, maximise=True, keep_weakly=False
+            ),
+            "botorch": lambda z: botorch_is_nondominated(z, deduplicate=True),
+            "paretoset (numba)": lambda z: paretoset(
+                z, sense=z.shape[1] * ["max"], distinct=True, use_numba=True
+            ),
+        },
+        check=check_values,
+    )
+
+    for maxrow in n:
+        bench(maxrow, x[:maxrow, :])
+
+    gc.collect()
+    bench.plots(file_prefix=file_prefix, title=title, log="xy")
 
 if "__file__" not in globals():  # Running interactively.
     plt.show()

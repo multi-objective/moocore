@@ -1,7 +1,7 @@
 Benchmarks
 ==========
 
-The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, `DESDEO`_, `paretoset`_, `Nevergrad`_, `jMetalPy`_, `seqme`_ and `fast-pareto`_.  Other Python packages are not included in the comparison because they are based on these packages for the functionality benchmarked, so they are **at least as slow** as them. For example `Xopt`_ and `BoFire`_ use `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ already uses `moocore`_ for hypervolume and other quality metrics, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.  We do not compare with the Bayesian optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and too slow to run the benchmarks in a reasonable time.
+The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, `DESDEO`_, `paretoset`_, `Nevergrad`_, `jMetalPy`_, `seqme`_, `fast-pareto`_ and `Optuna`_.  Other Python packages are not included in the comparison because they are based on these packages for the functionality benchmarked, so they are **at least as slow** as them. For example `Xopt`_ and `BoFire`_ use `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ already uses `moocore`_ for hypervolume and other quality metrics, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.  We do not compare with the Bayesian optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and too slow to run the benchmarks in a reasonable time.
 
 Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>` whereas `jMetalPy`_ does not provide the :ref:`IGD+ indicator <igd_hausdorf>`. `BoTorch`_ provides neither of them. `paretoset`_ and `fast-pareto`_ only identify nondominated points.
 
@@ -88,7 +88,10 @@ random within the hyper-cube.
 Exact computation of hypervolume
 --------------------------------
 
-The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D, 4D, 5D and 6D. As the plots show, `moocore`_ is 100 times faster than the other packages and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_ and `BoFire`_.  `BoTorch`_ and `fast-pareto`_ is not included for more than 3 objectives because **they are tens of thousands of times slower** than `moocore`_.  `Nevergrad`_ is not included for more than 5 objectives for the same reason.
+The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D, 4D, 5D and 6D. As the plots show, `moocore`_ is 100 times faster than the other packages and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_ and `BoFire`_.
+
+For 3D, `Optuna`_ uses a :math:`O(n^2)` algorithm, while `moocore` uses the best-known :math:`O(n\log n)` one, so the gap between the two will get significantly larger with a larger number of points than those tested here.  `BoTorch`_ and `fast-pareto`_ are not included for more than 3 objectives because **they are tens of thousands of times slower** than `moocore`_.  `Nevergrad`_ and `Optuna`_ are not included for more than 5 objectives for the same reason.
+
 
 |hv_bench-DTLZLinearShape-3d| |hv_bench-DTLZLinearShape-4d|
 
@@ -203,6 +206,7 @@ The following plots compare the speed of computing the :ref:`epsilon indicator  
 .. _DESDEO: https://desdeo.readthedocs.io/en/latest/
 .. _Nevergrad: https://facebookresearch.github.io/nevergrad/
 .. _Numba: https://numba.pydata.org/numba-doc/dev/index.html
+.. _Optuna: https://optuna.org/
 .. _Xopt: https://xopt.xopt.org/index.html
 .. _fast-pareto: https://github.com/nabenabe0928/fast-pareto
 .. _jMetalPy: https://jmetal.github.io/jMetalPy/index.html

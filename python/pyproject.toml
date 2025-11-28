@@ -51,6 +51,7 @@ optional-dependencies.benchmarks = [
   "nevergrad",
   "numba",
   "numpy",
+  "optuna",
   "pandas>=2",
   "paretoset",
   "pymoo",

@@ -18,7 +18,7 @@ from pymoo.indicators.hv import Hypervolume as pymoo_HV
 from jmetal.core.quality_indicator import HyperVolume as jmetal_HV
 from nevergrad.optimization.multiobjective import HypervolumeIndicator as ng_HV
 from fast_pareto import hypervolume as fp_hv
-
+from optuna._hypervolume import compute_hypervolume as optuna_hv
 # from trieste.acquisition.multi_objective import Pareto as trieste_Pareto
 # import tensorflow as tf
 
@@ -67,15 +67,19 @@ for name in names:
         "pymoo": lambda z, hv=pymoo_HV(ref_point=ref): hv(z),
         "jMetalPy": lambda z, hv=jmetal_HV(ref): hv.compute(z),
         "nevergrad": lambda z, hv=ng_HV(ref): hv.compute(z),
+        "optuna": lambda z, ref=ref: optuna_hv(
+            z, reference_point=ref, assume_pareto=False
+        ),
         "botorch": lambda z,
         hv=botorch_HV(ref_point=torch.from_numpy(-ref)): hv.compute(z),
         "fast_pareto": lambda z, ref=ref: fp_hv(
             z, ref_point=ref, assume_pareto=False
         ),
     }
+    # Too slow to run.
     if dim >= 6:
-        # Nevergrad is too slow
         del benchmarks["nevergrad"]
+        del benchmarks["optuna"]
     if dim >= 4:
         ## Trieste is hundreds of times slower than botorch. It is so slow that
         ## we cannot run the benchmark with the initial value of 500 points.
