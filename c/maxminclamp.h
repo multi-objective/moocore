@@ -20,10 +20,17 @@
 #define STATIC_ASSERT_TYPES_COMPATIBLE(x,y, msg) ((void) (&x == &y))
 #endif
 
+/**
+
+   The macros are optimized for the pattern x = MAX(x,y) and x = MIN(x,y), so
+   that when x == y, it will generate x = x instead of x = y, and the compiler
+   will optimize the assignment out.
+
+*/
 #if (defined(__GNUC__) && __GNUC__ >= 3) || defined(__clang__)
-#define __cmp_op_MIN <
-#define __cmp_op_MAX >
-#define __cmp(op, x, y) ((x) __cmp_op_##op (y) ? (x) : (y))
+#define __cmp_op_MAX <
+#define __cmp_op_MIN >
+#define __cmp(op, x, y) ((x) __cmp_op_##op (y) ? (y) : (x))
 #define __careful_cmp(op, x, y) __extension__({                                \
             __auto_type _x__ = (x);                                            \
             __auto_type _y__ = (y);                                            \
@@ -47,8 +54,8 @@
             _x__ <= _xmin__ ? _xmin__ : _x__ >= _xmax__ ? _xmax__ : _x__; })
 
 #else
-#define MAX(x,y) ((x) > (y) ? (x) : (y))
-#define MIN(x,y) ((x) < (y) ? (x) : (y))
+#define MAX(x,y) ((x) < (y) ? (y) : (x))
+#define MIN(x,y) ((x) > (y) ? (y) : (x))
 #define CLAMP(x, xmin, xmax) (MAX((xim), (MIN((x), (xmax)))))
 #endif
 
