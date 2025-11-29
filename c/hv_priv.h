@@ -300,9 +300,9 @@ compute_area_simple(const double * px, const dlnode_t * q, const dlnode_t * u, u
     ASSUME(i == 0 || i == 1);
     const uint_fast8_t j = 1 - i;
     double area = (q->x[j] - px[j]) * (u->x[i] - px[i]);
-// #if HV_DIMENSION == 3 && !defined(HVC_ONLY)
-    // assert(area > 0); //AG: This can happen when px->x[i] == u->x[i], and that is ok.
-// #endif
+#if HV_DIMENSION == 3 && !defined(HVC_ONLY)
+    assert(area >= 0); // == 0 when px[i] == u->x[i].
+#endif
     while (px[j] < u->x[j]) {
         q = u;
         u = u->cnext[i];
