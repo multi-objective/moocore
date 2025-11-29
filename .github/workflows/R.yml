@@ -2,7 +2,8 @@ name: R
 
 on:
   push:
-    branches-ignore: [gh-pages]
+    branches: [main]
+    tags-ignore: ["**"]
     paths:
       - ".github/workflows/rchk.yml"
       - ".github/workflows/R.yml"
@@ -12,7 +13,7 @@ on:
       - 'c/*.mk'
       - 'c/**/*.[ch]p?p?'
   pull_request:
-    branches-ignore:  [gh-pages]
+    branches-ignore: [gh-pages]
     paths:
       - ".github/workflows/rchk.yml"
       - ".github/workflows/R.yml"
