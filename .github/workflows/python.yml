@@ -2,7 +2,8 @@ name: Python
 
 on:
   push:
-    branches-ignore: [gh-pages]
+    branches: [main]
+    tags-ignore: ["**"]
     paths:
       - ".github/workflows/python.yml"
       - "python/**"
