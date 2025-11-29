@@ -1,6 +1,7 @@
 # moocore 0.2.0
 
  * `pareto_rank()` is faster in 3D.
+ * HV3D+ is slightly faster with repeated coordinates (#41).
 
 # moocore 0.1.10
 
