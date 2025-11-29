@@ -3,6 +3,7 @@
 ## 0.18
 
  * `pareto_rank()` is now O(k * n log n) in 3D, which is faster than the naive O(n^3).
+ * HV3D+ is slightly faster with repeated coordinates (#41).
 
 ## 0.17.0
 
