@@ -300,14 +300,18 @@ compute_area_simple(const double * px, const dlnode_t * q, const dlnode_t * u, u
     ASSUME(i == 0 || i == 1);
     const uint_fast8_t j = 1 - i;
     double area = (q->x[j] - px[j]) * (u->x[i] - px[i]);
-#if HV_DIMENSION == 3 && !defined(HVC_ONLY)
-    assert(area > 0);
-#endif
+// #if HV_DIMENSION == 3 && !defined(HVC_ONLY)
+    // assert(area > 0); //AG: This can happen when px->x[i] == u->x[i], and that is ok.
+// #endif
     while (px[j] < u->x[j]) {
         q = u;
         u = u->cnext[i];
         // With repeated coordinates, it can be zero.
         assert(u->x[i] - q->x[i] >= 0);
+        // If u and q have a repeated coordinate, then one weakly dominates the
+        // other in the (x,y)-plane. Such dominated point should not be visited.
+        assert(u->x[i] != q->x[i]);
+        assert(u->x[j] != q->x[j]);
         area += (q->x[j] - px[j]) * (u->x[i] - q->x[i]);
     }
     return area;
