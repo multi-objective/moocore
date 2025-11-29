@@ -105,6 +105,11 @@ hv3d_preprocessing(dlnode_t * list, size_t n)
             remove_from_z(p);
         } else {
             assert(node_point(nodeaux)[1] >= px[1]);
+            if (prev_x[1] == px[1]){
+                nodeaux = nodeaux->prev;
+                prev_x = node_point(nodeaux->prev);
+            }
+            assert(prev_x[1] < px[1]);
             // Delete everything in the tree that is dominated by p.
             while (node_point(nodeaux)[0] >= px[0]) {
                 assert(node_point(nodeaux)[1] >= px[1]);
@@ -115,6 +120,9 @@ hv3d_preprocessing(dlnode_t * list, size_t n)
             }
             node = new_avl_node(p, node + 1);
             avl_insert_before(&tree, nodeaux, node);
+            // Check if the data structure is properly setup
+            assert(node->prev->dlnode->x[0] > p->x[0] && node->prev->dlnode->x[1] < p->x[1]);
+            assert(node->next->dlnode->x[0] < p->x[0] && node->next->dlnode->x[1] > p->x[1]);
             set_delimiters(p, node->prev->dlnode, node->next->dlnode);
         }
         p = p->next[0];
