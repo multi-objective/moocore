@@ -43,7 +43,6 @@ dependencies = [
 
 optional-dependencies.benchmarks = [
   "botorch",
-  "py-cpuinfo",
   "desdeo",
   "fast-pareto",
   "jmetalpy",
@@ -54,6 +53,7 @@ optional-dependencies.benchmarks = [
   "optuna",
   "pandas>=2",
   "paretoset",
+  "py-cpuinfo",
   "pymoo",
   "seqme",
 ]
