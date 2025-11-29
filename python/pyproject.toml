@@ -43,10 +43,10 @@ dependencies = [
 
 optional-dependencies.benchmarks = [
   "botorch",
-  "cpuinfo",
+  "py-cpuinfo",
   "desdeo",
   "fast-pareto",
-  "jmetal",
+  "jmetalpy",
   "matplotlib",
   "nevergrad",
   "numba",
