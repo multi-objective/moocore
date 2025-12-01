@@ -112,7 +112,7 @@ winbuild winbuild_:
 	$(Reval) "devtools::check_win_devel()"
 
 covr:
-	$(Reval) "Sys.setenv(NOT_CRAN='true');covr::report(covr::package_coverage(type='all', quiet=FALSE), browse=TRUE)"
+	$(Reval) "Sys.setenv(NOT_CRAN='true');covr::report(withr::with_makevars(c(MOOCORE_DEBUG='1', LTO_OPT=''), covr::package_coverage(type='all', commentDonttest=FALSE, commentDontrun=FALSE, quiet=FALSE)), browse=TRUE)"
 
 benchmarks: quick-install
 	$(RM) ./vignettes/articles/bench/*.rds

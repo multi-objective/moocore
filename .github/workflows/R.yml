@@ -162,7 +162,7 @@ jobs:
         env:
           NOT_CRAN: false
         run: |
-          coverage <- withr::with_makevars(c(MOOCORE_DEBUG="1"),
+          coverage <- withr::with_makevars(c(MOOCORE_DEBUG="1", LTO_OPT=""),
                         covr::package_coverage(type="all", quiet=FALSE, clean = FALSE,
                            commentDonttest = FALSE, commentDontrun = FALSE, flags="R",
                            install_path = file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package"))

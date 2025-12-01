@@ -226,7 +226,7 @@ $(CXXSHLIB): $(LIBHV_OBJS)
 	$(CXX) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $^ $(SHLIB_LDFLAGS)
 
 clean:
-	@-$(RM) *.s *.i
+	@-$(RM) *.s *.i *.gcda mt19937/*.gcda
 	@-$(RM) config.status config.log
 	@-$(RM) Hypervolume_MEX.mex
 	@-$(RM) $(SHLIB) $(CXXSHLIB)
