@@ -1070,7 +1070,7 @@ def generate_ndset(
     does not result in a uniform sampling when
     projected onto the surface of the hyper-sphere.
 
-    Method ``"convex-sphere"`` is quivalent to ``1 - generate_ndset(...,
+    Method ``"convex-sphere"`` is equivalent to ``1 - generate_ndset(...,
     method="concave-sphere")``, which is convex for minimisation problems.  It
     corresponds to translating points from the negative orthant of the
     hyper-sphere to the positive orthant.

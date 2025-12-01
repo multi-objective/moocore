@@ -71,7 +71,7 @@ hyper-sphere.  Sampling from the uniform distribution
 \citep{LacKlaFon2017box} does not result in a uniform sampling when
 projected onto the surface of the hyper-sphere.
 
-Method \code{"convex-sphere"} is quivalent to \code{1 - generate_ndset(..., method="concave-sphere")}, which is convex for minimisation problems.  It
+Method \code{"convex-sphere"} is equivalent to \code{1 - generate_ndset(..., method="concave-sphere")}, which is convex for minimisation problems.  It
 corresponds to translating points from the negative orthant of the
 hyper-sphere to the positive orthant.
 
