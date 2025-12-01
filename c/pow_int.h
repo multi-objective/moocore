@@ -42,7 +42,7 @@ fast_pow_uint_max32(double base, uint_fast8_t exp)
       case 30: { b15 = fast_pow_uint_max32(base, 15); return b15 * b15; }
       case 31: { b15 = fast_pow_uint_max32(base, 15); return b15 * b15 * base; }
       case 32: { b16 = fast_pow_uint_max32(base, 16); return b16 * b16; }
-      default: unreachable();
+      default: unreachable(); // COVR_EXCL_LINE # nocov
     }
 }
 
@@ -103,7 +103,7 @@ fast_powl_uint_max32(long double base, uint_fast8_t exp)
       case 30: { b15 = fast_powl_uint_max32(base, 15); return b15 * b15; }
       case 31: { b15 = fast_powl_uint_max32(base, 15); return b15 * b15 * base; }
       case 32: { b16 = fast_powl_uint_max32(base, 16); return b16 * b16; }
-      default: unreachable();
+      default: unreachable(); // COVR_EXCL_LINE # nocov
     }
 }
 

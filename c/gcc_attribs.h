@@ -121,14 +121,14 @@
 
 
 #if (defined(__GNUC__) && __GNUC__ >= 3) || defined(__clang__)
-# define likely(x)	__builtin_expect(!!(x), 1)
-# define unlikely(x)	__builtin_expect(!!(x), 0)
+# define likely(x)	  __builtin_expect(!!(x), 1)
+# define unlikely(x)  __builtin_expect(!!(x), 0)
 #elif (defined(__cplusplus) && __cplusplus >= 202002L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
-# define likely(x)	(x) [[likely]]
-# define unlikely(x)	(x) [[unlikely]]
+# define likely(x)	  (x) [[likely]]
+# define unlikely(x)  (x) [[unlikely]]
 #else
-# define likely(x)	(x)
-# define unlikely(x)	(x)
+# define likely(x)	  (x)
+# define unlikely(x)  (x)
 #endif
 
 #ifdef _MSC_VER

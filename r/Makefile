@@ -89,7 +89,7 @@ check: build
 ifdef TEST
 	_R_CHECK_FORCE_SUGGESTS_=false NOT_CRAN=true $(Reval) 'devtools::test(filter="$(TEST)")'
 else
-	cd $(BINDIR) && (_R_CHECK_FORCE_SUGGESTS_=false NOT_CRAN=true DEBUG=1 R CMD check --run-donttest --run-dontrun --timings $(PACKAGE)_$(PACKAGEVERSION).tar.gz; cat $(PACKAGE).Rcheck/$(PACKAGE)-Ex.timings)
+	cd $(BINDIR) && (_R_CHECK_FORCE_SUGGESTS_=false NOT_CRAN=true MOOCORE_DEBUG=1 R CMD check --run-donttest --run-dontrun --timings $(PACKAGE)_$(PACKAGEVERSION).tar.gz; cat $(PACKAGE).Rcheck/$(PACKAGE)-Ex.timings)
 endif
 
 show:
@@ -112,7 +112,7 @@ winbuild winbuild_:
 	$(Reval) "devtools::check_win_devel()"
 
 covr:
-	$(Reval) "Sys.setenv(NOT_CRAN='true');covr::report(covr::package_coverage(type='all', quiet=FALSE), browse=TRUE)"
+	$(Reval) "Sys.setenv(NOT_CRAN='true');covr::report(withr::with_makevars(c(MOOCORE_DEBUG='1', LTO_OPT=''), covr::package_coverage(type='all', commentDonttest=FALSE, commentDontrun=FALSE, quiet=FALSE)), browse=TRUE)"
 
 benchmarks: quick-install
 	$(RM) ./vignettes/articles/bench/*.rds

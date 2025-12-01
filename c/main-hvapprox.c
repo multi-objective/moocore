@@ -173,7 +173,7 @@ hvapprox_file (const char *filename, double *reference,
               volume = hv_approx_hua_wang(&data[nobj * cumsize], nobj, cumsizes[n] - cumsize, reference, maximise, nsamples);
               break;
           default:
-              unreachable();
+              unreachable();  // COVR_EXCL_LINE # nocov
         }
 
         if (volume == 0.0) {

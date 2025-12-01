@@ -1,11 +1,11 @@
 #!/bin/sh
 rm -f  \
    *-Ex.R *.html config.* confdefs.h tests/testthat/*.pdf \
-   src/*.o src/*.so src/symbols.rds \
+   src/*.o src/*.so src/*.gcda src/symbols.rds \
    inst/doc/*.blg inst/doc/*.bbl \
    vignettes/*.R vignettes/*.html \
-   vignettes/articles/*.R vignettes/articles/*.html \
+   vignettes/articles/*.R vignettes/articles/*.html
 
 rm -rf autom4te.cache benchmarks_files
+rm -f src/libmoocore/*.o src/libmoocore/*.gcda src/libmoocore/*/*.gcda
 find . -name '*.orig' -o -name '.Rhistory' -o -name '*.Rout' -print0 | xargs -0 rm -f
-rm -f src/libmoocore/*.o

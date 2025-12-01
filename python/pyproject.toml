@@ -192,6 +192,11 @@ faulthandler_timeout = 10
 doctest_optionflags = "NUMBER"
 addopts = [ "--import-mode=importlib", "--durations=5", "--durations-min=1.0" ]
 
+[tool.coverage.report]
+exclude_also = [
+  '# nocov',
+]
+
 [tool.mypy]
 python_version = "3.11"
 # Strictness (recommended for library code)

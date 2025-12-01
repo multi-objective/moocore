@@ -270,7 +270,7 @@ static inline void default_cmdline_handler(int opt)
           usage();
           exit(EXIT_SUCCESS);
       default:
-          unreachable();
+          unreachable(); // COVR_EXCL_LINE # nocov
     }
 }
 
