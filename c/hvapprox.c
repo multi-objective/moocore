@@ -434,7 +434,7 @@ int_of_power_of_sin_from_0_to_b(dimension_t m, double b)
           return 0.13994993409141898*b - cos_b*sin_b*(
               0.03125*POW(sin_b, 30) + 31/960.*POW(sin_b, 28) + 899/26880.*POW(sin_b, 26) + 8091/232960.*POW(sin_b, 24) + 13485/372736.*POW(sin_b, 22) + 310155/8200192.*POW(sin_b, 20) + 186093/4685824.*POW(sin_b, 18) + 392863/9371648.*POW(sin_b, 16) + 6678671/149946368.*POW(sin_b, 14) + 100180065/2099249152.*POW(sin_b, 12) + 33393355/645922816.*POW(sin_b, 10) + 6678671/117440512.*POW(sin_b, 8) + 60108039/939524096.*POW(sin_b, 6) + 0.07463996484875679*POW(sin_b, 4) + 0.093299956060945988*POW(sin_b, 2) + 0.13994993409141898);
       default:
-          unreachable();
+          unreachable();  // COVR_EXCL_LINE # nocov
     }
 #undef POW
 }
