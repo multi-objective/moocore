@@ -35,7 +35,7 @@ class ReadDatasetsError(Exception):
 
     Parameters
     ----------
-    error_code : int
+    error_code:
         Error code returned by ``read_datasets()`` C function.
 
     """
