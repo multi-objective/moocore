@@ -52,6 +52,7 @@ color
 colormap
 colors
 doi
+favor
 hyperrectangle
 hyperrectangles
 hypervolume
@@ -60,5 +61,6 @@ libre
 matrixStats
 metaheuristic
 nondominated
+orthant
 orthotopes
 polytope
