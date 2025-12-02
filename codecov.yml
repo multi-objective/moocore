@@ -17,8 +17,14 @@ component_management:
     statuses:
       - type: project # in this case every component that doesn't have a status defined will have a project type one
         target: auto
+        threshold: 1%
         branches:
           - "!main"
+      - type: patch
+        target: auto
+        threshold: 1%
+        informational: true
+
   individual_components:
     - component_id: tests  # this is an identifier that should not be changed
       name: tests  # this is a display name, and can be changed freely
@@ -30,6 +36,9 @@ component_management:
           target: 100%
           informational: false
         - type: patch
+          target: auto
+          threshold: 1%
+          informational: true
 
     - component_id: src
       name: src
@@ -41,3 +50,6 @@ component_management:
           threshold: 1%
           informational: true
         - type: patch
+          target: auto
+          threshold: 1%
+          informational: true
