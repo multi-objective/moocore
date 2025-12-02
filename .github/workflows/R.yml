@@ -162,11 +162,13 @@ jobs:
         env:
           NOT_CRAN: false
         run: |
+          options(covr.gcov_additional_paths="c", covr.filter_non_package=FALSE)
           coverage <- withr::with_makevars(c(MOOCORE_DEBUG="1", LTO_OPT=""),
-                        covr::package_coverage(type="all", quiet=FALSE, clean = FALSE,
-                           commentDonttest = FALSE, commentDontrun = FALSE, flags="R",
-                           install_path = file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package"))
-          )
+            covr::package_coverage(type="all", quiet=FALSE, clean=FALSE,
+              commentDonttest = FALSE, commentDontrun = FALSE, flags="R",
+              relative_path=normalizePath(file.path(getwd(), "..")),
+              install_path = file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package")
+            ))
           print(coverage)
           covr::to_cobertura(coverage)
           list.files("../", pattern="*.xml", recursive=TRUE)
