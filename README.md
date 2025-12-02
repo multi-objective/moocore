@@ -58,6 +58,16 @@ The following projects currently use `moocore`:
  - [`seqme`](https://github.com/szczurek-lab/seqme)
 
 
+Citing `moocore`
+----------------
+
+There is no publication associated with `moocore` yet.
+
+If you are using specific functions in your research, for example, to [compute the hypervolume](https://multi-objective.github.io/moocore/python/reference/generated/moocore.hypervolume.html), you should cite the papers that proposed the algorithms implemented in `moocore`.  They are referenced in the documentation of each function.
+
+If you want to explicitly acknowledge `moocore`, please add a link to [this Github repository](https://github.com/multi-objective/moocore).
+
+
 [c-build-badge]: https://github.com/multi-objective/moocore/actions/workflows/C.yml/badge.svg?event=push
 [c-build-link]: https://github.com/multi-objective/moocore/actions/workflows/C.yml
 [c-moocore-github]: https://github.com/multi-objective/moocore/tree/main/c#readme
