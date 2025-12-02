@@ -73,7 +73,6 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     head->vol = head->area + d_stop * (n+1);
     head->x = NULL; // head contains no data
     head->ignore = 0;  // should never get used
-    head->x_aux = malloc(3*(n+1) * sizeof(double));
 
     // Reserve space for the sentinels.
     dlnode_t * list4d = new_cdllist(0, ref);
@@ -94,7 +93,6 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
             head[i].r_prev = head->r_prev + i * (d_stop - 1);
             head[i].area = head->area + i * d_stop;
             head[i].vol = head->vol + i * d_stop;
-            head[i].x_aux = head->x_aux + i * 3;
             i++;
         }
     }
@@ -137,11 +135,9 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         }
     }
     // Reset x to point to the first objective.
-    size_t l;
     for (i = 0; i < n; i++){
         scratch[i]->x -= STOP_DIMENSION;
-        for(l = 0; l < 3; l++)
-            scratch[i]->x_aux[l] = scratch[i]->x[l];
+        scratch[i]->is_bounded = false;
     }
 
     free(scratch);
@@ -158,7 +154,6 @@ finish:
 static void fpli_free_cdllist(dlnode_t * head)
 {
     assert(head->next[0] == head->prev[0]);
-    free(head->x_aux);
     free_cdllist(head->next[0]); // free 4D sentinels
     free(head->r_next);
     free(head->area);
@@ -235,7 +230,121 @@ fpli_hv4d(dlnode_t * restrict list, size_t c _attr_maybe_unused)
     return hv;
 }
 
-_attr_optimize_finite_and_associative_math // Required for auto-vectorization: https://gcc.gnu.org/PR122687
+static inline void
+restore_points(dlnode_t * list, dlnode_t * last)
+{
+    dlnode_t * newp = (list+1)->next[1];
+    while (newp != last) {
+        // MANUEL: We only modify the points that are not ignored.
+        if (newp->ignore < 3)
+            newp->is_bounded = false;
+        newp = newp->next[1];
+    }
+}
+
+static inline void
+update_bound_3d(dlnode_t * newp, const double * bound)
+{
+    for (int i = 0; i < 3; i++) {
+        if (newp->x[i] < bound[i]) {
+            newp->is_bounded = true;
+            for (int k = 0; k < i; k++)
+                newp->bound[k] = newp->x[k];
+            for (; i < 3; i++)
+                newp->bound[i] = MAX(newp->x[i], bound[i]);
+            DEBUG1(newp->bound[3] = newp->x[3]);
+            return;
+        }
+    }
+}
+
+/* Compute the hv contribution of "the_point" in d=4 by iteratively computing the one contribution problem in d=3. */
+static inline double
+onec4dplusU(dlnode_t * list, dlnode_t * the_point)
+{
+    // MANUEL: It would be better to move this check to hv.c to avoid calling reset_sentinels_3d. You can add an assert here.
+    if (the_point->ignore >= 3) {
+        return 0;
+    }
+
+    assert(list+2 == list->prev[0]);
+    assert(list+2 == list->prev[1]);
+    assert(list+1 == list->next[1]);
+
+    dlnode_t * newp = (list+1)->next[1];
+    const dlnode_t * last = list+2;
+
+    the_point->closest[0] = list+1;
+    the_point->closest[1] = list;
+
+    const double * the_point_x = the_point->x;
+    // MANUEL: I added this because I think we cannot (and should not) call this function with an empty list.
+    assert(newp != last);
+    // PART 1: Setup 3D base (TODO: improve)
+    while (newp != last && newp->x[3] <= the_point_x[3]) {
+        // MANUEL: When can newp be equal to the_point?
+        if (newp != the_point && newp->ignore < 3){
+
+            if (weakly_dominates(newp->x, the_point_x, 3)) {
+                the_point->ignore = 3;
+                restore_points(list, newp);
+                return 0;
+            }
+
+            // MANUEL: This modifies ->x[], why?
+            update_bound_3d(newp, the_point_x);
+
+            if (restart_base_setup_z_and_closest(list, newp)) {
+                add_to_z(newp);
+                update_links(list, newp);
+            }
+        }
+        newp = newp->next[1];
+    }
+
+    restart_base_setup_z_and_closest(list, the_point);
+    double volume = one_contribution_3d(the_point);
+    assert(volume > 0);
+    double height = newp->x[3] - the_point_x[3];
+    // It cannot be zero because we exited the loop above.
+    assert(height > 0);
+    double hv = volume * height;
+
+    // PART 2: Update the 3D contribution
+    while (newp != last &&
+            (newp->x[0] > the_point_x[0] || newp->x[1] > the_point_x[1] || newp->x[2] > the_point_x[2])) {
+
+        // MANUEL: I think newp cannot be equal to the_point here. If it was
+        // equal, we would have exited the loop.
+        assert(newp != the_point); //
+        if (newp != the_point && newp->ignore < 3) {
+            // MANUEL: This modifies ->x[], why?
+            update_bound_3d(newp, the_point_x);
+
+            if (restart_base_setup_z_and_closest(list, newp)) {
+
+                // newp was not dominated by something else.
+                double newp_v = one_contribution_3d(newp);
+                assert(newp_v > 0);
+                volume -= newp_v;
+
+                add_to_z(newp);
+                update_links(list, newp);
+            }
+        }
+        // FIXME: It newp was dominated, can we accumulate the height and update
+        // hv later?
+        height = newp->next[1]->x[3] - newp->x[3];
+        assert(height >= 0);
+        hv += volume * height;
+
+        newp = newp->next[1];
+    }
+
+    restore_points(list, newp);
+    return hv;
+}
+
 static double
 fpli_onec4d(dlnode_t * restrict list, size_t c _attr_maybe_unused, dlnode_t *the_point)
 {
@@ -248,6 +357,7 @@ fpli_onec4d(dlnode_t * restrict list, size_t c _attr_maybe_unused, dlnode_t *the
     return contrib;
 }
 
+_attr_optimize_finite_and_associative_math // Required for auto-vectorization: https://gcc.gnu.org/PR122687
 static double
 one_point_hv(const double * restrict x, const double * restrict ref, dimension_t d)
 {

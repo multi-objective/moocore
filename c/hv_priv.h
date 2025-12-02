@@ -15,7 +15,7 @@
 */
 
 typedef struct dlnode {
-    /*const*/ double * restrict x;  // point coordinates (objective vector).
+    const double * restrict x;  // point coordinates (objective vector).
 #ifdef HV_RECURSIVE
     // In the recursive algorithm, the number of dimensions is not known in
     // advance, so next and prev cannot be fixed-size arrays.
@@ -23,6 +23,8 @@ typedef struct dlnode {
     struct dlnode ** r_prev;       // previous-node vector for dimensions 5 and above.
     double * restrict area;      // partial area for dimensions 4 and above.
     double * restrict vol;       // partial volume for dimensions 4 and above.
+    double bound[DEBUG >= 1 ? 4 : 3];
+    bool is_bounded;
 #endif
     /* With HV_DIMENSION==3, we have 'struct dlnode * next[1]' instead of
        'struct dlnode * next'.  GCC -O3 is able to remove the extra
@@ -32,20 +34,25 @@ typedef struct dlnode {
     struct dlnode * prev[HV_DIMENSION - 2]; //keeps the points sorted according to coordinates 2 and 3 (except the sentinel 3)
 
     struct dlnode * cnext[2]; //current next
-    double * x_aux;  // point coordinates (objective vector).
 #if HV_DIMENSION == 4 || defined(HVC_ONLY)
     struct dlnode * closest[2]; // closest[0] == cx, closest[1] == cy
     // FIXME: unused
     //unsigned int ndomr;    // number of dominators.
 #endif
 #ifdef HVC_ONLY
-    double area, volume;
+    double area, volume; // FIXME: Use these variables also for HV_RECURSIVE.
     double last_slice_z; // FIXME: Is this really needed?
     struct dlnode * head[2]; // lowest (x, y)
 #endif
     // In hvc this is used as a boolean (duplicated or dominated)
     dimension_t ignore;          // [0, 255]
 } dlnode_t;
+
+#ifdef HV_RECURSIVE
+#define x_bound(NODE) ((NODE->is_bounded) ? (NODE->bound) : (NODE->x))
+#else
+#define x_bound(NODE) (NODE->x)
+#endif
 
 // ------------ Update data structure -----------------------------------------
 
@@ -148,6 +155,9 @@ init_sentinel(dlnode_t * restrict s, const double * restrict x)
     s->x = x;
     // Initialize it when debugging so it will crash if uninitialized.
     DEBUG1(s->cnext[0] = s->cnext[1] = NULL);
+#ifdef HV_RECURSIVE
+    s->is_bounded = false;
+#endif
 #if HV_DIMENSION == 4
     //s->ndomr = 0;
 #endif
@@ -300,20 +310,24 @@ compute_area_simple(const double * px, const dlnode_t * q, const dlnode_t * u, u
 {
     ASSUME(i == 0 || i == 1);
     const uint_fast8_t j = 1 - i;
-    double area = (q->x[j] - px[j]) * (u->x[i] - px[i]);
+    const double * qx = x_bound(q);
+    const double * ux = x_bound(u);
+    double area = (qx[j] - px[j]) * (ux[i] - px[i]);
 #if HV_DIMENSION == 3 && !defined(HVC_ONLY)
     assert(area >= 0); // == 0 when px[i] == u->x[i].
 #endif
-    while (px[j] < u->x[j]) {
+    while (px[j] < ux[j]) {
         q = u;
+        qx = ux;
         u = u->cnext[i];
+        ux = x_bound(u);
         // With repeated coordinates, it can be zero.
-        assert(u->x[i] - q->x[i] >= 0);
+        assert(ux[i] - qx[i] >= 0);
         // If u and q have a repeated coordinate, then one weakly dominates the
         // other in the (x,y)-plane. Such dominated point should not be visited.
-        assert(u->x[i] != q->x[i]);
-        assert(u->x[j] != q->x[j]);
-        area += (q->x[j] - px[j]) * (u->x[i] - q->x[i]);
+        assert(ux[i] != qx[i]);
+        assert(ux[j] != qx[j]);
+        area += (qx[j] - px[j]) * (ux[i] - qx[i]);
     }
     return area;
 }

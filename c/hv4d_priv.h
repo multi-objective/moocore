@@ -67,11 +67,11 @@ static void
 update_links(dlnode_t * restrict list, dlnode_t * restrict newp)
 {
     assert(list+2 == list->prev[0]);
-    const double newx[] = { newp->x[0], newp->x[1], newp->x[2] };
+    const double * newx = x_bound(newp);
     dlnode_t * p = newp->next[0];
-    const dlnode_t * stop = list+2;
+    const dlnode_t * const stop = list+2;
     while (p != stop) {
-        const double * px = p->x;
+        const double * px = x_bound(p);
         // px dominates newx (but not equal)
         if (px[0] <= newx[0] && px[1] <= newx[1] && (px[0] < newx[0] || px[1] < newx[1]))
             return;
@@ -82,10 +82,10 @@ update_links(dlnode_t * restrict list, dlnode_t * restrict newp)
                 assert(weakly_dominates(newx, px, 3));
                 //p->ndomr++;
                 remove_from_z(p);
-            } else if (newx[0] < px[0] && lex_cmp_3d_102(newx, p->closest[1]->x)) { // newx[1] > px[1]
+            } else if (newx[0] < px[0] && lex_cmp_3d_102(newx, x_bound(p->closest[1]))) { // newx[1] > px[1]
                 p->closest[1] = newp;
             }
-        } else if (newx[1] < px[1] && lex_cmp_3d_012(newx, p->closest[0]->x)) { //newx[0] > px[0]
+        } else if (newx[1] < px[1] && lex_cmp_3d_012(newx, x_bound(p->closest[0]))) { //newx[0] > px[0]
             p->closest[0] = newp;
         }
         p = p->next[0];
@@ -101,17 +101,17 @@ static bool
 restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict newp)
 {
     // FIXME: This is the most expensive function in the HV4D+ algorithm.
-    const double newx[] = { newp->x[0], newp->x[1], newp->x[2], newp->x[3] };
+    const double newx[] = { x_bound(newp)[0], x_bound(newp)[1], x_bound(newp)[2], newp->x[3] };
     assert(list+1 == list->next[0]);
     dlnode_t * closest0 = list+1;
     dlnode_t * closest1 = list;
-    const double * closest0x = closest0->x;
-    const double * closest1x = closest1->x;
+    double closest0x[] = { closest0->x[0], closest0->x[1] };
+    double closest1x[] = { closest1->x[0], closest1->x[1] };
     dlnode_t * p = (list+1)->next[0];
     assert(p == list->next[0]->next[0]);
     restart_list_y(list);
     while (true) {
-        const double * restrict px =  p->x;
+        const double * px = x_bound(p);
         // Help auto-vectorization.
         bool p_lt_new_0 = px[0] < newx[0];
         bool p_lt_new_1 = px[1] < newx[1];
@@ -132,6 +132,7 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
 
         //if (!lexicographic_less_3d(px, newx)) { // Slower
         if (!(p_lt_new_2 || (p_eq_new_2 && (p_lt_new_1 || (p_eq_new_1 && p_leq_new_0))))) {
+            assert(!lexicographic_less_3d(px, newx));
             newp->closest[0] = closest0;
             newp->closest[1] = closest1;
             newp->prev[0] = p->prev[0];
@@ -149,10 +150,12 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
         ASSUME(!p_leq_new_0 || !p_leq_new_1);
         if (p_lt_new_1 && (px[0] < closest0x[0] || (px[0] == closest0x[0] && px[1] < closest0x[1]))) {
             closest0 = p;
-            closest0x = px;
+            closest0x[0] = px[0];
+            closest0x[1] = px[1];
         } else if (p_lt_new_0 && (px[1] < closest1x[1] || (px[1] == closest1x[1] && px[0] < closest1x[0]))) {
             closest1 = p;
-            closest1x = px;
+            closest1x[0] = px[0];
+            closest1x[1] = px[1];
         }
         p = p->next[0];
     }
@@ -164,27 +167,27 @@ static double
 one_contribution_3d(dlnode_t * restrict newp)
 {
     set_cnext_to_closest(newp);
-    const double * newx = newp->x;
+    const double * newx = x_bound(newp);
     // if newx[0] == newp->cnext[0]->x[0], the first area is zero
     double area = compute_area_no_inners(newx, newp->cnext[0], 1);
     double volume = 0;
     double lastz = newx[2];
     dlnode_t * p = newp->next[0];
-    assert(!weakly_dominates(p->x, newx, 4));
+    assert(!weakly_dominates(x_bound(p), newx, 4));
     while (true) {
-        const double * px = p->x;
+        const double * px = x_bound(p);
         volume += area * (px[2] - lastz);
 
         if (px[0] <= newx[0] && px[1] <= newx[1])
             return volume;
 
         ASSUME(px[0] > newx[0] || px[1] > newx[1]);
-        assert(!weakly_dominates(px, p->next[0]->x, 4));
+        assert(!weakly_dominates(px, x_bound(p->next[0]), 4));
 
         set_cnext_to_closest(p);
 
         if (px[0] < newx[0])  {
-            if (px[1] <= newp->cnext[1]->x[1]) {
+            if (px[1] <= x_bound(newp->cnext[1])[1]) {
                 const double tmpx[] = { newx[0], px[1] };
                 // if px[1] == newp->cnext[1]->x[1] then area starts at 0.
                 area -= compute_area_no_inners(tmpx, newp->cnext[1], 0);
@@ -193,7 +196,7 @@ one_contribution_3d(dlnode_t * restrict newp)
                 newp->cnext[1] = p;
             }
         } else if (px[1] < newx[1]) {
-            if (px[0] <= newp->cnext[0]->x[0]) {
+            if (px[0] <= x_bound(newp->cnext[0])[0]) {
                 const double tmpx[] = { px[0], newx[1] };
                 // if px[0] == newp->cnext[0]->x[0] then area starts at 0.
                 area -= compute_area_no_inners(tmpx, newp->cnext[0], 1);
@@ -242,113 +245,6 @@ hv4dplusU(dlnode_t * list)
         hv += volume * height;
         newp = newp->next[1];
     }
-    return hv;
-}
-
-static inline void
-restore_points(dlnode_t * list, dlnode_t * last)
-{
-    dlnode_t * newp = (list+1)->next[1];
-    while (newp != last) {
-        // MANUEL: We only modify the points that are not ignored.
-        if (newp->ignore < 3) {
-            for (int i = 0; i < 3; i++) {
-                newp->x[i] = newp->x_aux[i];
-            }
-        }
-        newp = newp->next[1];
-    }
-}
-
-/* Compute the hv contribution of "the_point" in d=4 by iteratively computing the one contribution problem in d=3. */
-static inline double
-onec4dplusU(dlnode_t * list, dlnode_t * the_point)
-{
-    // MANUEL: It would be better to move this check to hv.c to avoid calling reset_sentinels_3d. You can add an assert here.
-    if (the_point->ignore >= 3) {
-        return 0;
-    }
-
-    assert(list+2 == list->prev[0]);
-    assert(list+2 == list->prev[1]);
-    assert(list+1 == list->next[1]);
-
-    dlnode_t * newp = (list+1)->next[1];
-    const dlnode_t * last = list+2;
-
-    the_point->closest[0] = list+1;
-    the_point->closest[1] = list;
-
-    const double * the_point_x = the_point->x;
-    // MANUEL: I added this because I think we cannot (and should not) call this function with an empty list.
-    assert(newp != last);
-    // PART 1: Setup 3D base (TODO: improve)
-    while (newp != last && newp->x[3] <= the_point_x[3]) {
-        // MANUEL: When can newp be equal to the_point?
-        if (newp != the_point && newp->ignore < 3){
-
-            if (weakly_dominates(newp->x, the_point_x, 3)) {
-                the_point->ignore = 3;
-                restore_points(list, newp);
-                return 0;
-            }
-
-            // FIXME: This modifies ->x[], why?
-            for (int i = 0; i < 3; i++){
-                // MANUEL: so basically: if (newp->x[i] < the_point_x[i]) newp->x[i] = the_point_x[i];
-                newp->x[i] = (newp->x[i] >= the_point_x[i]) ? newp->x[i] : the_point_x[i];
-            }
-
-            if (restart_base_setup_z_and_closest(list, newp)) {
-                add_to_z(newp);
-                update_links(list, newp);
-            }
-        }
-        newp = newp->next[1];
-    }
-
-    restart_base_setup_z_and_closest(list, the_point);
-    double volume = one_contribution_3d(the_point);
-    assert(volume > 0);
-    double height = newp->x[3] - the_point_x[3];
-    // It cannot be zero because we exited the loop above.
-    assert(height > 0);
-    double hv = volume * height;
-
-    // PART 2: Update the 3D contribution
-    while (newp != last &&
-            (newp->x[0] > the_point_x[0] || newp->x[1] > the_point_x[1] || newp->x[2] > the_point_x[2])) {
-
-        // MANUEL: I think newp cannot be equal to the_point here. If it was
-        // equal, we would have exited the loop.
-        assert(newp != the_point); //
-        if (newp != the_point && newp->ignore < 3) {
-            // FIXME: This modifies ->x[], why?
-            for(int i = 0; i < 3; i++){
-                // MANUEL: so basically: if (newp->x[i] < the_point_x[i]) newp->x[i] = the_point_x[i];
-                newp->x[i] = (newp->x[i] >= the_point_x[i]) ? newp->x[i] : the_point_x[i];
-            }
-            if (restart_base_setup_z_and_closest(list, newp)) {
-
-                // newp was not dominated by something else.
-                double newp_v = one_contribution_3d(newp);
-                assert(newp_v > 0);
-                volume -= newp_v;
-
-                add_to_z(newp);
-                update_links(list, newp);
-            }
-        }
-        // FIXME: It newp was dominated, can we accumulate the height and update
-        // hv later?
-        height = newp->next[1]->x[3] - newp->x[3];
-        assert(height >= 0);
-        hv += volume * height;
-
-        newp = newp->next[1];
-    }
-
-    restore_points(list, newp);
     return hv;
 }
 
