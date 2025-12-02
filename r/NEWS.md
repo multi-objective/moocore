@@ -2,6 +2,7 @@
 
  * `pareto_rank()` is faster in 3D.
  * HV3D+ is slightly faster with repeated coordinates (#41).
+ * `hypervolume()` is significantly faster for more than four dimensions (Andreia P. Guerreiro).
 
 # moocore 0.1.10
 
