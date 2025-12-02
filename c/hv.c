@@ -232,11 +232,13 @@ fpli_hv4d(dlnode_t * restrict list, size_t c _attr_maybe_unused)
 static inline void
 restore_points(dlnode_t * list, dlnode_t * last)
 {
+    // MANUEL: How probable is that we do not need to restore anything?
     dlnode_t * newp = (list+1)->next[1];
     while (newp != last) {
-        // MANUEL: We only modify the points that are not ignored.
-        if (newp->ignore < 3)
-            newp->is_bounded = false;
+        // is_bounded => ignore < 3W, but checking newp->ignore is more
+        // expensive than just setting is_bounded unconditionally.
+        assert(!newp->is_bounded || newp->ignore < 3);
+        newp->is_bounded = false;
         newp = newp->next[1];
     }
 }
