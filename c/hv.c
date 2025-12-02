@@ -88,6 +88,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
            that are needed to calculate the hypervolume. */
         if (likely(strongly_dominates(data + j * d, ref, d))) {
             head[i].x = data + (j+1) * d; // this will be fixed a few lines below...
+            head[i].is_bounded = false;
             head[i].ignore = 0;
             head[i].r_next = head->r_next + i * (d_stop - 1);
             head[i].r_prev = head->r_prev + i * (d_stop - 1);
@@ -135,10 +136,8 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         }
     }
     // Reset x to point to the first objective.
-    for (i = 0; i < n; i++){
+    for (i = 0; i < n; i++)
         scratch[i]->x -= STOP_DIMENSION;
-        scratch[i]->is_bounded = false;
-    }
 
     free(scratch);
 
@@ -262,10 +261,7 @@ update_bound_3d(dlnode_t * newp, const double * bound)
 static inline double
 onec4dplusU(dlnode_t * list, dlnode_t * the_point)
 {
-    // MANUEL: It would be better to move this check to hv.c to avoid calling reset_sentinels_3d. You can add an assert here.
-    if (the_point->ignore >= 3) {
-        return 0;
-    }
+    assert(the_point->ignore < 3);
 
     assert(list+2 == list->prev[0]);
     assert(list+2 == list->prev[1]);
@@ -314,10 +310,9 @@ onec4dplusU(dlnode_t * list, dlnode_t * the_point)
     while (newp != last &&
             (newp->x[0] > the_point_x[0] || newp->x[1] > the_point_x[1] || newp->x[2] > the_point_x[2])) {
 
-        // MANUEL: I think newp cannot be equal to the_point here. If it was
-        // equal, we would have exited the loop.
-        assert(newp != the_point); //
-        if (newp != the_point && newp->ignore < 3) {
+        // newp cannot be equal to the_point here. Otherwise, we would have exited the loop.
+        assert(newp != the_point);
+        if (newp->ignore < 3) {
             // MANUEL: This modifies ->x[], why?
             update_bound_3d(newp, the_point_x);
 
@@ -350,6 +345,9 @@ fpli_onec4d(dlnode_t * restrict list, size_t c _attr_maybe_unused, dlnode_t *the
 {
     ASSUME(c > 1);
     assert(list->next[0] == list->prev[0]);
+    if (the_point->ignore >= 3)
+        return 0;
+
     dlnode_t * restrict list4d = list->next[0];
     // hv4dplusU() will change the sentinels for 3D, so we need to reset them.
     reset_sentinels_3d(list4d);

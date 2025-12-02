@@ -111,7 +111,7 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
     assert(p == list->next[0]->next[0]);
     restart_list_y(list);
     while (true) {
-        const double * px = x_bound(p);
+        const double * restrict px = x_bound(p);
         // Help auto-vectorization.
         bool p_lt_new_0 = px[0] < newx[0];
         bool p_lt_new_1 = px[1] < newx[1];
