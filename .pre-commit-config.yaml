@@ -12,6 +12,7 @@ repos:
       - id: parsable-R
       - id: no-browser-statement
       - id: no-print-statement
+        exclude: '(do\.R)'
       - id: no-debug-statement
       - id: deps-in-desc
         args: [--root=./r/]
