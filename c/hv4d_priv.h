@@ -219,7 +219,7 @@ one_contribution_3d(dlnode_t * restrict newp)
 
 /* Compute the hypervolume indicator in d=4 by iteratively computing the one
    contribution problem in d=3. */
-static double
+static inline double
 hv4dplusU(dlnode_t * list)
 {
     assert(list+2 == list->prev[0]);

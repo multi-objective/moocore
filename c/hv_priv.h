@@ -335,7 +335,7 @@ compute_area_simple(const double * px, const dlnode_t * q, const dlnode_t * u, u
 /* Same as compute_area_simple() but for cases when p does not have any inner
    delimiters and u=q->cnext[i].  */
 static inline double
-compute_area_no_inners(const double * px, const dlnode_t * q, uint_fast8_t i)
+compute_area_no_inners(const double * restrict px, const dlnode_t * restrict q, uint_fast8_t i)
 {
     ASSUME(i == 0 || i == 1);
     return compute_area_simple(px, q, q->cnext[i], i);
