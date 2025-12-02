@@ -189,10 +189,6 @@ jobs:
   pkgdown:
     name: pkgdown ${{ matrix.os }} (${{ matrix.r }})
     needs: R-CMD-check
-    if: contains('
-        refs/heads/master
-        refs/heads/main
-      ', github.ref) && github.event_name == 'push'
     permissions:
       contents: write # github-pages-deploy-action
     concurrency: # Recommended if you intend to make multiple deployments in quick succession.
@@ -230,7 +226,7 @@ jobs:
         working-directory: r
 
       - name: Deploy 🚀
-        if: success() && runner.os == 'Linux' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: r/docs # The folder the action should deploy.
