@@ -31,11 +31,11 @@ def test_read_datasets_data(test_datapath):
     tests = [
         ("input1.dat", "dat1_read_datasets.txt", (100, 3)),
         (
-            "spherical-250-10-3d.txt",
+            "spherical-250-10-3d.txt.xz",
             "spherical_read_datasets.txt.xz",
             (2500, 4),
         ),
-        ("uniform-250-10-3d.txt", "uniform_read_datasets.txt.xz", (2500, 4)),
+        ("uniform-250-10-3d.txt.xz", "uniform_read_datasets.txt.xz", (2500, 4)),
         ("wrots_l10w100_dat.xz", "wrots_l10_read_datasets.txt", (3262, 3)),
         ("wrots_l100w10_dat.xz", "wrots_l100_read_datasets.txt", (888, 3)),
         ("ALG_1_dat.xz", "ALG_1_dat_read_datasets.txt.xz", (23260, 3)),
@@ -294,8 +294,8 @@ def test_eaf(test_datapath):
     # FIXME: ALG_1_dat is creating slightly different percentile values than expected in its EAF output
     tests = [
         ("input1.dat", "dat1_eaf.txt"),
-        ("spherical-250-10-3d.txt", "spherical_eaf.txt.xz"),
-        ("uniform-250-10-3d.txt", "uniform_eaf.txt.xz"),
+        ("spherical-250-10-3d.txt.xz", "spherical_eaf.txt.xz"),
+        ("uniform-250-10-3d.txt.xz", "uniform_eaf.txt.xz"),
         ("wrots_l10w100_dat.xz", "wrots_l10_eaf.txt.xz"),
         ("wrots_l100w10_dat.xz", "wrots_l100_eaf.txt.xz"),
         # ("ALG_1_dat.xz",          # "ALG_1_dat_get_eaf.txt.xz"),

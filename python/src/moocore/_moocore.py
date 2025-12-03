@@ -1861,7 +1861,7 @@ def vorob_t(data: ArrayLike, /, sets: ArrayLike, *, ref: ArrayLike) -> dict:
 
     Examples
     --------
-    >>> CPFs = moocore.get_dataset("CPFs.txt")
+    >>> CPFs = moocore.get_dataset("CPFs.txt.xz")
     >>> res = moocore.vorob_t(CPFs[:, :-1], sets=CPFs[:, -1], ref=(2, 200))
     >>> res["threshold"]
     44.140625
@@ -1929,7 +1929,7 @@ def vorob_dev(
 
     Examples
     --------
-    >>> CPFs = moocore.get_dataset("CPFs.txt")
+    >>> CPFs = moocore.get_dataset("CPFs.txt.xz")
     >>> vd = moocore.vorob_dev(CPFs[:, :-1], sets=CPFs[:, -1], ref=(2, 200))
     >>> vd
     3017.12989402326

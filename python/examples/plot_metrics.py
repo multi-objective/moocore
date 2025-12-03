@@ -15,8 +15,8 @@ import moocore
 # First, read the datasets.
 #
 
-spherical = moocore.get_dataset("spherical-250-10-3d.txt")
-uniform = moocore.get_dataset("uniform-250-10-3d.txt")
+spherical = moocore.get_dataset("spherical-250-10-3d.txt.xz")
+uniform = moocore.get_dataset("uniform-250-10-3d.txt.xz")
 
 spherical_objs = spherical[:, :-1]
 spherical_sets = spherical[:, -1]

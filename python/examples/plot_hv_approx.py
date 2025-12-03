@@ -27,7 +27,7 @@ import moocore
 # First calculate the exact hypervolume.
 
 ref = 2.1
-x = moocore.get_dataset("CPFs.txt")[:, :-1]
+x = moocore.get_dataset("CPFs.txt.xz")[:, :-1]
 x = moocore.filter_dominated(x)
 x = moocore.normalise(x, to_range=[1, 2])
 true_hv = moocore.hypervolume(x, ref=ref)
