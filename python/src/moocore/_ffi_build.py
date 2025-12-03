@@ -84,7 +84,7 @@ is_x86_64 = target_platform in ("i686", "x86", "x86_64", "AMD64")
 # Compiler flags.
 MSVC_CFLAGS = ["/GL", "/O2", "/GS-", "/wd4996", "/DMOOCORE_SHARED_LIB"]
 MSVC_LDFLAGS = ["/LTCG"]
-GCC_CFLAGS = ["-O3", "-flto"]
+GCC_CFLAGS = ["-O3", "-flto", "-fvisibility=hidden"]
 if is_x86_64:
     # Compile for sufficiently old x86-64 architecture.
     MSVC_CFLAGS += ["/arch:AVX"]
