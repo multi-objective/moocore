@@ -4,6 +4,7 @@
 
  * `pareto_rank()` is now O(k * n log n) in 3D, which is faster than the naive O(n^3).
  * HV3D+ is slightly faster with repeated coordinates (#41).
+ * `fpli_hv()` is significantly faster for more than four dimensions (Andreia P. Guerreiro).
 
 ## 0.17.0
 

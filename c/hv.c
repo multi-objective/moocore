@@ -88,6 +88,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
            that are needed to calculate the hypervolume. */
         if (likely(strongly_dominates(data + j * d, ref, d))) {
             head[i].x = data + (j+1) * d; // this will be fixed a few lines below...
+            head[i].is_bounded = false;
             head[i].ignore = 0;
             head[i].r_next = head->r_next + i * (d_stop - 1);
             head[i].r_prev = head->r_prev + i * (d_stop - 1);
@@ -172,6 +173,21 @@ update_bound(double * restrict bound, const double * restrict x, dimension_t dim
 }
 
 static void
+delete_4d(dlnode_t * restrict nodep)
+{
+    nodep->prev[1]->next[1] = nodep->next[1];
+    nodep->next[1]->prev[1] = nodep->prev[1];
+}
+
+static void
+reinsert_4d(dlnode_t * restrict nodep)
+{
+    nodep->prev[1]->next[1] = nodep;
+    nodep->next[1]->prev[1] = nodep;
+}
+
+
+static void
 delete_dom(dlnode_t * restrict nodep, dimension_t dim)
 {
     ASSUME(dim > STOP_DIMENSION);
@@ -181,9 +197,7 @@ delete_dom(dlnode_t * restrict nodep, dimension_t dim)
         nodep->r_prev[d]->r_next[d] = nodep->r_next[d];
         nodep->r_next[d]->r_prev[d] = nodep->r_prev[d];
     }
-    // Dimension 4.
-    nodep->prev[1]->next[1] = nodep->next[1];
-    nodep->next[1]->prev[1] = nodep->prev[1];
+    delete_4d(nodep);
 }
 
 static void
@@ -192,7 +206,6 @@ delete(dlnode_t * restrict nodep, dimension_t dim, double * restrict bound)
     delete_dom(nodep, dim);
     update_bound(bound, nodep->x, dim);
 }
-
 
 static void
 reinsert_nobound(dlnode_t * restrict nodep, dimension_t dim)
@@ -204,9 +217,7 @@ reinsert_nobound(dlnode_t * restrict nodep, dimension_t dim)
         nodep->r_prev[d]->r_next[d] = nodep;
         nodep->r_next[d]->r_prev[d] = nodep;
     }
-    // Dimension 4.
-    nodep->prev[1]->next[1] = nodep;
-    nodep->next[1]->prev[1] = nodep;
+    reinsert_4d(nodep);
 }
 
 static void
@@ -216,16 +227,136 @@ reinsert(dlnode_t * restrict nodep, dimension_t dim, double * restrict bound)
     update_bound(bound, nodep->x, dim);
 }
 
+static inline void
+restore_points(dlnode_t * list, const dlnode_t * last)
+{
+    // MANUEL: How probable is that we do not need to restore anything?
+    dlnode_t * newp = (list+1)->next[1];
+    while (newp != last) {
+        /* is_bounded => ignore < 3, but checking newp->ignore is more
+           expensive than just setting is_bounded unconditionally.  */
+        assert(!newp->is_bounded || newp->ignore < 3);
+        newp->is_bounded = false;
+        newp = newp->next[1];
+    }
+}
+
+static inline void
+update_bound_3d(dlnode_t * restrict newp, const double * restrict bound)
+{
+    for (int i = 0; i < 3; i++) {
+        if (newp->x[i] < bound[i]) {
+            newp->is_bounded = true;
+            for (int k = 0; k < i; k++)
+                newp->bound[k] = newp->x[k];
+            for (; i < 3; i++)
+                newp->bound[i] = MAX(newp->x[i], bound[i]);
+            DEBUG1(newp->bound[3] = newp->x[3]);
+            return;
+        }
+    }
+}
+
+/**
+   Compute the hv contribution of "the_point" in d=4 by iteratively computing
+   the one contribution problem in d=3.
+*/
+static inline double
+onec4dplusU(dlnode_t * list, dlnode_t * the_point)
+{
+    assert(the_point->ignore < 3);
+
+    assert(list+2 == list->prev[0]);
+    assert(list+2 == list->prev[1]);
+    assert(list+1 == list->next[1]);
+
+    the_point->closest[0] = list+1;
+    the_point->closest[1] = list;
+    const double * the_point_x = the_point->x;
+    delete_4d(the_point);
+
+    dlnode_t * newp = (list+1)->next[1];
+    const dlnode_t * const last = list+2;
+    // MANUEL: I added this because I think we cannot (and should not) call this function with an empty list.
+    assert(newp != last);
+    // PART 1: Setup 3D base (TODO: improve)
+    while (newp != last && newp->x[3] <= the_point_x[3]) {
+        if (newp->ignore < 3) {
+            assert(newp != the_point);
+
+            if (weakly_dominates(newp->x, the_point_x, 3)) {
+                the_point->ignore = 3;
+                reinsert_4d(the_point);
+                restore_points(list, newp);
+                return 0;
+            }
+
+            update_bound_3d(newp, the_point_x);
+
+            if (restart_base_setup_z_and_closest(list, newp)) {
+                add_to_z(newp);
+                update_links(list, newp);
+            }
+        }
+        newp = newp->next[1];
+    }
+
+    reinsert_4d(the_point);
+    restart_base_setup_z_and_closest(list, the_point);
+    double volume = one_contribution_3d(the_point);
+    assert(volume > 0);
+    double height = newp->x[3] - the_point_x[3];
+    // It cannot be zero because we exited the loop above.
+    assert(height > 0);
+    double hv = volume * height;
+
+    // PART 2: Update the 3D contribution
+    while (newp != last &&
+            (newp->x[0] > the_point_x[0] || newp->x[1] > the_point_x[1] || newp->x[2] > the_point_x[2])) {
+
+        // newp cannot be equal to the_point here. Otherwise, we would have exited the loop.
+        assert(newp != the_point);
+        if (newp->ignore < 3) {
+            update_bound_3d(newp, the_point_x);
+
+            if (restart_base_setup_z_and_closest(list, newp)) {
+                // newp was not dominated by something else.
+                double newp_v = one_contribution_3d(newp);
+                assert(newp_v > 0);
+                volume -= newp_v;
+
+                add_to_z(newp);
+                update_links(list, newp);
+            }
+        }
+        // FIXME: It newp was dominated, can we accumulate the height and update
+        // hv later?
+        height = newp->next[1]->x[3] - newp->x[3];
+        assert(height >= 0);
+        hv += volume * height;
+
+        newp = newp->next[1];
+    }
+
+    restore_points(list, newp);
+    return hv;
+}
+
 static double
-fpli_hv4d(dlnode_t * restrict list, size_t c _attr_maybe_unused)
+fpli_onec4d(dlnode_t * restrict list, size_t c _attr_maybe_unused, dlnode_t *the_point)
 {
     ASSUME(c > 1);
     assert(list->next[0] == list->prev[0]);
+    // MANUEL: This never triggers!
+    assert(the_point->ignore < 3);
+    if (the_point->ignore >= 3)
+        return 0;
+
     dlnode_t * restrict list4d = list->next[0];
     // hv4dplusU() will change the sentinels for 3D, so we need to reset them.
     reset_sentinels_3d(list4d);
-    double hv = hv4dplusU(list4d);
-    return hv;
+    double contrib = onec4dplusU(list4d, the_point);
+    return contrib;
 }
 
 _attr_optimize_finite_and_associative_math // Required for auto-vectorization: https://gcc.gnu.org/PR122687
@@ -261,13 +392,6 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
              const double * restrict ref, double * restrict bound)
 {
     ASSUME(c > 1);
-    ASSUME(dim >= STOP_DIMENSION);
-    if (dim == STOP_DIMENSION) {
-        /*---------------------------------------
-          base case of dimension 4
-          --------------------------------------*/
-        return fpli_hv4d(list, c);
-    }
     ASSUME(dim > STOP_DIMENSION);
     /* ------------------------------------------------------
        General case for dimensions higher than 4D
@@ -335,7 +459,17 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
             DEBUG1(debug_counter[1]++);
             hypera = p1_prev->area[d_stop];
         } else {
-            hypera = hv_recursive(list, dim - 1, c, ref, bound);
+            if (dim - 1 == STOP_DIMENSION) {
+                /*---------------------------------------
+                  base case of dimension 4
+                  --------------------------------------*/
+                hypera = fpli_onec4d(list, c, p1);
+                // hypera only has the contribution of p1.
+                hypera += p1_prev->area[d_stop];
+            } else {
+                assert(dim - 1 > STOP_DIMENSION);
+                hypera = hv_recursive(list, dim - 1, c, ref, bound);
+            }
             /* At this point, p1 is the point with the highest value in
                dimension dim in the list: If it is dominated in dimension
                dim-1, then it is also dominated in dimension dim. */
@@ -396,19 +530,27 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
     // FIXME: This is never used?
     // bound[d_stop] = p0->x[dim];
     reinsert_nobound(p0, dim);
-    p1 = p0;
-    dlnode_t * p1_prev = p0->r_prev[d_stop - 1];
-    p0 = p0->r_next[d_stop - 1];
-    c++;
 
-    assert(c > 1);
     while (true) {
-        // FIXME: This is not true in the first iteration if c > 1 previously.
-        //assert(p0 == p1->r_prev[d_stop]);
-        assert(p1_prev == p1->r_prev[d_stop - 1]);
+        dlnode_t * p1_prev = p0->r_prev[d_stop - 1];
+        p1 = p0;
+        p0 = p0->r_next[d_stop - 1];
         p1->vol[d_stop] = hyperv;
         assert(p1->ignore == 0);
-        double hypera = hv_recursive(list, dim - 1, c, ref, bound);
+        c++;
+        double hypera;
+        if (dim - 1 == STOP_DIMENSION) {
+            /*---------------------------------------
+              base case of dimension 4
+              --------------------------------------*/
+            hypera = fpli_onec4d(list, c, p1);
+            // hypera only has the contribution of p1.
+            hypera += p1_prev->area[d_stop];
+        } else {
+            assert(dim - 1 > STOP_DIMENSION);
+            hypera = hv_recursive(list, dim - 1, c, ref, bound);
+        }
+
         /* At this point, p1 is the point with the highest value in
            dimension dim in the list: If it is dominated in dimension
            dim-1, then it is also dominated in dimension dim. */
@@ -434,10 +576,6 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
         // bound[d_stop] = p0->x[dim];
         // FIXME: Does updating the bound here matters?
         reinsert(p0, dim, bound);
-        p1 = p0;
-        p1_prev = p0->r_prev[d_stop - 1];
-        p0 = p0->r_next[d_stop - 1];
-        c++;
     }
 }
 
