@@ -173,6 +173,7 @@ Conversely, if the hypervolume of a set is larger than the hypervolume of
 another, then we know for sure than the latter set cannot be better than the
 former in terms of Pareto-optimality.
 
+Like most measures of unions of high-dimensional geometric objects, computing the hypervolume is #P-hard :cite:p:`BriFri2010approx`.
 
 
 .. _hv_approximation:

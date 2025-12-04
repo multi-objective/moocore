@@ -39,6 +39,9 @@
 #' another, then we know for sure than the latter set cannot be better than the
 #' former in terms of Pareto-optimality.
 #'
+#' Like most measures of unions of high-dimensional geometric objects,
+#' computing the hypervolume is #P-hard \citep{BriFri2010approx}.
+#'
 #' For 2D and 3D, the algorithms used
 #' \citep{FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec} have \eqn{O(n \log n)}
 #' complexity, where \eqn{n} is the number of input points. The 3D case uses
