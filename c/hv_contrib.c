@@ -12,7 +12,7 @@ hvc_1point_diff(const double * restrict points, dimension_t dim, size_t size,
                 const double * restrict ref, const double hv_total)
 {
     const double tolerance = sqrt(DBL_EPSILON);
-    double hvc = hv_total - fpli_hv(points, dim, (int) size, ref);
+    double hvc = hv_total - fpli_hv(points, size, dim, ref);
     // Handle very small values.
     hvc = (hvc >= tolerance) ? hvc : 0.0;
     return hvc;
@@ -307,7 +307,7 @@ hvc_check(double hv_total, const double * restrict hvc,
           bool ignore_dominated)
 {
     const double tolerance = sqrt(DBL_EPSILON);
-    double hv_total_true = fpli_hv(points, dim, (int) size, ref);
+    double hv_total_true = fpli_hv(points, size, dim, ref);
     if (fabs(hv_total_true - hv_total) > tolerance) {
         fatal_error("hv_total = %-22.15g != hv_total_true = %-22.15g !", hv_total, hv_total_true);
     }
@@ -353,7 +353,7 @@ hv_contributions(double * restrict hvc, double * restrict points, int d, int n,
     size_t size = (size_t) n;
     if (size == 0) return 0;
     if (size == 1) {
-        hvc[0] = fpli_hv(points, dim, (int) size, ref);
+        hvc[0] = fpli_hv(points, size, dim, ref);
         return hvc[0];
     }
     /* We cannot rely on the caller and the functions below will skip points
@@ -371,7 +371,7 @@ hv_contributions(double * restrict hvc, double * restrict points, int d, int n,
         DEBUG1(hvc_check(hv_total, hvc, points, dim, size, ref,
                          /* ignore_dominated = */true));
     } else {
-        hv_total = fpli_hv(points, dim, (int) size, ref);
+        hv_total = fpli_hv(points, size, dim, ref);
         if (ignore_dominated)
             hvc_1point_diffs_nondom(hvc, points, dim, size, ref, NULL, hv_total);
         else

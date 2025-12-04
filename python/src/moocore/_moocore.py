@@ -398,9 +398,11 @@ def epsilon_mult(
 
 
 def _hypervolume(data: ArrayLike, ref: ArrayLike) -> float:
-    data_p, npoints, nobj = np2d_to_double_array(data)
+    data_p, npoints, nobj = np2d_to_double_array(
+        data, ctype_shape=("size_t", "uint_fast8_t")
+    )
     ref_buf = ffi.from_buffer("double []", ref)
-    hv = lib.fpli_hv(data_p, nobj, npoints, ref_buf)
+    hv = lib.fpli_hv(data_p, npoints, nobj, ref_buf)
     if hv < 0:
         raise MemoryError("memory allocation failed")
     return hv

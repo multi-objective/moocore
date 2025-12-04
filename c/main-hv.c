@@ -186,7 +186,8 @@ hv_file (const char *filename, double *reference,
                                       cumsizes[n] - cumsize, reference,
                                       /*ignore_dominated=*/true);
         } else {
-            volume = fpli_hv(&data[nobj * cumsize], nobj, cumsizes[n] - cumsize, reference);
+            ASSUME(nobj < 256);
+            volume = fpli_hv(&data[nobj * cumsize], cumsizes[n] - cumsize, (dimension_t) nobj, reference);
         }
         if (volume == 0.0) {
             errprintf ("none of the points strictly dominates the reference point\n");

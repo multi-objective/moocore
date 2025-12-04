@@ -181,7 +181,8 @@ fread_int(FILE *instream, int *number)
 
 /* Convenience wrapper to read_double_data used by Python's moocore.  */
 int
-read_datasets(const char * filename, double ** restrict data_p, int * restrict ncols_p, int * restrict datasize_p)
+read_datasets(const char * filename, double ** restrict data_p,
+              int * restrict ncols_p, int * restrict datasize_p)
 {
     double * data = NULL;
     int * cumsizes = NULL;

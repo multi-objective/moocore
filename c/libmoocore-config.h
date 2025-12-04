@@ -27,4 +27,6 @@
 # define END_C_DECLS // empty
 #endif
 
+#include "config.h"
+
 #endif // ! LIBMOOCORE_CONFIG_H_

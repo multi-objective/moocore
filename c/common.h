@@ -119,9 +119,6 @@ moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
 #define STATIC_CAST(TYPE,OP) ((TYPE)(OP))
 #endif
 
-#include <stdint.h>
-typedef uint_fast8_t dimension_t;
-
 /* FIXME: Move this to a better place: matrix.h ? */
 static inline void
 matrix_transpose_double(double * restrict dst, const double * restrict src,

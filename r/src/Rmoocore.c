@@ -390,8 +390,8 @@ hypervolume_C(SEXP DATA, SEXP REFERENCE)
     /* We transpose the matrix before calling this function. */
     SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
     SEXP_2_DOUBLE_VECTOR(REFERENCE, reference, reference_len);
-    assert (nobj == reference_len);
-    double hv = fpli_hv(data, nobj, npoint, reference);
+    assert(nobj == reference_len);
+    double hv = fpli_hv(data, npoint, nobj, reference);
     return Rf_ScalarReal(hv);
 }
 

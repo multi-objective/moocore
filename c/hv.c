@@ -473,16 +473,14 @@ double hv4d(const double * restrict data, size_t n, const double * restrict ref)
    Returns 0 if no point strictly dominates ref.
    Returns -1 if out of memory.
 */
-double fpli_hv(const double * restrict data, int d, int npoints,
+double fpli_hv(const double * restrict data, size_t n, dimension_t dim,
                const double * restrict ref)
 {
-    size_t n = (size_t) npoints;
     if (unlikely(n == 0)) return 0.0;
-    ASSUME(d > 1 && d < 256);
-    if (d == 4) return hv4d(data, n, ref);
-    if (d == 3) return hv3d(data, n, ref);
-    if (d == 2) return hv2d(data, n, ref);
-    dimension_t dim = (dimension_t) d;
+    ASSUME(dim > 1);
+    if (dim == 4) return hv4d(data, n, ref);
+    if (dim == 3) return hv3d(data, n, ref);
+    if (dim == 2) return hv2d(data, n, ref);
     dlnode_t * list = fpli_setup_cdllist(data, dim, &n, ref);
     double hyperv;
     if (likely(n > 1)) {

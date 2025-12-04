@@ -20,4 +20,7 @@
 # undef NDEBUG // Enable assert()
 #endif
 
+#include <stdint.h>
+typedef uint_fast8_t dimension_t;
+
 #endif // _MOOCORE_CONFIG_H_

@@ -1,10 +1,13 @@
-/* From stdlib.h */
+// Must be consistent with the definition in moocore.
+typedef uint_fast8_t dimension_t;
+
+// From stdlib.h
 void free(void *);
 
-/* io.h */
-int read_datasets(const char * filename, double **data_p, int *ncols_p, int *datasize_p);
-/* hv.h */
-double fpli_hv(const double *data, int d, int n, const double *ref);
+// io.h
+int read_datasets(const char * filename, double ** restrict data_p, int * restrict ncols_p, int * restrict datasize_p);
+// hv.h
+double fpli_hv(const double * restrict data, size_t n, dimension_t d, const double * restrict ref);
 void hv_contributions(double *hvc, double *points, int dim, int size, const double * ref, bool ignore_dominated);
 
 double IGD (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);
