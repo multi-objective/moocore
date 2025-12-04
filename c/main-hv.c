@@ -182,8 +182,8 @@ hv_file (const char *filename, double *reference,
         double volume, time_elapsed;
         if (contributions_flag) {
             hvc = realloc(hvc, (cumsizes[n] - cumsize) * sizeof(*hvc));
-            volume = hv_contributions(hvc, &data[nobj * cumsize], nobj,
-                                      cumsizes[n] - cumsize, reference,
+            volume = hv_contributions(hvc, &data[nobj * cumsize],
+                                      cumsizes[n] - cumsize, (dimension_t) nobj, reference,
                                       /*ignore_dominated=*/true);
         } else {
             ASSUME(nobj < 256);

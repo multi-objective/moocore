@@ -8,7 +8,7 @@
 #include "sort.h"
 
 static inline double
-hvc_1point_diff(const double * restrict points, dimension_t dim, size_t size,
+hvc_1point_diff(const double * restrict points, size_t size, dimension_t dim,
                 const double * restrict ref, const double hv_total)
 {
     const double tolerance = sqrt(DBL_EPSILON);
@@ -27,7 +27,7 @@ hvc_1point_diff(const double * restrict points, dimension_t dim, size_t size,
    one point.
 */
 static void
-hvc_1point_diffs(double * restrict hvc, double * restrict points, dimension_t dim, size_t size,
+hvc_1point_diffs(double * restrict hvc, double * restrict points, size_t size, dimension_t dim,
                  const double * restrict ref, const bool * uev, const double hv_total)
 {
     ASSUME(size > 1);
@@ -42,7 +42,7 @@ hvc_1point_diffs(double * restrict hvc, double * restrict points, dimension_t di
         } else if (nondom[i] && strongly_dominates(points + i * dim, ref, dim)) {
             memcpy(tmp, points + i * dim, sizeof(double) * dim);
             memcpy(points + i * dim, last, sizeof(double) * dim);
-            hvc[i] = hvc_1point_diff(points, dim, size - 1, ref, hv_total);
+            hvc[i] = hvc_1point_diff(points, size - 1, dim, ref, hv_total);
             memcpy(points + i * dim, tmp, sizeof(double) * dim);
         }
     }
@@ -51,7 +51,7 @@ hvc_1point_diffs(double * restrict hvc, double * restrict points, dimension_t di
     if (unlikely(keep_uevs && uev[size - 1])) {
         hvc[size - 1] = hv_total;
     } else if (nondom[size - 1] && strongly_dominates(last, ref, dim)) {
-        hvc[size - 1] = hvc_1point_diff(points, dim, size - 1, ref, hv_total);
+        hvc[size - 1] = hvc_1point_diff(points, size - 1, dim, ref, hv_total);
     }
     free((void *)nondom);
 }
@@ -62,7 +62,7 @@ hvc_1point_diffs(double * restrict hvc, double * restrict points, dimension_t di
 */
 static void
 hvc_1point_diffs_nondom(double * restrict hvc, double * restrict points,
-                        dimension_t dim, size_t size,
+                        size_t size, dimension_t dim,
                         const double * restrict ref, const bool * uev,
                         const double hv_total)
 {
@@ -105,7 +105,7 @@ hvc_1point_diffs_nondom(double * restrict hvc, double * restrict points,
         } else if (strongly_dominates(points + i * dim, ref, dim)) {
             memcpy(tmp_point, points + i * dim, sizeof(double) * dim);
             memcpy(points + i * dim, last_point, sizeof(double) * dim);
-            hvc[i] = hvc_1point_diff(points, dim, new_size - 1, ref, hv_total);
+            hvc[i] = hvc_1point_diff(points, new_size - 1, dim, ref, hv_total);
             memcpy(points + i * dim, tmp_point, sizeof(double) * dim);
         }
     }
@@ -303,7 +303,7 @@ hvc2d_nondom(double * restrict hvc, const double * restrict data, size_t n,
 static inline void
 hvc_check(double hv_total, const double * restrict hvc,
           double * restrict points,
-          dimension_t dim, size_t size, const double * restrict ref,
+          size_t size, dimension_t dim, const double * restrict ref,
           bool ignore_dominated)
 {
     const double tolerance = sqrt(DBL_EPSILON);
@@ -316,9 +316,9 @@ hvc_check(double hv_total, const double * restrict hvc,
     memset(hvc_true, 0, size * sizeof(*hvc_true));
 
     if (ignore_dominated)
-        hvc_1point_diffs_nondom(hvc_true, points, dim, size, ref, NULL, hv_total);
+        hvc_1point_diffs_nondom(hvc_true, points, size, dim, ref, NULL, hv_total);
     else
-        hvc_1point_diffs(hvc_true, points, dim, size, ref, NULL, hv_total);
+        hvc_1point_diffs(hvc_true, points, size, dim, ref, NULL, hv_total);
     for (size_t i = 0; i < size; i++) {
         if (fabs(hvc[i] - hvc_true[i]) > tolerance) {
             DEBUG1_PRINT("%-22.15g", points[i * dim]);
@@ -343,39 +343,37 @@ hvc3d(double * restrict hvc, const double * restrict data, size_t n, const doubl
    reference point.
 */
 double
-hv_contributions(double * restrict hvc, double * restrict points, int d, int n,
+hv_contributions(double * restrict hvc, double * restrict points,
+                 size_t n, dimension_t dim,
                  const double * restrict ref, bool ignore_dominated)
 {
     assert(hvc != NULL);
-    ASSUME(d > 1 && d <= 32);
-    ASSUME(n >= 0);
-    dimension_t dim = (dimension_t) d;
-    size_t size = (size_t) n;
-    if (size == 0) return 0;
-    if (size == 1) {
-        hvc[0] = fpli_hv(points, size, dim, ref);
+    ASSUME(dim > 1);
+    if (n == 0) return 0;
+    if (n == 1) {
+        hvc[0] = fpli_hv(points, n, dim, ref);
         return hvc[0];
     }
     /* We cannot rely on the caller and the functions below will skip points
        that do not dominate the reference point.  */
-    memset(hvc, 0, size * sizeof(double));
+    memset(hvc, 0, n * sizeof(*hvc));
 
     double hv_total;
     if (dim == 2) {
         hv_total = ignore_dominated
-            ? hvc2d_nondom(hvc, points, size, ref)
-            : hvc2d(hvc, points, size, ref);
-        DEBUG1(hvc_check(hv_total, hvc, points, dim, size, ref, ignore_dominated));
+            ? hvc2d_nondom(hvc, points, n, ref)
+            : hvc2d(hvc, points, n, ref);
+        DEBUG1(hvc_check(hv_total, hvc, points, n, dim, ref, ignore_dominated));
     } else if (dim == 3 && ignore_dominated) {
-        hv_total = hvc3d(hvc, points, size, ref);
-        DEBUG1(hvc_check(hv_total, hvc, points, dim, size, ref,
+        hv_total = hvc3d(hvc, points, n, ref);
+        DEBUG1(hvc_check(hv_total, hvc, points, n, dim, ref,
                          /* ignore_dominated = */true));
     } else {
-        hv_total = fpli_hv(points, size, dim, ref);
+        hv_total = fpli_hv(points, n, dim, ref);
         if (ignore_dominated)
-            hvc_1point_diffs_nondom(hvc, points, dim, size, ref, NULL, hv_total);
+            hvc_1point_diffs_nondom(hvc, points, n, dim, ref, NULL, hv_total);
         else
-            hvc_1point_diffs(hvc, points, dim, size, ref, NULL, hv_total);
+            hvc_1point_diffs(hvc, points, n, dim, ref, NULL, hv_total);
     }
     return hv_total;
 }

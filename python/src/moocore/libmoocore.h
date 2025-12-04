@@ -8,7 +8,7 @@ void free(void *);
 int read_datasets(const char * filename, double ** restrict data_p, int * restrict ncols_p, int * restrict datasize_p);
 // hv.h
 double fpli_hv(const double * restrict data, size_t n, dimension_t d, const double * restrict ref);
-void hv_contributions(double *hvc, double *points, int dim, int size, const double * ref, bool ignore_dominated);
+void hv_contributions(double * restrict hvc, double * restrict points, size_t n, dimension_t d, const double * restrict ref, bool ignore_dominated);
 
 double IGD (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);
 double IGD_plus (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);

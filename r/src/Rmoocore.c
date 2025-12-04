@@ -404,7 +404,7 @@ hv_contributions_C(SEXP DATA, SEXP REFERENCE, SEXP IGNORE_DOMINATED)
     assert (nobj == reference_len);
     bool ignore_dominated = SEXP_is_true(IGNORE_DOMINATED);
     new_real_vector(hv, npoint);
-    hv_contributions(hv, data, nobj, npoint, reference, ignore_dominated);
+    hv_contributions(hv, data, npoint, nobj, reference, ignore_dominated);
     UNPROTECT (nprotected);
     return Rexp(hv);
 }

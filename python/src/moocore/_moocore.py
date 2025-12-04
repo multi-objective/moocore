@@ -825,10 +825,12 @@ def hv_contributions(
 
     hvc = np.empty(len(x), dtype=float)
     hvc_p, _ = np1d_to_double_array(hvc)
-    x_p, npoints, nobj = np2d_to_double_array(x)
+    x_p, npoints, nobj = np2d_to_double_array(
+        x, ctype_shape=("size_t", "uint_fast8_t")
+    )
     ref_buf = ffi.from_buffer("double []", ref)
     ignore_dominated = ffi.cast("bool", bool(ignore_dominated))
-    lib.hv_contributions(hvc_p, x_p, nobj, npoints, ref_buf, ignore_dominated)
+    lib.hv_contributions(hvc_p, x_p, npoints, nobj, ref_buf, ignore_dominated)
     return hvc
 
 

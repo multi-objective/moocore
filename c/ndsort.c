@@ -248,8 +248,8 @@ int main(int argc, char *argv[])
                        lower_range, upper_range,
                        lbound, ubound);
 
-            double *hvc = malloc(sizeof(double) * data_size);
-            hv_contributions(hvc, data, dim, data_size, ref, /*ignore_dominated=*/true);
+            double * hvc = malloc(sizeof(*hvc) * data_size);
+            hv_contributions(hvc, data, data_size, (dimension_t) dim, ref, /*ignore_dominated=*/true);
             /* FIXME: handle uevs: keep_uevs_flag ? uev : NULL);*/
             for (int k = 0, j = 0; k < size; k++) {
                 if (rank[k] != i) continue;
