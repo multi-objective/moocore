@@ -10,7 +10,7 @@
 
 [ [**Homepage**][py-moocore-homepage] ]
 [ [**GitHub**][py-moocore-github] ]
-
+[ [**ClickPy Dashboard**](https://clickpy.clickhouse.com/dashboard/moocore) ]
 
 **Contributors:**
     [Manuel López-Ibáñez](https://lopez-ibanez.eu),
