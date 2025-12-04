@@ -78,6 +78,8 @@ def _get_target_platform():
 
 
 is_windows = platform.system() == "Windows"
+is_macos = platform.system() == "Darwin"
+
 target_platform = _get_target_platform()
 is_x86_64 = target_platform in ("i686", "x86", "x86_64", "AMD64")
 
@@ -85,27 +87,26 @@ is_x86_64 = target_platform in ("i686", "x86", "x86_64", "AMD64")
 MSVC_CFLAGS = ["/GL", "/O2", "/GS-", "/wd4996", "/DMOOCORE_SHARED_LIB"]
 MSVC_LDFLAGS = ["/LTCG"]
 GCC_CFLAGS = ["-O3", "-flto", "-fvisibility=hidden"]
+GCC_LDFLAGS = [*GCC_CFLAGS]
 if is_x86_64:
     # Compile for sufficiently old x86-64 architecture.
-    MSVC_CFLAGS += ["/arch:AVX"]
-    MSVC_LDFLAGS += ["/arch:AVX"]
-    GCC_CFLAGS += ["-march=x86-64-v2"]
-
-extra_compile_args = []
-extra_link_args = []
-if is_windows and uses_msvc():
-    extra_compile_args.extend(MSVC_CFLAGS)
-    extra_link_args.extend(MSVC_LDFLAGS)
+    MSVC_arch = ["/arch:AVX"]
+    GCC_arch = ["-march=x86-64-v2"]
 else:
-    extra_compile_args.extend(GCC_CFLAGS)
-    extra_link_args.extend(GCC_CFLAGS)
+    MSVC_arch = []
+    GCC_arch = []
 
-cflags = os.environ.get("CFLAGS", "")
-if cflags != "":
-    extra_compile_args.extend(cflags.split())
-ldflags = os.environ.get("LDFLAGS", "")
-if ldflags != "":
-    extra_link_args.extend(ldflags.split())
+if is_windows and uses_msvc():
+    cflags = MSVC_CFLAGS + MSVC_arch
+    ldflags = MSVC_LDFLAGS + MSVC_arch
+else:
+    cflags = GCC_CFLAGS + GCC_arch
+    ldflags = GCC_LDFLAGS + GCC_arch
+    if not is_macos:
+        ldflags += ["-Wl,-z,now"]
+
+cflags += os.environ.get("CFLAGS", "").split()
+ldflags += os.environ.get("LDFLAGS", "").split()
 
 ffibuilder = FFI()
 file_path = os.path.dirname(os.path.realpath(__file__))
@@ -124,8 +125,8 @@ ffibuilder.set_source(
     define_macros=[("DEBUG", str(DEBUG))],
     undef_macros=undef_macros,
     include_dirs=[libmoocore_path],
-    extra_compile_args=extra_compile_args,
-    extra_link_args=extra_link_args,
+    extra_compile_args=cflags,
+    extra_link_args=ldflags,
     py_limited_api=True,  # build against the stable ABI (abi3)
 )
 
