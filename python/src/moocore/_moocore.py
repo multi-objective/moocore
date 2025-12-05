@@ -1249,11 +1249,11 @@ def is_nondominated(
             return nondom
 
     data_p, npoints, nobj = np2d_to_double_array(
-        data, ctype_shape=("size_t", "int")
+        data, ctype_shape=("size_t", "uint_fast8_t")
     )
     maximise_p = ffi.from_buffer("bool []", maximise)
     keep_weakly = ffi.cast("bool", bool(keep_weakly))
-    nondom = lib.is_nondominated(data_p, nobj, npoints, maximise_p, keep_weakly)
+    nondom = lib.is_nondominated(data_p, npoints, nobj, maximise_p, keep_weakly)
     nondom = ffi.buffer(nondom, nrows)
     return np.frombuffer(nondom, dtype=bool)
 
@@ -1305,10 +1305,10 @@ def any_dominated(
 
     maximise = _parse_maximise(maximise, nobj)
     data_p, npoints, nobj = np2d_to_double_array(
-        data, ctype_shape=("size_t", "int")
+        data, ctype_shape=("size_t", "uint_fast8_t")
     )
     maximise_p = ffi.from_buffer("bool []", maximise)
-    res = lib.find_weakly_dominated_point(data_p, nobj, npoints, maximise_p)
+    res = lib.find_weakly_dominated_point(data_p, npoints, nobj, maximise_p)
     return res < nrows
 
 
@@ -1616,7 +1616,7 @@ def pareto_rank(
         data[:, maximise] = -data[:, maximise]
 
     data_p, npoints, nobj = np2d_to_double_array(
-        data, ctype_shape=("size_t", "int")
+        data, ctype_shape=("size_t", "uint_fast8_t")
     )
     ranks = lib.pareto_rank(data_p, npoints, nobj)
     ranks = ffi.buffer(ranks, nrows * ffi.sizeof("int"))
@@ -1689,14 +1689,16 @@ def normalise(
         upper = np.where(np.isnan(upper), data.max(axis=0), upper)
 
     maximise = _parse_maximise(maximise, data.shape[1])
-    data_p, npoints, nobj = np2d_to_double_array(data)
+    data_p, npoints, nobj = np2d_to_double_array(
+        data, ctype_shape=("size_t", "uint_fast8_t")
+    )
     maximise_p = ffi.from_buffer("bool []", maximise)
     lbound_p = ffi.from_buffer("double []", lower)
     ubound_p = ffi.from_buffer("double []", upper)
     lib.agree_normalise(
         data_p,
-        nobj,
         npoints,
+        nobj,
         maximise_p,
         to_range[0],
         to_range[1],

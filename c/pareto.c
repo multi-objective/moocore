@@ -393,11 +393,10 @@ check_pareto_rank(const int * restrict rank_true, const double * restrict points
    point (lower means less dominated).
 */
 int *
-pareto_rank(const double * restrict points, size_t size, int d)
+pareto_rank(const double * restrict points, size_t size, dimension_t dim)
 {
-    ASSUME(d >= 2 && d <= 32);
-    dimension_t dim = (dimension_t) d;
-    if (unlikely(size <= 0))
+    ASSUME(dim >= 2);
+    if (unlikely(size == 0))
         return NULL;
     if (unlikely(size == 1))
         return (int *) calloc(1, sizeof(int));

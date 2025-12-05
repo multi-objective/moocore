@@ -303,8 +303,8 @@ normalise_C(SEXP DATA, SEXP RANGE, SEXP LBOUND, SEXP UBOUND, SEXP MAXIMISE)
     assert(nobj == maximise_len);
     assert(range_len == 2);
 
-    agree_normalise(data, nobj, npoint, maximise, range[0], range[1],
-                    lbound, ubound);
+    agree_normalise(data, npoint, (dimension_t) nobj, maximise,
+                    range[0], range[1], lbound, ubound);
     free (maximise);
     UNPROTECT(nprotected);
     return R_NilValue;
@@ -330,7 +330,7 @@ is_nondominated_C(SEXP DATA, SEXP MAXIMISE, SEXP KEEP_WEAKLY)
     assert(nobj == maximise_len);
 
     double * data = matrix_malloc_and_transpose(rdata, npoint, nobj);
-    bool * bool_is_nondom = is_nondominated(data, nobj, npoint, maximise, keep_weakly);
+    bool * bool_is_nondom = is_nondominated(data, npoint, (dimension_t) nobj, maximise, keep_weakly);
     free(data);
     free(maximise);
 
@@ -358,7 +358,7 @@ any_dominated_C(SEXP DATA, SEXP MAXIMISE)
         return Rf_ScalarLogical(1);
 
     double * data = matrix_malloc_and_transpose(rdata, npoint, nobj);
-    size_t res = find_weakly_dominated_point(data, nobj, (size_t) npoint, maximise);
+    size_t res = find_weakly_dominated_point(data, npoint, (dimension_t) nobj, maximise);
     free(data);
     free(maximise);
     UNPROTECT(nprotected);
@@ -373,7 +373,7 @@ pareto_ranking_C(SEXP DATA)
     SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
 
     new_int_vector(rank, npoint);
-    int * restrict rank2 = pareto_rank(data, npoint, nobj);
+    int * restrict rank2 = pareto_rank(data, npoint, (dimension_t) nobj);
     for (int i = 0; i < npoint; i++)
         rank[i] = rank2[i] + 1; // pareto_rank returns 0-based ranks.
     free(rank2);

@@ -161,30 +161,27 @@ robust_read_point(char * restrict optarg, int *nobj, const char * restrict errms
 #include <math.h> // INFINITY
 
 static void
-data_bounds(double **minimum_p, double **maximum_p,
-            const double *data, int nobj, int rows)
+data_bounds(double * restrict * restrict minimum_p, double * restrict * restrict maximum_p,
+            const double * restrict data, size_t rows, dimension_t nobj)
 {
     ASSUME(nobj > 1);
-    ASSUME(nobj <= 32);
-    int k;
-
     double * minimum = *minimum_p;
     if (minimum == NULL) {
-        minimum = malloc (nobj * sizeof(double));
-        for (k = 0; k < nobj; k++)
+        minimum = malloc(nobj * sizeof(*minimum));
+        for (dimension_t k = 0; k < nobj; k++)
             minimum[k] = INFINITY;
         *minimum_p = minimum;
     }
     double * maximum = *maximum_p;
     if (maximum == NULL) {
-        maximum = malloc (nobj * sizeof(double));
-        for (k = 0; k < nobj; k++)
+        maximum = malloc(nobj * sizeof(*maximum));
+        for (dimension_t k = 0; k < nobj; k++)
             maximum[k] = -INFINITY;
         *maximum_p = maximum;
     }
 
-    for (int r = 0, n = 0; r < rows; r++) {
-        for (k = 0; k < nobj; k++, n++) {
+    for (size_t r = 0, n = 0; r < rows; r++) {
+        for (dimension_t k = 0; k < nobj; k++, n++) {
             if (maximum[k] < data[n])
                 maximum[k] = data[n];
             if (minimum[k] > data[n])
@@ -194,16 +191,19 @@ data_bounds(double **minimum_p, double **maximum_p,
 }
 
 _attr_maybe_unused static void
-file_bounds (const char *filename, double **maximum_p, double **minimum_p,
-             int *dim_p)
+file_bounds (const char * filename,
+             double * restrict * restrict maximum_p, double * restrict * restrict minimum_p,
+             int * restrict dim_p)
 {
-    double *data = NULL;
-    int *cumsizes = NULL;
+    double * data = NULL;
+    int * cumsizes = NULL;
     int nruns = 0;
     handle_read_data_error(
         read_double_data(filename, &data, dim_p, &cumsizes, &nruns),
         filename);
-    data_bounds(minimum_p, maximum_p, data, *dim_p, cumsizes[nruns - 1]);
+    assert(nruns > 0);
+    assert(*dim_p > 1 && *dim_p < 256);
+    data_bounds(minimum_p, maximum_p, data, cumsizes[nruns - 1], (dimension_t) *dim_p);
     free(data);
     free(cumsizes);
 }

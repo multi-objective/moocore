@@ -84,20 +84,22 @@ OPTION_MAXIMISE_STR
 }
 
 static void
-do_file (const char *filename, double *reference, size_t reference_size,
-         int *nobj_p, const signed char * minmax, bool maximise_all_flag)
+do_file(const char * filename, double * restrict reference, size_t reference_size,
+        int * restrict nobj_p, const signed char * restrict minmax, bool maximise_all_flag)
 {
-    double *data = NULL;
-    int *cumsizes = NULL;
+    double * data = NULL;
+    int * cumsizes = NULL;
     int nruns = 0;
-    int nobj = *nobj_p;
 
     handle_read_data_error(
-        read_double_data (filename, &data, &nobj, &cumsizes, &nruns), filename);
+        read_double_data(filename, &data, nobj_p, &cumsizes, &nruns), filename);
     if (!filename)
         filename = stdin_name;
 
-    if (!additive_flag && !all_positive(data, cumsizes[nruns - 1], (dimension_t) nobj)) {
+    ASSUME(*nobj_p > 1 && *nobj_p < 256);
+    dimension_t nobj = (dimension_t) *nobj_p;
+
+    if (!additive_flag && !all_positive(data, cumsizes[nruns - 1], nobj)) {
         errprintf("cannot calculate multiplicative epsilon indicator with non-positive values when reading '%s'.", filename);
         exit(EXIT_FAILURE);
     }
@@ -118,12 +120,10 @@ do_file (const char *filename, double *reference, size_t reference_size,
         nruns = 1;
     }
 #endif
-    ASSUME(nobj > 1 && nobj < 256);
-    dimension_t dim = (dimension_t) nobj;
     /* Default minmax if not set yet.  */
     bool free_minmax = false;
     if (minmax == NULL) {
-        minmax = maximise_all_flag ? minmax_maximise(dim) : minmax_minimise(dim);
+        minmax = maximise_all_flag ? minmax_maximise(nobj) : minmax_minimise(nobj);
         free_minmax = true;
     }
 
@@ -134,10 +134,10 @@ do_file (const char *filename, double *reference, size_t reference_size,
         // double time_elapsed = 0;
         //Timer_start ();
         double epsilon = (additive_flag)
-            ? epsilon_additive_minmax(minmax, dim,
+            ? epsilon_additive_minmax(minmax, nobj,
                                       &data[nobj * cumsize], cumsizes[n] - cumsize,
                                       reference, reference_size)
-            : epsilon_mult_minmax(minmax, dim,
+            : epsilon_mult_minmax(minmax, nobj,
                                   &data[nobj * cumsize], cumsizes[n] - cumsize,
                                   reference, reference_size);
         //        time_elapsed = Timer_elapsed_virtual ();
@@ -161,19 +161,11 @@ do_file (const char *filename, double *reference, size_t reference_size,
     free (data);
     free (cumsizes);
     if (free_minmax) free( (void *) minmax);
-    *nobj_p = nobj;
 }
 
 int main(int argc, char *argv[])
 {
-    bool check_flag = true;
-    double *reference = NULL;
-    size_t reference_size = 0;
-    const signed char *minmax = NULL;
-    bool maximise_all_flag = false;
-    int nobj = 0, tmp_nobj = 0;
-
-    /* see the man page for getopt_long for an explanation of these fields */
+    // See the man page for getopt_long for an explanation of these fields.
     static const char short_options[] = "hVvqamMr:s:o:";
     static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
@@ -192,6 +184,13 @@ int main(int argc, char *argv[])
     };
 
     set_program_invocation_short_name(argv[0]);
+
+    bool check_flag = true;
+    double *reference = NULL;
+    size_t reference_size = 0;
+    const signed char *minmax = NULL;
+    bool maximise_all_flag = false;
+    int nobj = 0, tmp_nobj = 0;
 
     int opt; /* it's actually going to hold a char */
     int longopt_index;
@@ -262,9 +261,9 @@ int main(int argc, char *argv[])
         minmax = maximise_all_flag ? minmax_maximise((dimension_t) nobj) : minmax_minimise((dimension_t) nobj);
     }
     if (check_flag) {
-        /* Ensure the reference set is nondominated.  */
+        // Ensure the reference set is nondominated.
         size_t prev_reference_size = reference_size;
-        reference_size = filter_dominated_set(reference, nobj, reference_size, minmax);
+        reference_size = filter_dominated_set(reference, reference_size, (dimension_t) nobj, minmax);
         if (prev_reference_size > reference_size)
             warnprintf("removed %zd dominated points from the reference set",
                        prev_reference_size - reference_size);
@@ -274,10 +273,10 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
     int numfiles = argc - optind;
-    if (numfiles < 1) { /* Read stdin.  */
-        do_file (NULL, reference, reference_size, &nobj, minmax, maximise_all_flag);
+    if (numfiles < 1) { // Read stdin.
+        do_file(NULL, reference, reference_size, &nobj, minmax, maximise_all_flag);
     } else if (numfiles == 1) {
-        do_file (argv[optind], reference, reference_size, &nobj, minmax, maximise_all_flag);
+        do_file(argv[optind], reference, reference_size, &nobj, minmax, maximise_all_flag);
     } else {
         int k;
         /* FIXME: Calculate the nondominated front among all input
@@ -285,7 +284,7 @@ int main(int argc, char *argv[])
 #if 0
         if (reference == NULL) {
             reference_size =
-                calculate_nondominated (&reference, data, nobj, cumsizes[nruns-1],
+                calculate_nondominated(&reference, data, nobj, cumsizes[nruns-1],
                                         minmax);
             write_sets (stderr, reference, nobj, &reference_size, 1);
         }

@@ -17,12 +17,17 @@ double avg_Hausdorff_dist(const double * restrict data, size_t n, dimension_t d,
 double epsilon_additive(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const bool * restrict maximise);
 double epsilon_mult(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const bool * restrict maximise);
 
-/* nondominated.h */
-size_t find_weakly_dominated_point(const double * points, int dim, size_t size, const bool * maximise);
-bool * is_nondominated (const double * data, int nobj, size_t npoint, const bool * maximise, bool keep_weakly);
-int * pareto_rank(const double * points, size_t size, int dim);
-void agree_normalise (double *data, int nobj, int npoint, const bool * maximise,
-                      const double lower_range, const double upper_range, const double *lbound, const double *ubound);
+// nondominated.h
+size_t find_weakly_dominated_point(const double * restrict points, size_t n, dimension_t d,
+                                   const bool * restrict maximise);
+bool * is_nondominated(const double * restrict data, size_t n, dimension_t d,
+                       const bool * restrict maximise, bool keep_weakly);
+int * pareto_rank(const double * restrict points, size_t size, dimension_t dim);
+void agree_normalise(double * restrict data, size_t size, dimension_t dim,
+                     const bool * restrict maximise,
+                     const double lower_range, const double upper_range,
+                     const double * restrict lbound, const double * restrict ubound);
+
 double * eaf_compute_matrix (int *eaf_npoints, double * data, int nobj, const int *cumsizes,
                              int nruns, const double * percentile, int nlevels);
 double * eafdiff_compute_rectangles(int *eaf_npoints, double * data, int nobj,

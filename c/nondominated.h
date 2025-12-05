@@ -99,7 +99,7 @@ nondom_init (size_t size)
 }
 
 static inline const double *
-force_agree_minimize(const double * restrict points, dimension_t dim, size_t size,
+force_agree_minimize(const double * restrict points, size_t size, dimension_t dim,
                      const signed char * restrict minmax,
                      _attr_maybe_unused const enum objs_agree_t agree)
 {
@@ -356,7 +356,7 @@ find_nondominated_set_3d_(const double * restrict points, size_t size, bool * re
 }
 
 static inline size_t
-find_nondominated_set_agree_(const double * restrict points, dimension_t dim, size_t size,
+find_nondominated_set_agree_(const double * restrict points, size_t size, dimension_t dim,
                              bool * restrict nondom, const bool keep_weakly,
                              const enum objs_agree_t agree, const signed char * restrict minmax)
 {
@@ -425,18 +425,18 @@ find_nondominated_set_agree_(const double * restrict points, dimension_t dim, si
 }
 
 static inline size_t
-find_dominated_point_agree_(const double * restrict points, dimension_t dim, size_t size,
+find_dominated_point_agree_(const double * restrict points, size_t size, dimension_t dim,
                             const bool keep_weakly, const enum objs_agree_t agree,
                             const signed char * restrict minmax)
 {
-    return find_nondominated_set_agree_(points, dim, size, /* nondom=*/NULL,
+    return find_nondominated_set_agree_(points, size, dim, /* nondom=*/NULL,
                                         keep_weakly, agree, minmax);
 }
 
 /* Stop as soon as one dominated point is found and return its position.
 **/
 static inline size_t
-find_dominated_point_(const double * restrict points, dimension_t dim, size_t size,
+find_dominated_point_(const double * restrict points, size_t size, dimension_t dim,
                       const signed char * restrict minmax, enum objs_agree_t agree,
                       const bool keep_weakly)
 {
@@ -446,7 +446,7 @@ find_dominated_point_(const double * restrict points, dimension_t dim, size_t si
 
     ASSUME(dim >= 2);
     if (dim <= 3) {
-        const double *pp = force_agree_minimize(points, dim, size, minmax, agree);
+        const double *pp = force_agree_minimize(points, size, dim, minmax, agree);
         size_t res;
         if (dim == 2) {
             res = find_dominated_2d_(pp, size, keep_weakly);
@@ -466,13 +466,13 @@ find_dominated_point_(const double * restrict points, dimension_t dim, size_t si
     switch (agree) {
       case AGREE_NONE:
           return find_dominated_point_agree_(
-              points, dim, size, keep_weakly, AGREE_NONE, minmax);
+              points, size, dim, keep_weakly, AGREE_NONE, minmax);
       case AGREE_MINIMISE:
           return find_dominated_point_agree_(
-              points, dim, size, keep_weakly, AGREE_MINIMISE, /*minmax=*/NULL);
+              points, size, dim, keep_weakly, AGREE_MINIMISE, /*minmax=*/NULL);
       case AGREE_MAXIMISE:
           return find_dominated_point_agree_(
-              points, dim, size, keep_weakly, AGREE_MAXIMISE, /*minmax=*/NULL);
+              points, size, dim, keep_weakly, AGREE_MAXIMISE, /*minmax=*/NULL);
       default:
           unreachable();  // # nocov
     }
@@ -482,7 +482,7 @@ find_dominated_point_(const double * restrict points, dimension_t dim, size_t si
    nondominated points.
 **/
 static inline size_t
-find_nondominated_set_(const double * restrict points, dimension_t dim, size_t size,
+find_nondominated_set_(const double * restrict points, size_t size, dimension_t dim,
                        const signed char * restrict minmax, enum objs_agree_t agree,
                        bool * nondom, const bool keep_weakly)
 {
@@ -494,7 +494,7 @@ find_nondominated_set_(const double * restrict points, dimension_t dim, size_t s
     ASSUME(nondom != NULL);
 
     if (dim <= 3) {
-        const double *pp = force_agree_minimize (points, dim, size, minmax, agree);
+        const double *pp = force_agree_minimize (points, size, dim, minmax, agree);
         size_t res;
         if (dim == 2) {
             res = find_nondominated_set_2d_(pp, size, nondom, keep_weakly);
@@ -517,68 +517,68 @@ find_nondominated_set_(const double * restrict points, dimension_t dim, size_t s
     switch (agree) {
       case AGREE_NONE:
           return find_nondominated_set_agree_(
-              points, dim, size, nondom, keep_weakly, AGREE_NONE, minmax);
+              points, size, dim, nondom, keep_weakly, AGREE_NONE, minmax);
       case AGREE_MINIMISE:
           return find_nondominated_set_agree_(
-              points, dim, size, nondom, keep_weakly, AGREE_MINIMISE, /*minmax=*/NULL);
+              points, size, dim, nondom, keep_weakly, AGREE_MINIMISE, /*minmax=*/NULL);
       case AGREE_MAXIMISE:
           return find_nondominated_set_agree_(
-              points, dim, size, nondom, keep_weakly, AGREE_MAXIMISE, /*minmax=*/NULL);
+              points, size, dim, nondom, keep_weakly, AGREE_MAXIMISE, /*minmax=*/NULL);
       default:
           unreachable();  // # nocov
     }
 }
 
 static inline size_t
-find_dominated_point_agree(const double * restrict points, int dim, size_t size,
+find_dominated_point_agree(const double * restrict points, size_t size, dimension_t dim,
                            const signed char * restrict minmax,
                            enum objs_agree_t agree)
 {
-    ASSUME(dim >= 2 && dim <= 32);
-    return find_dominated_point_(points, (dimension_t) dim, size, minmax,
-                                 agree, /* keep_weakly = */false);
+    ASSUME(dim >= 2);
+    return find_dominated_point_(points, size, dim, minmax, agree,
+                                 /* keep_weakly = */false);
 }
 
 static inline size_t
-find_dominated_point(const double * restrict points, int dim, size_t size,
+find_dominated_point(const double * restrict points, size_t size, dimension_t dim,
                      const signed char * restrict minmax)
 {
-    ASSUME(dim >= 2 && dim <= 32);
-    return find_dominated_point_(points, (dimension_t) dim, size, minmax,
+    ASSUME(dim >= 2);
+    return find_dominated_point_(points, size, dim, minmax,
                                  AGREE_NONE, /* keep_weakly = */false);
 }
 
 static inline size_t
-find_weakly_dominated_point(const double * restrict points, int dim, size_t size,
+find_weakly_dominated_point(const double * restrict points, size_t size, dimension_t dim,
                             const bool * restrict maximise)
 {
-    ASSUME(dim >= 2 && dim <= 32);
-    const signed char * minmax = minmax_from_bool(maximise, (dimension_t) dim);
-    size_t pos = find_dominated_point_(points, (dimension_t) dim, size, minmax,
+    ASSUME(dim >= 2);
+    const signed char * minmax = minmax_from_bool(maximise, dim);
+    size_t pos = find_dominated_point_(points, size, dim, minmax,
                                        AGREE_NONE, /* keep_weakly = */false);
     free((void *)minmax);
     return pos;
 }
 
 static inline size_t
-find_nondominated_set_agree(const double * restrict points, int dim, size_t size,
+find_nondominated_set_agree(const double * restrict points, size_t size, dimension_t dim,
                             const signed char * restrict minmax, const signed char agree,
                             bool * restrict nondom)
 {
-    ASSUME(dim >= 2 && dim <= 32);
+    ASSUME(dim >= 2);
     ASSUME(agree == AGREE_MINIMISE || agree == AGREE_MAXIMISE || agree == AGREE_NONE);
-    return find_nondominated_set_(points, (dimension_t) dim, size, minmax,
+    return find_nondominated_set_(points, size, dim, minmax,
                                   (enum objs_agree_t) agree, nondom,
                                   /* keep_weakly = */false);
 }
 
 static inline size_t
-find_nondominated_set(const double * restrict points, dimension_t dim, size_t size,
+find_nondominated_set(const double * restrict points, size_t size, dimension_t dim,
                       const signed char * restrict minmax, bool * restrict nondom)
 {
-    ASSUME(dim >= 2 && dim <= 32);
+    ASSUME(dim >= 2);
     size_t new_size = find_nondominated_set_(
-        points, dim, size, minmax, AGREE_NONE, nondom,
+        points, size, dim, minmax, AGREE_NONE, nondom,
         /* keep_weakly = */false);
 
     if (new_size > size || new_size == 0 || new_size == SIZE_MAX) { /* This can't happen.  */
@@ -591,23 +591,24 @@ find_nondominated_set(const double * restrict points, dimension_t dim, size_t si
 }
 
 static inline size_t
-find_weak_nondominated_set(const double * restrict points, dimension_t dim, size_t size,
+find_weak_nondominated_set(const double * restrict points, size_t size, dimension_t dim,
                            const signed char * restrict minmax,
                            bool * restrict nondom)
 {
-    ASSUME(dim >= 2 && dim <= 32);
-    return find_nondominated_set_(points, dim, size, minmax, AGREE_NONE, nondom,
+    ASSUME(dim >= 2);
+    return find_nondominated_set_(points, size, dim, minmax, AGREE_NONE, nondom,
                                   /* keep_weakly = */true);
 }
 
 static inline size_t
-find_weak_nondominated_set_minimise(const double * restrict points, dimension_t dim,
-                                    size_t size, bool * restrict nondom)
+find_weak_nondominated_set_minimise(const double * restrict points,
+                                    size_t size, dimension_t dim,
+                                    bool * restrict nondom)
 {
-    ASSUME(dim >= 2 && dim <= 32);
+    ASSUME(dim >= 2);
     const signed char * minmax = minmax_minimise(dim);
     ASSUME(minmax != NULL);
-    size_t new_size = find_weak_nondominated_set(points, dim, size, minmax,
+    size_t new_size = find_weak_nondominated_set(points, size, dim, minmax,
                                                  nondom);
     free((void *)minmax);
     return new_size;
@@ -616,13 +617,12 @@ find_weak_nondominated_set_minimise(const double * restrict points, dimension_t 
 
 static inline size_t
 get_nondominated_set(double **pareto_set_p,
-                     const double * restrict points, int dim, size_t size,
+                     const double * restrict points, size_t size, dimension_t dim,
                      const signed char * restrict minmax)
 {
-    ASSUME(dim >= 2 && dim <= 32);
-
+    ASSUME(dim >= 2);
     bool * nondom = nondom_init(size);
-    size_t new_size = find_nondominated_set(points, (dimension_t) dim, size, minmax, nondom);
+    size_t new_size = find_nondominated_set(points, size, dim, minmax, nondom);
     double * pareto_set = malloc(new_size * dim * sizeof(*pareto_set));
 
     if (new_size < size) {
@@ -643,14 +643,14 @@ get_nondominated_set(double **pareto_set_p,
 }
 
 static inline size_t
-filter_dominated_set(double * restrict points, int dim, size_t size,
+filter_dominated_set(double * restrict points, size_t size, dimension_t dim,
                      const signed char * restrict minmax)
 {
-    ASSUME(dim >= 2 && dim <= 32);
+    ASSUME(dim >= 2);
     ASSUME(size > 0);
 
     bool * nondom = nondom_init(size);
-    size_t new_size = find_nondominated_set(points, (dimension_t) dim, size, minmax, nondom);
+    size_t new_size = find_nondominated_set(points, size, dim, minmax, nondom);
 
     if (new_size < size) {
         size_t k = 0;
@@ -669,67 +669,66 @@ filter_dominated_set(double * restrict points, int dim, size_t size,
 }
 
 static inline bool *
-is_nondominated_minmax(const double * restrict data, dimension_t nobj, size_t npoint,
+is_nondominated_minmax(const double * restrict data, size_t npoint, dimension_t nobj,
                        const signed char * restrict minmax, bool keep_weakly)
 {
     bool * nondom = nondom_init(npoint);
-    find_nondominated_set_(data, nobj, npoint, minmax, AGREE_NONE, nondom, keep_weakly);
+    find_nondominated_set_(data, npoint, nobj, minmax, AGREE_NONE, nondom, keep_weakly);
     return nondom;
 }
 
 static inline bool *
-is_nondominated_minimise(const double * data, dimension_t nobj, size_t npoint,
+is_nondominated_minimise(const double * restrict data, size_t npoint, dimension_t nobj,
                          bool keep_weakly)
 {
     const signed char * minmax = minmax_minimise(nobj);
-    bool * nondom = is_nondominated_minmax(data, nobj, npoint, minmax,
+    bool * nondom = is_nondominated_minmax(data, npoint, nobj, minmax,
                                            keep_weakly);
     free((void *) minmax);
     return nondom;
 }
 
 _attr_maybe_unused static bool *
-is_nondominated(const double * restrict data, int nobj, size_t npoint,
+is_nondominated(const double * restrict data, size_t npoint, dimension_t nobj,
                 const bool * restrict maximise, bool keep_weakly)
 {
-    ASSUME(nobj >= 2 && nobj <= 32);
-    const signed char * minmax = minmax_from_bool(maximise, (dimension_t) nobj);
-    bool * nondom = is_nondominated_minmax(data, (dimension_t) nobj, npoint,
-                                           minmax, keep_weakly);
+    ASSUME(nobj >= 2);
+    const signed char * minmax = minmax_from_bool(maximise, nobj);
+    bool * nondom = is_nondominated_minmax(data, npoint, nobj, minmax,
+                                           keep_weakly);
     free((void *)minmax);
     return nondom;
 }
 
 static inline void
-agree_objectives (double * restrict points, int dim, int size,
+agree_objectives (double * restrict points, size_t size, dimension_t dim,
                   const signed char * restrict minmax, const enum objs_agree_t agree)
 {
-    for (int d = 0; d < dim; d++)
+    for (dimension_t d = 0; d < dim; d++)
         if ((agree > 0 && minmax[d] < 0)
             || (agree < 0 && minmax[d] > 0))
-            for (int k = 0; k < size; k++)
+            for (size_t k = 0; k < size; k++)
                 points[k * dim + d] = -(points[k * dim + d]);
 }
 
 
 static inline void
-normalise(double * restrict points, int dim, int size,
+normalise(double * restrict points, size_t size, dimension_t dim,
           const signed char * restrict minmax, signed char agree,
           const double lower_range, const double upper_range,
           const double * restrict lbound, const double * restrict ubound)
 {
     const double range = upper_range - lower_range;
     double * diff = malloc(dim * sizeof(*diff));
-    int k, d;
-    for (d = 0; d < dim; d++) {
+    for (dimension_t d = 0; d < dim; d++) {
         diff[d] = ubound[d] - lbound[d];
         if (diff[d] == 0.0) // FIXME: Should we use approximate equality?
             diff[d] = 1; // FIXME: Do we need to handle agree?
     }
 
-    for (k = 0; k < size; k++) {
+    for (size_t k = 0; k < size; k++) {
         double * p = points + k * dim;
-        for (d = 0; d < dim; d++)
+        for (dimension_t d = 0; d < dim; d++)
             if ((agree > 0 && minmax[d] < 0) || (agree < 0 && minmax[d] > 0))
                 p[d] = lower_range + range * (ubound[d] + p[d]) / diff[d];
             else
@@ -740,20 +739,20 @@ normalise(double * restrict points, int dim, int size,
 }
 
 _attr_maybe_unused static void
-agree_normalise (double * restrict data, int nobj, int npoint,
+agree_normalise (double * restrict data, size_t npoint, dimension_t nobj,
                  const bool * restrict maximise,
                  const double lower_range, const double upper_range,
                  const double * restrict lbound, const double * restrict ubound)
 {
-    const signed char * minmax = minmax_from_bool(maximise, (dimension_t)nobj);
+    const signed char * minmax = minmax_from_bool(maximise, nobj);
     // We have to make the objectives agree before normalisation.
     // FIXME: Do normalisation and agree in one step.
-    agree_objectives(data, nobj, npoint, minmax, AGREE_MINIMISE);
-    normalise(data, nobj, npoint, minmax, AGREE_MINIMISE,
+    agree_objectives(data, npoint, nobj, minmax, AGREE_MINIMISE);
+    normalise(data, npoint, nobj, minmax, AGREE_MINIMISE,
               lower_range, upper_range, lbound, ubound);
     free ((void *)minmax);
 }
 
-int * pareto_rank(const double * restrict points, size_t size, int dim) _attr_malloc;
+int * pareto_rank(const double * restrict points, size_t size, dimension_t dim) _attr_malloc;
 
 #endif /* NONDOMINATED_H */

@@ -101,18 +101,25 @@ OPTION_MAXIMISE_STR
 }
 
 static void
-do_file (const char *filename, double *reference, size_t reference_size,
-         int *nobj_p, const signed char * minmax, bool maximise_all_flag)
+do_file (const char *filename, double * restrict reference, size_t reference_size,
+         int * restrict nobj_p, const signed char * restrict minmax, bool maximise_all_flag)
 {
-    double *data = NULL;
-    int *cumsizes = NULL;
+    double * data = NULL;
+    int * cumsizes = NULL;
     int nruns = 0;
-    int nobj = *nobj_p;
 
     handle_read_data_error(
-        read_double_data (filename, &data, &nobj, &cumsizes, &nruns), filename);
+        read_double_data (filename, &data, nobj_p, &cumsizes, &nruns), filename);
     if (!filename)
         filename = stdin_name;
+#if 0
+    if (union_flag) {
+        cumsizes[0] = cumsizes[nruns - 1];
+        nruns = 1;
+    }
+#endif
+
+    dimension_t nobj = (dimension_t) *nobj_p;
 
     char *outfilename = NULL;
     FILE *outfile = stdout;
@@ -124,16 +131,10 @@ do_file (const char *filename, double *reference, size_t reference_size,
             exit (EXIT_FAILURE);
         }
     }
-#if 0
-    if (union_flag) {
-        cumsizes[0] = cumsizes[nruns - 1];
-        nruns = 1;
-    }
-#endif
-    /* Default minmax if not set yet.  */
+    // Default minmax if not set yet.
     bool free_minmax = false;
     if (minmax == NULL) {
-        minmax = maximise_all_flag ? minmax_maximise((dimension_t) nobj) : minmax_minimise((dimension_t) nobj);
+        minmax = maximise_all_flag ? minmax_maximise(nobj) : minmax_minimise(nobj);
         free_minmax = true;
     }
 
@@ -169,7 +170,7 @@ do_file (const char *filename, double *reference, size_t reference_size,
     for (int n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
         _attr_maybe_unused double time_elapsed = 0;
         size_t size_a = cumsizes[n] - cumsize;
-        const double *points_a = &data[nobj * cumsize];
+        const double * points_a = &data[nobj * cumsize];
         //Timer_start ();
         sep = "\0";
 
@@ -177,7 +178,7 @@ do_file (const char *filename, double *reference, size_t reference_size,
         do {                                                                   \
             if (IF) {                                                          \
                 fprintf (outfile, "%s" indicator_printf_format, sep,           \
-                         FUN((dimension_t) nobj, minmax, points_a, size_a, reference, reference_size, ## __VA_ARGS__)); \
+                         FUN(nobj, minmax, points_a, size_a, reference, reference_size, ## __VA_ARGS__)); \
                 sep = "\t";                                                    \
             }                                                                  \
         } while (0)
@@ -208,20 +209,13 @@ do_file (const char *filename, double *reference, size_t reference_size,
     free (data);
     free (cumsizes);
     if (free_minmax) free( (void *) minmax);
-    *nobj_p = nobj;
 }
 
 int main(int argc, char *argv[])
 {
-    double *reference = NULL;
-    size_t reference_size = 0;
-    const signed char *minmax = NULL;
-    bool maximise_all_flag = false;
-    int nobj = 0, tmp_nobj = 0;
+    enum { GD_opt = 1000, IGD_opt, GD_p_opt, IGD_p_opt, IGD_plus_opt, hausdorff_opt};
 
-    enum { GD_opt = 1000,
-           IGD_opt, GD_p_opt, IGD_p_opt, IGD_plus_opt, hausdorff_opt};
-    /* see the man page for getopt_long for an explanation of these fields */
+    // See the man page for getopt_long for an explanation of these fields.
     static const char short_options[] = "hVvqap:Mr:s:o:";
     static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
@@ -244,6 +238,12 @@ int main(int argc, char *argv[])
         {NULL, 0, NULL, 0} /* marks end of list */
     };
     set_program_invocation_short_name(argv[0]);
+
+    double * reference = NULL;
+    size_t reference_size = 0;
+    const signed char * minmax = NULL;
+    bool maximise_all_flag = false;
+    int nobj = 0;
 
     int opt;
     int longopt_index;
@@ -296,20 +296,21 @@ int main(int argc, char *argv[])
             minmax = parse_cmdline_minmax(minmax, optarg, &nobj);
             break;
 
-        case 'r': // --reference
-            reference_size = read_reference_set(&reference, optarg, &tmp_nobj);
-            if (reference == NULL || reference_size == 0) {
-                errprintf ("invalid reference set '%s", optarg);
-                exit(EXIT_FAILURE);
-            }
-            if (nobj == 0) {
-                nobj = tmp_nobj;
-            } else if (tmp_nobj != nobj) {
-                errprintf ("number of objectives in --obj (%d) and reference set (%d) do not match", nobj, tmp_nobj);
-                exit(EXIT_FAILURE);
-            }
-            break;
-
+          case 'r': { // --reference
+              int tmp_nobj = 0;
+              reference_size = read_reference_set(&reference, optarg, &tmp_nobj);
+              if (reference == NULL || reference_size == 0) {
+                  errprintf ("invalid reference set '%s", optarg);
+                  exit(EXIT_FAILURE);
+              }
+              if (nobj == 0) {
+                  nobj = tmp_nobj;
+              } else if (tmp_nobj != nobj) {
+                  errprintf ("number of objectives in --obj (%d) and reference set (%d) do not match", nobj, tmp_nobj);
+                  exit(EXIT_FAILURE);
+              }
+              break;
+          }
         case 's': // --suffix
             suffix = optarg;
             break;
@@ -338,7 +339,7 @@ int main(int argc, char *argv[])
     if (minmax == NULL) {
         minmax = maximise_all_flag ? minmax_maximise((dimension_t) nobj) : minmax_minimise((dimension_t) nobj);
     }
-    reference_size = filter_dominated_set(reference, nobj, reference_size, minmax);
+    reference_size = filter_dominated_set(reference, reference_size, (dimension_t)nobj, minmax);
 
     int numfiles = argc - optind;
     if (numfiles < 1) {/* Read stdin.  */

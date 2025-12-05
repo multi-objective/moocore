@@ -32,7 +32,7 @@ hvc_1point_diffs(double * restrict hvc, double * restrict points, size_t size, d
 {
     ASSUME(size > 1);
     bool keep_uevs = uev != NULL;
-    const bool * nondom = is_nondominated_minimise(points, dim, size,
+    const bool * nondom = is_nondominated_minimise(points, size, dim,
                                                    /*keep_weakly=*/false);
     const double * const last = points + (size - 1) * dim;
     double * tmp = MOOCORE_MALLOC(dim, double);
@@ -76,7 +76,7 @@ hvc_1point_diffs_nondom(double * restrict hvc, double * restrict points,
     bool keep_uevs = uev != NULL;
     bool * nondom = nondom_init(size);
     // Duplicated points will still contribute zero.
-    size_t new_size = find_weak_nondominated_set_minimise(points, dim, size, nondom);
+    size_t new_size = find_weak_nondominated_set_minimise(points, size, dim, nondom);
     size_t first = 0;
     double * tmp_point = MOOCORE_MALLOC(dim, double);
     if (new_size < size) {

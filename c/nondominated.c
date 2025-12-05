@@ -202,10 +202,10 @@ force_bounds (double *points, int nobj, int *cumsizes, int nsets,
 }
 
 static bool
-check_dominated(const char * filename, const double *points,
-                 int nobj, const int *cumsizes, int nruns,
-                 const signed char *minmax, const signed char agree,
-                 bool * restrict nondom)
+check_dominated(const char * filename, const double * restrict points,
+                dimension_t nobj, const int * restrict cumsizes, int nruns,
+                const signed char * restrict minmax, const signed char agree,
+                bool * restrict nondom)
 {
     bool first_time = true;
     bool dominated_found = false;
@@ -213,9 +213,10 @@ check_dominated(const char * filename, const double *points,
     for (int n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
         size_t old_size = cumsizes[n] - cumsize;
         size_t new_size = (nondom == NULL)
-            ? find_dominated_point_agree(&points[nobj * cumsize], nobj, old_size, minmax, agree)
-            : find_nondominated_set_agree(&points[nobj * cumsize], nobj,
-                                          old_size, minmax, agree,
+            ? find_dominated_point_agree(&points[nobj * cumsize], old_size,
+                                         nobj, minmax, agree)
+            : find_nondominated_set_agree(&points[nobj * cumsize], old_size,
+                                          nobj, minmax, agree,
                                           &nondom[cumsize]);
 
         if (verbose_flag >= 2) {
@@ -321,17 +322,12 @@ process_file (const char *filename,
               bool check_minimum, bool check_maximum, bool maximise_all_flag,
               const bool *logarithm)
 {
-    bool logarithm_flag = false;
-
     double *points = NULL;
-    int nobj = *nobj_p;
     int *cumsizes = NULL;
     int nsets = 0;
 
     handle_read_data_error(
-        read_double_data (filename, &points, &nobj, &cumsizes, &nsets), filename);
-    ASSUME(nobj > 1 && nobj < 128);
-
+        read_double_data (filename, &points, nobj_p, &cumsizes, &nsets), filename);
     if (!filename)
         filename = stdin_name;
 
@@ -340,16 +336,19 @@ process_file (const char *filename,
         nsets = 1;
     }
 
-    /* Default minmax if not set yet.  */
+    ASSUME(*nobj_p > 1 && *nobj_p < 256);
+    dimension_t nobj = (dimension_t) *nobj_p;
+
+    // Default minmax if not set yet.
     bool free_minmax = false;
     if (minmax == NULL) {
-        minmax = maximise_all_flag ? minmax_maximise((dimension_t)nobj) : minmax_minimise((dimension_t)nobj);
+        minmax = maximise_all_flag ? minmax_maximise(nobj) : minmax_minimise(nobj);
         free_minmax = true;
     }
 
-    double *minimum = NULL;
-    double *maximum = NULL;
-    data_bounds(&minimum, &maximum, points, nobj, cumsizes[nsets - 1]);
+    double * minimum = NULL;
+    double * maximum = NULL;
+    data_bounds(&minimum, &maximum, points, cumsizes[nsets - 1], nobj);
 
     if (verbose_flag >= 2)
         print_input_info (stderr, filename, nobj, cumsizes, nsets, minmax,
@@ -381,15 +380,16 @@ process_file (const char *filename,
 
     double *log_lbound = NULL;
     double *log_ubound = NULL;
+    bool logarithm_flag = false;
 
     if (logarithm) {
         log_lbound = malloc(sizeof(double) * nobj);
         log_ubound = malloc(sizeof(double) * nobj);
 
-        memcpy (log_lbound, lbound, sizeof(double) * nobj);
-        memcpy (log_ubound, ubound, sizeof(double) * nobj);
+        memcpy(log_lbound, lbound, sizeof(double) * nobj);
+        memcpy(log_ubound, ubound, sizeof(double) * nobj);
 
-        for (int d = 0; d < nobj; d++) {
+        for (dimension_t d = 0; d < nobj; d++) {
             if (!logarithm[d]) continue;
             log_lbound[d] = log10(lbound[d]);
             log_ubound[d] = log10(ubound[d]);
@@ -399,16 +399,16 @@ process_file (const char *filename,
         if (logarithm_flag) {
             lbound = log_lbound;
             ubound = log_ubound;
-            logarithm_scale (points, nobj, cumsizes[nsets - 1], logarithm);
+            logarithm_scale(points, nobj, cumsizes[nsets - 1], logarithm);
         }
     }
 
     if (agree)
-        agree_objectives (points, nobj, cumsizes[nsets - 1], minmax, agree);
+        agree_objectives (points, cumsizes[nsets - 1], nobj, minmax, agree);
 
     if (normalise_flag)
-        normalise (points, nobj, cumsizes[nsets - 1], minmax, agree,
-                   lrange, urange, lbound, ubound);
+        normalise(points, cumsizes[nsets - 1], nobj, minmax, agree,
+                  lrange, urange, lbound, ubound);
 
     bool dominated_found = false;
     // With verbose we print the number of nondominated.
@@ -460,8 +460,6 @@ process_file (const char *filename,
 
     *minimum_p = minimum;
     *maximum_p = maximum;
-    *nobj_p = nobj;
-
     if (verbose_flag >= 2)
         fprintf (stderr, "#\n");
 
@@ -470,18 +468,7 @@ process_file (const char *filename,
 
 int main(int argc, char *argv[])
 {
-    signed char agree = 0;
-    double lower_range = 0.0;
-    double upper_range = 0.0;
-    double *lower_bound = NULL;
-    double *upper_bound = NULL;
-
-    const signed char *minmax = NULL;
-    bool maximise_all_flag = false;
-    const bool *logarithm = NULL;
-    int nobj = 0;
-
-    /* see the man page for getopt_long for an explanation of these fields */
+    // See the man page for getopt_long for an explanation of these fields.
     static const char short_options[] = "hVvqfo:a:n:u:l:Us:b";
     static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
@@ -504,6 +491,17 @@ int main(int argc, char *argv[])
         {NULL, 0, NULL, 0} /* marks end of list */
     };
     set_program_invocation_short_name(argv[0]);
+
+    signed char agree = 0;
+    double lower_range = 0.0;
+    double upper_range = 0.0;
+    double *lower_bound = NULL;
+    double *upper_bound = NULL;
+
+    const signed char *minmax = NULL;
+    bool maximise_all_flag = false;
+    const bool *logarithm = NULL;
+    int nobj = 0;
 
     int opt; /* it's actually going to hold a char */
     int longopt_index;

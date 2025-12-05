@@ -202,22 +202,22 @@ calculate_volume_between_points(const double *p1, const double * p2, int dim)
 }
 
 static void
-normalise01_inplace(double *points, int dim, int npoints,
-                    const double *lbound, const double *ubound)
+normalise01_inplace(double * restrict points, size_t npoints, dimension_t dim,
+                    const double * restrict lbound, const double * restrict ubound)
 {
-    const signed char * minmax = minmax_minimise((dimension_t) dim);
-    normalise(points, dim, npoints, minmax, /*agree=*/-1, 0.0, 1.0,
+    const signed char * minmax = minmax_minimise(dim);
+    normalise(points, npoints, dim, minmax, /*agree=*/-1, 0.0, 1.0,
               lbound, ubound);
     free((void *) minmax);
 }
 
 static double *
-normalise01(const double *points, int dim, int npoints,
+normalise01(const double *points, size_t npoints, dimension_t dim,
             const double *lbound, const double *ubound)
 {
-    double * points2 = malloc(sizeof(double) * dim * npoints);
-    memcpy(points2, points, sizeof(double) * dim * npoints);
-    normalise01_inplace(points2, dim, npoints, lbound, ubound);
+    double * points2 = malloc(sizeof(*points2) * dim * npoints);
+    memcpy(points2, points, sizeof(*points) * dim * npoints);
+    normalise01_inplace(points2, npoints, dim, lbound, ubound);
     return points2;
 }
 
@@ -229,7 +229,7 @@ whv_hype_sample(const double *points, int npoints,
 {
     const int nobj = 2;
     const double * samples = dist->create_samples(dist, nsamples);
-    const double * points2 = normalise01(points, nobj, npoints, ideal, ref);
+    const double * points2 = normalise01(points, npoints, nobj, ideal, ref);
     double whv = estimate_whv(points2, npoints, samples, nsamples);
     free((void *)samples);
     free((void *)points2);
@@ -248,7 +248,7 @@ whv_hype_estimate(const double *points, int npoints,
     const int nobj = 2;
     /* FIXME: this modifies mu, it would be better to keep mu and use a copy */
     if (dist->type == HYPE_DIST_GAUSSIAN) {
-        normalise01_inplace(dist->mu, nobj, 1, ideal, ref);
+        normalise01_inplace(dist->mu, 1, nobj, ideal, ref);
         //fprintf(stderr, "mu = %g, %g\n", dist->mu[0], dist->mu[1]);
     }
     return whv_hype_sample(points, npoints, ideal, ref, nsamples, dist);
@@ -283,8 +283,8 @@ whv_hype_gaus(const double *points, int npoints,
 {
     hype_sample_dist * dist = hype_dist_gaussian_new(seed, mu);
     const int nobj = 2;
-    /* FIXME: this modifies mu, it would be better to keep mu and use a copy */
-    normalise01_inplace(dist->mu, nobj, 1, ideal, ref);
+    // FIXME: this modifies mu, it would be better to keep mu and use a copy.
+    normalise01_inplace(dist->mu, 1, nobj, ideal, ref);
     double whv = whv_hype_sample(points, npoints, ideal, ref, nsamples, dist);
     hype_dist_free(dist);
     return whv;

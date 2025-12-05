@@ -100,23 +100,28 @@ fprint_hvc(FILE * outfile, const double * hvc, size_t n)
 */
 
 static void
-hv_file (const char *filename, double *reference,
-         double *maximum, double *minimum, int *nobj_p)
+hv_file(const char *filename, double * restrict reference,
+         double * restrict maximum, double * restrict minimum, int * restrict nobj_p)
 {
-    double *data = NULL;
-    int *cumsizes = NULL;
-    int cumsize;
+    double * data = NULL;
+    int * cumsizes = NULL;
     int nruns = 0;
-    int n;
-    int nobj = *nobj_p;
-    char *outfilename = NULL;
-    FILE *outfile = stdout;
 
     handle_read_data_error(
-        read_double_data (filename, &data, &nobj, &cumsizes, &nruns), filename);
+        read_double_data (filename, &data, nobj_p, &cumsizes, &nruns), filename);
     if (!filename)
         filename = stdin_name;
 
+    if (union_flag) {
+        cumsizes[0] = cumsizes[nruns - 1];
+        nruns = 1;
+    }
+
+    ASSUME(*nobj_p > 1 && *nobj_p < 256);
+    dimension_t nobj = (dimension_t) *nobj_p;
+
+    char * outfilename = NULL;
+    FILE * outfile = stdout;
     if (filename != stdin_name && suffix) {
         outfilename = m_strcat(filename, suffix);
         outfile = fopen (outfilename, "w");
@@ -126,17 +131,12 @@ hv_file (const char *filename, double *reference,
         }
     }
 
-    if (union_flag) {
-        cumsizes[0] = cumsizes[nruns - 1];
-        nruns = 1;
-    }
-
     if (verbose_flag >= 2)
         printf("# file: %s\n", filename);
 
     bool needs_minimum = (minimum == NULL);
     if (needs_minimum) {
-        data_bounds (&minimum, &maximum, data, nobj, cumsizes[nruns-1]);
+        data_bounds(&minimum, &maximum, data, cumsizes[nruns-1], nobj);
         if (verbose_flag >= 2) {
             printf ("# minimum:   ");
             vector_printf (minimum, nobj);
@@ -148,7 +148,7 @@ hv_file (const char *filename, double *reference,
     }
 
     if (reference != NULL) {
-        for (n = 0; n < nobj; n++) {
+        for (dimension_t n = 0; n < nobj; n++) {
             if (reference[n] <= maximum[n]) {
                 warnprintf ("%s: some points do not strictly dominate "
                             "the reference point and they will be discarded",
@@ -157,11 +157,11 @@ hv_file (const char *filename, double *reference,
             }
         }
     } else {
-        reference = malloc(nobj * sizeof(double));
-        for (n = 0; n < nobj; n++) {
-            /* default reference point is: */
+        reference = malloc(nobj * sizeof(*reference));
+        for (dimension_t n = 0; n < nobj; n++) {
+            // Default reference point is:
             reference[n] = maximum[n] + 0.1 * (maximum[n] - minimum[n]);
-            /* so that extreme points have some influence. */
+            // so that extreme points have some influence.
         }
     }
 
@@ -177,17 +177,16 @@ hv_file (const char *filename, double *reference,
     }
 
     double * hvc = NULL;
-    for (n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
+    for (int n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
         Timer_start ();
         double volume, time_elapsed;
         if (contributions_flag) {
             hvc = realloc(hvc, (cumsizes[n] - cumsize) * sizeof(*hvc));
             volume = hv_contributions(hvc, &data[nobj * cumsize],
-                                      cumsizes[n] - cumsize, (dimension_t) nobj, reference,
+                                      cumsizes[n] - cumsize, nobj, reference,
                                       /*ignore_dominated=*/true);
         } else {
-            ASSUME(nobj < 256);
-            volume = fpli_hv(&data[nobj * cumsize], cumsizes[n] - cumsize, (dimension_t) nobj, reference);
+            volume = fpli_hv(&data[nobj * cumsize], cumsizes[n] - cumsize, nobj, reference);
         }
         if (volume == 0.0) {
             errprintf ("none of the points strictly dominates the reference point\n");
@@ -213,12 +212,11 @@ hv_file (const char *filename, double *reference,
         fclose (outfile);
         free (outfilename);
     }
-    *nobj_p = nobj;
 }
 
 int main(int argc, char *argv[])
 {
-    /* See the man page for getopt_long for an explanation of these fields.  */
+    // See the man page for getopt_long for an explanation of these fields.
     static const char short_options[] = "hVvqucr:s:S";
     static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
@@ -234,7 +232,7 @@ int main(int argc, char *argv[])
 
     set_program_invocation_short_name(argv[0]);
 
-    double *reference = NULL;
+    double * reference = NULL;
     int nobj = 0;
 
     int opt; /* it's actually going to hold a char.  */
@@ -273,7 +271,7 @@ int main(int argc, char *argv[])
 
     int numfiles = argc - optind;
     if (numfiles < 1) /* Read stdin.  */
-        hv_file (NULL, reference, NULL, NULL, &nobj);
+        hv_file(NULL, reference, NULL, NULL, &nobj);
     else if (numfiles == 1) {
         hv_file (argv[optind], reference, NULL, NULL, &nobj);
     } else {
