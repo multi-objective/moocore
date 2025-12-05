@@ -9,12 +9,13 @@ int read_datasets(const char * filename, double ** restrict data_p, int * restri
 // hv.h
 double fpli_hv(const double * restrict data, size_t n, dimension_t d, const double * restrict ref);
 void hv_contributions(double * restrict hvc, double * restrict points, size_t n, dimension_t d, const double * restrict ref, bool ignore_dominated);
-
-double IGD (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);
-double IGD_plus (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);
-double avg_Hausdorff_dist (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise, unsigned int p);
-double epsilon_additive (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);
-double epsilon_mult (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);
+// igd.h
+double IGD(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const bool * restrict maximise);
+double IGD_plus(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const bool * restrict maximise);
+double avg_Hausdorff_dist(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const bool * restrict maximise, unsigned int p);
+// epsilon.h
+double epsilon_additive(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const bool * restrict maximise);
+double epsilon_mult(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const bool * restrict maximise);
 
 /* nondominated.h */
 size_t find_weakly_dominated_point(const double * points, int dim, size_t size, const bool * maximise);

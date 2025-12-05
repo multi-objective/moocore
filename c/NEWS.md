@@ -4,7 +4,8 @@
 
  * `pareto_rank()` is now O(k * n log n) in 3D, which is faster than the naive O(n^3).
  * HV3D+ is slightly faster with repeated coordinates (#41).
- * Switch argument order of `fpli_hv()`, `hv_contributions()`
+ * Switch argument order of `fpli_hv()`, `hv_contributions()`, `IGD()`,
+   `IGD_plus()`, `avg_Hausdorff_dist()`, `epsilon_additive()`, `epsilon_mult()`
    to pass first the number of rows then the number of columns.
 
 ## 0.17.0

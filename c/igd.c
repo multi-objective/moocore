@@ -168,7 +168,7 @@ do_file (const char *filename, double *reference, size_t reference_size,
 
     for (int n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
         _attr_maybe_unused double time_elapsed = 0;
-        int size_a = cumsizes[n] - cumsize;
+        size_t size_a = cumsizes[n] - cumsize;
         const double *points_a = &data[nobj * cumsize];
         //Timer_start ();
         sep = "\0";
@@ -177,7 +177,7 @@ do_file (const char *filename, double *reference, size_t reference_size,
         do {                                                                   \
             if (IF) {                                                          \
                 fprintf (outfile, "%s" indicator_printf_format, sep,           \
-                         FUN(nobj, minmax, points_a, size_a, reference, (int) reference_size, ## __VA_ARGS__)); \
+                         FUN((dimension_t) nobj, minmax, points_a, size_a, reference, reference_size, ## __VA_ARGS__)); \
                 sep = "\t";                                                    \
             }                                                                  \
         } while (0)

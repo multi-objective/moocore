@@ -504,10 +504,10 @@ static inline SEXP
 unary_metric_ref(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE,
                  enum unary_metric_t metric, SEXP EXTRA)
 {
-    /* We transpose the matrix before calling this function. */
+    // We transpose the matrix before calling this function.
     SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
     double *ref = REAL(REFERENCE);
-    /* We transpose the matrix before calling this function. */
+    // We transpose the matrix before calling this function.
     int ref_size = Rf_ncols(REFERENCE);
     SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
     assert (nobj == maximise_len);
@@ -515,20 +515,20 @@ unary_metric_ref(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE,
     double value;
     switch (metric) {
       case EPSILON_ADD:
-          value = epsilon_additive (data, nobj, npoint, ref, ref_size, maximise);
+          value = epsilon_additive(data, npoint, nobj, ref, ref_size, maximise);
           break;
       case EPSILON_MUL:
-          value = epsilon_mult (data, nobj, npoint, ref, ref_size, maximise);
+          value = epsilon_mult(data, npoint, nobj, ref, ref_size, maximise);
           break;
       case INV_GD:
-          value = IGD (data, nobj, npoint, ref, ref_size, maximise);
+          value = IGD(data, npoint, nobj, ref, ref_size, maximise);
           break;
       case INV_GDPLUS:
-          value = IGD_plus (data, nobj, npoint, ref, ref_size, maximise);
+          value = IGD_plus(data, npoint, nobj, ref, ref_size, maximise);
           break;
       case AVG_HAUSDORFF: {
           SEXP_2_INT(EXTRA, p);
-          value = avg_Hausdorff_dist (data, nobj, npoint, ref, ref_size, maximise, p);
+          value = avg_Hausdorff_dist(data, npoint, nobj, ref, ref_size, maximise, p);
           break;
       }
       default:

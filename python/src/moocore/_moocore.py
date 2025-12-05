@@ -188,10 +188,12 @@ def _unary_refset_common(
             )
 
     maximise = _parse_maximise(maximise, nobj)
-    data_p, npoints, nobj = np2d_to_double_array(data)
-    ref_p, ref_size = np1d_to_double_array(ref)
+    data_p, npoints, nobj = np2d_to_double_array(
+        data, ctype_shape=("size_t", "uint_fast8_t")
+    )
+    ref_p, ref_size = np1d_to_double_array(ref, ctype_size="size_t")
     maximise_p = ffi.from_buffer("bool []", maximise)
-    return data_p, nobj, npoints, ref_p, ref_size, maximise_p
+    return data_p, npoints, nobj, ref_p, ref_size, maximise_p
 
 
 def igd(
@@ -210,10 +212,10 @@ def igd(
         A single numerical value.
 
     """
-    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
+    data_p, n, d, ref_p, ref_size, maximise_p = _unary_refset_common(
         data, ref, maximise
     )
-    return lib.IGD(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
+    return lib.IGD(data_p, n, d, ref_p, ref_size, maximise_p)
 
 
 def igd_plus(
@@ -279,10 +281,10 @@ def igd_plus(
 
 
     """  # noqa: D401
-    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
+    data_p, n, d, ref_p, ref_size, maximise_p = _unary_refset_common(
         data, ref, maximise
     )
-    return lib.IGD_plus(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
+    return lib.IGD_plus(data_p, n, d, ref_p, ref_size, maximise_p)
 
 
 def avg_hausdorff_dist(  # noqa: D417
@@ -310,13 +312,11 @@ def avg_hausdorff_dist(  # noqa: D417
     if p <= 0:
         raise ValueError("'p' must be larger than zero")
 
-    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
+    data_p, n, d, ref_p, ref_size, maximise_p = _unary_refset_common(
         data, ref, maximise
     )
     p = ffi.cast("unsigned int", p)
-    return lib.avg_Hausdorff_dist(
-        data_p, nobj, npoints, ref_p, ref_size, maximise_p, p
-    )
+    return lib.avg_Hausdorff_dist(data_p, n, d, ref_p, ref_size, maximise_p, p)
 
 
 def epsilon_additive(
@@ -364,12 +364,10 @@ def epsilon_additive(
     3.5
 
     """
-    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
+    data_p, n, d, ref_p, ref_size, maximise_p = _unary_refset_common(
         data, ref, maximise
     )
-    return lib.epsilon_additive(
-        data_p, nobj, npoints, ref_p, ref_size, maximise_p
-    )
+    return lib.epsilon_additive(data_p, n, d, ref_p, ref_size, maximise_p)
 
 
 def epsilon_mult(
@@ -391,10 +389,10 @@ def epsilon_mult(
         A single numerical value.
 
     """
-    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
+    data_p, n, d, ref_p, ref_size, maximise_p = _unary_refset_common(
         data, ref, maximise, check_all_positive=True
     )
-    return lib.epsilon_mult(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
+    return lib.epsilon_mult(data_p, n, d, ref_p, ref_size, maximise_p)
 
 
 def _hypervolume(data: ArrayLike, ref: ArrayLike) -> float:
