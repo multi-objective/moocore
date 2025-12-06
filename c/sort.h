@@ -39,6 +39,16 @@ weakly_dominates(const double * restrict a, const double * restrict b, const dim
 }
 
 static inline bool
+any_less_than(const double * restrict a, const double * restrict b, dimension_t dim)
+{
+    for (dimension_t d = 0; d < dim; d++)
+        if (a[d] < b[d])
+            return true;
+    return false;
+}
+
+
+static inline bool
 lexicographic_less_3d(const double * restrict a, const double * restrict b)
 {
     return a[2] < b[2] || (a[2] == b[2] && (a[1] < b[1] || (a[1] == b[1] && a[0] <= b[0])));

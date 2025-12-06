@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
-#include "hvapprox.h"
 #include "common.h"
+#include "hvapprox.h"
 #include "pow_int.h"
 #include "rng.h"
 
@@ -175,14 +175,11 @@ euclidean_norm(const double * restrict w, dimension_t dim)
    Computation, 23(5), 913–918. doi:10.1109/tevc.2019.2895108 .
 */
 double
-hv_approx_normal(const double * restrict data, int nobjs, int n,
+hv_approx_normal(const double * restrict data, size_t npoints, dimension_t dim,
                  const double * restrict ref, const bool * restrict maximise,
                  uint_fast32_t nsamples, uint32_t random_seed)
 {
-    ASSUME(nobjs > 1 && nobjs < 32);
-    ASSUME(n >= 0);
-    const dimension_t dim = (dimension_t) nobjs;
-    size_t npoints = (size_t) n;
+    ASSUME(dim > 1 && dim < 32);
     const double * points = transform_and_filter(data, &npoints, dim, ref, maximise);
     if (points == NULL)
         return 0;
@@ -211,7 +208,7 @@ hv_approx_normal(const double * restrict data, int nobjs, int n,
     }
     free(w);
     free(rng);
-    free((void*)points);
+    free((void *)points);
     const long double c_m = sphere_area_div_2_pow_d_times_d[dim];
     return STATIC_CAST(double, c_m * (expected / STATIC_CAST(long double, nsamples)));
 }
@@ -617,14 +614,11 @@ compute_hua_wang_direction(double * restrict direction, dimension_t dim,
    Computation, 23(5), 913–918. doi:10.1109/tevc.2019.2895108 .
 */
 double
-hv_approx_hua_wang(const double * restrict data, int nobjs, int n,
+hv_approx_hua_wang(const double * restrict data, size_t npoints, dimension_t dim,
                    const double * restrict ref, const bool * restrict maximise,
                    uint_fast32_t nsamples)
 {
-    ASSUME(nobjs > 1 && nobjs < 32);
-    ASSUME(n >= 0);
-    const dimension_t dim = (dimension_t) nobjs;
-    size_t npoints = (size_t) n;
+    ASSUME(dim > 1 && dim < 32);
     const double * points = transform_and_filter(data, &npoints, dim, ref, maximise);
     if (points == NULL)
         return 0;
@@ -653,7 +647,7 @@ hv_approx_hua_wang(const double * restrict data, int nobjs, int n,
     }
     free((void *) int_all);
     free((void *) polar_a);
-    free((void*)points);
+    free((void *) points);
     const long double c_m = sphere_area_div_2_pow_d_times_d[dim];
     return STATIC_CAST(double, c_m * (expected / STATIC_CAST(long double, nsamples)));
 }

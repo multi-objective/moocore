@@ -179,15 +179,11 @@ int main(int argc, char *argv[])
     double * points = NULL;
     int * cumsizes = NULL;
     int nsets = 0;
-    // FIXME: Instead of this strange call, create a wrapper read_data_robust.
-    handle_read_data_error(
-        read_double_data (filename, &points, &dim, &cumsizes, &nsets),
-        filename);
-    if (!filename)
+    robust_read_double_data(filename, &points, &dim, &cumsizes, &nsets, /* union_flag=*/true);
+    if (filename == NULL)
         filename = stdin_name;
-
-    const int size = cumsizes[0] = cumsizes[nsets - 1];
-    nsets = 1;
+    const int size = cumsizes[0];
+    free(cumsizes);
 
     // Default minmax if not set yet.
     if (minmax == NULL)
@@ -201,14 +197,14 @@ int main(int argc, char *argv[])
     int * rank = pareto_rank(points, size, (dimension_t) dim);
 
     if (only_rank_flag) {
-        fprint_rank (stdout, rank, size);
+        fprint_rank(stdout, rank, size);
 
     } else {
         bool *uev = NULL;
         static const double upper_range = 0.9;
         static const double lower_range = 0.0;
 
-        double * order = malloc (sizeof(double) * size);
+        double * order = malloc (sizeof(*order) * size);
         int max_rank = 0;
         for (int k = 0; k < size; k++) {
             if (rank[k] > max_rank) max_rank = rank[k];
@@ -263,9 +259,8 @@ int main(int argc, char *argv[])
         free (order);
     }
 
-    free (rank);
-    free (cumsizes);
-    free (points);
-    free ((void *) minmax);
+    free(rank);
+    free(points);
+    free((void *) minmax);
     return 0;
 }

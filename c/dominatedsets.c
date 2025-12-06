@@ -379,9 +379,9 @@ int main(int argc, char *argv[])
         points[k] = NULL;
         cumsizes[k] = NULL;
         nruns[k] = 0;
-        handle_read_data_error(
-            read_double_data (filenames[k], &points[k], &dim, &cumsizes[k], &nruns[k]),
-            filenames[k]);
+        robust_read_double_data(filenames[k], &points[k], &dim,
+                                &cumsizes[k], &nruns[k],
+                                /* union_flag=*/false);
     }
 
     // Default minmax if not set yet.

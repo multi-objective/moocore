@@ -87,6 +87,18 @@ minmax_maximise(dimension_t nobj)
     return default_minmax(nobj, AGREE_MAXIMISE);
 }
 
+static inline bool
+minmax_alloc(const signed char * restrict * minmax, bool maximise_all_flag,
+             dimension_t d)
+{
+    if (*minmax == NULL) {
+        *minmax = maximise_all_flag ? minmax_maximise(d) : minmax_minimise(d);
+        return true;
+    }
+    return false;
+}
+
+
 // FIXME: It would be more efficient to default to false (using calloc) and
 // change to true.
 static inline bool *
@@ -454,7 +466,7 @@ find_dominated_point_(const double * restrict points, size_t size, dimension_t d
             res = find_dominated_3d_(pp, size, keep_weakly);
         }
         if (pp != points)
-            free((void*)pp);
+            free((void *) pp);
         return res;
     }
 
@@ -502,7 +514,7 @@ find_nondominated_set_(const double * restrict points, size_t size, dimension_t 
             res = find_nondominated_set_3d_(pp, size, nondom, keep_weakly);
         }
         if (pp != points)
-            free((void*)pp);
+            free((void *) pp);
         return res;
     }
 

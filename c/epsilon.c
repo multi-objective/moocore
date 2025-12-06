@@ -90,13 +90,9 @@ do_file(const char * filename, double * restrict reference, size_t reference_siz
     double * data = NULL;
     int * cumsizes = NULL;
     int nruns = 0;
-
-    handle_read_data_error(
-        read_double_data(filename, &data, nobj_p, &cumsizes, &nruns), filename);
-    if (!filename)
+    robust_read_double_data(filename, &data, nobj_p, &cumsizes, &nruns, /*union_flag=*/false);
+    if (filename == NULL)
         filename = stdin_name;
-
-    ASSUME(*nobj_p > 1 && *nobj_p < 256);
     dimension_t nobj = (dimension_t) *nobj_p;
 
     if (!additive_flag && !all_positive(data, cumsizes[nruns - 1], nobj)) {
@@ -104,28 +100,10 @@ do_file(const char * filename, double * restrict reference, size_t reference_siz
         exit(EXIT_FAILURE);
     }
 
-    char *outfilename = NULL;
-    FILE *outfile = stdout;
-    if (filename != stdin_name && suffix) {
-        outfilename = m_strcat(filename, suffix);
-        outfile = fopen (outfilename, "w");
-        if (outfile == NULL) {
-            errprintf ("%s: %s\n", outfilename, strerror(errno));
-            exit (EXIT_FAILURE);
-        }
-    }
-#if 0
-    if (union_flag) {
-        cumsizes[0] = cumsizes[nruns - 1];
-        nruns = 1;
-    }
-#endif
-    /* Default minmax if not set yet.  */
-    bool free_minmax = false;
-    if (minmax == NULL) {
-        minmax = maximise_all_flag ? minmax_maximise(nobj) : minmax_minimise(nobj);
-        free_minmax = true;
-    }
+    const char * outfilename = NULL;
+    FILE * outfile = fopen_outfile(&outfilename, filename, suffix);
+    // Default minmax if not set yet.
+    bool free_minmax = minmax_alloc(&minmax, maximise_all_flag, nobj);
 
     if (verbose_flag)
         printf("# file: %s\n", filename);
@@ -152,15 +130,10 @@ do_file(const char * filename, double * restrict reference, size_t reference_siz
          */
     }
 
-    if (outfilename) {
-        if (verbose_flag)
-            fprintf (stderr, "# %s -> %s\n", filename, outfilename);
-        fclose (outfile);
-        free (outfilename);
-    }
-    free (data);
-    free (cumsizes);
-    if (free_minmax) free( (void *) minmax);
+    fclose_outfile(outfile, filename, outfilename, verbose_flag);
+    free(data);
+    free(cumsizes);
+    if (free_minmax) free((void *) minmax);
 }
 
 int main(int argc, char *argv[])
@@ -186,11 +159,11 @@ int main(int argc, char *argv[])
     set_program_invocation_short_name(argv[0]);
 
     bool check_flag = true;
-    double *reference = NULL;
+    double * reference = NULL;
     size_t reference_size = 0;
-    const signed char *minmax = NULL;
+    const signed char * minmax = NULL;
     bool maximise_all_flag = false;
-    int nobj = 0, tmp_nobj = 0;
+    int nobj = 0;
 
     int opt; /* it's actually going to hold a char */
     int longopt_index;
@@ -218,17 +191,7 @@ int main(int argc, char *argv[])
             break;
 
         case 'r': // --reference
-            reference_size = read_reference_set(&reference, optarg, &tmp_nobj);
-            if (reference == NULL || reference_size == 0) {
-                errprintf ("invalid reference set '%s", optarg);
-                exit(EXIT_FAILURE);
-            }
-            if (nobj == 0) {
-                nobj = tmp_nobj;
-            } else if (tmp_nobj != nobj) {
-                errprintf ("number of objectives in --obj (%d) and reference set (%d) do not match", nobj, tmp_nobj);
-                exit(EXIT_FAILURE);
-            }
+            reference_size = read_reference_set(optarg, &reference, &nobj);
             break;
 
         case 's': // --suffix
@@ -305,6 +268,6 @@ int main(int argc, char *argv[])
     }
 
     free(reference);
-    free((void*)minmax);
+    free((void *)minmax);
     return EXIT_SUCCESS;
 }

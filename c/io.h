@@ -27,11 +27,11 @@ enum ERROR_READ_DATA { READ_INPUT_FILE_EMPTY = -1,
 };
 
 int
-read_int_data (const char * filename, int ** restrict data_p,
-               int * restrict nobjs_p, int ** restrict cumsizes_p, int * restrict nsets_p);
+read_int_data(const char * filename, int ** restrict data_p,
+              int * restrict nobjs_p, int ** restrict cumsizes_p, int * restrict nsets_p);
 int
-read_double_data (const char *filename, double ** restrict data_p,
-                  int * restrict nobjs_p, int ** restrict cumsizes_p, int * restrict nsets_p);
+read_double_data(const char * filename, double ** restrict data_p,
+                 int * restrict nobjs_p, int ** restrict cumsizes_p, int * restrict nsets_p);
 
 #ifndef R_PACKAGE
 

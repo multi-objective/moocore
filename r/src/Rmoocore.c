@@ -69,7 +69,7 @@ compute_eafdiff_C(SEXP DATA, SEXP CUMSIZES, SEXP INTERVALS)
     const int totalpoints = eaf_totalpoints (eaf, nruns);
 
     SEXP mat = PROTECT(Rf_allocMatrix(REALSXP, totalpoints, nobj + 1));
-    double *rmat = REAL(mat);
+    double * rmat = REAL(mat);
 
     int pos = 0;
     for (int k = 0; k < nruns; k++) {
@@ -467,7 +467,7 @@ hv_approx_dz2019_mc_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE, SEXP NSAMPLES, S
     assert(nobj == reference_len);
     assert(nobj == maximise_len);
 
-    double hv = hv_approx_normal(data, nobj, npoints, ref, maximise, (uint_fast32_t) nsamples, seed);
+    double hv = hv_approx_normal(data, npoints, nobj, ref, maximise, (uint_fast32_t) nsamples, seed);
     free (maximise);
     return Rf_ScalarReal(hv);
 }
@@ -483,8 +483,8 @@ hv_approx_dz2019_hw_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE, SEXP NSAMPLES)
     assert(nobj == reference_len);
     assert(nobj == maximise_len);
 
-    double hv = hv_approx_hua_wang(data, nobj, npoints, ref, maximise, (uint_fast32_t) nsamples);
-    free (maximise);
+    double hv = hv_approx_hua_wang(data, npoints, nobj, ref, maximise, (uint_fast32_t) nsamples);
+    free(maximise);
     return Rf_ScalarReal(hv);
 }
 

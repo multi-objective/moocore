@@ -59,23 +59,39 @@ static void version(void)
 #endif
 
 static inline void
-handle_read_data_error (int err, const char *filename)
+handle_read_data_error(int err, const char * filename)
 {
     switch (err) {
       case 0: /* No error */
-          break;
+          return;
 
       case READ_INPUT_FILE_EMPTY:
           if (!filename)
               filename = stdin_name;
-          errprintf ("%s: no input data.", filename);
-          exit (EXIT_FAILURE);
+          errprintf("%s: no input data.", filename);
+          exit(EXIT_FAILURE);
 
       case READ_INPUT_WRONG_INITIAL_DIM:
-          errprintf ("check the argument of " READ_INPUT_WRONG_INITIAL_DIM_ERRSTR  ".");
+          errprintf("check the argument of " READ_INPUT_WRONG_INITIAL_DIM_ERRSTR  ".");
           /* fall-through */
       default:
-          exit (EXIT_FAILURE);
+          exit(EXIT_FAILURE);
+    }
+}
+
+static void
+robust_read_double_data(const char * filename, double ** restrict data_p,
+                        int * restrict nobjs_p, int ** restrict cumsizes_p,
+                        int * restrict nsets_p, bool union_flag)
+{
+    handle_read_data_error(
+        read_double_data(filename, data_p, nobjs_p, cumsizes_p, nsets_p),
+        filename);
+    assert(*nsets_p > 0);
+    assert(*nobjs_p > 1 && *nobjs_p < 256);
+    if (union_flag) {
+        (*cumsizes_p)[0] = (*cumsizes_p)[*nsets_p - 1];
+        *nsets_p = 1;
     }
 }
 
@@ -91,23 +107,25 @@ handle_read_data_error (int err, const char *filename)
 */
 
 static inline size_t
-read_reference_set (double **reference_p, const char *filename, int *nobj_p)
+read_reference_set(const char * filename, double ** restrict reference,
+                   int * restrict nobj_p)
 {
-    double *reference = NULL;
-    int *cumsizes = NULL;
+    int tmp_nobj = 0;
+    int * cumsizes = NULL;
     int nruns = 0;
-    int nobj = *nobj_p;
-    size_t reference_size;
-
-    handle_read_data_error(
-        read_double_data (filename, &reference, &nobj, &cumsizes, &nruns),
-        filename);
-    if (!filename)
-        filename = stdin_name;
-    reference_size = (size_t) cumsizes[nruns - 1];
+    assert(filename != NULL);
+    robust_read_double_data(filename, reference, &tmp_nobj, &cumsizes, &nruns,
+                            /* union_flag=*/true);
+    size_t reference_size = cumsizes[0];
     free(cumsizes);
-    *nobj_p = nobj;
-    *reference_p = reference;
+    if (reference == NULL || reference_size == 0)
+        fatal_error("invalid reference set '%s", optarg);
+
+    if (*nobj_p == 0) {
+        *nobj_p = tmp_nobj;
+    } else if (tmp_nobj != *nobj_p) {
+        fatal_error("number of objectives in --obj (%d) and reference set (%d) do not match", *nobj_p, tmp_nobj);
+    }
     return reference_size;
 }
 
@@ -117,14 +135,14 @@ static inline double *
 read_point(char * str, int * nobj)
 {
     int k = 0, size = 10;
-    double * point = malloc(size * sizeof(double));
+    double * point = malloc(size * sizeof(*point));
     char * endp = str;
     char * cursor;
     do {
         cursor = endp;
         if (k == size) {
             size += 10;
-            point = realloc(point, size * sizeof(double));
+            point = realloc(point, size * sizeof(*point));
         }
         point[k] = strtod(cursor, &endp);
         k++;
@@ -144,18 +162,55 @@ read_point(char * str, int * nobj)
         return NULL;
     }
     if (k < size)
-        point = realloc(point, k * sizeof(double));
+        point = realloc(point, k * sizeof(*point));
     *nobj = k - 1;
     return point;
 }
 
 static inline double *
-robust_read_point(char * restrict optarg, int *nobj, const char * restrict errmsg)
+robust_read_point(char * restrict optarg, int * restrict nobj, const char * restrict errmsg)
 {
     double * point = read_point(optarg, nobj);
     if (point == NULL)
         fatal_error(errmsg, optarg);
     return point;
+}
+
+static inline char * m_strcat(const char * a, const char * b)
+{
+    size_t dest_len = strlen(a) + strlen(b) + 1;
+    char * dest = malloc(sizeof(*dest) * dest_len);
+    if (unlikely(dest == NULL))
+        return NULL;
+    strcpy(dest, a);
+    strcat(dest, b);
+    return dest;
+}
+
+static inline FILE *
+fopen_outfile(const char ** outfilename, const char * restrict filename,
+              const char * restrict suffix)
+{
+    FILE * outfile = stdout;
+    if (filename != stdin_name && suffix) {
+        *outfilename = m_strcat(filename, suffix);
+        outfile = fopen(*outfilename, "w");
+        if (outfile == NULL)
+            fatal_error("%s: %s\n", *outfilename, strerror(errno));
+    }
+    return outfile;
+}
+
+static inline void
+fclose_outfile(FILE * outfile, const char * filename, const char * outfilename,
+               bool verbose_flag)
+{
+    if (outfilename) {
+        if (verbose_flag)
+            fprintf(stderr, "# %s -> %s\n", filename, outfilename);
+        fclose(outfile);
+        free((void *) outfilename);
+    }
 }
 
 #include <math.h> // INFINITY
@@ -191,53 +246,40 @@ data_bounds(double * restrict * restrict minimum_p, double * restrict * restrict
 }
 
 _attr_maybe_unused static void
-file_bounds (const char * filename,
-             double * restrict * restrict maximum_p, double * restrict * restrict minimum_p,
-             int * restrict dim_p)
+file_bounds(const char * filename, double * restrict * restrict maximum_p,
+            double * restrict * restrict minimum_p, int * restrict dim_p)
 {
     double * data = NULL;
     int * cumsizes = NULL;
     int nruns = 0;
-    handle_read_data_error(
-        read_double_data(filename, &data, dim_p, &cumsizes, &nruns),
-        filename);
-    assert(nruns > 0);
-    assert(*dim_p > 1 && *dim_p < 256);
-    data_bounds(minimum_p, maximum_p, data, cumsizes[nruns - 1], (dimension_t) *dim_p);
-    free(data);
+    assert(filename != NULL);
+    robust_read_double_data(filename, &data, dim_p, &cumsizes, &nruns,
+                            /* union_flag=*/true);
+    size_t size = cumsizes[0];
     free(cumsizes);
+    data_bounds(minimum_p, maximum_p, data, size, (dimension_t) *dim_p);
+    free(data);
 }
 
-static inline char * m_strcat(const char * a, const char * b)
-{
-    size_t dest_len = strlen(a) + strlen(b) + 1;
-    char * dest = malloc(sizeof(char) * dest_len);
-    if (unlikely(dest == NULL))
-        return NULL;
-    strcpy (dest, a);
-    strcat (dest, b);
-    return dest;
-}
-
-static inline const char *str_is_default(bool flag)
+static inline const char * str_is_default(bool flag)
 {
     return flag ? "(default)" : "";
 }
 
-static inline void set_program_invocation_short_name(char *s)
+static inline void set_program_invocation_short_name(char * s)
 {
     if (program_invocation_short_name == NULL || program_invocation_short_name[0] == '\0')
         program_invocation_short_name = s;
 }
 
 static inline const signed char *
-parse_cmdline_minmax(const signed char * minmax, const char *optarg, int *nobj_p)
+parse_cmdline_minmax(const signed char * restrict minmax, const char * restrict optarg, int * restrict nobj_p)
 {
     int tmp_nobj = 0, nobj = *nobj_p;
 
     if (minmax != NULL)
         free((void *) minmax);
-    minmax = read_minmax (optarg, &tmp_nobj);
+    minmax = read_minmax(optarg, &tmp_nobj);
     if (minmax == NULL) {
         errprintf ("invalid argument '%s' for -o, --obj"
                    ", it should be a sequence of '+' or '-'\n", optarg);

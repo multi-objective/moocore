@@ -274,7 +274,7 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
 static inline void
 free_cdllist(dlnode_t * restrict list)
 {
-    free((void*) list->x); // Free sentinels.
+    free((void *) list->x); // Free sentinels.
     free(list);
 }
 

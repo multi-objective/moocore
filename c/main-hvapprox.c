@@ -87,38 +87,21 @@ OPTION_SEED_STR
 
 // FIXME: There is a similar function in main-hv.c
 static void
-hvapprox_file (const char * filename, double * restrict reference,
-               double * restrict maximum, double * restrict minimum,
-               int * restrict nobj_p,
-               uint_fast32_t nsamples, enum approx_method_t hv_approx_method, uint32_t seed)
+hvapprox_file(const char * filename, double * restrict reference,
+              double * restrict maximum, double * restrict minimum,
+              int * restrict nobj_p,
+              uint_fast32_t nsamples, enum approx_method_t hv_approx_method, uint32_t seed)
 {
     double * data = NULL;
     int * cumsizes = NULL;
     int nruns = 0;
-
-    handle_read_data_error(
-        read_double_data (filename, &data, nobj_p, &cumsizes, &nruns), filename);
-    if (!filename)
+    robust_read_double_data(filename, &data, nobj_p, &cumsizes, &nruns, union_flag);
+    if (filename == NULL)
         filename = stdin_name;
-
-    if (union_flag) {
-        cumsizes[0] = cumsizes[nruns - 1];
-        nruns = 1;
-    }
-
-    ASSUME(*nobj_p > 1 && *nobj_p < 256);
     dimension_t nobj = (dimension_t) *nobj_p;
 
-    char * outfilename = NULL;
-    FILE * outfile = stdout;
-    if (filename != stdin_name && suffix) {
-        outfilename = m_strcat(filename, suffix);
-        outfile = fopen (outfilename, "w");
-        if (outfile == NULL) {
-            errprintf ("%s: %s\n", outfilename, strerror(errno));
-            exit (EXIT_FAILURE);
-        }
-    }
+    const char * outfilename = NULL;
+    FILE * outfile = fopen_outfile(&outfilename, filename, suffix);
 
     if (verbose_flag >= 2)
         printf("# file: %s\n", filename);
@@ -161,17 +144,17 @@ hvapprox_file (const char * filename, double * restrict reference,
     }
 
     // Minimise everything by default.
-    const bool * maximise = new_bool_maximise((dimension_t) nobj, false);
+    const bool * maximise = new_bool_maximise(nobj, false);
     for (int n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
         Timer_start ();
 
         double volume;
         switch (hv_approx_method) {
           case DZ2019_MC:
-              volume = hv_approx_normal(&data[nobj * cumsize], nobj, cumsizes[n] - cumsize, reference, maximise, nsamples, seed);
+              volume = hv_approx_normal(&data[nobj * cumsize], cumsizes[n] - cumsize, nobj, reference, maximise, nsamples, seed);
               break;
           case DZ2019_HW:
-              volume = hv_approx_hua_wang(&data[nobj * cumsize], nobj, cumsizes[n] - cumsize, reference, maximise, nsamples);
+              volume = hv_approx_hua_wang(&data[nobj * cumsize], cumsizes[n] - cumsize, nobj, reference, maximise, nsamples);
               break;
           default:
               unreachable();  // COVR_EXCL_LINE # nocov
@@ -188,15 +171,10 @@ hvapprox_file (const char * filename, double * restrict reference,
             fprintf (outfile, "# Time: %f seconds\n", time_elapsed);
     }
 
-    if (outfilename) {
-        if (verbose_flag)
-            fprintf (stderr, "# %s -> %s\n", filename, outfilename);
-        fclose (outfile);
-        free (outfilename);
-    }
-    free ((void *) maximise);
-    free (data);
-    free (cumsizes);
+    fclose_outfile(outfile, filename, outfilename, verbose_flag);
+    free((void *) maximise);
+    free(data);
+    free(cumsizes);
     if (needs_minimum) {
         free (minimum);
         free (maximum);
@@ -311,8 +289,8 @@ int main(int argc, char *argv[])
         hvapprox_file (argv[optind], reference, NULL, NULL, &nobj, nsamples, hv_approx_method, seed);
     } else {
         int k;
-        double *maximum = NULL;
-        double *minimum = NULL;
+        double * maximum = NULL;
+        double * minimum = NULL;
         if (reference == NULL) {
             /* Calculate the maximum among all input files to use as
                reference point.  */

@@ -963,30 +963,37 @@ def hv_approx(
             f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
         )
 
-    maximise = _parse_maximise(maximise, nobj)
-    maximise = ffi.from_buffer("bool []", maximise)
-    data_p, npoints, nobj = np2d_to_double_array(data)
-    ref = ffi.from_buffer("double []", ref)
-
     if not is_integer_value(nsamples):
         raise ValueError(f"nsamples must be an integer value: {nsamples}")
     nsamples = ffi.cast("uint_fast32_t", nsamples)
-    if method == "DZ2019-MC":
-        seed = _get_seed_for_c(seed)
-        hv = lib.hv_approx_normal(
-            data_p, nobj, npoints, ref, maximise, nsamples, seed
-        )
-    elif method == "DZ2019-HW":
-        hv = lib.hv_approx_hua_wang(
-            data_p, nobj, npoints, ref, maximise, nsamples
-        )
-    else:
-        raise ValueError("Unknown value of method = {method}")
+
+    maximise = _parse_maximise(maximise, nobj)
+    maximise = ffi.from_buffer("bool []", maximise)
+    data_p, npoints, nobj = np2d_to_double_array(
+        data, ctype_shape=("size_t", "uint_fast8_t")
+    )
+    ref = ffi.from_buffer("double []", ref)
+
+    match method:
+        case "DZ2019-MC":
+            seed = _get_seed_for_c(seed)
+            hv = lib.hv_approx_normal(
+                data_p, npoints, nobj, ref, maximise, nsamples, seed
+            )
+        case "DZ2019-HW":
+            hv = lib.hv_approx_hua_wang(
+                data_p, npoints, nobj, ref, maximise, nsamples
+            )
+        case _:
+            raise ValueError("Unknown value of method = {method}")
 
     return hv
 
 
-# FIXME: Implement also WFG hard type described here: https://www.sciencedirect.com/science/article/pii/S0305054816301538?via=ihub#bib26 (code: https://github.com/renaudlr/moo-nondominated-sets/blob/master/wfgHardGenerator.R)
+# FIXME: Implement also WFG hard type described here:
+# https://www.sciencedirect.com/science/article/pii/S0305054816301538?via=ihub#bib26
+# (code:
+# https://github.com/renaudlr/moo-nondominated-sets/blob/master/wfgHardGenerator.R)
 
 
 def generate_ndset(
@@ -2198,10 +2205,6 @@ def whv_rect(
             "Invalid number of columns in 'rectangles' (should be 5)"
         )
 
-    ref = atleast_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
-    x, npoints, _ = np2d_to_double_array(x)
-    ref = ffi.from_buffer("double []", ref)
-    rectangles, rectangles_nrow, _ = np2d_to_double_array(rectangles)
     maximise = _parse_maximise(maximise, nobj)
     if maximise.any():
         raise NotImplementedError("Only minimization is currently supported")
@@ -2215,6 +2218,10 @@ def whv_rect(
     #     else:
     #         pos = np.flatnonzero(maximise) + [0,2]
     #         rectangles[:, pos] = -rectangles[:, pos]
+    ref = atleast_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
+    ref = ffi.from_buffer("double []", ref)
+    x, npoints, _ = np2d_to_double_array(x)
+    rectangles, rectangles_nrow, _ = np2d_to_double_array(rectangles)
     hv = lib.rect_weighted_hv2d(x, npoints, rectangles, rectangles_nrow, ref)
     return hv
 

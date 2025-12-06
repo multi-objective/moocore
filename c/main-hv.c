@@ -106,30 +106,13 @@ hv_file(const char *filename, double * restrict reference,
     double * data = NULL;
     int * cumsizes = NULL;
     int nruns = 0;
-
-    handle_read_data_error(
-        read_double_data (filename, &data, nobj_p, &cumsizes, &nruns), filename);
-    if (!filename)
+    robust_read_double_data(filename, &data, nobj_p, &cumsizes, &nruns, union_flag);
+    if (filename == NULL)
         filename = stdin_name;
-
-    if (union_flag) {
-        cumsizes[0] = cumsizes[nruns - 1];
-        nruns = 1;
-    }
-
-    ASSUME(*nobj_p > 1 && *nobj_p < 256);
     dimension_t nobj = (dimension_t) *nobj_p;
 
-    char * outfilename = NULL;
-    FILE * outfile = stdout;
-    if (filename != stdin_name && suffix) {
-        outfilename = m_strcat(filename, suffix);
-        outfile = fopen (outfilename, "w");
-        if (outfile == NULL) {
-            errprintf ("%s: %s\n", outfilename, strerror(errno));
-            exit (EXIT_FAILURE);
-        }
-    }
+    const char * outfilename = NULL;
+    FILE * outfile = fopen_outfile(&outfilename, filename, suffix);
 
     if (verbose_flag >= 2)
         printf("# file: %s\n", filename);
@@ -203,15 +186,9 @@ hv_file(const char *filename, double * restrict reference,
     }
     if (contributions_flag)
         free(hvc);
+    fclose_outfile(outfile, filename, outfilename, verbose_flag);
     free(data);
     free(cumsizes);
-
-    if (outfilename) {
-        if (verbose_flag)
-            fprintf (stderr, "# %s -> %s\n", filename, outfilename);
-        fclose (outfile);
-        free (outfilename);
-    }
 }
 
 int main(int argc, char *argv[])

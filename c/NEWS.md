@@ -7,7 +7,7 @@
  * Switch argument order of `fpli_hv()`, `hv_contributions()`, `IGD()`,
    `IGD_plus()`, `avg_Hausdorff_dist()`, `epsilon_additive()`, `epsilon_mult()`,
    `find_weakly_dominated_point()`, `is_nondominated()`, `pareto_rank()`,
-   `agree_normalise()`
+   `agree_normalise()`, `hv_approx_hua_wang()`, `hv_approx_normal()`
    to pass first the number of rows then the number of columns.
 
 ## 0.17.0

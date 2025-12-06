@@ -6,7 +6,7 @@ extern char *program_invocation_short_name;
 char *program_invocation_short_name;
 #endif
 
-/* Do not inline it so we can set a breakpoint when debugging. */
+// Do not inline it so we can set a breakpoint when debugging.
 void fatal_error(const char *format,...)
 {
     va_list ap;
