@@ -9,6 +9,14 @@ import math
 import moocore
 
 
+def assert_expected(value, fun, *args, **kwargs):
+    """Check that fun return the expected value.
+
+    Once we require numpy>=2, we can use assert_allclose(strict=True) and avoid importing math.
+    """
+    assert math.isclose(fun(*args, **kwargs), value)
+
+
 def test_read_datasets_data(test_datapath):
     """Check that the moocore.read_datasets() functions returns the same array as that which is calculated from the R library."""
 
@@ -72,100 +80,84 @@ class TestHypervolume:
 
     input1 = moocore.get_dataset("input1.dat")
 
-    def test_hv_output(self, test_datapath):
+    def test_hv_output(self, test_datapath, immutable_call):
         """Checks the hypervolume calculation produces the correct value."""
         X = self.input1
         dat = X[X[:, 2] == 1, :2]
-        hv = moocore.hypervolume(dat, ref=np.array([10, 10]))
-        assert math.isclose(hv, 90.46272765), (
-            "input1.dat hypervolume produces wrong output"
-        )
-
-        hv_ind = moocore.Hypervolume(ref=[10, 10])
-        hv = hv_ind(dat)
-        assert math.isclose(hv, 90.46272765), (
-            "input1.dat Hypervolume(ref = [10,10]) produces wrong output"
-        )
+        ref = np.array([10, 10])
+        hv_ind = moocore.Hypervolume(ref=ref)
+        assert_expected(90.46272765, moocore.hypervolume, dat, ref=ref)
+        assert_expected(90.46272765, hv_ind, dat)
 
         dat = X[X[:, 2] == 2, :2]
-        hv = moocore.hypervolume(dat, ref=[10, 10])
-        assert math.isclose(hv, 53.969708954), (
-            "input1.dat hypervolume produces wrong output"
-        )
-
-        hv = hv_ind(dat)
-        assert math.isclose(hv, 53.969708954), (
-            "input1.dat Hypervolume(ref = [10,10]) produces wrong output"
-        )
+        assert_expected(53.969708954, moocore.hypervolume, dat, ref=ref)
+        assert_expected(53.969708954, hv_ind, dat)
 
         X = moocore.read_datasets(test_datapath("duplicated3.inp"))[:, :-1]
-        hv = moocore.hypervolume(
-            X, ref=[-14324, -14906, -14500, -14654, -14232, -14093]
-        )
-        assert math.isclose(hv, 1.52890128312393e20)
+        ref = [-14324, -14906, -14500, -14654, -14232, -14093]
+        assert_expected(1.52890128312393e20, moocore.hypervolume, X, ref=ref)
 
-        ref_set = moocore.read_datasets(test_datapath("duplicated3.inp"))[
-            :, :-1
-        ]
-        ref_set = moocore.filter_dominated(ref_set)
-        rhv_ind = moocore.RelativeHypervolume(
-            ref=[-14324, -14906, -14500, -14654, -14232, -14093],
-            ref_set=ref_set,
-        )
+        ref_set = moocore.filter_dominated(X)
+        rhv_ind = moocore.RelativeHypervolume(ref=ref, ref_set=ref_set)
         assert rhv_ind(X) == 0
 
         ref = [2, 2, 2]
         x = [[1, 0, 1], [0, 1, 0]]
-        assert moocore.hypervolume(x, ref) == 5.0
+        assert immutable_call(moocore.hypervolume, x, ref) == 5.0
+
+        ref = np.array([2, -2, 2], dtype=float)
+        x = [[1, 0, 1], [0, -1, 0]]
+        assert (
+            immutable_call(
+                moocore.hypervolume, x, ref, maximise=[False, True, False]
+            )
+            == 5.0
+        )
+
+        ref = [-2, -2, -2]
+        x = [[-1, 0, -1], [0, -1, 0]]
+        assert immutable_call(moocore.hypervolume, x, ref, maximise=True) == 5.0
 
     def test_hv_wrong_ref(self, test_datapath):
-        """Check that the moocore.hv() functions fails correctly after a ref with the wrong dimensions is input."""
+        """Check that the moocore.hypervolume() fails correctly after a ref with the wrong dimensions is input."""
         X = self.input1
         with pytest.raises(Exception) as expt:
             moocore.hypervolume(X[X[:, 2] == 1, :2], ref=np.array([10, 10, 10]))
         assert expt.type is ValueError
 
 
-def assert_igd(x, ref, value):
-    assert math.isclose(moocore.igd(x, ref), value)
-
-
-def assert_igd_plus(x, ref, value):
-    assert math.isclose(moocore.igd_plus(x, ref), value)
-
-
 def test_igd():
     ref = np.array([10, 0, 6, 1, 2, 2, 1, 6, 0, 10]).reshape((-1, 2))
     A = np.array([4, 2, 3, 3, 2, 4]).reshape((-1, 2))
     B = np.array([8, 2, 4, 4, 2, 8]).reshape((-1, 2))
-    assert_igd(A, ref, 3.707092031609239)
-    assert_igd(B, ref, 2.59148346584763)
+    assert_expected(3.707092031609239, moocore.igd, A, ref)
+    assert_expected(2.59148346584763, moocore.igd, B, ref)
 
-    assert_igd_plus(A, ref, 1.482842712474619)
-    assert_igd_plus(B, ref, 2.260112615949154)
+    assert_expected(1.482842712474619, moocore.igd_plus, A, ref)
+    assert_expected(2.260112615949154, moocore.igd_plus, B, ref)
 
-    assert math.isclose(moocore.avg_hausdorff_dist(A, ref), 3.707092031609239)
-    assert math.isclose(moocore.avg_hausdorff_dist(B, ref), 2.59148346584763)
+    assert_expected(3.707092031609239, moocore.avg_hausdorff_dist, A, ref)
+    assert_expected(2.59148346584763, moocore.avg_hausdorff_dist, B, ref)
 
     ref = np.array([[1, 1]])
-    assert_igd(ref, ref, 0.0)
-    assert_igd_plus(ref, ref, 0.0)
+    assert_expected(0.0, moocore.igd, ref, ref)
+    assert_expected(0.0, moocore.igd_plus, ref, ref)
 
     ref = np.array([[1, 1], [2, 2]])
     x = np.array([[1, 1]])
-    assert_igd(x, ref, 0.7071067811865476)
-    assert_igd_plus(x, ref, 0.0)
+    assert_expected(0.7071067811865476, moocore.igd, x, ref)
+    assert_expected(0.0, moocore.igd_plus, x, ref)
 
     x = [[1.5, 1.5], [2.2, 2.2], [1.9, 1.9]]
-    assert_igd(x, ref, 0.4242640687119286)
+    assert_expected(0.4242640687119286, moocore.igd, x, ref)
 
     ref = [[1.0, 1.0], [2.1, 2.1]]
     x = [[1.5, 1.5], [2.2, 2.2]]
-    assert_igd(x, ref, 0.4242640687119286)
+    assert_expected(0.4242640687119286, moocore.igd, x, ref)
 
     ref = np.array([[1, 1, 1], [2, 2, 2]])
     x = np.array([[1, 1, 1]])
-    assert_igd(x, ref, 0.8660254037844386)
+    assert_expected(0.8660254037844386, moocore.igd, x, ref)
 
 
 @pytest.mark.parametrize("dim", range(0, 3))
@@ -240,17 +232,17 @@ def test_is_nondominated(test_datapath):
     )
 
 
-def test_epsilon():
+def test_epsilon(immutable_call):
     """Same as in R package."""
     ref = np.array([10, 1, 6, 1, 2, 2, 1, 6, 1, 10]).reshape((-1, 2))
     A = np.array([4, 2, 3, 3, 2, 4]).reshape((-1, 2))
-    assert math.isclose(moocore.epsilon_additive(A, ref), 1.0)
-    assert math.isclose(moocore.epsilon_mult(A, ref), 2.0)
-    assert math.isclose(moocore.epsilon_mult(A, ref, maximise=True), 2.5)
-    assert math.isclose(moocore.epsilon_additive(A, ref, maximise=True), 6.0)
+    assert_expected(1.0, moocore.epsilon_additive, A, ref)
+    assert_expected(2.0, moocore.epsilon_mult, A, ref)
+    assert_expected(2.5, moocore.epsilon_mult, A, ref, maximise=True)
+    assert_expected(6.0, moocore.epsilon_additive, A, ref, maximise=True)
 
 
-def test_normalise():
+def test_normalise(immutable_call):
     A = np.array(
         [
             [0, 0, 0],
@@ -284,10 +276,8 @@ def test_normalise():
 
     # Check that normalise does not modify the original array.
     A = np.array([[1.0, 2.0], [2.0, 1.0]])
-    A_copy = A.copy()
-    B = moocore.normalise(A)
-    assert_allclose(A, A_copy)
-    assert_allclose(B, np.array([[0.0, 1.0], [1.0, 0.0]]))
+    B = immutable_call(moocore.normalise, A)
+    assert_allclose(B, [[0.0, 1.0], [1.0, 0.0]])
 
 
 def test_eaf(test_datapath):

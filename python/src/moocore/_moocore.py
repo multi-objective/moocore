@@ -21,7 +21,7 @@ from ._utils import (
     np2d_to_double_array,
     np1d_to_double_array,
     np1d_to_int_array,
-    atleast_1d_of_length_n,
+    array_1d_of_length_n,
     is_integer_value,
     _get_seed_for_c,
 )
@@ -153,7 +153,7 @@ def read_datasets(filename: str | os.PathLike | StringIO) -> np.ndarray:
 
 def _parse_maximise(maximise: bool | Sequence[bool], nobj: int) -> np.ndarray:
     """Convert maximise array or single bool to ndarray format."""
-    return atleast_1d_of_length_n(maximise, nobj).astype(bool)
+    return array_1d_of_length_n(maximise, nobj).astype(bool)
 
 
 def _all_positive(x: ArrayLike) -> bool:
@@ -167,9 +167,9 @@ def _unary_refset_common(
     check_all_positive: bool = False,
 ):
     # Convert to numpy.array in case the user provides a list.  We use
-    # np.asarray(dtype=float) to convert it to floating-point, otherwise if a user inputs
-    # something like ref = np.array([10, 10]) then numpy would interpret it as
-    # an int array.
+    # np.asarray(dtype=float) to convert it to floating-point, otherwise if a
+    # user inputs something like ref = np.array([10, 10]) then numpy would
+    # interpret it as an int array.
     data = np.asarray(data, dtype=float)
     ref = np.atleast_2d(np.asarray(ref, dtype=float))
     nobj = data.shape[1]
@@ -515,7 +515,8 @@ def hypervolume(
     # an int array.
     data, data_copied = asarray_maybe_copy(data)
     nobj = data.shape[1]
-    ref = atleast_1d_of_length_n(np.array(ref, dtype=float), nobj)
+    # Make sure it is a 1D array of length nobj.
+    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
     if nobj != ref.shape[0]:
         raise ValueError(
             f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
@@ -806,7 +807,7 @@ def hv_contributions(
     # an int array.
     x, x_copied = asarray_maybe_copy(x)
     nobj = x.shape[1]
-    ref = atleast_1d_of_length_n(np.array(ref, dtype=float), nobj)
+    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
     if nobj != ref.shape[0]:
         raise ValueError(
             f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
@@ -957,7 +958,7 @@ def hv_approx(
     # an int array.
     data = np.asarray(data, dtype=float)
     nobj = data.shape[1]
-    ref = atleast_1d_of_length_n(np.array(ref, dtype=float), nobj)
+    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
     if nobj != ref.shape[0]:
         raise ValueError(
             f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
@@ -1688,8 +1689,8 @@ def normalise(
     to_range = np.asarray(to_range, dtype=float)
     if to_range.shape[0] != 2:
         raise ValueError("'to_range' must have length 2")
-    lower = atleast_1d_of_length_n(np.asarray(lower, dtype=float), nobj)
-    upper = atleast_1d_of_length_n(np.asarray(upper, dtype=float), nobj)
+    lower = array_1d_of_length_n(np.asarray(lower, dtype=float), nobj)
+    upper = array_1d_of_length_n(np.asarray(upper, dtype=float), nobj)
     if np.any(np.isnan(lower)):
         lower = np.where(np.isnan(lower), data.min(axis=0), lower)
     if np.any(np.isnan(upper)):
@@ -1821,7 +1822,7 @@ def eaf(
     nsets = len(cumsizes)
     cumsizes = np.cumsum(cumsizes)
     cumsizes_p, ncumsizes = np1d_to_int_array(cumsizes)
-    percentiles = np.atleast_1d(percentiles)
+    percentiles = np.ravel(percentiles)
     if len(percentiles) == 0:
         percentiles = np.arange(1.0, nsets + 1) * (100.0 / nsets)
     else:
@@ -2218,7 +2219,7 @@ def whv_rect(
     #     else:
     #         pos = np.flatnonzero(maximise) + [0,2]
     #         rectangles[:, pos] = -rectangles[:, pos]
-    ref = atleast_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
+    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
     ref = ffi.from_buffer("double []", ref)
     x, npoints, _ = np2d_to_double_array(x)
     rectangles, rectangles_nrow, _ = np2d_to_double_array(rectangles)
@@ -2324,14 +2325,14 @@ def total_whv_rect(
     if scalefactor <= 0 or scalefactor > 1:
         raise ValueError("'scalefactor' must be within (0,1]")
 
-    ref = atleast_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
+    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
     whv = whv_rect(x, rectangles, ref=ref, maximise=maximise)
     hv = hypervolume(x, ref=ref)  # FIXME: maximise = maximise)
     if ideal is None:
         # FIXME: Should we include the range of the rectangles here?
         ideal = get_ideal(x, maximise=maximise)
     else:
-        ideal = atleast_1d_of_length_n(np.asarray(ideal, dtype=float), nobj)
+        ideal = array_1d_of_length_n(np.asarray(ideal, dtype=float), nobj)
 
     beta = scalefactor * abs((ref - ideal).prod())
     return float(hv + beta * whv)
@@ -2592,8 +2593,8 @@ def whv_hype(
     if nobj != 2:
         raise NotImplementedError("Only 2D datasets are currently supported")
 
-    ref = atleast_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
-    ideal = atleast_1d_of_length_n(np.asarray(ideal, dtype=float), nobj)
+    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
+    ideal = array_1d_of_length_n(np.asarray(ideal, dtype=float), nobj)
 
     maximise = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
@@ -2603,8 +2604,8 @@ def whv_hype(
         data[:, maximise] = -data[:, maximise]
         # These are so small that is ok to just copy them.
         ref = ref.copy()
-        ideal = ideal.copy()
         ref[maximise] = -ref[maximise]
+        ideal = ideal.copy()
         ideal[maximise] = -ideal[maximise]
 
     data_p, npoints, nobj = np2d_to_double_array(data)
@@ -2620,7 +2621,7 @@ def whv_hype(
         mu = ffi.cast("double", mu)
         hv = lib.whv_hype_expo(data_p, npoints, ideal, ref, nsamples, seed, mu)
     elif dist == "point":
-        mu = atleast_1d_of_length_n(np.asarray(mu, dtype=float), nobj)
+        mu = array_1d_of_length_n(np.asarray(mu, dtype=float), nobj)
         mu, _ = np1d_to_double_array(mu)
         hv = lib.whv_hype_gaus(data_p, npoints, ideal, ref, nsamples, seed, mu)
     else:
