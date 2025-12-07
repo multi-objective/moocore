@@ -11,6 +11,7 @@ Version 0.2.0 (development)
 - New :ref:`bench-ndsort` benchmarks.
 - :func:`~moocore.pareto_rank` is faster in 3D.
 - HV3D+ is slightly faster with repeated coordinates (:issue:`41`).
+- Requires ``numpy>=1.24``.
 
 
 Version 0.1.10 (24/11/2025)

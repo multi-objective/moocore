@@ -2,6 +2,7 @@
 import copy
 from collections.abc import Mapping
 import numpy as np
+from numpy.testing import assert_array_equal
 
 
 def deep_copy(obj):
@@ -25,7 +26,13 @@ def deep_equal(a, b):
         return False
 
     if isinstance(a, np.ndarray):
-        return np.array_equal(a, b)
+        try:
+            assert_array_equal(a, b, strict=True)
+        except Exception as e:
+            print(e)
+            return False
+        else:
+            return True
 
     if isinstance(a, Mapping):
         if a.keys() != b.keys():
