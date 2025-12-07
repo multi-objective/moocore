@@ -117,7 +117,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-# include "hv.h"
+#include "hv.h"
 #include "mex.h"
 
 #if !defined(TRUE) || !defined(FALSE)
@@ -239,8 +239,8 @@ double * data_maximum(double *data, int nobj, int rows)
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-    int nobj;               /* Number of objectives */
     int popsize;            /* Number of solutions  */
+    int nobj;               /* Number of objectives */
 
     double *MatLab_Obj;     /* Pointer to the objective matrix */
 
@@ -291,7 +291,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
     plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
      volume = mxGetPr(plhs[0]);
-    *volume = fpli_hv(data, nobj, popsize, reference);
+    *volume = fpli_hv(data, popsize, nobj, reference);
     #ifdef DEBUG
         mexPrintf("HyperVolume = %f\n",*volume);
     #endif

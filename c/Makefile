@@ -122,9 +122,6 @@ EXE_LDFLAGS=$(LDLIBS)
 
 include gitversion.mk
 
-# mex
-MEX?=mkoctfile --mex
-
 ifneq ($(uname_S),Cygwin)
 CPPFLAGS += -D_GNU_SOURCE
 else
@@ -168,9 +165,9 @@ EXE_FILES := $(addsuffix $(EXE), $(addprefix $(BINDIR)/,$(ALL_NAMES)))
 SHLIB=libmoocore.$(SHLIB_EXT)
 CXXSHLIB=libmoocorepp.$(SHLIB_EXT)
 
-default: $(EXE_FILES)
-
 .PHONY : all clean default dist $(ALL_NAMES) test time shlibs
+
+default: $(EXE_FILES)
 
 all: clean
 	$(MAKE) default
@@ -228,7 +225,6 @@ $(CXXSHLIB): $(LIBHV_OBJS)
 clean:
 	@-$(RM) *.s *.i *.gcda mt19937/*.gcda
 	@-$(RM) config.status config.log
-	@-$(RM) Hypervolume_MEX.mex
 	@-$(RM) $(SHLIB) $(CXXSHLIB)
 	@for exe in $(EXE_FILES); do \
 		echo "---> Removing $$exe <---"; \
@@ -267,10 +263,6 @@ $(TIME_TARGETS):
 	$(MAKE) $(target) DEBUG=0 SANITIZERS=""
 	$(call ECHO,---> Testing $(target) for speed (DEBUG=0) <--- )
 	@cd $(TESTSUITE)/$(target) && ../regtest.py $(BINDIR)/$(target)$(EXE) && cd $(PWD)
-
-mex: Hypervolume_MEX.c $(LIBHV_OBJS)
-	$(call ECHO,---> You can use 'make mex MEXFLAGS="-O -std=c99"' to pass flags to mex. Code compiled by mex is less optimized (slower) than the default 'hv' command-line program <---)
-	$(MEX) -v $(MEXFLAGS) -std=c99 $^
 
 DIST_SRC_FILES = $(DIST_OTHER_FILES) $(SRCS) $(HDRS)
 DIST_SRC:= moocore-$(VERSION)-src

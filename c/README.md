@@ -55,7 +55,7 @@ The build system will try to pick good compiler flags for you, but if you need t
 
 
 If you do not want to see the command line of each compiler
-invocation, you pass `S=1` to `make`.
+invocation, also pass `S=1` to `make`.
 
 
 Embedding (shared library)
