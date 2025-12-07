@@ -197,6 +197,7 @@ check_dominated(const char * filename, const double * restrict points,
 {
     bool first_time = true;
     bool dominated_found = false;
+    // We use it for %-*s in fprintf, so it must be an int.
     int filename_len = (int) MAX(strlen(filename), strlen("filename"));
     for (int n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
         size_t old_size = cumsizes[n] - cumsize;
@@ -226,8 +227,7 @@ check_dominated(const char * filename, const double * restrict points,
 
         if (new_size < old_size) {
             dominated_found = true;
-        }
-        else if (new_size > old_size) {/* This can't happen.  */
+        } else if (new_size > old_size) { // This can't happen.
             fatal_error ("%s:%d: a bug happened: new_size > old_size!\n",
                          __FILE__, __LINE__);
         }
@@ -236,8 +236,8 @@ check_dominated(const char * filename, const double * restrict points,
 }
 
 static void
-print_file_info (FILE *stream, const char *filename,
-                 int nobj, const signed char *minmax)
+print_file_info(FILE *stream, const char *filename,
+                int nobj, const signed char * restrict minmax)
 {
     /* Print some info about input files.  */
     fprintf (stream, "# file: %s\n", filename);
@@ -565,7 +565,7 @@ int main(int argc, char *argv[])
     double *minimum = NULL;
     double *maximum = NULL;
 
-    if (numfiles <= 1) {/* <= 0 means: No input files: read stdin.  */
+    if (numfiles <= 1) {// <= 0 means: No input files: read stdin.
         bool dominated_found =
             process_file((numfiles == 1) ? argv[optind] : NULL,
                          minmax, &nobj, agree,
