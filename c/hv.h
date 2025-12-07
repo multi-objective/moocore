@@ -20,6 +20,7 @@
 #ifndef HV_H_
 #define HV_H_
 
+#include <stdbool.h>
 #include "libmoocore-config.h"
 
 // C++ needs to know that types and declarations are C, not C++.
