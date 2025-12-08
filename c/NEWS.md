@@ -9,6 +9,7 @@
    `find_weakly_dominated_point()`, `is_nondominated()`, `pareto_rank()`,
    `agree_normalise()`, `hv_approx_hua_wang()`, `hv_approx_normal()`
    to pass first the number of rows then the number of columns.
+ * Reorganize igd.h so that helper functions are inlined and more loops are vectorized.
 
 ## 0.17.0
 

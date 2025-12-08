@@ -7,11 +7,12 @@ What's new
 Version 0.2.0 (development)
 ---------------------------
 
+- Requires ``numpy>=1.24``.
 - Optuna is now included in the benchmarks.
 - New :ref:`bench-ndsort` benchmarks.
 - :func:`~moocore.pareto_rank` is faster in 3D.
 - HV3D+ is slightly faster with repeated coordinates (:issue:`41`).
-- Requires ``numpy>=1.24``.
+- :func:`moocore.igd`, :func:`moocore.igd_plus`, :func:`moocore.avg_hausdorff_dist` are faster.
 
 
 Version 0.1.10 (24/11/2025)

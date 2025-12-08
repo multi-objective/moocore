@@ -49,53 +49,73 @@
 
 #include <float.h>
 #include <math.h>
-#ifndef INFINITY
-#define INFINITY (HUGE_VAL)
-#endif
-#include <stdint.h>
 #include "common.h"
 #include "pow_int.h"
 #include "nondominated.h" // minmax_from_bool
 
+#ifndef INFINITY
+#define INFINITY (HUGE_VAL)
+#endif
+
+_attr_optimize_finite_math
 static inline double
-gd_common(dimension_t dim, const signed char * restrict minmax,
-          const double * restrict points_a, size_t size_a,
-          const double * restrict points_r, size_t size_r,
-          bool plus, bool psize, uint_fast8_t p)
+gd_common_helper_(const enum objs_agree_t agree,
+                  const signed char * restrict minmax, dimension_t dim,
+                  const double * restrict points_a, size_t size_a,
+                  const double * restrict points_r, size_t size_r,
+                  bool plus, bool psize, uint_fast8_t p)
 {
     if (size_a == 0) return INFINITY;
     ASSUME(size_a > 0);
     ASSUME(size_r > 0);
     ASSUME(dim >= 2);
+    ASSUME(agree == AGREE_MINIMISE || agree == AGREE_MAXIMISE || agree == AGREE_NONE);
+    assert((agree == AGREE_NONE) == (minmax != NULL));
 
+    double * diff = malloc(dim * sizeof(*diff));
     double gd = 0;
     for (size_t a = 0; a < size_a; a++) {
         double min_dist = INFINITY;
+        const double * restrict pa = points_a + a * dim;
         for (size_t r = 0; r < size_r; r++) {
-            double dist = 0.0;
+            const double * restrict pr = points_r + r * dim;
+            // TODO: Implement taxicab and infinity norms
             for (dimension_t d = 0; d < dim; d++) {
-                if (minmax[d] == 0) continue;
-                double a_d = points_a[a * dim + d];
-                double r_d = points_r[r * dim + d];
-                double diff = (!plus)
-                    ? (r_d - a_d)
-                    : MAX((minmax[d] < 0) ? (r_d - a_d) : (a_d - r_d), 0.0);
-                // TODO: Implement taxicab and infinity norms
-                dist += diff * diff;
+                double a_d = pa[d];
+                double r_d = pr[d];
+                diff[d] = (agree == AGREE_NONE)
+                    ? (plus
+                       ? (unlikely(minmax[d] == 0) ? 0 : (minmax[d] < 0) ? MAX(r_d - a_d, 0.) : MAX(a_d - r_d, 0.))
+                       : (unlikely(minmax[d] == 0) ? 0 : (a_d - r_d)))
+                    : (plus
+                       ? ((agree == AGREE_MINIMISE) ? MAX(r_d - a_d, 0.) : MAX(a_d - r_d, 0.))
+                       : (a_d - r_d));
             }
+            double dist = 0.0;
+            for (dimension_t d = 0; d < dim; d++)
+                dist += diff[d] * diff[d];
+
+            if (unlikely(dist == 0))
+                goto zero_skip;
             // We calculate the sqrt() of the Euclidean outside the loop, which
             // is faster and does not change the minimum.
-            if (dist < min_dist) min_dist = dist;
+            min_dist = MIN(min_dist, dist);
         }
+        ASSUME(min_dist > 0);
         // Here we calculate the actual Euclidean distance.
         if (p == 1)
-            min_dist = (double) sqrtl(min_dist);
+            min_dist = sqrt(min_dist);
         else if (p % 2 == 0)
             min_dist = pow_uint(min_dist, p/2);
         else
-            min_dist = pow_uint((double) sqrtl(min_dist), p);
+            min_dist = pow_uint(sqrt(min_dist), p);
         gd += min_dist;
+    zero_skip:
+        (void)0;
     }
+    free(diff);
+
+    ASSUME(gd >= 0);
 
     if (p == 1)
         return gd / (double) size_a;
@@ -105,23 +125,73 @@ gd_common(dimension_t dim, const signed char * restrict minmax,
         return (double) powl(gd, 1.0 / p) / (double) size_a;
 }
 
+_attr_optimize_finite_math
 static inline double
-GD_minmax(dimension_t dim, const signed char * restrict minmax,
+gd_common_agree_none(const signed char * restrict minmax, dimension_t dim,
+                    const double * restrict points_a, size_t size_a,
+                    const double * restrict points_r, size_t size_r,
+                    bool plus, bool psize, uint_fast8_t p)
+{
+    return gd_common_helper_(AGREE_NONE, minmax, dim, points_a, size_a, points_r, size_r, plus, psize, p);
+}
+
+_attr_optimize_finite_math
+static inline double
+gd_common_agree_min(dimension_t dim,
+                    const double * restrict points_a, size_t size_a,
+                    const double * restrict points_r, size_t size_r,
+                    bool plus, bool psize, uint_fast8_t p)
+{
+    return gd_common_helper_(AGREE_MINIMISE, /*minmax=*/NULL, dim, points_a, size_a, points_r, size_r, plus, psize, p);
+}
+
+_attr_optimize_finite_math
+static inline double
+gd_common_agree_max(dimension_t dim,
+                    const double * restrict points_a, size_t size_a,
+                    const double * restrict points_r, size_t size_r,
+                    bool plus, bool psize, uint_fast8_t p)
+{
+    return gd_common_helper_(AGREE_MAXIMISE, /*minmax=*/NULL, dim, points_a, size_a, points_r, size_r, plus, psize, p);
+}
+
+_attr_optimize_finite_math
+static inline double
+gd_common(const signed char * restrict minmax, dimension_t dim,
+          const double * restrict points_a, size_t size_a,
+          const double * restrict points_r, size_t size_r,
+          bool plus, bool psize, uint_fast8_t p)
+{
+    // This forces the compiler to generate three specialized versions of the function.
+    switch (check_all_minimize_maximize(minmax, dim)) {
+      case AGREE_MINIMISE:
+          return gd_common_agree_min(dim, points_a, size_a, points_r, size_r, plus, psize, p);
+      case AGREE_MAXIMISE:
+          return gd_common_agree_max(dim, points_a, size_a, points_r, size_r, plus, psize, p);
+      default:
+          return gd_common_agree_none(minmax, dim, points_a, size_a, points_r, size_r, plus, psize, p);
+    }
+}
+
+_attr_optimize_finite_math
+static inline double
+GD_minmax(const signed char * restrict minmax, dimension_t dim,
           const double * restrict points_a, size_t size_a,
           const double * restrict points_r, size_t size_r)
 {
-    return gd_common(dim, minmax,
+    return gd_common(minmax, dim,
                      points_a, size_a,
                      points_r, size_r,
                      /*plus=*/false, /*psize=*/false, /*p=*/1);
 }
 
+_attr_optimize_finite_math
 static inline double
-IGD_minmax(dimension_t dim, const signed char * restrict minmax,
+IGD_minmax(const signed char * restrict minmax, dimension_t dim,
            const double * restrict points_a, size_t size_a,
            const double * restrict points_r, size_t size_r)
 {
-    return gd_common(dim, minmax,
+    return gd_common(minmax, dim,
                      points_r, size_r,
                      points_a, size_a,
                      /*plus=*/false, /*psize=*/false, /*p=*/1);
@@ -133,39 +203,42 @@ IGD(const double * restrict data, size_t npoints, dimension_t nobj,
     const bool *  restrict maximise)
 {
     const signed char * minmax = minmax_from_bool(maximise, nobj);
-    double value = IGD_minmax(nobj, minmax, data, npoints, ref, ref_size);
+    double value = IGD_minmax(minmax, nobj, data, npoints, ref, ref_size);
     free ((void *)minmax);
     return value;
 }
 
+_attr_optimize_finite_math
 static inline double
-GD_p(dimension_t dim, const signed char * restrict minmax,
+GD_p(const signed char * restrict minmax, dimension_t dim,
      const double * restrict points_a, size_t size_a,
      const double * restrict points_r, size_t size_r, unsigned int p)
 {
-    return gd_common(dim, minmax,
+    return gd_common(minmax, dim,
                      points_a, size_a,
                      points_r, size_r,
                      /*plus=*/false, /*psize=*/true, (uint_fast8_t)p);
 }
 
+_attr_optimize_finite_math
 static inline double
-IGD_p(dimension_t dim, const signed char * restrict minmax,
+IGD_p(const signed char * restrict minmax, dimension_t dim,
       const double * restrict points_a, size_t size_a,
       const double * restrict points_r, size_t size_r, unsigned int p)
 {
-    return gd_common(dim, minmax,
+    return gd_common(minmax, dim,
                      points_r, size_r,
                      points_a, size_a,
                      /*plus=*/false, /*psize=*/true, (uint_fast8_t) p);
 }
 
+_attr_optimize_finite_math
 static inline double
-IGD_plus_minmax(dimension_t dim, const signed char * restrict minmax,
+IGD_plus_minmax(const signed char * restrict minmax, dimension_t dim,
                 const double * restrict points_a, size_t size_a,
                 const double * restrict points_r, size_t size_r)
 {
-    return gd_common(dim, minmax,
+    return gd_common(minmax, dim,
                      points_r, size_r,
                      points_a, size_a,
                      /*plus=*/true, /*psize=*/true, /*p=*/1);
@@ -178,23 +251,24 @@ IGD_plus(const double * restrict data, size_t npoints, dimension_t nobj,
 {
     ASSUME(nobj > 0);
     const signed char * minmax = minmax_from_bool(maximise, nobj);
-    double value = IGD_plus_minmax(nobj, minmax, data, npoints, ref, ref_size);
+    double value = IGD_plus_minmax(minmax, nobj, data, npoints, ref, ref_size);
     free ((void *)minmax);
     return value;
 }
 
+_attr_optimize_finite_math
 static inline double
-avg_Hausdorff_dist_minmax(dimension_t dim, const signed char * restrict minmax,
+avg_Hausdorff_dist_minmax(const signed char * restrict minmax, dimension_t dim,
                           const double * restrict points_a, size_t size_a,
                           const double * restrict points_r, size_t size_r,
                           unsigned int p)
 {
-    double gd_p = gd_common(dim, minmax,
+    double gd_p = gd_common(minmax, dim,
                             points_a, size_a,
                             points_r, size_r,
                             /*plus=*/false, /*psize=*/true, (uint_fast8_t)p);
 
-    double igd_p = gd_common(dim, minmax,
+    double igd_p = gd_common(minmax, dim,
                              points_r, size_r,
                              points_a, size_a,
                              /*plus=*/false, /*psize=*/true, (uint_fast8_t)p);
@@ -209,7 +283,7 @@ avg_Hausdorff_dist(const double * restrict data, size_t npoints, dimension_t nob
 {
     ASSUME(nobj > 0);
     const signed char * minmax = minmax_from_bool(maximise, nobj);
-    double value = avg_Hausdorff_dist_minmax(nobj, minmax, data, npoints, ref, ref_size, p);
+    double value = avg_Hausdorff_dist_minmax(minmax, nobj, data, npoints, ref, ref_size, p);
     free ((void *)minmax);
     return value;
 }
