@@ -131,13 +131,61 @@ def test_igd():
     A = np.array([4, 2, 3, 3, 2, 4]).reshape((-1, 2))
     B = np.array([8, 2, 4, 4, 2, 8]).reshape((-1, 2))
     assert_expected(3.707092031609239, moocore.igd, A, ref)
-    assert_expected(2.59148346584763, moocore.igd, B, ref)
+    assert_expected(2.591483465847630, moocore.igd, B, ref)
+    assert_expected(3.707092031609239, moocore.igd, A, ref, maximise=True)
+    assert_expected(2.591483465847630, moocore.igd, B, ref, maximise=True)
+    assert_expected(
+        3.707092031609239, moocore.igd, A, ref, maximise=[True, False]
+    )
+    assert_expected(
+        2.591483465847630, moocore.igd, B, ref, maximise=[True, False]
+    )
 
     assert_expected(1.482842712474619, moocore.igd_plus, A, ref)
     assert_expected(2.260112615949154, moocore.igd_plus, B, ref)
+    assert_expected(
+        1.482842712474619, moocore.igd_plus, -A, -ref, maximise=True
+    )
+    assert_expected(
+        2.260112615949154, moocore.igd_plus, -B, -ref, maximise=True
+    )
+    assert_expected(
+        1.482842712474619,
+        moocore.igd_plus,
+        A * [[-1, 1]],
+        ref * [[-1, 1]],
+        maximise=[True, False],
+    )
+    assert_expected(
+        2.260112615949154,
+        moocore.igd_plus,
+        B * [[-1, 1]],
+        ref * [[-1, 1]],
+        maximise=[True, False],
+    )
 
     assert_expected(3.707092031609239, moocore.avg_hausdorff_dist, A, ref)
-    assert_expected(2.59148346584763, moocore.avg_hausdorff_dist, B, ref)
+    assert_expected(2.591483465847630, moocore.avg_hausdorff_dist, B, ref)
+    assert_expected(
+        3.707092031609239, moocore.avg_hausdorff_dist, A, ref, maximise=True
+    )
+    assert_expected(
+        2.591483465847630, moocore.avg_hausdorff_dist, B, ref, maximise=True
+    )
+    assert_expected(
+        3.707092031609239,
+        moocore.avg_hausdorff_dist,
+        A,
+        ref,
+        maximise=[True, False],
+    )
+    assert_expected(
+        2.591483465847630,
+        moocore.avg_hausdorff_dist,
+        B,
+        ref,
+        maximise=[True, False],
+    )
 
     ref = np.array([[1, 1]])
     assert_expected(0.0, moocore.igd, ref, ref)
