@@ -69,7 +69,6 @@ def _get_target_platform():
     flags = [f for f in arch_flags.split(" ") if f.strip() != ""]
     try:
         pos = flags.index("-arch")
-
         return flags[pos + 1].lower()
     except ValueError:
         pass
@@ -131,4 +130,4 @@ ffibuilder.set_source(
 )
 
 if __name__ == "__main__":
-    ffibuilder.compile(verbose=True, debug=bool(DEBUG))
+    ffibuilder.compile(verbose=True, debug=bool(DEBUG))  # nocov
