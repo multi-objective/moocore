@@ -263,7 +263,7 @@ pareto_better (int dim, const signed char *minmax,
         }
     }
 
-    int result2 = epsilon_additive_ind((dimension_t) dim, minmax, points_a, size_a, points_b, size_b);
+    int result2 = epsilon_additive_ind(minmax, (dimension_t) dim, points_a, size_a, points_b, size_b);
 
     DEBUG2 (
         printf ("result = %d, result2 = %d\n", result, result2);

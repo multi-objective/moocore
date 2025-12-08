@@ -52,20 +52,20 @@ epsilon_helper_(bool do_mult, const enum objs_agree_t agree,
                 const double * restrict points_a, size_t size_a,
                 const double * restrict points_b, size_t size_b)
 {
-// Converting this macro to an inline function hinders vectorization.
-#define eps_value_(X,Y) (do_mult ? ((X) / (Y)) : ((X) - (Y)))
-
     ASSUME(2 <= dim && dim <= 32);
     ASSUME(size_a > 0 && size_b > 0);
     ASSUME(agree == AGREE_MINIMISE || agree == AGREE_MAXIMISE || agree == AGREE_NONE);
     assert((agree == AGREE_NONE) == (minmax != NULL));
+
+// Converting this macro to an inline function hinders vectorization.
+#define eps_value_(X,Y) (do_mult ? ((X) / (Y)) : ((X) - (Y)))
+
     double epsilon = do_mult ? 0 : -INFINITY;
     for (size_t b = 0; b < size_b; b++) {
-        bool skip_max = false;
         double epsilon_min = INFINITY;
-        const double * restrict pb = &points_b[b * dim];
+        const double * restrict pb = points_b + b * dim;
         for (size_t a = 0; a < size_a; a++) {
-            const double * restrict pa = &points_a[a * dim];
+            const double * restrict pa = points_a + a * dim;
             double epsilon_max = (agree == AGREE_NONE)
                 ? MAX(minmax[0] * eps_value_(pb[0], pa[0]),
                       minmax[1] * eps_value_(pb[1], pa[1]))
@@ -85,17 +85,17 @@ epsilon_helper_(bool do_mult, const enum objs_agree_t agree,
                 epsilon_max = MAX(epsilon_max, epsilon_temp);
             }
 
-            if (epsilon_max <= epsilon) {
-                skip_max = true;
-                break;
-            }
+            if (epsilon_max <= epsilon)
+                goto skip_max;
             epsilon_min = MIN(epsilon_min, epsilon_max);
         }
-        if (skip_max) continue;
         epsilon = MAX(epsilon, epsilon_min);
+    skip_max:
+        (void)0;
     }
     return epsilon;
 }
+#undef eps_value
 
 _attr_optimize_finite_math
 static inline double
@@ -220,7 +220,7 @@ epsilon_mult(const double * restrict data, size_t n, dimension_t dim,
 /* FIXME: this can be done much faster. For example, the diff needs to
    be calculated just once and stored on a temporary array diff[].  */
 static inline int
-epsilon_additive_ind(dimension_t dim, const signed char * restrict minmax,
+epsilon_additive_ind(const signed char * restrict minmax, dimension_t dim,
                      const double * restrict points_a, size_t size_a,
                      const double * restrict points_b, size_t size_b)
 {
