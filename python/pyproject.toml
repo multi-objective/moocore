@@ -214,3 +214,10 @@ warn_unused_configs = true
 # Imports
 ignore_missing_imports = true
 files = [ "src/" ]
+
+[tool.gcovr]
+exclude-lines-by-pattern = [
+  " *ASSUME\\([^)]+\\);",
+  ".*# nocov",
+  ".* unreachable\\(\\);",
+]
