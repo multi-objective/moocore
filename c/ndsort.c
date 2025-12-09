@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 
     int dim = 0;
     const char * filename;
-    const signed char *minmax = NULL;
+    const int * minmax = NULL;
     bool only_rank_flag = false;
 //    bool hypervolume_flag = false;
 //    bool keep_uevs_flag = false;

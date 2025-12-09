@@ -3,6 +3,7 @@
  * `pareto_rank()` is faster in 3D.
  * HV3D+ is slightly faster with repeated coordinates (#41).
  * `igd()`, `igd_plus()`, `avg_hausdorff_dist()` are faster.
+ * Fix wrong values returned by `epsilon_mult()` when mixing minimization and maximization.
 
 # moocore 0.1.10
 

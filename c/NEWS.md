@@ -10,6 +10,8 @@
    `agree_normalise()`, `hv_approx_hua_wang()`, `hv_approx_normal()`
    to pass first the number of rows then the number of columns.
  * Reorganize igd.h so that helper functions are inlined and more loops are vectorized.
+ * Change the type of `minmax` from `signed char *` to `int *` to help vectorization.
+ * Fix bug in `epsilon_mult()` with mixed min-max objectives.
 
 ## 0.17.0
 

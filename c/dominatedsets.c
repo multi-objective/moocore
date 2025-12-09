@@ -180,7 +180,7 @@ print_results (char **filenames, int numfiles, int *nruns, int **results)
 }
 
 static inline int
-dominance(int dim, const double *a, const double *b, const signed char *minmax)
+dominance(int dim, const double * restrict a, const double * restrict b, const int * restrict minmax)
 /***********************************************
  return: O  -> if a == b
          1  -> if a dominates b
@@ -205,7 +205,7 @@ dominance(int dim, const double *a, const double *b, const signed char *minmax)
     return 0;
 }
 
-static int set_dominates (int dim, const signed char *minmax,
+static int set_dominates (int dim, const int * restrict minmax,
                           const double *points_x, int size_x,
                           const double *points_y, int size_y)
 {
@@ -248,7 +248,7 @@ static int set_dominates (int dim, const signed char *minmax,
 }
 
 int
-pareto_better (int dim, const signed char *minmax,
+pareto_better (int dim, const int * restrict minmax,
                const double *points_a, int size_a,
                const double *points_b, int size_b)
 {
@@ -282,7 +282,7 @@ pareto_better (int dim, const signed char *minmax,
 }
 
 void
-cmpparetos (int dim, const signed char *minmax,
+cmpparetos (int dim, const int * restrict minmax,
             const double * points_a, int nruns_a,
             const int *cumsizes_a, int *numbetter_a,
             const double * points_b, int nruns_b,
@@ -327,7 +327,7 @@ int main(int argc, char *argv[])
     set_program_invocation_short_name(argv[0]);
 
     int dim = 0;
-    const signed char *minmax = NULL;
+    const int * restrict minmax = NULL;
     int k, n, j;
 
     int opt; /* it's actually going to hold a char */

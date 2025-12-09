@@ -85,7 +85,7 @@ OPTION_MAXIMISE_STR
 
 static void
 do_file(const char * filename, double * restrict reference, size_t reference_size,
-        int * restrict nobj_p, const signed char * restrict minmax, bool maximise_all_flag)
+        int * restrict nobj_p, const int * restrict minmax, bool maximise_all_flag)
 {
     double * data = NULL;
     int * cumsizes = NULL;
@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
     bool check_flag = true;
     double * reference = NULL;
     size_t reference_size = 0;
-    const signed char * minmax = NULL;
+    const int * minmax = NULL;
     bool maximise_all_flag = false;
     int nobj = 0;
 

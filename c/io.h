@@ -46,14 +46,14 @@ int write_sets_filtered (FILE *outfile, const double *data, int ncols,
                          const int *cumsizes, int nruns,
                          const bool *write_p);
 
-static inline const signed char *
+static inline const int *
 read_minmax (const char *str, int *nobj_p)
 {
     assert (str != NULL);
     size_t len = strlen(str);
     bool all_ignored = true;
     size_t nobj = (size_t) *nobj_p;
-    signed char * minmax = malloc (sizeof(signed char) * MAX(len, nobj));
+    int * minmax = malloc (sizeof(*minmax) * MAX(len, nobj));
     for (size_t i = 0; i < len; i++) {
         switch (str[i]) {
           case '+':

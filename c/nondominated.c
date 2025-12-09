@@ -192,7 +192,7 @@ force_bounds(double * restrict points,
 static bool
 check_dominated(const char * filename, const double * restrict points,
                 dimension_t nobj, const int * restrict cumsizes, int nruns,
-                const signed char * restrict minmax, const signed char agree,
+                const int * restrict minmax, const int agree,
                 bool * restrict nondom)
 {
     bool first_time = true;
@@ -237,7 +237,7 @@ check_dominated(const char * filename, const double * restrict points,
 
 static void
 print_file_info(FILE *stream, const char *filename,
-                int nobj, const signed char * restrict minmax)
+                int nobj, const int * restrict minmax)
 {
     /* Print some info about input files.  */
     fprintf (stream, "# file: %s\n", filename);
@@ -251,8 +251,8 @@ print_file_info(FILE *stream, const char *filename,
 
 static void
 print_output_header (FILE *stream, const char *filename,
-                     int nobj, const signed char *minmax,
-                     signed char agree,
+                     int nobj, const int *minmax,
+                     int agree,
                      double lrange, double urange,
                      const double *lbound, const double *ubound,
                      const bool *logarithm)
@@ -285,7 +285,7 @@ print_output_header (FILE *stream, const char *filename,
 static void
 print_input_info (FILE *stream, const char *filename,
                   int nobj, const int *cumsizes, int nruns,
-                  const signed char *minmax,
+                  const int *minmax,
                   const double *minimum, const double *maximum)
 {
     print_file_info (stream, filename, nobj, minmax);
@@ -303,8 +303,8 @@ print_input_info (FILE *stream, const char *filename,
 
 static bool
 process_file(const char * filename,
-             const signed char * restrict minmax, int * restrict nobj_p,
-             signed char agree,
+             const int * restrict minmax, int * restrict nobj_p,
+             int agree,
              double lrange, double urange,
              double * restrict lbound, double * restrict ubound,
              double ** minimum_p, double ** maximum_p,
@@ -462,15 +462,15 @@ int main(int argc, char *argv[])
     };
     set_program_invocation_short_name(argv[0]);
 
-    signed char agree = 0;
+    int agree = 0;
     double lower_range = 0.0;
     double upper_range = 0.0;
-    double *lower_bound = NULL;
-    double *upper_bound = NULL;
+    double * lower_bound = NULL;
+    double * upper_bound = NULL;
 
-    const signed char *minmax = NULL;
+    const int * minmax = NULL;
     bool maximise_all_flag = false;
-    const bool *logarithm = NULL;
+    const bool * logarithm = NULL;
     int nobj = 0;
 
     int opt; /* it's actually going to hold a char */

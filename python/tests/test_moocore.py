@@ -17,26 +17,9 @@ def assert_expected(value, fun, *args, **kwargs):
     assert math.isclose(fun(*args, **kwargs), value)
 
 
-def test_read_datasets_data(test_datapath):
-    """Check that the moocore.read_datasets() functions returns the same array as that which is calculated from the R library."""
-
-    def check_testdata(testpath, expected_name, expected_shape):
-        testdata = moocore.read_datasets(testpath)
-        assert testdata.shape == expected_shape, (
-            f"Read data array has incorrect shape, should be {expected_shape} but is {testdata.shape}"
-        )
-        if expected_name != "":
-            check_data = np.loadtxt(
-                test_datapath(f"expected_output/read_datasets/{expected_name}")
-            )
-
-        assert_allclose(
-            testdata,
-            check_data,
-            err_msg=f"read_datasets does not produce expected array for file {testpath}",
-        )
-
-    tests = [
+@pytest.mark.parametrize(
+    "test,expected_name,expected_shape",
+    [
         ("input1.dat", "dat1_read_datasets.txt", (100, 3)),
         (
             "spherical-250-10-3d.txt.xz",
@@ -47,10 +30,24 @@ def test_read_datasets_data(test_datapath):
         ("wrots_l10w100_dat.xz", "wrots_l10_read_datasets.txt", (3262, 3)),
         ("wrots_l100w10_dat.xz", "wrots_l100_read_datasets.txt", (888, 3)),
         ("ALG_1_dat.xz", "ALG_1_dat_read_datasets.txt.xz", (23260, 3)),
-    ]
-
-    for test, expected_name, expected_shape in tests:
-        check_testdata(test_datapath(test), expected_name, expected_shape)
+    ],
+)
+def test_read_datasets_data(test_datapath, test, expected_name, expected_shape):
+    """Check that the moocore.read_datasets() functions returns the same array as that which is calculated from the R library."""
+    test_path = test_datapath(test)
+    testdata = moocore.read_datasets(test_path)
+    assert testdata.shape == expected_shape, (
+        f"Read data array has incorrect shape, should be {expected_shape} but is {testdata.shape}"
+    )
+    if expected_name != "":
+        check_data = np.loadtxt(
+            test_datapath("expected_output/read_datasets/" + expected_name)
+        )
+    assert_allclose(
+        testdata,
+        check_data,
+        err_msg=f"read_datasets does not produce expected array for file {test_path}",
+    )
 
 
 def test_read_datasets_badname():
@@ -288,6 +285,29 @@ def test_epsilon(immutable_call):
     assert_expected(2.0, moocore.epsilon_mult, A, ref)
     assert_expected(2.5, moocore.epsilon_mult, A, ref, maximise=True)
     assert_expected(6.0, moocore.epsilon_additive, A, ref, maximise=True)
+    assert_expected(1.0, moocore.epsilon_additive, -A, -ref, maximise=True)
+    assert_expected(6.0, moocore.epsilon_additive, -A, -ref, maximise=False)
+    assert_expected(2.5, moocore.epsilon_mult, A, ref, maximise=[True, False])
+    assert_expected(2.5, moocore.epsilon_mult, A, ref, maximise=[False, True])
+
+
+@pytest.mark.parametrize("dim", range(3, 6))
+def test_epsilon_dim(dim):
+    seed = np.random.default_rng().integers(2**32 - 2)
+    rng = np.random.default_rng(seed)
+    maximum = 100
+    nrows = 25
+    A = rng.integers(1, maximum, (nrows, dim))
+    B = rng.integers(1, maximum, (nrows, dim))
+    logA = np.log(A)
+    logB = np.log(B)
+    minmax = rng.choice([False, True], dim)
+    for maximise in (False, True, minmax):
+        mult = moocore.epsilon_mult(A, B, maximise=maximise)
+        addi = np.exp(moocore.epsilon_additive(logA, logB, maximise=maximise))
+        assert math.isclose(mult, addi), (
+            f"{mult} != {addi} for seed {seed} and maximise = {maximise}"
+        )
 
 
 def test_normalise(immutable_call):
@@ -328,42 +348,46 @@ def test_normalise(immutable_call):
     assert_allclose(B, [[0.0, 1.0], [1.0, 0.0]])
 
 
-def test_eaf(test_datapath):
-    # FIXME: ALG_1_dat is creating slightly different percentile values than expected in its EAF output
-    tests = [
+@pytest.mark.parametrize(
+    "test_name, expected_eaf_name",
+    [
         ("input1.dat", "dat1_eaf.txt"),
         ("spherical-250-10-3d.txt.xz", "spherical_eaf.txt.xz"),
         ("uniform-250-10-3d.txt.xz", "uniform_eaf.txt.xz"),
         ("wrots_l10w100_dat.xz", "wrots_l10_eaf.txt.xz"),
         ("wrots_l100w10_dat.xz", "wrots_l100_eaf.txt.xz"),
-        # ("ALG_1_dat.xz",          # "ALG_1_dat_get_eaf.txt.xz"),
-    ]
-    for test_name, expected_eaf_name in tests:
-        filename = test_datapath(test_name)
-        dataset = moocore.read_datasets(filename)
-        x = dataset[:, :-1]
-        sets = dataset[:, -1]
-        eaf_test = moocore.eaf(x, sets=sets)
-        eaf_pct_test = moocore.eaf(x, sets=sets, percentiles=[0, 50, 100])
-        expected_eaf_result = np.loadtxt(
-            test_datapath(f"expected_output/eaf/{expected_eaf_name}")
-        )
-        expected_eaf_pct_result = np.loadtxt(
-            test_datapath(f"expected_output/eaf/pct_{expected_eaf_name}")
-        )
-        assert eaf_test.shape == expected_eaf_result.shape, (
-            f"Shapes of {test_name} and {expected_eaf_name} do not match"
-        )
-        assert_allclose(
-            eaf_test,
-            expected_eaf_result,
-            err_msg=f"{expected_eaf_name} test failed",
-        )
-        assert_allclose(
-            eaf_pct_test,
-            expected_eaf_pct_result,
-            err_msg=f"pct_{expected_eaf_name} test failed",
-        )
+        # FIXME: ALG_1_dat is creating slightly different percentile values than expected in its EAF output
+        pytest.param(
+            "ALG_1_dat.xz", "ALG_1_dat_get_eaf.txt.xz", marks=pytest.mark.xfail
+        ),
+    ],
+)
+def test_eaf(test_datapath, test_name, expected_eaf_name):
+    filename = test_datapath(test_name)
+    dataset = moocore.read_datasets(filename)
+    x = dataset[:, :-1]
+    sets = dataset[:, -1]
+    eaf_test = moocore.eaf(x, sets=sets)
+    eaf_pct_test = moocore.eaf(x, sets=sets, percentiles=[0, 50, 100])
+    expected_eaf_result = np.loadtxt(
+        test_datapath(f"expected_output/eaf/{expected_eaf_name}")
+    )
+    expected_eaf_pct_result = np.loadtxt(
+        test_datapath(f"expected_output/eaf/pct_{expected_eaf_name}")
+    )
+    assert eaf_test.shape == expected_eaf_result.shape, (
+        f"Shapes of {test_name} and {expected_eaf_name} do not match"
+    )
+    assert_allclose(
+        eaf_test,
+        expected_eaf_result,
+        err_msg=f"{expected_eaf_name} test failed",
+    )
+    assert_allclose(
+        eaf_pct_test,
+        expected_eaf_pct_result,
+        err_msg=f"pct_{expected_eaf_name} test failed",
+    )
 
 
 def test_get_dataset_path():

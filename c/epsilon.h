@@ -48,7 +48,7 @@ all_positive(const double * restrict points, size_t size, dimension_t dim)
 _attr_optimize_finite_math
 static inline double
 epsilon_helper_(bool do_mult, const enum objs_agree_t agree,
-                const signed char * restrict minmax, dimension_t dim,
+                const int * restrict minmax, dimension_t dim,
                 const double * restrict points_a, size_t size_a,
                 const double * restrict points_b, size_t size_b)
 {
@@ -57,8 +57,14 @@ epsilon_helper_(bool do_mult, const enum objs_agree_t agree,
     ASSUME(agree == AGREE_MINIMISE || agree == AGREE_MAXIMISE || agree == AGREE_NONE);
     assert((agree == AGREE_NONE) == (minmax != NULL));
 
-// Converting this macro to an inline function hinders vectorization.
-#define eps_value_(X,Y) (do_mult ? ((X) / (Y)) : ((X) - (Y)))
+// Converting these macros to an inline function hinders vectorization.
+#define eps_value_(X, Y)   (do_mult ? ((X) / (Y)) : ((X) - (Y)))
+#define eps_value_minmax_(M, X, Y)                                             \
+    ((M < 0) ? eps_value_(X,Y) : ((M > 0) ? eps_value_(Y,X) : 0))
+#define eps_value_agree_(DIM)                                                  \
+    (minmax ? eps_value_minmax_(minmax[DIM], pa[DIM], pb[DIM])                 \
+     : ((agree == AGREE_MINIMISE)                                              \
+        ? eps_value_(pa[DIM], pb[DIM]) : eps_value_(pb[DIM], pa[DIM])))
 
     double epsilon = do_mult ? 0 : -INFINITY;
     for (size_t b = 0; b < size_b; b++) {
@@ -66,22 +72,13 @@ epsilon_helper_(bool do_mult, const enum objs_agree_t agree,
         const double * restrict pb = points_b + b * dim;
         for (size_t a = 0; a < size_a; a++) {
             const double * restrict pa = points_a + a * dim;
-            double epsilon_max = (agree == AGREE_NONE)
-                ? MAX(minmax[0] * eps_value_(pb[0], pa[0]),
-                      minmax[1] * eps_value_(pb[1], pa[1]))
-                : ((agree == AGREE_MINIMISE)
-                   ? MAX(eps_value_(pa[0], pb[0]), eps_value_(pa[1], pb[1]))
-                   : MAX(eps_value_(pb[0], pa[0]), eps_value_(pb[1], pa[1])));
+            double epsilon_max = MAX(eps_value_agree_(0), eps_value_agree_(1));
 
             if (epsilon_max >= epsilon_min)
                 continue;
 
             for (dimension_t d = 2; d < dim; d++) {
-                double epsilon_temp = (agree == AGREE_NONE)
-                    ? minmax[d] * eps_value_(pb[d], pa[d])
-                    : ((agree == AGREE_MINIMISE)
-                       ? eps_value_(pa[d], pb[d])
-                       : eps_value_(pb[d], pa[d]));
+                double epsilon_temp = eps_value_agree_(d);
                 epsilon_max = MAX(epsilon_max, epsilon_temp);
             }
 
@@ -95,11 +92,14 @@ epsilon_helper_(bool do_mult, const enum objs_agree_t agree,
     }
     return epsilon;
 }
-#undef eps_value
+
+#undef eps_value_
+#undef eps_value_minmax_
+#undef eps_value_agree_
 
 _attr_optimize_finite_math
 static inline double
-epsilon_mult_agree_none(const signed char * restrict minmax, dimension_t dim,
+epsilon_mult_agree_none(const int * restrict minmax, dimension_t dim,
                         const double * restrict points_a, size_t size_a,
                         const double * restrict points_b, size_t size_b)
 {
@@ -127,7 +127,7 @@ epsilon_mult_agree_max(dimension_t dim,
 
 _attr_optimize_finite_math
 static inline double
-epsilon_addi_agree_none(const signed char * restrict minmax, dimension_t dim,
+epsilon_addi_agree_none(const int * restrict minmax, dimension_t dim,
                         const double * restrict points_a, size_t size_a,
                         const double * restrict points_b, size_t size_b)
 {
@@ -155,7 +155,7 @@ epsilon_addi_agree_max(dimension_t dim,
 
 _attr_optimize_finite_math
 static inline double
-epsilon_mult_minmax(const signed char * restrict minmax, dimension_t dim,
+epsilon_mult_minmax(const int * restrict minmax, dimension_t dim,
                     const double * restrict points_a, size_t size_a,
                     const double * restrict points_b, size_t size_b)
 {
@@ -178,7 +178,7 @@ epsilon_mult_minmax(const signed char * restrict minmax, dimension_t dim,
 
 _attr_optimize_finite_math
 static inline double
-epsilon_additive_minmax(const signed char * restrict minmax, dimension_t dim,
+epsilon_additive_minmax(const int * restrict minmax, dimension_t dim,
                         const double * restrict points_a, size_t size_a,
                         const double * restrict points_b, size_t size_b)
 {
@@ -199,7 +199,7 @@ epsilon_additive(const double * restrict data, size_t n, dimension_t dim,
                  const bool * restrict maximise)
 {
     ASSUME(dim >= 2);
-    const signed char * minmax = minmax_from_bool(maximise, dim);
+    const int * minmax = minmax_from_bool(maximise, dim);
     double value = epsilon_additive_minmax(minmax, dim, data, n, ref, ref_size);
     free ((void *)minmax);
     return value;
@@ -211,7 +211,7 @@ epsilon_mult(const double * restrict data, size_t n, dimension_t dim,
              const bool * restrict maximise)
 {
     ASSUME(dim >= 2);
-    const signed char * minmax = minmax_from_bool(maximise, dim);
+    const int * minmax = minmax_from_bool(maximise, dim);
     double value = epsilon_mult_minmax(minmax, dim, data, n, ref, ref_size);
     free ((void *)minmax);
     return value;
@@ -220,7 +220,7 @@ epsilon_mult(const double * restrict data, size_t n, dimension_t dim,
 /* FIXME: this can be done much faster. For example, the diff needs to
    be calculated just once and stored on a temporary array diff[].  */
 static inline int
-epsilon_additive_ind(const signed char * restrict minmax, dimension_t dim,
+epsilon_additive_ind(const int * restrict minmax, dimension_t dim,
                      const double * restrict points_a, size_t size_a,
                      const double * restrict points_b, size_t size_b)
 {

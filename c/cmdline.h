@@ -272,8 +272,8 @@ static inline void set_program_invocation_short_name(char * s)
         program_invocation_short_name = s;
 }
 
-static inline const signed char *
-parse_cmdline_minmax(const signed char * restrict minmax, const char * restrict optarg, int * restrict nobj_p)
+static inline const int *
+parse_cmdline_minmax(const int * restrict minmax, const char * restrict optarg, int * restrict nobj_p)
 {
     int tmp_nobj = 0, nobj = *nobj_p;
 

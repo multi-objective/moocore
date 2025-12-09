@@ -60,7 +60,7 @@
 _attr_optimize_finite_math
 static inline double
 gd_common_helper_(const enum objs_agree_t agree,
-                  const signed char * restrict minmax, dimension_t dim,
+                  const int * restrict minmax, dimension_t dim,
                   const double * restrict points_a, size_t size_a,
                   const double * restrict points_r, size_t size_r,
                   bool plus, bool psize, uint_fast8_t p)
@@ -127,7 +127,7 @@ gd_common_helper_(const enum objs_agree_t agree,
 
 _attr_optimize_finite_math
 static inline double
-gd_common_agree_none(const signed char * restrict minmax, dimension_t dim,
+gd_common_agree_none(const int * restrict minmax, dimension_t dim,
                     const double * restrict points_a, size_t size_a,
                     const double * restrict points_r, size_t size_r,
                     bool plus, bool psize, uint_fast8_t p)
@@ -157,7 +157,7 @@ gd_common_agree_max(dimension_t dim,
 
 _attr_optimize_finite_math
 static inline double
-gd_common(const signed char * restrict minmax, dimension_t dim,
+gd_common(const int * restrict minmax, dimension_t dim,
           const double * restrict points_a, size_t size_a,
           const double * restrict points_r, size_t size_r,
           bool plus, bool psize, uint_fast8_t p)
@@ -175,7 +175,7 @@ gd_common(const signed char * restrict minmax, dimension_t dim,
 
 _attr_optimize_finite_math
 static inline double
-GD_minmax(const signed char * restrict minmax, dimension_t dim,
+GD_minmax(const int * restrict minmax, dimension_t dim,
           const double * restrict points_a, size_t size_a,
           const double * restrict points_r, size_t size_r)
 {
@@ -187,7 +187,7 @@ GD_minmax(const signed char * restrict minmax, dimension_t dim,
 
 _attr_optimize_finite_math
 static inline double
-IGD_minmax(const signed char * restrict minmax, dimension_t dim,
+IGD_minmax(const int * restrict minmax, dimension_t dim,
            const double * restrict points_a, size_t size_a,
            const double * restrict points_r, size_t size_r)
 {
@@ -202,7 +202,7 @@ IGD(const double * restrict data, size_t npoints, dimension_t nobj,
     const double * restrict ref, size_t ref_size,
     const bool *  restrict maximise)
 {
-    const signed char * minmax = minmax_from_bool(maximise, nobj);
+    const int * minmax = minmax_from_bool(maximise, nobj);
     double value = IGD_minmax(minmax, nobj, data, npoints, ref, ref_size);
     free ((void *)minmax);
     return value;
@@ -210,7 +210,7 @@ IGD(const double * restrict data, size_t npoints, dimension_t nobj,
 
 _attr_optimize_finite_math
 static inline double
-GD_p(const signed char * restrict minmax, dimension_t dim,
+GD_p(const int * restrict minmax, dimension_t dim,
      const double * restrict points_a, size_t size_a,
      const double * restrict points_r, size_t size_r, unsigned int p)
 {
@@ -222,7 +222,7 @@ GD_p(const signed char * restrict minmax, dimension_t dim,
 
 _attr_optimize_finite_math
 static inline double
-IGD_p(const signed char * restrict minmax, dimension_t dim,
+IGD_p(const int * restrict minmax, dimension_t dim,
       const double * restrict points_a, size_t size_a,
       const double * restrict points_r, size_t size_r, unsigned int p)
 {
@@ -234,7 +234,7 @@ IGD_p(const signed char * restrict minmax, dimension_t dim,
 
 _attr_optimize_finite_math
 static inline double
-IGD_plus_minmax(const signed char * restrict minmax, dimension_t dim,
+IGD_plus_minmax(const int * restrict minmax, dimension_t dim,
                 const double * restrict points_a, size_t size_a,
                 const double * restrict points_r, size_t size_r)
 {
@@ -250,7 +250,7 @@ IGD_plus(const double * restrict data, size_t npoints, dimension_t nobj,
          const bool * restrict  maximise)
 {
     ASSUME(nobj > 0);
-    const signed char * minmax = minmax_from_bool(maximise, nobj);
+    const int * minmax = minmax_from_bool(maximise, nobj);
     double value = IGD_plus_minmax(minmax, nobj, data, npoints, ref, ref_size);
     free ((void *)minmax);
     return value;
@@ -258,7 +258,7 @@ IGD_plus(const double * restrict data, size_t npoints, dimension_t nobj,
 
 _attr_optimize_finite_math
 static inline double
-avg_Hausdorff_dist_minmax(const signed char * restrict minmax, dimension_t dim,
+avg_Hausdorff_dist_minmax(const int * restrict minmax, dimension_t dim,
                           const double * restrict points_a, size_t size_a,
                           const double * restrict points_r, size_t size_r,
                           unsigned int p)
@@ -282,7 +282,7 @@ avg_Hausdorff_dist(const double * restrict data, size_t npoints, dimension_t nob
                    const bool * restrict maximise, unsigned int p)
 {
     ASSUME(nobj > 0);
-    const signed char * minmax = minmax_from_bool(maximise, nobj);
+    const int * minmax = minmax_from_bool(maximise, nobj);
     double value = avg_Hausdorff_dist_minmax(minmax, nobj, data, npoints, ref, ref_size, p);
     free ((void *)minmax);
     return value;
