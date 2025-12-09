@@ -83,10 +83,10 @@ gd_common_helper_(const enum objs_agree_t agree,
             for (dimension_t d = 0; d < dim; d++) {
                 double a_d = pa[d];
                 double r_d = pr[d];
-                diff[d] = (agree == AGREE_NONE)
+                diff[d] = minmax
                     ? (plus
-                       ? (unlikely(minmax[d] == 0) ? 0 : (minmax[d] < 0) ? MAX(r_d - a_d, 0.) : MAX(a_d - r_d, 0.))
-                       : (unlikely(minmax[d] == 0) ? 0 : (a_d - r_d)))
+                       ? ((minmax[d] < 0) ? MAX(r_d - a_d, 0.) : (minmax[d] > 0 ? MAX(a_d - r_d, 0.) : 0))
+                       : (likely(minmax[d] != 0) ? (a_d - r_d) : 0))
                     : (plus
                        ? ((agree == AGREE_MINIMISE) ? MAX(r_d - a_d, 0.) : MAX(a_d - r_d, 0.))
                        : (a_d - r_d));
