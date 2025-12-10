@@ -58,7 +58,7 @@ static double
 get_expected_value(const double * restrict points, size_t npoints,
                    dimension_t dim, const double * restrict w)
 {
-    ASSUME(1 <= dim && dim <= 32);
+    ASSUME(1 <= dim && dim <= MOOCORE_DIMENSION_MAX);
     ASSUME(npoints > 0);
     // points >= 0 && w >=0 so max_s_w cannot be < 0.
     double max_s_w = -INFINITY;
@@ -155,13 +155,12 @@ static const long double sphere_area_div_2_pow_d_times_d[] = {
     0x1.95114f4a6c2b4f99edd29e9b248c2ebcac0da20801p-44L, // d = 29, value = 8.994307879156888e-14
     0x1.6fadb9f1557439151a0ebd2ccbe6ab2048f78253c3p-46L, // d = 30, value = 2.0410263396641442e-14
     0x1.4866e45924c71ba782251a99649c76cd10bffad1bdp-48L, // d = 31, value = 4.5574921866587215e-15
-    0x1.20c62c2f2d7f4a970cb97b8e179a6943fd21ba7509p-50L, // d = 32, value = 1.001886461636272e-15
 };
 
 _attr_pure_func static double
 euclidean_norm(const double * restrict w, dimension_t dim)
 {
-    ASSUME(2 <= dim && dim <= 32);
+    ASSUME(2 <= dim && dim <= MOOCORE_DIMENSION_MAX);
     double norm = (w[0] * w[0]) + (w[1] * w[1]);
     for (dimension_t k = 2; k < dim; k++)
         norm += w[k] * w[k];
@@ -179,7 +178,7 @@ hv_approx_normal(const double * restrict data, size_t npoints, dimension_t dim,
                  const double * restrict ref, const bool * restrict maximise,
                  uint_fast32_t nsamples, uint32_t random_seed)
 {
-    ASSUME(dim > 1 && dim < 32);
+    ASSUME(2 <= dim && dim <= MOOCORE_DIMENSION_MAX);
     const double * points = transform_and_filter(data, &npoints, dim, ref, maximise);
     if (points == NULL)
         return 0;
@@ -217,7 +216,7 @@ hv_approx_normal(const double * restrict data, size_t npoints, dimension_t dim,
 static uint_fast32_t *
 construct_polar_a(dimension_t dim, uint_fast32_t nsamples)
 {
-    ASSUME(1 <= dim && dim <= 32);
+    ASSUME(1 <= dim && dim <= MOOCORE_DIMENSION_MAX);
     // Step 1: find prime p such that dim <= eularfunction(p)/2 == (p-1)/2
     static const dimension_t primes [] = {
         1,  3,  5,  7, 11, 11, 13, 17, 17, 19,
@@ -294,8 +293,8 @@ def sin_power_integral(n, b):
         return sp.simplify(sp.simplify(integral));
     return integral
 
-# Calculate and print the integrals for n from 0 to 32
-results = {n: sin_power_integral(n, b) for n in range(33)}
+# Calculate and print the integrals for n from 0 to 31
+results = {n: sin_power_integral(n, b) for n in range(32)}
 
 # Function to check if a number has an exact floating-point representation
 def is_exact_float(e):
@@ -323,7 +322,7 @@ for n, integral in results.items():
 _attr_const_func static double
 int_of_power_of_sin_from_0_to_b(dimension_t m, double b)
 {
-#define POW fast_pow_uint_max32
+#define POW fast_pow_uint_max31
     double sin_b, cos_b;
 
     switch (m) {
@@ -426,10 +425,6 @@ int_of_power_of_sin_from_0_to_b(dimension_t m, double b)
       case 31:
           cos_b = cos(b);
           return POW(cos_b, 31)/31. - 15/29.*POW(cos_b, 29) + (35/9.)*POW(cos_b, 27) - 91/5.*POW(cos_b, 25) + (1365/23.)*POW(cos_b, 23) - 143*POW(cos_b, 21) + (5005/19.)*POW(cos_b, 19) - 6435/17.*POW(cos_b, 17) + 429*POW(cos_b, 15) - 385*POW(cos_b, 13) + 273*POW(cos_b, 11) - 455/3.*POW(cos_b, 9) + 65*POW(cos_b, 7) - 21*POW(cos_b, 5) + 5*POW(cos_b, 3) - cos_b + 67108864/300540195.;
-      case 32:
-          sin_b = sin(b); cos_b = cos(b);
-          return 0.13994993409141898*b - cos_b*sin_b*(
-              0.03125*POW(sin_b, 30) + 31/960.*POW(sin_b, 28) + 899/26880.*POW(sin_b, 26) + 8091/232960.*POW(sin_b, 24) + 13485/372736.*POW(sin_b, 22) + 310155/8200192.*POW(sin_b, 20) + 186093/4685824.*POW(sin_b, 18) + 392863/9371648.*POW(sin_b, 16) + 6678671/149946368.*POW(sin_b, 14) + 100180065/2099249152.*POW(sin_b, 12) + 33393355/645922816.*POW(sin_b, 10) + 6678671/117440512.*POW(sin_b, 8) + 60108039/939524096.*POW(sin_b, 6) + 0.07463996484875679*POW(sin_b, 4) + 0.093299956060945988*POW(sin_b, 2) + 0.13994993409141898);
       default:
           unreachable();  // COVR_EXCL_LINE # nocov
     }
@@ -474,7 +469,6 @@ static const long double int_power_of_sin_from_0_to_half_pi[] = {
     /* d = 29 */ 33554432. / 145422675.,
     /* d = 30 */ 9694845.L * M_PI / 134217728.L,
     /* d = 31 */ 67108864. / 300540195.,
-    /* d = 32 */ 300540195.L * M_PI / 4294967296.L
 #else
     /* d =  3 */ 2 / 3.L,
     /* d =  4 */ 3 * M_PIl / 16,
@@ -505,7 +499,6 @@ static const long double int_power_of_sin_from_0_to_half_pi[] = {
     /* d = 29 */ 33554432 / 145422675.L,
     /* d = 30 */ 9694845 * M_PIl / 134217728.L,
     /* d = 31 */ 67108864 / 300540195.L,
-    /* d = 32 */ 300540195 * M_PIl / 4294967296
 #endif
 };
 
@@ -556,7 +549,7 @@ static void
 compute_theta(long double * restrict theta, dimension_t dim,
               const long double * restrict int_all)
 {
-    ASSUME(2 <= dim && dim <= 32);
+    ASSUME(2 <= dim && dim <= MOOCORE_DIMENSION_MAX);
     for (dimension_t j = 0; j < dim - 1; j++) {
         // We multiply here because we computed 1 / int_all[j] before.
         theta[j] = solve_inverse_int_of_power_sin(theta[j] * int_all[(dim - 2) - j],
@@ -588,7 +581,7 @@ static void
 compute_hua_wang_direction(double * restrict direction, dimension_t dim,
                            const double * restrict sin_theta, const double * restrict cos_theta)
 {
-    ASSUME(2 <= dim && dim <= 32);
+    ASSUME(2 <= dim && dim <= MOOCORE_DIMENSION_MAX);
     dimension_t j;
     for (j = 0; j < dim - 1; j++)
         direction[j] = sin_theta[0];
@@ -618,7 +611,7 @@ hv_approx_hua_wang(const double * restrict data, size_t npoints, dimension_t dim
                    const double * restrict ref, const bool * restrict maximise,
                    uint_fast32_t nsamples)
 {
-    ASSUME(dim > 1 && dim < 32);
+    ASSUME(2 <= dim && dim <= MOOCORE_DIMENSION_MAX);
     const double * points = transform_and_filter(data, &npoints, dim, ref, maximise);
     if (points == NULL)
         return 0;

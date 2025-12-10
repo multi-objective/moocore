@@ -65,19 +65,19 @@ gd_common_helper_(const enum objs_agree_t agree,
                   const double * restrict points_r, size_t size_r,
                   bool plus, bool psize, uint_fast8_t p)
 {
+    ASSUME(2 <= dim && dim <= MOOCORE_DIMENSION_MAX);
     if (size_a == 0) return INFINITY;
     ASSUME(size_a > 0);
     ASSUME(size_r > 0);
-    ASSUME(dim >= 2);
     ASSUME(agree == AGREE_MINIMISE || agree == AGREE_MAXIMISE || agree == AGREE_NONE);
     assert((agree == AGREE_NONE) == (minmax != NULL));
 
-    double * diff = malloc(dim * sizeof(*diff));
     double gd = 0;
     for (size_t a = 0; a < size_a; a++) {
         double min_dist = INFINITY;
         const double * restrict pa = points_a + a * dim;
         for (size_t r = 0; r < size_r; r++) {
+            double diff[MOOCORE_DIMENSION_MAX + 1];
             const double * restrict pr = points_r + r * dim;
             // TODO: Implement taxicab and infinity norms
             for (dimension_t d = 0; d < dim; d++) {
@@ -113,8 +113,6 @@ gd_common_helper_(const enum objs_agree_t agree,
     zero_skip:
         (void)0;
     }
-    free(diff);
-
     ASSUME(gd >= 0);
 
     if (p == 1)

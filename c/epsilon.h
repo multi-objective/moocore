@@ -15,7 +15,7 @@ static inline bool
 all_positive(const double * restrict points, size_t size, dimension_t dim)
 {
     ASSUME(size > 0);
-    ASSUME(1 <= dim && dim <= 32);
+    ASSUME(1 <= dim && dim <= MOOCORE_DIMENSION_MAX);
     const size_t len = size * dim;
     for (size_t a = 0; a < len; a++)
         if (points[a] <= 0)
@@ -52,7 +52,7 @@ epsilon_helper_(bool do_mult, const enum objs_agree_t agree,
                 const double * restrict points_a, size_t size_a,
                 const double * restrict points_b, size_t size_b)
 {
-    ASSUME(2 <= dim && dim <= 32);
+    ASSUME(2 <= dim && dim <= MOOCORE_DIMENSION_MAX);
     ASSUME(size_a > 0 && size_b > 0);
     ASSUME(agree == AGREE_MINIMISE || agree == AGREE_MAXIMISE || agree == AGREE_NONE);
     assert((agree == AGREE_NONE) == (minmax != NULL));
