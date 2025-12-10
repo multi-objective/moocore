@@ -1,7 +1,16 @@
+/**
+   These functions compute base ** exp when exp is an non-negative integer.
+   The fast_ variants use the fewer number of multiplications possible.
+
+   FIXME: GCC has __builtin_powi(): https://gcc.gnu.org/onlinedocs/gcc/Floating-Point-Format-Builtins.html#index-_005f_005fbuiltin_005fpowi
+
+   Measure its speed and accuracy versus theses functions.
+*/
+
 #include <stdint.h>
 #include "common.h"
 
-// Fast power function for exp between 0 and 32
+// Fast power function for exp between 0 and 31
 _attr_const_func static inline double
 fast_pow_uint_max31(double base, uint_fast8_t exp)
 {
