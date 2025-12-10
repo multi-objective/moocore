@@ -216,11 +216,11 @@ shlibs: clean $(SHLIB) $(CXXSHLIB)
 
 $(SHLIB): CFLAGS += $(SHLIB_CFLAGS)
 $(SHLIB): $(LIBHV_OBJS)
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $^ $(SHLIB_LDFLAGS)
+	$(QUIET_CC)$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $^ $(SHLIB_LDFLAGS)
 
 $(CXXSHLIB): CFLAGS += $(SHLIB_CFLAGS)
 $(CXXSHLIB): $(LIBHV_OBJS)
-	$(CXX) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $^ $(SHLIB_LDFLAGS)
+	$(QUIET_CXX)$(CXX) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $^ $(SHLIB_LDFLAGS)
 
 clean:
 	@-$(RM) *.s *.i *.gcda mt19937/*.gcda
