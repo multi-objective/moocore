@@ -45,6 +45,12 @@ lexicographic_less_3d(const double * restrict a, const double * restrict b)
 }
 
 static inline bool
+lexicographic_less_2d(const double * restrict a, const double * restrict b)
+{
+    return (a[1] < b[1] || (a[1] == b[1] && a[0] <= b[0]));
+}
+
+static inline bool
 all_equal_double(const double * restrict a, const double * restrict b, dimension_t dim)
 {
     ASSUME(dim >= 2);

@@ -159,6 +159,93 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
     unreachable();
 }
 
+
+/* Assumes that the HV3D+ data structure is reconstructed up to z <= newp->x[2].
+ Sweeps the points in the data structure in ascending order of y-coordinate, includes newp
+ in the z list, sets up  the "closest" data of newp and, if equalz=true (i.e., all points in
+ the data structure have x[2] == newp->x[2]), it also updates the "closest" data of the point
+ that follows newp according to the lexicographic order (z,y,x).
+*/
+static bool
+continue_base_update_z_closest(dlnode_t * restrict list, dlnode_t * restrict newp, bool equalz)
+{
+    const double newx[] = { newp->x[0], newp->x[1], newp->x[2], newp->x[3] };
+    assert(list+1 == list->next[0]);
+    dlnode_t * lex_prev = list+1;
+    dlnode_t * closest1;
+    dlnode_t * p = (list+1)->cnext[1];
+
+    // find newp->closest[0]
+    while (p->x[1] < newx[1]){
+        assert(p->x[2] <= newx[2]);
+        p = p->cnext[1];
+    }
+
+    if (p->x[1] != newx[1] || p->x[0] > newx[0])
+        p = p->cnext[0];
+
+    assert(lexicographic_less_2d(p->x, newx));
+    assert(lexicographic_less_2d(newx, p->cnext[1]->x));
+
+    lex_prev = p; // newp->closest[0] = lex_prev
+
+    // check if newp is dominated
+    if (weakly_dominates(p->x, newx, 3)){
+        return false;
+    }
+
+    p = lex_prev->cnext[1];
+
+    // if all points in the list have z-coordinate equal to px[2]
+    if (equalz){
+        // check if newp dominates points in the list
+        assert(p->cnext[0]->x[1] < newx[1]);
+        assert(p->x[1] >= newx[1]);
+        while (p->x[0] >= newx[0]) {
+            remove_from_z(p);
+            p = p->cnext[1];
+        }
+        // update the closest of points in the list (max. 1), if needed
+        assert(p->x[0] < newx[0]);
+        p->closest[0] = newp;
+
+        //setup z list
+        assert(p == list || lex_prev->next[0] == p);
+        newp->prev[0] = lex_prev;
+        newp->next[0] = lex_prev->next[0];
+
+        closest1 = list;
+
+    }else{
+        //setup z list
+        newp->prev[0] = list->prev[0]->prev[0];
+        newp->next[0] = list->prev[0];
+
+         // find newp->closest[1]
+         while (p->x[0] >= newx[0]){
+             assert(p->x[2] <= newx[2]);
+             p = p->cnext[1];
+        }
+        closest1 = p;
+    }
+
+    newp->closest[0] = lex_prev;
+    newp->closest[1] = closest1;
+
+    // update cnext
+    lex_prev->cnext[1] = newp;
+    newp->cnext[0] = lex_prev;
+    newp->cnext[1] = p;
+    p->cnext[0] = newp;
+
+    //update z list
+    newp->next[0]->prev[0] = newp;
+    newp->prev[0]->next[0] = newp;
+
+    return true;
+}
+
+
 // FIXME: This is very similar to the loop in hvc3d_list() but it doesn't use p->last_slice_z
 static double
 one_contribution_3d(dlnode_t * restrict newp)
@@ -245,24 +332,11 @@ hv4dplusU(dlnode_t * list)
     return hv;
 }
 
-static inline void
-restore_points(dlnode_t * list, dlnode_t * last)
-{
-    dlnode_t * newp = (list+1)->next[1];
-    while (newp != last) {
-        // MANUEL: We only modify the points that are not ignored.
-        if (newp->ignore < 3) {
-            for (int i = 0; i < 3; i++) {
-                newp->x[i] = newp->x_aux[i];
-            }
-        }
-        newp = newp->next[1];
-    }
-}
+
 
 /* Compute the hv contribution of "the_point" in d=4 by iteratively computing the one contribution problem in d=3. */
 static inline double
-onec4dplusU(dlnode_t * list, dlnode_t * the_point)
+onec4dplusU(dlnode_t * list, dlnode_t * list_aux, dlnode_t * the_point)
 {
     // MANUEL: It would be better to move this check to hv.c to avoid calling reset_sentinels_3d. You can add an assert here.
     if (the_point->ignore >= 3) {
@@ -272,43 +346,59 @@ onec4dplusU(dlnode_t * list, dlnode_t * the_point)
     assert(list+2 == list->prev[0]);
     assert(list+2 == list->prev[1]);
     assert(list+1 == list->next[1]);
-
-    dlnode_t * newp = (list+1)->next[1];
+    dlnode_t * newp = (list+1)->next[0];
     const dlnode_t * last = list+2;
 
-    the_point->closest[0] = list+1;
-    the_point->closest[1] = list;
+    dlnode_t * z_first = (list+1)->next[0];
+    dlnode_t * z_last = last->prev[0];
 
     const double * the_point_x = the_point->x;
-    // MANUEL: I added this because I think we cannot (and should not) call this function with an empty list.
-    assert(newp != last);
-    // PART 1: Setup 3D base (TODO: improve)
-    while (newp != last && newp->x[3] <= the_point_x[3]) {
-        // MANUEL: When can newp be equal to the_point?
-        if (newp != the_point && newp->ignore < 3){
+    double * x_aux = list_aux->x;
+    size_t c = 0, cx = 0;
 
-            if (weakly_dominates(newp->x, the_point_x, 3)) {
-                the_point->ignore = 3;
-                restore_points(list, newp);
-                return 0;
-            }
+    dlnode_t * newp_aux = list_aux+1; //list_aux is a sentinel
 
-            // FIXME: This modifies ->x[], why?
-            for (int i = 0; i < 3; i++){
-                // MANUEL: so basically: if (newp->x[i] < the_point_x[i]) newp->x[i] = the_point_x[i];
-                newp->x[i] = (newp->x[i] >= the_point_x[i]) ? newp->x[i] : the_point_x[i];
-            }
+    reset_sentinels_3d(list);
+    restart_list_y(list);
 
-            if (restart_base_setup_z_and_closest(list, newp)) {
-                add_to_z(newp);
-                update_links(list, newp);
+    if ((list+1)->next[1] != the_point){
+        // PART 1: Setup 3D base (if there are any points below the_point_x[3])
+        while (newp != last) {
+            // MANUEL: When can newp be equal to the_point?
+            if (newp->x[3] <= the_point_x[3] && newp != the_point && newp->ignore < 3){
+                if (newp->x[0] <= the_point_x[0] && newp->x[1] <= the_point_x[1] && newp->x[2] <= the_point_x[2]){
+                    the_point->ignore = 3;
+                    //restore modified links (z list)
+                    (list+1)->next[0] = z_first;
+                    (list+2)->prev[0] = z_last;
+                    return 0;
+                }
+
+                for (int i = 0; i < 3; i++){
+                    // MANUEL: so basically: if (newp->x[i] < the_point_x[i]) newp->x[i] = the_point_x[i]; AG: Yes. x_aux is the coordinate-wise maximum between newp->x and the_point_x
+                    x_aux[cx++] = (newp->x[i] >= the_point_x[i]) ? newp->x[i] : the_point_x[i];
+                }
+
+                newp_aux->x = x_aux + cx - 3;
+                if (continue_base_update_z_closest(list, newp_aux, newp_aux->x[2] == the_point_x[2] && c > 0)) {
+                    newp_aux++;
+                    c++;
+                }
             }
+            newp = newp->next[0];
         }
-        newp = newp->next[1];
     }
+    newp = the_point->next[1];
+    while(newp->x[3] <= the_point_x[3])
+        newp = newp->next[1];
 
+    dlnode_t * tp_prev_z = the_point->prev[0];
+    dlnode_t * tp_next_z = the_point->next[0];
     restart_base_setup_z_and_closest(list, the_point);
     double volume = one_contribution_3d(the_point);
+    the_point->prev[0] = tp_prev_z;
+    the_point->next[0] = tp_next_z;
+
     assert(volume > 0);
     double height = newp->x[3] - the_point_x[3];
     // It cannot be zero because we exited the loop above.
@@ -319,28 +409,25 @@ onec4dplusU(dlnode_t * list, dlnode_t * the_point)
     while (newp != last &&
             (newp->x[0] > the_point_x[0] || newp->x[1] > the_point_x[1] || newp->x[2] > the_point_x[2])) {
 
-        // MANUEL: I think newp cannot be equal to the_point here. If it was
-        // equal, we would have exited the loop.
-        assert(newp != the_point); //
-        if (newp != the_point && newp->ignore < 3) {
-            // FIXME: This modifies ->x[], why?
+        if (newp->ignore < 3) {
             for(int i = 0; i < 3; i++){
-                // MANUEL: so basically: if (newp->x[i] < the_point_x[i]) newp->x[i] = the_point_x[i];
-                newp->x[i] = (newp->x[i] >= the_point_x[i]) ? newp->x[i] : the_point_x[i];
+                // MANUEL: so basically: if (newp->x[i] < the_point_x[i]) newp->x[i] = the_point_x[i]; AG: Yes. x_aux is the coordinate-wise maximum between newp->x and the_point_x
+                x_aux[cx++] = (newp->x[i] >= the_point_x[i]) ? newp->x[i] : the_point_x[i];
             }
-            if (restart_base_setup_z_and_closest(list, newp)) {
-
+            newp_aux->x = x_aux + cx - 3;
+            if (restart_base_setup_z_and_closest(list, newp_aux)) {
                 // newp was not dominated by something else.
-                double newp_v = one_contribution_3d(newp);
+                double newp_v = one_contribution_3d(newp_aux);
                 assert(newp_v > 0);
                 volume -= newp_v;
 
-                add_to_z(newp);
-                update_links(list, newp);
+                add_to_z(newp_aux);
+                update_links(list, newp_aux);
             }
+            newp_aux++;
         }
-        // FIXME: It newp was dominated, can we accumulate the height and update
-        // hv later?
+        // FIXME: If newp was dominated, can we accumulate the height and update
+        // hv later? AG: Yes
         height = newp->next[1]->x[3] - newp->x[3];
         assert(height >= 0);
         hv += volume * height;
@@ -348,7 +435,10 @@ onec4dplusU(dlnode_t * list, dlnode_t * the_point)
         newp = newp->next[1];
     }
 
-    restore_points(list, newp);
+    // Restore z list
+    (list+1)->next[0] = z_first;
+    (list+2)->prev[0] = z_last;
+
     return hv;
 }
 
