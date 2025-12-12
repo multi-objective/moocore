@@ -79,12 +79,11 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     // Link head and list4d; head is not used by HV4D, so next[0] and prev[0]
     // should remain untouched.
     head->next[0] = list4d;
-    // head->prev[0] = list4d; // Save it twice so we can use assert() later.
 
-    // Reserve space for auxiliar list and auxiliar x vector used in onec4dplusU
-    dlnode_t * list_aux = (dlnode_t *) malloc((n + 1) * sizeof(*list_aux));
-    double * x_aux = malloc(3 * n * sizeof(double));
-    list_aux->x = x_aux;
+    // Reserve space for auxiliar list and auxiliar x vector used in onec4dplusU.
+    // This list will store at most n-1 points.
+    dlnode_t * list_aux = (dlnode_t *) malloc(n * sizeof(*list_aux));
+    list_aux->vol = malloc(3 * n * sizeof(double));
     head->prev[0] = list_aux;
     list_aux->next[0] = list4d;
 
@@ -162,7 +161,7 @@ static void fpli_free_cdllist(dlnode_t * head)
 {
     assert(head->next[0] == head->prev[0]->next[0]);
     free_cdllist(head->next[0]); // free 4D sentinels
-    free(head->prev[0]->x); // free x_aux (4D basecase)
+    free(head->prev[0]->vol); // free x_aux (4D basecase)
     free(head->prev[0]); // free list_aux (4D basecase)
     free(head->r_next);
     free(head->area);
@@ -234,19 +233,7 @@ reinsert(dlnode_t * restrict nodep, dimension_t dim, double * restrict bound)
 }
 
 static double
-fpli_hv4d(dlnode_t * restrict list, size_t c _attr_maybe_unused)
-{
-    ASSUME(c > 1);
-    assert(list->next[0] == list->prev[0]);
-    dlnode_t * restrict list4d = list->next[0];
-    // hv4dplusU() will change the sentinels for 3D, so we need to reset them.
-    reset_sentinels_3d(list4d);
-    double hv = hv4dplusU(list4d);
-    return hv;
-}
-
-static double
-fpli_onec4d(dlnode_t * restrict list, size_t c _attr_maybe_unused, dlnode_t *the_point)
+fpli_onec4d(dlnode_t * restrict list, size_t c _attr_maybe_unused, dlnode_t * restrict the_point)
 {
     ASSUME(c > 1);
     assert(list->next[0] == list->prev[0]->next[0]);
