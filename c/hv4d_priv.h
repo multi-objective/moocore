@@ -126,7 +126,9 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
         // if (weakly_dominates(px, newx, 3)) { // Slower
         if (p_leq_new_0 & p_leq_new_1 & p_leq_new_2) {
             //new->ndomr++;
-            assert(weakly_dominates(px, newx, 4));
+             //AG: in onec4dplusU, px may be just a 3-dimensional vector
+            // so we cannot have this assertion
+            // assert(weakly_dominates(px, newx, 4));
             return false;
         }
 
@@ -198,16 +200,18 @@ continue_base_update_z_closest(dlnode_t * restrict list, dlnode_t * restrict new
 
     // if all points in the list have z-coordinate equal to px[2]
     if (equalz){
-        // check if newp dominates points in the list
         assert(p->cnext[0]->x[1] < newx[1]);
         assert(p->x[1] >= newx[1]);
+        // check if newp dominates points in the list
         while (p->x[0] >= newx[0]) {
             remove_from_z(p);
             p = p->cnext[1];
         }
-        // update the closest of points in the list (max. 1), if needed
+
         assert(p->x[0] < newx[0]);
-        p->closest[0] = newp;
+        // update the closest of points in the list (max. 1), if needed
+        if (p != list)
+            p->closest[0] = newp;
 
         //setup z list
         assert(p == list || lex_prev->next[0] == p);
