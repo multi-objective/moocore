@@ -378,18 +378,20 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
     reset_sentinels_3d(list);
     restart_list_y(list);
 
-    // FIXME: Would it be possible to remove the_point so we don't need to test it?
-
     const double * the_point_x = the_point->x;
     if ((list+1)->next[1] != the_point) {
-        bool done_once = false;
         // PART 1: Setup 3D base (if there are any points below the_point_x[3])
+        bool done_once = false;
+        // Set the_point->ignore=3 so the loop will skip it, but restore its
+        // value after the loop.
+        dimension_t the_point_ignore = the_point->ignore;
+        the_point->ignore = 3;
         assert(newp != last);
         do {
             const double * newpx = newp->x;
-            if (newpx[3] <= the_point_x[3] && newp != the_point && newp->ignore < 3){
+            if (newpx[3] <= the_point_x[3] && newp->ignore < 3) {
                 if (newpx[0] <= the_point_x[0] && newpx[1] <= the_point_x[1] && newpx[2] <= the_point_x[2]) {
-                    the_point->ignore = 3;
+                    assert(the_point->ignore == 3);
                     // Restore modified links (z list).
                     (list+1)->next[0] = z_first;
                     (list+2)->prev[0] = z_last;
@@ -408,6 +410,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
             }
             newp = newp->next[0];
         } while (newp != last);
+        the_point->ignore = the_point_ignore;
     }
     newp = the_point->next[1];
     while (newp->x[3] <= the_point_x[3])
