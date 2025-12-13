@@ -182,11 +182,9 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
 static inline bool
 continue_base_update_z_closest(dlnode_t * restrict list, dlnode_t * restrict newp, bool equalz)
 {
-    const double newx[] = { newp->x[0], newp->x[1], newp->x[2]};
+    const double newx[] = { newp->x[0], newp->x[1], newp->x[2] };
     assert(list+1 == list->next[0]);
-    dlnode_t * lex_prev = list+1;
-    dlnode_t * p = lex_prev->cnext[1];
-    dlnode_t * closest1;
+    dlnode_t * p = (list+1)->cnext[1];
 
     // find newp->closest[0]
     while (p->x[1] < newx[1]){
@@ -200,13 +198,11 @@ continue_base_update_z_closest(dlnode_t * restrict list, dlnode_t * restrict new
     assert(lexicographic_less_2d(p->x, newx));
     assert(lexicographic_less_2d(newx, p->cnext[1]->x));
 
-    lex_prev = p; // newp->closest[0] = lex_prev
-
     // Check if newp is dominated.
     if (weakly_dominates(p->x, newx, 3)) {
         return false;
     }
-
+    dlnode_t * lex_prev = p; // newp->closest[0] = lex_prev
     p = lex_prev->cnext[1];
 
     // if all points in the list have z-coordinate equal to px[2]
@@ -229,24 +225,22 @@ continue_base_update_z_closest(dlnode_t * restrict list, dlnode_t * restrict new
         newp->prev[0] = lex_prev;
         newp->next[0] = lex_prev->next[0];
 
-        closest1 = list;
+        newp->closest[1] = list;
 
     } else {
         //setup z list
         newp->prev[0] = list->prev[0]->prev[0];
         newp->next[0] = list->prev[0];
 
-         // find newp->closest[1]
-         while (p->x[0] >= newx[0]){
-             assert(p->x[2] <= newx[2]);
-             p = p->cnext[1];
+        // find newp->closest[1]
+        while (p->x[0] >= newx[0]){
+            assert(p->x[2] <= newx[2]);
+            p = p->cnext[1];
         }
-        closest1 = p;
+        newp->closest[1] = p;
     }
 
     newp->closest[0] = lex_prev;
-    newp->closest[1] = closest1;
-
     // update cnext
     lex_prev->cnext[1] = newp;
     newp->cnext[0] = lex_prev;
@@ -375,10 +369,9 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
     assert(list+1 == list->next[1]);
 
     dlnode_t * newp = (list+1)->next[0];
-    dlnode_t * z_first = newp;
     const dlnode_t * const last = list+2;
-    dlnode_t * z_last = last->prev[0];
-
+    dlnode_t * const z_first = newp;
+    dlnode_t * const z_last = last->prev[0];
 
     double * x_aux = list_aux->vol;
     dlnode_t * newp_aux = list_aux+1; // list_aux is a sentinel
@@ -386,24 +379,26 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
     reset_sentinels_3d(list);
     restart_list_y(list);
 
-    // FIXME: Would it be possible to remove the_point so we don't need to test it?
-
     const double * the_point_x = the_point->x;
     if ((list+1)->next[1] != the_point) {
-        bool done_once = false;
         // PART 1: Setup 3D base (if there are any points below the_point_x[3])
+        bool done_once = false;
+        // Set the_point->ignore=3 so the loop will skip it, but restore its
+        // value after the loop.
+        dimension_t the_point_ignore = the_point->ignore;
+        the_point->ignore = 3;
         assert(newp != last);
         do {
             const double * newpx = newp->x;
-            if (newpx[3] <= the_point_x[3] && newp != the_point && newp->ignore < 3){
-                if (newpx[0] <= the_point_x[0] && newpx[1] <= the_point_x[1] && newpx[2] <= the_point_x[2]) {
-                    the_point->ignore = 3;
+            if (newpx[3] <= the_point_x[3] && newp->ignore < 3) {
+                if (weakly_dominates(newpx, the_point_x, 3)) {
+                    assert(the_point->ignore == 3);
                     // Restore modified links (z list).
                     (list+1)->next[0] = z_first;
                     (list+2)->prev[0] = z_last;
                     return 0;
                 }
-
+                // FIXME: Is it possible that x_aux matches newpx? YES! So just assign and avoid the comparison.
                 // x_aux is the coordinate-wise maximum between newpx and the_point_x.
                 update_bound_3d(x_aux, newpx, the_point_x);
                 newp_aux->x = x_aux;
@@ -416,6 +411,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
             }
             newp = newp->next[0];
         } while (newp != last);
+        the_point->ignore = the_point_ignore;
     }
     newp = the_point->next[1];
     while (newp->x[3] <= the_point_x[3])
@@ -423,9 +419,12 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
 
     dlnode_t * tp_prev_z = the_point->prev[0];
     dlnode_t * tp_next_z = the_point->next[0];
-    // FIXME: Why do we ignore the return value of this function?
-    bool res = restart_base_setup_z_and_closest(list, the_point);
-    assert(res);
+    // FIXME: Does this call always return true?
+#if DEBUG >= 1
+    assert(restart_base_setup_z_and_closest(list, the_point));
+#else
+    restart_base_setup_z_and_closest(list, the_point);
+#endif
     double volume = one_contribution_3d(the_point);
     the_point->prev[0] = tp_prev_z;
     the_point->next[0] = tp_next_z;
@@ -439,10 +438,11 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
     // PART 2: Update the 3D contribution.
     while (newp != last) {
         const double * newpx = newp->x;
-        if (newpx[0] <= the_point_x[0] && newpx[1] <= the_point_x[1] && newpx[2] <= the_point_x[2])
+        if (weakly_dominates(newpx, the_point_x, 3))
             break;
 
         if (newp->ignore < 3) {
+            // FIXME: Is it possible that x_aux matches newpx? YES! So just assign and avoid the comparison.
             // x_aux is the coordinate-wise maximum between newpx and the_point_x.
             update_bound_3d(x_aux, newpx, the_point_x);
             newp_aux->x = x_aux;
@@ -455,10 +455,8 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
 
                 add_to_z(newp_aux);
                 update_links(list, newp_aux);
+                newp_aux++;
             }
-            // FIXME: If the above returned false, then newp_aux was not used
-            // so we could re-use it, no?
-            newp_aux++;
         }
         // FIXME: If newp was dominated, can we accumulate the height and update
         // hv later? AG: Yes
