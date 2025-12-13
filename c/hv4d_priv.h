@@ -367,9 +367,9 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
     assert(list+1 == list->next[1]);
 
     dlnode_t * newp = (list+1)->next[0];
-    dlnode_t * z_first = newp;
     const dlnode_t * const last = list+2;
-    dlnode_t * z_last = last->prev[0];
+    dlnode_t * const z_first = newp;
+    dlnode_t * const z_last = last->prev[0];
 
 
     double * x_aux = list_aux->vol;
@@ -390,14 +390,14 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
         do {
             const double * newpx = newp->x;
             if (newpx[3] <= the_point_x[3] && newp->ignore < 3) {
-                if (newpx[0] <= the_point_x[0] && newpx[1] <= the_point_x[1] && newpx[2] <= the_point_x[2]) {
+                if (weakly_dominates(newpx, the_point_x, 3)) {
                     assert(the_point->ignore == 3);
                     // Restore modified links (z list).
                     (list+1)->next[0] = z_first;
                     (list+2)->prev[0] = z_last;
                     return 0;
                 }
-
+                // FIXME: Is it possible that x_aux matches newpx? YES! So just assign and avoid the comparison.
                 // x_aux is the coordinate-wise maximum between newpx and the_point_x.
                 update_bound_3d(x_aux, newpx, the_point_x);
                 newp_aux->x = x_aux;
@@ -434,10 +434,11 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
     // PART 2: Update the 3D contribution.
     while (newp != last) {
         const double * newpx = newp->x;
-        if (newpx[0] <= the_point_x[0] && newpx[1] <= the_point_x[1] && newpx[2] <= the_point_x[2])
+        if (weakly_dominates(newpx, the_point_x, 3))
             break;
 
         if (newp->ignore < 3) {
+            // FIXME: Is it possible that x_aux matches newpx? YES! So just assign and avoid the comparison.
             // x_aux is the coordinate-wise maximum between newpx and the_point_x.
             update_bound_3d(x_aux, newpx, the_point_x);
             newp_aux->x = x_aux;
