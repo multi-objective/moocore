@@ -389,7 +389,8 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
     if ((list+1)->next[1] != the_point) {
         bool done_once = false;
         // PART 1: Setup 3D base (if there are any points below the_point_x[3])
-        while (newp != last) {
+        assert(newp != last);
+        do {
             const double * newpx = newp->x;
             if (newpx[3] <= the_point_x[3] && newp != the_point && newp->ignore < 3){
                 if (newpx[0] <= the_point_x[0] && newpx[1] <= the_point_x[1] && newpx[2] <= the_point_x[2]) {
@@ -411,7 +412,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
                 }
             }
             newp = newp->next[0];
-        }
+        } while (newp != last);
     }
     newp = the_point->next[1];
     while (newp->x[3] <= the_point_x[3])

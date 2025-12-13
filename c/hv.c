@@ -182,6 +182,34 @@ update_bound(double * restrict bound, const double * restrict x, dimension_t dim
 }
 
 static void
+delete_4d(dlnode_t * restrict nodep)
+{
+    nodep->prev[1]->next[1] = nodep->next[1];
+    nodep->next[1]->prev[1] = nodep->prev[1];
+}
+
+static void
+delete_3d(dlnode_t * restrict nodep)
+{
+    nodep->prev[0]->next[0] = nodep->next[0];
+    nodep->next[0]->prev[0] = nodep->prev[0];
+}
+
+static void
+reinsert_4d(dlnode_t * restrict nodep)
+{
+    nodep->prev[1]->next[1] = nodep;
+    nodep->next[1]->prev[1] = nodep;
+}
+
+static void
+reinsert_3d(dlnode_t * restrict nodep)
+{
+    nodep->prev[0]->next[0] = nodep;
+    nodep->next[0]->prev[0] = nodep;
+}
+
+static void
 delete_dom(dlnode_t * restrict nodep, dimension_t dim)
 {
     ASSUME(dim > STOP_DIMENSION);
@@ -191,12 +219,8 @@ delete_dom(dlnode_t * restrict nodep, dimension_t dim)
         nodep->r_prev[d]->r_next[d] = nodep->r_next[d];
         nodep->r_next[d]->r_prev[d] = nodep->r_prev[d];
     }
-    // Dimension 4.
-    nodep->prev[1]->next[1] = nodep->next[1];
-    nodep->next[1]->prev[1] = nodep->prev[1];
-    // Dimension 3.
-    nodep->prev[0]->next[0] = nodep->next[0];
-    nodep->next[0]->prev[0] = nodep->prev[0];
+    delete_4d(nodep);
+    delete_3d(nodep);
 }
 
 static void
@@ -217,12 +241,8 @@ reinsert_nobound(dlnode_t * restrict nodep, dimension_t dim)
         nodep->r_prev[d]->r_next[d] = nodep;
         nodep->r_next[d]->r_prev[d] = nodep;
     }
-    // Dimension 4.
-    nodep->prev[1]->next[1] = nodep;
-    nodep->next[1]->prev[1] = nodep;
-    // Dimension 3.
-    nodep->prev[0]->next[0] = nodep;
-    nodep->next[0]->prev[0] = nodep;
+    reinsert_4d(nodep);
+    reinsert_3d(nodep);
 }
 
 static void
@@ -413,20 +433,17 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
     // FIXME: This is never used?
     // bound[d_stop] = p0->x[dim];
     reinsert_nobound(p0, dim);
-    p1 = p0;
-    dlnode_t * p1_prev = p0->r_prev[d_stop - 1];
-    p0 = p0->r_next[d_stop - 1];
-    c++;
 
-    assert(c > 1);
     while (true) {
-        // FIXME: This is not true in the first iteration if c > 1 previously.
-        //assert(p0 == p1->r_prev[d_stop]);
-        assert(p1_prev == p1->r_prev[d_stop - 1]);
+        dlnode_t * p1_prev = p0->r_prev[d_stop - 1];
+        p1 = p0;
+        p0 = p0->r_next[d_stop - 1];
         p1->vol[d_stop] = hyperv;
         assert(p1->ignore == 0);
+        c++;
+
         double hypera = hv_recursive(list, dim - 1, c, ref, bound, p1);
-        if(dim - 1 == STOP_DIMENSION){ //hypera only has the contribution of p1
+        if (dim - 1 == STOP_DIMENSION) { //hypera only has the contribution of p1
             hypera += p1_prev->area[d_stop];
         }
         /* At this point, p1 is the point with the highest value in
@@ -454,10 +471,6 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
         // bound[d_stop] = p0->x[dim];
         // FIXME: Does updating the bound here matters?
         reinsert(p0, dim, bound);
-        p1 = p0;
-        p1_prev = p0->r_prev[d_stop - 1];
-        p0 = p0->r_next[d_stop - 1];
-        c++;
     }
 }
 
