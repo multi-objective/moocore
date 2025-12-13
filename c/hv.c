@@ -142,8 +142,8 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         }
     }
     // Reset x to point to the first objective.
-    for (i = 0; i < n; i++){
-        scratch[i]->x -= STOP_DIMENSION-1;
+    for (i = 0; i < n; i++) {
+        scratch[i]->x -= STOP_DIMENSION - 1;
     }
 
     free(scratch);

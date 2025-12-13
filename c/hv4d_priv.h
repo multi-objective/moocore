@@ -180,11 +180,9 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
 static inline bool
 continue_base_update_z_closest(dlnode_t * restrict list, dlnode_t * restrict newp, bool equalz)
 {
-    const double newx[] = { newp->x[0], newp->x[1], newp->x[2]};
+    const double newx[] = { newp->x[0], newp->x[1], newp->x[2] };
     assert(list+1 == list->next[0]);
-    dlnode_t * lex_prev = list+1;
-    dlnode_t * p = lex_prev->cnext[1];
-    dlnode_t * closest1;
+    dlnode_t * p = (list+1)->cnext[1];
 
     // find newp->closest[0]
     while (p->x[1] < newx[1]){
@@ -198,13 +196,11 @@ continue_base_update_z_closest(dlnode_t * restrict list, dlnode_t * restrict new
     assert(lexicographic_less_2d(p->x, newx));
     assert(lexicographic_less_2d(newx, p->cnext[1]->x));
 
-    lex_prev = p; // newp->closest[0] = lex_prev
-
     // Check if newp is dominated.
     if (weakly_dominates(p->x, newx, 3)) {
         return false;
     }
-
+    dlnode_t * lex_prev = p; // newp->closest[0] = lex_prev
     p = lex_prev->cnext[1];
 
     // if all points in the list have z-coordinate equal to px[2]
@@ -227,24 +223,22 @@ continue_base_update_z_closest(dlnode_t * restrict list, dlnode_t * restrict new
         newp->prev[0] = lex_prev;
         newp->next[0] = lex_prev->next[0];
 
-        closest1 = list;
+        newp->closest[1] = list;
 
     } else {
         //setup z list
         newp->prev[0] = list->prev[0]->prev[0];
         newp->next[0] = list->prev[0];
 
-         // find newp->closest[1]
-         while (p->x[0] >= newx[0]){
-             assert(p->x[2] <= newx[2]);
-             p = p->cnext[1];
+        // find newp->closest[1]
+        while (p->x[0] >= newx[0]){
+            assert(p->x[2] <= newx[2]);
+            p = p->cnext[1];
         }
-        closest1 = p;
+        newp->closest[1] = p;
     }
 
     newp->closest[0] = lex_prev;
-    newp->closest[1] = closest1;
-
     // update cnext
     lex_prev->cnext[1] = newp;
     newp->cnext[0] = lex_prev;
