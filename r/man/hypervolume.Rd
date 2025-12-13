@@ -72,14 +72,15 @@ For 5D or higher and up to 15 points, the implementation uses the
 inclusion-exclusion algorithm \citep{WuAzam2001metrics}, which has \eqn{O(m
 2^{n})} time and \eqn{O(n\cdot m)} space complexity, but it is very fast for
 such small sets.  For larger number of points, it uses a recursive algorithm
-\citep{FonPaqLop06:hypervolume} with \eqn{\text{HV4D}^{+}} as the base case,
-resulting in a \eqn{O(n^{m-2})} time complexity and \eqn{O(n)} space
-complexity in the worst-case.  Experimental results show that the pruning
-techniques used may reduce the time complexity even further.  The original
-proposal \citep{FonPaqLop06:hypervolume} had the HV3D algorithm as the base
-case, giving a time complexity of \eqn{O(n^{m-2} \log n)}.  Andreia
-P. Guerreiro enhanced the numerical stability of the algorithm by avoiding
-floating-point comparisons of partial hypervolumes.
+\citep{FonPaqLop06:hypervolume} that computes 4D contributions
+\citep{GueFon2017hv4d} as the base case, resulting in a \eqn{O(n^{m-2})}
+time complexity and \eqn{O(n)} space complexity in the worst-case.
+Experimental results show that the pruning techniques used may reduce the
+time complexity even further.  The original proposal
+\citep{FonPaqLop06:hypervolume} had the HV3D algorithm as the base case,
+giving a time complexity of \eqn{O(n^{m-2} \log n)}.  Andreia P. Guerreiro
+enhanced the numerical stability of the algorithm by avoiding floating-point
+comparisons of partial hypervolumes.
 }
 \examples{
 
