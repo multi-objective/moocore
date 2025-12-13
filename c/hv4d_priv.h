@@ -69,7 +69,7 @@ update_links(dlnode_t * restrict list, dlnode_t * restrict newp)
     assert(list+2 == list->prev[0]);
     const double newx[] = { newp->x[0], newp->x[1], newp->x[2] };
     dlnode_t * p = newp->next[0];
-    const dlnode_t * stop = list+2;
+    const dlnode_t * const stop = list+2;
     while (p != stop) {
         const double * px = p->x;
         // px dominates newx (but not equal)
@@ -141,6 +141,7 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
 
         //if (!lexicographic_less_3d(px, newx)) { // Slower
         if (!(p_lt_new_2 || (p_eq_new_2 && (p_lt_new_1 || (p_eq_new_1 && p_leq_new_0))))) {
+            assert(!lexicographic_less_3d(px, newx));
             newp->closest[0] = closest0;
             newp->closest[1] = closest1;
             newp->prev[0] = p->prev[0];

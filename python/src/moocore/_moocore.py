@@ -432,11 +432,12 @@ def hypervolume(
     for speed.
 
     For 5D or higher, it uses a recursive algorithm
-    :footcite:p:`FonPaqLop06:hypervolume` with HV4D\ :sup:`+` as the base case,
-    resulting in a :math:`O(n^{d-2})` time complexity and :math:`O(n)` space
-    complexity in the worst-case, where :math:`d` is the dimension of the
-    points.  Experimental results show that the pruning techniques used may
-    reduce the time complexity even further.  The original proposal
+    :footcite:p:`FonPaqLop06:hypervolume` that computes 4D contributions
+    :footcite:p:`GueFon2017hv4d` as the base case, resulting in a
+    :math:`O(n^{d-2})` time complexity and :math:`O(n)` space complexity in the
+    worst-case, where :math:`d` is the dimension of the points.  Experimental
+    results show that the pruning techniques used may reduce the time
+    complexity even further.  The original proposal
     :footcite:p:`FonPaqLop06:hypervolume` had the HV3D algorithm as the base
     case, giving a time complexity of :math:`O(n^{d-2} \log n)`.  Andreia
     P. Guerreiro enhanced the numerical stability of the recursive algorithm by
