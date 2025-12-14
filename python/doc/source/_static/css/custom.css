@@ -27,3 +27,18 @@ html {
 {
   display: none;
 }
+
+/* Monospace titles for API docs */
+div.empty + section>h1 {
+  font-family: var(--pst-font-family-monospace);
+}
+
+.prename {
+  font-family: var(--pst-font-family-monospace);
+  font-size: var(--pst-font-size-h4);
+}
+
+/* Removes moocore. prefix in API docs. */
+.sig-prename {
+  display: none;
+}

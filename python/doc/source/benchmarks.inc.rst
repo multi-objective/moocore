@@ -91,7 +91,7 @@ Exact computation of hypervolume
 
 The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D, 4D, 5D and 6D. As the plots show, `moocore`_ is 100 times faster than the other packages and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_ and `BoFire`_.
 
-For 3D, `Optuna`_ uses a :math:`O(n^2)` algorithm, while `moocore` uses the best-known :math:`O(n\log n)` one, so the gap between the two will get significantly larger with a larger number of points than those tested here.  `BoTorch`_ and `fast-pareto`_ are not included for more than 3 objectives because **they are tens of thousands of times slower** than `moocore`_.  `Nevergrad`_ and `Optuna`_ are not included for more than 5 objectives for the same reason.
+For 3D, `Optuna`_ uses a :math:`O(n^2)` algorithm, while `moocore`_ uses the best-known :math:`O(n\log n)` one, so the gap between the two will get significantly larger with a larger number of points than those tested here.  `BoTorch`_ and `fast-pareto`_ are not included for more than 3 objectives because **they are tens of thousands of times slower** than `moocore`_.  `Nevergrad`_ and `Optuna`_ are not included for more than 5 objectives for the same reason.
 
 
 |hv_bench-DTLZLinearShape-3d| |hv_bench-DTLZLinearShape-4d|

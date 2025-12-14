@@ -147,18 +147,9 @@ html_theme = "pydata_sphinx_theme"
 #     switcher_version = f"{version}"
 
 html_theme_options = {
-    "sidebar_includehidden": True,
-    "github_url": github_url,
     "collapse_navigation": True,
-    "navigation_with_keys": False,
-    "navbar_align": "left",
+    "github_url": github_url,
     "header_links_before_dropdown": 5,
-    "show_toc_level": 2,  # On this page sidebar
-    "show_prev_next": True,
-    "use_edit_page_button": True,
-    # Add light/dark mode and documentation version switcher:
-    # "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"],
-    "navbar_end": ["theme-switcher", "navbar-icon-links"],
     "icon_links": [
         {
             "name": "PyPI",
@@ -166,12 +157,25 @@ html_theme_options = {
             "icon": "fa-solid fa-box",
         },
     ],
+    "logo": {
+        "text": f"{project} {version}",
+    },
+    "navbar_align": "content",
+    # Add light/dark mode and documentation version switcher:
+    # "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"],
+    "navbar_end": ["theme-switcher", "navbar-icon-links"],
+    "navbar_start": ["navbar-logo"],
+    "navigation_with_keys": False,
     # https://sphinx-gallery.github.io/stable/advanced.html#using-sphinx-gallery-sidebar-components
     "secondary_sidebar_items": [
         "page-toc",
         "sg_download_links",
         "sg_launcher_links",
     ],
+    "show_prev_next": True,
+    "show_toc_level": 2,  # On this page sidebar
+    "sidebar_includehidden": True,
+    "use_edit_page_button": True,
     # "icon_links": [
     #     {
     #         # Label for this link
@@ -235,8 +239,8 @@ pygments_style = "sphinx"
 intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "mooplot": ("https://multi-objective.github.io/mooplot/python/", None),
-    "neps": ("https://numpy.org/neps/", None),
-    "numpy": ("https://numpy.org/doc/stable/", None),
+    # "neps": ("https://numpy.org/neps/", None),
+    # "numpy": ("https://numpy.org/doc/stable/", None),
     "nx-guides": ("https://networkx.org/nx-guides/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
     "python": ("https://docs.python.org/3/", None),

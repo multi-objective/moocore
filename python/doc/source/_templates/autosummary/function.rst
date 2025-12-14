@@ -1,3 +1,8 @@
+.. raw:: html
+
+   <div class="prename">{{ module }}.</div>
+   <div class="empty"></div>
+
 {{ objname | escape | underline}}
 
 .. currentmodule:: {{ module }}

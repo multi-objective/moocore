@@ -10,10 +10,22 @@ API reference
 :Date: |today|
 
 This reference manual details functions, modules, and objects
-included in moocore, describing what they are and what they do.
+included in ``moocore``, describing what they are and what they do.
 For learning how to use moocore, see the :ref:`complete documentation <moocore_docs_mainpage>`.
 
-.. toctree::
-   :maxdepth: 2
+Many docstrings contain example code, which demonstrates basic usage
+of the function. The examples assume that moocore is imported with::
 
-   functions
+  >>> import moocore
+
+A convenient way to execute examples is the ``%doctest_mode`` mode of
+IPython, which allows for pasting of multi-line examples and preserves
+indentation.
+
+.. toctree::
+   :maxdepth: 1
+
+   functions.io
+   functions.dominance
+   functions.metrics
+   functions.eaf
