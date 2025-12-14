@@ -13,7 +13,7 @@ There are a lot of ways you can contribute:
 
 1. Contribute code:
     The code is available at https://github.com/multi-objective/moocore/ .
-    Feel free to fork the project and create a pull request.
+    Feel free to fork the project and create a pull request.  There is a `TODO <https://github.com/multi-objective/moocore/blob/main/TODO>`_ file and a list of open issues at https://github.com/multi-objective/moocore/issues .  If you are unsure how to contribute, open an issue and explain your background and interests.
 
 2. Comments/suggestions on the :ref:`api_reference`:
     What functionality is missing? What would be useful APIs of existing functionality? What code/algorithms would be useful to implement?
