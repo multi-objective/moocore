@@ -2,6 +2,7 @@
 #include <R.h>
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
+#include <R_ext/Visibility.h> // attribute_visible
 
 // Not sure how to fix this warning. Also newer versions of Clang do not warn.
 // warning: must specify at least one argument for '...' parameter of variadic macro
@@ -33,7 +34,7 @@ static const R_CallMethodDef CallEntries[] = {
 #  pragma clang diagnostic pop
 #endif
 
-void R_init_moocore(DllInfo *dll)
+void attribute_visible R_init_moocore(DllInfo *dll)
 {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
