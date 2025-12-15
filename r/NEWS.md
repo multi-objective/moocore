@@ -5,6 +5,8 @@
  * `igd()`, `igd_plus()`, `avg_hausdorff_dist()` are faster.
  * Fix wrong values returned by `epsilon_mult()` when mixing minimization and maximization.
  * Fix documentation of `epsilon_additive()` (@leandrolanzieri)
+ * `hypervolume()` uses the inclusion-exclusion algorithm for small inputs of
+   up to 15 points, which is significantly faster.
 
 
 # moocore 0.1.10

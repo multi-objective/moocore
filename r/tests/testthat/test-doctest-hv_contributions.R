@@ -4,7 +4,7 @@
 test_that("Doctest: hv_contributions", {
   # Created from @doctest for `hv_contributions`
   # Source file: R/hv.R
-  # Source line: 161
+  # Source line: 164
   x <- matrix(c(5, 1, 1, 5, 4, 2, 4, 4, 5, 1), ncol = 2, byrow = TRUE)
   expect_equal(hv_contributions(x, reference = c(6, 6)), c(0, 3, 3, 0, 0))
   expect_equal(hv_contributions(x, reference = c(6, 6), ignore_dominated = FALSE),

@@ -67,16 +67,19 @@ which has \eqn{O(n^2)} complexity.  Compared to the \href{https://github.com/apg
 correctly handles weakly dominated points and has been further optimized for
 speed.
 
-For 5D or higher, it uses a recursive algorithm
-\citep{FonPaqLop06:hypervolume} with \eqn{\text{HV4D}^{+}} as the base case,
-resulting in a \eqn{O(n^{d-2})} time complexity and \eqn{O(n)} space
-complexity in the worst-case, where \eqn{d} is the dimension of the points.
-Experimental results show that the pruning techniques used may reduce the
-time complexity even further.  The original proposal
-\citep{FonPaqLop06:hypervolume} had the HV3D algorithm as the base case,
-giving a time complexity of \eqn{O(n^{d-2} \log n)}.  Andreia P. Guerreiro
-enhanced the numerical stability of the algorithm by avoiding floating-point
-comparisons of partial hypervolumes.
+For 5D or higher and up to 15 points, the implementation uses the
+inclusion-exclusion algorithm \citet{WuAzam2001metrics}, which has \eqn{O(d
+2^{n})} time and \eqn{O(n\cdot d)} space complexity, but it is very fast for
+such small sets.  For larger number of points, it uses a recursive algorithm
+it uses a recursive algorithm \citep{FonPaqLop06:hypervolume} with
+\eqn{\text{HV4D}^{+}} as the base case, resulting in a \eqn{O(n^{d-2})} time
+complexity and \eqn{O(n)} space complexity in the worst-case, where \eqn{d}
+is the dimension of the points.  Experimental results show that the pruning
+techniques used may reduce the time complexity even further.  The original
+proposal \citep{FonPaqLop06:hypervolume} had the HV3D algorithm as the base
+case, giving a time complexity of \eqn{O(n^{d-2} \log n)}.  Andreia
+P. Guerreiro enhanced the numerical stability of the algorithm by avoiding
+floating-point comparisons of partial hypervolumes.
 }
 \examples{
 

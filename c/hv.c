@@ -38,6 +38,7 @@
 #include "hv4d_priv.h"
 
 #define STOP_DIMENSION 3 // default: stop on dimension 4.
+#define MAX_ROWS_HV_INEX 15
 
 static int compare_node(const void * restrict p1, const void * restrict p2)
 {
@@ -64,6 +65,22 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     size_t n = *size;
 
     dlnode_t * head = malloc((n+1) * sizeof(*head));
+    size_t i = 1;
+    for (size_t j = 0; j < n; j++) {
+        /* Filters those points that do not strictly dominate the reference
+           point.  This is needed to assure that the points left are only those
+           that are needed to calculate the hypervolume. */
+        const double * restrict px = data + j * d;
+        if (likely(strongly_dominates(px, ref, d))) {
+            head[i].x = px; // this will be fixed a few lines below...
+            i++;
+        }
+    }
+    n = i - 1;
+    if (unlikely(n <= MAX_ROWS_HV_INEX))
+        goto finish;
+
+
     // Allocate single blocks of memory as much as possible.
     // We need space in r_next and r_prev for dimension 5 and above (d_stop - 1).
     head->r_next = malloc(2 * (d_stop - 1) * (n+1) * sizeof(head));
@@ -81,28 +98,18 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     head->next[0] = list4d;
     head->prev[0] = list4d; // Save it twice so we can use assert() later.
 
-    size_t i = 1;
-    for (size_t j = 0; j < n; j++) {
-        /* Filters those points that do not strictly dominate the reference
-           point.  This is needed to assure that the points left are only those
-           that are needed to calculate the hypervolume. */
-        if (likely(strongly_dominates(data + j * d, ref, d))) {
-            head[i].x = data + (j+1) * d; // this will be fixed a few lines below...
-            head[i].ignore = 0;
-            head[i].r_next = head->r_next + i * (d_stop - 1);
-            head[i].r_prev = head->r_prev + i * (d_stop - 1);
-            head[i].area = head->area + i * d_stop;
-            head[i].vol = head->vol + i * d_stop;
-            i++;
-        }
+    for (i = 1; i <= n; i++) {
+        head[i].x += d; // Shift to sort below in reverse order of dimensions.
+        head[i].ignore = 0;
+        head[i].r_next = head->r_next + i * (d_stop - 1);
+        head[i].r_prev = head->r_prev + i * (d_stop - 1);
+        head[i].area = head->area + i * d_stop;
+        head[i].vol = head->vol + i * d_stop;
     }
-    n = i - 1;
-    if (unlikely(n == 0))
-        goto finish;
 
-    dlnode_t **scratch = malloc(n * sizeof(*scratch));
+    dlnode_t ** scratch = malloc(n * sizeof(*scratch));
     for (i = 0; i < n; i++)
-        scratch[i] = head + i + 1;
+        scratch[i] = head + 1 + i;
 
     for (int j = d_stop - 2; j >= -1; j--) {
         /* FIXME: replace qsort() by something better:
@@ -166,8 +173,7 @@ update_bound(double * restrict bound, const double * restrict x, dimension_t dim
 
     PRAGMA_ASSUME_NO_VECTOR_DEPENDENCY // We need this to avoid a wasteful alias check.
     for (dimension_t d = 0; d < dim - STOP_DIMENSION; d++) {
-        if (bound[d] > y[d])
-            bound[d] = y[d];
+        bound[d] = MIN(bound[d], y[d]);
     }
 }
 
@@ -232,11 +238,101 @@ _attr_optimize_finite_and_associative_math // Required for auto-vectorization: h
 static double
 one_point_hv(const double * restrict x, const double * restrict ref, dimension_t d)
 {
-    double hv = ref[0] - x[0];
-    for (dimension_t i = 1; i < d; i++)
+    ASSUME(2 <= d && d <= MOOCORE_DIMENSION_MAX);
+    double hv = 1.0;
+    for (dimension_t i = 0; i < d; i++)
         hv *= (ref[i] - x[i]);
     return hv;
 }
+
+_attr_optimize_finite_and_associative_math
+static inline void
+upper_bound(double * restrict dest, const double * restrict a, const double * restrict b, dimension_t dim)
+{
+    for (dimension_t i = 0; i < dim; i++)
+        dest[i] = MAX(a[i], b[i]);
+}
+
+_attr_optimize_finite_and_associative_math
+static double
+hv_two_points(const double * restrict x1, const double * restrict x2,
+              const double * restrict ref, dimension_t d)
+{
+    ASSUME(2 <= d && d <= MOOCORE_DIMENSION_MAX);
+    double hv = one_point_hv(x1, ref, d) + one_point_hv(x2, ref, d);
+    double bound[MOOCORE_DIMENSION_MAX+1];
+    upper_bound(bound, x1, x2, d);
+    hv -= one_point_hv(bound, ref, d);
+    return hv;
+}
+
+/**
+   Computation of the hypervolume via inclusion–exclusion.
+*/
+_attr_optimize_finite_and_associative_math
+static double
+hv_inex_list(const dlnode_t * restrict list, int n, dimension_t dim,
+             const double * restrict ref)
+{
+    ASSUME(3 <= n && n <= MAX_ROWS_HV_INEX);
+    ASSUME(2 <= dim && dim <= MOOCORE_DIMENSION_MAX);
+    // Accumulate positive and negative values separately to improve accuracy.
+    // If more accuracy is needed, we could use Neumaier compensated
+    // accumulators.
+    double hv[] = {0.0, 0.0}; // 0 is negative, 1 is positive.
+
+    // Process individual points.
+    for (int i = 0; i < n; ++i) {
+        const double * restrict px = list[i].x;
+        hv[1] += one_point_hv(px, ref, dim);
+    }
+
+    // Depth-first-search state.
+    int start_stack[MAX_ROWS_HV_INEX - 1];
+    double * buffer = malloc((n-1) * dim * sizeof(*buffer));
+    if (!buffer)
+        return -1;
+    // Pre-compute to speed-up access.
+    double * subset_max[MAX_ROWS_HV_INEX - 1];
+    for (int i = 0; i < n - 1; i++) {
+        subset_max[i] = buffer + i * dim;
+    }
+
+    // Build all possible subsets starting from each possible pair.
+    for (int i = 0; i < n - 1; ++i) {
+        const double * restrict pi = list[i].x;
+        for (int j = i + 1; j < n; ++j) {
+            const double * restrict pj = list[j].x;
+            double * restrict child = subset_max[0];
+            upper_bound(child, pi, pj, dim);
+            hv[0] += one_point_hv(child, ref, dim);
+
+            int top = 0;
+            int idx = j + 1;
+            while (true) {
+                if (idx < n) {
+                    start_stack[top] = idx + 1;
+                    const double * restrict parent = subset_max[top];
+                    ++top;
+                    // At this point, subset size == top + 2.
+                    child = subset_max[top];
+                    upper_bound(child, list[idx].x, parent, dim);
+                    // Inclusion–exclusion accumulation.
+                    hv[top & 1] += one_point_hv(child, ref, dim);
+                    idx++;
+                } else if (top > 0) {
+                    --top;
+                    idx = start_stack[top];
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+    free(buffer);
+    return hv[1] - hv[0];
+}
+
 
 static inline void
 update_area(double * restrict area, const double * restrict x,
@@ -469,7 +565,7 @@ hv2d(const double * restrict data, size_t n, const double * restrict ref)
 double hv3d(const double * restrict data, size_t n, const double * restrict ref);
 double hv4d(const double * restrict data, size_t n, const double * restrict ref);
 
-/*
+/**
    Returns 0 if no point strictly dominates ref.
    Returns -1 if out of memory.
 */
@@ -483,15 +579,22 @@ double fpli_hv(const double * restrict data, size_t n, dimension_t dim,
     if (dim == 2) return hv2d(data, n, ref);
     dlnode_t * list = fpli_setup_cdllist(data, dim, &n, ref);
     double hyperv;
-    if (likely(n > 1)) {
+    if (likely(n > MAX_ROWS_HV_INEX)) {
         hyperv = fpli_hv_ge5d(list, dim - 1, n, ref);
+        fpli_free_cdllist(list);
+        return hyperv;
+    }
+    if (unlikely(n > 2)) {
+        hyperv = hv_inex_list(list+1, (int) n, dim, ref);
+    } else if (unlikely(n == 2)) {
+        hyperv = hv_two_points(list[1].x, list[2].x, ref, dim);
     } else if (unlikely(n == 1)) {
-        hyperv = one_point_hv(list->r_next[0]->x, ref, dim);
+        hyperv = one_point_hv(list[1].x, ref, dim);
     } else {
         assert(n == 0);
         hyperv = 0.0; // Returning here would leak memory.
     }
     // Clean up.
-    fpli_free_cdllist(list);
+    free(list);
     return hyperv;
 }

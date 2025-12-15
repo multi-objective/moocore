@@ -32,6 +32,7 @@ Muller1959sphere
 RubMel1998simulation
 SchEsqLarCoe2012tec
 VelLam1998gp
+WuAzam2001metrics
 ZhoZhaJin2009igdx
 ZitThi1998ppsn
 ZitThiLauFon2003:tec

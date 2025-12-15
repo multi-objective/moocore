@@ -12,10 +12,10 @@ Version 0.2.0 (development)
 - New :ref:`bench-ndsort` benchmarks.
 - :func:`~moocore.pareto_rank` is faster in 3D.
 - HV3D+ is slightly faster with repeated coordinates (:issue:`41`).
-- :func:`moocore.igd`, :func:`moocore.igd_plus`, :func:`moocore.avg_hausdorff_dist` are faster.
-- Fix wrong values returned by :func:`moocore.epsilon_mult` when mixing minimization and maximization.
+- :func:`~moocore.igd`, :func:`~moocore.igd_plus`, :func:`~moocore.avg_hausdorff_dist` are faster.
+- Fix wrong values returned by :func:`~moocore.epsilon_mult` when mixing minimization and maximization.
 - Fix documentation of :ref:`epsilon_metric` (@leandrolanzieri)
-
+- :func:`~moocore.hypervolume` uses the inclusion-exclusion algorithm for small inputs of up to 15 points, which is significantly faster.
 
 
 Version 0.1.10 (24/11/2025)
