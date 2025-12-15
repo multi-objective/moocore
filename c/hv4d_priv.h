@@ -371,7 +371,6 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
     dlnode_t * const z_first = newp;
     dlnode_t * const z_last = last->prev[0];
 
-
     double * x_aux = list_aux->vol;
     dlnode_t * newp_aux = list_aux+1; // list_aux is a sentinel
 
@@ -451,10 +450,8 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
 
                 add_to_z(newp_aux);
                 update_links(list, newp_aux);
+                newp_aux++;
             }
-            // FIXME: If the above returned false, then newp_aux was not used
-            // so we could re-use it, no?
-            newp_aux++;
         }
         // FIXME: If newp was dominated, can we accumulate the height and update
         // hv later? AG: Yes
