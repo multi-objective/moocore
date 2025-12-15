@@ -417,9 +417,12 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
 
     dlnode_t * tp_prev_z = the_point->prev[0];
     dlnode_t * tp_next_z = the_point->next[0];
-    // FIXME: Why do we ignore the return value of this function?
-    bool res = restart_base_setup_z_and_closest(list, the_point);
-    assert(res);
+    // FIXME: Does this call always return true?
+#if DEBUG >= 1
+    assert(restart_base_setup_z_and_closest(list, the_point));
+#else
+    restart_base_setup_z_and_closest(list, the_point);
+#endif
     double volume = one_contribution_3d(the_point);
     the_point->prev[0] = tp_prev_z;
     the_point->next[0] = tp_next_z;
