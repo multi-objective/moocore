@@ -99,7 +99,8 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     head->prev[0] = list4d; // Save it twice so we can use assert() later.
 
     for (i = 1; i <= n; i++) {
-        head[i].x += d; // Shift to sort below in reverse order of dimensions.
+        // Shift x because qsort() cannot take the dimension to sort as an argument.
+        head[i].x += d - 1;
         head[i].ignore = 0;
         head[i].r_next = head->r_next + i * (d_stop - 1);
         head[i].r_prev = head->r_prev + i * (d_stop - 1);
@@ -111,14 +112,12 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     for (i = 0; i < n; i++)
         scratch[i] = head + 1 + i;
 
-    for (int j = d_stop - 2; j >= -1; j--) {
+    int j = d_stop - 2;
+    while (true) {
         /* FIXME: replace qsort() by something better:
            https://github.com/numpy/x86-simd-sort
            https://github.com/google/highway/tree/52a2d98d07852c5d69284e175666e5f8cc7d8285/hwy/contrib/sort
          */
-        // We shift x because qsort() cannot take the dimension to sort as an argument.
-        for (i = 0; i < n; i++)
-            scratch[i]->x--;
         // Sort each dimension independently.
         qsort(scratch, n, sizeof(*scratch), compare_node);
         if (j == -1) {
@@ -130,20 +129,24 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
             }
             scratch[n-1]->next[1] = list4d+2;
             (list4d+2)->prev[1] = scratch[n-1];
-        } else {
-            head->r_next[j] = scratch[0];
-            scratch[0]->r_prev[j] = head;
-            for (i = 1; i < n; i++) {
-                scratch[i-1]->r_next[j] = scratch[i];
-                scratch[i]->r_prev[j] = scratch[i-1];
-            }
-            scratch[n-1]->r_next[j] = head;
-            head->r_prev[j] = scratch[n-1];
+            break;
         }
+        head->r_next[j] = scratch[0];
+        scratch[0]->r_prev[j] = head;
+        for (i = 1; i < n; i++) {
+            scratch[i-1]->r_next[j] = scratch[i];
+            scratch[i]->r_prev[j] = scratch[i-1];
+        }
+        scratch[n-1]->r_next[j] = head;
+        head->r_prev[j] = scratch[n-1];
+        j--;
+        // Consider next objective (in reverse order).
+        for (i = 1; i <= n; i++)
+            head[i].x--;
     }
     // Reset x to point to the first objective.
-    for (i = 0; i < n; i++)
-        scratch[i]->x -= STOP_DIMENSION;
+    for (i = 1; i <= n; i++)
+        head[i].x -= STOP_DIMENSION;
 
     free(scratch);
 
