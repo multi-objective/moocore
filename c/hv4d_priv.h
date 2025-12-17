@@ -233,6 +233,7 @@ continue_base_update_z_closest(dlnode_t * restrict list, dlnode_t * restrict new
         // find newp->closest[1]
         while (p->x[0] >= newx[0]){
             assert(p->x[2] <= newx[2]);
+            assert(!weakly_dominates(newx, p->x, 3));
             p = p->cnext[1];
         }
         newp->closest[1] = p;
@@ -339,6 +340,37 @@ hv4dplusU(dlnode_t * list)
     return hv;
 }
 
+static inline int compare_lex_2d(const void * pa, const void * pb)
+{
+    const double ax = **(const double **)pa;
+    const double bx = **(const double **)pb;
+    const double ay = *(*(const double **)pa + 1);
+    const double by = *(*(const double **)pb + 1);
+    int cmpx = cmp_double_asc(ax, bx);
+    int cmpy = cmp_double_asc(ay, by);
+    return cmpy ? cmpy : cmpx;
+}
+
+static inline void lex_sort_equal_z_and_setup_nodes(dlnode_t * newp_aux, double * x_aux, size_t n) {
+    const double **scratch = malloc(n * sizeof(*scratch));
+    double * x = x_aux;
+    size_t i;
+    for (i = 0; i < n; i++){
+        scratch[i] = x;
+        x += 3;
+    }
+
+    qsort(scratch, n, sizeof(*scratch), compare_lex_2d);
+
+    for (i = 0; i < n; i++) {
+        newp_aux->x = scratch[i];
+        assert(i == 0 || lexicographic_less_2d(scratch[i-1], scratch[i]));
+        newp_aux++;
+    }
+
+    free(scratch);
+}
+
 
 static inline void
 update_bound_3d(double * restrict dest, const double * restrict a, const double * restrict b)
@@ -373,20 +405,25 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
 
     double * x_aux = list_aux->vol;
     dlnode_t * newp_aux = list_aux+1; // list_aux is a sentinel
+    dlnode_t * prevp_aux;
+    int c;
 
     reset_sentinels_3d(list);
     restart_list_y(list);
 
+
     const double * the_point_x = the_point->x;
+    // Setup the 3D base only if there are any points leq than the_point_x[3])
     if ((list+1)->next[1] != the_point) {
-        // PART 1: Setup 3D base (if there are any points below the_point_x[3])
         bool done_once = false;
         // Set the_point->ignore=3 so the loop will skip it, but restore its
         // value after the loop.
         dimension_t the_point_ignore = the_point->ignore;
         the_point->ignore = 3;
         assert(newp != last);
-        do {
+
+        // PART 1: Setup 2D base of the 3D base
+        while (newp->x[2] <= the_point_x[2]) {
             const double * newpx = newp->x;
             if (newpx[3] <= the_point_x[3] && newp->ignore < 3) {
                 if (weakly_dominates(newpx, the_point_x, 3)) {
@@ -396,21 +433,64 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
                     (list+2)->prev[0] = z_last;
                     return 0;
                 }
+
                 // FIXME: Is it possible that x_aux matches newpx? YES! So just assign and avoid the comparison.
                 // x_aux is the coordinate-wise maximum between newpx and the_point_x.
                 update_bound_3d(x_aux, newpx, the_point_x);
                 newp_aux->x = x_aux;
                 x_aux += 3;
-                bool equalz = newp_aux->x[2] == the_point_x[2] && done_once;
-                if (continue_base_update_z_closest(list, newp_aux, equalz)) {
+
+                if (continue_base_update_z_closest(list, newp_aux, done_once)) {
                     newp_aux++;
                     done_once = true;
                 }
             }
             newp = newp->next[0];
-        } while (newp != last);
+        }
         the_point->ignore = the_point_ignore;
+
+        // PART 2: Setup the remainder of the 3D base
+        c = 0;
+        while (newp != last) {
+            const double * newpx = newp->x;
+            if (newpx[3] <= the_point_x[3] && newp->ignore < 3) {
+
+                // FIXME: Is it possible that x_aux matches newpx? YES! So just assign and avoid the comparison.
+                // x_aux is the coordinate-wise maximum between newpx and the_point_x.
+                update_bound_3d(x_aux, newpx, the_point_x);
+                x_aux += 3;
+                c++;
+            }
+
+            if(c > 0 && newp->next[0]->x[2] > newpx[2]){
+                if (c == 1) {
+                    newp_aux->x = x_aux-3;
+                    continue_base_update_z_closest(list, newp_aux, false);
+                    newp_aux++;
+                } else {
+                    // all points with equal z-coordinate will be added to the data structure in lex order
+                    lex_sort_equal_z_and_setup_nodes(newp_aux, x_aux-3*c, c);
+                    continue_base_update_z_closest(list, newp_aux, false);
+                    prevp_aux = newp_aux;
+                    newp_aux++;
+
+                    for (int i = 1; i < c; i++) {
+                        assert(newpx[2] == newp_aux->x[2]); // all c points have equal z
+                        assert(prevp_aux->x[1] <= newp_aux->x[1]); // due to lexsort
+                        if (newp_aux->x[0] < prevp_aux->x[0]){
+                            // if newp_aux is not dominated by prevp
+                            continue_base_update_z_closest(list, newp_aux, false);
+                        }
+                        prevp_aux = newp_aux;
+                        newp_aux++;
+                    }
+                }
+                c = 0;
+            }
+            newp = newp->next[0];
+        }
     }
+
     newp = the_point->next[1];
     while (newp->x[3] <= the_point_x[3])
         newp = newp->next[1];
@@ -433,7 +513,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
     assert(height > 0);
     double hv = volume * height;
 
-    // PART 2: Update the 3D contribution.
+    // PART 3: Update the 3D contribution.
     while (newp != last) {
         const double * newpx = newp->x;
         if (weakly_dominates(newpx, the_point_x, 3))
