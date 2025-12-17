@@ -106,13 +106,13 @@ is defined as :cite:p:`ZitThiLauFon2003:tec`
 .. math::
    epsilon(A,R) = \max_{r \in R} \min_{a \in A} \max_{1 \leq i \leq m} epsilon(a_i, r_i)
 
-where :math:`a` and :math:`b` are objective vectors of length :math:`m`.
+where :math:`a` and :math:`r` are objective vectors of length :math:`m`.
 
-In the case of minimization of objective :math:`i`, :math:`epsilon(a_i,b_i)` is
-computed as :math:`a_i/b_i` for the multiplicative variant (respectively,
-:math:`a_i - b_i` for the additive variant), whereas in the case of
-maximization of objective :math:`i`, :math:`epsilon(a_i,b_i) = b_i/a_i` for the
-multiplicative variant (respectively, :math:`b_i - a_i` for the additive
+In the case of minimization of objective :math:`i`, :math:`epsilon(a_i,r_i)` is
+computed as :math:`a_i/r_i` for the multiplicative variant (respectively,
+:math:`a_i - r_i` for the additive variant), whereas in the case of
+maximization of objective :math:`i`, :math:`epsilon(a_i,r_i) = r_i/a_i` for the
+multiplicative variant (respectively, :math:`r_i - a_i` for the additive
 variant).  This allows computing a single value for problems where some
 objectives are to be maximized while others are to be minimized. Moreover, a
 lower value corresponds to a better approximation set, independently of the
