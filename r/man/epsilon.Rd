@@ -33,13 +33,13 @@ reference set \eqn{R \subset \mathbb{R}^m} is defined as
 
 \deqn{epsilon(A,R) = \max_{r \in R} \min_{a \in A} \max_{1 \leq i \leq m} epsilon(a_i, r_i)}
 
-where \eqn{a} and \eqn{b} are objective vectors of length \eqn{m}.
+where \eqn{a} and \eqn{r} are objective vectors of length \eqn{m}.
 
-In the case of minimization of objective \eqn{i}, \eqn{epsilon(a_i,b_i)} is
-computed as \eqn{a_i/b_i} for the multiplicative variant (respectively,
-\eqn{a_i - b_i} for the additive variant), whereas in the case of
-maximization of objective \eqn{i}, \eqn{epsilon(a_i,b_i) = b_i/a_i} for the
-multiplicative variant (respectively, \eqn{b_i - a_i} for the additive
+In the case of minimization of objective \eqn{i}, \eqn{epsilon(a_i,r_i)} is
+computed as \eqn{a_i/r_i} for the multiplicative variant (respectively,
+\eqn{a_i - r_i} for the additive variant), whereas in the case of
+maximization of objective \eqn{i}, \eqn{epsilon(a_i,r_i) = r_i/a_i} for the
+multiplicative variant (respectively, \eqn{r_i - a_i} for the additive
 variant). This allows computing a single value for problems where some
 objectives are to be maximized while others are to be minimized. Moreover, a
 lower value corresponds to a better approximation set, independently of the
