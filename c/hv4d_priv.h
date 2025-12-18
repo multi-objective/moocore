@@ -373,7 +373,6 @@ static inline void lex_sort_equal_z_and_setup_nodes(dlnode_t * newp_aux, double 
     free(scratch);
 }
 
-
 static inline void
 update_bound_3d(double * restrict dest, const double * restrict a, const double * restrict b)
 {
@@ -537,7 +536,12 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
                 update_links(list, newp_aux);
                 newp_aux++;
             }
+
+            if (weakly_dominates(the_point_x, newpx, 3)){
+                newp->ignore = 3;
+            }
         }
+
         // FIXME: If newp was dominated, can we accumulate the height and update
         // hv later? AG: Yes
         height = newp->next[1]->x[3] - newpx[3];
