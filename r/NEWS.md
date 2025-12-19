@@ -4,6 +4,8 @@
  * HV3D+ is slightly faster with repeated coordinates (#41).
  * `igd()`, `igd_plus()`, `avg_hausdorff_dist()` are faster.
  * Fix wrong values returned by `epsilon_mult()` when mixing minimization and maximization.
+ * Fix documentation of `epsilon_additive()` (@leandrolanzieri)
+
 
 # moocore 0.1.10
 
