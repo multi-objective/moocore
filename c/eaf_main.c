@@ -418,6 +418,7 @@ int main(int argc, char *argv[])
 
     free(level);
     free(data);
+    free(percentile);
     free(cumsizes);
     eaf_free(eaf, nlevels);
     return 0;
