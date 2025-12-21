@@ -154,7 +154,7 @@ generate_sorted_pp_2d(const double *points, size_t size)
         p[k] = points + 2 * k;
 
     // Sort in ascending lexicographic order from the last dimension.
-    qsort(p, size, sizeof(*p), &cmp_double_asc_rev_2d);
+    qsort(p, size, sizeof(*p), cmp_ppdouble_asc_rev_2d);
     return p;
 }
 

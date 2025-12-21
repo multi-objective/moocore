@@ -92,10 +92,8 @@ cmp_double_asc_x_asc_y(double ax, double ay, double bx, double by)
 }
 
 static inline int
-cmp_double_asc_rev(const void * restrict pa, const void * restrict pb, dimension_t dim)
+cmp_double_asc_rev(const double * restrict a, const double * restrict b, dimension_t dim)
 {
-    const double * restrict a = *((const double **)pa);
-    const double * restrict b = *((const double **)pb);
     ASSUME(dim >= 2);
     int i = dim - 1;
     int res = cmp_double_asc(a[i], b[i]);
@@ -106,43 +104,54 @@ cmp_double_asc_rev(const void * restrict pa, const void * restrict pb, dimension
     return res;
 }
 
+// Lexicographic order of coordinates: asc y, then asc x
 static inline int
-cmp_double_asc_rev_2d(const void * restrict pa, const void * restrict pb)
+cmp_pdouble_asc_rev_2d(const void * restrict pa, const void * restrict pb)
 {
-    return cmp_double_asc_rev(pa, pb, 2);
+    const double * restrict a = (const double *) pa;
+    const double * restrict b = (const double *) pb;
+    const double ax = a[0], ay = a[1], bx = b[0], by = b[1];
+    int cmpx = cmp_double_asc(ax, bx);
+    int cmpy = cmp_double_asc(ay, by);
+    return cmpy ? cmpy : cmpx;
+}
+static inline int
+cmp_ppdouble_asc_rev_2d(const void * restrict pa, const void * restrict pb)
+{
+    return cmp_pdouble_asc_rev_2d(*(const double **) pa, *(const double **) pb);
 }
 
 // Lexicographic order of coordinates (z,y,x)
 static inline int
 cmp_double_asc_rev_3d(const void * restrict pa, const void * restrict pb)
 {
-    return cmp_double_asc_rev(pa, pb, 3);
+    return cmp_double_asc_rev(*(const double **)pa, *(const double **)pb, 3);
 }
 
 static inline int
 cmp_double_asc_rev_4d(const void * restrict pa, const void * restrict pb)
 {
-    return cmp_double_asc_rev(pa, pb, 4);
+    return cmp_double_asc_rev(*(const double **)pa, *(const double **)pb, 4);
 }
 
 static inline int
-cmp_double_asc_only_dim(const void * restrict pa, const void * restrict pb, dimension_t dim)
+cmp_double_asc_only_dim(const double * restrict pa, const double * restrict pb, dimension_t dim)
 {
-    const double a = *(*(const double **)pa + dim);
-    const double b = *(*(const double **)pb + dim);
+    const double a = pa[dim];
+    const double b = pb[dim];
     return cmp_double_asc(a, b);
 }
 
 static inline int
 cmp_double_asc_only_3d(const void * restrict pa, const void * restrict pb)
 {
-    return cmp_double_asc_only_dim(pa, pb, 2);
+    return cmp_double_asc_only_dim(*(const double **)pa, *(const double **)pb, 2);
 }
 
 static inline int
 cmp_double_asc_only_4d(const void * restrict pa, const void * restrict pb)
 {
-    return cmp_double_asc_only_dim(pa, pb, 3);
+    return cmp_double_asc_only_dim(*(const double **)pa, *(const double **)pb, 3);
 }
 
 static inline int
@@ -177,11 +186,7 @@ cmp_pdouble_asc_x_asc_y(const void * restrict pa, const void * restrict pb)
 static inline int
 cmp_ppdouble_asc_x_asc_y(const void * restrict pa, const void * restrict pb)
 {
-    const double ax = **(const double **)pa;
-    const double bx = **(const double **)pb;
-    const double ay = *(*(const double **)pa + 1);
-    const double by = *(*(const double **)pb + 1);
-    return cmp_double_asc_x_asc_y(ax, ay, bx, by);
+    return cmp_pdouble_asc_x_asc_y(*(const double **)pa, *(const double **)pb);
 }
 
 static inline const double **

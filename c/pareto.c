@@ -170,7 +170,7 @@ pareto_rank_2d(const double * restrict points, size_t size)
 #endif
 
     // Sort in ascending lexicographic order from the second dimension.
-    qsort(p, size, sizeof(*p), cmp_double_asc_rev_2d);
+    qsort(p, size, sizeof(*p), cmp_ppdouble_asc_rev_2d);
 
 #ifdef PARETO_RANK_2D_DEBUG
     for (size_t k = 0; k < size; k++) {
