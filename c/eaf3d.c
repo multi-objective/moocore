@@ -740,8 +740,8 @@ eaf_store_point_3d (eaf_t * eaf, objective_t x, objective_t y, objective_t z,
 
 
 eaf_t **
-eaf3d (objective_t *data, const int *cumsize, int nruns,
-       const int *attlevel, const int nlevels)
+eaf3d(objective_t *data, const int *cumsize, int nruns,
+      const int *attlevel, const int nlevels)
 {
     const int nobj = 3;
     const int ntotal = cumsize[nruns - 1]; /* total number of points in data */
@@ -773,10 +773,10 @@ eaf3d (objective_t *data, const int *cumsize, int nruns,
 
     }
 
-    removed_list_t * removed_list = (removed_list_t *) malloc(sizeof(removed_list_t));
-    removed_list->head = NULL;
+    removed_list_t removed_list;
+    removed_list.head = NULL;
     dlnode_t *list = setup_cdllist(data, nobj, cumsize, nruns);
-    eaf3df(removed_list, list, set, level, output, nruns);
+    eaf3df(&removed_list, list, set, level, output, nruns);
 
     for (i = 0; i < nruns; i++) {
         add2output_all(output[i], level[i]);
@@ -794,19 +794,18 @@ eaf3d (objective_t *data, const int *cumsize, int nruns,
     /* Create output EAF */
     /* FIXME: This should be done earlier instead of creating the trees. */
 
-    eaf_t **eaf = malloc(nlevels * sizeof(eaf_t*));
-    int * attained = malloc(nruns * sizeof(int));
+    eaf_t **eaf = malloc(nlevels * sizeof(*eaf));
+    int * attained = malloc(nruns * sizeof(*attained));
     for (int l = 0; l < nlevels; l++) {
-        eaf[l] = eaf_create (nobj, nruns, ntotal);
+        eaf[l] = eaf_create(nobj, nruns, ntotal);
         int k = attlevel[l] - 1;
         avl_node_t * aux = output[k]->head;
         while (aux) {
             objective_t * val = aux->item;
-            for(int j = 0; j < nruns; j++)
+            for (int j = 0; j < nruns; j++)
                 attained[j] = 0;
             find_all_promoters(aux, attained, nruns);
-            eaf_store_point_3d (eaf[l], val[0], val[1], val[2],
-                                attained);
+            eaf_store_point_3d(eaf[l], val[0], val[1], val[2], attained);
             aux = aux->next;
         }
     }
