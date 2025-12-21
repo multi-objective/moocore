@@ -461,19 +461,18 @@ def hypervolume(
     for speed.
 
     For 5D or higher and up to 15 points, the implementation uses the
-    inclusion-exclusion algorithm :footcite:t:`WuAzam2001metrics`, which has
-    :math:`O(d 2^{n})` time and :math:`O(n\cdot d)` space complexity, but it is
-    very fast for such small sets.  For larger number of points, it uses a
-    recursive algorithm :footcite:p:`FonPaqLop06:hypervolume` with HV4D\
-    :sup:`+` as the base case, resulting in a :math:`O(n^{d-2})` time
-    complexity and :math:`O(n)` space complexity in the worst-case, where
-    :math:`d` is the dimension of the points.  Experimental results show that
-    the pruning techniques used may reduce the time complexity even further.
-    The original proposal :footcite:p:`FonPaqLop06:hypervolume` had the HV3D
-    algorithm as the base case, giving a time complexity of :math:`O(n^{d-2}
-    \log n)`.  Andreia P. Guerreiro enhanced the numerical stability of the
-    recursive algorithm by avoiding floating-point comparisons of partial
-    hypervolumes.
+    inclusion-exclusion algorithm :footcite:p:`WuAzam2001metrics`, which has
+    :math:`O(m 2^{n})` time and :math:`O(n\cdot m)` space complexity, where
+    :math:`m` is the dimension of the points, but it is very fast for such
+    small sets.  For larger number of points, it uses a recursive algorithm
+    :footcite:p:`FonPaqLop06:hypervolume` with HV4D\ :sup:`+` as the base case,
+    resulting in a :math:`O(n^{m-2})` time complexity and :math:`O(n)` space
+    complexity in the worst-case.  Experimental results show that the pruning
+    techniques used may reduce the time complexity even further.  The original
+    proposal :footcite:p:`FonPaqLop06:hypervolume` had the HV3D algorithm as
+    the base case, giving a time complexity of :math:`O(n^{m-2} \log n)`.
+    Andreia P. Guerreiro enhanced the numerical stability of the recursive
+    algorithm by avoiding floating-point comparisons of partial hypervolumes.
 
 
     References
