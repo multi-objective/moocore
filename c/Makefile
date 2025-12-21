@@ -196,21 +196,29 @@ $(EXE_FILES): cmdline.o io.o
 	$(call ECHO,--> Building $@ version $(VERSION) <---)
 	$(QUIET_LINK)$(CC) -o $@ $^ $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS) $(LDFLAGS)
 
-dominatedsets.o: cmdline.h io.h nondominated.h
-eaf_main.o: cmdline.h io.h eaf.h
-epsilon.o: cmdline.h io.h epsilon.h nondominated.h
-main-hv.o: cmdline.h io.h hv.h timer.h
-ndsort.o: cmdline.h io.h nondominated.h
-nondominated.o : cmdline.h io.h nondominated.h
-main-hvapprox.o: cmdline.h io.h hvapprox.h
-hvapprox.o: hvapprox.h pow_int.h
-timer.o: timer.h
-eaf.o eaf3d.h: eaf.h
-cmdline.o: cmdline.h io.h
-io.o: io_priv.h io.h
-igd.o : cmdline.h io.h igd.h
 avl.o: avl.h
-$(OBJS): common.h gcc_attribs.h
+cmdline.o: cmdline.h io.h
+dominatedsets.o: cmdline.h io.h nondominated.h sort.h avl_tiny.h epsilon.h
+eaf.o: eaf.h io.h bit_array.h cvector.h
+eaf3d.o: eaf.h io.h bit_array.h cvector.h avl.h
+eaf_main.o: cmdline.h io.h eaf.h bit_array.h cvector.h
+epsilon.o: cmdline.h io.h epsilon.h nondominated.h sort.h avl_tiny.h
+hv.o: hv.h hv_priv.h hv4d_priv.h sort.h libmoocore-config.h
+hv3dplus.o: hv_priv.h sort.h hv3d_priv.h avl_tiny.h
+hv4d.o: hv4d_priv.h hv_priv.h sort.h
+hv_contrib.o: hv.h libmoocore-config.h nondominated.h sort.h avl_tiny.h
+hvapprox.o: hvapprox.h pow_int.h rng.h mt19937/mt19937.h
+hvc3d.o: hv_priv.h sort.h hv3d_priv.h avl_tiny.h
+igd.o: cmdline.h io.h igd.h nondominated.h sort.h avl_tiny.h pow_int.h
+io.o: io.h io_priv.h
+main-hv.o: cmdline.h io.h hv.h timer.h libmoocore-config.h nondominated.h sort.h avl_tiny.h hvapprox.h
+main-hvapprox.o: cmdline.h io.h hvapprox.h
+ndsort.o: cmdline.h io.h nondominated.h sort.h avl_tiny.h hv.h
+nondominated.o : cmdline.h io.h nondominated.h avl_tiny.h
+pareto.o: nondominated.h sort.h avl_tiny.h
+rng.o: rng.h mt19937/mt19937.h ziggurat_constants.h
+timer.o: timer.h
+$(OBJS): common.h gcc_attribs.h config.h maxminclamp.h
 
 shlibs: clean $(SHLIB) $(CXXSHLIB)
 
