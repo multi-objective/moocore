@@ -120,7 +120,7 @@
 #endif
 
 
-#if (defined(__GNUC__) && __GNUC__ >= 3) || defined(__clang__)
+#if defined(__GNUC__) || defined(__clang__)
 # define likely(x)	  __builtin_expect(!!(x), 1)
 # define unlikely(x)  __builtin_expect(!!(x), 0)
 #elif (defined(__cplusplus) && __cplusplus >= 202002L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
@@ -213,7 +213,7 @@
 
 #ifdef __ICC
 #define PRAGMA_ASSUME_NO_VECTOR_DEPENDENCY PRAGMA(ivdep)
-#elif defined(__GNUC__)  && __GNUC__ >= 5
+#elif defined(__GNUC__) && !defined(__clang__)
 #define PRAGMA_ASSUME_NO_VECTOR_DEPENDENCY PRAGMA(GCC ivdep)
 #else
 #define PRAGMA_ASSUME_NO_VECTOR_DEPENDENCY
