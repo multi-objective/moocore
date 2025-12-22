@@ -194,7 +194,10 @@ addopts = [ "--import-mode=importlib", "--durations=5", "--durations-min=1.0" ]
 
 [tool.coverage.report]
 exclude_also = [
-  '# nocov',
+  '.*(?:#|//)\s+nocov',
+  '.* ASSUME\s?\(.+\);',
+  '.* unreachable\s?\(\);',
+  '.*(?:GCOVR?|LCOV)_EXCL_LINE',
 ]
 
 [tool.mypy]
@@ -217,7 +220,8 @@ files = [ "src/" ]
 
 [tool.gcovr]
 exclude-lines-by-pattern = [
-  " *ASSUME\\([^)]+\\);",
-  ".*# nocov",
-  ".* unreachable\\(\\);",
+  '.*(?:#|//)\s+nocov',
+  '.* ASSUME\s?\(.+\);',
+  '.* unreachable\s?\(\);',
+  '.*(?:GCOVR?|LCOV)_EXCL_LINE',
 ]

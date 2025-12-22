@@ -154,7 +154,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           install-pandoc: true
-          extra-packages: any::covr any::xml2
+          extra-packages: any::covr any::xml2 any::rex
           needs: coverage
           working-directory: r
 
@@ -162,7 +162,12 @@ jobs:
         env:
           NOT_CRAN: false
         run: |
-          options(covr.gcov_additional_paths="c", covr.filter_non_package=FALSE)
+          exclude_pattern = rex::rex(or(group(or("#", "//"), any_spaces, "nocov"),
+                                        group(or("ASSUME", "unreachable"), maybe(" "), "("),
+                                        group(or("GCOV", "GCOVR", "LCOV"), "_EXCL_LINE")))
+          options(covr.gcov_additional_paths="c",
+                  covr.filter_non_package=FALSE,
+                  covr.exclude_pattern=exclude_pattern)
           coverage <- withr::with_makevars(c(MOOCORE_DEBUG="1", LTO_OPT=""),
             covr::package_coverage(type="all", quiet=FALSE, clean=FALSE,
               commentDonttest = FALSE, commentDontrun = FALSE, flags="R",
