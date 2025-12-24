@@ -493,8 +493,8 @@ find_dominated_point_(const double * restrict points, size_t size, dimension_t d
       case AGREE_MAXIMISE:
           return find_dominated_point_agree_(
               points, size, dim, keep_weakly, AGREE_MAXIMISE, /*minmax=*/NULL);
-      default:
-          unreachable();  // # nocov
+      default: // LCOV_EXCL_LINE # nocov
+          unreachable();
     }
 }
 
@@ -544,8 +544,8 @@ find_nondominated_set_(const double * restrict points, size_t size, dimension_t 
       case AGREE_MAXIMISE:
           return find_nondominated_set_agree_(
               points, size, dim, nondom, keep_weakly, AGREE_MAXIMISE, /*minmax=*/NULL);
-      default:
-          unreachable();  // # nocov
+      default: // LCOV_EXCL_LINE # nocov
+          unreachable();
     }
 }
 

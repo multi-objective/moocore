@@ -311,8 +311,9 @@ static inline void default_cmdline_handler(int opt)
       case 'h': // --help
           usage();
           exit(EXIT_SUCCESS);
-      default:
-          unreachable(); // COVR_EXCL_LINE # nocov
+
+      default: // LCOV_EXCL_LINE # nocov
+          unreachable();
     }
 }
 

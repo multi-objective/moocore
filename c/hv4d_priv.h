@@ -156,7 +156,7 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
         }
         p = p->next[0];
     }
-    unreachable();  // COVR_EXCL_LINE # nocov
+    unreachable();
 }
 
 // FIXME: This is very similar to the loop in hvc3d_list() but it doesn't use p->last_slice_z
@@ -211,7 +211,7 @@ one_contribution_3d(dlnode_t * restrict newp)
         lastz = px[2];
         p = p->next[0];
     }
-    unreachable();  // COVR_EXCL_LINE # nocov
+    unreachable();
 }
 
 /* Compute the hypervolume indicator in d=4 by iteratively computing the one

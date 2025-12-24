@@ -425,8 +425,8 @@ int_of_power_of_sin_from_0_to_b(dimension_t m, double b)
       case 31:
           cos_b = cos(b);
           return POW(cos_b, 31)/31. - 15/29.*POW(cos_b, 29) + (35/9.)*POW(cos_b, 27) - 91/5.*POW(cos_b, 25) + (1365/23.)*POW(cos_b, 23) - 143*POW(cos_b, 21) + (5005/19.)*POW(cos_b, 19) - 6435/17.*POW(cos_b, 17) + 429*POW(cos_b, 15) - 385*POW(cos_b, 13) + 273*POW(cos_b, 11) - 455/3.*POW(cos_b, 9) + 65*POW(cos_b, 7) - 21*POW(cos_b, 5) + 5*POW(cos_b, 3) - cos_b + 67108864/300540195.;
-      default:
-          unreachable();  // COVR_EXCL_LINE # nocov
+      default:   // LCOV_EXCL_LINE # nocov
+          unreachable();
     }
 #undef POW
 }
