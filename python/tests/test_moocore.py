@@ -463,12 +463,12 @@ def check_hvc(points, ref, err_msg):
     assert_allclose(true_hvc, hvc, err_msg=err_msg)
 
 
-@pytest.mark.parametrize("dim", range(2, 5))
+@pytest.mark.parametrize("dim", range(2, 7))
 def test_hvc(dim):
     seed = np.random.default_rng().integers(2**32 - 2)
     rng = np.random.default_rng(seed)
     maximum = 100
-    nrows = 25
+    nrows = 20
     ref = np.full(dim, maximum + 1)
     points = rng.integers(1, maximum, (nrows, dim))
     check_hvc(points, ref, err_msg=f"dim={dim}, seed={seed}: ")
