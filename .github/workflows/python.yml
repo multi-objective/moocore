@@ -12,7 +12,9 @@ on:
       - 'c/*.mk'
       - 'c/**/*.[ch]p?p?'
   pull_request:
-    branches-ignore: [gh-pages]
+    branches:
+      - '**'
+      - '!gh-pages'
     paths:
       - ".github/workflows/python.yml"
       - "python/**"
