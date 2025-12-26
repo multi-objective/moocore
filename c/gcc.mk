@@ -1,4 +1,5 @@
 # -*- Makefile-gmake -*-
+DEFAULT_SANITIZERS=-fsanitize=undefined,address,pointer-compare,pointer-subtract,float-cast-overflow,float-divide-by-zero
 WERROR=
 ifdef WERROR
 WERROR_FLAG:=-Werror
@@ -13,7 +14,7 @@ ifeq ($(DEBUG), 0)
   # -ftree-loop-im -ftree-loop-ivcanon -fivopts -ftree-vectorize -funroll-loops -fipa-pta
   #
 else
-  SANITIZERS ?= -fsanitize=undefined -fsanitize=address -fsanitize=float-cast-overflow -fsanitize=float-divide-by-zero
+  SANITIZERS ?= $(DEFAULT_SANITIZERS)
   OPT_CFLAGS ?= -g3 -O0
 endif
 
