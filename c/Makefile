@@ -156,6 +156,7 @@ EXE_CFLAGS += $(SANITIZERS) $(OPT_CFLAGS) $(MARCH_FLAGS) $(WARN_CFLAGS) \
 
 # List of test target base names
 TEST_NAMES := eaf nondominated hv hvapprox igd epsilon dominatedsets ndsort
+ASAN_TARGETS := $(addprefix asan-,$(TEST_NAMES))
 TEST_TARGETS := $(addprefix test-,$(TEST_NAMES))
 TIME_TARGETS := $(addprefix time-,$(TEST_NAMES))
 ALL_NAMES := $(TEST_NAMES)
@@ -242,6 +243,27 @@ clean:
 	@$(RM) $(OBJS) $(HV_OBJS) $(HV_LIB)
 
 TESTSUITE:="../testsuite"
+asan: OPT_CFLAGS ?=-Og -g3
+asan: DEBUG=1
+asan: SANITIZERS ?=-fsanitize=undefined,address,pointer-compare,pointer-subtract,float-cast-overflow,float-divide-by-zero
+asan:
+	@if ! test -d $(TESTSUITE); then  		    	         \
+	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
+	fi
+	$(MAKE) all DEBUG=1 SANITIZERS="$(SANITIZERS)" OPT_CFLAGS="$(OPT_CFLAGS)"
+	$(MAKE) $(ASAN_TARGETS)
+
+$(ASAN_TARGETS): target=$(subst asan-,,$@)
+$(ASAN_TARGETS): DEBUG=1
+$(ASAN_TARGETS): OPT_CFLAGS ?=-Og -g3
+$(ASAN_TARGETS): SANITIZERS ?=-fsanitize=undefined,address,pointer-compare,pointer-subtract,float-cast-overflow,float-divide-by-zero
+$(ASAN_TARGETS):
+	$(MAKE) $(target) DEBUG=1 SANITIZERS="$(SANITIZERS)" OPT_CFLAGS="$(OPT_CFLAGS)"
+	$(call ECHO,---> Testing $(target) for errors (DEBUG=1, $(SANITIZERS)) <--- )
+	export ASAN_OPTIONS='detect_invalid_pointer_pairs=2:abort_on_error=1'
+	export UBSAN_OPTIONS='print_stacktrace=1:halt_on_error=1'
+	@cd $(TESTSUITE)/$(target) && ../regtest.py $(BINDIR)/$(target)$(EXE) && cd $(PWD)
+
 test: OPT_CFLAGS ?=-Og -g3
 test: SANITIZERS ?=
 test:
