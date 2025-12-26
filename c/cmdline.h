@@ -134,15 +134,17 @@ read_reference_set(const char * filename, double ** restrict reference,
 static inline double *
 read_point(char * str, int * nobj)
 {
-    int k = 0, size = 10;
+    int k = 0, size = 16;
     double * point = malloc(size * sizeof(*point));
     char * endp = str;
     char * cursor;
     do {
         cursor = endp;
         if (k == size) {
-            size += 10;
+            size *= 2;
             point = realloc(point, size * sizeof(*point));
+            if (!point)
+                return NULL;
         }
         point[k] = strtod(cursor, &endp);
         k++;
@@ -151,7 +153,7 @@ read_point(char * str, int * nobj)
     // not end of string: error
     while (*cursor != '\0') {
         if (!isspace(*cursor)) {
-            free (point);
+            free(point);
             return NULL;
         }
         cursor++;
@@ -161,8 +163,9 @@ read_point(char * str, int * nobj)
         free(point);
         return NULL;
     }
-    if (k < size)
+    if (k < size) {
         point = realloc(point, k * sizeof(*point));
+    }
     *nobj = k - 1;
     return point;
 }
