@@ -38,7 +38,7 @@
 #include "hv4d_priv.h"
 
 #define STOP_DIMENSION 3 // stop on dimension 4.
-#define MAX_ROWS_HV_INEX 1
+#define MAX_ROWS_HV_INEX 2
 
 static int compare_node(const void * restrict p1, const void * restrict p2)
 {
@@ -356,7 +356,7 @@ hv_inex_list(const dlnode_t * restrict list, int n, dimension_t dim,
                     child = subset_max[top];
                     upper_bound(child, list[idx].x, parent, dim);
                     // Inclusion–exclusion accumulation.
-                    hv[top & 1] += one_point_hv(child, ref, dim);
+                    hv[top % 2] += one_point_hv(child, ref, dim);
                     idx++;
                 } else if (top > 0) {
                     --top;
