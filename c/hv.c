@@ -34,6 +34,7 @@
 #include <float.h>
 #include "common.h"
 #include "hv.h"
+#include "nondominated.h"
 #define HV_RECURSIVE
 #include "hv4d_priv.h"
 
@@ -64,6 +65,8 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     dimension_t d_stop = d - STOP_DIMENSION;
     size_t n = *size;
 
+    bool * nondom = is_nondominated_minimise(data, n, d, /* keep_weakly=*/false);
+
     dlnode_t * head = malloc((n+1) * sizeof(*head));
     size_t i = 1;
     for (size_t j = 0; j < n; j++) {
@@ -71,11 +74,12 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
            point.  This is needed to assure that the points left are only those
            that are needed to calculate the hypervolume. */
         const double * restrict px = data + j * d;
-        if (likely(strongly_dominates(px, ref, d))) {
+        if (nondom[j] && likely(strongly_dominates(px, ref, d))) {
             head[i].x = px; // this will be fixed a few lines below...
             i++;
         }
     }
+    free(nondom);
     n = i - 1;
     if (unlikely(n <= MAX_ROWS_HV_INEX))
         goto finish;
