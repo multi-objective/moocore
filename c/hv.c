@@ -37,7 +37,7 @@
 #define HV_RECURSIVE
 #include "hv4d_priv.h"
 
-#define STOP_DIMENSION 3 // default: stop on dimension 4.
+#define STOP_DIMENSION 3 // stop on dimension 4.
 #define MAX_ROWS_HV_INEX 15
 
 static int compare_node(const void * restrict p1, const void * restrict p2)
@@ -470,7 +470,7 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
     ASSUME(c > 1);
     ASSUME(dim > STOP_DIMENSION);
     const dimension_t d_stop = dim - STOP_DIMENSION;
-    ASSUME(0 < d_stop && d_stop < 255); // Silence -Walloc-size-larger-than= warning
+    ASSUME(0 < d_stop && d_stop < MOOCORE_DIMENSION_MAX); // Silence -Walloc-size-larger-than= warning
     double * bound = malloc(d_stop * sizeof(*bound));
     for (dimension_t i = 0; i < d_stop; i++)
         bound[i] = -DBL_MAX;
@@ -552,7 +552,7 @@ hv2d(const double * restrict data, size_t n, const double * restrict ref)
     double prev_j = ref[1];
     size_t j = 0;
     do {
-        /* Filter everything that may be above the ref point. */
+        // Filter everything that may be above the ref point.
         if (p[j][1] < prev_j) {
             // We found one point that dominates ref.
             hyperv += (ref[0] - p[j][0]) * (prev_j - p[j][1]);

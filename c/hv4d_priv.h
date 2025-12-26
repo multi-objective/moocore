@@ -5,7 +5,7 @@
  HV4D+ algorithm.
  ------------------------------------------------------------------------------
 
-                        Copyright (C) 2013, 2016, 2017
+                        Copyright (C) 2013, 2016, 2017, 2025
                      Andreia P. Guerreiro <apg@dei.uc.pt>
 
  This Source Code Form is subject to the terms of the Mozilla Public
@@ -69,16 +69,16 @@ update_links(dlnode_t * restrict list, dlnode_t * restrict newp)
     assert(list+2 == list->prev[0]);
     const double newx[] = { newp->x[0], newp->x[1], newp->x[2] };
     dlnode_t * p = newp->next[0];
-    const dlnode_t * stop = list+2;
+    const dlnode_t * const stop = list+2;
     while (p != stop) {
         const double * px = p->x;
         // px dominates newx (but not equal)
         if (px[0] <= newx[0] && px[1] <= newx[1] && (px[0] < newx[0] || px[1] < newx[1]))
             return;
 
-        if (newx[0] <= px[0]){
+        if (newx[0] <= px[0]) {
             //new <= p
-            if (newx[1] <= px[1]){
+            if (newx[1] <= px[1]) {
                 assert(weakly_dominates(newx, px, 3));
                 //p->ndomr++;
                 remove_from_z(p);
@@ -225,7 +225,7 @@ hv4dplusU(dlnode_t * list)
 
     double volume = 0, hv = 0;
     dlnode_t * newp = (list+1)->next[1];
-    const dlnode_t * last = list+2;
+    const dlnode_t * const last = list+2;
     while (newp != last) {
         if (restart_base_setup_z_and_closest(list, newp)) {
             // newp was not dominated by something else.

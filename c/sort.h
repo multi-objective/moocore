@@ -183,6 +183,7 @@ cmp_pdouble_asc_x_asc_y(const void * restrict pa, const void * restrict pb)
     return cmp_double_asc_x_asc_y(ax, ay, bx, by);
 }
 
+// Ascending lexicographic 2D (ascending x, then ascending y)
 static inline int
 cmp_ppdouble_asc_x_asc_y(const void * restrict pa, const void * restrict pb)
 {
