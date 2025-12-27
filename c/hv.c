@@ -495,18 +495,14 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
     // FIXME: This is never used?
     // bound[d_stop] = p0->x[dim];
     reinsert_nobound(p0, dim);
-    p1 = p0;
-    dlnode_t * p1_prev = p0->r_prev[d_stop - 1];
-    p0 = p0->r_next[d_stop - 1];
-    c++;
 
-    assert(c > 1);
     while (true) {
-        // FIXME: This is not true in the first iteration if c > 1 previously.
-        //assert(p0 == p1->r_prev[d_stop]);
-        assert(p1_prev == p1->r_prev[d_stop - 1]);
+        dlnode_t * p1_prev = p0->r_prev[d_stop - 1];
+        p1 = p0;
+        p0 = p0->r_next[d_stop - 1];
         p1->vol[d_stop] = hyperv;
         assert(p1->ignore == 0);
+        c++;
         double hypera = hv_recursive(list, dim - 1, c, ref, bound);
         /* At this point, p1 is the point with the highest value in
            dimension dim in the list: If it is dominated in dimension
@@ -533,10 +529,6 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
         // bound[d_stop] = p0->x[dim];
         // FIXME: Does updating the bound here matters?
         reinsert(p0, dim, bound);
-        p1 = p0;
-        p1_prev = p0->r_prev[d_stop - 1];
-        p0 = p0->r_next[d_stop - 1];
-        c++;
     }
 }
 
