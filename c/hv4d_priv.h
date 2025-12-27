@@ -105,8 +105,8 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
     assert(list+1 == list->next[0]);
     dlnode_t * closest0 = list+1;
     dlnode_t * closest1 = list;
-    const double * closest0x = closest0->x;
-    const double * closest1x = closest1->x;
+    double closest0x[] = { closest0->x[0], closest0->x[1] };
+    double closest1x[] = { closest1->x[0], closest1->x[1] };
     dlnode_t * p = (list+1)->next[0];
     assert(p == list->next[0]->next[0]);
     restart_list_y(list);
@@ -132,6 +132,7 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
 
         //if (!lexicographic_less_3d(px, newx)) { // Slower
         if (!(p_lt_new_2 || (p_eq_new_2 && (p_lt_new_1 || (p_eq_new_1 && p_leq_new_0))))) {
+            assert(!lexicographic_less_3d(px, newx));
             newp->closest[0] = closest0;
             newp->closest[1] = closest1;
             newp->prev[0] = p->prev[0];
@@ -149,10 +150,12 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
         ASSUME(!p_leq_new_0 || !p_leq_new_1);
         if (p_lt_new_1 && (px[0] < closest0x[0] || (px[0] == closest0x[0] && px[1] < closest0x[1]))) {
             closest0 = p;
-            closest0x = px;
+            closest0x[0] = px[0];
+            closest0x[1] = px[1];
         } else if (p_lt_new_0 && (px[1] < closest1x[1] || (px[1] == closest1x[1] && px[0] < closest1x[0]))) {
             closest1 = p;
-            closest1x = px;
+            closest1x[0] = px[0];
+            closest1x[1] = px[1];
         }
         p = p->next[0];
     }
