@@ -1,5 +1,5 @@
 # -*- Makefile-gmake -*-
-DEFAULT_SANITIZERS=-fsanitize=undefined,address,pointer-compare,pointer-subtract,float-cast-overflow,float-divide-by-zero
+DEFAULT_SANITIZERS=-fsanitize=undefined,address,pointer-subtract,float-cast-overflow,float-divide-by-zero,bounds -fno-omit-frame-pointer -fsanitize-address-use-after-scope -fno-common
 WERROR=
 ifdef WERROR
 WERROR_FLAG:=-Werror

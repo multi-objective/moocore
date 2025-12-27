@@ -260,7 +260,7 @@ $(ASAN_TARGETS):
 	$(call ECHO,---> Testing $(target) for errors (DEBUG=1, $(SANITIZERS)) <--- )
 
 	@cd $(TESTSUITE)/$(target) && \
-	export ASAN_OPTIONS='detect_leaks=0:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:abort_on_error=1' && \
+	export ASAN_OPTIONS='detect_leaks=0:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_invalid_pointer_pairs=2:abort_on_error=1' && \
 	export UBSAN_OPTIONS='print_stacktrace=1:halt_on_error=1' && \
 	../regtest.py $(BINDIR)/$(target)$(EXE) && cd $(PWD)
 
