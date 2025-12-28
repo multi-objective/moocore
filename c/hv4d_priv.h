@@ -236,6 +236,7 @@ hv4dplusU(dlnode_t * list)
             assert(new_v > 0);
             volume += new_v;
             add_to_z(newp);
+            assert((list+1)->next[0] == list->next[0]->next[0]);
             update_links(list, newp);
         }
         // FIXME: It newp was dominated, can we accumulate the height and update
