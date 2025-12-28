@@ -360,14 +360,6 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
              const double * restrict ref, double * restrict bound)
 {
     ASSUME(c > 1);
-    ASSUME(dim >= STOP_DIMENSION);
-    if (dim == STOP_DIMENSION) {
-        /*---------------------------------------
-          base case of dimension 4
-          --------------------------------------*/
-        return fpli_hv4d(list, c);
-    }
-    ASSUME(dim > STOP_DIMENSION);
     /* ------------------------------------------------------
        General case for dimensions higher than 4D
        ------------------------------------------------------ */
@@ -434,7 +426,13 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
             DEBUG1(debug_counter[1]++);
             hypera = p1_prev->area[d_stop];
         } else {
-            hypera = hv_recursive(list, dim - 1, c, ref, bound);
+            ASSUME(dim - 1 >= STOP_DIMENSION);
+            if (dim - 1 == STOP_DIMENSION) {
+                // base case of dimension 4.
+                hypera = fpli_hv4d(list, c);
+            } else {
+                hypera = hv_recursive(list, dim - 1, c, ref, bound);
+            }
             /* At this point, p1 is the point with the highest value in
                dimension dim in the list: If it is dominated in dimension
                dim-1, then it is also dominated in dimension dim. */
@@ -503,7 +501,14 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
         p1->vol[d_stop] = hyperv;
         assert(p1->ignore == 0);
         c++;
-        double hypera = hv_recursive(list, dim - 1, c, ref, bound);
+        double hypera;
+        ASSUME(dim - 1 >= STOP_DIMENSION);
+        if (dim - 1 == STOP_DIMENSION) {
+            // base case of dimension 4.
+            hypera = fpli_hv4d(list, c);
+        } else {
+            hypera = hv_recursive(list, dim - 1, c, ref, bound);
+        }
         /* At this point, p1 is the point with the highest value in
            dimension dim in the list: If it is dominated in dimension
            dim-1, then it is also dominated in dimension dim. */
