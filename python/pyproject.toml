@@ -112,7 +112,7 @@ build-verbosity = 2
 # Will cause the wheel to be installed with these optional-dependencies
 test-extras = [ "test" ]
 test-command = [
-  "pytest --doctest-modules --doctest-continue-on-failure {package}/tests {package}/src/moocore/_moocore.py",
+  "pytest -vvv -s --doctest-modules --doctest-continue-on-failure {package}/tests {package}/src/moocore/_moocore.py",
 ]
 #test-skip = "*-*linux_{aarch64,ppc64le,s390x}"
 
