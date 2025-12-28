@@ -83,8 +83,15 @@ target_platform = _get_target_platform()
 is_x86_64 = target_platform in ("i686", "x86", "x86_64", "AMD64")
 
 # Compiler flags.
-MSVC_CFLAGS = ["/GL", "/O2", "/GS-", "/wd4996", "/DMOOCORE_SHARED_LIB"]
-MSVC_LDFLAGS = ["/LTCG"]
+MSVC_CFLAGS = [
+    "/O2",  # Maximize speed
+    "/GL",  # Enables whole program optimization.
+    "/GS-",  # Disable buffer security check (for speed)
+    "/wd4996",
+    "/wd4114",
+    "/DMOOCORE_SHARED_LIB",
+]
+MSVC_LDFLAGS = ["/LTCG"]  # Link-time optimization
 GCC_CFLAGS = ["-O3", "-flto", "-fvisibility=hidden"]
 GCC_LDFLAGS = [*GCC_CFLAGS]
 if is_x86_64:
