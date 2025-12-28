@@ -193,36 +193,31 @@ jobs:
           directory: python
 
   wheels:
-    name: 🎡 Build wheels on ${{ matrix.os }} (${{ matrix.python-version }})
+    name: 🎡 Build wheels on ${{ matrix.os }}
     needs: coverage
     runs-on: ${{ matrix.os }}
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       fail-fast: false
       matrix:
-        # FIXME: add windows-11-arm and ubuntu-24.04-arm
         # https://github.com/scipy/scipy/blob/6b79a4dec1f9ca2db4e49c328d04d293880991c6/.github/workflows/wheels.yml#L78
         # https://github.com/numpy/numpy-release/blob/main/.github/workflows/wheels.yml
         # macos-14 is Apple Silicon (arm64), but we build an universal2 wheel.
         # The configuration of cibuildwheel can be found in pyproject.toml
-        os: [ubuntu-22.04, ubuntu-22.04-arm, windows-2025, macos-14]
-        python-version: ['3.10']
-        include:
-          # 3.11 is the earliest version on windows-arm
-          - os: windows-11-arm
-            python-version: "3.11"
+        os: [ubuntu-22.04, ubuntu-22.04-arm, windows-2025, macos-14, windows-11-arm]
 
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python 3.11 for Windows ARM64
+        if: ${{ matrix.os == 'windows-11-arm' }}
         uses: actions/setup-python@v6
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.11'
           cache: 'pip'
 
       - name: Setup LLVM for Windows ARM64 (NOT WORKING/FIXME)
-        if: ${{ matrix.os == 'windows-11-arm' }}
+        if: false # ${{ matrix.os == 'windows-11-arm' }}
         uses: ./.github/windows_arm64_steps
 
       - name: Build wheels
@@ -236,7 +231,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: moocore-wheels-${{ matrix.os }}-${{ matrix.python-version }}-${{ strategy.job-index }}
+          name: moocore-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: wheelhouse/*.whl
 
   upload_pypi:
