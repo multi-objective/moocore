@@ -244,7 +244,7 @@ IGD_plus_minmax(const int * restrict minmax, dimension_t dim,
 
 _attr_maybe_unused static double
 IGD_plus(const double * restrict data, size_t npoints, dimension_t nobj,
-         const double * restrict ref, int ref_size,
+         const double * restrict ref, size_t ref_size,
          const bool * restrict  maximise)
 {
     ASSUME(nobj > 0);
