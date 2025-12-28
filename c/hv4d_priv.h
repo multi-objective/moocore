@@ -98,7 +98,7 @@ update_links(dlnode_t * restrict list, dlnode_t * restrict newp)
 _attr_optimize_finite_math
 __attribute__((hot))
 static bool
-restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict newp)
+restart_base_setup_z_and_closest(dlnode_t * list, dlnode_t * newp)
 {
     // FIXME: This is the most expensive function in the HV4D+ algorithm.
     const double newx[] = { newp->x[0], newp->x[1], newp->x[2], newp->x[3] };
