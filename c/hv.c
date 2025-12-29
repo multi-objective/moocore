@@ -118,42 +118,47 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     for (i = 0; i < n; i++)
         scratch[i] = head + 1 + i;
 
-    for (int j = d_stop - 2; j >= -2; j--) {
+    for (int j = d_stop - 2; j >= 0; j--) {
         /* FIXME: replace qsort() by something better:
            https://github.com/numpy/x86-simd-sort
            https://github.com/google/highway/tree/52a2d98d07852c5d69284e175666e5f8cc7d8285/hwy/contrib/sort
          */
         // Sort each dimension independently.
         qsort(scratch, n, sizeof(*scratch), compare_node);
-        if (j >= 0) {
-            head->r_next[j] = scratch[0];
-            scratch[0]->r_prev[j] = head;
-            for (i = 1; i < n; i++) {
-                scratch[i-1]->r_next[j] = scratch[i];
-                scratch[i]->r_prev[j] = scratch[i-1];
-            }
-            scratch[n-1]->r_next[j] = head;
-            head->r_prev[j] = scratch[n-1];
-        } else {
-            const int j2 = j + 2;
-            (list4d+1)->next[j2] = scratch[0];
-            scratch[0]->prev[j2] = list4d+1;
-            for (i = 1; i < n; i++) {
-                scratch[i-1]->next[j2] = scratch[i];
-                scratch[i]->prev[j2] = scratch[i-1];
-            }
-            scratch[n-1]->next[j2] = list4d+2;
-            (list4d+2)->prev[j2] = scratch[n-1];
+        head->r_next[j] = scratch[0];
+        scratch[0]->r_prev[j] = head;
+        for (i = 1; i < n; i++) {
+            scratch[i-1]->r_next[j] = scratch[i];
+            scratch[i]->r_prev[j] = scratch[i-1];
         }
+        scratch[n-1]->r_next[j] = head;
+        head->r_prev[j] = scratch[n-1];
         // Consider next objective (in reverse order).
         for (i = 1; i <= n; i++)
             head[i].x--;
     }
-    // Reset x to point to the first objective.
-    for (i = 1; i <= n; i++) {
-        head[i].x -= STOP_DIMENSION - 2;
-    }
 
+    for (int j = 1; j >= 0; j--) {
+        // Sort each dimension independently.
+        qsort(scratch, n, sizeof(*scratch), compare_node);
+        (list4d+1)->next[j] = scratch[0];
+        scratch[0]->prev[j] = list4d+1;
+        for (i = 1; i < n; i++) {
+            scratch[i-1]->next[j] = scratch[i];
+            scratch[i]->prev[j] = scratch[i-1];
+        }
+        scratch[n-1]->next[j] = list4d+2;
+        (list4d+2)->prev[j] = scratch[n-1];
+        if (j > 0) {
+            // Consider next objective (in reverse order).
+            for (i = 1; i <= n; i++)
+                head[i].x--;
+        } else {
+            // Reset x to point to the first objective.
+            for (i = 1; i <= n; i++)
+                head[i].x -= STOP_DIMENSION - 1;
+        }
+    }
     free(scratch);
 
     // Make sure it is not used.
