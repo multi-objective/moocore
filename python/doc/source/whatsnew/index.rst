@@ -16,6 +16,7 @@ Version 0.2.0 (development)
 - Fix wrong values returned by :func:`~moocore.epsilon_mult` when mixing minimization and maximization.
 - Fix documentation of :ref:`epsilon_metric` (@leandrolanzieri)
 - :func:`~moocore.hypervolume` uses the inclusion-exclusion algorithm for small inputs of up to 15 points, which is significantly faster.
+- MSVC miscompiles Windows ARM64 wheels, so do not build them.
 
 
 Version 0.1.10 (24/11/2025)
