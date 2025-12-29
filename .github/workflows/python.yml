@@ -225,7 +225,7 @@ jobs:
         uses: pypa/cibuildwheel@v3.3.0
         env:
           CIBW_TEST_ENVIRONMENT: PYTHONUNBUFFERED=1
-          CIBW_PROJECT_REQUIRES_PYTHON: ${{ matrix.os == 'windows-11-arm' && ">=3.11" || "" }}
+          CIBW_PROJECT_REQUIRES_PYTHON: ${{ matrix.os == 'windows-11-arm' && '>=3.11' || '' }}
         with:
           package-dir: python
           output-dir: wheelhouse
