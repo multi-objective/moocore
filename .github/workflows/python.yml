@@ -209,11 +209,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up Python 3.12 for Windows ARM64
+      - name: Set up Python 3.11 for Windows ARM64
         if: ${{ matrix.os == 'windows-11-arm' }}
         uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
+          python-version: '3.11'
+          architecture: 'arm64'
           cache: 'pip'
 
       - name: Setup LLVM for Windows ARM64 (NOT WORKING/FIXME)
