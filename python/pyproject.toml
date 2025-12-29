@@ -138,6 +138,9 @@ repair-wheel-command = [
   "abi3audit --verbose --strict --report {wheel}",
 ]
 
+[tool.cibuildwheel.windows-arm64]
+build = "cp311-*"
+
 [tool.cibuildwheel.macos]
 archs = [ "universal2" ]
 before-build = "pip install abi3audit"
