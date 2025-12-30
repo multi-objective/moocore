@@ -36,6 +36,16 @@
 #define HV_DIMENSION 4
 #include "hv_priv.h"
 
+static inline void
+print_pointx(const char * str, const double * x, dimension_t dim, const char * end)
+{
+    fprintf(stderr, "%s =", str);
+    for (dimension_t d = 0; d < dim; d++) {
+            fprintf(stderr, " %g", x[d]);
+    }
+    fprintf(stderr, "%s", end);
+}
+
 // ------------ Update data structure -----------------------------------------
 
 static inline void
@@ -112,6 +122,7 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
     double closest0x[] = { closest0->x[0], closest0->x[1] };
     double closest1x[] = { closest1->x[0], closest1->x[1] };
     dlnode_t * p = (list+1)->next[0];
+    print_pointx("restart_base_setup_z_and_closest: p", p->x, 3, "\n");
     assert(p == list->next[0]->next[0]);
     restart_list_y(list);
     while (true) {
@@ -146,6 +157,7 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
             newp->closest[1] = closest1;
             newp->prev[0] = p->prev[0];
             newp->next[0] = p;
+            print_pointx("restart_base_setup_z_and_closest: newp->next[0]", p->x, 3, "\n");
             return true;
         }
 
@@ -267,10 +279,17 @@ one_contribution_3d(dlnode_t * restrict newp)
     double volume = 0;
     double lastz = newx[2];
     dlnode_t * p = newp->next[0];
+#if !defined(HV_RECURSIVE) && HV_DIMENSION == 4
     assert(!weakly_dominates(p->x, newx, 4));
+#else
+    assert(!weakly_dominates(p->x, newx, 3));
+#endif
     while (true) {
         const double * px = p->x;
         volume += area * (px[2] - lastz);
+        fprintf(stderr, "one_contribution_3d: volume = %g = %g * %g: ", volume, area, px[2] - lastz);
+        print_pointx("newx", newx, 3, ": ");
+        print_pointx("px", newx, 3, "\n");
 
         if (px[0] <= newx[0] && px[1] <= newx[1])
             return volume;
@@ -285,6 +304,7 @@ one_contribution_3d(dlnode_t * restrict newp)
                 const double tmpx[] = { newx[0], px[1] };
                 // if px[1] == newp->cnext[1]->x[1] then area starts at 0.
                 area -= compute_area_no_inners(tmpx, newp->cnext[1], 0);
+                //fprintf(stderr, "one_contribution_3d: area(0) = %g\n", area);
                 p->cnext[1] = newp->cnext[1];
                 p->cnext[0]->cnext[1] = p;
                 newp->cnext[1] = p;
@@ -294,6 +314,7 @@ one_contribution_3d(dlnode_t * restrict newp)
                 const double tmpx[] = { px[0], newx[1] };
                 // if px[0] == newp->cnext[0]->x[0] then area starts at 0.
                 area -= compute_area_no_inners(tmpx, newp->cnext[0], 1);
+                //fprintf(stderr, "one_contribution_3d: area(1) = %g\n", area);
                 p->cnext[0] = newp->cnext[0];
                 p->cnext[1]->cnext[0] = p;
                 newp->cnext[0] = p;
@@ -302,6 +323,7 @@ one_contribution_3d(dlnode_t * restrict newp)
             assert(px[0] >= newx[0] && px[1] >= newx[1]);
             // if px[0] == p->cnext[0]->x[0] then area starts at 0.
             area -= compute_area_no_inners(px, p->cnext[0], 1);
+            //fprintf(stderr, "one_contribution_3d: area(2) = %g\n", area);
             p->cnext[1]->cnext[0] = p;
             p->cnext[0]->cnext[1] = p;
         }
@@ -411,7 +433,9 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
 
     reset_sentinels_3d(list);
     restart_list_y(list);
-
+    print_pointx("onec4dplusU: (list+1)->next[0]", (list+1)->next[0]->x, 3, " ");
+    print_pointx("(list+1)->next[1]", (list+1)->next[1]->x, 3, " ");
+    print_pointx("the_point", the_point->x, 3, "\n");
 
     const double * the_point_x = the_point->x;
     // Setup the 3D base only if there are any points leq than the_point_x[3])
@@ -423,6 +447,8 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
         the_point->ignore = 3;
         assert(newp != last);
 
+        print_pointx("part1: newp", newp->x, 3, " ");
+        print_pointx("last", last->x, 3, "\n");
         // PART 1: Setup 2D base of the 3D base
         while (newp->x[2] <= the_point_x[2]) {
             const double * newpx = newp->x;
@@ -442,11 +468,14 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
                 x_aux += 3;
 
                 if (continue_base_update_z_closest(list, newp_aux, done_once)) {
+                    print_pointx("continue_base_update_z_closest (1): (list+1)->next[0]", (list+1)->next[0]->x, 3, "\n");
                     newp_aux++;
                     done_once = true;
                 }
             }
             newp = newp->next[0];
+            print_pointx("part1: newp", newp->x, 3, " ");
+            print_pointx("last", last->x, 3, "\n");
         }
         the_point->ignore = the_point_ignore;
 
@@ -462,16 +491,19 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
                 x_aux += 3;
                 c++;
             }
-
-            if(c > 0 && newp->next[0]->x[2] > newpx[2]){
+            print_pointx("part2: newp->next[0]", newp->next[0]->x, 3, " ");
+            print_pointx("newpx", newpx, 3, "\n");
+            if (c > 0 && newp->next[0]->x[2] > newpx[2]) {
                 if (c == 1) {
-                    newp_aux->x = x_aux-3;
+                    newp_aux->x = x_aux - 3;
                     continue_base_update_z_closest(list, newp_aux, false);
+                    print_pointx("continue_base_update_z_closest (2): (list+1)->next[0]", (list+1)->next[0]->x, 3, "\n");
                     newp_aux++;
                 } else {
                     // all points with equal z-coordinate will be added to the data structure in lex order
                     lex_sort_equal_z_and_setup_nodes(newp_aux, x_aux-3*c, c);
                     continue_base_update_z_closest(list, newp_aux, false);
+                    print_pointx("continue_base_update_z_closest (3): (list+1)->next[0]", (list+1)->next[0]->x, 3, "\n");
                     prevp_aux = newp_aux;
                     newp_aux++;
 
@@ -481,6 +513,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
                         if (newp_aux->x[0] < prevp_aux->x[0]){
                             // if newp_aux is not dominated by prevp
                             continue_base_update_z_closest(list, newp_aux, false);
+                            print_pointx("continue_base_update_z_closest (4): (list+1)->next[0]", (list+1)->next[0]->x, 3, "\n");
                         }
                         prevp_aux = newp_aux;
                         newp_aux++;
@@ -498,12 +531,14 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
 
     dlnode_t * tp_prev_z = the_point->prev[0];
     dlnode_t * tp_next_z = the_point->next[0];
+    print_pointx("tp_next_z", tp_next_z->x, 3, "\n");
     // FIXME: Does this call always return true?
 #if DEBUG >= 1
     assert(restart_base_setup_z_and_closest(list, the_point));
 #else
     restart_base_setup_z_and_closest(list, the_point);
 #endif
+    print_pointx("the_point->next[0]", the_point->next[0]->x, 3, "\n");
     double volume = one_contribution_3d(the_point);
     the_point->prev[0] = tp_prev_z;
     the_point->next[0] = tp_next_z;
@@ -547,7 +582,6 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
         height = newp->next[1]->x[3] - newpx[3];
         assert(height >= 0);
         hv += volume * height;
-
         newp = newp->next[1];
     }
 

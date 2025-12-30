@@ -141,6 +141,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     for (int j = 1; j >= 0; j--) {
         // Sort each dimension independently.
         qsort(scratch, n, sizeof(*scratch), compare_node);
+        if (j == 1) print_pointx("setup: ", (list4d+1)->next[1]->x, 3, "\n");
         (list4d+1)->next[j] = scratch[0];
         scratch[0]->prev[j] = list4d+1;
         for (i = 1; i < n; i++) {
@@ -194,14 +195,15 @@ update_bound(double * restrict bound, const double * restrict x, dimension_t dim
 }
 
 static void
-delete_4d(dlnode_t * restrict nodep)
+delete_4d(dlnode_t * nodep)
 {
+    print_pointx("delete_4d:", nodep->x, 4, "\n");
     nodep->prev[1]->next[1] = nodep->next[1];
     nodep->next[1]->prev[1] = nodep->prev[1];
 }
 
 static void
-delete_3d(dlnode_t * restrict nodep)
+delete_3d(dlnode_t * nodep)
 {
     nodep->prev[0]->next[0] = nodep->next[0];
     nodep->next[0]->prev[0] = nodep->prev[0];
@@ -210,6 +212,7 @@ delete_3d(dlnode_t * restrict nodep)
 static void
 reinsert_4d(dlnode_t * restrict nodep)
 {
+    print_pointx("reinsert_4d:", nodep->x, 4, "\n");
     nodep->prev[1]->next[1] = nodep;
     nodep->next[1]->prev[1] = nodep;
 }
@@ -546,10 +549,16 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
         if (dim - 1 == STOP_DIMENSION) {
             // base case of dimension 4.
             hypera = fpli_onec4d(list, c, p1);
+            fprintf(stderr, "fpli_onec4d: hypera: %d: %g + %g:", c, hypera, p1_prev->area[d_stop]);
+            for (dimension_t d = 0; d < 5; d++) {
+                fprintf(stderr, " %g", p1->x[d]);
+            }
+            fprintf(stderr, "\n");
             // hypera only has the contribution of p1.
             hypera += p1_prev->area[d_stop];
         } else {
             hypera = hv_recursive(list, dim - 1, c, ref, bound);
+            fprintf(stderr, "hv_recursive: hypera: %d: %g\n", c, hypera);
         }
         /* At this point, p1 is the point with the highest value in
            dimension dim in the list: If it is dominated in dimension
@@ -623,15 +632,19 @@ double fpli_hv(const double * restrict data, size_t n, dimension_t dim,
     double hyperv;
     if (likely(n > MAX_ROWS_HV_INEX)) {
         hyperv = fpli_hv_ge5d(list, dim - 1, n, ref);
+        fprintf(stderr, "fpli_hv_ge5d: %u: %g\n", n, hyperv);
         fpli_free_cdllist(list);
         return hyperv;
     }
     if (unlikely(n > 2)) {
         hyperv = hv_inex_list(list+1, (int) n, dim, ref);
+        fprintf(stderr, "hv_inex_list: %u: %g\n", n, hyperv);
     } else if (unlikely(n == 2)) {
         hyperv = hv_two_points(list[1].x, list[2].x, ref, dim);
+        fprintf(stderr, "hv_two_points: %g\n", hyperv);
     } else if (unlikely(n == 1)) {
         hyperv = one_point_hv(list[1].x, ref, dim);
+        fprintf(stderr, "one_point_hv: %g\n", hyperv);
     } else {
         assert(n == 0);
         hyperv = 0.0; // Returning here would leak memory.
