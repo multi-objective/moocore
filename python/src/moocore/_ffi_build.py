@@ -13,7 +13,7 @@ import platform
 from cffi import FFI
 
 # Compile in debug mode.
-DEBUG = int(os.environ.get("MOOCORE_DEBUG", "0"))
+DEBUG = 1  # int(os.environ.get("MOOCORE_DEBUG", "0"))
 
 libmoocore_h = "src/moocore/libmoocore.h"
 sources_path = "src/moocore/libmoocore/"
@@ -92,12 +92,12 @@ MSVC_CFLAGS = [
     "/DMOOCORE_SHARED_LIB",
 ]
 MSVC_LDFLAGS = ["/LTCG"]  # Link-time optimization
-GCC_CFLAGS = ["-O3", "-flto", "-fvisibility=hidden"]
+GCC_CFLAGS = ["-O0"]  # ["-O3", "-flto", "-fvisibility=hidden"]
 GCC_LDFLAGS = [*GCC_CFLAGS]
 if is_x86_64:
     # Compile for sufficiently old x86-64 architecture.
     MSVC_arch = ["/arch:AVX"]
-    GCC_arch = ["-march=x86-64-v2"]
+    GCC_arch = []  # ["-march=x86-64-v2"]
 else:
     MSVC_arch = []
     GCC_arch = []
