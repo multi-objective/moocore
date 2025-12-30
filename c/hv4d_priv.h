@@ -122,7 +122,6 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
     double closest0x[] = { closest0->x[0], closest0->x[1] };
     double closest1x[] = { closest1->x[0], closest1->x[1] };
     dlnode_t * p = (list+1)->next[0];
-    print_pointx("restart_base_setup_z_and_closest: p", p->x, 3, "\n");
     assert(p == list->next[0]->next[0]);
     restart_list_y(list);
     while (true) {
@@ -157,7 +156,6 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
             newp->closest[1] = closest1;
             newp->prev[0] = p->prev[0];
             newp->next[0] = p;
-            print_pointx("restart_base_setup_z_and_closest: newp->next[0]", p->x, 3, "\n");
             return true;
         }
 
@@ -433,9 +431,9 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
 
     reset_sentinels_3d(list);
     restart_list_y(list);
-    print_pointx("onec4dplusU: (list+1)->next[0]", (list+1)->next[0]->x, 3, " ");
-    print_pointx("(list+1)->next[1]", (list+1)->next[1]->x, 3, " ");
-    print_pointx("the_point", the_point->x, 3, "\n");
+    print_pointx("onec4dplusU: (list+1)->next[0]", (list+1)->next[0]->x, 4, " ");
+    print_pointx("(list+1)->next[1]", (list+1)->next[1]->x, 4, " ");
+    print_pointx("the_point", the_point->x, 4, "\n");
 
     const double * the_point_x = the_point->x;
     // Setup the 3D base only if there are any points leq than the_point_x[3])
