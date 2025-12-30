@@ -122,6 +122,14 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         const int j2 = j+2;
         qsort(scratch, n, sizeof(*scratch), compare_node);
         if (j <= -1) {
+//#define FORCE_BUG
+#ifdef FORCE_BUG
+            if (j2 == 1) {
+                dlnode_t * tmp = scratch[0];
+                scratch[0] = scratch[1];
+                scratch[1] = tmp;
+            }
+#endif
             (list4d+1)->next[j2] = scratch[0];
             scratch[0]->prev[j2] = list4d+1;
             for (i = 1; i < n; i++) {
