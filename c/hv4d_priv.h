@@ -409,14 +409,12 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
 
     double * x_aux = list_aux->vol;
     dlnode_t * newp_aux = list_aux+1; // list_aux is a sentinel
-    dlnode_t * prevp_aux;
-    int c;
 
     reset_sentinels_3d(list);
     restart_list_y(list);
 
     const double * the_point_x = the_point->x;
-    // Setup the 3D base only if there are any points leq than the_point_x[3])
+    // Setup the 3D base only if there are any points leq than the_point_x[3].
     if ((list+1)->next[1] != the_point || the_point_x[3] == the_point->next[1]->x[3]) {
         bool done_once = false;
         // Set the_point->ignore=3 so the loop will skip it, but restore its
@@ -452,7 +450,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
         the_point->ignore = the_point_ignore;
 
         // PART 2: Setup the remainder of the 3D base
-        c = 0;
+        int c = 0;
         while (newp != last) {
             const double * newpx = newp->x;
             if (newpx[3] <= the_point_x[3] && newp->ignore < 3) {
@@ -469,19 +467,19 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
                     newp_aux++;
                 } else {
                     // all points with equal z-coordinate will be added to the data structure in lex order
-                    lex_sort_equal_z_and_setup_nodes(newp_aux, x_aux-3*c, c);
+                    lex_sort_equal_z_and_setup_nodes(newp_aux, x_aux - 3*c, c);
                     continue_base_update_z_closest(list, newp_aux, false);
-                    prevp_aux = newp_aux;
+                    const double * prevp_aux_x = newp_aux->x;
                     newp_aux++;
 
                     for (int i = 1; i < c; i++) {
                         assert(newpx[2] == newp_aux->x[2]); // all c points have equal z
-                        assert(prevp_aux->x[1] <= newp_aux->x[1]); // due to lexsort
-                        if (newp_aux->x[0] < prevp_aux->x[0]){
+                        assert(prevp_aux_x[1] <= newp_aux->x[1]); // due to lexsort
+                        if (newp_aux->x[0] < prevp_aux_x[0]){
                             // if newp_aux is not dominated by prevp
                             continue_base_update_z_closest(list, newp_aux, false);
                         }
-                        prevp_aux = newp_aux;
+                        prevp_aux_x = newp_aux->x;
                         newp_aux++;
                     }
                 }
@@ -497,7 +495,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
 
     dlnode_t * tp_prev_z = the_point->prev[0];
     dlnode_t * tp_next_z = the_point->next[0];
-    // FIXME: Does this call always return true?
+    // This call should always return true.
 #if DEBUG >= 1
     assert(restart_base_setup_z_and_closest(list, the_point));
 #else
@@ -519,7 +517,6 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
         if (weakly_dominates(newpx, the_point_x, 3))
             break;
         if (newp->ignore < 3) {
-            // FIXME: Is it possible that x_aux matches newpx? YES! So just assign and avoid the comparison.
             // x_aux is the coordinate-wise maximum between newpx and the_point_x.
             update_bound_3d(x_aux, newpx, the_point_x);
             newp_aux->x = x_aux;
