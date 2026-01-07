@@ -417,7 +417,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
 
     const double * the_point_x = the_point->x;
     // Setup the 3D base only if there are any points leq than the_point_x[3])
-    if ((list+1)->next[1]->x[3] <= the_point_x[3]) {
+    if ((list+1)->next[1] != the_point || the_point_x[3] == the_point->next[1]->x[3]) {
         bool done_once = false;
         // Set the_point->ignore=3 so the loop will skip it, but restore its
         // value after the loop.
@@ -518,7 +518,6 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
         const double * newpx = newp->x;
         if (weakly_dominates(newpx, the_point_x, 3))
             break;
-
         if (newp->ignore < 3) {
             // FIXME: Is it possible that x_aux matches newpx? YES! So just assign and avoid the comparison.
             // x_aux is the coordinate-wise maximum between newpx and the_point_x.
