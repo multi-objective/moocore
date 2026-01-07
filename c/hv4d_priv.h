@@ -267,7 +267,11 @@ one_contribution_3d(dlnode_t * restrict newp)
     double volume = 0;
     double lastz = newx[2];
     dlnode_t * p = newp->next[0];
+#if !defined(HV_RECURSIVE) && HV_DIMENSION == 4
     assert(!weakly_dominates(p->x, newx, 4));
+#else
+    assert(!weakly_dominates(p->x, newx, 3));
+#endif
     while (true) {
         const double * px = p->x;
         volume += area * (px[2] - lastz);
@@ -399,9 +403,8 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
     assert(list+2 == list->prev[1]);
     assert(list+1 == list->next[1]);
 
-    dlnode_t * newp = (list+1)->next[0];
     const dlnode_t * const last = list+2;
-    dlnode_t * const z_first = newp;
+    dlnode_t * const z_first = (list+1)->next[0];
     dlnode_t * const z_last = last->prev[0];
 
     double * x_aux = list_aux->vol;
@@ -412,15 +415,15 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
     reset_sentinels_3d(list);
     restart_list_y(list);
 
-
     const double * the_point_x = the_point->x;
     // Setup the 3D base only if there are any points leq than the_point_x[3])
-    if ((list+1)->next[1] != the_point) {
+    if ((list+1)->next[1]->x[3] <= the_point_x[3]) {
         bool done_once = false;
         // Set the_point->ignore=3 so the loop will skip it, but restore its
         // value after the loop.
         dimension_t the_point_ignore = the_point->ignore;
         the_point->ignore = 3;
+        dlnode_t * newp = z_first;
         assert(newp != last);
 
         // PART 1: Setup 2D base of the 3D base
@@ -434,8 +437,6 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
                     (list+2)->prev[0] = z_last;
                     return 0;
                 }
-
-                // FIXME: Is it possible that x_aux matches newpx? YES! So just assign and avoid the comparison.
                 // x_aux is the coordinate-wise maximum between newpx and the_point_x.
                 update_bound_3d(x_aux, newpx, the_point_x);
                 newp_aux->x = x_aux;
@@ -455,17 +456,15 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
         while (newp != last) {
             const double * newpx = newp->x;
             if (newpx[3] <= the_point_x[3] && newp->ignore < 3) {
-
-                // FIXME: Is it possible that x_aux matches newpx? YES! So just assign and avoid the comparison.
                 // x_aux is the coordinate-wise maximum between newpx and the_point_x.
                 update_bound_3d(x_aux, newpx, the_point_x);
                 x_aux += 3;
                 c++;
             }
 
-            if(c > 0 && newp->next[0]->x[2] > newpx[2]){
+            if (c > 0 && newp->next[0]->x[2] > newpx[2]) {
                 if (c == 1) {
-                    newp_aux->x = x_aux-3;
+                    newp_aux->x = x_aux - 3;
                     continue_base_update_z_closest(list, newp_aux, false);
                     newp_aux++;
                 } else {
@@ -492,7 +491,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
         }
     }
 
-    newp = the_point->next[1];
+    dlnode_t * newp = the_point->next[1];
     while (newp->x[3] <= the_point_x[3])
         newp = newp->next[1];
 
