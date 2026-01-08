@@ -7,6 +7,7 @@
  * Fix documentation of `epsilon_additive()` (@leandrolanzieri)
  * `hypervolume()` uses the inclusion-exclusion algorithm for small inputs of
    up to 15 points, which is significantly faster.
+ * `hypervolume()` is significantly faster for more than four dimensions (Andreia P. Guerreiro).
 
 
 # moocore 0.1.10
