@@ -216,12 +216,13 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
+        # FIXME: This step installs clang-cl but cibuildwheel does not use it.
       - name: Setup LLVM for Windows ARM64 (NOT WORKING/FIXME)
         if: false # ${{ matrix.os == 'windows-11-arm' }}
         uses: ./.github/windows_arm64_steps
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.2.1
+        uses: pypa/cibuildwheel@v3.3.0
         with:
           package-dir: python
           output-dir: wheelhouse
