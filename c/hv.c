@@ -86,8 +86,8 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     head->r_next = malloc(2 * (d_stop - 1) * (n+1) * sizeof(head));
     head->r_prev = head->r_next + (d_stop - 1) * (n+1);
     // We only need space in area and vol for dimension 4 and above.
-    head->area = malloc(2 * d_stop * (n+1) * sizeof(*data));
-    head->vol = head->area + d_stop * (n+1);
+    head->area = malloc(2 * d_stop * n * sizeof(*data));
+    head->vol = head->area + d_stop * n;
     head->x = NULL; // head contains no data
     head->ignore = 0;  // should never get used
 
@@ -110,9 +110,12 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         head[i].ignore = 0;
         head[i].r_next = head->r_next + i * (d_stop - 1);
         head[i].r_prev = head->r_prev + i * (d_stop - 1);
-        head[i].area = head->area + i * d_stop;
-        head[i].vol = head->vol + i * d_stop;
+        head[i].area = head->area + (i - 1) * d_stop;
+        head[i].vol = head->vol + (i - 1) * d_stop;
     }
+    // Make sure they are not used.
+    head->area = NULL;
+    head->vol = NULL;
 
     dlnode_t ** scratch = malloc(n * sizeof(*scratch));
     for (i = 0; i < n; i++)
@@ -161,10 +164,6 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     }
     free(scratch);
 
-    // Make sure it is not used.
-    ASAN_POISON_MEMORY_REGION(head->area, sizeof(*data) * d_stop);
-    ASAN_POISON_MEMORY_REGION(head->vol, sizeof(*data) * d_stop);
-
 finish:
     *size = n;
     return head;
@@ -177,7 +176,7 @@ static void fpli_free_cdllist(dlnode_t * head)
     free(head->prev[0]->vol); // free x_aux (4D basecase)
     free(head->prev[0]); // free list_aux (4D basecase)
     free(head->r_next);
-    free(head->area);
+    free(head[1].area); // free ->area and ->vol.
     free(head);
 }
 
