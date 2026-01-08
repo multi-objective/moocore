@@ -64,7 +64,11 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     dimension_t d_stop = d - STOP_DIMENSION;
     size_t n = *size;
 
-    dlnode_t * head = malloc((n+1) * sizeof(*head));
+    // Reserve space for main CDLL used by hv_recursive() and for the auxiliary
+    // list used by onec4dplusU().  The main CDLL will store all points + 1
+    // sentinel.  The auxiliary list will store at most n - 1 points + 1
+    // sentinel.
+    dlnode_t * head = malloc((n + 1 + n) * sizeof(*head));
     size_t i = 1;
     for (size_t j = 0; j < n; j++) {
         /* Filters those points that do not strictly dominate the reference
@@ -97,9 +101,9 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     // should remain untouched.
     head->next[0] = list4d;
 
-    // Reserve space for auxiliar list and auxiliar x vector used in onec4dplusU.
-    // This list will store at most n-1 points.
-    dlnode_t * list_aux = (dlnode_t *) malloc(n * sizeof(*list_aux));
+    // Setup the auxiliary list used in onec4dplusU().
+    dlnode_t * list_aux = head + n + 1;
+    // Reserve space for n auxiliary 3D points used by onec4dplusU().
     list_aux->vol = malloc(3 * n * sizeof(double));
     head->prev[0] = list_aux;
     list_aux->next[0] = list4d;
@@ -174,10 +178,9 @@ static void fpli_free_cdllist(dlnode_t * head)
     assert(head->next[0] == head->prev[0]->next[0]);
     free_cdllist(head->next[0]); // free 4D sentinels
     free(head->prev[0]->vol); // free x_aux (4D basecase)
-    free(head->prev[0]); // free list_aux (4D basecase)
     free(head->r_next);
     free(head[1].area); // free ->area and ->vol.
-    free(head);
+    free(head); // Free main CDLL and list_aux (4D basecase).
 }
 
 static inline void
