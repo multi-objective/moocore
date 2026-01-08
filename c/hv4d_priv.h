@@ -377,13 +377,6 @@ static inline void lex_sort_equal_z_and_setup_nodes(dlnode_t * newp_aux, double 
     free(scratch);
 }
 
-static inline void
-update_bound_3d(double * restrict dest, const double * restrict a, const double * restrict b)
-{
-    for (int i = 0; i < 3; i++)
-        dest[i] = MAX(a[i], b[i]);
-}
-
 // FIXME: Move this function to hv.c
 #ifdef HV_RECURSIVE
 /**
@@ -436,7 +429,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
                     return 0;
                 }
                 // x_aux is the coordinate-wise maximum between newpx and the_point_x.
-                update_bound_3d(x_aux, newpx, the_point_x);
+                upper_bound(x_aux, newpx, the_point_x, 3);
                 newp_aux->x = x_aux;
                 x_aux += 3;
 
@@ -455,7 +448,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
             const double * newpx = newp->x;
             if (newpx[3] <= the_point_x[3] && newp->ignore < 3) {
                 // x_aux is the coordinate-wise maximum between newpx and the_point_x.
-                update_bound_3d(x_aux, newpx, the_point_x);
+                upper_bound(x_aux, newpx, the_point_x, 3);
                 x_aux += 3;
                 c++;
             }
@@ -518,7 +511,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
             break;
         if (newp->ignore < 3) {
             // x_aux is the coordinate-wise maximum between newpx and the_point_x.
-            update_bound_3d(x_aux, newpx, the_point_x);
+            upper_bound(x_aux, newpx, the_point_x, 3);
             newp_aux->x = x_aux;
             x_aux += 3;
             if (restart_base_setup_z_and_closest(list, newp_aux)) {

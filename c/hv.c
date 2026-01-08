@@ -289,14 +289,6 @@ one_point_hv(const double * restrict x, const double * restrict ref, dimension_t
 }
 
 _attr_optimize_finite_and_associative_math
-static inline void
-upper_bound(double * restrict dest, const double * restrict a, const double * restrict b, dimension_t dim)
-{
-    for (dimension_t i = 0; i < dim; i++)
-        dest[i] = MAX(a[i], b[i]);
-}
-
-_attr_optimize_finite_and_associative_math
 static double
 hv_two_points(const double * restrict x1, const double * restrict x2,
               const double * restrict ref, dimension_t d)
