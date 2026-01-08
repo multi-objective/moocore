@@ -35,7 +35,7 @@
 #include "common.h"
 #include "hv.h"
 #define HV_RECURSIVE
-#include "hv4d_priv.h"
+#include "hvc4d_priv.h"
 
 #define STOP_DIMENSION 3 // stop on dimension 4.
 #define MAX_ROWS_HV_INEX 15
