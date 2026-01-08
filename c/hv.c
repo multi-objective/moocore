@@ -89,8 +89,9 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     // We need space in r_next and r_prev for dimension 5 and above (d_stop - 1).
     head->r_next = malloc(2 * (d_stop - 1) * (n+1) * sizeof(head));
     head->r_prev = head->r_next + (d_stop - 1) * (n+1);
-    // We only need space in area and vol for dimension 4 and above.
-    head->area = malloc(2 * d_stop * n * sizeof(*data));
+    // We only need space in area and vol for dimension 4 and above (d-stop).
+    // Also reserve space for n-1 auxiliary 3D points used by onec4dplusU().
+    head->area = malloc((2 * d_stop * n + 3 * (n-1)) * sizeof(*data));
     head->vol = head->area + d_stop * n;
     head->x = NULL; // head contains no data
     head->ignore = 0;  // should never get used
@@ -103,8 +104,8 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
 
     // Setup the auxiliary list used in onec4dplusU().
     dlnode_t * list_aux = head + n + 1;
-    // Reserve space for n auxiliary 3D points used by onec4dplusU().
-    list_aux->vol = malloc(3 * n * sizeof(double));
+    // Setup the auxiliary 3D points used in onec4dplusU().
+    list_aux->vol = head->vol + d_stop * n;
     head->prev[0] = list_aux;
     list_aux->next[0] = list4d;
 
@@ -177,9 +178,8 @@ static void fpli_free_cdllist(dlnode_t * head)
 {
     assert(head->next[0] == head->prev[0]->next[0]);
     free_cdllist(head->next[0]); // free 4D sentinels
-    free(head->prev[0]->vol); // free x_aux (4D basecase)
     free(head->r_next);
-    free(head[1].area); // free ->area and ->vol.
+    free(head[1].area); // Free ->area, ->vol and list_aux->vol (x_aux used by 4D basecase).
     free(head); // Free main CDLL and list_aux (4D basecase).
 }
 
