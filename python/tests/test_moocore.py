@@ -52,23 +52,20 @@ def test_read_datasets_data(test_datapath, test, expected_name, expected_shape):
 
 def test_read_datasets_badname():
     """Check that the `moocore.read_datasets()` functions fails correctly after a bad file name is input."""
-    with pytest.raises(Exception) as expt:
+    with pytest.raises(
+        FileNotFoundError, match=r"file 'nonexistent_file.txt' not found"
+    ):
         moocore.read_datasets("nonexistent_file.txt")
-
-    assert str(expt.value) == "file 'nonexistent_file.txt' not found"
-    assert expt.type is FileNotFoundError
 
 
 def test_read_datasets_errorcode(test_datapath):
     """Checks that an exception is raised when `read_datasets()` returns an error code, as well as checking specific error types from the `ReadDatasetsError` type."""
-    with pytest.raises(Exception) as expt:
+    with pytest.raises(moocore.ReadDatasetsError) as expt:
         moocore.read_datasets(test_datapath("empty"))
-    assert expt.type is moocore.ReadDatasetsError
     assert expt.value.message == "READ_INPUT_FILE_EMPTY"
 
-    with pytest.raises(Exception) as expt:
+    with pytest.raises(moocore.ReadDatasetsError) as expt:
         moocore.read_datasets(test_datapath("column_error.dat"))
-    assert expt.type is moocore.ReadDatasetsError
     assert expt.value.message == "ERROR_COLUMNS"
 
 
@@ -118,9 +115,8 @@ class TestHypervolume:
     def test_hv_wrong_ref(self, test_datapath):
         """Check that the moocore.hypervolume() fails correctly after a ref with the wrong dimensions is input."""
         X = self.input1
-        with pytest.raises(Exception) as expt:
+        with pytest.raises(ValueError):
             moocore.hypervolume(X[X[:, 2] == 1, :2], ref=np.array([10, 10, 10]))
-        assert expt.type is ValueError
 
 
 def test_igd():
@@ -391,9 +387,8 @@ def test_eaf(test_datapath, test_name, expected_eaf_name):
 
 
 def test_get_dataset_path():
-    with pytest.raises(Exception) as expt:
+    with pytest.raises(ValueError):
         moocore.get_dataset_path("notavailable")
-    assert expt.type is ValueError
 
 
 # def test_eafdiff(test_datapath):
@@ -444,6 +439,15 @@ def test_hv_approx_default_seed():
     ## Precision goes down significantly with higher dimensions.
     signif = 2
     np.testing.assert_approx_equal(true_hv, appr_hv, significant=signif)
+
+
+def test_hv_approx_errors():
+    with pytest.raises(
+        ValueError, match=r".*nsamples must be an integer value.*"
+    ):
+        moocore.hv_approx(
+            [[0, 0]], [1, 1], method="DZ2019-MC", seed=None, nsamples="10"
+        )
 
 
 def check_hvc(points, ref, err_msg):
