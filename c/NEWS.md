@@ -12,6 +12,8 @@
  * Reorganize igd.h so that helper functions are inlined and more loops are vectorized.
  * Change the type of `minmax` from `signed char *` to `int *` to help vectorization.
  * Fix bug in `epsilon_mult()` with mixed min-max objectives.
+ * `fpli_hv()` calculates 4D contributions as the base case, which is
+   significantly faster for more than four dimensions. (Andreia P. Guerreiro)
 
 ## 0.17.0
 

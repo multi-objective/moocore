@@ -325,4 +325,14 @@ compute_area_no_inners(const double * px, const dlnode_t * q, uint_fast8_t i)
     ASSUME(i == 0 || i == 1);
     return compute_area_simple(px, q, q->cnext[i], i);
 }
+
+_attr_optimize_finite_and_associative_math
+static inline void
+upper_bound(double * restrict dest, const double * restrict a,
+            const double * restrict b, dimension_t dim)
+{
+    for (dimension_t i = 0; i < dim; i++)
+        dest[i] = MAX(a[i], b[i]);
+}
+
 #endif // _HV_PRIV_H
