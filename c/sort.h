@@ -116,9 +116,8 @@ cmp_pdouble_asc_rev_2d(const void * restrict pa, const void * restrict pb)
 {
     const double * restrict a = (const double *) pa;
     const double * restrict b = (const double *) pb;
-    const double ax = a[0], ay = a[1], bx = b[0], by = b[1];
-    int cmpx = cmp_double_asc(ax, bx);
-    int cmpy = cmp_double_asc(ay, by);
+    int cmpx = cmp_double_asc(a[0], b[0]);
+    int cmpy = cmp_double_asc(a[1], b[1]);
     return cmpy ? cmpy : cmpx;
 }
 static inline int

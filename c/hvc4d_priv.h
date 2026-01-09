@@ -108,17 +108,6 @@ continue_base_update_z_closest(dlnode_t * restrict list, dlnode_t * restrict new
     return true;
 }
 
-static inline int compare_lex_2d(const void * pa, const void * pb)
-{
-    const double ax = **(const double **)pa;
-    const double bx = **(const double **)pb;
-    const double ay = *(*(const double **)pa + 1);
-    const double by = *(*(const double **)pb + 1);
-    int cmpx = cmp_double_asc(ax, bx);
-    int cmpy = cmp_double_asc(ay, by);
-    return cmpy ? cmpy : cmpx;
-}
-
 static inline void
 lex_sort_equal_z_and_setup_nodes(dlnode_t * newp_aux, double * x_aux, size_t n)
 {
@@ -130,7 +119,7 @@ lex_sort_equal_z_and_setup_nodes(dlnode_t * newp_aux, double * x_aux, size_t n)
         x += 3;
     }
 
-    qsort(scratch, n, sizeof(*scratch), compare_lex_2d);
+    qsort(scratch, n, sizeof(*scratch), cmp_ppdouble_asc_rev_2d);
 
     for (i = 0; i < n; i++) {
         newp_aux->x = scratch[i];
