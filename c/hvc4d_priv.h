@@ -25,6 +25,44 @@
 
 #include "hv4d_priv.h"
 
+typedef struct lex_sort_buffer {
+    const double ** scratch;
+    size_t capacity;
+} lex_sort_buffer_t;
+
+static inline int
+lex_sort_equal_z_and_setup_nodes(lex_sort_buffer_t * restrict buff,
+                                 dlnode_t * restrict newp_aux,
+                                 const double * restrict x_aux, size_t n)
+{
+    const double ** scratch = buff->scratch;
+    if (buff->capacity < n) {
+        scratch = realloc(scratch, n * sizeof(*scratch));
+        if (!scratch) {
+            buff->scratch = NULL;
+            return -1;
+        }
+        buff->scratch = scratch;
+        buff->capacity = n;
+    }
+
+    const double * x = x_aux;
+    for (size_t i = 0; i < n; i++){
+        scratch[i] = x;
+        x += 3;
+    }
+
+    qsort(scratch, n, sizeof(*scratch), cmp_ppdouble_asc_rev_2d);
+
+    for (size_t i = 0; i < n; i++) {
+        newp_aux->x = scratch[i];
+        assert(i == 0 || lexicographic_less_2d(scratch[i-1], scratch[i]));
+        newp_aux++;
+    }
+    return 0;
+}
+
+
 /**
    Assumes that the HV3D+ data structure is reconstructed up to z <= newp->x[2].
    Sweeps the points in the data structure in ascending order of y-coordinate, includes newp
@@ -108,28 +146,6 @@ continue_base_update_z_closest(dlnode_t * restrict list, dlnode_t * restrict new
     return true;
 }
 
-static inline void
-lex_sort_equal_z_and_setup_nodes(dlnode_t * newp_aux, double * x_aux, size_t n)
-{
-    const double ** scratch = malloc(n * sizeof(*scratch));
-    double * x = x_aux;
-    size_t i;
-    for (i = 0; i < n; i++){
-        scratch[i] = x;
-        x += 3;
-    }
-
-    qsort(scratch, n, sizeof(*scratch), cmp_ppdouble_asc_rev_2d);
-
-    for (i = 0; i < n; i++) {
-        newp_aux->x = scratch[i];
-        assert(i == 0 || lexicographic_less_2d(scratch[i-1], scratch[i]));
-        newp_aux++;
-    }
-
-    free(scratch);
-}
-
 /**
    Compute the hv contribution of "the_point" in d=4 by iteratively computing
    the one contribution problem in d=3. */
@@ -195,6 +211,8 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
 
         // PART 2: Setup the remainder of the 3D base
         int c = 0;
+        // FIXME: Could we keep this buffer in list_aux? Or pass it down as an argument?
+        lex_sort_buffer_t sort_buffer = { .scratch = NULL, .capacity = 0 };
         while (newp != last) {
             const double * newpx = newp->x;
             if (newpx[3] <= the_point_x[3] && newp->ignore < 3) {
@@ -211,7 +229,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
                     newp_aux++;
                 } else {
                     // all points with equal z-coordinate will be added to the data structure in lex order
-                    lex_sort_equal_z_and_setup_nodes(newp_aux, x_aux - 3*c, c);
+                    lex_sort_equal_z_and_setup_nodes(&sort_buffer, newp_aux, x_aux - 3*c, c);
                     continue_base_update_z_closest(list, newp_aux, false);
                     const double * prevp_aux_x = newp_aux->x;
                     newp_aux++;
@@ -231,6 +249,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
             }
             newp = newp->next[0];
         }
+        free(sort_buffer.scratch);
     }
 
     dlnode_t * newp = the_point->next[1];
@@ -240,11 +259,9 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
     dlnode_t * tp_prev_z = the_point->prev[0];
     dlnode_t * tp_next_z = the_point->next[0];
     // This call should always return true.
-#if DEBUG >= 1
-    assert(restart_base_setup_z_and_closest(list, the_point));
-#else
-    restart_base_setup_z_and_closest(list, the_point);
-#endif
+    _attr_maybe_unused bool restart_base_setup_z_and_closest_result =
+        restart_base_setup_z_and_closest(list, the_point);
+    assert(restart_base_setup_z_and_closest_result);
     double volume = one_contribution_3d(the_point);
     the_point->prev[0] = tp_prev_z;
     the_point->next[0] = tp_next_z;

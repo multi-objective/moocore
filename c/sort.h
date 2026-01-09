@@ -57,7 +57,7 @@ lexicographic_less_3d(const double * restrict a, const double * restrict b)
 static inline bool
 lexicographic_less_2d(const double * restrict a, const double * restrict b)
 {
-    return (a[1] < b[1] || (a[1] == b[1] && a[0] <= b[0]));
+    return a[1] < b[1] || (a[1] == b[1] && a[0] <= b[0]);
 }
 
 static inline bool
