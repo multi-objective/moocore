@@ -4,6 +4,8 @@ How to release
 
 1. Run [testsuite workflow](https://github.com/multi-objective/testsuite/actions/workflows/moocore.yml)
 
+1. `make clean`
+
 1. `./release.py`
 
 1. `git ci -a -m "Prepare to release v${PACKAGEVERSION}"`
