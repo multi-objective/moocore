@@ -4,7 +4,7 @@
 What's new
 **********
 
-Version 0.2.0 (development)
+Version 0.2.0 (10/01/2026)
 ---------------------------
 
 - Requires ``numpy>=1.24``.
