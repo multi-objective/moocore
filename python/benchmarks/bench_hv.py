@@ -55,6 +55,8 @@ def check_values(a, b, what, n, name):
 
 title = "HV computation"
 file_prefix = "hv"
+
+print(f"Running benchmark: {title}")
 names = files.keys()
 for name in names:
     x = read_datasets_and_filter_dominated(files[name]["file"])

@@ -43,6 +43,8 @@ def get_dataset(name):
 
 title = "pareto_rank()"
 file_prefix = "ndsort"
+
+print(f"Running benchmark: {title}")
 names = files.keys()
 for name in names:
     x = get_dataset(name)

@@ -69,6 +69,8 @@ def check_values(a, b, what, n, name):
 
 title = "is_non_dominated(keep_weakly=True)"
 file_prefix = "wndom"
+
+print(f"Running benchmark: {title}")
 names = files.keys()
 for name in names:
     x = get_dataset(name)
@@ -119,6 +121,8 @@ for name in names:
 
 title = "is_non_dominated(keep_weakly=False)"
 file_prefix = "ndom"
+
+print(f"Running benchmark: {title}")
 names = files.keys()
 for name in names:
     x = get_dataset(name)

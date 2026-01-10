@@ -30,6 +30,7 @@ files = {
 title = "eps+ computation"
 file_prefix = "eps"
 
+print(f"Running benchmark: {title}")
 names = files.keys()
 for name in names:
     x = read_data(files[name][0])

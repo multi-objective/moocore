@@ -87,6 +87,8 @@ def time_hv_exact(name, maxrow, z, ref):
 
 title = "HV approximation"
 file_prefix = "hvapprox"
+
+print(f"Running benchmark: {title}")
 names = files.keys()
 for name in names:
     x = read_datasets_and_filter_dominated(path_to_data + files[name]["file"])
