@@ -69,7 +69,7 @@ correctly handles weakly dominated points and has been further optimized for
 speed.
 
 For 5D or higher and up to 15 points, the implementation uses the
-inclusion-exclusion algorithm \citep{WuAzam2001metrics}, which has \eqn{O(m
+inclusion-exclusion algorithm \citep{WuAza2001metrics}, which has \eqn{O(m
 2^{n})} time and \eqn{O(n\cdot m)} space complexity, but it is very fast for
 such small sets.  For larger number of points, it uses a recursive algorithm
 \citep{FonPaqLop06:hypervolume} with \eqn{\text{HV4D}^{+}} as the base case,

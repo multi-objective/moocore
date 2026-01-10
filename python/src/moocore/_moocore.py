@@ -461,7 +461,7 @@ def hypervolume(
     for speed.
 
     For 5D or higher and up to 15 points, the implementation uses the
-    inclusion-exclusion algorithm :footcite:p:`WuAzam2001metrics`, which has
+    inclusion-exclusion algorithm :footcite:p:`WuAza2001metrics`, which has
     :math:`O(m 2^{n})` time and :math:`O(n\cdot m)` space complexity, where
     :math:`m` is the dimension of the points, but it is very fast for such
     small sets.  For larger number of points, it uses a recursive algorithm
