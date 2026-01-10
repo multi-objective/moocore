@@ -56,11 +56,8 @@ jobs:
           echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           echo "${{ runner.temp }}/msys64/mingw64/usr/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - run: $CC -v
-        shell: bash
-
-      - run: $CXX -v
-        shell: bash
+      - run: ${{ matrix.cc }} -v
+      - run: ${{ matrix.cxx }} -v
 
       - run: make -C c all DEBUG=0 WERROR=1
       - run: make -C c all DEBUG=1 WERROR=1
