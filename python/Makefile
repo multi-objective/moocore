@@ -1,6 +1,6 @@
 # This file should be almost identical to
 # https://github.com/multi-objective/mooplot/blob/main/python/Makefile
-.PHONY : install dev-install build test doc fastdoc clean docdeps pre-commit
+.PHONY : install dev-install build test doc fastdoc clean docdeps pre-commit benchmarks
 
 install: build
 	python3 -m pip install . --disable-pip-version-check
@@ -37,3 +37,17 @@ clean:
 	find . -name '__pycache__' | xargs $(RM) -r
 	$(RM) -r .pytest_cache .tox .ruff_cache build src/*.egg-info/ doc/source/auto_examples
 	$(RM) .coverage coverage.xml c_coverage.xml dist/* src/moocore/*.so
+
+benchmarks: install
+	$(RM) ./benchmarks/*_bench-*.png
+	cd benchmarks                             && \
+	python3 bench_epsilon.py                  && \
+	python3 bench_hv.py                       && \
+	python3 bench_hvapprox.py                 && \
+	python3 bench_igdplus.py                  && \
+	python3 bench_ndom.py                     && \
+	python3 bench_ndsort.py                   && \
+	mv *.png -t ../doc/source/_static/bench/  && \
+	cd ..
+	$(MAKE) -C doc html
+	$(MAKE) -C doc show
