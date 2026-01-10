@@ -26,8 +26,9 @@ ifndef MARCH
 endif
 ifneq ($(MARCH),none)
  MARCH_FLAGS = -march=$(MARCH)
- gcc-guess-march = $(strip $(shell $(CC) $(CFLAGS) $(OPT_CFLAGS) $(MARCH_FLAGS)  -x c -S -\#\#\# - < /dev/null 2>&1 | \
-	 	            grep -m 1 -e cc1 | grep -o -e "march=[^'\"]*" | head -n 1 | sed 's,march=,,'))
+ # GCC prints -mcpu=CPU in MacOS and -march=CPU otherwise. Clang prints "-target-cpu" "CPU".
+ gcc-guess-march = $(strip $(shell $(CC) $(CFLAGS) $(OPT_CFLAGS) $(MARCH_FLAGS) -x c -S -\#\#\# - < /dev/null 2>&1 | \
+                            sed -n '/cc1/{s/.*-march=\([^"'"'"' ]*\).*/\1/p;s/.*-target-cpu" "\([^"]*\)".*/\1/p;s/.*-mcpu=\([^"'"'"' ]*\).*/\1/p;q;}'))
  ifeq ($(gcc-guess-march),)
    gcc-guess-march=unknown
  endif
