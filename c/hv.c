@@ -40,7 +40,19 @@
 #define STOP_DIMENSION 3 // stop on dimension 4.
 #define MAX_ROWS_HV_INEX 15
 
-static int compare_node(const void * restrict p1, const void * restrict p2)
+static void
+printf_point(const char * prefix, const double * x, dimension_t d, const char * suffix)
+{
+    fprintf(stderr, "%s", prefix);
+    fprintf(stderr, "%-20.10g", x[0]);
+    for (dimension_t i = 1; i < d; i++) {
+        fprintf(stderr, " %-20.10g", x[i]);
+    }
+    fprintf(stderr, "%s", suffix);
+}
+
+static int
+cmp_dlnode_asc(const void * restrict p1, const void * restrict p2)
 {
     const double * restrict x1 = (*(const dlnode_t **)p1)->x;
     const double * restrict x2 = (*(const dlnode_t **)p2)->x;
@@ -132,7 +144,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
            https://github.com/google/highway/tree/52a2d98d07852c5d69284e175666e5f8cc7d8285/hwy/contrib/sort
          */
         // Sort each dimension independently.
-        qsort(scratch, n, sizeof(*scratch), compare_node);
+        qsort(scratch, n, sizeof(*scratch), cmp_dlnode_asc);
         head->r_next[j] = scratch[0];
         scratch[0]->r_prev[j] = head;
         for (i = 1; i < n; i++) {
@@ -148,7 +160,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
 
     for (int j = 1; j >= 0; j--) {
         // Sort each dimension independently.
-        qsort(scratch, n, sizeof(*scratch), compare_node);
+        qsort(scratch, n, sizeof(*scratch), cmp_dlnode_asc);
         (list4d+1)->next[j] = scratch[0];
         scratch[0]->prev[j] = list4d+1;
         for (i = 1; i < n; i++) {
@@ -168,6 +180,14 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         }
     }
     free(scratch);
+    for (int j = d_stop - 2; j >= -2; j--) {
+        dlnode_t * p = head;
+        fprintf(stderr, "=== Dimension %d\n", j+2 + STOP_DIMENSION);
+        for (size_t i = 0; i < n; i++) {
+            p = (j < 0) ? p->next[j+2] : p->r_next[j];
+            printf_point("", p->x, d, "\n");
+        }
+    }
 
 finish:
     *size = n;
