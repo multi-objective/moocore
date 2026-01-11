@@ -180,8 +180,9 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         }
     }
     free(scratch);
+
     for (int j = d_stop - 2; j >= -2; j--) {
-        dlnode_t * p = head;
+        dlnode_t * p = (j < 0) ? (list4d+1) : head;
         fprintf(stderr, "=== Dimension %d\n", j+2 + STOP_DIMENSION);
         for (size_t i = 0; i < n; i++) {
             p = (j < 0) ? p->next[j+2] : p->r_next[j];
