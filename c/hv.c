@@ -445,7 +445,7 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
         hyperv = p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
         fprintf(stderr, "hv_recursive (dim=%d, c=%u): ", dim, (unsigned int)c);
         printf_point("bound: ", bound, d_stop+1, ": ");
-        printf_point("p1: ", p1->x, dim, ": ");
+        printf_point("p1: ", p1->x, dim+1, ": ");
         fprintf(stderr, "hyperv = %g\n", hyperv);
 
         // FIXME: This is never used?
@@ -462,7 +462,7 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
             * (p1->x[dim] - p1_prev->x[dim]);
         fprintf(stderr, "hv_recursive (dim=%d, c=%u): ", dim, (unsigned int)c);
         printf_point("bound: ", bound, d_stop+1, ": ");
-        printf_point("p1: ", p1->x, dim, ": ");
+        printf_point("p1: ", p1->x, dim+1, ": ");
         fprintf(stderr, "hyperv = %g\n", hyperv);
         assert(p0 != p1_prev);
         assert(p0 == p1->r_next[d_stop - 1]);
@@ -484,7 +484,7 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
             if (dim - 1 == STOP_DIMENSION) {
                 // base case of dimension 4.
                 hypera = fpli_onec4d(list, c, p1);
-                printf_point("fpli_onec4d: the_point: ", p1->x, 4, ": ");
+                printf_point("fpli_onec4d: the_point: ", p1->x, dim + 1, ": ");
                 fprintf(stderr, "hypera + p1_prev->area[d_stop] = %g + %g\n",hypera, p1_prev->area[d_stop]);
                  // hypera only has the contribution of p1.
                 hypera += p1_prev->area[d_stop];
@@ -511,6 +511,9 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
         hyperv += hypera * (p0->x[dim] - p1->x[dim]);
         // FIXME: This is never used?
         // bound[d_stop] = p0->x[dim];
+        fprintf(stderr, "reinsert (dim=%d, c=%u): ", dim, (unsigned int)c);
+        printf_point("p0: ", p0->x, dim+1, ": ");
+        fprintf(stderr, "hyperv = %g\n", hyperv);
         reinsert(p0, dim, bound);
         c++;
         p1 = p0;
