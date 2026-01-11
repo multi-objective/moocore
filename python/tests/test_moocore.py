@@ -119,6 +119,20 @@ class TestHypervolume:
             moocore.hypervolume(X[X[:, 2] == 1, :2], ref=np.array([10, 10, 10]))
 
 
+@pytest.mark.parametrize("dim", range(5, 9))
+def test_hv_dominated(dim):
+    seed = np.random.default_rng().integers(2**32 - 2)
+    rng = np.random.default_rng(seed)
+    ref = np.full(dim, 1.0)
+    nrows = 50
+    points = rng.uniform(size=(nrows, dim))
+    hv = moocore.hypervolume(points, ref=ref)
+    hv_nondom = moocore.hypervolume(moocore.filter_dominated(points), ref=ref)
+    err_msg = f"dim={dim}, seed={seed}"
+    assert_allclose(hv, hv_nondom, err_msg=err_msg)
+    assert hv < 1, err_msg
+
+
 def test_igd():
     ref = np.array([10, 0, 6, 1, 2, 2, 1, 6, 0, 10]).reshape((-1, 2))
     A = np.array([4, 2, 3, 3, 2, 4]).reshape((-1, 2))
