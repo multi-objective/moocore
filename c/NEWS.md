@@ -1,5 +1,8 @@
 # moocore C library
 
+## 0.19
+
+
 ## 0.18
 
  * `pareto_rank()` is now O(k * n log n) in 3D, which is faster than the naive O(n^3).

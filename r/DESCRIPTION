@@ -1,7 +1,7 @@
 Package: moocore
 Type: Package
 Title: Core Mathematical Functions for Multi-Objective Optimization
-Version: 0.2.0
+Version: 0.2.0.900
 Authors@R: c(person("Manuel", "López-Ibáñez", role = c("aut", "cre"),
                     email = "manuel.lopez-ibanez@manchester.ac.uk",
                     comment = c(ORCID = "0000-0001-9974-1295")),
