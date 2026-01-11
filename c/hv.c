@@ -295,6 +295,8 @@ fpli_onec4d(dlnode_t * restrict list, size_t c _attr_maybe_unused, dlnode_t * re
     dlnode_t * restrict list4d = list->next[0];
     dlnode_t * restrict list_aux = list->prev[0];
     double contrib = onec4dplusU(list4d, list_aux, the_point);
+    printf_point("fpli_onec4d: the_point: ", the_point->x, 4, ": ");
+    fprintf(stderr, "%g\n", contrib);
     return contrib;
 }
 
@@ -451,6 +453,9 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
             return p1->area[d_stop] * (ref[dim] - p1->x[dim]);
         */
         hyperv = p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
+        printf_point("hv_recursive (c==1): p1: ", p1->x, dim, ": ");
+        fprintf(stderr, "hyperv = %g\n", hyperv);
+
         // FIXME: This is never used?
         // bound[d_stop] = p0->x[dim];
         reinsert(p0, dim, bound);
@@ -463,6 +468,8 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
         DEBUG1(debug_counter[0]++);
         hyperv = p1_prev->vol[d_stop] + p1_prev->area[d_stop]
             * (p1->x[dim] - p1_prev->x[dim]);
+        printf_point("hv_recursive (c > 1): p1: ", p1->x, dim, ": ");
+        fprintf(stderr, "hyperv = %g\n", hyperv);
         assert(p0 != p1_prev);
         assert(p0 == p1->r_next[d_stop - 1]);
         // p0->x may be NULL here and thus we may return below.
