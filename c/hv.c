@@ -40,17 +40,6 @@
 #define STOP_DIMENSION 3 // stop on dimension 4.
 #define MAX_ROWS_HV_INEX 15
 
-static void
-printf_point(const char * prefix, const double * x, dimension_t d, const char * suffix)
-{
-    fprintf(stderr, "%s", prefix);
-    fprintf(stderr, "%-20.10g", x[0]);
-    for (dimension_t i = 1; i < d; i++) {
-        fprintf(stderr, " %-20.10g", x[i]);
-    }
-    fprintf(stderr, "%s", suffix);
-}
-
 static int
 cmp_dlnode_asc(const void * restrict p1, const void * restrict p2)
 {
@@ -453,7 +442,8 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
             return p1->area[d_stop] * (ref[dim] - p1->x[dim]);
         */
         hyperv = p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
-        printf_point("hv_recursive (c==1): p1: ", p1->x, dim, ": ");
+        fprintf(stderr, "hv_recursive (dim=%d, c=%u): ", dim, (unsigned int)c);
+        printf_point("p1: ", p1->x, dim, ": ");
         fprintf(stderr, "hyperv = %g\n", hyperv);
 
         // FIXME: This is never used?
@@ -468,7 +458,8 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
         DEBUG1(debug_counter[0]++);
         hyperv = p1_prev->vol[d_stop] + p1_prev->area[d_stop]
             * (p1->x[dim] - p1_prev->x[dim]);
-        printf_point("hv_recursive (c > 1): p1: ", p1->x, dim, ": ");
+        fprintf(stderr, "hv_recursive (dim=%d, c=%u): ", dim, (unsigned int)c);
+        printf_point("p1: ", p1->x, dim, ": ");
         fprintf(stderr, "hyperv = %g\n", hyperv);
         assert(p0 != p1_prev);
         assert(p0 == p1->r_next[d_stop - 1]);

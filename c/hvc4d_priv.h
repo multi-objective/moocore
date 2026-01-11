@@ -25,6 +25,17 @@
 
 #include "hv4d_priv.h"
 
+static void
+printf_point(const char * prefix, const double * x, dimension_t d, const char * suffix)
+{
+    fprintf(stderr, "%s", prefix);
+    fprintf(stderr, "%-20.10g", x[0]);
+    for (dimension_t i = 1; i < d; i++) {
+        fprintf(stderr, " %-20.10g", x[i]);
+    }
+    fprintf(stderr, "%s", suffix);
+}
+
 typedef struct lex_sort_buffer {
     const double ** scratch;
     size_t capacity;
@@ -38,6 +49,7 @@ lex_sort_equal_z_and_setup_nodes(lex_sort_buffer_t * restrict buff,
     const double ** scratch = buff->scratch;
     if (buff->capacity < n) {
         scratch = realloc(scratch, n * sizeof(*scratch));
+        assert(scratch);
         if (!scratch) {
             buff->scratch = NULL;
             return -1;
@@ -54,8 +66,10 @@ lex_sort_equal_z_and_setup_nodes(lex_sort_buffer_t * restrict buff,
 
     qsort(scratch, n, sizeof(*scratch), cmp_ppdouble_asc_rev_2d);
 
+    fprintf(stderr, "lex_sort_equal_z_and_setup_nodes: %d\n", n);
     for (size_t i = 0; i < n; i++) {
         newp_aux->x = scratch[i];
+        printf_point("", newp_aux->x, 3, "\n");
         assert(i == 0 || lexicographic_less_2d(scratch[i-1], scratch[i]));
         newp_aux++;
     }
