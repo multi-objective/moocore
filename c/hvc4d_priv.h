@@ -66,7 +66,7 @@ lex_sort_equal_z_and_setup_nodes(lex_sort_buffer_t * restrict buff,
 
     qsort(scratch, n, sizeof(*scratch), cmp_ppdouble_asc_rev_2d);
 
-    fprintf(stderr, "lex_sort_equal_z_and_setup_nodes: %d\n", n);
+    fprintf(stderr, "lex_sort_equal_z_and_setup_nodes: %u\n", (unsigned int)n);
     for (size_t i = 0; i < n; i++) {
         newp_aux->x = scratch[i];
         printf_point("", newp_aux->x, 3, "\n");

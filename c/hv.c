@@ -284,8 +284,6 @@ fpli_onec4d(dlnode_t * restrict list, size_t c _attr_maybe_unused, dlnode_t * re
     dlnode_t * restrict list4d = list->next[0];
     dlnode_t * restrict list_aux = list->prev[0];
     double contrib = onec4dplusU(list4d, list_aux, the_point);
-    printf_point("fpli_onec4d: the_point: ", the_point->x, 4, ": ");
-    fprintf(stderr, "%g\n", contrib);
     return contrib;
 }
 
@@ -417,6 +415,9 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
     }
     dlnode_t * p1_prev = p1->r_prev[d_stop - 1];
     dlnode_t * p0 = list;
+    fprintf(stderr, "hv_recursive (dim=%d, c=%u): ", dim, (unsigned int)c);
+    printf_point("bound: ", bound, d_stop+1, "\n");
+
     /* Delete all points x[dim] > bound[d_stop].  In case of repeated
        coordinates, delete also all points x[dim] == bound[d_stop] except
        one.  */
@@ -443,6 +444,7 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
         */
         hyperv = p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
         fprintf(stderr, "hv_recursive (dim=%d, c=%u): ", dim, (unsigned int)c);
+        printf_point("bound: ", bound, d_stop+1, ": ");
         printf_point("p1: ", p1->x, dim, ": ");
         fprintf(stderr, "hyperv = %g\n", hyperv);
 
@@ -459,6 +461,7 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
         hyperv = p1_prev->vol[d_stop] + p1_prev->area[d_stop]
             * (p1->x[dim] - p1_prev->x[dim]);
         fprintf(stderr, "hv_recursive (dim=%d, c=%u): ", dim, (unsigned int)c);
+        printf_point("bound: ", bound, d_stop+1, ": ");
         printf_point("p1: ", p1->x, dim, ": ");
         fprintf(stderr, "hyperv = %g\n", hyperv);
         assert(p0 != p1_prev);
@@ -481,7 +484,9 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
             if (dim - 1 == STOP_DIMENSION) {
                 // base case of dimension 4.
                 hypera = fpli_onec4d(list, c, p1);
-                // hypera only has the contribution of p1.
+                printf_point("fpli_onec4d: the_point: ", p1->x, 4, ": ");
+                fprintf(stderr, "hypera + p1_prev->area[d_stop] = %g + %g\n",hypera, p1_prev->area[d_stop]);
+                 // hypera only has the contribution of p1.
                 hypera += p1_prev->area[d_stop];
             } else {
                 hypera = hv_recursive(list, dim - 1, c, ref, bound);
