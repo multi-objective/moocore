@@ -29,9 +29,9 @@ static void
 printf_point(const char * prefix, const double * x, dimension_t d, const char * suffix)
 {
     fprintf(stderr, "%s", prefix);
-    fprintf(stderr, "%-20.10g", x[0]);
+    fprintf(stderr, "%-10.7g", x[0]);
     for (dimension_t i = 1; i < d; i++) {
-        fprintf(stderr, " %-20.10g", x[i]);
+        fprintf(stderr, " %-10.7g", x[i]);
     }
     fprintf(stderr, "%s", suffix);
 }

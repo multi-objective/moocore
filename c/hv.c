@@ -551,6 +551,8 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
     dlnode_t * p0 = p1->r_next[d_stop - 1];
     assert(p0->x != NULL);
     double hyperv = p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
+    printf_point("reinsert_no_bound: p1: ", p1->x, dim+1, ": ");
+    fprintf(stderr, "hyperv = %g\n", hyperv);
     // FIXME: This is never used?
     // bound[d_stop] = p0->x[dim];
     reinsert_nobound(p0, dim);
