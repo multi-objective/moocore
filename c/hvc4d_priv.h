@@ -188,6 +188,8 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
     restart_list_y(list);
 
     const double * the_point_x = the_point->x;
+    printf_point("(list+1)->next[1]:", (list+1)->next[1]->x, 4, ": ");
+    printf_point("the_point->next[1]:", the_point->next[1]->x, 4, "\n");
     // Setup the 3D base only if there are any points leq than the_point_x[3].
     if ((list+1)->next[1] != the_point || the_point_x[3] == the_point->next[1]->x[3]) {
         bool done_once = false;
@@ -201,6 +203,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
         // PART 1: Setup 2D base of the 3D base
         while (newp->x[2] <= the_point_x[2]) {
             const double * newpx = newp->x;
+            printf_point("PART1: newpx:", newpx, 4, "\n");
             if (newpx[3] <= the_point_x[3] && newp->ignore < 3) {
                 if (weakly_dominates(newpx, the_point_x, 3)) {
                     assert(the_point->ignore == 3);
@@ -227,6 +230,8 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
         int c = 0;
         // FIXME: Could we keep this buffer in list_aux? Or pass it down as an argument?
         lex_sort_buffer_t sort_buffer = { .scratch = NULL, .capacity = 0 };
+        printf_point("PART2: newp:", newp->x, 4, "\n");
+
         while (newp != last) {
             const double * newpx = newp->x;
             if (newpx[3] <= the_point_x[3] && newp->ignore < 3) {
@@ -285,6 +290,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
     // It cannot be zero because we exited the loop above.
     assert(height > 0);
     double hv = volume * height;
+    fprintf(stderr, "one_contribution_3d: hv = %g * %g\n", volume, height);
 
     // PART 3: Update the 3D contribution.
     while (newp != last) {
@@ -301,6 +307,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
                 double newp_v = one_contribution_3d(newp_aux);
                 assert(newp_v > 0);
                 volume -= newp_v;
+                fprintf(stderr, "one_contribution_3d: volume = %g - %g\n", volume, newp_v);
 
                 add_to_z(newp_aux);
                 update_links(list, newp_aux);
