@@ -25,17 +25,6 @@
 
 #include "hv4d_priv.h"
 
-static void
-printf_point(const char * prefix, const double * x, dimension_t d, const char * suffix)
-{
-    fprintf(stderr, "%s", prefix);
-    fprintf(stderr, "%-10.7g", x[0]);
-    for (dimension_t i = 1; i < d; i++) {
-        fprintf(stderr, " %-10.7g", x[i]);
-    }
-    fprintf(stderr, "%s", suffix);
-}
-
 typedef struct lex_sort_buffer {
     const double ** scratch;
     size_t capacity;

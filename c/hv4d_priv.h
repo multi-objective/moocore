@@ -36,6 +36,18 @@
 #define HV_DIMENSION 4
 #include "hv_priv.h"
 
+static void
+printf_point(const char * prefix, const double * x, dimension_t d, const char * suffix)
+{
+    fprintf(stderr, "%s", prefix);
+    fprintf(stderr, "%-10.7g", x[0]);
+    for (dimension_t i = 1; i < d; i++) {
+        fprintf(stderr, " %-10.7g", x[i]);
+    }
+    fprintf(stderr, "%s", suffix);
+}
+
+
 // ------------ Update data structure -----------------------------------------
 
 static inline void
@@ -177,6 +189,8 @@ one_contribution_3d(dlnode_t * restrict newp)
 {
     set_cnext_to_closest(newp);
     const double * newx = newp->x;
+    printf_point("one_contribution_3d: newx: ", newx, 4, "\n");
+
     // if newx[0] == newp->cnext[0]->x[0], the first area is zero
     double area = compute_area_no_inners(newx, newp->cnext[0], 1);
     double volume = 0;
@@ -189,6 +203,8 @@ one_contribution_3d(dlnode_t * restrict newp)
 #endif
     while (true) {
         const double * px = p->x;
+        printf_point("one_contribution_3d: px: ", px, 4, ": ");
+        fprintf(stderr, "volume = %g + %g * %g\n", volume, area, (px[2] - lastz));
         volume += area * (px[2] - lastz);
 
         if (px[0] <= newx[0] && px[1] <= newx[1])
