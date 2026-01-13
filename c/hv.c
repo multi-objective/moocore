@@ -477,8 +477,8 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
         p1->vol[d_stop] = hyperv;
         double hypera;
         if (p1->ignore >= dim) {
-            fprintf(stderr, "hv_recursive (ignore >= dim=%d, c=%u): ",
-                    dim, (unsigned int)c);
+            fprintf(stderr, "hv_recursive (ignore=%u >= dim=%d, c=%u): ",
+                    p1->ignore, dim, (unsigned int)c);
             printf_point("p1: ", p1->x, dim+1, ": ");
             fprintf(stderr, "hyperv = %g: p1_prev->area[d_stop] = %g\n", hyperv,
                 p1_prev->area[d_stop]);
@@ -509,9 +509,9 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
                 fprintf(stderr, ": ignore(1) = %u\n", dim);
             } else if (hypera <= p1_prev->area[d_stop]) {
                 DEBUG1(debug_counter[3]++);
-                p1->ignore = dim;
                 printf_point("hv_recursive: p1: ", p1->x, dim+1, "");
-                fprintf(stderr, ": ignore(2) = %u\n", dim);
+                fprintf(stderr, ": ignore(2) = %u (was: %u)\n", dim, p1->ignore);
+                p1->ignore = dim;
             }
         }
         p1->area[d_stop] = hypera;
@@ -604,9 +604,9 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
             fprintf(stderr, ": ignore(1) = %u\n", dim);
         } else if (hypera <= p1_prev->area[d_stop]) {
             DEBUG1(debug_counter[5]++);
-            p1->ignore = dim;
             printf_point("fpli_hv_ge5d: p1: ", p1->x, dim+1, "");
-            fprintf(stderr, ": ignore(2) = %u\n", dim);
+            fprintf(stderr, ": ignore(2) = %u (was: %u)\n", dim, p1->ignore);
+            p1->ignore = dim;
         }
         p1->area[d_stop] = hypera;
         if (p0->x == NULL) {
