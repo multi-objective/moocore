@@ -480,7 +480,7 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
             fprintf(stderr, "hv_recursive (ignore=%u >= dim=%d, c=%u): ",
                     p1->ignore, dim, (unsigned int)c);
             printf_point("p1: ", p1->x, dim+1, ": ");
-            fprintf(stderr, "hyperv = %g: p1_prev->area[d_stop] = %g\n", hyperv,
+            fprintf(stderr, " (i=%lu): hyperv = %g: p1_prev->area[d_stop] = %g\n", p1->x - list->area, hyperv,
                 p1_prev->area[d_stop]);
             DEBUG1(debug_counter[1]++);
             hypera = p1_prev->area[d_stop];
@@ -490,13 +490,13 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
                 // base case of dimension 4.
                 hypera = fpli_onec4d(list, c, p1);
                 printf_point("fpli_onec4d: the_point: ", p1->x, dim + 1, ": ");
-                fprintf(stderr, "hypera + p1_prev->area[d_stop] = %g + %g\n",hypera, p1_prev->area[d_stop]);
+                fprintf(stderr, "(i=%lu): hypera + p1_prev->area[d_stop] = %g + %g\n", p1->x - list->area, hypera, p1_prev->area[d_stop]);
                  // hypera only has the contribution of p1.
                 hypera += p1_prev->area[d_stop];
             } else {
                 fprintf(stderr, "hv_recursive (dim=%d, c=%u): ", dim, (unsigned int)c);
                 printf_point("p1: ", p1->x, dim+1, ": ");
-                fprintf(stderr, "hyperv = %g\n", hyperv);
+                fprintf(stderr, " (i=%lu): hyperv = %g\n", p1->x - list->area, hyperv);
                 hypera = hv_recursive(list, dim - 1, c, ref, bound);
             }
             /* At this point, p1 is the point with the highest value in
