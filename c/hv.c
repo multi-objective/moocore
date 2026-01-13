@@ -38,7 +38,7 @@
 #include "hvc4d_priv.h"
 
 #define STOP_DIMENSION 3 // stop on dimension 4.
-#define MAX_ROWS_HV_INEX 15
+#define MAX_ROWS_HV_INEX 3
 
 static int
 cmp_dlnode_asc(const void * restrict p1, const void * restrict p2)
