@@ -305,6 +305,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
 
             if (weakly_dominates(the_point_x, newpx, 3)){
                 newp->ignore = 3;
+                printf_point("PART3: nexpx: ", newpx, 3, ": ignore = 3\n");
             }
         }
 
