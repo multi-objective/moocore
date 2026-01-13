@@ -175,6 +175,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         fprintf(stderr, "=== Dimension %d\n", j+2 + STOP_DIMENSION);
         for (size_t i = 0; i < n; i++) {
             p = (j < 0) ? p->next[j+2] : p->r_next[j];
+            fprintf(stderr, "%2lu: ", (p->x - data) / d);
             printf_point("", p->x, d, "\n");
         }
     }
