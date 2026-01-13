@@ -120,7 +120,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         head[i].vol = head->vol + (i - 1) * d_stop;
     }
     // Make sure they are not used.
-    head->area = NULL;
+    head->area = data;
     head->vol = NULL;
 
     dlnode_t ** scratch = malloc(n * sizeof(*scratch));
@@ -506,11 +506,11 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
                 DEBUG1(debug_counter[2]++);
                 p1->ignore = dim;
                 printf_point("hv_recursive: p1: ", p1->x, dim+1, "");
-                fprintf(stderr, " (%p): ignore(1) = %u\n", p1->x, dim);
+                fprintf(stderr, " (i=%lu): ignore(1) = %u\n", (p1->x - list->area), dim);
             } else if (hypera <= p1_prev->area[d_stop]) {
                 DEBUG1(debug_counter[3]++);
                 printf_point("hv_recursive: p1: ", p1->x, dim+1, "");
-                fprintf(stderr, " (%p): ignore(2) = %u (was: %u)\n", p1->x, dim, p1->ignore);
+                fprintf(stderr, " (i=%lu): ignore(2) = %u (was: %u)\n", p1->x - list->area, dim, p1->ignore);
                 p1->ignore = dim;
             }
         }
