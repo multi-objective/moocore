@@ -196,6 +196,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
             if (newpx[3] <= the_point_x[3] && newp->ignore < 3) {
                 if (weakly_dominates(newpx, the_point_x, 3)) {
                     assert(the_point->ignore == 3);
+                    printf_point("PART1: the_point:", the_point_x, 3, ": ignore = 3\n");
                     // Restore modified links (z list).
                     (list+1)->next[0] = z_first;
                     (list+2)->prev[0] = z_last;
