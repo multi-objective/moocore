@@ -127,6 +127,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     for (i = 0; i < n; i++)
         scratch[i] = head + 1 + i;
 
+//#define FORCE_BUG
     for (int j = d_stop - 2; j >= 0; j--) {
         /* FIXME: replace qsort() by something better:
            https://github.com/numpy/x86-simd-sort
@@ -134,6 +135,13 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
          */
         // Sort each dimension independently.
         qsort(scratch, n, sizeof(*scratch), cmp_dlnode_asc);
+#ifdef FORCE_BUG
+        if (j == d_stop - 2) {
+            SWAP(scratch[10], scratch[11]);
+        } else if (j == 0) {
+            SWAP(scratch[3], scratch[4]);
+        }
+#endif
         head->r_next[j] = scratch[0];
         scratch[0]->r_prev[j] = head;
         for (i = 1; i < n; i++) {
