@@ -48,6 +48,7 @@ printf_point(const char * prefix, const double * x, dimension_t d, const char * 
 }
 
 #define DEBUG2_PRINT_POINT(...) DEBUG2(printf_point(__VA_ARGS__))
+#define DEBUG1_PRINT_POINT(...) DEBUG1(printf_point(__VA_ARGS__))
 
 // ------------ Update data structure -----------------------------------------
 

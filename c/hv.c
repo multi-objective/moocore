@@ -500,6 +500,10 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
                     hypera = p1_prev->area[d_stop];
                 } else {
                     // FIXME: hypera can be negative ????
+                    if (hypera < 0) {
+                        DEBUG1_PRINT_POINT("fpli_onec4d: the_point: ", p1->x, dim + 1, ": ");
+                        DEBUG1_PRINT("(i=%lu): hypera + p1_prev->area[d_stop] = %g + %g\n", p1->x - list->area, hypera, p1_prev->area[d_stop]);
+                    }
                     assert(hypera >= 0);
                     // FIXME: If hypera == 0, why we have not set p1->ignore earlier?
                     // assert (hypera > 0);
