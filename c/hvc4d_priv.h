@@ -298,7 +298,6 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
                 assert(newp_v > 0);
                 volume -= newp_v;
                 DEBUG2_PRINT("one_contribution_3d: volume = %g - %g\n", volume, newp_v);
-
                 add_to_z(newp_aux);
                 update_links(list, newp_aux);
                 newp_aux++;
@@ -314,6 +313,8 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
         // hv later? AG: Yes
         height = newp->next[1]->x[3] - newpx[3];
         assert(height >= 0);
+        // FIXME: volume can be negative???
+        // assert(volume >= 0);
         hv += volume * height;
 
         newp = newp->next[1];
