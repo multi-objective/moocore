@@ -47,6 +47,7 @@ printf_point(const char * prefix, const double * x, dimension_t d, const char * 
     fprintf(stderr, "%s", suffix);
 }
 
+#define DEBUG2_PRINT_POINT(...) DEBUG2(printf_point(__VA_ARGS__))
 
 // ------------ Update data structure -----------------------------------------
 
@@ -128,7 +129,7 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
     restart_list_y(list);
     while (true) {
         const double * restrict px =  p->x;
-        printf_point("restart_base_setup_z_and_closest: px: ", px, 3, "\n");
+        DEBUG2_PRINT_POINT("restart_base_setup_z_and_closest: px: ", px, 3, "\n");
         // Help auto-vectorization.
         bool p_lt_new_0 = px[0] < newx[0];
         bool p_lt_new_1 = px[1] < newx[1];
@@ -190,7 +191,7 @@ one_contribution_3d(dlnode_t * restrict newp)
 {
     set_cnext_to_closest(newp);
     const double * newx = newp->x;
-    printf_point("one_contribution_3d: newx: ", newx, 4, "\n");
+    DEBUG2_PRINT_POINT("one_contribution_3d: newx: ", newx, 4, "\n");
 
     // if newx[0] == newp->cnext[0]->x[0], the first area is zero
     double area = compute_area_no_inners(newx, newp->cnext[0], 1);
@@ -204,8 +205,8 @@ one_contribution_3d(dlnode_t * restrict newp)
 #endif
     while (true) {
         const double * px = p->x;
-        printf_point("one_contribution_3d: px: ", px, 4, ": ");
-        fprintf(stderr, "volume = %g + %g * %g\n", volume, area, (px[2] - lastz));
+        DEBUG2_PRINT_POINT("one_contribution_3d: px: ", px, 4, ": ");
+        DEBUG2_PRINT("volume = %g + %g * %g\n", volume, area, (px[2] - lastz));
         volume += area * (px[2] - lastz);
 
         if (px[0] <= newx[0] && px[1] <= newx[1])

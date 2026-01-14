@@ -55,10 +55,10 @@ lex_sort_equal_z_and_setup_nodes(lex_sort_buffer_t * restrict buff,
 
     qsort(scratch, n, sizeof(*scratch), cmp_ppdouble_asc_rev_2d);
 
-    fprintf(stderr, "lex_sort_equal_z_and_setup_nodes: %u\n", (unsigned int)n);
+    DEBUG2_PRINT("lex_sort_equal_z_and_setup_nodes: %u\n", (unsigned int)n);
     for (size_t i = 0; i < n; i++) {
         newp_aux->x = scratch[i];
-        printf_point("", newp_aux->x, 3, "\n");
+        DEBUG2_PRINT_POINT("", newp_aux->x, 3, "\n");
         assert(i == 0 || lexicographic_less_2d(scratch[i-1], scratch[i]));
         newp_aux++;
     }
@@ -177,8 +177,8 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
     restart_list_y(list);
 
     const double * the_point_x = the_point->x;
-    printf_point("(list+1)->next[1]:", (list+1)->next[1]->x, 4, ": ");
-    printf_point("the_point->next[1]:", the_point->next[1]->x, 4, "\n");
+    DEBUG2_PRINT_POINT("(list+1)->next[1]:", (list+1)->next[1]->x, 4, ": ");
+    DEBUG2_PRINT_POINT("the_point->next[1]:", the_point->next[1]->x, 4, "\n");
     // Setup the 3D base only if there are any points leq than the_point_x[3].
     if ((list+1)->next[1] != the_point || the_point_x[3] == the_point->next[1]->x[3]) {
         bool done_once = false;
@@ -192,11 +192,11 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
         // PART 1: Setup 2D base of the 3D base
         while (newp->x[2] <= the_point_x[2]) {
             const double * newpx = newp->x;
-            printf_point("PART1: newpx:", newpx, 4, "\n");
+            DEBUG2_PRINT_POINT("PART1: newpx:", newpx, 4, "\n");
             if (newpx[3] <= the_point_x[3] && newp->ignore < 3) {
                 if (weakly_dominates(newpx, the_point_x, 3)) {
                     assert(the_point->ignore == 3);
-                    printf_point("PART1: the_point:", the_point_x, 3, ": ignore = 3\n");
+                    DEBUG2_PRINT_POINT("PART1: the_point:", the_point_x, 3, ": ignore = 3\n");
                     // Restore modified links (z list).
                     (list+1)->next[0] = z_first;
                     (list+2)->prev[0] = z_last;
@@ -220,7 +220,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
         int c = 0;
         // FIXME: Could we keep this buffer in list_aux? Or pass it down as an argument?
         lex_sort_buffer_t sort_buffer = { .scratch = NULL, .capacity = 0 };
-        printf_point("PART2: newp:", newp->x, 4, "\n");
+        DEBUG2_PRINT_POINT("PART2: newp:", newp->x, 4, "\n");
 
         while (newp != last) {
             const double * newpx = newp->x;
@@ -280,7 +280,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
     // It cannot be zero because we exited the loop above.
     assert(height > 0);
     double hv = volume * height;
-    fprintf(stderr, "one_contribution_3d: hv = %g * %g\n", volume, height);
+    DEBUG2_PRINT("one_contribution_3d: hv = %g * %g\n", volume, height);
 
     // PART 3: Update the 3D contribution.
     while (newp != last) {
@@ -297,7 +297,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
                 double newp_v = one_contribution_3d(newp_aux);
                 assert(newp_v > 0);
                 volume -= newp_v;
-                fprintf(stderr, "one_contribution_3d: volume = %g - %g\n", volume, newp_v);
+                DEBUG2_PRINT("one_contribution_3d: volume = %g - %g\n", volume, newp_v);
 
                 add_to_z(newp_aux);
                 update_links(list, newp_aux);
@@ -306,7 +306,7 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
 
             if (weakly_dominates(the_point_x, newpx, 3)){
                 newp->ignore = 3;
-                printf_point("PART3: newpx: ", newpx, 3, ": ignore = 3\n");
+                DEBUG2_PRINT_POINT("PART3: newpx: ", newpx, 3, ": ignore = 3\n");
             }
         }
 

@@ -39,6 +39,7 @@
 
 #define STOP_DIMENSION 3 // stop on dimension 4.
 #define MAX_ROWS_HV_INEX 3
+//#define FORCE_BUG
 
 static int
 cmp_dlnode_asc(const void * restrict p1, const void * restrict p2)
@@ -127,7 +128,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     for (i = 0; i < n; i++)
         scratch[i] = head + 1 + i;
 
-//#define FORCE_BUG
+
     for (int j = d_stop - 2; j >= 0; j--) {
         /* FIXME: replace qsort() by something better:
            https://github.com/numpy/x86-simd-sort
@@ -135,13 +136,6 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
          */
         // Sort each dimension independently.
         qsort(scratch, n, sizeof(*scratch), cmp_dlnode_asc);
-#ifdef FORCE_BUG
-        if (j == d_stop - 2) {
-            SWAP(scratch[10], scratch[11]);
-        } else if (j == 0) {
-            SWAP(scratch[3], scratch[4]);
-        }
-#endif
         head->r_next[j] = scratch[0];
         scratch[0]->r_prev[j] = head;
         for (i = 1; i < n; i++) {
@@ -180,11 +174,11 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
 
     for (int j = d_stop - 2; j >= -2; j--) {
         dlnode_t * p = (j < 0) ? (list4d+1) : head;
-        fprintf(stderr, "=== Dimension %d\n", j+2 + STOP_DIMENSION);
+        DEBUG2_PRINT("=== Dimension %d\n", j+2 + STOP_DIMENSION);
         for (size_t i = 0; i < n; i++) {
             p = (j < 0) ? p->next[j+2] : p->r_next[j];
-            fprintf(stderr, "%2lu: ", (p->x - data) / d);
-            printf_point("", p->x, d, "\n");
+            DEBUG2_PRINT("%2lu: ", (p->x - data) / d);
+            DEBUG2_PRINT_POINT("", p->x, d, "\n");
         }
     }
 
@@ -424,8 +418,8 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
     }
     dlnode_t * p1_prev = p1->r_prev[d_stop - 1];
     dlnode_t * p0 = list;
-    fprintf(stderr, "hv_recursive (dim=%d, c=%u): ", dim, (unsigned int)c);
-    printf_point("bound: ", bound, d_stop+1, "\n");
+    DEBUG2_PRINT("hv_recursive (dim=%d, c=%u): ", dim, (unsigned int)c);
+    DEBUG2_PRINT_POINT("bound: ", bound, d_stop+1, "\n");
 
     /* Delete all points x[dim] > bound[d_stop].  In case of repeated
        coordinates, delete also all points x[dim] == bound[d_stop] except
@@ -435,9 +429,9 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
         // FIXME: Instead of deleting each point, unlink the start and end
         // nodes after the loop.
         delete(p1, dim, bound);
-        fprintf(stderr, "delete (dim=%d, c=%u): ", dim, (unsigned int)c);
-        printf_point("bound: ", bound, d_stop+1, ": ");
-        printf_point("p1: ", p1->x, d_stop+1, "\n");
+        DEBUG2_PRINT("delete (dim=%d, c=%u): ", dim, (unsigned int)c);
+        DEBUG2_PRINT_POINT("bound: ", bound, d_stop+1, ": ");
+        DEBUG2_PRINT_POINT("p1: ", p1->x, d_stop+1, "\n");
         p0 = p1;
         p1 = p1->r_prev[d_stop - 1];
         p1_prev = p1->r_prev[d_stop - 1];
@@ -455,11 +449,11 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
             return p1->area[d_stop] * (ref[dim] - p1->x[dim]);
         */
         hyperv = p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
-        fprintf(stderr, "hv_recursive (dim=%d, c=%u): ", dim, (unsigned int)c);
-        printf_point("p1->area: ", p1->area, d_stop+1, ": ");
-        printf_point("bound: ", bound, d_stop+1, ": ");
-        printf_point("p1: ", p1->x, dim+1, ": ");
-        fprintf(stderr, "hyperv = %g\n", hyperv);
+        DEBUG2_PRINT("hv_recursive (dim=%d, c=%u): ", dim, (unsigned int)c);
+        DEBUG2_PRINT_POINT("p1->area: ", p1->area, d_stop+1, ": ");
+        DEBUG2_PRINT_POINT("bound: ", bound, d_stop+1, ": ");
+        DEBUG2_PRINT_POINT("p1: ", p1->x, dim+1, ": ");
+        DEBUG2_PRINT("hyperv = %g\n", hyperv);
 
         // FIXME: This is never used?
         // bound[d_stop] = p0->x[dim];
@@ -486,10 +480,10 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
         p1->vol[d_stop] = hyperv;
         double hypera;
         if (p1->ignore >= dim) {
-            fprintf(stderr, "hv_recursive (ignore=%u >= dim=%d, c=%u): ",
+            DEBUG2_PRINT("hv_recursive (ignore=%u >= dim=%d, c=%u): ",
                     p1->ignore, dim, (unsigned int)c);
-            printf_point("p1: ", p1->x, dim+1, ": ");
-            fprintf(stderr, " (i=%lu): hyperv = %g: p1_prev->area[d_stop] = %g\n", p1->x - list->area, hyperv,
+            DEBUG2_PRINT_POINT("p1: ", p1->x, dim+1, ": ");
+            DEBUG2_PRINT(" (i=%lu): hyperv = %g: p1_prev->area[d_stop] = %g\n", p1->x - list->area, hyperv,
                 p1_prev->area[d_stop]);
             DEBUG1(debug_counter[1]++);
             hypera = p1_prev->area[d_stop];
@@ -498,44 +492,69 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
             if (dim - 1 == STOP_DIMENSION) {
                 // base case of dimension 4.
                 hypera = fpli_onec4d(list, c, p1);
-                printf_point("fpli_onec4d: the_point: ", p1->x, dim + 1, ": ");
-                fprintf(stderr, "(i=%lu): hypera + p1_prev->area[d_stop] = %g + %g\n", p1->x - list->area, hypera, p1_prev->area[d_stop]);
-                 // hypera only has the contribution of p1.
-                hypera += p1_prev->area[d_stop];
+                DEBUG2_PRINT_POINT("fpli_onec4d: the_point: ", p1->x, dim + 1, ": ");
+                DEBUG2_PRINT("(i=%lu): hypera + p1_prev->area[d_stop] = %g + %g\n", p1->x - list->area, hypera, p1_prev->area[d_stop]);
+                if (p1->ignore == dim - 1) {
+                    assert(hypera == 0);
+                    p1->ignore = dim;
+                    hypera = p1_prev->area[d_stop];
+                } else {
+                    // FIXME: hypera can be negative ????
+                    assert(hypera >= 0);
+                    // FIXME: If hypera == 0, why we have not set p1->ignore earlier?
+                    // assert (hypera > 0);
+                    // hypera only has the contribution of p1.
+                    hypera += p1_prev->area[d_stop];
+                }
             } else {
-                fprintf(stderr, "hv_recursive (dim=%d, c=%u): ", dim, (unsigned int)c);
-                printf_point("p1: ", p1->x, dim+1, ": ");
-                fprintf(stderr, " (i=%lu): hyperv = %g\n", p1->x - list->area, hyperv);
+                DEBUG2_PRINT("hv_recursive (dim=%d, c=%u): ", dim, (unsigned int)c);
+                DEBUG2_PRINT_POINT("p1: ", p1->x, dim+1, ": ");
+                DEBUG2_PRINT(" (i=%lu): hyperv = %g\n", p1->x - list->area, hyperv);
                 hypera = hv_recursive(list, dim - 1, c, ref, bound);
+                if (p1->ignore == dim - 1) {
+                    p1->ignore = dim;
+                    DEBUG2_PRINT_POINT("hv_recursive: p1: ", p1->x, dim+1, "");
+                    DEBUG2_PRINT(" (i=%lu): ignore(1) = %u\n", (p1->x - list->area), dim);
+                } else if (hypera <= p1_prev->area[d_stop]) {
+                    // FIXME: hypera can be negative ????
+                    assert(hypera >= 0);
+                    // FIXME: If hypera == 0, why we have not set p1->ignore earlier?
+                    // assert (hypera > 0);
+                    DEBUG2_PRINT_POINT("hv_recursive: p1: ", p1->x, dim+1, "");
+                    DEBUG2_PRINT(" (i=%lu): ignore(2) = %u (was: %u): hypera = %g\n", p1->x - list->area, dim, p1->ignore, hypera);
+                    p1->ignore = dim;
+                }
             }
             /* At this point, p1 is the point with the highest value in
                dimension dim in the list: If it is dominated in dimension
                dim-1, then it is also dominated in dimension dim. */
+            /*
             if (p1->ignore == dim - 1) {
                 DEBUG1(debug_counter[2]++);
                 p1->ignore = dim;
-                printf_point("hv_recursive: p1: ", p1->x, dim+1, "");
-                fprintf(stderr, " (i=%lu): ignore(1) = %u\n", (p1->x - list->area), dim);
+                DEBUG2_PRINT_POINT("hv_recursive: p1: ", p1->x, dim+1, "");
+                DEBUG2_PRINT(" (i=%lu): ignore(1) = %u\n", (p1->x - list->area), dim);
             } else if (hypera <= p1_prev->area[d_stop]) {
                 DEBUG1(debug_counter[3]++);
-                printf_point("hv_recursive: p1: ", p1->x, dim+1, "");
-                fprintf(stderr, " (i=%lu): ignore(2) = %u (was: %u)\n", p1->x - list->area, dim, p1->ignore);
+                DEBUG2_PRINT_POINT("hv_recursive: p1: ", p1->x, dim+1, "");
+                DEBUG2_PRINT(" (i=%lu): ignore(2) = %u (was: %u)\n", p1->x - list->area, dim, p1->ignore);
                 p1->ignore = dim;
             }
+            */
         }
         p1->area[d_stop] = hypera;
         if (p0->x == NULL) {
-            fprintf(stderr, "reinsert (dim=%u, c=%u): p0->x == NULL: ", dim, (unsigned) c);
-            fprintf(stderr, "hyperv = %g + %g * %g\n",
+            DEBUG2_PRINT("reinsert (dim=%u, c=%u): p0->x == NULL: ", dim, (unsigned) c);
+            DEBUG2_PRINT("hyperv = %g + %g * %g\n",
                     hyperv, hypera, (ref[dim] - p1->x[dim]));
 
             bound[d_stop] = p1->x[dim];
             hyperv += hypera * (ref[dim] - p1->x[dim]);
             return hyperv;
         }
-        fprintf(stderr, "reinsert (dim=%u, c=%u): ", dim, (unsigned) c);
-        printf_point("p0: ", p0->x, dim+1, ": ");
-        fprintf(stderr, "hyperv = %g + %g * %g\n",
+        DEBUG2_PRINT("reinsert (dim=%u, c=%u): ", dim, (unsigned) c);
+        DEBUG2_PRINT_POINT("p0: ", p0->x, dim+1, ": ");
+        DEBUG2_PRINT("hyperv = %g + %g * %g\n",
                 hyperv, hypera, (p0->x[dim] - p1->x[dim]));
 
         hyperv += hypera * (p0->x[dim] - p1->x[dim]);
@@ -569,8 +588,8 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
     // Delete all points in dimensions < dim.
     do {
         delete_dom(p1, dim);
-        fprintf(stderr, "delete (dim=%d, c=%u): ", dim, (unsigned int)c);
-        printf_point("p1: ", p1->x, dim+1, "\n");
+        DEBUG2_PRINT("delete (dim=%d, c=%u): ", dim, (unsigned int)c);
+        DEBUG2_PRINT_POINT("p1: ", p1->x, dim+1, "\n");
         p1 = p1->r_prev[d_stop - 1];
         c--;
     } while (c > 1);
@@ -580,8 +599,8 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
     dlnode_t * p0 = p1->r_next[d_stop - 1];
     assert(p0->x != NULL);
     double hyperv = p1->area[d_stop] * (p0->x[dim] - p1->x[dim]);
-    printf_point("reinsert_no_bound: p1: ", p1->x, dim+1, ": ");
-    fprintf(stderr, "hyperv = %g\n", hyperv);
+    DEBUG2_PRINT_POINT("reinsert_no_bound: p1: ", p1->x, dim+1, ": ");
+    DEBUG2_PRINT("hyperv = %g\n", hyperv);
     // FIXME: This is never used?
     // bound[d_stop] = p0->x[dim];
     reinsert_nobound(p0, dim);
@@ -598,39 +617,64 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
         if (dim - 1 == STOP_DIMENSION) {
             // base case of dimension 4.
             hypera = fpli_onec4d(list, c, p1);
-            // hypera only has the contribution of p1.
-            hypera += p1_prev->area[d_stop];
+            if (p1->ignore == dim - 1) {
+                assert(hypera == 0);
+                p1->ignore = dim;
+                DEBUG2_PRINT_POINT("fpli_hv_ge5d: p1: ", p1->x, dim+1, "");
+                DEBUG2_PRINT(": ignore(1) = %u\n", dim);
+                hypera = p1_prev->area[d_stop];
+            } else {
+                assert(hypera > 0);
+                // hypera only has the contribution of p1.
+                hypera += p1_prev->area[d_stop];
+            }
         } else {
             hypera = hv_recursive(list, dim - 1, c, ref, bound);
+            if (p1->ignore == dim - 1) {
+                DEBUG1(debug_counter[4]++);
+                p1->ignore = dim;
+                DEBUG2_PRINT_POINT("fpli_hv_ge5d: p1: ", p1->x, dim+1, "");
+                DEBUG2_PRINT(": ignore(1) = %u\n", dim);
+            } else if (hypera <= p1_prev->area[d_stop]) {
+                assert(hypera > 0);
+                DEBUG1(debug_counter[5]++);
+                DEBUG2_PRINT_POINT("fpli_hv_ge5d: p1: ", p1->x, dim+1, "");
+                DEBUG2_PRINT(": ignore(2) = %u (was: %u)\n", dim, p1->ignore);
+#ifdef FORCE_BUG
+                p1->ignore = dim;
+#endif
+            }
         }
         /* At this point, p1 is the point with the highest value in
            dimension dim in the list: If it is dominated in dimension
            dim-1, then it is also dominated in dimension dim. */
+        /*
         if (p1->ignore == dim - 1) {
             DEBUG1(debug_counter[4]++);
             p1->ignore = dim;
-            printf_point("fpli_hv_ge5d: p1: ", p1->x, dim+1, "");
-            fprintf(stderr, ": ignore(1) = %u\n", dim);
+            DEBUG2_PRINT_POINT("fpli_hv_ge5d: p1: ", p1->x, dim+1, "");
+            DEBUG2_PRINT(": ignore(1) = %u\n", dim);
         } else if (hypera <= p1_prev->area[d_stop]) {
             DEBUG1(debug_counter[5]++);
-            printf_point("fpli_hv_ge5d: p1: ", p1->x, dim+1, "");
-            fprintf(stderr, ": ignore(2) = %u (was: %u)\n", dim, p1->ignore);
+            DEBUG2_PRINT_POINT("fpli_hv_ge5d: p1: ", p1->x, dim+1, "");
+            DEBUG2_PRINT(": ignore(2) = %u (was: %u)\n", dim, p1->ignore);
             p1->ignore = dim;
         }
+        */
         p1->area[d_stop] = hypera;
         if (p0->x == NULL) {
             free(bound);
 #if defined(HV_COUNTERS) && DEBUG >= 1
             for (size_t i = 0; i < sizeof(debug_counter)/sizeof(size_t); i++)
-                fprintf(stderr, "debug_counter[%zu] = %zu\n", i, debug_counter[i]);
+                DEBUG2_PRINT("debug_counter[%zu] = %zu\n", i, debug_counter[i]);
 #endif
             hyperv += hypera * (ref[dim] - p1->x[dim]);
             return hyperv;
         }
-        fprintf(stderr, "reinsert (dim=%u, c=%u): ", dim, (unsigned) c);
-        printf_point("p0: ", p0->x, dim+1, ": ");
-        fprintf(stderr, "p1_prev->area[d_stop] = %g: ", p1_prev->area[d_stop]);
-        fprintf(stderr, "hyperv = %g + %g * %g\n",
+        DEBUG2_PRINT("reinsert (dim=%u, c=%u): ", dim, (unsigned) c);
+        DEBUG2_PRINT_POINT("p0: ", p0->x, dim+1, ": ");
+        DEBUG2_PRINT("p1_prev->area[d_stop] = %g: ", p1_prev->area[d_stop]);
+        DEBUG2_PRINT("hyperv = %g + %g * %g\n",
                 hyperv, hypera, (p0->x[dim] - p1->x[dim]));
         hyperv += hypera * (p0->x[dim] - p1->x[dim]);
         // FIXME: This is never used?
