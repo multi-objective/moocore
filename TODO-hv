@@ -16,6 +16,16 @@ https://github.com/apguerreiro/HVC
 
 https://github.com/adbjesus/mooutils/blob/main/include/mooutils/indicators.hpp
 
+## Generalized hypervolume contribution:
+
+J. Bader and E. Zitzler, “HypE: An algorithm for fast hypervolume-based
+many-objective optimization,” Evol. Comput., vol. 19, no. 1, pp. 45–76,
+Mar. 2011.
+
+## Approximation of the Generalized hypervolume contribution
+
+Jingda Deng and Qingfu Zhang. Approximating hypervolume and hypervolume contributions using polar coordinate. IEEE Transactions on Evolutionary Computation, 23(5):913–918, October 2019. doi:10.1109/tevc.2019.2895108
+
 ## Other
 
 a) Issue error if number is infinite or NaN
