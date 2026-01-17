@@ -8,7 +8,6 @@
  * `hypervolume()` uses the inclusion-exclusion algorithm for small inputs of
    up to 15 points, which is significantly faster.
 
-
 # moocore 0.1.10
 
  * `mooocore` now requires R >= 4.1.
