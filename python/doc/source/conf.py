@@ -56,7 +56,6 @@ extensions = [
     "sphinx.ext.autosummary",  # Create neat summary tables for modules/classes/methods etc
     "sphinx_copybutton",  # A small sphinx extension to add a "copy" button to code blocks.
     "sphinx.ext.mathjax",
-    "sphinx.ext.extlinks",
     # "sphinx.ext.autosectionlabel", DO NOT USE: causes duplicated labels.
     "sphinxcontrib.bibtex",
     "sphinx_gallery.gen_gallery",
@@ -73,6 +72,7 @@ copybutton_copy_empty_lines = False
 extlinks = {
     "issue": (github_url + "/issues/%s", "#%s"),
     "pr": (github_url + "/pull/%s", "PR #%s"),
+    "user": ("https://github.com/%s", "@%s"),
 }
 # -----------------------------------------------------------------------------
 # Autosummary
