@@ -24,6 +24,7 @@ sys.path.insert(0, os.path.abspath("."))
 
 # Prevent ruff from deleting seemingly unused imports
 import my_unsrt_style  # noqa: F401
+import super_with_brackets  # noqa: F401
 
 project = "moocore"
 _full_version = moocore.__version__
@@ -97,8 +98,7 @@ napoleon_type_aliases = {
 }
 
 bibtex_bibfiles = ["REFERENCES.bib"]
-bibtex_reference_style = "super"
-# bibtex_default_style = "unsrt"
+bibtex_reference_style = "super_with_brackets"
 bibtex_default_style = "my_unsrt"
 bibtex_cite_id = "cite-{bibliography_count}-{key}"
 bibtex_footcite_id = "footcite-{key}"
