@@ -6,7 +6,7 @@ This example illustrates functionality related to the EAF.
 The AUC of the EAF and the AOC (Hypervolume)
 --------------------------------------------
 
-The Area-Over-the-Curve (i.e., the hypervolume) of a set of nondominated sets is exactly the the Area-Under-the-Curve (AUC) of their corresponding EAF :cite:p:`LopVerDreDoe2025`, as this example shows.
+The Area-Over-the-Curve (i.e., the hypervolume) of a set of nondominated sets is exactly the Area-Under-the-Curve (AUC) of their corresponding EAF :cite:p:`LopVerDreDoe2025`, as this example shows.
 
 """
 

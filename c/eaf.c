@@ -271,7 +271,7 @@ eaf_compute_matrix(int *eaf_npoints, double * data, int nobj, const int *cumsize
         nlevel : number of attainment levels to compute.
         coord_file  : stream to write the resulting attainment surfaces.
         indic_file  : stream to write the resulting attainment indices.
-        diff_file   : stream to write the difference between the the
+        diff_file   : stream to write the difference between the
                       first half and the second half of nruns.
 */
 
