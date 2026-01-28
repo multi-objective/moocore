@@ -1,3 +1,7 @@
+# moocore 0.3.0
+
+ * `hypervolume()` is significantly faster for more than four dimensions (Andreia P. Guerreiro).
+
 # moocore 0.2.0
 
  * `pareto_rank()` is faster in 3D.

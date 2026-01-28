@@ -101,7 +101,11 @@ static bool
 restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict newp)
 {
     // FIXME: This is the most expensive function in the HV4D+ algorithm.
+#ifdef HV_RECURSIVE
+    const double newx[] = { newp->x[0], newp->x[1], newp->x[2] };
+#else
     const double newx[] = { newp->x[0], newp->x[1], newp->x[2], newp->x[3] };
+#endif
     assert(list+1 == list->next[0]);
     dlnode_t * closest0 = list+1;
     dlnode_t * closest1 = list;
@@ -126,7 +130,12 @@ restart_base_setup_z_and_closest(dlnode_t * restrict list, dlnode_t * restrict n
         // if (weakly_dominates(px, newx, 3)) { // Slower
         if (p_leq_new_0 & p_leq_new_1 & p_leq_new_2) {
             //new->ndomr++;
+#ifdef HV_RECURSIVE
+            // When called by onec4dplusU, px may be just a 3-dimensional vector.
+            assert(weakly_dominates(px, newx, 3));
+#else
             assert(weakly_dominates(px, newx, 4));
+#endif
             return false;
         }
 
@@ -173,7 +182,11 @@ one_contribution_3d(dlnode_t * restrict newp)
     double volume = 0;
     double lastz = newx[2];
     dlnode_t * p = newp->next[0];
+#if !defined(HV_RECURSIVE) && HV_DIMENSION == 4
     assert(!weakly_dominates(p->x, newx, 4));
+#else
+    assert(!weakly_dominates(p->x, newx, 3));
+#endif
     while (true) {
         const double * px = p->x;
         volume += area * (px[2] - lastz);
@@ -219,7 +232,7 @@ one_contribution_3d(dlnode_t * restrict newp)
 
 /* Compute the hypervolume indicator in d=4 by iteratively computing the one
    contribution problem in d=3. */
-static double
+static inline double
 hv4dplusU(dlnode_t * list)
 {
     assert(list+2 == list->prev[0]);
