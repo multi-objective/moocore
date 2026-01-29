@@ -4,11 +4,17 @@
 What's new
 **********
 
+Version 0.3.0 (development)
+---------------------------
+
+- `moarchiving <https://cma-es.github.io/moarchiving/>`_ is now included in the benchmarks.
+
+
 Version 0.2.0 (10/01/2026)
 ---------------------------
 
 - Requires ``numpy>=1.24``.
-- Optuna is now included in the benchmarks.
+- `Optuna <https://optuna.org>`_ is now included in the benchmarks.
 - New :ref:`bench-ndsort` benchmarks.
 - :func:`~moocore.pareto_rank` is faster in 3D.
 - HV3D+ is slightly faster with repeated coordinates (:issue:`41`).

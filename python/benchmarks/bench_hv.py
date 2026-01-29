@@ -19,6 +19,11 @@ from jmetal.core.quality_indicator import HyperVolume as jmetal_HV
 from nevergrad.optimization.multiobjective import HypervolumeIndicator as ng_HV
 from fast_pareto import hypervolume as fp_hv
 from optuna._hypervolume import compute_hypervolume as optuna_hv
+from moarchiving import get_mo_archive as moarch_get_mo_archive
+
+# FIXME: How to test both float and Fractions?
+moarch_get_mo_archive.hypervolume_computation_float_type = float
+moarch_get_mo_archive.hypervolume_final_float_type = float
 # from trieste.acquisition.multi_objective import Pareto as trieste_Pareto
 # import tensorflow as tf
 
@@ -72,6 +77,9 @@ for name in names:
         "optuna": lambda z, ref=ref: optuna_hv(
             z, reference_point=ref, assume_pareto=False
         ),
+        "moarchiving (float)": lambda z, ref=ref: float(
+            moarch_get_mo_archive(z, reference_point=ref).hypervolume
+        ),
         "botorch": lambda z,
         hv=botorch_HV(ref_point=torch.from_numpy(-ref)): hv.compute(z),
         "fast_pareto": lambda z, ref=ref: fp_hv(
@@ -82,6 +90,9 @@ for name in names:
     if dim >= 6:
         del benchmarks["nevergrad"]
         del benchmarks["optuna"]
+    if dim >= 5:
+        # Only supports 2D, 3D and 4D
+        del benchmarks["moarchiving (float)"]
     if dim >= 4:
         ## Trieste is hundreds of times slower than botorch. It is so slow that
         ## we cannot run the benchmark with the initial value of 500 points.

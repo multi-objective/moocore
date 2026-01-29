@@ -47,6 +47,7 @@ optional-dependencies.benchmarks = [
   "fast-pareto",
   "jmetalpy",
   "matplotlib",
+  "moarchiving",
   "nevergrad",
   "numba",
   "numpy",
