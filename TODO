@@ -20,6 +20,8 @@ Computation, pp. 465–472 (2012)]
      - [Merge non-dominated sorting](https://github.com/jMetal/jMetal/blob/main/jmetal-core/src/main/java/org/uma/jmetal/util/ranking/impl/MergeNonDominatedSortRanking.java
 )
      - Jensen-style divide-and-conquer with small-size subroutines:
+ - [ ] HSSP (Hypervolume Subset Selection Problem)
+   - https://github.com/rgoomes/hssp
  - [ ] 3D Nondominated sorting:
      Y. Nekrich. A fast algorithm for three-dimensional layers of maxima problem. In Algorithms and Data Structures, number 6844 in Lecture Notes in Computer Science, pages 607–618. 2011.
  - [ ] Setup https://github.com/koaning/sphinx-marimo
