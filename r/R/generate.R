@@ -9,6 +9,8 @@
 #' [normalise()].  Otherwise, points are scaled to a non-negative integer range
 #' that keeps the points mutually nondominated.
 #'
+#' See the visualisations in the vignette \HTMLVignette{generate}{Sampling Random Nondominated Sets}.
+#'
 #' @param n `integer(1)`\cr Number of rows in the output.
 #' @param d `integer(1)`\cr Number of columns in the output.
 #' @param method `character(1)`\cr Method used to generate the random nondominated set.

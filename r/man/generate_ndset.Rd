@@ -30,6 +30,8 @@ When \code{integer = FALSE} (the default), the points are generated within the
 hypercube \eqn{(0,1)^d} and can be scaled to another range using
 \code{\link[=normalise]{normalise()}}.  Otherwise, points are scaled to a non-negative integer range
 that keeps the points mutually nondominated.
+
+See the visualisations in the vignette \HTMLVignette{generate}{Sampling Random Nondominated Sets}.
 }
 \details{
 The available methods are:

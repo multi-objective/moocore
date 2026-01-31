@@ -39,7 +39,8 @@ reference point assuming minimization of all objectives. The default
 \code{method="DZ2019-HW"} is deterministic and ignores the parameter \code{seed},
 while \code{method="DZ2019-MC"} relies on Monte-Carlo sampling
 \citep{DenZha2019approxhv}.  Both methods tend to get more accurate with
-higher values of \code{nsamples}, but the increase in accuracy is not monotonic.
+higher values of \code{nsamples}, but the increase in accuracy is not monotonic,
+as shown in the vignette \HTMLVignette{hv_approx}{Approximating the hypervolume}.
 }
 \details{
 This function implements the method proposed by \citet{DenZha2019approxhv}

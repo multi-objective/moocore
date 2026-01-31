@@ -5,8 +5,8 @@
 #' `method="DZ2019-HW"` is deterministic and ignores the parameter `seed`,
 #' while `method="DZ2019-MC"` relies on Monte-Carlo sampling
 #' \citep{DenZha2019approxhv}.  Both methods tend to get more accurate with
-#' higher values of `nsamples`, but the increase in accuracy is not monotonic.
-#  FIXME: Link to vignette like the Python docs.
+#' higher values of `nsamples`, but the increase in accuracy is not monotonic,
+#' as shown in the vignette \HTMLVignette{hv_approx}{Approximating the hypervolume}.
 #'
 #' @author Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
 #'
