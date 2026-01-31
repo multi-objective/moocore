@@ -58,6 +58,7 @@ The following projects currently use `moocore`:
  - [`IOHInspector`](https://github.com/IOHprofiler/IOHinspector?tab=readme-ov-file)
  - [QuantumAnnealingMOO](https://github.com/andrew-d-king/QuantumAnnealingMOO) (D-Wave Quantum Inc)
  - [`seqme`](https://github.com/szczurek-lab/seqme)
+ - [`bonobench`](https://github.com/schaepermeier/bonobench)
 
 
 Citing `moocore`
