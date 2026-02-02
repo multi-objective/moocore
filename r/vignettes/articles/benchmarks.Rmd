@@ -210,6 +210,10 @@ for (name in names(files)) {
 
 As the plots show, [`moocore`][moocore] is always faster than [`emoa`][emoa] and, hence, faster than [`GPareto`][GPareto], [`mlr3mbo`][mlr3mbo], [`rmoo`][rmoo] and [`bbotk`][bbotk].
 
+# Hypervolume contribution
+
+The only R package, other than [`moocore`][moocore], able to compute hypervolume contributions `moocore::hv_contributions()` is [`emoa`][emoa]. However, [`emoa`][emoa] is buggy and calculates wrong values ([olafmersmann/emoa#1](https://github.com/olafmersmann/emoa/issues/1)).
+
 [moocore]: https://multi-objective.github.io/moocore/r/
 [emoa]: https://cran.r-project.org/package=emoa
 [bbotk]:  https://cran.r-project.org/package=bbotk
