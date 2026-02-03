@@ -10,7 +10,7 @@ import numpy as np
 import moocore
 import matplotlib.pyplot as plt
 
-from bench import Bench, get_geomrange
+from bench import Bench, get_geomrange, check_float_vector
 
 import torch
 from botorch.utils.multi_objective.pareto import (
@@ -58,15 +58,6 @@ def get_dataset(name):
 # Exclude the conversion to torch from the timing.
 setup = {"botorch": lambda z: torch.from_numpy(z)}
 
-
-def check_values(a, b, what, n, name):
-    np.testing.assert_allclose(
-        a,
-        b,
-        err_msg=f"In {name}, maxrow={n}, {what}={b}  not equal to moocore={a}",
-    )
-
-
 title = "is_non_dominated(keep_weakly=True)"
 file_prefix = "wndom"
 
@@ -109,7 +100,7 @@ for name in names:
                 optuna_is_pf(-z, assume_unique_lexsorted=False)
             ),
         },
-        check=check_values,
+        check=check_float_vector,
     )
 
     for maxrow in n:
@@ -141,7 +132,7 @@ for name in names:
                 z, sense=z.shape[1] * ["max"], distinct=True, use_numba=True
             ),
         },
-        check=check_values,
+        check=check_float_vector,
     )
 
     for maxrow in n:

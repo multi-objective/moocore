@@ -80,6 +80,14 @@ def check_float_values(a, b, what, n, name):
     )
 
 
+def check_float_vector(a, b, what, n, name):
+    np.testing.assert_allclose(
+        a,
+        b,
+        err_msg=f"In {name}, maxrow={n}, {what}={b}  not equal to moocore={a}",
+    )
+
+
 class Bench:
     cpu_model = cpuinfo.get_cpu_info()["brand_raw"]
 
