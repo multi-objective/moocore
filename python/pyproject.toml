@@ -18,11 +18,11 @@ keywords = [
   "operations research",
   "Optimization",
 ]
-license = "LGPL-2.1-or-later"
+license = "LGPL-2.1-OR-later"
 license-files = [ "COPYRIGHTS" ]
 authors = [
-  { name = "Manuel López-Ibáñez", email = "manuel.lopez-ibanez@manchester.ac.uk" },
   { name = "Fergus Rooney", email = "fergus.rooney@outlook.com" },
+  { name = "Manuel López-Ibáñez", email = "manuel.lopez-ibanez@manchester.ac.uk" },
 ]
 requires-python = ">=3.10"
 classifiers = [
@@ -130,20 +130,20 @@ repair-wheel-command = [
   "abi3audit --verbose --strict --report {wheel}",
 ]
 
+[tool.cibuildwheel.macos]
+archs = [ "universal2" ]
+before-build = "pip install abi3audit"
+repair-wheel-command = [
+  "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}",
+  "abi3audit --verbose --strict --report {wheel}",
+]
+
 [tool.cibuildwheel.windows]
 archs = [ "native" ]
 # Use delvewheel on windows
 before-build = "pip install delvewheel abi3audit"
 repair-wheel-command = [
   "delvewheel repair -w {dest_dir} {wheel}",
-  "abi3audit --verbose --strict --report {wheel}",
-]
-
-[tool.cibuildwheel.macos]
-archs = [ "universal2" ]
-before-build = "pip install abi3audit"
-repair-wheel-command = [
-  "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}",
   "abi3audit --verbose --strict --report {wheel}",
 ]
 
