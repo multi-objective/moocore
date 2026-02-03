@@ -28,5 +28,6 @@
 #endif
 
 #include "config.h"
+#include "gcc_attribs.h"
 
 #endif // ! LIBMOOCORE_CONFIG_H_
