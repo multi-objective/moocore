@@ -23,6 +23,7 @@ license-files = [ "COPYRIGHTS" ]
 authors = [
   { name = "Manuel López-Ibáñez", email = "manuel.lopez-ibanez@manchester.ac.uk" },
   { name = "Fergus Rooney", email = "fergus.rooney@outlook.com" },
+  { name = "Lennart Schäpermeier", email = "lennart.schaepermeier@uni-muenster.de" },
 ]
 requires-python = ">=3.10"
 classifiers = [

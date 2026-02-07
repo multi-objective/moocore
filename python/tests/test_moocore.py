@@ -555,3 +555,52 @@ def test_nondominated_sorting_3d():
         [False, False, False, False, True],
     ]
     check_nondominated_sorting_fronts(five_fronts, five_fronts_expected)
+
+
+class TestR2Exact:
+    """Test exact R2 computation."""
+
+    def test_r2_output(self):
+        """Checks the exact R2 calculation produces the correct value for some known simple test cases."""
+        # perfect approximation of ideal ref yields 0.0
+        r2 = moocore.r2_exact([[0, 0]], [0, 0])
+        assert_allclose(r2, 0.0)
+
+        # [1,1] in normalized objective space should yield r2 = 0.75
+        r2 = moocore.r2_exact([[2, 2]], [1, 1])
+        assert_allclose(r2, 0.75)
+
+        # [[1,0],[0,1]] should yield r2 = 0.25
+        r2 = moocore.r2_exact([[0, 1], [1, 0]], [0, 0])
+        assert_allclose(r2, 0.25)
+
+        r2 = moocore.r2_exact(
+            [[0, 1], [0.2, 0.8], [0.4, 0.6], [0.6, 0.4], [0.8, 0.2], [1, 0]],
+            [0, 0],
+        )
+        assert_allclose(r2, 0.1833333333333333)
+
+        # a closely sampled linear front should yield a value close to 1/6
+        x = np.linspace(0, 1, 1000001)
+        pf = list(zip(x, (1 - x)))
+        r2 = moocore.r2_exact(pf, ref=[0, 0])
+        assert_allclose(r2, 1 / 6, atol=1e-6)
+
+    def test_r2_from_doc(self):
+        """Checks that the exact R2 examples from the documentation work as expected."""
+        dat = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
+        r2 = moocore.r2_exact(dat, ref=[0, 0])
+        assert_allclose(r2, 2.5941919191919194)
+
+        r2 = moocore.r2_exact(dat, ref=[10, 10], maximise=True)
+        assert_allclose(r2, 2.5196969696969695)
+
+        dat = moocore.get_dataset("input1.dat")[:, :-1]
+        r2 = moocore.r2_exact(dat, ref=[0, 0])
+
+        assert_allclose(r2, 0.33360768789505657)
+
+        dat = moocore.filter_dominated(dat)
+        moocore.r2_exact(dat, ref=[10, 10])
+
+        assert_allclose(r2, 0.33360768789505657)

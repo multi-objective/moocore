@@ -8,7 +8,7 @@ Version 0.3.0 (development)
 ---------------------------
 
 - `moarchiving <https://cma-es.github.io/moarchiving/>`_ is now included in the benchmarks.
-
+- :func:`~moocore.r2_exact` implements the exact computation of the R2 indicator for bi-objective solution sets.
 
 Version 0.2.0 (10/01/2026)
 ---------------------------

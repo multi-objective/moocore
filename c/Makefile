@@ -62,6 +62,7 @@ SRCS =  avl.c                                                                \
         eafdiff.c                                                            \
         eaf_main.c                                                           \
         epsilon.c                                                            \
+        r2_exact.c                                                           \
         hv3dplus.c                                                           \
         hv4d.c                                                               \
         hv.c                                                                 \
@@ -91,6 +92,7 @@ HDRS =  avl.h                                                                \
         cvector.h                                                            \
         eaf.h                                                                \
         epsilon.h                                                            \
+        r2_exact.h                                                           \
         gcc_attribs.h                                                        \
         hv.h                                                                 \
         hvapprox.h                                                           \

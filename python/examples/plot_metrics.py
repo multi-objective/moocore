@@ -98,10 +98,11 @@ plt.show()
 # %%
 #
 # However, both :func:`moocore.igd` and :func:`moocore.avg_hausdorff_dist`
-# incorrectly measure B as better than A, whereas :func:`moocore.igd_plus` and
-# :func:`moocore.hypervolume` correctly measure A as better than B (remember
-# that hypervolume must be maximized) and :func:`moocore.epsilon_additive` measures
-# both as equally good (epsilon is weakly Pareto compliant).
+# incorrectly measure B as better than A, whereas :func:`moocore.igd_plus`,
+# :func:`moocore.r2_exact` and :func:`moocore.hypervolume` correctly measure A
+# as better than B (remember that hypervolume must be maximized) and
+# :func:`moocore.epsilon_additive` measures both as equally good
+# (epsilon is weakly Pareto compliant).
 #
 
 pd.DataFrame(
@@ -112,6 +113,7 @@ pd.DataFrame(
             moocore.igd_plus(A, ref),
             moocore.epsilon_additive(A, ref),
             moocore.hypervolume(A, ref=10),
+            moocore.r2_exact(A, ref=0),
         ],
         B=[
             moocore.igd(B, ref),
@@ -119,7 +121,8 @@ pd.DataFrame(
             moocore.igd_plus(B, ref),
             moocore.epsilon_additive(B, ref),
             moocore.hypervolume(B, ref=10),
+            moocore.r2_exact(B, ref=0),
         ],
     ),
-    index=["IGD", "Hausdorff", "IGD+", "eps+", "HV"],
+    index=["IGD", "Hausdorff", "IGD+", "eps+", "HV", "Exact R2"],
 )

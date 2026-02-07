@@ -2733,3 +2733,108 @@ def apply_within_sets(
     if not shorter:
         res = res.take(np.concatenate(idx).argsort(), axis=0)
     return res
+
+
+def r2_exact(
+    data: ArrayLike,
+    /,
+    ref: ArrayLike,
+    *,
+    maximise: bool | Sequence[bool] = False,
+) -> float:
+    r"""Exact R2 indicator.
+
+    Computes the exact R2 indicator with respect to a given ideal/utopian reference point
+    assuming minimization of all objectives.
+
+    .. seealso:: For details of the R2 indicator, see :ref:`r2_indicator`.
+
+    Parameters
+    ----------
+    data :
+        Numpy array of numerical values, where each row gives the coordinates of a point.
+        If the array is created from the :func:`read_datasets` function, remove the last column.
+    ref :
+        Reference point as a 1D vector. Must be same length as a single point in the ``data``.
+    maximise :
+        Whether the objectives must be maximised instead of minimised.
+        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
+        Also accepts a 1D numpy array with value 0/1 for each objective.
+
+    Returns
+    -------
+        A single numerical value, the exact R2 indicator.
+
+    Notes
+    -----
+    The current implementation exclusively supports bi-objective solution sets and runs in :math:`O(n \log n)`.
+    For more details on the computation of the exact R2 indicator refer to :footcite:t:`SchKer2025r2v2`.
+
+    References
+    ----------
+    .. footbibliography::
+
+    Examples
+    --------
+    >>> dat = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
+    >>> moocore.r2_exact(dat, ref=[0, 0])
+    2.594191919191919
+
+    This function assumes that objectives must be minimized by default. We can
+    easily specify maximization:
+
+    >>> dat = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
+    >>> moocore.r2_exact(dat, ref=[10, 10], maximise=True)
+    2.519696969696969
+
+    Merge all the sets of a dataset by removing the set number column:
+
+    >>> dat = moocore.get_dataset("input1.dat")[:, :-1]
+    >>> len(dat)
+    100
+
+    Dominated points are ignored, so this:
+
+    >>> moocore.r2_exact(dat, ref=0)
+    0.3336076878950565
+
+    gives the same exact R2 value as this:
+
+    >>> dat = moocore.filter_dominated(dat)
+    >>> len(dat)
+    6
+    >>> moocore.r2_exact(dat, ref=0)
+    0.3336076878950565
+
+    """
+    # Convert to numpy.array in case the user provides a list.  We use
+    # np.asarray to convert it to floating-point, otherwise if a user inputs
+    # something like ref = np.array([10, 10]) then numpy would interpret it as
+    # an int array.
+    data, data_copied = asarray_maybe_copy(data)
+    nobj = data.shape[1]
+    # Make sure it is a 1D array of length nobj.
+    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
+    if nobj != ref.shape[0]:
+        raise ValueError(
+            f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
+        )
+
+    maximise = _parse_maximise(maximise, nobj)
+    # FIXME: Do this in C.
+    if maximise.any():
+        if not data_copied:
+            data = data.copy()
+        data[:, maximise] = -data[:, maximise]
+        ref = ref.copy()
+        ref[maximise] = -ref[maximise]
+
+    data_p, npoints, nobj = np2d_to_double_array(
+        data, ctype_shape=("size_t", "uint_fast8_t")
+    )
+    ref_buf = ffi.from_buffer("double []", ref)
+    r2 = lib.r2_exact(data_p, npoints, nobj, ref_buf)
+    # if r2 < 0:
+    #     raise MemoryError("memory allocation failed")
+
+    return r2
