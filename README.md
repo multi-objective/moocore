@@ -15,10 +15,11 @@
     [Manuel López-Ibáñez](https://lopez-ibanez.eu),
     [Carlos M. Fonseca](https://eden.dei.uc.pt/~cmfonsec/),
     [Luís Paquete](https://eden.dei.uc.pt/~paquete/),
-    Andreia P. Guerreiro
-    Mickaël Binois.
+    Andreia P. Guerreiro,
+    Mickaël Binois,
     Leonardo C.T. Bezerra,
-    Fergus Rooney.
+    Fergus Rooney,
+    [Lennart Schäpermeier](https://schaepermeier.github.io).
 
 ---------------------------------------
 

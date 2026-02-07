@@ -14,7 +14,8 @@
 
 **Contributors:**
     [Manuel López-Ibáñez](https://lopez-ibanez.eu),
-    Fergus Rooney.
+    Fergus Rooney,
+    [Lennart Schäpermeier](https://schaepermeier.github.io).
 
 ---------------------------------------
 

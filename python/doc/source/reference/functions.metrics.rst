@@ -190,6 +190,46 @@ Approximating the hypervolume metric
 Computing the hypervolume can be time consuming, thus several approaches have been proposed in the literature to approximate its value via Monte-Carlo or quasi-Monte-Carlo sampling :cite:p:`DenZha2019approxhv`. These methods are implemented in :func:`whv_hype` and :func:`hv_approx`.
 
 
+.. _r2_indicator:
+
+(Exact) R2 Indicator
+=============================================================================
+
+.. autosummary::
+   :toctree: generated/
+
+   r2_exact
+
+The unary R2 indicator is a quality indicator for a set :math:`A \subset \mathbb{R}^m`
+w.r.t. an ideal or utopian reference point :math:`\vec{r} \in \mathbb{R}^m`.
+It was originally proposed by :cite:t:`HanJas1998` and is defined as the
+expected Tchebycheff utility under a uniform distribution of weight vectors
+(w.l.o.g. assuming minimization):
+
+.. math::
+   R2(A) := \int_{w \in W} \min_{a \in A} \left\{ \max_{i=1,\dots,m} w_i (a_i - r_i) \right\} \, dw,
+
+where :math:`W` denotes the uniform distribution across weights:
+
+.. math::
+   W = \{w \in \mathbb R^m \mid w_i \geq 0, \sum_{i=1}^m w_i = 1\}.
+
+The R2 indicator is to be minimized and has an optimal value of 0 when
+:math:`\vec{r} \in A`.
+
+The exact R2 indicator is strongly Pareto-compliant, i.e., compatible with Pareto-optimality:
+
+.. math::
+   \forall A, B \subset \mathbb R^m: A \prec B \Rightarrow R2(A) < R2(B).
+
+Given an ideal or utopian reference ponint, which is available in most scenarios,
+all non-dominated solutions always contribute to the value of the exact R2 indicator.
+However, it is scale-dependent and care should be taken such that all objectives
+contribute approximately equally to the indicator, e.g., by normalizing the
+Pareto front to the unit hypercube.
+
+:func:`r2_exact` computes the exact R2 indicator for bi-objective solution
+sets in :math:`\mathcal O(N \log N)` following :cite:t:`SchKer2025r2v2`.
 
 Bibliography
 ============

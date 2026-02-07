@@ -17,6 +17,7 @@ GruFon2009:emaa
 Grunert01
 GueFon2017hv4d
 GueFonPaq2021hv
+HanJas1998
 HerWer1987tabucol
 IshMasTanNoj2015igd
 Jen03
@@ -31,6 +32,7 @@ Molchanov2005theory
 Muller1959sphere
 RubMel1998simulation
 SchEsqLarCoe2012tec
+SchKer2025r2v2
 VelLam1998gp
 WuAza2001metrics
 ZhoZhaJin2009igdx

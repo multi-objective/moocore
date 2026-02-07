@@ -16,6 +16,8 @@ double avg_Hausdorff_dist(const double * restrict data, size_t n, dimension_t d,
 // epsilon.h
 double epsilon_additive(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const bool * restrict maximise);
 double epsilon_mult(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const bool * restrict maximise);
+// r2_exact.h
+double r2_exact(const double * restrict data, size_t n, dimension_t d, const double * restrict ref);
 
 // nondominated.h
 size_t find_weakly_dominated_point(const double * restrict points, size_t n, dimension_t d,
