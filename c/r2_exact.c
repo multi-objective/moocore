@@ -25,17 +25,14 @@ static double _utility(const double y1, const double y2, const double y2p)
 double r2_exact(const double * restrict data, size_t n, dimension_t dim,
                 const double * restrict ref)
 {
+    assert(dim == 2);
     if (unlikely(n == 0)) return -1;
 
-    ASSUME(dim == 2);
-
     // p is sorted by f1 (primarily), then f2 (secondarily)
-    const double **p = generate_sorted_doublep_2d(data, &n, DBL_MAX);
-
+    const double **p = generate_sorted_doublep_2d(data, n);
     if (unlikely(!p)) return -1;
 
     size_t j = 0;
-
     // skip points not dominated by "ideal" ref point
     while (j < n && p[j][0] < ref[0]) {
         j++;
@@ -59,7 +56,7 @@ double r2_exact(const double * restrict data, size_t n, dimension_t dim,
     double r2_exact = _utility(prev_y1, prev_y2, DBL_MAX);
     // printf("y2 segment: %f, %f, MAX: %f\n", p[j][0] - ref[0], p[j][1] - ref[1], _utility(p[j][0] - ref[0], p[j][1] - ref[1], DBL_MAX));
 
-    while(j < n - 1) {
+    while (j < n - 1) {
         j++;
         double y1 = p[j][0] - ref[0];
         double y2 = p[j][1] - ref[1];

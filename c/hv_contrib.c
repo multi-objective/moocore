@@ -147,7 +147,7 @@ hvc2d(double * restrict hvc, const double * restrict data, size_t n,
       const double * restrict ref)
 {
     ASSUME(n > 0);
-    const double **p = generate_sorted_doublep_2d(data, &n, ref[0]);
+    const double **p = generate_sorted_doublep_2d_filter_by_ref(data, &n, ref[0]);
     if (unlikely(n == 0)) return 0;
     if (unlikely(!p)) return -1;
 
@@ -232,7 +232,7 @@ hvc2d_nondom(double * restrict hvc, const double * restrict data, size_t n,
              const double * restrict ref)
 {
     ASSUME(n > 0);
-    const double **p = generate_sorted_doublep_2d(data, &n, ref[0]);
+    const double **p = generate_sorted_doublep_2d_filter_by_ref(data, &n, ref[0]);
     if (unlikely(n == 0)) return 0;
     if (unlikely(!p)) return -1;
 

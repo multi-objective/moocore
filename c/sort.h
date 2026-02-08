@@ -191,8 +191,20 @@ cmp_ppdouble_asc_x_asc_y(const void * restrict pa, const void * restrict pb)
 }
 
 static inline const double **
-generate_sorted_doublep_2d(const double * restrict points,
-                           size_t * restrict size, const double ref0)
+generate_sorted_doublep_2d(const double * restrict points, size_t n)
+{
+    const double **p = (const double **) malloc(n * sizeof(*p));
+    for (size_t k = 0; k < n; k++)
+        p[k] = points + 2 * k;
+
+    qsort(p, n, sizeof(*p), cmp_ppdouble_asc_x_asc_y);
+    return p;
+}
+
+
+static inline const double **
+generate_sorted_doublep_2d_filter_by_ref(const double * restrict points,
+                                         size_t * restrict size, const double ref0)
 {
     size_t n = *size;
     const double **p = (const double **) malloc(n * sizeof(*p));

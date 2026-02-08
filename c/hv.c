@@ -536,7 +536,7 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
 static double
 hv2d(const double * restrict data, size_t n, const double * restrict ref)
 {
-    const double **p = generate_sorted_doublep_2d(data, &n, ref[0]);
+    const double **p = generate_sorted_doublep_2d_filter_by_ref(data, &n, ref[0]);
     if (unlikely(n == 0)) return 0;
     if (unlikely(!p)) return -1;
 
