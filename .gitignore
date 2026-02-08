@@ -44,4 +44,5 @@
 
 bin/
 moocore.Rcheck/
+moocore_*.tar.gz
 testsuite/

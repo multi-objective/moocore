@@ -488,6 +488,19 @@ hv_approx_dz2019_hw_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE, SEXP NSAMPLES)
     return Rf_ScalarReal(hv);
 }
 
+#include "r2_exact.h"
+
+SEXP
+r2_exact_C(SEXP DATA, SEXP REFERENCE)
+{
+    /* We transpose the matrix before calling this function. */
+    SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
+    SEXP_2_DOUBLE_VECTOR(REFERENCE, reference, reference_len);
+    assert(nobj == reference_len);
+    double r2 = r2_exact(data, npoint, nobj, reference);
+    return Rf_ScalarReal(r2);
+}
+
 #include "epsilon.h"
 #include "igd.h"
 #include "nondominated.h"

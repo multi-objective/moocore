@@ -1,3 +1,8 @@
+# moocore 0.2.0.900
+
+ * `r2_exact()` implements the exact computation of the R2 indicator for bi-objective solution sets.
+
+
 # moocore 0.2.0
 
  * `pareto_rank()` is faster in 3D.
