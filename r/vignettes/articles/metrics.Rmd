@@ -109,7 +109,7 @@ legend("topright", legend=c("Reference", "A", "B"), pch=c(23,1,19),
 
 Assuming minimization of both objectives, $A$ is better than $B$ in terms of
 Pareto optimality.  However, both `igd()` and `avg_hausdorff_dist()`
-incorrectly measure $B$ as better than $A$, whereas `igd_plus()` and
+incorrectly measure $B$ as better than $A$, whereas `r2_exact()`, `igd_plus()` and
 `hypervolume()` correctly measure $A$ as better than $B$ (remember that
 hypervolume must be maximized) and `epsilon_additive()` measures both as
 equally good (epsilon is weakly Pareto compliant).
@@ -122,14 +122,16 @@ knitr::kable(
         avg_hausdorff_dist(A, ref),
         igd_plus(A, ref),
         epsilon_additive(A, ref),
-        hypervolume(A, ref=10)),
+        hypervolume(A, ref=10),
+        r2_exact(A, ref=0)),
     B = c(
         igd(B, ref),
         avg_hausdorff_dist(B, ref),
         igd_plus(B, ref),
         epsilon_additive(B, ref),
-        hypervolume(B, ref=10)),
-    row.names=c("IGD", "Hausdorff", "IGD+", "eps+", "HV")), format = "html") %>%
+        hypervolume(B, ref=10),
+        r2_exact(B, ref=0)),
+    row.names=c("IGD", "Hausdorff", "IGD+", "eps+", "HV", "Exact R2")), format = "html") %>%
   kableExtra::kable_styling(position = "center",
     bootstrap_options = c("striped", "condensed", "responsive"))
 ```
