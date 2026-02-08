@@ -81,6 +81,7 @@ r2_exact <- function(x, reference, maximise = FALSE)
 {
   x <- as_double_matrix(x)
   nobjs <- ncol(x)
+  if (nobjs != 2L) stop("sorry: only 2 objectives supported")
   if (!is.numeric(reference))
     stop("a numerical reference vector must be provided")
   if (length(reference) == 1L) reference <- rep_len(reference, nobjs)

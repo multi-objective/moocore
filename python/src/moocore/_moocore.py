@@ -2749,6 +2749,9 @@ def r2_exact(
 
     .. seealso:: For details of the R2 indicator, see :ref:`r2_indicator`.
 
+    .. warning::
+        The current implementation only supports 2 objectives.
+
     Parameters
     ----------
     data :
@@ -2819,6 +2822,8 @@ def r2_exact(
         raise ValueError(
             f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
         )
+    if nobj != 2:
+        raise NotImplementedError("Only 2D datasets are currently supported")
 
     maximise = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
