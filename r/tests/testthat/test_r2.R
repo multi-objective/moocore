@@ -24,7 +24,7 @@ test_that("r2_exact from doc", {
   expect_equal(r2_exact(dat, reference = c(10, 10), maximise = TRUE), 2.5196969696969695, tolerance = 1e-9)
 
   extdata_path <- system.file(package = "moocore", "extdata")
-  dat <- read_datasets(file.path(extdata_path, "ALG_1_dat.xz"))[, 1:2]
+  dat <- read_datasets(file.path(extdata_path, "example1_dat"))[, 1:2]
   r2_val <- r2_exact(dat, reference = c(0, 0))
   dat_nondom <- filter_dominated(dat)
   r2_val_nondom <- r2_exact(dat_nondom, reference = c(0, 0))

@@ -33,14 +33,21 @@ exact R2 indicator refer to \citet{SchKer2025r2v2}.
 dat <- matrix(c(5, 5, 4, 6, 2, 7, 7, 4), ncol = 2, byrow = TRUE)
 r2_exact(dat, reference = c(0, 0))
 
+# This function assumes minimisation by default. We can easily specify maximisation:
 r2_exact(dat, reference = c(10, 10), maximise = TRUE)
 
+# Merge all the sets of a dataset by removing the set number column:
 extdata_path <- system.file(package="moocore","extdata")
-dat <- read_datasets(file.path(extdata_path, "ALG_1_dat.xz"))[, 1:2]
-r2_exact(dat, reference = c(0, 0))
+dat <- read_datasets(file.path(extdata_path, "example1_dat"))[, 1:2]
+nrow(dat)
 
+# Dominated points are ignored, so this:
+r2_exact(dat, reference = 0)
+
+# gives the same exact R2 value as this:
 dat <- filter_dominated(dat)
-r2_exact(dat, reference = c(0, 0))
+nrow(dat)
+r2_exact(dat, reference = 0)
 
 }
 \references{

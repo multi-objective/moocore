@@ -27,16 +27,26 @@
 #' @expect equal(tolerance = 1e-9, 2.5941919191919194)
 #' r2_exact(dat, reference = c(0, 0))
 #'
+#' # This function assumes minimisation by default. We can easily specify maximisation:
 #' @expect equal(tolerance = 1e-9, 2.5196969696969695)
 #' r2_exact(dat, reference = c(10, 10), maximise = TRUE)
 #'
-#' @omit
+#' # Merge all the sets of a dataset by removing the set number column:
 #' extdata_path <- system.file(package="moocore","extdata")
-#' dat <- read_datasets(file.path(extdata_path, "ALG_1_dat.xz"))[, 1:2]
-#' r2_exact(dat, reference = c(0, 0))
+#' dat <- read_datasets(file.path(extdata_path, "example1_dat"))[, 1:2]
+#' @expect equal(65L)
+#' nrow(dat)
 #'
+#' # Dominated points are ignored, so this:
+#' @expect equal(tolerance = 1e-9, 3865393.493470812)
+#' r2_exact(dat, reference = 0)
+#'
+#' # gives the same exact R2 value as this:
 #' dat <- filter_dominated(dat)
-#' r2_exact(dat, reference = c(0, 0))
+#' @expect equal(9L)
+#' nrow(dat)
+#' @expect equal(tolerance = 1e-9, 3865393.493470812)
+#' r2_exact(dat, reference = 0)
 #'
 #' @export
 #' @concept metrics

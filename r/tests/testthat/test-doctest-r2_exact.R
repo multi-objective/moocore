@@ -8,4 +8,11 @@ test_that("Doctest: r2_exact", {
   dat <- matrix(c(5, 5, 4, 6, 2, 7, 7, 4), ncol = 2, byrow = TRUE)
   expect_equal(r2_exact(dat, reference = c(0, 0)), 2.5941919191919194, tolerance = 1e-9)
   expect_equal(r2_exact(dat, reference = c(10, 10), maximise = TRUE), 2.5196969696969695, tolerance = 1e-9)
+  extdata_path <- system.file(package = "moocore", "extdata")
+  dat <- read_datasets(file.path(extdata_path, "example1_dat"))[, 1:2]
+  expect_equal(nrow(dat), 65L)
+  expect_equal(r2_exact(dat, reference = 0), 3865393.493470812, tolerance = 1e-9)
+  dat <- filter_dominated(dat)
+  expect_equal(nrow(dat), 9L)
+  expect_equal(r2_exact(dat, reference = 0), 3865393.493470812, tolerance = 1e-9)
 })
