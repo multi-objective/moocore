@@ -5,7 +5,12 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
-from bench import Bench, read_datasets_and_filter_dominated, get_range
+from bench import (
+    Bench,
+    read_datasets_and_filter_dominated,
+    get_range,
+    check_float_values,
+)
 
 import numpy as np
 import moocore
@@ -50,12 +55,6 @@ files = {
         range=(100, 500, 100),
     ),
 }
-
-
-def check_values(a, b, what, n, name):
-    assert np.isclose(a, b), (
-        f"In {name}, maxrow={n}, {what}={b}  not equal to moocore={a}"
-    )
 
 
 title = "HV computation"
@@ -109,7 +108,7 @@ for name in names:
         # elif what == "trieste":
         #     zz = tf.convert_to_tensor(z)
         bench=benchmarks,
-        check=check_values,
+        check=check_float_values,
     )
 
     for maxrow in n:
