@@ -79,8 +79,9 @@ for name in names:
         "moarchiving (float)": lambda z, ref=ref: float(
             moarch_get_mo_archive(z, reference_point=ref).hypervolume
         ),
-        "botorch": lambda z,
-        hv=botorch_HV(ref_point=torch.from_numpy(-ref)): hv.compute(z),
+        "botorch": lambda z, hv=botorch_HV(ref_point=torch.from_numpy(-ref)): (
+            hv.compute(z)
+        ),
         "fast_pareto": lambda z, ref=ref: fp_hv(
             z, ref_point=ref, assume_pareto=False
         ),
