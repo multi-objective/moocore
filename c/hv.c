@@ -473,9 +473,6 @@ hv_recursive(dlnode_t * restrict list, dimension_t dim, size_t c,
             if (p1->ignore == dim - 1) {
                 DEBUG1(debug_counter[2]++);
                 p1->ignore = dim;
-            } else if (hypera <= p1_prev->area[d_stop]) {
-                DEBUG1(debug_counter[3]++);
-                p1->ignore = dim;
             }
         }
         p1->area[d_stop] = hypera;
@@ -550,9 +547,6 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
            dim-1, then it is also dominated in dimension dim. */
         if (p1->ignore == dim - 1) {
             DEBUG1(debug_counter[4]++);
-            p1->ignore = dim;
-        } else if (hypera <= p1_prev->area[d_stop]) {
-            DEBUG1(debug_counter[5]++);
             p1->ignore = dim;
         }
         p1->area[d_stop] = hypera;
