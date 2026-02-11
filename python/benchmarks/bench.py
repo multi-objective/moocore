@@ -88,6 +88,17 @@ def check_float_vector(a, b, what, n, name):
     )
 
 
+def _normalize(result):
+    if isinstance(result, tuple):
+        # (args, kwargs)
+        if len(result) == 2 and isinstance(result[1], dict):
+            return result[0], result[1]
+        return result, {}
+    elif isinstance(result, dict):
+        return (), result
+    return (result,), {}
+
+
 class Bench:
     cpu_model = cpuinfo.get_cpu_info()["brand_raw"]
 
@@ -124,13 +135,11 @@ class Bench:
     def keys(self):
         return self.bench.keys()
 
-    def bench1(self, what, n, *args, **kwargs):
-        if self.setup:
-            if isinstance(self.setup, dict):
-                setup = self.setup.get(what)
-                if setup:
-                    args = (setup(*args, **kwargs),)
-                    kwargs = {}
+    def bench1(self, what, _n, *args, **kwargs):
+        if self.setup and isinstance(self.setup, dict):
+            setup = self.setup.get(what)
+            if setup:
+                args, kwargs = _normalize(setup(*args, **kwargs))
 
         fun = self.bench[what]
         duration, value = timeit.Timer(lambda: fun(*args, **kwargs)).timeit(
@@ -139,14 +148,17 @@ class Bench:
         self.times[what] += [duration]
         if self.values is not None:
             self.values[what] += [value]
-        print(f"{self.name}:{n}:{what}:{duration}")
+        print(f"{self.name}:{_n}:{what}:{duration}")
         return value
 
-    def __call__(self, n, *args, **kwargs):
+    def __call__(self, _n, *args, **kwargs):
         # FIXME: Ideally, bench() would call fun for each value in self.n
-        assert n in self.n
+        assert _n in self.n
+        if self.setup and not isinstance(self.setup, dict):
+            args, kwargs = _normalize(self.setup(*args, **kwargs))
+
         values = {
-            what: self.bench1(what, n, *args, **kwargs) for what in self.keys()
+            what: self.bench1(what, _n, *args, **kwargs) for what in self.keys()
         }
         if self.check:
             a = values["moocore"]
@@ -154,7 +166,7 @@ class Bench:
                 if what == "moocore":
                     continue
                 b = values[what]
-                self.check(a, b, what=what, n=n, name=self.name)
+                self.check(a, b, what=what, n=_n, name=self.name)
 
         return values
 
