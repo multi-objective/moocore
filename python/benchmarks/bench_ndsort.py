@@ -5,7 +5,7 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
-from bench import Bench, get_geomrange
+from bench import Bench, get_geomrange, check_float_vector
 
 import numpy as np
 import moocore
@@ -59,11 +59,7 @@ for name in names:
             "pymoo": lambda z, nds=pymoo_NDS(): nds.do(z, return_rank=True)[1],
             "desdeo": lambda z: desdeo_nds(z).argmax(axis=0),
         },
-        check=lambda a, b, what, n, name: np.testing.assert_array_equal(
-            a,
-            b,
-            err_msg=f"In {name}, maxrow={n}, {what}={b}  not equal to moocore={a}",
-        ),
+        check=check_float_vector,
     )
 
     for maxrow in n:
