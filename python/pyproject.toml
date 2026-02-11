@@ -189,6 +189,10 @@ lint.pycodestyle.max-doc-length = 80
 lint.pycodestyle.max-line-length = 80
 lint.pydocstyle.convention = "numpy"
 
+[tool.pyproject-fmt]
+# Table format: "short" collapses sub-tables to dotted keys, "long" expands to [table.subtable] headers
+table_format = "long"
+
 [tool.pytest.ini_options]
 faulthandler_timeout = 10
 doctest_optionflags = "NUMBER"
