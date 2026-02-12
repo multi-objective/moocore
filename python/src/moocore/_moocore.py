@@ -1749,7 +1749,7 @@ def eaf(
     -----
     In the current implementation, the EAF is computed using the algorithms
     proposed by :footcite:t:`FonGueLopPaq2011emo`, which have complexity
-    :math:`O(m\log m + nm)` in 2D and :math:`O(n^2 m \log m)` in 3D, where
+    :math:`\Theta(m\log m + nm)` in 2D and :math:`O(n^2 m \log m)` in 3D, where
     :math:`n` is the number of input sets and :math:`m` is the total number of
     input points.
 

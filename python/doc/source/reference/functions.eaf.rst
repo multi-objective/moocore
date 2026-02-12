@@ -17,6 +17,15 @@ EAF Computation
    eafdiff
    largest_eafdiff
 
+
+The empirical first-order attainment function (EAF) is used to assess the
+performance of stochastic multiobjective optimisers such as multiobjective
+evolutionary algorithms :footcite:p:`Grunert01`.  It is an estimator for the
+first-order attainment function, which provides information about the location
+and, to some extent, the variability of the random sets of nondominated
+objective vectors produced by such optimisers when applied to given problem
+instances.
+
 Given a set :math:`A \subset \mathbb{R}^d`, the attainment function of
 :math:`A`, denoted by :math:`\alpha_{A}\colon \mathbb{R}^d\to \{0,1\}`,
 specifies which points in the objective space are weakly dominated by

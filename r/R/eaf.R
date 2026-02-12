@@ -27,6 +27,14 @@
 #'
 #' @details
 #'
+#' The empirical first-order attainment function (EAF) is used to assess the
+#' performance of stochastic multiobjective optimisers such as multiobjective
+#' evolutionary algorithms \citep{Grunert01}.  It is an estimator for the
+#' first-order attainment function, which provides information about the
+#' location and, to some extent, the variability of the random sets of
+#' nondominated objective vectors produced by such optimisers when applied to
+#' given problem instances.
+#'
 #' Given a set \eqn{A \subset \mathbb{R}^d}, the attainment function of
 #' \eqn{A}, denoted by \eqn{\alpha_{A}\colon \mathbb{R}^d\to \{0,1\}},
 #' specifies which points in the objective space are weakly dominated by
@@ -60,7 +68,7 @@
 #' and represents the lower boundary of the space attained by all input sets.
 #'
 #' In the current implementation, the EAF is computed using the algorithms
-#' proposed by \citet{FonGueLopPaq2011emo}, which have complexity \eqn{O(m\log
+#' proposed by \citet{FonGueLopPaq2011emo}, which have complexity \eqn{\Theta(m\log
 #' m + nm)} in 2D and \eqn{O(n^2 m \log m)} in 3D, where \eqn{n} is the number
 #' of input sets and \eqn{m} is the total number of input points.
 #'
