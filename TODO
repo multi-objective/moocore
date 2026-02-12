@@ -25,6 +25,9 @@ Computation, pp. 465–472 (2012)]
    - https://github.com/rgoomes/hssp
  - [ ] 3D Nondominated sorting:
      Y. Nekrich. A fast algorithm for three-dimensional layers of maxima problem. In Algorithms and Data Structures, number 6844 in Lecture Notes in Computer Science, pages 607–618. 2011.
+ - [ ] Exactly computing Expected Hypervolume Improvement (EHVI) and qEHVI for any dimension: https://github.com/Ksrma/EHVI-HVI
+ - [ ] Decremental greedy hypervolume subset selection: https://github.com/Ksrma/gHSSD-Tree
+ - [ ] Benchmark against: https://github.com/MOEAFramework/MOEAFramework
  - [ ] Setup https://github.com/koaning/sphinx-marimo
  - [x] Merge hypervolume/trunk README
  - [x] hv2d contributions
