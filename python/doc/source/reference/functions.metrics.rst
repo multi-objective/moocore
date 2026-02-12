@@ -229,7 +229,7 @@ contribute approximately equally to the indicator, e.g., by normalizing the
 Pareto front to the unit hypercube.
 
 :func:`r2_exact` computes the exact R2 indicator for bi-objective solution
-sets in :math:`\mathcal O(N \log N)` following :cite:t:`SchKer2025r2v2`.
+sets in :math:`O(n \log n)` following :cite:t:`SchKer2025r2v2`.
 
 Bibliography
 ============
