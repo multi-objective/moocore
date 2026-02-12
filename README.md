@@ -51,15 +51,16 @@ Who is using `moocore`?
 The following projects currently use `moocore`:
 
  - [`mooplot`](https://github.com/multi-objective/mooplot)
+ - [`DESDEO`](https://github.com/industrial-optimization-group/DESDEO/)
+ - [`GPareto`](https://github.com/mbinois/GPareto)
+ - [`IOHInspector`](https://github.com/IOHprofiler/IOHinspector?tab=readme-ov-file)
+ - [`Liger`](https://www.ide.uk/project-liger)
+ - [`bonobench`](https://github.com/schaepermeier/bonobench)
  - [`gMOIP`](https://cran.r-project.org/web/packages/gMOIP/index.html)
  - [`jMetalPy`](https://jmetalpy.readthedocs.io/en/develop/)
  - [`pymoo`](https://pymoo.org/)
- - [`Liger`](https://www.ide.uk/project-liger)
- - [`DESDEO`](https://github.com/industrial-optimization-group/DESDEO/)
- - [`IOHInspector`](https://github.com/IOHprofiler/IOHinspector?tab=readme-ov-file)
- - [QuantumAnnealingMOO](https://github.com/andrew-d-king/QuantumAnnealingMOO) (D-Wave Quantum Inc)
  - [`seqme`](https://github.com/szczurek-lab/seqme)
- - [`bonobench`](https://github.com/schaepermeier/bonobench)
+ - [QuantumAnnealingMOO](https://github.com/andrew-d-king/QuantumAnnealingMOO) (D-Wave Quantum Inc)
 
 
 Citing `moocore`
