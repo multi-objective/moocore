@@ -19,6 +19,8 @@ from desdeo.tools.non_dominated_sorting import (
 )
 
 from paretoset import paretorank as paretoset_paretorank
+## It cannot be installed: https://github.com/esa/pygmo2/issues/152
+# from pygmo import pareto_dominance as pg_pareto_dominance
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
 files = {

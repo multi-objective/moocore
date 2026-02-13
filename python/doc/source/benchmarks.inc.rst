@@ -5,6 +5,8 @@ The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_,
 
 Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>` whereas `jMetalPy`_ does not provide the :ref:`IGD+ indicator <igd_hausdorf>`. `BoTorch`_ provides neither of them. `paretoset`_ and `fast-pareto`_ only identify nondominated points.
 
+We would like to benchmark `pygmo`_, however, it is currently impossible to install using ``pip`` (See: https://github.com/esa/pygmo2/issues/152)
+
 The source code for the benchmarks below can be found at https://github.com/multi-objective/moocore/tree/main/python/benchmarks .
 
 .. _bench-ndom:
@@ -201,7 +203,6 @@ The following plots compare the speed of computing the :ref:`epsilon indicator  
 
 
 
-.. _moocore: https://multi-objective.github.io/moocore/python/
 .. _BoFire: https://experimental-design.github.io/bofire/
 .. _BoTorch: https://botorch.org/
 .. _DEAP: https://deap.readthedocs.io/en/master/
@@ -212,9 +213,11 @@ The following plots compare the speed of computing the :ref:`epsilon indicator  
 .. _Xopt: https://xopt.xopt.org/index.html
 .. _fast-pareto: https://github.com/nabenabe0928/fast-pareto
 .. _jMetalPy: https://jmetal.github.io/jMetalPy/index.html
+.. _moarchiving: https://cma-es.github.io/moarchiving/
+.. _moocore: https://multi-objective.github.io/moocore/python/
 .. _paretoset: https://github.com/tommyod/paretoset
+.. _pygmo: https://esa.github.io/pygmo2/
 .. _pymoo: https://pymoo.org/
 .. _pysamoo: https://anyoptimization.com/projects/pysamoo/
 .. _seqme: https://seqme.readthedocs.io
 .. _trieste: https://secondmind-labs.github.io/trieste
-.. _moarchiving: https://cma-es.github.io/moarchiving/
