@@ -7,7 +7,7 @@ ci:
 
 repos:
   - repo: https://github.com/lorenzwalthert/precommit
-    rev: v0.4.3.9017
+    rev: v0.4.3.9020
     hooks:
       - id: parsable-R
       - id: no-browser-statement
@@ -45,19 +45,19 @@ repos:
         exclude: '(\.Rd|python/doc/source/reference/.*|test-doctest-.*)'
 
   - repo: https://github.com/tox-dev/tox-ini-fmt
-    rev: "1.7.0"
+    rev: "1.7.1"
     hooks:
       - id: tox-ini-fmt
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: "v2.11.0"
+    rev: "v2.16.0"
     hooks:
       - id: pyproject-fmt
         additional_dependencies: ["tox>=4.12.1"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.14.3
+    rev: v0.15.1
     hooks:
       # Run the formatter.
       - id: ruff-format
@@ -69,6 +69,6 @@ repos:
         require_serial: true
 
   - repo: https://github.com/sphinx-contrib/sphinx-lint
-    rev: v1.0.1
+    rev: v1.0.2
     hooks:
       - id: sphinx-lint
