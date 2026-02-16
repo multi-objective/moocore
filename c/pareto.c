@@ -395,7 +395,6 @@ check_pareto_rank(const int * restrict rank_true, const double * restrict points
 int *
 pareto_rank(const double * restrict points, size_t size, dimension_t dim)
 {
-    ASSUME(dim >= 2);
     if (unlikely(size == 0))
         return NULL;
     if (unlikely(size == 1))
@@ -407,9 +406,12 @@ pareto_rank(const double * restrict points, size_t size, dimension_t dim)
     int * rank;
     if (dim == 3) {
         rank = pareto_rank_3d(points, size);
-    } else {
-        assert(dim == 2);
+    } else if (dim == 2) {
         rank = pareto_rank_2d(points, size);
+    } else {
+        // FIXME: Handle dim=1 like python does.
+        // FIXME: How to handle dim=0? Python returns a vector of zeros.
+        return NULL;
     }
     DEBUG1(check_pareto_rank(rank, points, size, dim));
     return rank;

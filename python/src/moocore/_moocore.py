@@ -1614,12 +1614,15 @@ def pareto_rank(
     nrows, nobj = data.shape
     maximise = _parse_maximise(maximise, nobj)
 
-    if nobj == 1:
-        data = data.ravel()
-        if maximise:
-            data = -data
-        # FIXME: Can we do the same faster?
-        return np.unique(data, return_inverse=True)[1]
+    if nobj < 2:
+        if nobj == 1:
+            data = data.ravel()
+            if maximise:
+                data = -data
+                # FIXME: Can we do the same faster?
+            return np.unique(data, return_inverse=True)[1]
+        if nobj == 0:
+            return np.zeros(shape=nrows, dtype=int)
 
     if maximise.any():
         # FIXME: Do this in C.

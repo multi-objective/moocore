@@ -513,6 +513,21 @@ def test_pareto_rank(dim):
         r += 1
 
 
+def test_pareto_rank_dim0_dim1():
+    x = np.empty((5, 0))
+    assert_array_equal(
+        moocore.pareto_rank(x), np.zeros(shape=x.shape[0], dtype=int)
+    )
+    x = np.arange(5).reshape(-1, 1)
+    assert_array_equal(
+        moocore.pareto_rank(x), np.array([0, 1, 2, 3, 4], dtype=int)
+    )
+    x[2] = 1
+    assert_array_equal(
+        moocore.pareto_rank(x), np.array([0, 1, 1, 2, 3], dtype=int)
+    )
+
+
 def check_nondominated_sorting_fronts(x, expected):
     ranks = moocore.pareto_rank(np.array(x))
     fronts = [(g == ranks) for g in np.unique(ranks)]
