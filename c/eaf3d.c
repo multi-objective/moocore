@@ -30,14 +30,14 @@
 #include "avl.h"
 
 typedef struct dlnode {
-    objective_t *x;             /* The data vector */
+    objective_t * x;             /* The data vector */
     struct dlnode *next;
     struct dlnode *prev;
     int set;
 } dlnode_t;
 
 typedef struct removed_list {
-    avl_node_t *head;
+    avl_node_t * head;
 } removed_list_t;
 
 /*
@@ -47,7 +47,7 @@ static bool avl_tree_is_empty (const avl_tree_t *avltree)
 }
 */
 
-static inline objective_t *node_point(const avl_node_t *node)
+static inline objective_t * node_point(const avl_node_t * node)
 {
     return (objective_t*) node->item;
 }
@@ -66,12 +66,12 @@ static int compare_node(const void *p1, const void *p2)
   Create a list of points, ordered by the third coordinate.
 */
 static dlnode_t *
-setup_cdllist(objective_t *data, int d, const int *cumsize, int nsets)
+setup_cdllist(objective_t * restrict data, int d, const int * restrict cumsize, int nsets)
 {
     int n = cumsize[nsets - 1];
-    dlnode_t *head = malloc ((n + 1) * sizeof(dlnode_t));
+    dlnode_t * head = malloc((n + 1) * sizeof(dlnode_t));
     head->x = data;
-    head[0].set = 0;
+    head->set = 0;
 
     int i, k;
     for (i = 0, k = 0; i < n; i++) {
@@ -85,7 +85,7 @@ setup_cdllist(objective_t *data, int d, const int *cumsize, int nsets)
     }
     head->x = NULL; // head contains no data
 
-    dlnode_t **scratch = malloc(n * sizeof(*scratch));
+    dlnode_t ** scratch = malloc(n * sizeof(*scratch));
     for (i = 0; i < n; i++)
         scratch[i] = head + i + 1;
 
@@ -97,7 +97,6 @@ setup_cdllist(objective_t *data, int d, const int *cumsize, int nsets)
     qsort(scratch, n, sizeof(*scratch), compare_node);
 
     head->next = scratch[0];
-
     scratch[0]->prev = head;
     for (i = 1; i < n; i++) {
         scratch[i-1]->next = scratch[i];
@@ -133,21 +132,23 @@ static int compare_tree_desc_y( const void *p1, const void *p2)
     return (y1 > y2) ? -1 : (y1 < y2) ? 1 : 0;
 }
 
-static int avl_search_closest_y(const avl_tree_t *avltree, const void *item, avl_node_t **avlnode) {
-    avl_node_t *node;
-    int c;
+static int
+avl_search_closest_y(const avl_tree_t * restrict avltree, const void * restrict item,
+                     avl_node_t ** avlnode)
+{
+    avl_node_t * node;
 
-    if(!avlnode)
+    if (!avlnode)
         avlnode = &node;
 
     node = avltree->top;
-    if(!node) {
+    if (!node) {
         *avlnode = NULL;
         return 0;
     }
 
     do {
-        c = compare_tree_desc_y(item, node->item);
+        int c = compare_tree_desc_y(item, node->item);
         if (c < 0) {
             if(node->left)
                 node = node->left;
@@ -171,9 +172,9 @@ static int avl_search_closest_y(const avl_tree_t *avltree, const void *item, avl
 
 
 static void
-find_all_promoters(avl_node_t * avlnode, int * dom_sets, int nruns)
+find_all_promoters(avl_node_t * restrict avlnode, int * restrict dom_sets, int nruns)
 {
-    avl_node_t *node = avlnode;
+    avl_node_t * node = avlnode;
 
     while (node != NULL) {
         dom_sets[node->set] = 1;
@@ -210,7 +211,7 @@ printlist(const avl_tree_t *avltree, int dim, FILE *outfile)
 }
 
 
-void printset(FILE* stream, avl_tree_t **set, int nset)
+void printset(FILE * stream, avl_tree_t ** set, int nset)
 {
     fprintf(stream, "# sets\n----------------------\n");
     for (int i = 0; i < nset; i++){
@@ -268,7 +269,8 @@ printlist_points_indic(avl_tree_t *avltree, int dim, int nruns, FILE *outfile, F
 }
 
 /* Returns the total number of points printed */
-int printoutput(avl_tree_t **level, int nset, int d, FILE **outfile, int noutfiles, FILE **outfileindic, int noutfilesi, int * attlevel, int nlevels)
+int printoutput(avl_tree_t **level, int nset, int d, FILE **outfile, int noutfiles,
+                FILE **outfileindic, int noutfilesi, int * attlevel, int nlevels)
 {
     int totalp = 0;
     for (int i = 0; i < nlevels; i++){
@@ -293,18 +295,18 @@ int printoutput(avl_tree_t **level, int nset, int d, FILE **outfile, int noutfil
 
 
 
-static void print_list_indic(avl_tree_t * level, int nruns, FILE * indicfile)
+static void
+print_list_indic(avl_tree_t * level, int nruns, FILE * indicfile)
 {
     int * dom_sets = (int *) malloc(nruns * sizeof(int));
-    int i;
     avl_node_t * avlnode = level->head;
     while (avlnode) {
-        for (i = 0;  i < nruns; i++){
+        for (int i = 0;  i < nruns; i++) {
             dom_sets[i] = 0;
         }
         find_all_promoters(avlnode, dom_sets, nruns);
 
-        for (i = 0; i < nruns; i++){
+        for (int i = 0; i < nruns; i++) {
             fprintf(indicfile, "%d\t", dom_sets[i]);
         }
         fprintf(indicfile, "\n");
@@ -316,11 +318,11 @@ static void print_list_indic(avl_tree_t * level, int nruns, FILE * indicfile)
 
 void printindic(avl_tree_t ** levels, int nruns, FILE ** indicfile, int nfiles, int * attlevel, int nlevels)
 {
-    for (int i = 0; i < nlevels; i++){
+    for (int i = 0; i < nlevels; i++) {
         int k = attlevel[i] - 1;
         int f = (nfiles == 1) ? 0 : i;
 
-        if (levels[k]->head != NULL){
+        if (levels[k]->head != NULL) {
             print_list_indic(levels[k], nruns, indicfile[f]);
         }
 
@@ -414,15 +416,14 @@ add2level(removed_list_t * removed_list, avl_tree_t *tree,
           prevnode = (node_point(prevnode)[0] > item[0])
               ? prevnode : prevnode->prev;
           break;
-
       case 1: break;
     }
 
     //aux represents the point immediately below item.
-    avl_node_t *aux = prevnode->next;
+    avl_node_t * aux = prevnode->next;
     // A new point (item) is added, but only if it isn't dominated.
     if (node_point(aux)[0] > item[0]) {
-        avl_node_t *tnode = malloc(sizeof(avl_node_t));
+        avl_node_t * tnode = malloc(sizeof(*tnode));
         avl_init_node(tnode, item);
         avl_add_promoter(tnode, set, promoter);
         avl_node_t *newnode = tnode;
@@ -436,7 +437,7 @@ add2level(removed_list_t * removed_list, avl_tree_t *tree,
 
             if (node_point(aux)[2] < item[2])
                 add2output(output, aux);
-            else{
+            else {
                 free(aux->item);
                 add_removed(removed_list, aux);
                 aux->remover = newnode;
@@ -453,21 +454,26 @@ add2level(removed_list_t * removed_list, avl_tree_t *tree,
     }
 }
 
-
-static objective_t * copy_point(const objective_t * v)
+static objective_t * new_point(objective_t x1, objective_t x2, objective_t x3)
 {
     objective_t *value = malloc(3 * sizeof(objective_t));
-
-    value[0] = v[0];
-    value[1] = v[1];
-    value[2] = v[2];
-
+    value[0] = x1;
+    value[1] = x2;
+    value[2] = x3;
     return value;
 }
 
-//at left or equal
-static avl_node_t * find_point_at_left(avl_tree_t *tree, objective_t *item){
+static objective_t * copy_point(const objective_t * v)
+{
+    return new_point(v[0], v[1], v[2]);
+}
 
+
+
+//at left or equal
+static avl_node_t *
+find_point_at_left(avl_tree_t * tree, objective_t * item)
+{
     avl_node_t *leftNode;
 
     if (avl_search_closest(tree, item, &leftNode) < 0)
@@ -477,7 +483,8 @@ static avl_node_t * find_point_at_left(avl_tree_t *tree, objective_t *item){
 }
 
 //below and not equal
-static avl_node_t * find_point_below(avl_tree_t *tree, objective_t *item)
+static avl_node_t *
+find_point_below(avl_tree_t *tree, objective_t *item)
 {
     avl_node_t *belowNode;
 
@@ -485,17 +492,6 @@ static avl_node_t * find_point_below(avl_tree_t *tree, objective_t *item)
         belowNode = belowNode->next;
 
     return belowNode;
-}
-
-
-
-static objective_t * new_point(objective_t x1, objective_t x2, objective_t x3)
-{
-    objective_t *value = malloc(3 * sizeof(objective_t));
-    value[0] = x1;
-    value[1] = x2;
-    value[2] = x3;
-    return value;
 }
 
 
@@ -514,11 +510,11 @@ eaf3df(removed_list_t * removed_list, dlnode_t *list, avl_tree_t **set,
         avl_node_t * promoter;
     };
 
-    struct aux_nodes * aux = malloc(sizeof(struct aux_nodes) * nset);
+    struct aux_nodes * aux = malloc(sizeof(*aux) * nset);
 
     dlnode_t *new = list->next; //new - represents the new point
 
-    //add new to its set
+    // add new to its set
     avl_node_t * tnode = avl_init_node(malloc(sizeof(avl_node_t)), new->x);
     avl_insert_after(set[new->set], set[new->set]->head, tnode);
 
@@ -596,9 +592,10 @@ eaf3df(removed_list_t * removed_list, dlnode_t *list, avl_tree_t **set,
                         aux[k].levelNode = find_point_below(level[k], setNode->item);
                         aux[k].promoter = aux[k].levelNode;
                     } else {
-                        objective_t *value = new_point(node_point(aux[k].levelNode)[0], node_point(aux[k].levelNode)[1], new->x[2]);
+                        objective_t * value = new_point(node_point(aux[k].levelNode)[0], node_point(aux[k].levelNode)[1], new->x[2]);
                         tnode = add2level(removed_list, level[k+1], value, output[k+1], new->set, aux[k].promoter);
-                        if(tnode != NULL && new->x[2] == node_point(aux[k].promoter)[2] && node_point(aux[k].levelNode)[0] == node_point(aux[k].promoter)[0]){
+                        if (tnode != NULL && new->x[2] == node_point(aux[k].promoter)[2]
+                            && node_point(aux[k].levelNode)[0] == node_point(aux[k].promoter)[0]) {
                             aux[k].promoter->equal = tnode;
                         }
 
@@ -611,14 +608,15 @@ eaf3df(removed_list_t * removed_list, dlnode_t *list, avl_tree_t **set,
         } while (node_point(setNode)[1] > new->x[1]);
 
         //Third part
-        for (int k = start_at; k >= stop_at; k--){
+        for (int k = start_at; k >= stop_at; k--) {
             //if the intersection point of new with the point from level k immediately below new
             //isn't dominated, it is added to level k+1
-            if(node_point(aux[k].levelNode)[0] < node_point(setNode)[0]){
+            if (node_point(aux[k].levelNode)[0] < node_point(setNode)[0]) {
 
-                objective_t *value =new_point(node_point(aux[k].levelNode)[0], new->x[1], new->x[2]);
+                objective_t * value = new_point(node_point(aux[k].levelNode)[0], new->x[1], new->x[2]);
                 tnode = add2level(removed_list, level[k+1], value, output[k+1], new->set, aux[k].promoter);
-                if (tnode != NULL && new->x[2] == node_point(aux[k].levelNode)[2] && new->x[1] == node_point(aux[k].levelNode)[1]){
+                if (tnode != NULL && new->x[2] == node_point(aux[k].levelNode)[2]
+                    && new->x[1] == node_point(aux[k].levelNode)[1]) {
                     aux[k].promoter->equal = tnode;
                 }
             }
@@ -636,7 +634,7 @@ eaf3df(removed_list_t * removed_list, dlnode_t *list, avl_tree_t **set,
         }
 
         if (!mask[new->set]) {
-            if (start_at < (nset - 2))
+            if (start_at < nset - 2)
                 start_at++;
             mask[new->set] = true;
         }
@@ -649,12 +647,10 @@ eaf3df(removed_list_t * removed_list, dlnode_t *list, avl_tree_t **set,
 static void
 freetree(avl_tree_t *avltree)
 {
-    avl_node_t *aux, *aux2;
-    aux=avltree->head;
-
-    if(aux){ // FIXME: Double check of aux?
-        while(aux){
-            aux2 = aux;
+    avl_node_t * aux = avltree->head;
+    if (aux) { // FIXME: Double check of aux?
+        while (aux) {
+            avl_node_t * aux2 = aux;
             aux = aux2->next;
             free(aux2->item);
             free(aux2);
@@ -667,13 +663,11 @@ freetree(avl_tree_t *avltree)
 static void
 freetree2(avl_tree_t *avltree)
 {
-    avl_node_t *aux, *aux2;
-    aux=avltree->head;
-
+    avl_node_t * aux = avltree->head;
     free(aux->item);
 
-    while(aux->next){
-        aux2 = aux;
+    while (aux->next) {
+        avl_node_t * aux2 = aux;
         aux = aux2->next;
         // FIXME: aux2->time is not freed?
         free(aux2);
@@ -681,7 +675,6 @@ freetree2(avl_tree_t *avltree)
     // FIXME: Double free of aux->item
     free(aux->item);
     free(aux);
-
     free(avltree);
 }
 
@@ -701,7 +694,7 @@ static void free_removed(removed_list_t * removed_list)
 _attr_maybe_unused static void
 freeoutput(removed_list_t * removed_list, avl_tree_t **output, int nset)
 {
-    for (int i = 0; i < nset; i++){
+    for (int i = 0; i < nset; i++) {
         freetree(output[i]);
     }
     free(output);
@@ -727,11 +720,11 @@ void add_sentinels(avl_tree_t * tree, int n)
 }
 
 static void
-eaf_store_point_3d (eaf_t * eaf, objective_t x, objective_t y, objective_t z,
-                    const int *save_attained)
+eaf_store_point_3d(eaf_t * restrict eaf, objective_t x, objective_t y, objective_t z,
+                   const int * restrict save_attained)
 {
-    const int nobj = 3;
-    objective_t * pos = eaf_store_point_help (eaf, nobj, save_attained);
+    const dimension_t nobj = 3;
+    objective_t * pos = eaf_store_point_help(eaf, nobj, save_attained);
     pos[0] = x;
     pos[1] = y;
     pos[2] = z;
@@ -740,8 +733,8 @@ eaf_store_point_3d (eaf_t * eaf, objective_t x, objective_t y, objective_t z,
 
 
 eaf_t **
-eaf3d(objective_t *data, const int *cumsize, int nruns,
-      const int *attlevel, const int nlevels)
+eaf3d(objective_t * restrict data, const int * restrict cumsize, int nruns,
+      const int * restrict attlevel, const int nlevels)
 {
     const int nobj = 3;
     const int ntotal = cumsize[nruns - 1]; /* total number of points in data */
@@ -758,9 +751,9 @@ eaf3d(objective_t *data, const int *cumsize, int nruns,
        This way we do not need to do avl_alloc_tree for each tree, which
        creates a lot of small memory chunks.
     */
-    avl_tree_t **set = malloc (nruns * sizeof(avl_tree_t));
-    avl_tree_t **level = malloc (nruns * sizeof(avl_tree_t));
-    avl_tree_t **output = malloc (nruns * sizeof(avl_tree_t));
+    avl_tree_t ** set = malloc(2 * nruns * sizeof(avl_tree_t));
+    avl_tree_t ** level = malloc(nruns * sizeof(avl_tree_t));
+    avl_tree_t ** output = malloc(nruns * sizeof(avl_tree_t));
 
     int i;
     for (i = 0; i < nruns; i++) {
@@ -775,7 +768,7 @@ eaf3d(objective_t *data, const int *cumsize, int nruns,
 
     removed_list_t removed_list;
     removed_list.head = NULL;
-    dlnode_t *list = setup_cdllist(data, nobj, cumsize, nruns);
+    dlnode_t * list = setup_cdllist(data, nobj, cumsize, nruns);
     eaf3df(&removed_list, list, set, level, output, nruns);
 
     for (i = 0; i < nruns; i++) {
@@ -794,8 +787,8 @@ eaf3d(objective_t *data, const int *cumsize, int nruns,
     /* Create output EAF */
     /* FIXME: This should be done earlier instead of creating the trees. */
 
-    eaf_t **eaf = malloc(nlevels * sizeof(*eaf));
     int * attained = malloc(nruns * sizeof(*attained));
+    eaf_t ** eaf = malloc(nlevels * sizeof(*eaf));
     for (int l = 0; l < nlevels; l++) {
         eaf[l] = eaf_create(nobj, nruns, ntotal);
         int k = attlevel[l] - 1;

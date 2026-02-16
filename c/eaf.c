@@ -34,7 +34,7 @@
 #define DEBUG_POLYGONS 0
 #endif
 
-static int compare_x_asc (const void *p1, const void *p2)
+static int compare_x_asc(const void * p1, const void * p2)
 {
     objective_t x1 = **(objective_t **)p1;
     objective_t x2 = **(objective_t **)p2;
@@ -42,7 +42,7 @@ static int compare_x_asc (const void *p1, const void *p2)
     return (x1 < x2) ? -1 : ((x1 > x2) ? 1 : 0);
 }
 
-static int compare_y_desc (const void *p1, const void *p2)
+static int compare_y_desc(const void * p1, const void * p2)
 {
     objective_t y1 = *(*(objective_t **)p1+1);
     objective_t y2 = *(*(objective_t **)p2+1);
@@ -51,22 +51,25 @@ static int compare_y_desc (const void *p1, const void *p2)
 }
 
 static void
-point2d_printf(FILE *stream, const objective_t x, const objective_t y)
+point2d_printf(FILE * stream, const objective_t x, const objective_t y)
 {
     fprintf(stream, point_printf_format point_printf_sep point_printf_format, x, y);
 }
 
 static void
-point_printf(FILE *stream, const objective_t *p, int nobj)
+point_printf(FILE * stream, const objective_t * restrict p, dimension_t nobj)
 {
     point2d_printf(stream, p[0], p[1]);
-    for (int k = 2; k < nobj; k++)
-        fprintf (stream, point_printf_sep point_printf_format, p[k]);
+    for (dimension_t k = 2; k < nobj; k++)
+        fprintf(stream, point_printf_sep point_printf_format, p[k]);
 }
 
-eaf_t * eaf_create (int nobj, int nruns, int npoints)
+eaf_t * eaf_create(int nobj, int nruns, int npoints)
 {
-    eaf_t *eaf = MOOCORE_MALLOC(1, eaf_t);
+    ASSUME(nruns >= 0);
+    ASSUME(npoints >= 0);
+
+    eaf_t * eaf = MOOCORE_MALLOC(1, eaf_t);
     eaf->nruns = nruns;
     eaf->size = 0;
     eaf->nreallocs = 0;
@@ -80,11 +83,11 @@ eaf_t * eaf_create (int nobj, int nruns, int npoints)
     return eaf;
 }
 
-void eaf_delete (eaf_t * eaf)
+void eaf_delete(eaf_t * eaf)
 {
-    free (eaf->data);
-    free (eaf->bit_attained);
-    free (eaf);
+    free(eaf->data);
+    free(eaf->bit_attained);
+    free(eaf);
 }
 
 void eaf_free(eaf_t ** eaf, int nruns)
@@ -94,20 +97,21 @@ void eaf_free(eaf_t ** eaf, int nruns)
     free(eaf);
 }
 
-void eaf_realloc(eaf_t * eaf, size_t nobj)
+static void
+eaf_realloc(eaf_t * eaf, dimension_t nobj)
 {
     const int nruns = eaf->nruns;
-    eaf->data = realloc (eaf->data,
-                         sizeof(objective_t) * nobj * eaf->maxsize);
+    eaf->data = realloc(eaf->data,
+                        sizeof(objective_t) * nobj * eaf->maxsize);
     assert(eaf->data);
-    eaf->bit_attained = realloc (eaf->bit_attained,
-                                 bit_array_bytesize(nruns) * eaf->maxsize);
+    eaf->bit_attained = realloc(eaf->bit_attained,
+                                bit_array_bytesize(nruns) * eaf->maxsize);
     assert(eaf->bit_attained);
 }
 
 objective_t *
-eaf_store_point_help (eaf_t * eaf, int nobj,
-                      const int *save_attained)
+eaf_store_point_help(eaf_t * restrict eaf, dimension_t nobj,
+                     const int * restrict save_attained)
 {
     const int nruns = eaf->nruns;
 
@@ -130,7 +134,7 @@ eaf_store_point_help (eaf_t * eaf, int nobj,
 }
 
 static void
-eaf_adjust_memory (eaf_t * eaf, int nobj)
+eaf_adjust_memory(eaf_t * restrict eaf, dimension_t nobj)
 {
     if (eaf->size < eaf->maxsize) {
         //fprintf(stderr,"reduce size: %ld -> %ld\n", eaf->maxsize, eaf->size);
@@ -140,64 +144,65 @@ eaf_adjust_memory (eaf_t * eaf, int nobj)
 }
 
 static void
-eaf_store_point_2d (eaf_t * eaf, objective_t x, objective_t y,
-                    const int *save_attained)
+eaf_store_point_2d(eaf_t * restrict eaf, objective_t x, objective_t y,
+                   const int * restrict save_attained)
 {
-    const int nobj = 2;
-    objective_t * pos = eaf_store_point_help (eaf, nobj, save_attained);
+    const dimension_t nobj = 2;
+    objective_t * pos = eaf_store_point_help(eaf, nobj, save_attained);
     pos[0] = x;
     pos[1] = y;
     eaf->size++;
 }
 
 static void
-eaf_print_line (FILE *coord_file, FILE *indic_file, FILE *diff_file,
-                const objective_t *x, int nobj,
-                const bit_array *attained, int nruns)
+eaf_print_line(FILE * coord_file, FILE * indic_file, FILE * diff_file,
+                const objective_t * restrict x, dimension_t nobj,
+                const bit_array * restrict attained, int nruns)
 {
     if (coord_file) {
         point_printf(coord_file, x, nobj);
-        fprintf (coord_file,
-                 (coord_file == indic_file) || (coord_file == diff_file)
-                 ? "\t" : "\n");
+        fprintf(coord_file,
+                (coord_file == indic_file) || (coord_file == diff_file)
+                ? "\t" : "\n");
     }
 
     int k, count1 = 0, count2 = 0;
     if (indic_file) {
-        fprintf (indic_file, "%d",
-                 bit_array_get(attained, 0) ? (count1++,1) : 0);
+        fprintf(indic_file, "%d",
+                bit_array_get(attained, 0) ? (count1++,1) : 0);
         for (k = 1; k < nruns/2; k++)
-            fprintf (indic_file, " %d",
-                     bit_array_get(attained, k) ? (count1++,1) : 0);
+            fprintf(indic_file, " %d",
+                    bit_array_get(attained, k) ? (count1++,1) : 0);
         for (k = nruns/2; k < nruns; k++)
-            fprintf (indic_file, " %d",
-                     bit_array_get(attained, k) ? (count2++,1) : 0);
+            fprintf(indic_file, " %d",
+                    bit_array_get(attained, k) ? (count2++,1) : 0);
 
-        fprintf (indic_file, (indic_file == diff_file) ? "\t" : "\n");
+        fprintf(indic_file, (indic_file == diff_file) ? "\t" : "\n");
     } else if (diff_file) {
         attained_left_right(attained, nruns/2, nruns, &count1, &count2);
     }
 
     if (diff_file)
-        fprintf (diff_file,"%d %d\n", count1, count2);
+        fprintf(diff_file,"%d %d\n", count1, count2);
 }
 
 /* Print one attainment surface of the EAF.  */
 void
-eaf_print_attsurf (const eaf_t * eaf, int nobj, FILE *coord_file,  FILE *indic_file, FILE *diff_file)
+eaf_print_attsurf(const eaf_t * restrict eaf, dimension_t nobj,
+                  FILE * coord_file,  FILE * indic_file, FILE * diff_file)
 {
     for (size_t i = 0; i < eaf->size; i++) {
-        const objective_t *p = eaf->data + i * nobj;
+        const objective_t * p = eaf->data + i * nobj;
         /* bit_array_fprintf(stderr, eaf->bit_attained, eaf->nruns * eaf->size); */
-        eaf_print_line (coord_file, indic_file, diff_file,
-                        p, nobj,
-                        bit_array_offset(eaf->bit_attained, i, eaf->nruns),
-                        eaf->nruns);
+        eaf_print_line(coord_file, indic_file, diff_file,
+                       p, nobj,
+                       bit_array_offset(eaf->bit_attained, i, eaf->nruns),
+                       eaf->nruns);
     }
 }
 
 _attr_maybe_unused static void
-fprint_set2d (FILE *stream, const objective_t * const *data, int ntotal)
+fprint_set2d (FILE * stream, const objective_t * const * data, int ntotal)
 {
     for (int k = 0; k < ntotal; k++)
         fprintf (stream, "%6d: " point_printf_format " " point_printf_format "\n", k,
@@ -205,8 +210,8 @@ fprint_set2d (FILE *stream, const objective_t * const *data, int ntotal)
 }
 
 void
-eaf2matrix_R (double *rmat, eaf_t * const * eaf, int nobj, int totalpoints,
-              const double * percentile, int nlevels)
+eaf2matrix_R(double * restrict rmat, eaf_t * const * eaf, int nobj, int totalpoints,
+             const double * restrict percentile, int nlevels)
 {
     int pos = 0;
     for (int k = 0; k < nlevels; k++) {
@@ -223,16 +228,17 @@ eaf2matrix_R (double *rmat, eaf_t * const * eaf, int nobj, int totalpoints,
 }
 
 void
-eaf2matrix (double *rmat, eaf_t * const * eaf, int nobj, _attr_maybe_unused int totalpoints,
-            const double * percentile, int nlevels)
+eaf2matrix(double * restrict rmat, eaf_t * const * eaf, int nobj,
+           _attr_maybe_unused int totalpoints,
+           const double * restrict percentile, int nlevels)
 {
+    const dimension_t ncol = (dimension_t)nobj + 1;
     int pos = 0;
-    int ncol = nobj + 1;
     for (int k = 0; k < nlevels; k++) {
         size_t npoints = eaf[k]->size;
         double p = percentile ? percentile[k] : level2percentile(k+1, nlevels);
         for (size_t i = 0; i < npoints; i++) {
-            for (int j = 0; j < nobj; j++) {
+            for (dimension_t j = 0; j < nobj; j++) {
                 rmat[j + pos * ncol] = eaf[k]->data[j + i * nobj];
             }
             rmat[nobj + pos * ncol] = p;
@@ -242,15 +248,16 @@ eaf2matrix (double *rmat, eaf_t * const * eaf, int nobj, _attr_maybe_unused int 
 }
 
 double *
-eaf_compute_matrix(int *eaf_npoints, double * data, int nobj, const int *cumsizes, int nruns,
-                   const double * percentile, int nlevels)
+eaf_compute_matrix(int * restrict eaf_npoints, double * restrict data, int nobj,
+                   const int * restrict cumsizes, int nruns,
+                   const double * restrict percentile, int nlevels)
 {
-    int *level = levels_from_percentiles(percentile, nlevels, nruns);
-    eaf_t **eaf = attsurf(data, nobj, cumsizes, nruns, level, nlevels);
+    int * level = levels_from_percentiles(percentile, nlevels, nruns);
+    eaf_t ** eaf = attsurf(data, nobj, cumsizes, nruns, level, nlevels);
     free (level);
 
-    int totalpoints = eaf_totalpoints (eaf, nlevels);
-    double *mat = malloc(sizeof(double) * totalpoints * (nobj + 1));
+    int totalpoints = eaf_totalpoints(eaf, nlevels);
+    double * mat = malloc(sizeof(*mat) * totalpoints * (nobj + 1));
     eaf2matrix(mat, eaf, nobj, totalpoints, percentile, nlevels);
     eaf_free(eaf, nlevels);
     *eaf_npoints = totalpoints;
@@ -276,86 +283,73 @@ eaf_compute_matrix(int *eaf_npoints, double * data, int nobj, const int *cumsize
 */
 
 eaf_t **
-eaf2d (const objective_t *data, const int *cumsize, int nruns,
-       const int *attlevel, const int nlevels)
+eaf2d(const objective_t * restrict data, const int * restrict cumsize, int nruns,
+      const int * restrict attlevel, const int nlevels)
 {
-    const int nobj = 2;
-    eaf_t **eaf;
-    const objective_t **datax, **datay; /* used to access the data sorted
-                                           according to x or y */
-
+    const dimension_t nobj = 2;
     const int ntotal = cumsize[nruns - 1]; /* total number of points in data */
-    int *runtab;
-    int *attained, *save_attained;
-    int k, j, l;
-
     /* Access to the data is made via two arrays of pointers: ix, iy
        These are sorted, to allow for dimension sweeping */
 
-    datax = malloc (ntotal * sizeof(objective_t *));
-    datay = malloc (ntotal * sizeof(objective_t *));
+    const objective_t ** datax = malloc(2 * ntotal * sizeof(*datax));
+    const objective_t ** datay = datax + ntotal;
 
-    for (k = 0; k < ntotal ; k++)
+    for (int k = 0; k < ntotal; k++)
         datax[k] = datay[k] = data + nobj * k;
 
     DEBUG1(/* Sanity check. */
-        for (k = 1; k < nruns ; k++)
+        for (int k = 1; k < nruns ; k++)
             assert(cumsize[k-1] < cumsize[k]);
         );
-
     DEBUG2(
-        fprintf (stderr, "Original data:\n");
-        fprint_set2d (stderr, datax, ntotal);
+        fprintf(stderr, "Original data:\n");
+        fprint_set2d(stderr, datax, ntotal);
         );
 
-    qsort (datax, ntotal, sizeof(*datax), &compare_x_asc);
-    qsort (datay, ntotal, sizeof(*datay), &compare_y_desc);
+    qsort(datax, ntotal, sizeof(*datax), &compare_x_asc);
+    qsort(datay, ntotal, sizeof(*datay), &compare_y_desc);
 
     DEBUG2(
-        fprintf (stderr, "Sorted data (x):\n");
-        fprint_set2d (stderr, datax, ntotal);
-        fprintf (stderr, "Sorted data (y):\n");
+        fprintf(stderr, "Sorted data (x):\n");
+        fprint_set2d(stderr, datax, ntotal);
+        fprintf(stderr, "Sorted data (y):\n");
         fprint_set2d (stderr, datay, ntotal);
         );
 
-    /* Setup a lookup table to go from a point to the approximation
-       set (run) to which it belongs.  */
+    /* Setup a lookup table to go from a point to the approximation set (run)
+       to which it belongs.  */
 
-    runtab = malloc (ntotal * sizeof(int));
-    for (k = 0, j = 0; k < ntotal; k++) {
-        if (k == cumsize[j])
-            j++;
-        runtab[k] = j;
+    int * runtab = malloc(ntotal * sizeof(*runtab));
+    for (int k = 0, j = 0; k < ntotal; j++) {
+        for (; k < cumsize[j]; k++)
+            runtab[k] = j;
     }
 
     DEBUG2(
-        fprintf (stderr, "Runtab:\n");
-        for (k = 0; k < ntotal; k++)
-            fprintf (stderr, "%6d: %6d\n", k, runtab[k]);
+        fprintf(stderr, "Runtab:\n");
+        for (int k = 0; k < ntotal; k++)
+            fprintf(stderr, "%6d: %6d\n", k, runtab[k]);
         );
 
     /* Setup tables to keep attainment statistics. In particular,
        save_attained is needed to cope with repeated values on the same
        axis. */
+    int * attained = malloc(2 * nruns * sizeof(*attained));
+    int * save_attained = attained + nruns;
+    eaf_t ** eaf = malloc(nlevels * sizeof(*eaf));
 
-    attained = malloc (nruns * sizeof(int));
-    save_attained = malloc (nruns * sizeof(int));
-    eaf = malloc(nlevels * sizeof(eaf_t*));
-
-    for (l = 0; l < nlevels; l++) {
-        eaf[l] = eaf_create (nobj, nruns, ntotal);
+    for (int l = 0; l < nlevels; l++) {
+        eaf[l] = eaf_create(nobj, nruns, ntotal);
         int level = attlevel[l];
         int x = 0;
         int y = 0;
-
         int nattained = 0;
-        for (k = 0; k < nruns; k++) attained[k] = 0;
+        for (int k = 0; k < nruns; k++) attained[k] = 0;
 
         /* Start at upper-left corner */
         int run = runtab[(datax[x] - data) / nobj];
         attained[run]++;
         nattained++;
-
         do {
             /* Move right until desired attainment level is reached */
             while (x < ntotal - 1 &&
@@ -368,11 +362,11 @@ eaf2d (const objective_t *data, const int *cumsize, int nruns,
                     attained[run]++;
                 }
             }
-#if DEBUG > 1
-            for (k = 0; k < nruns; k++)
-                fprintf (stderr, "%d ", attained[k]);
-            fprintf (stderr, "\n");
-#endif
+            DEBUG2(
+                for (int k = 0; k < nruns; k++)
+                    fprintf (stderr, "%d ", attained[k]);
+                fprintf (stderr, "\n")
+                );
 
             if (nattained < level)
                 continue;
@@ -382,7 +376,6 @@ eaf2d (const objective_t *data, const int *cumsize, int nruns,
             do {
                 /* If there are repeated values along the y axis,
                    we need to remember where we are.  */
-                /*save_nattained = nattained;*/
                 memcpy (save_attained, attained, nruns * sizeof(*attained));
 
                 do {
@@ -392,27 +385,23 @@ eaf2d (const objective_t *data, const int *cumsize, int nruns,
                         if (!attained[run])
                             nattained--;
                     }
-#if DEBUG > 1
-                    for (k = 0; k < nruns; k++)
-                        fprintf (stderr, "%d ", attained[k]);
-                    fprintf (stderr, "\n");
-#endif
                     y++;
+                    DEBUG2(
+                        for (int k = 0; k < nruns; k++)
+                            fprintf (stderr, "%d ", attained[k]);
+                        fprintf (stderr, "\n")
+                        );
                 } while (y < ntotal && datay[y][1] == datay[y - 1][1]);
             } while (nattained >= level && y < ntotal);
 
-            assert (nattained < level);
-
-            eaf_store_point_2d (eaf[l], datax[x][0], datay[y - 1][1],
-                                save_attained);
+            assert(nattained < level);
+            eaf_store_point_2d(eaf[l], datax[x][0], datay[y - 1][1], save_attained);
 
         } while (x < ntotal - 1 && y < ntotal);
         eaf_adjust_memory(eaf[l], nobj);
     }
-    free(save_attained);
     free(attained);
     free(runtab);
-    free(datay);
     free(datax);
 
     return eaf;
@@ -428,7 +417,7 @@ eaf2d (const objective_t *data, const int *cumsize, int nruns,
 #define PRINT_POINT(X,Y,C) (void)0
 #endif
 
-static int
+static size_t
 eaf_max_size(eaf_t * const * eaf, int nlevels)
 {
     size_t max_size = 0;
@@ -436,20 +425,20 @@ eaf_max_size(eaf_t * const * eaf, int nlevels)
         if (max_size < eaf[a]->size)
             max_size = eaf[a]->size;
     }
-    return (int) max_size;
+    return max_size;
 }
 
 static int
 eaf_diff_color(const eaf_t * eaf, size_t k, int nruns)
 {
-    const bit_array *bit_attained = bit_array_offset(eaf->bit_attained, k, nruns);
+    const bit_array * bit_attained = bit_array_offset(eaf->bit_attained, k, nruns);
     int count_left, count_right;
-    attained_left_right (bit_attained, nruns/2, nruns, &count_left, &count_right);
+    attained_left_right(bit_attained, nruns/2, nruns, &count_left, &count_right);
     return count_left - count_right;
 }
 
 static void
-init_colors(int * color, const eaf_t * eaf, size_t eaf_size, int nruns)
+init_colors(int * restrict color, const eaf_t * restrict eaf, size_t eaf_size, int nruns)
 {
     for (size_t k = 0; k < eaf_size; k++) {
         color[k] = eaf_diff_color(eaf, k, nruns);
@@ -457,7 +446,7 @@ init_colors(int * color, const eaf_t * eaf, size_t eaf_size, int nruns)
 }
 
 static const objective_t *
-next_polygon(const objective_t *src, int nobj, const objective_t * end)
+next_polygon(const objective_t * src, int nobj, const objective_t * end)
 {
     while (src < end && *src != objective_MIN)
         src += nobj;
@@ -466,19 +455,16 @@ next_polygon(const objective_t *src, int nobj, const objective_t * end)
 }
 
 static void
-min_max_in_objective(const objective_t *v,
-                     int nobj, int k,
-                     objective_t *min_ref, objective_t *max_ref)
+min_max_in_objective(const objective_t * restrict v, dimension_t nobj,
+                     objective_t * restrict min_ref, objective_t * restrict max_ref)
 {
-    assert(k < nobj);
-    assert(v[k] != objective_MIN); // Empty polygon?
-
-    objective_t min = v[k];
-    objective_t max = v[k];
+    assert(*v != objective_MIN); // Empty polygon?
+    objective_t min = *v;
+    objective_t max = *v;
     v += nobj;
-    while (v[k] != objective_MIN) {
-        if (min > v[k]) min = v[k];
-        if (max < v[k]) max = v[k];
+    while (*v != objective_MIN) {
+        if (min > *v) min = *v;
+        if (max < *v) max = *v;
         v += nobj;
     }
     *min_ref = min;
@@ -486,7 +472,7 @@ min_max_in_objective(const objective_t *v,
 }
 
 static bool
-polygon_dominates_point(const objective_t *p, const objective_t *x, int nobj)
+polygon_dominates_point(const objective_t * p, const objective_t * x, int nobj)
 {
     assert(x[0] != objective_MIN);
     while (p[0] != objective_MIN) {
@@ -503,7 +489,7 @@ polygon_dominates_point(const objective_t *p, const objective_t *x, int nobj)
 }
 
 static bool
-polygon_dominates_any_point(const objective_t *a, const objective_t *b, int nobj)
+polygon_dominates_any_point(const objective_t * a, const objective_t * b, int nobj)
 {
     while (b[0] != objective_MIN) {
         if (polygon_dominates_point(a, b, nobj)) return true;
@@ -513,12 +499,12 @@ polygon_dominates_any_point(const objective_t *a, const objective_t *b, int nobj
 }
 
 static bool
-polygons_intersect(const objective_t *a, const objective_t *b, int nobj)
+polygons_intersect(const objective_t * a, const objective_t * b, dimension_t nobj)
 {
-    for (int k = 0; k < nobj; k++) {
+    for (dimension_t k = 0; k < nobj; k++) {
         objective_t min_a, max_a, min_b, max_b;
-        min_max_in_objective(a, nobj, k, &min_a, &max_a);
-        min_max_in_objective(b, nobj, k, &min_b, &max_b);
+        min_max_in_objective(a + k, nobj, &min_a, &max_a);
+        min_max_in_objective(b + k, nobj, &min_b, &max_b);
         // If we can draw a line completely separating them in one axis, then
         // they don't intersect.
         if (max_a <= min_b || max_b <= min_a) return false;
@@ -531,7 +517,7 @@ polygons_intersect(const objective_t *a, const objective_t *b, int nobj)
 
 
 _attr_maybe_unused static void
-polygon_print(const objective_t *p, int nobj)
+polygon_print(const objective_t * p, dimension_t nobj)
 {
     while (p[0] != objective_MIN) {
         point_printf(stderr, p, nobj);
@@ -543,7 +529,7 @@ polygon_print(const objective_t *p, int nobj)
 }
 
 _attr_maybe_unused static void
-eaf_check_polygons(eaf_polygon_t *p, int nobj)
+eaf_check_polygons(eaf_polygon_t * p, dimension_t nobj)
 {
     // This only works for 2 objectives.
     assert(nobj == 2);
@@ -579,12 +565,12 @@ eaf_check_polygons(eaf_polygon_t *p, int nobj)
 
 /* Produce a polygon suitable to be plotted by the polygon function in R.  */
 eaf_polygon_t *
-eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
+eaf_compute_polygon(eaf_t ** eaf, int nobj, int nlevels)
 {
 /* FIXME: Don't add anything if color_0 == 0 */
 
 #define POLY_SIZE_CHECK()                                                      \
-    do { _poly_size_check--; assert(_poly_size_check >= 4);                \
+    do { _poly_size_check--; assert(_poly_size_check >= 4);                    \
         assert(_poly_size_check % 2 == 0); _poly_size_check = 0; } while(0)
 #define eaf_point(A,K) (eaf[(A)]->data + (K) * nobj)
 #define push_point_color(X, Y, C)                                              \
@@ -596,7 +582,7 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
 #define push_point(X, Y) push_point_color(X,Y, INT_MIN)
 
 #if DEBUG_POLYGONS > 0
-#define EXPENSIVE_CHECK_POLYGONS() eaf_check_polygons(polygon, nobj)
+#define EXPENSIVE_CHECK_POLYGONS() eaf_check_polygons(polygon, (dimension_t)nobj)
 #else
 #define EXPENSIVE_CHECK_POLYGONS() (void)0
 #endif
@@ -612,7 +598,7 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
 
     assert(nruns % 2 == 0);
 
-    int max_size = eaf_max_size(eaf, nlevels);
+    size_t max_size = eaf_max_size(eaf, nlevels);
     int * color = MOOCORE_MALLOC(max_size, int);
     eaf_polygon_t * polygon = MOOCORE_MALLOC(1, eaf_polygon_t);
     vector_objective_ctor (&polygon->xy, max_size);
@@ -783,9 +769,7 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
         }
     }
     free (color);
-#if DEBUG >= 1
-    eaf_check_polygons(polygon, nobj); // This is slow with lots of polygons
-#endif
+    DEBUG1(eaf_check_polygons(polygon, (dimension_t)nobj)); // This is slow with lots of polygons
     return polygon;
 }
 
@@ -793,10 +777,10 @@ eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
    much simpler, but it produces artifacts when plotted with the
    polygon function in R.  */
 eaf_polygon_t *
-eaf_compute_polygon_old (eaf_t **eaf, int nobj, int nlevels)
+eaf_compute_polygon_old (eaf_t ** eaf, int nobj, int nlevels)
 {
     _attr_maybe_unused int _poly_size_check = 0;
-    int max_size = eaf_max_size(eaf, nlevels);
+    size_t max_size = eaf_max_size(eaf, nlevels);
     int nruns = eaf[0]->nruns;
     assert(nruns % 2 == 0);
 
@@ -961,7 +945,7 @@ rectangle_add(eaf_polygon_t * regions,
 }
 
 eaf_polygon_t *
-eaf_compute_rectangles (eaf_t **eaf, int nobj, int nlevels)
+eaf_compute_rectangles(eaf_t **eaf, int nobj, int nlevels)
 {
 #define eaf_point(A,K) (eaf[(A)]->data + (K) * nobj)
 #if 0
@@ -975,7 +959,7 @@ eaf_compute_rectangles (eaf_t **eaf, int nobj, int nlevels)
 
     assert(nruns % 2 == 0);
 
-    int max_size = eaf_max_size(eaf, nlevels);
+    size_t max_size = eaf_max_size(eaf, nlevels);
     int * color = MOOCORE_MALLOC(max_size, int);
     eaf_polygon_t * regions = MOOCORE_MALLOC(1, eaf_polygon_t);
     vector_objective_ctor (&regions->xy, max_size);
@@ -991,8 +975,8 @@ eaf_compute_rectangles (eaf_t **eaf, int nobj, int nlevels)
         init_colors(color, eaf[a], eaf_a_size, nruns);
         objective_t top = objective_MAX;
         int ka = 0, kb = 0;
-        const objective_t * pkb = eaf_point (b, kb);
-        const objective_t * pka = eaf_point (a, ka);
+        const objective_t * pkb = eaf_point(b, kb);
+        const objective_t * pka = eaf_point(a, ka);
         printf_points(ka, kb, pka, pkb);
         while (true) {
 

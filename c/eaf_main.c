@@ -136,13 +136,13 @@ static int read_ints (int *levels, char *str)
 }
 
 static void
-eaf_print (eaf_t **eaf, int nobj, int nlevels,
-           FILE *coord_file, FILE *indic_file, FILE *diff_file)
+eaf_print(eaf_t ** eaf, dimension_t nobj, int nlevels,
+          FILE * coord_file, FILE * indic_file, FILE * diff_file)
 {
     for (int k = 0; k < nlevels; k++) {
-        eaf_print_attsurf (eaf[k], nobj, coord_file, indic_file, diff_file);
+        eaf_print_attsurf(eaf[k], nobj, coord_file, indic_file, diff_file);
         if (coord_file)
-            fprintf (coord_file, "\n");
+            fprintf(coord_file, "\n");
         else if (indic_file)
             fprintf(indic_file, "\n");
         else if (diff_file)
@@ -392,28 +392,27 @@ int main(int argc, char *argv[])
     }
 
     if (verbose_flag) {
-        fprintf (stderr, "# objectives (%d): --\n", nobj);
-        fprintf (stderr, "# sets: %d\n", nruns);
-        fprintf (stderr, "# points: %d\n", cumsizes[nruns - 1]);
-        fprintf (stderr, "# calculating levels:");
+        fprintf(stderr, "# objectives (%d): --\n", nobj);
+        fprintf(stderr, "# sets: %d\n", nruns);
+        fprintf(stderr, "# points: %d\n", cumsizes[nruns - 1]);
+        fprintf(stderr, "# calculating levels:");
         for (k = 0; k < nlevels; k++)
             fprintf (stderr, " %d", level[k]);
         fprintf (stderr, "\n");
     }
 
-    eaf_t **eaf = attsurf (data, nobj, cumsizes, nruns, level, nlevels);
+    eaf_t ** eaf = attsurf(data, nobj, cumsizes, nruns, level, nlevels);
 
     if (polygon_flag) {
-        eaf_print_polygon (coord_file, eaf, nobj, nlevels);
-        fclose (coord_file);
+        eaf_print_polygon(coord_file, eaf, nobj, nlevels);
+        fclose(coord_file);
     } else {
-        eaf_print (eaf, nobj, nlevels,
-                   coord_file, indic_file, diff_file);
-        fclose (coord_file);
+        eaf_print(eaf, (dimension_t) nobj, nlevels, coord_file, indic_file, diff_file);
+        fclose(coord_file);
         if (indic_file && indic_file != coord_file)
-            fclose (indic_file);
+            fclose(indic_file);
         if (diff_file && diff_file != coord_file && diff_file != indic_file)
-            fclose (diff_file);
+            fclose(diff_file);
     }
 
     free(level);
@@ -421,5 +420,5 @@ int main(int argc, char *argv[])
     free(percentile);
     free(cumsizes);
     eaf_free(eaf, nlevels);
-    return 0;
+    return EXIT_SUCCESS;
 }
