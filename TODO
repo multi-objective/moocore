@@ -17,6 +17,8 @@ Computation, pp. 465–472 (2012)]
  - [ ] A Fast Incremental BSP Tree Archive for Non-dominated Points: https://doi.org/10.1007/978-3-319-54157-0_18
  - [ ] Faster nondominated algorithm (is_nondominated, filter_dominated) for d>3: https://doi.org/10.1145/321906.321910 and https://github.com/TLDart/nondLib/blob/main/nondlib.hpp <https://dl.acm.org/doi/10.1145/3449726.3462737> <https://dl.acm.org/doi/pdf/10.1145/358841.358850>
  - [ ] Faster nondominated sorting: https://github.com/mbuzdalov/non-dominated-sorting       https://github.com/KernelA/nds-py
+ <https://discourse.julialang.org/t/fast-non-dominated-sorting/24164/20>
+ <https://ctlab.itmo.ru/~mbuzdalov/ec-2018/05-nds.pdf>
      - Tree partitioning by Gustavson/Syberfeldt
      - [Merge non-dominated sorting](https://github.com/jMetal/jMetal/blob/main/jmetal-core/src/main/java/org/uma/jmetal/util/ranking/impl/MergeNonDominatedSortRanking.java
 )
