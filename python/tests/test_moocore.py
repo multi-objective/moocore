@@ -133,6 +133,19 @@ def test_hv_dominated(dim):
     assert hv < 1, err_msg
 
 
+def test_hv_dim0_dim1():
+    x = np.empty((5, 0))
+    with pytest.raises(ValueError):
+        moocore.hypervolume(x, ref=[])
+    x = np.array([[0.0]])
+    assert moocore.hypervolume(x, ref=np.array([0.0])) == 0.0
+    points = np.random.default_rng().uniform(size=(5, 1))
+    ref = 1.1
+    assert math.isclose(
+        ref - points.min(), moocore.hypervolume(points, ref=[ref])
+    )
+
+
 def test_igd():
     ref = np.array([10, 0, 6, 1, 2, 2, 1, 6, 0, 10]).reshape((-1, 2))
     A = np.array([4, 2, 3, 3, 2, 4]).reshape((-1, 2))

@@ -475,6 +475,8 @@ def hypervolume(
     P. Guerreiro enhanced the numerical stability of the recursive algorithm by
     avoiding floating-point comparisons of partial hypervolumes.
 
+    The hypervolume of 1D inputs is defined as `max(0, ref - data.min())`.
+
 
     References
     ----------
@@ -525,6 +527,8 @@ def hypervolume(
         raise ValueError(
             f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
         )
+    if nobj == 0:
+        raise ValueError("input data must have at least 1 column")
 
     maximise = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.

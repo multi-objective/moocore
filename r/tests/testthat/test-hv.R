@@ -18,6 +18,16 @@ expect_equal(test_hv_file("duplicated3.inp",
 
 })
 
+test_that("hv_dim0_dim1", {
+  x <- matrix(numeric(), nrow=5,ncol=0)
+  expect_error(hypervolume(x, ref=c()), "must have at least 1 column")
+  x <- matrix(0, ncol=1)
+  expect_equal(0.0, hypervolume(x, ref=0.0))
+  x <- matrix(runif(5), ncol=1)
+  ref <- 1.1
+  expect_equal(hypervolume(x, ref=ref), ref - min(x))
+})
+
 test_that("hv_contributions", {
   hv_contributions_slow <- function(dataset, reference, maximise)
     hypervolume(dataset, reference, maximise) -

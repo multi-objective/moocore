@@ -71,6 +71,8 @@
 #' enhanced the numerical stability of the algorithm by avoiding floating-point
 #' comparisons of partial hypervolumes.
 #'
+#' The hypervolume of 1D inputs is defined as `max(0, ref - min(x))`.
+#'
 #' @references
 #'
 #' \insertAllCited{}
@@ -87,7 +89,7 @@
 #' @concept metrics
 hypervolume <- function(x, reference, maximise = FALSE)
 {
-  x <- as_double_matrix(x)
+  x <- as_double_matrix_1(x)
   nobjs <- ncol(x)
   if (!is.numeric(reference))
     stop("a numerical reference vector must be provided")

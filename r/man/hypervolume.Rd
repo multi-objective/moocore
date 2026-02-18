@@ -81,6 +81,8 @@ time complexity even further.  The original proposal
 giving a time complexity of \eqn{O(n^{m-2} \log n)}.  Andreia P. Guerreiro
 enhanced the numerical stability of the algorithm by avoiding floating-point
 comparisons of partial hypervolumes.
+
+The hypervolume of 1D inputs is defined as \code{max(0, ref - min(x))}.
 }
 \examples{
 
