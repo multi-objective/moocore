@@ -592,6 +592,16 @@ hv2d(const double * restrict data, size_t n, const double * restrict ref)
     return hyperv;
 }
 
+static double
+hv1d(const double * restrict data, size_t n, const double * restrict ref)
+{
+    double min_val = data[0];
+    for (size_t k = 1; k < n; k++) {
+        min_val = MIN(min_val, data[k]);
+    }
+    return MAX(0.0, ref[0] - min_val);
+}
+
 double hv3d(const double * restrict data, size_t n, const double * restrict ref);
 double hv4d(const double * restrict data, size_t n, const double * restrict ref);
 
@@ -603,10 +613,12 @@ double fpli_hv(const double * restrict data, size_t n, dimension_t dim,
                const double * restrict ref)
 {
     if (unlikely(n == 0)) return 0.0;
-    ASSUME(dim > 1);
+    ASSUME(dim > 0);
     if (dim == 4) return hv4d(data, n, ref);
     if (dim == 3) return hv3d(data, n, ref);
     if (dim == 2) return hv2d(data, n, ref);
+    if (unlikely(dim == 1)) return hv1d(data, n, ref);
+
     dlnode_t * list = fpli_setup_cdllist(data, dim, &n, ref);
     double hyperv;
     if (likely(n > MAX_ROWS_HV_INEX)) {
