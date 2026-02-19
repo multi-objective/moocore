@@ -4,7 +4,6 @@
 test_that("Doctest: is_nondominated", {
   # Created from @doctest for `is_nondominated`
   # Source file: R/nondominated.R
-  # Source line: 33
   S = matrix(c(1, 1, 0, 1, 1, 0, 1, 0), ncol = 2, byrow = TRUE)
   expect_equal(is_nondominated(S), c(FALSE, TRUE, TRUE, FALSE))
   expect_equal(is_nondominated(S, maximise = TRUE), c(TRUE, FALSE, FALSE, FALSE))

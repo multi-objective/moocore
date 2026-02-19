@@ -4,7 +4,6 @@
 test_that("Doctest: whv_hype", {
   # Created from @doctest for `whv_hype`
   # Source file: R/whv.R
-  # Source line: 134
   expect_equal(whv_hype(matrix(2, ncol = 2), reference = 4, ideal = 1, seed = 42),
   3.99807)
   expect_equal(whv_hype(matrix(c(3, 1), ncol = 2), reference = 4, ideal = 1,

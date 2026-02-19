@@ -4,7 +4,6 @@
 test_that("Doctest: igd", {
   # Created from @doctest for `igd`
   # Source file: R/igd.R
-  # Source line: 75
   extdata_path <- system.file(package = "moocore", "extdata")
   path.A1 <- file.path(extdata_path, "ALG_1_dat.xz")
   path.A2 <- file.path(extdata_path, "ALG_2_dat.xz")

@@ -4,7 +4,6 @@
 test_that("Doctest: epsilon_additive", {
   # Created from @doctest for `epsilon_additive`
   # Source file: R/epsilon.R
-  # Source line: 58
   A1 <- matrix(c(9, 2, 8, 4, 7, 5, 5, 6, 4, 7), ncol = 2, byrow = TRUE)
   A2 <- matrix(c(8, 4, 7, 5, 5, 6, 4, 7), ncol = 2, byrow = TRUE)
   A3 <- matrix(c(10, 4, 9, 5, 8, 6, 7, 7, 6, 8), ncol = 2, byrow = TRUE)

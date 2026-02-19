@@ -21,7 +21,7 @@ Imports:
         matrixStats,
         Rdpack
 Suggests:
-    doctest (>= 0.3.0),
+    doctest (>= 0.4.0),
     spelling,
     testthat (>= 3.2.0),
     withr

@@ -4,7 +4,6 @@
 test_that("Doctest: r2_exact", {
   # Created from @doctest for `r2_exact`
   # Source file: R/r2.R
-  # Source line: 52
   dat <- matrix(c(5, 5, 4, 6, 2, 7, 7, 4), ncol = 2, byrow = TRUE)
   expect_equal(r2_exact(dat, reference = c(0, 0)), tolerance = 1e-09,
   2.59419191919192)
