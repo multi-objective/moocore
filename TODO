@@ -3,8 +3,7 @@
  - [ ] Merge eaf/eaf3d/uc/trunk/ command-line improvements
  - [ ] Merge hypervolume/Makefile README
  - [ ] Coverage Error Sayin 2024: is this the same as R2 indicator?
- - [ ] Appendix B of "The Hypervolume Indicator: Computational Problems
-and Algorithms" has more ND sets types: wave, cliff and hard.
+ - [ ] Appendix B of "The Hypervolume Indicator: Computational Problems and Algorithms" has more ND sets types: wave, cliff and hard.
  - [ ] Document logHYP: T. Friedrich, K. Bringmann, T. Voß, C. Igel. The Logarithmic Hypervolume Indicator. 11th ACM Foundations of Genetic Algorithms (FOGA), pages 81-92, 2009. https://hpi.de/friedrich/publications/all/Document/puma-friedrich/FriedrichBVI11.pdf/a839ddd47688611dcf92512ca010daf3.html?tx_extbibsonomycsl_publicationlist%5Baction%5D=view&tx_extbibsonomycsl_publicationlist%5Bpreview%5D=large&cHash=7cabd8bc9699c0ab3f88886a3f62976f
  - [ ] Document relation between hypervolume and attainment function.
  - [ ] R2 indicator: [Reinvestigating the R2 Indicator: Achieving Pareto Compliance by Integration](https://link.springer.com/chapter/10.1007/978-3-031-70085-9_13) [Brockhoff, D., Wagner, T., Trautmann, H.: On the properties of the R2 indicator. In: Proceedings of the 14th Annual Conference on Genetic and Evolutionary
@@ -14,8 +13,13 @@ Computation, pp. 465–472 (2012)]
  - [ ] Take a look at https://github.com/esa/pagmo2/blob/master/src/utils/multi_objective.cpp
  - [ ] Faster epsilon: https://github.com/mbuzdalov/orthant-search/blob/master/implementations/src/main/java/ru/ifmo/orthant/epsilon/OrthantImplementation.java
        and https://dl.acm.org/doi/pdf/10.1145/3205455.3205469 and http://www.cmap.polytechnique.fr/~nikolaus.hansen/proceedings/2016/GECCO/proceedings/p613.pdf
- - [ ] A Fast Incremental BSP Tree Archive for Non-dominated Points: https://doi.org/10.1007/978-3-319-54157-0_18
- - [ ] Faster nondominated algorithm (is_nondominated, filter_dominated) for d>3: https://doi.org/10.1145/321906.321910 and https://github.com/TLDart/nondLib/blob/main/nondlib.hpp <https://dl.acm.org/doi/10.1145/3449726.3462737> <https://dl.acm.org/doi/pdf/10.1145/358841.358850>
+ - Online nondominated filter
+   - [ ] [A Fast Incremental BSP Tree Archive for Non-dominated Points](https://doi.org/10.1007/978-3-319-54157-0_18)
+ - [ ] Faster nondominated algorithm (is_nondominated, filter_dominated) for d>3:
+    - Kung: https://doi.org/10.1145/321906.321910
+    - [Bentley: Multidimensional Divide-and-Conquer](https://dl.acm.org/doi/pdf/10.1145/358841.358850)
+    - C++ implementation: https://github.com/TLDart/nondLib/blob/main/nondlib.hpp <https://dl.acm.org/doi/10.1145/3449726.3462737>
+    - Faster for very many points: [Worst-case I/O-efficient Skyline Algorithms](https://www.cse.cuhk.edu.hk/~taoyf/paper/tods12-sky.pdf)
  - [ ] Faster nondominated sorting: https://github.com/mbuzdalov/non-dominated-sorting       https://github.com/KernelA/nds-py
  <https://discourse.julialang.org/t/fast-non-dominated-sorting/24164/20>
  <https://ctlab.itmo.ru/~mbuzdalov/ec-2018/05-nds.pdf>
@@ -23,10 +27,12 @@ Computation, pp. 465–472 (2012)]
      - [Merge non-dominated sorting](https://github.com/jMetal/jMetal/blob/main/jmetal-core/src/main/java/org/uma/jmetal/util/ranking/impl/MergeNonDominatedSortRanking.java
 )
      - Jensen-style divide-and-conquer with small-size subroutines:
- - [ ] HSSP (Hypervolume Subset Selection Problem)
-   - https://github.com/rgoomes/hssp
  - [ ] 3D Nondominated sorting:
      Y. Nekrich. A fast algorithm for three-dimensional layers of maxima problem. In Algorithms and Data Structures, number 6844 in Lecture Notes in Computer Science, pages 607–618. 2011.
+ - [ ] Epsilon-dominance:
+   - https://github.com/matthewjwoodruff/pareto.py
+ - [ ] HSSP (Hypervolume Subset Selection Problem)
+   - https://github.com/rgoomes/hssp
  - [ ] Exactly computing Expected Hypervolume Improvement (EHVI) and qEHVI for any dimension: https://github.com/Ksrma/EHVI-HVI
  - [ ] Decremental greedy hypervolume subset selection: https://github.com/Ksrma/gHSSD-Tree
  - [ ] Benchmark against: https://github.com/MOEAFramework/MOEAFramework
