@@ -491,7 +491,6 @@ def hypervolume(
     This function assumes that objectives must be minimized by default. We can
     easily specify maximization:
 
-    >>> dat = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
     >>> moocore.hypervolume(dat, ref=0, maximise=True)
     39.0
 
