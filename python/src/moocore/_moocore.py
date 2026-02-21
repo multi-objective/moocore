@@ -1268,7 +1268,7 @@ def is_nondominated(
     )
     maximise_p = ffi.from_buffer("bool []", maximise)
     keep_weakly = ffi.cast("bool", bool(keep_weakly))
-    nondom = lib.is_nondominated(data_p, npoints, nobj, maximise_p, keep_weakly)
+    nondom = lib.is_nondominated(data_p, npoints, nobj, keep_weakly, maximise_p)
     nondom = ffi.buffer(nondom, nrows)
     return np.frombuffer(nondom, dtype=bool)
 

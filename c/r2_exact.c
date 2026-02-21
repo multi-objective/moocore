@@ -29,7 +29,7 @@ double r2_exact(const double * restrict data, size_t n, dimension_t dim,
     if (unlikely(n == 0)) return -1;
 
     // p is sorted by f1 (primarily), then f2 (secondarily)
-    const double **p = generate_sorted_doublep_2d(data, n);
+    const double ** p = generate_row_pointers_asc_x_asc_y(data, n);
     if (unlikely(!p)) return -1;
 
     size_t j = 0;

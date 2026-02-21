@@ -192,7 +192,7 @@ force_bounds(double * restrict points,
 static bool
 check_dominated(const char * filename, const double * restrict points,
                 dimension_t nobj, const int * restrict cumsizes, int nruns,
-                const int * restrict minmax, const int agree,
+                const int agree, const int * restrict minmax,
                 bool * restrict nondom)
 {
     bool first_time = true;
@@ -203,9 +203,9 @@ check_dominated(const char * filename, const double * restrict points,
         size_t old_size = cumsizes[n] - cumsize;
         size_t new_size = (nondom == NULL)
             ? find_dominated_point_agree(&points[nobj * cumsize], old_size,
-                                         nobj, minmax, agree)
+                                         nobj, agree, minmax)
             : find_nondominated_set_agree(&points[nobj * cumsize], old_size,
-                                          nobj, minmax, agree,
+                                          nobj, agree, minmax,
                                           &nondom[cumsize]);
 
         if (verbose_flag >= 2) {
@@ -380,10 +380,10 @@ process_file(const char * filename,
     }
 
     if (agree)
-        agree_objectives (points, cumsizes[nsets - 1], nobj, minmax, agree);
+        agree_objectives (points, cumsizes[nsets - 1], nobj, agree, minmax);
 
     if (normalise_flag)
-        normalise(points, cumsizes[nsets - 1], nobj, minmax, agree,
+        normalise(points, cumsizes[nsets - 1], nobj, agree, minmax,
                   lrange, urange, lbound, ubound);
 
     bool dominated_found = false;
@@ -392,7 +392,7 @@ process_file(const char * filename,
     // Check sets.
     if (check_flag || filter_flag)
         dominated_found = check_dominated(filename, points, nobj, cumsizes,
-                                          nsets, minmax, agree, nondom);
+                                          nsets, agree, minmax, nondom);
 
     if (verbose_flag >= 2)
         fprintf (stderr, "# nondominated: %s\n", bool2str(!dominated_found));

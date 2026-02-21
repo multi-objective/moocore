@@ -206,7 +206,7 @@ normalise01_inplace(double * restrict points, size_t npoints, dimension_t dim,
                     const double * restrict lbound, const double * restrict ubound)
 {
     const int * minmax = minmax_minimise(dim);
-    normalise(points, npoints, dim, minmax, /*agree=*/-1, 0.0, 1.0,
+    normalise(points, npoints, dim, /*agree=*/AGREE_MINIMISE, minmax, 0.0, 1.0,
               lbound, ubound);
     free((void *) minmax);
 }

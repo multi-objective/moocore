@@ -20,7 +20,7 @@ pareto_rank_3d(const double * restrict points, size_t size)
     int * rank = calloc(size, sizeof(*rank));
     int front = 0;
 
-    const double **p = generate_sorted_pp_3d(points, size);
+    const double ** p = generate_row_pointers_asc_rev_3d(points, size);
 
     avl_tree_t tree;
     avl_init_tree(&tree, cmp_pdouble_asc_x_nonzero);

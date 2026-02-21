@@ -104,8 +104,8 @@ is_nondominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
   }
   .Call(is_nondominated_C,
     x,
-    rep_len(as.logical(maximise), nobjs),
-    as.logical(keep_weakly))
+    as.logical(keep_weakly),
+    rep_len(as.logical(maximise), nobjs))
 }
 
 #' @rdname nondominated
@@ -123,7 +123,7 @@ filter_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 any_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 {
   x <- as_double_matrix_1(x)
-  if (keep_weakly)
+  if (keep_weakly) # FIXME: Do this in C.
     x <- x[!duplicated(x), , drop = FALSE]
   nobjs <- ncol(x)
   .Call(any_dominated_C,

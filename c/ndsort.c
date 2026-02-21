@@ -200,24 +200,23 @@ int main(int argc, char *argv[])
         fprint_rank(stdout, rank, size);
 
     } else {
-        bool *uev = NULL;
+        bool * uev = NULL;
         static const double upper_range = 0.9;
         static const double lower_range = 0.0;
 
-        double * order = malloc (sizeof(*order) * size);
+        double * data = malloc(sizeof(*data) * ((size + 3) * dim + size));
+        double * ref = data + (size * dim);
+        for (int d = 0; d < dim; d++)
+            ref[d] = 1.0;
+
+        double * lbound = ref + dim;
+        double * ubound = lbound + dim;
+        double * order = ubound + dim;
         int max_rank = 0;
         for (int k = 0; k < size; k++) {
             if (rank[k] > max_rank) max_rank = rank[k];
             order[k] = rank[k];
         }
-
-        double * data = malloc (sizeof(double) * size * dim);
-        double * lbound = malloc(sizeof(double) * dim);
-        double * ubound = malloc(sizeof(double) * dim);
-        double * ref = malloc(sizeof(double) * dim);
-
-        for (int d = 0; d < dim; d++)
-            ref[d] = 1.0;
 
         max_rank = 1;
         for (int i = 1; i <= max_rank; i++) {
@@ -239,7 +238,7 @@ int main(int argc, char *argv[])
 
             uev = calculate_uev(uev, data, dim, data_size, lbound, ubound);
 
-            normalise(data, data_size, (dimension_t)dim, minmax, AGREE_NONE,
+            normalise(data, data_size, (dimension_t)dim, AGREE_NONE, minmax,
                       lower_range, upper_range, lbound, ubound);
 
             double * hvc = malloc(sizeof(*hvc) * data_size);
@@ -251,12 +250,8 @@ int main(int argc, char *argv[])
             }
             free (hvc);
         }
-        free (data);
-        free (lbound);
-        free (ubound);
-        free (ref);
-        fprint_vector_double (stdout, order, size);
-        free (order);
+        fprint_vector_double(stdout, order, size);
+        free(data);
     }
 
     free(rank);

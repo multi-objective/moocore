@@ -23,7 +23,7 @@ double r2_exact(const double * restrict data, size_t n, dimension_t d, const dou
 size_t find_weakly_dominated_point(const double * restrict points, size_t n, dimension_t d,
                                    const bool * restrict maximise);
 bool * is_nondominated(const double * restrict data, size_t n, dimension_t d,
-                       const bool * restrict maximise, bool keep_weakly);
+                       bool keep_weakly, const bool * restrict maximise);
 int * pareto_rank(const double * restrict points, size_t size, dimension_t dim);
 void agree_normalise(double * restrict data, size_t size, dimension_t dim,
                      const bool * restrict maximise,

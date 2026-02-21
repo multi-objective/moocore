@@ -320,23 +320,23 @@ matrix_malloc_and_transpose(const double * restrict rdata, size_t npoint, size_t
 }
 
 SEXP
-is_nondominated_C(SEXP DATA, SEXP MAXIMISE, SEXP KEEP_WEAKLY)
+is_nondominated_C(SEXP DATA, SEXP KEEP_WEAKLY, SEXP MAXIMISE)
 {
     int nprotected = 0;
     // We DO NOT transpose the matrix before calling this function.
     SEXP_2_DOUBLE_MATRIX(DATA, rdata, npoint, nobj);
-    SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
     SEXP_2_LOGICAL(KEEP_WEAKLY, keep_weakly);
+    SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
     assert(nobj == maximise_len);
 
     double * data = matrix_malloc_and_transpose(rdata, npoint, nobj);
-    bool * bool_is_nondom = is_nondominated(data, npoint, (dimension_t) nobj, maximise, keep_weakly);
+    bool * bool_is_nondom = is_nondominated(data, npoint, (dimension_t) nobj, keep_weakly, maximise);
     free(data);
     free(maximise);
 
-    new_logical_vector (is_nondom, npoint);
+    new_logical_vector(is_nondom, npoint);
     bool_2_logical_vector(is_nondom, bool_is_nondom, npoint);
-    free (bool_is_nondom);
+    free(bool_is_nondom);
     UNPROTECT(nprotected);
     return Rexp(is_nondom);
 }

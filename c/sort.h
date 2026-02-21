@@ -178,6 +178,7 @@ cmp_pdouble_asc_y_des_x_nonzero(const void * restrict pa, const void * restrict 
     return cmp ? cmp : (ax > bx ? -1 : 1);
 }
 
+// Ascending lexicographic 2D (ascending x, then ascending y)
 static inline int
 cmp_pdouble_asc_x_asc_y(const void * restrict pa, const void * restrict pb)
 {
@@ -196,12 +197,18 @@ cmp_ppdouble_asc_x_asc_y(const void * restrict pa, const void * restrict pb)
 }
 
 static inline const double **
-generate_sorted_doublep_2d(const double * restrict points, size_t n)
+generate_row_pointers(const double * restrict points, size_t size, dimension_t dim)
 {
-    const double **p = (const double **) malloc(n * sizeof(*p));
-    for (size_t k = 0; k < n; k++)
-        p[k] = points + 2 * k;
+    const double ** p = (const double **) malloc(size * sizeof(*p));
+    for (size_t k = 0; k < size; k++)
+        p[k] = points + dim * k;
+    return p;
+}
 
+static inline const double **
+generate_row_pointers_asc_x_asc_y(const double * restrict points, size_t n)
+{
+    const double ** p = generate_row_pointers(points, n, 2);
     qsort(p, n, sizeof(*p), cmp_ppdouble_asc_x_asc_y);
     return p;
 }
@@ -212,7 +219,7 @@ generate_sorted_doublep_2d_filter_by_ref(const double * restrict points,
                                          size_t * restrict size, const double ref0)
 {
     size_t n = *size;
-    const double **p = (const double **) malloc(n * sizeof(*p));
+    const double ** p = (const double **) malloc(n * sizeof(*p));
     size_t j = 0;
     for (size_t k = 0; k < n; k++) {
         /* There is no point in checking p[k][1] < ref[1] here because the
