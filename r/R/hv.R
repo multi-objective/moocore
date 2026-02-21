@@ -77,14 +77,20 @@
 #'
 #' \insertAllCited{}
 #'
-#' @examples
+#' @doctest
+#'
+#' dat = matrix(c(5, 5, 4, 6, 2, 7, 7, 4), ncol=2, byrow=TRUE)
+#' @expect equal(38)
+#' hypervolume(dat, ref=c(10, 10))
+#' @expect equal(39)
+#' hypervolume(dat, ref=0, maximise=TRUE)
 #'
 #' data(SPEA2minstoptimeRichmond)
 #' # The second objective must be maximized
 #' # We calculate the hypervolume of the union of all sets.
+#' @expect equal(7911375.69)
 #' hypervolume(SPEA2minstoptimeRichmond[, 1:2], reference = c(250, 0),
 #'             maximise = c(FALSE, TRUE))
-#'
 #' @export
 #' @concept metrics
 hypervolume <- function(x, reference, maximise = FALSE)

@@ -84,15 +84,6 @@ comparisons of partial hypervolumes.
 
 The hypervolume of 1D inputs is defined as \code{max(0, ref - min(x))}.
 }
-\examples{
-
-data(SPEA2minstoptimeRichmond)
-# The second objective must be maximized
-# We calculate the hypervolume of the union of all sets.
-hypervolume(SPEA2minstoptimeRichmond[, 1:2], reference = c(250, 0),
-            maximise = c(FALSE, TRUE))
-
-}
 \references{
 \insertAllCited{}
 }
@@ -100,3 +91,14 @@ hypervolume(SPEA2minstoptimeRichmond[, 1:2], reference = c(250, 0),
 Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
 }
 \concept{metrics}
+\examples{
+dat = matrix(c(5, 5, 4, 6, 2, 7, 7, 4), ncol=2, byrow=TRUE)
+hypervolume(dat, ref=c(10, 10))
+hypervolume(dat, ref=0, maximise=TRUE)
+
+data(SPEA2minstoptimeRichmond)
+# The second objective must be maximized
+# We calculate the hypervolume of the union of all sets.
+hypervolume(SPEA2minstoptimeRichmond[, 1:2], reference = c(250, 0),
+            maximise = c(FALSE, TRUE))
+}
