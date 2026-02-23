@@ -24,13 +24,14 @@ from jmetal.core.quality_indicator import HyperVolume as jmetal_HV
 from nevergrad.optimization.multiobjective import HypervolumeIndicator as ng_HV
 from fast_pareto import hypervolume as fp_hv
 from optuna._hypervolume import compute_hypervolume as optuna_hv
+
+# from trieste.acquisition.multi_objective import Pareto as trieste_Pareto
+# import tensorflow as tf
 from moarchiving import get_mo_archive as moarch_get_mo_archive
 
 # FIXME: How to test both float and Fractions?
 moarch_get_mo_archive.hypervolume_computation_float_type = float
 moarch_get_mo_archive.hypervolume_final_float_type = float
-# from trieste.acquisition.multi_objective import Pareto as trieste_Pareto
-# import tensorflow as tf
 
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
@@ -44,7 +45,7 @@ files = {
     ),
     "DTLZLinearShape.4d": dict(
         file=path_to_data + "DTLZLinearShape.4d.front.1000pts.10",
-        range=(100, 1000, 150),
+        range=(100, 1300, 150),
     ),
     "DTLZLinearShape.5d": dict(
         file=path_to_data + "DTLZLinearShape.5d.front.500pts.10",
