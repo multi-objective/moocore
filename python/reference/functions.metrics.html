@@ -1,0 +1,812 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Unary quality metrics &#8212; moocore 0.3.0.dev0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=79fc01cf" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=6fc6f92e"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=317740d0"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'reference/functions.metrics';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="igd" href="generated/moocore.igd.html" />
+    <link rel="prev" title="pareto_rank" href="generated/moocore.pareto_rank.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.3.0.dev0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">moocore 0.3.0.dev0</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../whatsnew/index.html">
+    What’s new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/multi-objective/moocore" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/moocore" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../whatsnew/index.html">
+    What’s new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/multi-objective/moocore" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/moocore" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="functions.io.html">Read, generate and transform sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.dominance.html">Identifying and filtering dominated vectors</a></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Unary quality metrics</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.igd.html">igd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.igd_plus.html">igd_plus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.avg_hausdorff_dist.html">avg_hausdorff_dist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.epsilon_additive.html">epsilon_additive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.epsilon_mult.html">epsilon_mult</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.hypervolume.html">hypervolume</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.Hypervolume.html">Hypervolume</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.RelativeHypervolume.html">RelativeHypervolume</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.hv_contributions.html">hv_contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.total_whv_rect.html">total_whv_rect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.whv_rect.html">whv_rect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.hv_approx.html">hv_approx</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.whv_hype.html">whv_hype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.r2_exact.html">r2_exact</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.eaf.html">Empirical Attainment Function (EAF)</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">API reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Unary quality metrics</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="unary-quality-metrics">
+<span id="id1"></span><h1>Unary quality metrics<a class="headerlink" href="#unary-quality-metrics" title="Link to this heading">#</a></h1>
+<section id="inverted-generational-distance-igd-and-igd-and-averaged-hausdorff-distance">
+<span id="igd-hausdorf"></span><h2>Inverted Generational Distance (IGD and IGD+) and Averaged Hausdorff Distance<a class="headerlink" href="#inverted-generational-distance-igd-and-igd-and-averaged-hausdorff-distance" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/moocore.igd.html#moocore.igd" title="moocore.igd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">igd</span></code></a>(data, /, ref, *[, maximise])</p></td>
+<td><p>Inverted Generational Distance (IGD).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/moocore.igd_plus.html#moocore.igd_plus" title="moocore.igd_plus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">igd_plus</span></code></a>(data, /, ref, *[, maximise])</p></td>
+<td><p>Modified IGD (IGD+).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/moocore.avg_hausdorff_dist.html#moocore.avg_hausdorff_dist" title="moocore.avg_hausdorff_dist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">avg_hausdorff_dist</span></code></a>(data, /, ref, *[, ...])</p></td>
+<td><p>Average Hausdorff distance.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Functions to compute the inverted generational distance (IGD and IGD+) and the
+averaged Hausdorff distance between nondominated sets of points.</p>
+<p>The generational distance (GD) of a set <span class="math notranslate nohighlight">\(A\)</span> is defined as the distance
+between each point <span class="math notranslate nohighlight">\(a \in A\)</span> and the closest point <span class="math notranslate nohighlight">\(r\)</span> in a reference
+set <span class="math notranslate nohighlight">\(R\)</span>, averaged over the size of <span class="math notranslate nohighlight">\(A\)</span>. Formally,</p>
+<div class="math notranslate nohighlight">
+\[GD_p(A,R) = \left(\frac{1}{|A|}\sum_{a\in A}\min_{r\in R} d(a,r)^p\right)^{\frac{1}{p}}\]</div>
+<p>where the distance in our implementation is the Euclidean distance:</p>
+<div class="math notranslate nohighlight">
+\[d(a,r) = \sqrt{\sum_{k=1}^m (a_k - r_k)^2}\]</div>
+<p>The inverted generational distance (IGD) is calculated as <span class="math notranslate nohighlight">\(IGD_p(A,R) = GD_p(R,A)\)</span>.</p>
+<p>The modified inverted generational distanced (IGD+) was proposed by
+<span id="id2">Ishibuchi <em>et al.</em><sup>[<a class="reference internal" href="#cite-1-ishmastannoj2015igd" title="Hisao Ishibuchi, Hiroyuki Masuda, Yuki Tanigaki, and Yusuke Nojima. Modified distance calculation in generational distance and inverted generational distance. In António Gaspar-Cunha, Carlos Henggeler Antunes, and Carlos A. Coello Coello, editors, Evolutionary Multi-criterion Optimization, EMO 2015 Part I, volume 9018 of Lecture Notes in Computer Science, pages 110–125. Springer, Heidelberg, Germany, 2015. [BibTeX].">1</a>]</sup></span> to ensure that IGD+ is weakly Pareto compliant,
+similarly to <a class="reference internal" href="generated/moocore.epsilon_additive.html#moocore.epsilon_additive" title="moocore.epsilon_additive"><code class="xref py py-func docutils literal notranslate"><span class="pre">epsilon_additive()</span></code></a> or <a class="reference internal" href="generated/moocore.epsilon_mult.html#moocore.epsilon_mult" title="moocore.epsilon_mult"><code class="xref py py-func docutils literal notranslate"><span class="pre">epsilon_mult()</span></code></a>. It modifies the
+distance measure as:</p>
+<div class="math notranslate nohighlight">
+\[d^+(r,a) = \sqrt{\sum_{k=1}^m (\max\{r_k - a_k, 0\})^2}\]</div>
+<p>The average Hausdorff distance (<span class="math notranslate nohighlight">\(\Delta_p\)</span>) was proposed by
+<span id="id3">Schütze <em>et al.</em><sup>[<a class="reference internal" href="#cite-1-schesqlarcoe2012tec" title="Oliver Schütze, X. Esquivel, A. Lara, and Carlos A. Coello Coello. Using the averaged Hausdorff distance as a performance measure in evolutionary multiobjective optimization. IEEE Transactions on Evolutionary Computation, 16(4):504–522, 2012. doi:10.1109/TEVC.2011.2161872, [BibTeX].">2</a>]</sup></span> and it is calculated as:</p>
+<div class="math notranslate nohighlight">
+\[\Delta_p(A,R) = \max\{ IGD_p(A,R), IGD_p(R,A) \}\]</div>
+<p>IGDX <span id="id4"><sup>[<a class="reference internal" href="#cite-1-zhozhajin2009igdx" title="A. Zhou, Qingfu Zhang, and Yaochu Jin. Approximating the set of Pareto-optimal solutions in both the decision and objective spaces by an estimation of distribution algorithm. IEEE Transactions on Evolutionary Computation, 13(5):1167–1189, 2009. doi:10.1109/TEVC.2009.2021467, [BibTeX].">3</a>]</sup></span> is the application of IGD to decision vectors
+instead of objective vectors to measure closeness and diversity in decision
+space. One can use the functions <a class="reference internal" href="generated/moocore.igd.html#moocore.igd" title="moocore.igd"><code class="xref py py-func docutils literal notranslate"><span class="pre">igd()</span></code></a> or <a class="reference internal" href="generated/moocore.igd_plus.html#moocore.igd_plus" title="moocore.igd_plus"><code class="xref py py-func docutils literal notranslate"><span class="pre">igd_plus()</span></code></a> (recommended)
+directly, just passing the decision vectors as <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p>
+<p>There are different formulations of the GD and IGD metrics in the literature
+that differ on the value of <span class="math notranslate nohighlight">\(p\)</span>, on the distance metric used and on
+whether the term <span class="math notranslate nohighlight">\(|A|^{-1}\)</span> is inside (as above) or outside the exponent
+<span class="math notranslate nohighlight">\(1/p\)</span>.  GD was first proposed by <span id="id5">Van Veldhuizen and Lamont<sup>[<a class="reference internal" href="#cite-1-vellam1998gp" title="David A. Van Veldhuizen and Gary B. Lamont. Evolutionary computation and convergence to a Pareto front. In John R. Koza, editor, Late Breaking Papers at the Genetic Programming 1998 Conference, 221–228. Stanford University, California, July 1998. Stanford University Bookstore. [BibTeX].">4</a>]</sup></span> with <span class="math notranslate nohighlight">\(p=2\)</span>
+and the term <span class="math notranslate nohighlight">\(|A|^{-1}\)</span> outside the exponent. IGD seems to have been
+mentioned first by <span id="id6">Coello Coello and Reyes-Sierra<sup>[<a class="reference internal" href="#cite-1-coesie2004igd" title="Carlos A. Coello Coello and Margarita Reyes-Sierra. A study of the parallelization of a coevolutionary multi-objective evolutionary algorithm. In Raúl Monroy, Gustavo Arroyo-Figueroa, Luis Enrique Sucar, and Humberto Sossa, editors, Proceedings of MICAI, volume 2972 of Lecture Notes in Artificial Intelligence, pages 688–697. Springer, Heidelberg, Germany, 2004. [BibTeX].">5</a>]</sup></span>, however, some people also used the
+name D-metric for the same concept with <span class="math notranslate nohighlight">\(p=1\)</span> and later papers have often
+used IGD/GD with <span class="math notranslate nohighlight">\(p=1\)</span>. <span id="id7">Schütze <em>et al.</em><sup>[<a class="reference internal" href="#cite-1-schesqlarcoe2012tec" title="Oliver Schütze, X. Esquivel, A. Lara, and Carlos A. Coello Coello. Using the averaged Hausdorff distance as a performance measure in evolutionary multiobjective optimization. IEEE Transactions on Evolutionary Computation, 16(4):504–522, 2012. doi:10.1109/TEVC.2011.2161872, [BibTeX].">2</a>]</sup></span> proposed to place
+the term <span class="math notranslate nohighlight">\(|A|^{-1}\)</span> inside the exponent, as in the formulation shown
+above.  This has a significant effect for GD and less so for IGD given a
+constant reference set. IGD+ also follows this formulation.  We refer to
+<span id="id8">Ishibuchi <em>et al.</em><sup>[<a class="reference internal" href="#cite-1-ishmastannoj2015igd" title="Hisao Ishibuchi, Hiroyuki Masuda, Yuki Tanigaki, and Yusuke Nojima. Modified distance calculation in generational distance and inverted generational distance. In António Gaspar-Cunha, Carlos Henggeler Antunes, and Carlos A. Coello Coello, editors, Evolutionary Multi-criterion Optimization, EMO 2015 Part I, volume 9018 of Lecture Notes in Computer Science, pages 110–125. Springer, Heidelberg, Germany, 2015. [BibTeX].">1</a>]</sup></span> and <span id="id9">Bezerra <em>et al.</em><sup>[<a class="reference internal" href="#cite-1-bezlopstu2017emo" title="Leonardo C. T. Bezerra, Manuel López-Ibáñez, and Thomas Stützle. An empirical assessment of the properties of inverted generational distance indicators on multi- and many-objective optimization. In Heike Trautmann, Günter Rudolph, Kathrin Klamroth, Oliver Schütze, Margaret M. Wiecek, Yaochu Jin, and Christian Grimme, editors, Evolutionary Multi-criterion Optimization, EMO 2017, volume 10173 of Lecture Notes in Computer Science, pages 31–45. Springer International Publishing, Cham, Switzerland, 2017. doi:10.1007/978-3-319-54157-0_3, [BibTeX].">6</a>]</sup></span> for a more
+detailed historical perspective and a comparison of the various variants.</p>
+<p>Following <span id="id10">Ishibuchi <em>et al.</em><sup>[<a class="reference internal" href="#cite-1-ishmastannoj2015igd" title="Hisao Ishibuchi, Hiroyuki Masuda, Yuki Tanigaki, and Yusuke Nojima. Modified distance calculation in generational distance and inverted generational distance. In António Gaspar-Cunha, Carlos Henggeler Antunes, and Carlos A. Coello Coello, editors, Evolutionary Multi-criterion Optimization, EMO 2015 Part I, volume 9018 of Lecture Notes in Computer Science, pages 110–125. Springer, Heidelberg, Germany, 2015. [BibTeX].">1</a>]</sup></span>, we always use <span class="math notranslate nohighlight">\(p=1\)</span> in our
+implementation of IGD and IGD+ because (1) it is the setting most used in
+recent works; (2) it makes irrelevant whether the term <span class="math notranslate nohighlight">\(|A|^{-1}\)</span> is
+inside or outside the exponent <span class="math notranslate nohighlight">\(1/p\)</span>; and (3) the meaning of IGD becomes
+the average Euclidean distance from each reference point to its nearest
+objective vector. It is also slightly faster to compute.</p>
+<p>GD should never be used directly to compare the quality of approximations to a
+Pareto front, it is not weakly Pareto-compliant and it often contradicts Pareto
+optimality.</p>
+<p>IGD is still popular due to historical reasons, but we strongly recommend IGD+
+instead of IGD, because IGD contradicts Pareto optimality in some cases
+(see examples in <a class="reference internal" href="generated/moocore.igd_plus.html#moocore.igd_plus" title="moocore.igd_plus"><code class="xref py py-func docutils literal notranslate"><span class="pre">igd_plus()</span></code></a>) whereas IGD+ is weakly Pareto-compliant.</p>
+<p>The average Hausdorff distance (<span class="math notranslate nohighlight">\(\Delta_p(A,R)\)</span>) is not weakly
+Pareto-compliant, as shown in the examples in <a class="reference internal" href="generated/moocore.igd_plus.html#moocore.igd_plus" title="moocore.igd_plus"><code class="xref py py-func docutils literal notranslate"><span class="pre">igd_plus()</span></code></a>.</p>
+</section>
+<section id="epsilon-metric">
+<span id="id11"></span><h2>Epsilon metric<a class="headerlink" href="#epsilon-metric" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/moocore.epsilon_additive.html#moocore.epsilon_additive" title="moocore.epsilon_additive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">epsilon_additive</span></code></a>(data, /, ref, *[, maximise])</p></td>
+<td><p>Additive epsilon metric.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/moocore.epsilon_mult.html#moocore.epsilon_mult" title="moocore.epsilon_mult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">epsilon_mult</span></code></a>(data, /, ref, *[, maximise])</p></td>
+<td><p>Multiplicative epsilon metric.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The epsilon metric of a set <span class="math notranslate nohighlight">\(A \subset \mathbb{R}^m\)</span> with respect to a reference set <span class="math notranslate nohighlight">\(R \subset \mathbb{R}^m\)</span>
+is defined as <span id="id12"><sup>[<a class="reference internal" href="#cite-1-zitthilaufon2003-tec" title="Eckart Zitzler, Lothar Thiele, Marco Laumanns, Carlos M. Fonseca, and Viviane Grunert da Fonseca. Performance assessment of multiobjective optimizers: an analysis and review. IEEE Transactions on Evolutionary Computation, 7(2):117–132, 2003. doi:10.1109/TEVC.2003.810758, [BibTeX].">7</a>]</sup></span></p>
+<div class="math notranslate nohighlight">
+\[epsilon(A,R) = \max_{r \in R} \min_{a \in A} \max_{1 \leq i \leq m} epsilon(a_i, r_i)\]</div>
+<p>where <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(r\)</span> are objective vectors of length <span class="math notranslate nohighlight">\(m\)</span>.</p>
+<p>In the case of minimization of objective <span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(epsilon(a_i,r_i)\)</span> is
+computed as <span class="math notranslate nohighlight">\(a_i/r_i\)</span> for the multiplicative variant (respectively,
+<span class="math notranslate nohighlight">\(a_i - r_i\)</span> for the additive variant), whereas in the case of
+maximization of objective <span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(epsilon(a_i,r_i) = r_i/a_i\)</span> for the
+multiplicative variant (respectively, <span class="math notranslate nohighlight">\(r_i - a_i\)</span> for the additive
+variant).  This allows computing a single value for problems where some
+objectives are to be maximized while others are to be minimized. Moreover, a
+lower value corresponds to a better approximation set, independently of the
+type of problem (minimization, maximization or mixed). However, the meaning of
+the value is different for each objective type. For example, imagine that
+objective 1 is to be minimized and objective 2 is to be maximized, and the
+multiplicative epsilon computed here for <span class="math notranslate nohighlight">\(epsilon(A,R) = 3\)</span>. This means
+that <span class="math notranslate nohighlight">\(A\)</span> needs to be multiplied by 1/3 for all <span class="math notranslate nohighlight">\(a_1\)</span> values and by
+3 for all <span class="math notranslate nohighlight">\(a_2\)</span> values in order to weakly dominate <span class="math notranslate nohighlight">\(R\)</span>.</p>
+<p>The multiplicative variant can be computed as <span class="math notranslate nohighlight">\(\exp(epsilon_{+}(\log(A),
+\log(R)))\)</span>, which makes clear that the computation of the multiplicative
+version for zero or negative values doesn’t make sense. See the examples in
+<a class="reference internal" href="generated/moocore.epsilon_additive.html#moocore.epsilon_additive" title="moocore.epsilon_additive"><code class="xref py py-func docutils literal notranslate"><span class="pre">epsilon_additive()</span></code></a>.</p>
+<p>The current implementation uses the naive algorithm that requires <span class="math notranslate nohighlight">\(O(m \cdot |A| \cdot
+|R|)\)</span>, where <span class="math notranslate nohighlight">\(m\)</span> is the number of objectives (dimension of vectors).</p>
+</section>
+<section id="hypervolume-metric">
+<span id="id13"></span><h2>Hypervolume metric<a class="headerlink" href="#hypervolume-metric" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/moocore.hypervolume.html#moocore.hypervolume" title="moocore.hypervolume"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hypervolume</span></code></a>(data, /, ref, *[, maximise])</p></td>
+<td><p>Hypervolume indicator.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/moocore.Hypervolume.html#moocore.Hypervolume" title="moocore.Hypervolume"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Hypervolume</span></code></a>(ref[, maximise])</p></td>
+<td><p>Object-oriented interface for the hypervolume indicator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/moocore.RelativeHypervolume.html#moocore.RelativeHypervolume" title="moocore.RelativeHypervolume"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RelativeHypervolume</span></code></a>(ref, ref_set[, maximise])</p></td>
+<td><p>Computes the hypervolume value of fronts relative to the hypervolume of a reference front.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/moocore.hv_contributions.html#moocore.hv_contributions" title="moocore.hv_contributions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hv_contributions</span></code></a>(x, /, ref[, maximise, ...])</p></td>
+<td><p>Hypervolume contributions of a set of points.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/moocore.total_whv_rect.html#moocore.total_whv_rect" title="moocore.total_whv_rect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_whv_rect</span></code></a>(x, /, rectangles, *, ref[, ...])</p></td>
+<td><p>Compute total weighted hypervolume given a set of rectangles.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/moocore.whv_rect.html#moocore.whv_rect" title="moocore.whv_rect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">whv_rect</span></code></a>(x, /, rectangles, *, ref[, maximise])</p></td>
+<td><p>Compute weighted hypervolume given a set of rectangles.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The hypervolume of a set of multidimensional points <span class="math notranslate nohighlight">\(A \subset
+\mathbb{R}^m\)</span> with respect to a reference point <span class="math notranslate nohighlight">\(\vec{r} \in \mathbb{R}^m\)</span>
+is the volume of the region dominated by the set and bounded by the reference
+point <span id="id14"><sup>[<a class="reference internal" href="#cite-1-zitthi1998ppsn" title="Eckart Zitzler and Lothar Thiele. Multiobjective optimization using evolutionary algorithms - A comparative case study. In Agoston E. Eiben, Thomas Bäck, Marc Schoenauer, and Hans-Paul Schwefel, editors, Parallel Problem Solving from Nature – PPSN V, volume 1498 of Lecture Notes in Computer Science, pages 292–301. Springer, Heidelberg, Germany, 1998. doi:10.1007/BFb0056872, [BibTeX].">8</a>]</sup></span>.  Points in <span class="math notranslate nohighlight">\(A\)</span> that do not strictly
+dominate <span class="math notranslate nohighlight">\(\vec{r}\)</span> do not contribute to the hypervolume value, thus,
+ideally, the reference point must be strictly dominated by all points in the
+true Pareto front.</p>
+<p>More precisely, the hypervolume is the <a class="reference external" href="https://en.wikipedia.org/wiki/Lebesgue_measure">Lebesgue measure</a> of the union of
+axis-aligned hyperrectangles
+(<a class="reference external" href="https://en.wikipedia.org/wiki/Hyperrectangle">orthotopes</a>), where each
+hyperrectangle is defined by one point from <span class="math notranslate nohighlight">\(\vec{a} \in A\)</span> and the
+reference point.  The union of axis-aligned hyperrectangles is also called an
+<em>orthogonal polytope</em>.</p>
+<p>The hypervolume is compatible with Pareto-optimality
+<span id="id15"><sup>[<a class="reference internal" href="#cite-1-zitthilaufon2003-tec" title="Eckart Zitzler, Lothar Thiele, Marco Laumanns, Carlos M. Fonseca, and Viviane Grunert da Fonseca. Performance assessment of multiobjective optimizers: an analysis and review. IEEE Transactions on Evolutionary Computation, 7(2):117–132, 2003. doi:10.1109/TEVC.2003.810758, [BibTeX].">7</a>, <a class="reference internal" href="#cite-1-knocor2002cec" title="Joshua D. Knowles and David Corne. On metrics for comparing non-dominated sets. In Proceedings of the 2002 Congress on Evolutionary Computation (CEC'02), 711–716. Piscataway, NJ, 2002. IEEE Press. [BibTeX].">9</a>]</sup></span>, that is, <span class="math notranslate nohighlight">\(\nexists A,B
+\subset \mathbb{R}^m\)</span>, such that <span class="math notranslate nohighlight">\(A\)</span> is better than <span class="math notranslate nohighlight">\(B\)</span> in terms of
+Pareto-optimality and <span class="math notranslate nohighlight">\(\text{hyp}(A) \leq \text{hyp}(B)\)</span>. In other words,
+if a set is better than another in terms of Pareto-optimality, the hypervolume
+of the former must be strictly larger than the hypervolume of the latter.
+Conversely, if the hypervolume of a set is larger than the hypervolume of
+another, then we know for sure than the latter set cannot be better than the
+former in terms of Pareto-optimality.</p>
+<p>Like most measures of unions of high-dimensional geometric objects, computing the hypervolume is #P-hard <span id="id16"><sup>[<a class="reference internal" href="#cite-1-brifri2010approx" title="Karl Bringmann and Tobias Friedrich. Approximating the volume of unions and intersections of high-dimensional geometric objects. Computational Geometry, 43(6–7):601–610, 2010. doi:10.1016/j.comgeo.2010.03.004, [BibTeX].">10</a>]</sup></span>.</p>
+</section>
+<section id="approximating-the-hypervolume-metric">
+<span id="hv-approximation"></span><h2>Approximating the hypervolume metric<a class="headerlink" href="#approximating-the-hypervolume-metric" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/moocore.hv_approx.html#moocore.hv_approx" title="moocore.hv_approx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hv_approx</span></code></a>(data, /, ref, *[, maximise, ...])</p></td>
+<td><p>Approximate the hypervolume indicator.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/moocore.whv_hype.html#moocore.whv_hype" title="moocore.whv_hype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">whv_hype</span></code></a>(data, /, *, ref, ideal[, maximise, ...])</p></td>
+<td><p>Approximation of the (weighted) hypervolume by Monte-Carlo sampling (2D only).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Computing the hypervolume can be time consuming, thus several approaches have been proposed in the literature to approximate its value via Monte-Carlo or quasi-Monte-Carlo sampling <span id="id17"><sup>[<a class="reference internal" href="#cite-1-denzha2019approxhv" title="Jingda Deng and Qingfu Zhang. Approximating hypervolume and hypervolume contributions using polar coordinate. IEEE Transactions on Evolutionary Computation, 23(5):913–918, October 2019. doi:10.1109/tevc.2019.2895108, [BibTeX].">11</a>]</sup></span>. These methods are implemented in <a class="reference internal" href="generated/moocore.whv_hype.html#moocore.whv_hype" title="moocore.whv_hype"><code class="xref py py-func docutils literal notranslate"><span class="pre">whv_hype()</span></code></a> and <a class="reference internal" href="generated/moocore.hv_approx.html#moocore.hv_approx" title="moocore.hv_approx"><code class="xref py py-func docutils literal notranslate"><span class="pre">hv_approx()</span></code></a>.</p>
+</section>
+<section id="exact-r2-indicator">
+<span id="r2-indicator"></span><h2>(Exact) R2 Indicator<a class="headerlink" href="#exact-r2-indicator" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/moocore.r2_exact.html#moocore.r2_exact" title="moocore.r2_exact"><code class="xref py py-obj docutils literal notranslate"><span class="pre">r2_exact</span></code></a>(data, /, ref, *[, maximise])</p></td>
+<td><p>Exact R2 indicator.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The unary R2 indicator is a quality indicator for a set <span class="math notranslate nohighlight">\(A \subset \mathbb{R}^m\)</span>
+w.r.t. an ideal or utopian reference point <span class="math notranslate nohighlight">\(\vec{r} \in \mathbb{R}^m\)</span>.
+It was originally proposed by <span id="id18">Hansen and Jaszkiewicz<sup>[<a class="reference internal" href="#cite-1-hanjas1998" title="Michael Pilegaard Hansen and Andrzej Jaszkiewicz. Evaluating the quality of approximations to the non-dominated set. Technical Report IMM-REP-1998-7, Institute of Mathematical Modelling, Technical University of Denmark, Lyngby, Denmark, 1998. [BibTeX].">12</a>]</sup></span> and is defined as the
+expected Tchebycheff utility under a uniform distribution of weight vectors
+(w.l.o.g. assuming minimization):</p>
+<div class="math notranslate nohighlight">
+\[R2(A) := \int_{w \in W} \min_{a \in A} \left\{ \max_{i=1,\dots,m} w_i (a_i - r_i) \right\} \, dw,\]</div>
+<p>where <span class="math notranslate nohighlight">\(W\)</span> denotes the uniform distribution across weights:</p>
+<div class="math notranslate nohighlight">
+\[W = \{w \in \mathbb R^m \mid w_i \geq 0, \sum_{i=1}^m w_i = 1\}.\]</div>
+<p>The R2 indicator is to be minimized and has an optimal value of 0 when
+<span class="math notranslate nohighlight">\(\vec{r} \in A\)</span>.</p>
+<p>The exact R2 indicator is strongly Pareto-compliant, i.e., compatible with Pareto-optimality:</p>
+<div class="math notranslate nohighlight">
+\[\forall A, B \subset \mathbb R^m: A \prec B \Rightarrow R2(A) &lt; R2(B).\]</div>
+<p>Given an ideal or utopian reference ponint, which is available in most scenarios,
+all non-dominated solutions always contribute to the value of the exact R2 indicator.
+However, it is scale-dependent and care should be taken such that all objectives
+contribute approximately equally to the indicator, e.g., by normalizing the
+Pareto front to the unit hypercube.</p>
+<p><a class="reference internal" href="generated/moocore.r2_exact.html#moocore.r2_exact" title="moocore.r2_exact"><code class="xref py py-func docutils literal notranslate"><span class="pre">r2_exact()</span></code></a> computes the exact R2 indicator for bi-objective solution
+sets in <span class="math notranslate nohighlight">\(O(n \log n)\)</span> following <span id="id19">Schäpermeier and Kerschke<sup>[<a class="reference internal" href="#cite-1-schker2025r2v2" title="Lennart Schäpermeier and Pascal Kerschke. R2 v2: the Pareto-compliant R2 indicator for better benchmarking in bi-objective optimization. Evolutionary Computation, pages 1–17, October 2025. doi:10.1162/evco.a.366, [BibTeX].">13</a>]</sup></span>.</p>
+</section>
+<section id="bibliography">
+<h2>Bibliography<a class="headerlink" href="#bibliography" title="Link to this heading">#</a></h2>
+<div class="docutils container" id="bibliography-1">
+<div role="list" class="citation-list">
+<div class="citation" id="cite-1-ishmastannoj2015igd" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id2">1</a>,<a role="doc-backlink" href="#id8">2</a>,<a role="doc-backlink" href="#id10">3</a>)</span>
+<p>Hisao Ishibuchi, Hiroyuki Masuda, Yuki Tanigaki, and Yusuke Nojima. Modified distance calculation in generational distance and inverted generational distance. In António Gaspar-Cunha, Carlos Henggeler Antunes, and Carlos A. Coello Coello, editors, <em>Evolutionary Multi-criterion Optimization, EMO 2015 Part I</em>, volume 9018 of Lecture Notes in Computer Science, pages 110–125. Springer, Heidelberg, Germany, 2015. <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#IshMasTanNoj2015igd">[BibTeX]</a>.</p>
+</div>
+<div class="citation" id="cite-1-schesqlarcoe2012tec" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id3">1</a>,<a role="doc-backlink" href="#id7">2</a>)</span>
+<p>Oliver Schütze, X. Esquivel, A. Lara, and Carlos A. Coello Coello. Using the averaged Hausdorff distance as a performance measure in evolutionary multiobjective optimization. <em>IEEE Transactions on Evolutionary Computation</em>, 16(4):504–522, 2012. <a class="reference external" href="https://doi.org/10.1109/TEVC.2011.2161872">doi:10.1109/TEVC.2011.2161872</a>, <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#SchEsqLarCoe2012tec">[BibTeX]</a>.</p>
+</div>
+<div class="citation" id="cite-1-zhozhajin2009igdx" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">3</a><span class="fn-bracket">]</span></span>
+<p>A. Zhou, Qingfu Zhang, and Yaochu Jin. Approximating the set of Pareto-optimal solutions in both the decision and objective spaces by an estimation of distribution algorithm. <em>IEEE Transactions on Evolutionary Computation</em>, 13(5):1167–1189, 2009. <a class="reference external" href="https://doi.org/10.1109/TEVC.2009.2021467">doi:10.1109/TEVC.2009.2021467</a>, <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#ZhoZhaJin2009igdx">[BibTeX]</a>.</p>
+</div>
+<div class="citation" id="cite-1-vellam1998gp" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">4</a><span class="fn-bracket">]</span></span>
+<p>David A. Van Veldhuizen and Gary B. Lamont. Evolutionary computation and convergence to a Pareto front. In John R. Koza, editor, <em>Late Breaking Papers at the Genetic Programming 1998 Conference</em>, 221–228. Stanford University, California, July 1998. Stanford University Bookstore. <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#VelLam1998gp">[BibTeX]</a>.</p>
+</div>
+<div class="citation" id="cite-1-coesie2004igd" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">5</a><span class="fn-bracket">]</span></span>
+<p>Carlos A. Coello Coello and Margarita Reyes-Sierra. A study of the parallelization of a coevolutionary multi-objective evolutionary algorithm. In Raúl Monroy, Gustavo Arroyo-Figueroa, Luis Enrique Sucar, and Humberto Sossa, editors, <em>Proceedings of MICAI</em>, volume 2972 of Lecture Notes in Artificial Intelligence, pages 688–697. Springer, Heidelberg, Germany, 2004. <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#CoeSie2004igd">[BibTeX]</a>.</p>
+</div>
+<div class="citation" id="cite-1-bezlopstu2017emo" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">6</a><span class="fn-bracket">]</span></span>
+<p>Leonardo C. T. Bezerra, Manuel López-Ibáñez, and Thomas Stützle. An empirical assessment of the properties of inverted generational distance indicators on multi- and many-objective optimization. In Heike Trautmann, Günter Rudolph, Kathrin Klamroth, Oliver Schütze, Margaret M. Wiecek, Yaochu Jin, and Christian Grimme, editors, <em>Evolutionary Multi-criterion Optimization, EMO 2017</em>, volume 10173 of Lecture Notes in Computer Science, pages 31–45. Springer International Publishing, Cham, Switzerland, 2017. <a class="reference external" href="https://doi.org/10.1007/978-3-319-54157-0_3">doi:10.1007/978-3-319-54157-0_3</a>, <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#BezLopStu2017emo">[BibTeX]</a>.</p>
+</div>
+<div class="citation" id="cite-1-zitthilaufon2003-tec" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id12">1</a>,<a role="doc-backlink" href="#id15">2</a>)</span>
+<p>Eckart Zitzler, Lothar Thiele, Marco Laumanns, Carlos M. Fonseca, and Viviane Grunert da Fonseca. Performance assessment of multiobjective optimizers: an analysis and review. <em>IEEE Transactions on Evolutionary Computation</em>, 7(2):117–132, 2003. <a class="reference external" href="https://doi.org/10.1109/TEVC.2003.810758">doi:10.1109/TEVC.2003.810758</a>, <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#ZitThiLauFon2003:tec">[BibTeX]</a>.</p>
+</div>
+<div class="citation" id="cite-1-zitthi1998ppsn" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id14">8</a><span class="fn-bracket">]</span></span>
+<p>Eckart Zitzler and Lothar Thiele. Multiobjective optimization using evolutionary algorithms - A comparative case study. In Agoston E. Eiben, Thomas Bäck, Marc Schoenauer, and Hans-Paul Schwefel, editors, <em>Parallel Problem Solving from Nature – PPSN V</em>, volume 1498 of Lecture Notes in Computer Science, pages 292–301. Springer, Heidelberg, Germany, 1998. <a class="reference external" href="https://doi.org/10.1007/BFb0056872">doi:10.1007/BFb0056872</a>, <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#ZitThi1998ppsn">[BibTeX]</a>.</p>
+</div>
+<div class="citation" id="cite-1-knocor2002cec" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id15">9</a><span class="fn-bracket">]</span></span>
+<p>Joshua D. Knowles and David Corne. On metrics for comparing non-dominated sets. In <em>Proceedings of the 2002 Congress on Evolutionary Computation (CEC'02)</em>, 711–716. Piscataway, NJ, 2002. IEEE Press. <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#KnoCor2002cec">[BibTeX]</a>.</p>
+</div>
+<div class="citation" id="cite-1-brifri2010approx" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id16">10</a><span class="fn-bracket">]</span></span>
+<p>Karl Bringmann and Tobias Friedrich. Approximating the volume of unions and intersections of high-dimensional geometric objects. <em>Computational Geometry</em>, 43(6–7):601–610, 2010. <a class="reference external" href="https://doi.org/10.1016/j.comgeo.2010.03.004">doi:10.1016/j.comgeo.2010.03.004</a>, <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#BriFri2010approx">[BibTeX]</a>.</p>
+</div>
+<div class="citation" id="cite-1-denzha2019approxhv" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id17">11</a><span class="fn-bracket">]</span></span>
+<p>Jingda Deng and Qingfu Zhang. Approximating hypervolume and hypervolume contributions using polar coordinate. <em>IEEE Transactions on Evolutionary Computation</em>, 23(5):913–918, October 2019. <a class="reference external" href="https://doi.org/10.1109/tevc.2019.2895108">doi:10.1109/tevc.2019.2895108</a>, <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#DenZha2019approxhv">[BibTeX]</a>.</p>
+</div>
+<div class="citation" id="cite-1-hanjas1998" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id18">12</a><span class="fn-bracket">]</span></span>
+<p>Michael Pilegaard Hansen and Andrzej Jaszkiewicz. Evaluating the quality of approximations to the non-dominated set. Technical Report IMM-REP-1998-7, Institute of Mathematical Modelling, Technical University of Denmark, Lyngby, Denmark, 1998. <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#HanJas1998">[BibTeX]</a>.</p>
+</div>
+<div class="citation" id="cite-1-schker2025r2v2" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id19">13</a><span class="fn-bracket">]</span></span>
+<p>Lennart Schäpermeier and Pascal Kerschke. R2 v2: the Pareto-compliant R2 indicator for better benchmarking in bi-objective optimization. <em>Evolutionary Computation</em>, pages 1–17, October 2025. <a class="reference external" href="https://doi.org/10.1162/evco.a.366">doi:10.1162/evco.a.366</a>, <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#SchKer2025r2v2">[BibTeX]</a>.</p>
+</div>
+<div class="citation" id="cite-1-lopverdredoe2025" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>14<span class="fn-bracket">]</span></span>
+<p>Manuel López-Ibáñez, Diederick Vermetten, Johann Dreo, and Carola Doerr. Using the empirical attainment function for analyzing single-objective black-box optimization algorithms. <em>IEEE Transactions on Evolutionary Computation</em>, 29(5):1774–1782, 2025. <a class="reference external" href="https://doi.org/10.1109/TEVC.2024.3462758">doi:10.1109/TEVC.2024.3462758</a>, <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#LopVerDreDoe2025">[BibTeX]</a>.</p>
+</div>
+<div class="citation" id="cite-1-lacklafon2017box" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>15<span class="fn-bracket">]</span></span>
+<p>Renaud Lacour, Kathrin Klamroth, and Carlos M. Fonseca. A box decomposition algorithm to compute the hypervolume indicator. <em>Computers &amp; Operations Research</em>, 79:347–360, 2017. <a class="reference external" href="https://doi.org/10.1016/J.COR.2016.06.021">doi:10.1016/J.COR.2016.06.021</a>, <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#LacKlaFon2017box">[BibTeX]</a>.</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="generated/moocore.pareto_rank.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">pareto_rank</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="generated/moocore.igd.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">igd</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inverted-generational-distance-igd-and-igd-and-averaged-hausdorff-distance">Inverted Generational Distance (IGD and IGD+) and Averaged Hausdorff Distance</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#epsilon-metric">Epsilon metric</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hypervolume-metric">Hypervolume metric</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#approximating-the-hypervolume-metric">Approximating the hypervolume metric</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exact-r2-indicator">(Exact) R2 Indicator</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bibliography">Bibliography</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

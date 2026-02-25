@@ -1,0 +1,577 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>moocore: Core Algorithms for Multi-Objective Optimization &#8212; moocore 0.3.0.dev0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=79fc01cf" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=6fc6f92e"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=317740d0"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API reference" href="reference/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.3.0.dev0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="#">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">moocore 0.3.0.dev0</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="whatsnew/index.html">
+    What’s new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/multi-objective/moocore" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/moocore" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="whatsnew/index.html">
+    What’s new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/multi-objective/moocore" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/moocore" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none"></div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="moocore-core-algorithms-for-multi-objective-optimization">
+<span id="moocore-docs-mainpage"></span><h1>moocore: Core Algorithms for Multi-Objective Optimization<a class="headerlink" href="#moocore-core-algorithms-for-multi-objective-optimization" title="Link to this heading">#</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<p><strong>Version</strong>: 0.3.0.dev0 (<a class="reference internal" href="whatsnew/index.html#whatsnew"><span class="std std-ref">What’s new</span></a>)</p>
+<p><strong>Date</strong> Feb 25, 2026</p>
+<p><strong>Useful links</strong>:
+<a class="reference external" href="https://github.com/multi-objective/moocore/tree/main/python#install">Install</a> |
+<a class="reference external" href="https://github.com/multi-objective/moocore">Source Repository</a> |
+<a class="reference external" href="https://github.com/multi-objective/moocore/issues">Issue Tracker</a></p>
+<p>This webpage documents the <code class="docutils literal notranslate"><span class="pre">moocore</span></code> Python package. There is also a  <a class="reference external" href="https://multi-objective.github.io/moocore/r">moocore R package</a>.</p>
+<p>The goal of the <strong>moocore</strong> project (<a class="github reference external" href="https://github.com/multi-objective/moocore/">multi-objective/moocore</a>) is to collect and document fast implementations of core mathematical functions and algorithms for multi-objective optimization and make them available to different programming languages via similar interfaces. These functions include:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="reference/functions.io.html#read-generate-transform-sets"><span class="std std-ref">Generate and transform nondominated sets</span></a>.</p></li>
+<li><p><a class="reference internal" href="reference/functions.dominance.html#identifying-and-filtering-dominated-vectors"><span class="std std-ref">Identify and filter dominated vectors</span></a>.</p></li>
+<li><p><a class="reference internal" href="reference/functions.metrics.html#unary-quality-metrics"><span class="std std-ref">Quality metrics</span></a> such as (weighted) hypervolume, epsilon, IGD+, (exact) R2, etc.</p></li>
+<li><p><a class="reference internal" href="reference/functions.eaf.html#empirical-attainment-function"><span class="std std-ref">Computation of the Empirical Attainment Function</span></a>. The empirical attainment function (EAF) describes the probabilistic distribution of the outcomes obtained by a stochastic algorithm in the objective space.</p></li>
+</ul>
+<p>Most critical functionality is implemented in C, with the R and Python packages providing convenient interfaces to the C code.</p>
+<p><strong>Keywords</strong>: empirical attainment function, summary attainment surfaces, EAF
+differences, multi-objective optimization, bi-objective optimization,
+performance measures, performance assessment</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 sd-pt-2 sd-pb-2 sd-pl-0 sd-pr-0 sd-text-center docutils">
+<div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 sd-g-4 sd-g-xs-4 sd-g-sm-4 sd-g-md-4 sd-g-lg-4 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-md sd-card-hover intro-card docutils">
+<img alt="" class="sd-card-img-top" src="_images/index_user_guide.svg" />
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+API Reference</div>
+<p class="sd-card-text">The reference guide contains a detailed description of the functions,
+modules, and objects.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="reference/index.html#api-reference"><span class="std std-ref">API reference</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-md sd-card-hover intro-card docutils">
+<img alt="" class="sd-card-img-top" src="_images/index_getting_started.svg" />
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Examples</div>
+<p class="sd-card-text">Detailed examples and tutorials.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="auto_examples/index.html#auto-examples"><span class="std std-ref">Examples</span></a></div>
+</div>
+</div>
+</div>
+<section id="benchmarks">
+<h2>Benchmarks<a class="headerlink" href="#benchmarks" title="Link to this heading">#</a></h2>
+<p>The following plots compare the performance of <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a>, <a class="reference external" href="https://pymoo.org/">pymoo</a>, <a class="reference external" href="https://botorch.org/">BoTorch</a>, <a class="reference external" href="https://desdeo.readthedocs.io/en/latest/">DESDEO</a>, <a class="reference external" href="https://github.com/tommyod/paretoset">paretoset</a>, <a class="reference external" href="https://facebookresearch.github.io/nevergrad/">Nevergrad</a>, <a class="reference external" href="https://jmetal.github.io/jMetalPy/index.html">jMetalPy</a>, <a class="reference external" href="https://seqme.readthedocs.io">seqme</a>, <a class="reference external" href="https://github.com/nabenabe0928/fast-pareto">fast-pareto</a>, <a class="reference external" href="https://optuna.org/">Optuna</a> and <a class="reference external" href="https://cma-es.github.io/moarchiving/">moarchiving</a>.  Other Python packages are not included in the comparison because they are based on these packages for the functionality benchmarked, so they are <strong>at least as slow</strong> as them. For example <a class="reference external" href="https://xopt.xopt.org/index.html">Xopt</a> and <a class="reference external" href="https://experimental-design.github.io/bofire/">BoFire</a> use <a class="reference external" href="https://botorch.org/">BoTorch</a>, <a class="reference external" href="https://anyoptimization.com/projects/pysamoo/">pysamoo</a> is an extension of <a class="reference external" href="https://pymoo.org/">pymoo</a>, <a class="reference external" href="https://desdeo.readthedocs.io/en/latest/">DESDEO</a> already uses <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a> for hypervolume and other quality metrics, and most of the multi-objective functionality of <a class="reference external" href="https://deap.readthedocs.io/en/master/">DEAP</a> is shared by <a class="reference external" href="https://pymoo.org/">pymoo</a>.  We do not compare with the Bayesian optimization toolbox <a class="reference external" href="https://secondmind-labs.github.io/trieste">trieste</a>, because it is much slower than <a class="reference external" href="https://botorch.org/">BoTorch</a> and too slow to run the benchmarks in a reasonable time.</p>
+<p>Not all packages provide the same functionality. For example, <a class="reference external" href="https://pymoo.org/">pymoo</a> does not provide the <a class="reference internal" href="reference/functions.metrics.html#epsilon-metric"><span class="std std-ref">epsilon indicator</span></a> whereas <a class="reference external" href="https://jmetal.github.io/jMetalPy/index.html">jMetalPy</a> does not provide the <a class="reference internal" href="reference/functions.metrics.html#igd-hausdorf"><span class="std std-ref">IGD+ indicator</span></a>. <a class="reference external" href="https://botorch.org/">BoTorch</a> provides neither of them. <a class="reference external" href="https://github.com/tommyod/paretoset">paretoset</a> and <a class="reference external" href="https://github.com/nabenabe0928/fast-pareto">fast-pareto</a> only identify nondominated points.</p>
+<p>We would like to benchmark <a class="reference external" href="https://esa.github.io/pygmo2/">pygmo</a>, however, it is currently impossible to install using <code class="docutils literal notranslate"><span class="pre">pip</span></code> (See: <a class="github reference external" href="https://github.com/esa/pygmo2/issues/152">esa/pygmo2#152</a>)</p>
+<p>The source code for the benchmarks below can be found at <a class="github reference external" href="https://github.com/multi-objective/moocore/tree/main/python/benchmarks">multi-objective/moocore</a> .</p>
+<section id="bench-ndom">
+<span id="identifying-nondominated-points"></span><h3>Identifying nondominated points<a class="headerlink" href="#bench-ndom" title="Link to this heading">#</a></h3>
+<p>The following plots compare the speed of finding nondominated solutions, equivalent to <a class="reference internal" href="reference/generated/moocore.is_nondominated.html#moocore.is_nondominated" title="moocore.is_nondominated"><code class="xref py py-func docutils literal notranslate"><span class="pre">moocore.is_nondominated()</span></code></a>, in 2D and 3D. We test both <code class="docutils literal notranslate"><span class="pre">keep_weakly=True</span></code> and <code class="docutils literal notranslate"><span class="pre">keep_weakly=False</span></code> (the latter is only supported by <a class="reference external" href="https://botorch.org/">botorch</a> and <a class="reference external" href="https://github.com/tommyod/paretoset">paretoset</a>).  The plots show that <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a> is 10 times faster than <a class="reference external" href="https://desdeo.readthedocs.io/en/latest/">DESDEO</a> and <a class="reference external" href="https://github.com/tommyod/paretoset">paretoset</a> and 100 times faster than the other packages. <a class="reference external" href="https://github.com/nabenabe0928/fast-pareto">fast-pareto</a> claims to implement a <span class="math notranslate nohighlight">\(O(n\log n)\)</span> algorithm for 3D, but the benchmarks below indicate a <span class="math notranslate nohighlight">\(O(n^2)\)</span> complexity, similar to other packages and significantly slower than <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a>.</p>
+<p><a class="reference internal" href="_images/wndom_bench-test2D-200k-time.png"><img alt="wndom_bench-test2D-200k" src="_images/wndom_bench-test2D-200k-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/wndom_bench-ran3d-40k-time.png"><img alt="wndom_bench-ran3d-40k" src="_images/wndom_bench-ran3d-40k-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/ndom_bench-test2D-200k-time.png"><img alt="ndom_bench-test2D-200k" src="_images/ndom_bench-test2D-200k-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/ndom_bench-ran3d-40k-time.png"><img alt="ndom_bench-ran3d-40k" src="_images/ndom_bench-ran3d-40k-time.png" style="width: 49%;" /></a></p>
+<p>For dimensions larger than 3, <a class="reference internal" href="reference/generated/moocore.is_nondominated.html#moocore.is_nondominated" title="moocore.is_nondominated"><code class="xref py py-func docutils literal notranslate"><span class="pre">moocore.is_nondominated()</span></code></a> still uses the
+naive <span class="math notranslate nohighlight">\(O(m n^2)\)</span> algorithm.  Nevertheless, the plots show that <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a>
+is still consistently faster than the other packages. <a class="reference external" href="https://github.com/nabenabe0928/fast-pareto">fast-pareto</a> claims to be using a <span class="math notranslate nohighlight">\(O(n\log^{m-2} n)\)</span> algorithm, but the benchmarks suggest that it is also using a <span class="math notranslate nohighlight">\(O(m n^2)\)</span> algorithm, although slower than most other packages and almost 10 times slower than <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a>.</p>
+<p><a class="reference internal" href="_images/wndom_bench-sphere-4d-time.png"><img alt="wndom_bench-sphere-4d" src="_images/wndom_bench-sphere-4d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/wndom_bench-sphere-5d-time.png"><img alt="wndom_bench-sphere-5d" src="_images/wndom_bench-sphere-5d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/ndom_bench-sphere-4d-time.png"><img alt="ndom_bench-sphere-4d" src="_images/ndom_bench-sphere-4d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/ndom_bench-sphere-5d-time.png"><img alt="ndom_bench-sphere-5d" src="_images/ndom_bench-sphere-5d-time.png" style="width: 49%;" /></a></p>
+</section>
+<section id="nondominated-sorting-pareto-ranking">
+<span id="bench-ndsort"></span><h3>Nondominated Sorting (Pareto ranking)<a class="headerlink" href="#nondominated-sorting-pareto-ranking" title="Link to this heading">#</a></h3>
+<p>Nondominated sorting (or Pareto ranking) assigns a rank to each point according
+to Pareto-optimality. It can be used to split a set of points into layers of
+nondominated fronts.  For more details, see <a class="reference internal" href="reference/generated/moocore.pareto_rank.html#moocore.pareto_rank" title="moocore.pareto_rank"><code class="xref py py-func docutils literal notranslate"><span class="pre">moocore.pareto_rank()</span></code></a>. This
+function in <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a> uses a <span class="math notranslate nohighlight">\(O(n \log n)\)</span> algorithm for 2 dimensions
+and a <span class="math notranslate nohighlight">\(O(k\cdot n\log n)\)</span> algorithm for 3 dimensions.  As the plots show,
+this makes <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a> significantly faster than <a class="reference external" href="https://github.com/tommyod/paretoset">paretoset</a>, <a class="reference external" href="https://pymoo.org/">pymoo</a> and
+<a class="reference external" href="https://desdeo.readthedocs.io/en/latest/">DESDEO</a>.  With higher dimensions, <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a> uses the naive <span class="math notranslate nohighlight">\(O(k m
+n^2)\)</span> algorithm, similar to <a class="reference external" href="https://github.com/tommyod/paretoset">paretoset</a> and <a class="reference external" href="https://desdeo.readthedocs.io/en/latest/">DESDEO</a> (if the latter are
+compiled with <a class="reference external" href="https://numba.pydata.org/numba-doc/dev/index.html">Numba</a>). In these benchmarks points are sampled uniformly at
+random within the hyper-cube.</p>
+<p><a class="reference internal" href="_images/ndsort_bench-ran-2d-time.png"><img alt="ndsort_bench-ran-2d" src="_images/ndsort_bench-ran-2d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/ndsort_bench-ran-3d-time.png"><img alt="ndsort_bench-ran-3d" src="_images/ndsort_bench-ran-3d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/ndsort_bench-ran-4d-time.png"><img alt="ndsort_bench-ran-4d" src="_images/ndsort_bench-ran-4d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/ndsort_bench-ran-5d-time.png"><img alt="ndsort_bench-ran-5d" src="_images/ndsort_bench-ran-5d-time.png" style="width: 49%;" /></a></p>
+</section>
+<section id="exact-computation-of-hypervolume">
+<span id="bench-hv"></span><h3>Exact computation of hypervolume<a class="headerlink" href="#exact-computation-of-hypervolume" title="Link to this heading">#</a></h3>
+<p>The following plots compare the speed of computing the <a class="reference internal" href="reference/functions.metrics.html#hypervolume-metric"><span class="std std-ref">hypervolume indicator</span></a> in 3D, 4D, 5D and 6D. As the plots show, <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a> is 100 times faster than the other packages and 1000 times faster than <a class="reference external" href="https://botorch.org/">BoTorch</a> and, by extension, <a class="reference external" href="https://xopt.xopt.org/index.html">Xopt</a> and <a class="reference external" href="https://experimental-design.github.io/bofire/">BoFire</a>.</p>
+<p>For 3D, <a class="reference external" href="https://optuna.org/">Optuna</a> uses a <span class="math notranslate nohighlight">\(O(n^2)\)</span> algorithm, while <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a> uses the best-known <span class="math notranslate nohighlight">\(O(n\log n)\)</span> one, so the gap between the two will get significantly larger with a larger number of points than those tested here. <a class="reference external" href="https://cma-es.github.io/moarchiving/">moarchiving</a> uses the same algorithms as <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a> for 3D and 4D, but a pure Python implementation, so it is still 10-100 times slower than <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a>’s C implementation.  <a class="reference external" href="https://botorch.org/">BoTorch</a> and <a class="reference external" href="https://github.com/nabenabe0928/fast-pareto">fast-pareto</a> are not included for more than 3 objectives because <strong>they are tens of thousands of times slower</strong> than <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a>.  <a class="reference external" href="https://facebookresearch.github.io/nevergrad/">Nevergrad</a> and <a class="reference external" href="https://optuna.org/">Optuna</a> are not included for more than 5 objectives for the same reason.</p>
+<p><a class="reference internal" href="_images/hv_bench-DTLZLinearShape.3d-time.png"><img alt="hv_bench-DTLZLinearShape-3d" src="_images/hv_bench-DTLZLinearShape.3d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/hv_bench-DTLZLinearShape.4d-time.png"><img alt="hv_bench-DTLZLinearShape-4d" src="_images/hv_bench-DTLZLinearShape.4d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/hv_bench-DTLZLinearShape.5d-time.png"><img alt="hv_bench-DTLZLinearShape-5d" src="_images/hv_bench-DTLZLinearShape.5d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/hv_bench-DTLZLinearShape.6d-time.png"><img alt="hv_bench-DTLZLinearShape-6d" src="_images/hv_bench-DTLZLinearShape.6d-time.png" style="width: 49%;" /></a></p>
+</section>
+<section id="approximation-of-the-hypervolume">
+<span id="bench-hvapprox"></span><h3>Approximation of the hypervolume<a class="headerlink" href="#approximation-of-the-hypervolume" title="Link to this heading">#</a></h3>
+<p>The following plots compare the accuracy and speed of approximating the hypervolume with the various methods provided by <a class="reference internal" href="reference/generated/moocore.hv_approx.html#moocore.hv_approx" title="moocore.hv_approx"><code class="xref py py-func docutils literal notranslate"><span class="pre">moocore.hv_approx()</span></code></a>. The plots show that method <code class="docutils literal notranslate"><span class="pre">DZ2019-HW</span></code> consistently produces the lowest approximation error, but it is also slower than method <code class="docutils literal notranslate"><span class="pre">DZ2019-MC</span></code>.  When the number of points increases, both methods are significantly faster than <a class="reference external" href="https://pymoo.org/">pymoo</a>.</p>
+<p>If you compare the plots of <strong>DTLZLinearShape-3d</strong> and <strong>DTLZLinearShape-4d</strong> below to the ones above in the previous section, you can see that the exact computation of the hypervolume in 3D or 4D for thousands of points takes milliseconds, whereas approximating the hypervolume is significantly slower and, thus, not worth doing.</p>
+<p><a class="reference internal" href="_images/hvapprox_bench-DTLZLinearShape.3d-values.png"><img alt="hvapprox_bench-DTLZLinearShape-3d-values" src="_images/hvapprox_bench-DTLZLinearShape.3d-values.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/hvapprox_bench-DTLZLinearShape.3d-time.png"><img alt="hvapprox_bench-DTLZLinearShape-3d-time" src="_images/hvapprox_bench-DTLZLinearShape.3d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/hvapprox_bench-DTLZLinearShape.4d-values.png"><img alt="hvapprox_bench-DTLZLinearShape-4d-values" src="_images/hvapprox_bench-DTLZLinearShape.4d-values.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/hvapprox_bench-DTLZLinearShape.4d-time.png"><img alt="hvapprox_bench-DTLZLinearShape-4d-time" src="_images/hvapprox_bench-DTLZLinearShape.4d-time.png" style="width: 49%;" /></a></p>
+<p>Approximating the hypervolume becomes more useful for dimensions higher than 5, where the exact computation becomes noticeably slower with hundreds of points.  For such problems,  method <code class="docutils literal notranslate"><span class="pre">DZ2019-HW</span></code> is significantly slower for few points than  <a class="reference external" href="https://pymoo.org/">pymoo</a>, which is much slower than <code class="docutils literal notranslate"><span class="pre">DZ2019-MC</span></code>. However, the computation time of <code class="docutils literal notranslate"><span class="pre">DZ2019-HW</span></code> increases very slowly with the number of points whereas the computation time of  <a class="reference external" href="https://pymoo.org/">pymoo</a> increases very rapidly.</p>
+<p><a class="reference internal" href="_images/hvapprox_bench-DTLZLinearShape.6d-values.png"><img alt="hvapprox_bench-DTLZLinearShape-6d-values" src="_images/hvapprox_bench-DTLZLinearShape.6d-values.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/hvapprox_bench-DTLZLinearShape.6d-time.png"><img alt="hvapprox_bench-DTLZLinearShape-6d-time" src="_images/hvapprox_bench-DTLZLinearShape.6d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/hvapprox_bench-DTLZSphereShape.6d-values.png"><img alt="hvapprox_bench-DTLZSphereShape-6d-values" src="_images/hvapprox_bench-DTLZSphereShape.6d-values.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/hvapprox_bench-DTLZSphereShape.6d-time.png"><img alt="hvapprox_bench-DTLZSphereShape-6d-time" src="_images/hvapprox_bench-DTLZSphereShape.6d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/hvapprox_bench-ran.6d-values.png"><img alt="hvapprox_bench-ran-6d-values" src="_images/hvapprox_bench-ran.6d-values.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/hvapprox_bench-ran.6d-time.png"><img alt="hvapprox_bench-ran-6d-time" src="_images/hvapprox_bench-ran.6d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/hvapprox_bench-DTLZLinearShape.9d-values.png"><img alt="hvapprox_bench-DTLZLinearShape-9d-values" src="_images/hvapprox_bench-DTLZLinearShape.9d-values.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/hvapprox_bench-DTLZLinearShape.9d-time.png"><img alt="hvapprox_bench-DTLZLinearShape-9d-time" src="_images/hvapprox_bench-DTLZLinearShape.9d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/hvapprox_bench-ran.9d-values.png"><img alt="hvapprox_bench-ran-9d-values" src="_images/hvapprox_bench-ran.9d-values.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/hvapprox_bench-ran.9d-time.png"><img alt="hvapprox_bench-ran-9d-time" src="_images/hvapprox_bench-ran.9d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/hvapprox_bench-DTLZSphereShape.10d-values.png"><img alt="hvapprox_bench-DTLZSphereShape-10d-values" src="_images/hvapprox_bench-DTLZSphereShape.10d-values.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/hvapprox_bench-DTLZSphereShape.10d-time.png"><img alt="hvapprox_bench-DTLZSphereShape-10d-time" src="_images/hvapprox_bench-DTLZSphereShape.10d-time.png" style="width: 49%;" /></a></p>
+</section>
+<section id="epsilon-and-igd-indicators">
+<h3>Epsilon and IGD+ indicators<a class="headerlink" href="#epsilon-and-igd-indicators" title="Link to this heading">#</a></h3>
+<p>The following plots compare the speed of computing the <a class="reference internal" href="reference/functions.metrics.html#epsilon-metric"><span class="std std-ref">epsilon indicator</span></a> metric and <a class="reference internal" href="reference/functions.metrics.html#igd-hausdorf"><span class="std std-ref">IGD+ indicator</span></a>. Although  the algorithms for computing these metrics are relatively simple and easy to vectorize in Python, the <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a> implementation is still 10 to 100 times faster. The implementation of IGD+ in <a class="reference external" href="https://desdeo.readthedocs.io/en/latest/">DESDEO</a> is almost a thousand times <strong>slower</strong>  than <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a>, so it is not included in the benchmarks below.</p>
+<p><a class="reference internal" href="_images/eps_bench-rmnk_10D_random_search-time.png"><img alt="pic5" src="_images/eps_bench-rmnk_10D_random_search-time.png" style="width: 48%;" /></a> <a class="reference internal" href="_images/igd_plus_bench-ran.40000pts.3d-time.png"><img alt="pic6" src="_images/igd_plus_bench-ran.40000pts.3d-time.png" style="width: 48%;" /></a></p>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="right-next"
+       href="reference/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">API reference</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#benchmarks">Benchmarks</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bench-ndom">Identifying nondominated points</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nondominated-sorting-pareto-ranking">Nondominated Sorting (Pareto ranking)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exact-computation-of-hypervolume">Exact computation of hypervolume</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#approximation-of-the-hypervolume">Approximation of the hypervolume</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#epsilon-and-igd-indicators">Epsilon and IGD+ indicators</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

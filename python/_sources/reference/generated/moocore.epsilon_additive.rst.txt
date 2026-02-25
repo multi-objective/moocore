@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+epsilon\_additive
+=================
+
+.. currentmodule:: moocore
+
+.. autofunction:: epsilon_additive
+
+.. _sphx_glr_backref_moocore.epsilon_additive:
+
+.. minigallery:: moocore.epsilon_additive
+   :add-heading: Gallery examples
+   :heading-level: -

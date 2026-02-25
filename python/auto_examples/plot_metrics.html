@@ -1,0 +1,747 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Computing Multi-Objective Quality Metrics &#8212; moocore 0.3.0.dev0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=79fc01cf" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=6fc6f92e"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=317740d0"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'auto_examples/plot_metrics';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Comparing methods for approximating the hypervolume" href="plot_hv_approx.html" />
+    <link rel="prev" title="Using moocore with Pandas" href="plot_pandas.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.3.0.dev0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">moocore 0.3.0.dev0</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../whatsnew/index.html">
+    What’s new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/multi-objective/moocore" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/moocore" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../whatsnew/index.html">
+    What’s new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/multi-objective/moocore" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/moocore" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_eaf.html">Empirical Attainment Function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_pandas.html">Using moocore with Pandas</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Computing Multi-Objective Quality Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_hv_approx.html">Comparing methods for approximating the hypervolume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_generate.html">Sampling Random Nondominated Sets</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Examples</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Computing Multi-Objective Quality Metrics</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-plot-metrics-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="computing-multi-objective-quality-metrics">
+<span id="sphx-glr-auto-examples-plot-metrics-py"></span><h1>Computing Multi-Objective Quality Metrics<a class="headerlink" href="#computing-multi-objective-quality-metrics" title="Link to this heading">#</a></h1>
+<p>Several examples of computing multi-objective unary quality metrics.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">moocore</span>
+</pre></div>
+</div>
+<section id="comparing-two-multi-objective-datasets-using-unary-quality-metrics">
+<h2>Comparing two multi-objective datasets using unary quality metrics<a class="headerlink" href="#comparing-two-multi-objective-datasets-using-unary-quality-metrics" title="Link to this heading">#</a></h2>
+<p>First, read the datasets.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">spherical</span> <span class="o">=</span> <a href="../reference/generated/moocore.get_dataset.html#moocore.get_dataset" title="moocore.get_dataset" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">get_dataset</span></a><span class="p">(</span><span class="s2">&quot;spherical-250-10-3d.txt.xz&quot;</span><span class="p">)</span>
+<span class="n">uniform</span> <span class="o">=</span> <a href="../reference/generated/moocore.get_dataset.html#moocore.get_dataset" title="moocore.get_dataset" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">get_dataset</span></a><span class="p">(</span><span class="s2">&quot;uniform-250-10-3d.txt.xz&quot;</span><span class="p">)</span>
+
+<span class="n">spherical_objs</span> <span class="o">=</span> <span class="n">spherical</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">spherical_sets</span> <span class="o">=</span> <span class="n">spherical</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">uniform_objs</span> <span class="o">=</span> <span class="n">uniform</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">10</span>
+<span class="n">uniform_sets</span> <span class="o">=</span> <span class="n">uniform</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Create reference set and reference point.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">ref_set</span> <span class="o">=</span> <a href="../reference/generated/moocore.filter_dominated.html#moocore.filter_dominated" title="moocore.filter_dominated" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">filter_dominated</span></a><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">spherical_objs</span><span class="p">,</span> <span class="n">uniform_objs</span><span class="p">)))</span>
+<span class="n">ref_point</span> <span class="o">=</span> <span class="mf">1.1</span>
+</pre></div>
+</div>
+<p>Calculate metrics.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">uniform_igd_plus</span> <span class="o">=</span> <a href="../reference/generated/moocore.apply_within_sets.html#moocore.apply_within_sets" title="moocore.apply_within_sets" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">apply_within_sets</span></a><span class="p">(</span>
+    <span class="n">uniform_objs</span><span class="p">,</span> <span class="n">uniform_sets</span><span class="p">,</span> <a href="../reference/generated/moocore.igd_plus.html#moocore.igd_plus" title="moocore.igd_plus" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">igd_plus</span></a><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">ref_set</span>
+<span class="p">)</span>
+<span class="n">spherical_igd_plus</span> <span class="o">=</span> <a href="../reference/generated/moocore.apply_within_sets.html#moocore.apply_within_sets" title="moocore.apply_within_sets" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">apply_within_sets</span></a><span class="p">(</span>
+    <span class="n">spherical_objs</span><span class="p">,</span> <span class="n">spherical_sets</span><span class="p">,</span> <a href="../reference/generated/moocore.igd_plus.html#moocore.igd_plus" title="moocore.igd_plus" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">igd_plus</span></a><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">ref_set</span>
+<span class="p">)</span>
+
+<span class="n">uniform_epsilon</span> <span class="o">=</span> <a href="../reference/generated/moocore.apply_within_sets.html#moocore.apply_within_sets" title="moocore.apply_within_sets" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">apply_within_sets</span></a><span class="p">(</span>
+    <span class="n">uniform_objs</span><span class="p">,</span> <span class="n">uniform_sets</span><span class="p">,</span> <a href="../reference/generated/moocore.epsilon_mult.html#moocore.epsilon_mult" title="moocore.epsilon_mult" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">epsilon_mult</span></a><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">ref_set</span>
+<span class="p">)</span>
+<span class="n">spherical_epsilon</span> <span class="o">=</span> <a href="../reference/generated/moocore.apply_within_sets.html#moocore.apply_within_sets" title="moocore.apply_within_sets" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">apply_within_sets</span></a><span class="p">(</span>
+    <span class="n">spherical_objs</span><span class="p">,</span> <span class="n">spherical_sets</span><span class="p">,</span> <a href="../reference/generated/moocore.epsilon_mult.html#moocore.epsilon_mult" title="moocore.epsilon_mult" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">epsilon_mult</span></a><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">ref_set</span>
+<span class="p">)</span>
+
+<span class="n">uniform_hypervolume</span> <span class="o">=</span> <a href="../reference/generated/moocore.apply_within_sets.html#moocore.apply_within_sets" title="moocore.apply_within_sets" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">apply_within_sets</span></a><span class="p">(</span>
+    <span class="n">uniform_objs</span><span class="p">,</span> <span class="n">uniform_sets</span><span class="p">,</span> <a href="../reference/generated/moocore.hypervolume.html#moocore.hypervolume" title="moocore.hypervolume" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">hypervolume</span></a><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">ref_point</span>
+<span class="p">)</span>
+<span class="n">spherical_hypervolume</span> <span class="o">=</span> <a href="../reference/generated/moocore.apply_within_sets.html#moocore.apply_within_sets" title="moocore.apply_within_sets" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">apply_within_sets</span></a><span class="p">(</span>
+    <span class="n">spherical_objs</span><span class="p">,</span> <span class="n">spherical_sets</span><span class="p">,</span> <a href="../reference/generated/moocore.hypervolume.html#moocore.hypervolume" title="moocore.hypervolume" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">hypervolume</span></a><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">ref_point</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            Uniform       Spherical</span>
+<span class="s2">            -------       ---------</span>
+<span class="s2">Mean HV  :  </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">uniform_hypervolume</span><span class="p">)</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">       </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">spherical_hypervolume</span><span class="p">)</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span>
+<span class="s2">Mean IGD+:  </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">uniform_igd_plus</span><span class="p">)</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">       </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">spherical_igd_plus</span><span class="p">)</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span>
+<span class="s2">Mean eps*:  </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">uniform_epsilon</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">       </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">spherical_epsilon</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span>
+
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>            Uniform       Spherical
+            -------       ---------
+Mean HV  :  0.78689       0.73290
+Mean IGD+:  0.12383       0.15745
+Mean eps*:  623.278       225.916
+</pre></div>
+</div>
+</section>
+<section id="igd-and-average-hausdorff-are-not-pareto-compliant">
+<h2>IGD and Average Hausdorff are not Pareto-compliant<a class="headerlink" href="#igd-and-average-hausdorff-are-not-pareto-compliant" title="Link to this heading">#</a></h2>
+<p>Example 4 by <span id="id1">Ishibuchi <em>et al.</em><sup>[<a class="reference internal" href="../reference/functions.metrics.html#cite-1-ishmastannoj2015igd" title="Hisao Ishibuchi, Hiroyuki Masuda, Yuki Tanigaki, and Yusuke Nojima. Modified distance calculation in generational distance and inverted generational distance. In António Gaspar-Cunha, Carlos Henggeler Antunes, and Carlos A. Coello Coello, editors, Evolutionary Multi-criterion Optimization, EMO 2015 Part I, volume 9018 of Lecture Notes in Computer Science, pages 110–125. Springer, Heidelberg, Germany, 2015. [BibTeX].">1</a>]</sup></span> shows a case where IGD gives the wrong answer.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">8</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Assuming minimization of both objectives, A is better than B in terms of Pareto optimality.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">set_theme</span><span class="p">()</span>
+
+<span class="n">df</span> <span class="o">=</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.concat.html#pandas.concat" title="pandas.concat" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-function"><span class="n">pd</span><span class="o">.</span><span class="n">concat</span></a><span class="p">(</span>
+    <span class="p">[</span>
+        <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></a><span class="p">({</span><span class="s2">&quot;f1&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;f2&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;Set&quot;</span><span class="p">:</span> <span class="n">label</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">ref</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;Ref&quot;</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">])</span>
+    <span class="p">],</span>
+    <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;f1&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;f2&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;Set&quot;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;Set&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_plot_metrics_001.png" srcset="../_images/sphx_glr_plot_metrics_001.png, ../_images/sphx_glr_plot_metrics_001_2_00x.png 2.00x" alt="plot metrics" class = "sphx-glr-single-img"/><p>However, both <a class="reference internal" href="../reference/generated/moocore.igd.html#moocore.igd" title="moocore.igd"><code class="xref py py-func docutils literal notranslate"><span class="pre">moocore.igd()</span></code></a> and <a class="reference internal" href="../reference/generated/moocore.avg_hausdorff_dist.html#moocore.avg_hausdorff_dist" title="moocore.avg_hausdorff_dist"><code class="xref py py-func docutils literal notranslate"><span class="pre">moocore.avg_hausdorff_dist()</span></code></a>
+incorrectly measure B as better than A, whereas <a class="reference internal" href="../reference/generated/moocore.igd_plus.html#moocore.igd_plus" title="moocore.igd_plus"><code class="xref py py-func docutils literal notranslate"><span class="pre">moocore.igd_plus()</span></code></a>,
+<a class="reference internal" href="../reference/generated/moocore.r2_exact.html#moocore.r2_exact" title="moocore.r2_exact"><code class="xref py py-func docutils literal notranslate"><span class="pre">moocore.r2_exact()</span></code></a> and <a class="reference internal" href="../reference/generated/moocore.hypervolume.html#moocore.hypervolume" title="moocore.hypervolume"><code class="xref py py-func docutils literal notranslate"><span class="pre">moocore.hypervolume()</span></code></a> correctly measure A
+as better than B (remember that hypervolume must be maximized) and
+<a class="reference internal" href="../reference/generated/moocore.epsilon_additive.html#moocore.epsilon_additive" title="moocore.epsilon_additive"><code class="xref py py-func docutils literal notranslate"><span class="pre">moocore.epsilon_additive()</span></code></a> measures both as equally good
+(epsilon is weakly Pareto compliant).</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></a><span class="p">(</span>
+    <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">A</span><span class="o">=</span><span class="p">[</span>
+            <a href="../reference/generated/moocore.igd.html#moocore.igd" title="moocore.igd" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">igd</span></a><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">ref</span><span class="p">),</span>
+            <a href="../reference/generated/moocore.avg_hausdorff_dist.html#moocore.avg_hausdorff_dist" title="moocore.avg_hausdorff_dist" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">avg_hausdorff_dist</span></a><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">ref</span><span class="p">),</span>
+            <a href="../reference/generated/moocore.igd_plus.html#moocore.igd_plus" title="moocore.igd_plus" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">igd_plus</span></a><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">ref</span><span class="p">),</span>
+            <a href="../reference/generated/moocore.epsilon_additive.html#moocore.epsilon_additive" title="moocore.epsilon_additive" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">epsilon_additive</span></a><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">ref</span><span class="p">),</span>
+            <a href="../reference/generated/moocore.hypervolume.html#moocore.hypervolume" title="moocore.hypervolume" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">hypervolume</span></a><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
+            <a href="../reference/generated/moocore.r2_exact.html#moocore.r2_exact" title="moocore.r2_exact" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">r2_exact</span></a><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="n">B</span><span class="o">=</span><span class="p">[</span>
+            <a href="../reference/generated/moocore.igd.html#moocore.igd" title="moocore.igd" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">igd</span></a><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">ref</span><span class="p">),</span>
+            <a href="../reference/generated/moocore.avg_hausdorff_dist.html#moocore.avg_hausdorff_dist" title="moocore.avg_hausdorff_dist" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">avg_hausdorff_dist</span></a><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">ref</span><span class="p">),</span>
+            <a href="../reference/generated/moocore.igd_plus.html#moocore.igd_plus" title="moocore.igd_plus" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">igd_plus</span></a><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">ref</span><span class="p">),</span>
+            <a href="../reference/generated/moocore.epsilon_additive.html#moocore.epsilon_additive" title="moocore.epsilon_additive" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">epsilon_additive</span></a><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">ref</span><span class="p">),</span>
+            <a href="../reference/generated/moocore.hypervolume.html#moocore.hypervolume" title="moocore.hypervolume" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">hypervolume</span></a><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
+            <a href="../reference/generated/moocore.r2_exact.html#moocore.r2_exact" title="moocore.r2_exact" class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function"><span class="n">moocore</span><span class="o">.</span><span class="n">r2_exact</span></a><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+        <span class="p">],</span>
+    <span class="p">),</span>
+    <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;IGD&quot;</span><span class="p">,</span> <span class="s2">&quot;Hausdorff&quot;</span><span class="p">,</span> <span class="s2">&quot;IGD+&quot;</span><span class="p">,</span> <span class="s2">&quot;eps+&quot;</span><span class="p">,</span> <span class="s2">&quot;HV&quot;</span><span class="p">,</span> <span class="s2">&quot;Exact R2&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>A</th>
+      <th>B</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>IGD</th>
+      <td>3.707092</td>
+      <td>2.591483</td>
+    </tr>
+    <tr>
+      <th>Hausdorff</th>
+      <td>3.707092</td>
+      <td>2.591483</td>
+    </tr>
+    <tr>
+      <th>IGD+</th>
+      <td>1.482843</td>
+      <td>2.260113</td>
+    </tr>
+    <tr>
+      <th>eps+</th>
+      <td>2.000000</td>
+      <td>2.000000</td>
+    </tr>
+    <tr>
+      <th>HV</th>
+      <td>61.000000</td>
+      <td>44.000000</td>
+    </tr>
+    <tr>
+      <th>Exact R2</th>
+      <td>1.630952</td>
+      <td>2.066667</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+<br />
+<br /><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.289 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-metrics-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/6dbc9c72e5bcee6ee20893a598dd3724/plot_metrics.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_metrics.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/2bde5214febb6ecdf0a91b5e94199d9d/plot_metrics.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_metrics.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/10edfa8a2faf9ea94d732c765b4d9e38/plot_metrics.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_metrics.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="plot_pandas.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Using moocore with Pandas</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="plot_hv_approx.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Comparing methods for approximating the hypervolume</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparing-two-multi-objective-datasets-using-unary-quality-metrics">Comparing two multi-objective datasets using unary quality metrics</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#igd-and-average-hausdorff-are-not-pareto-compliant">IGD and Average Hausdorff are not Pareto-compliant</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+
+  <div class="sphx-glr-sidebar-component">
+    
+      
+        <div class="sphx-glr-sidebar-item sphx-glr-download-python-sidebar" title="plot_metrics.py">
+          <a download href="../_downloads/2bde5214febb6ecdf0a91b5e94199d9d/plot_metrics.py">
+            <i class="fa-solid fa-download"></i>
+            Download source code
+          </a>
+        </div>
+      
+    
+      
+        <div class="sphx-glr-sidebar-item sphx-glr-download-jupyter-sidebar" title="plot_metrics.ipynb">
+          <a download href="../_downloads/6dbc9c72e5bcee6ee20893a598dd3724/plot_metrics.ipynb">
+            <i class="fa-solid fa-download"></i>
+            Download Jupyter notebook
+          </a>
+        </div>
+      
+    
+      
+        <div class="sphx-glr-sidebar-item sphx-glr-download-zip-sidebar" title="plot_metrics.zip">
+          <a download href="../_downloads/10edfa8a2faf9ea94d732c765b4d9e38/plot_metrics.zip">
+            <i class="fa-solid fa-download"></i>
+            Download zipped
+          </a>
+        </div>
+      
+    
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
