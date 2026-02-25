@@ -1,4 +1,7 @@
  - [ ] Replace AVL code
+   - https://github.com/ebiggers/avl_tree
+   - https://github.com/greensky00/avltree
+   - https://github.com/willemt/array-avl-tree
  - [ ] Merge eaf/eaf3d/uc/trunk/README
  - [ ] Merge eaf/eaf3d/uc/trunk/ command-line improvements
  - [ ] Merge hypervolume/Makefile README
