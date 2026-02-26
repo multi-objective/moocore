@@ -3,6 +3,8 @@
  * `r2_exact()` implements the exact computation of the R2 indicator for bi-objective solution sets.
  * `hypervolume()` is significantly faster for more than four dimensions (Andreia P. Guerreiro).
  * `hypervolume()` now handles 1D inputs and provides a clear error for 0D inputs (#58).
+ *  Add `GPGame` to [Benchmarks](https://multi-objective.github.io/moocore/r/articles/benchmarks.html).
+
 
 # moocore 0.2.0
 
