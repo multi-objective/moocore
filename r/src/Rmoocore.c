@@ -503,7 +503,6 @@ r2_exact_C(SEXP DATA, SEXP REFERENCE)
 
 #include "epsilon.h"
 #include "igd.h"
-#include "nondominated.h"
 
 enum unary_metric_t {
     EPSILON_ADD,
