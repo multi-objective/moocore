@@ -168,6 +168,23 @@ DEFINE_QSORT_CMP(cmp_pdouble_asc_x_nonzero, double *)
     return *a < *b ? -1 : 1;
 }
 
+// Deterministic tie-break by pointer value.
+DEFINE_QSORT_CMP(cmp_pdouble_asc_x_nonzero_stable, double *)
+{
+    ASSUME(a != b);
+    int cmp = cmp_double_asc(*a, *b);
+    // Deterministic tie-break by pointer value.
+    uintptr_t pa = (uintptr_t)a;
+    uintptr_t pb = (uintptr_t)b;
+    return cmp ? cmp : (pa < pb ? -1 : 1);
+}
+
+// Deterministic tie-break by pointer value.
+DEFINE_QSORT_CMP(cmp_ppdouble_asc_x_nonzero_stable, double * const *)
+{
+    return cmp_pdouble_asc_x_nonzero_stable(*a, *b);
+}
+
 DEFINE_QSORT_CMP(cmp_pdouble_asc_y_des_x_nonzero, double *)
 {
     const double ax = a[0];
@@ -200,6 +217,12 @@ DEFINE_QSORT_CMP(cmp_ppdouble_asc_x_asc_y, double **)
 {
     return cmp_pdouble_asc_x_asc_y(*a, *b);
 }
+
+DEFINE_QSORT_CMP(cmp_pdouble_asc_y_asc_z, double *)
+{
+    return cmp_double_asc_x_asc_y(a[1], a[2], b[1], b[2]);
+}
+
 
 static inline const double **
 generate_row_pointers(const double * restrict points, size_t size, dimension_t dim)

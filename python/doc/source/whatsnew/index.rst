@@ -11,6 +11,9 @@ Version 0.3.0 (development)
 - :func:`~moocore.r2_exact` implements the exact computation of the R2 indicator for bi-objective solution sets.
 - :func:`~moocore.hypervolume` is significantly faster for more than four dimensions (Andreia P. Guerreiro).
 - :func:`~moocore.hypervolume` now handles 1D inputs and provides a clear error for 0D inputs (:issue:`58`).
+- :func:`~moocore.is_nondominated` and :func:`~moocore.filter_dominated`
+  implement the best-known :math:`O(n(\log_2 n)^{m-2})` algorithm, thus they
+  are significantly faster for 4D and above. See :ref:`bench-ndom` benchmarks.
 
 
 Version 0.2.0 (10/01/2026)

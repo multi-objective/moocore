@@ -38,8 +38,14 @@ files = {
     "sphere-4d": dict(
         generate=(30000, 4, "sphere", 42), range=(1000, 30000, 10)
     ),
+    "convex-4d": dict(
+        generate=(30000, 4, "convex-sphere", 42), range=(1000, 30000, 10)
+    ),
     "sphere-5d": dict(
-        generate=(20000, 5, "sphere", 42), range=(1000, 20000, 10)
+        generate=(25000, 5, "sphere", 42), range=(1000, 25000, 10)
+    ),
+    "rmnk-10d": dict(
+        file="rmnk_0.0_10_16_1_0_ref.txt.xz", range=(1000, 20000, 10)
     ),
 }
 
@@ -65,41 +71,41 @@ print(f"Running benchmark: {title}")
 names = files.keys()
 for name in names:
     x = get_dataset(name)
+    dim = x.shape[1]
     n = get_geomrange(len(x), *files[name]["range"])
+
+    benchmarks = {
+        "moocore": lambda z: bool2pos(
+            moocore.is_nondominated(z, maximise=True, keep_weakly=True)
+        ),
+        "botorch": lambda z: bool2pos(
+            botorch_is_nondominated(z, deduplicate=False)
+        ),
+        "paretoset (numba)": lambda z: bool2pos(
+            paretoset(
+                z, sense=z.shape[1] * ["max"], distinct=False, use_numba=True
+            )
+        ),
+        "pymoo": lambda z, nds=pymoo_NonDominatedSorting(): nds.do(
+            -z, only_non_dominated_front=True
+        ),
+        "desdeo": lambda z: bool2pos(desdeo_is_nondominated(-z)),
+        "seqme": lambda z: bool2pos(
+            seqme_is_pareto_front(-z, assume_unique_lexsorted=True)
+        ),
+        "fast_pareto": lambda z: bool2pos(
+            fast_pareto_is_pf(-z, assume_unique_lexsorted=False)
+        ),
+        "optuna": lambda z: bool2pos(
+            optuna_is_pf(-z, assume_unique_lexsorted=False)
+        ),
+    }
 
     bench = Bench(
         name=name,
         n=n,
         setup=setup,
-        bench={
-            "moocore": lambda z: bool2pos(
-                moocore.is_nondominated(z, maximise=True, keep_weakly=True)
-            ),
-            "botorch": lambda z: bool2pos(
-                botorch_is_nondominated(z, deduplicate=False)
-            ),
-            "paretoset (numba)": lambda z: bool2pos(
-                paretoset(
-                    z,
-                    sense=z.shape[1] * ["max"],
-                    distinct=False,
-                    use_numba=True,
-                )
-            ),
-            "pymoo": lambda z, nds=pymoo_NonDominatedSorting(): nds.do(
-                -z, only_non_dominated_front=True
-            ),
-            "desdeo": lambda z: bool2pos(desdeo_is_nondominated(-z)),
-            "seqme": lambda z: bool2pos(
-                seqme_is_pareto_front(-z, assume_unique_lexsorted=True)
-            ),
-            "fast_pareto": lambda z: bool2pos(
-                fast_pareto_is_pf(-z, assume_unique_lexsorted=False)
-            ),
-            "optuna": lambda z: bool2pos(
-                optuna_is_pf(-z, assume_unique_lexsorted=False)
-            ),
-        },
+        bench=benchmarks,
         check=check_float_vector,
         max_time=10,
     )
@@ -116,21 +122,45 @@ print(f"Running benchmark: {title}")
 names = files.keys()
 for name in names:
     x = get_dataset(name)
+    dim = x.shape[1]
+    # Deduplicate so that we can benchmark packages that do not remove duplicates.
+    x = np.unique(x, axis=0)
     n = get_geomrange(len(x), *files[name]["range"])
+
+    benchmarks = {
+        "moocore": lambda z: bool2pos(
+            moocore.is_nondominated(z, maximise=True, keep_weakly=False)
+        ),
+        "botorch": lambda z: bool2pos(
+            botorch_is_nondominated(z, deduplicate=True)
+        ),
+        "paretoset (numba)": lambda z: bool2pos(
+            paretoset(
+                z, sense=z.shape[1] * ["max"], distinct=True, use_numba=True
+            )
+        ),
+        # The following packages do not support deduplication so they are
+        # actually slower because the user needs to remove duplicates.
+        "pymoo": lambda z, nds=pymoo_NonDominatedSorting(): nds.do(
+            -z, only_non_dominated_front=True
+        ),
+        "desdeo": lambda z: bool2pos(desdeo_is_nondominated(-z)),
+        "seqme": lambda z: bool2pos(
+            seqme_is_pareto_front(-z, assume_unique_lexsorted=True)
+        ),
+        "fast_pareto": lambda z: bool2pos(
+            fast_pareto_is_pf(-z, assume_unique_lexsorted=False)
+        ),
+        "optuna": lambda z: bool2pos(
+            optuna_is_pf(-z, assume_unique_lexsorted=False)
+        ),
+    }
 
     bench = Bench(
         name=name,
         n=n,
         setup=setup,
-        bench={
-            "moocore": lambda z: moocore.is_nondominated(
-                z, maximise=True, keep_weakly=False
-            ),
-            "botorch": lambda z: botorch_is_nondominated(z, deduplicate=True),
-            "paretoset (numba)": lambda z: paretoset(
-                z, sense=z.shape[1] * ["max"], distinct=True, use_numba=True
-            ),
-        },
+        bench=benchmarks,
         check=check_float_vector,
         max_time=10,
     )

@@ -9,3 +9,4 @@ test_that("Doctest: hv_approx", {
   expect_equal(hv_approx(x, ref = 10, seed = 42, method = "DZ2019-MC"), 38.014754)
   expect_equal(hv_approx(x, ref = 10, method = "DZ2019-HW"), 37.99989)
 })
+

@@ -1190,13 +1190,6 @@ def is_nondominated(
 ) -> np.ndarray:
     r"""Identify dominated points according to Pareto optimality.
 
-    Given :math:`n` points of dimension :math:`m`, the current implementation
-    uses the well-known :math:`O(n \log n)` dimension-sweep algorithm
-    :footcite:p:`KunLucPre1975jacm` for :math:`m \leq 3` and the naive
-    :math:`O(m n^2)` algorithm for :math:`m \geq 4`. The best-known
-    :math:`O(n(\log_2 n)^{m-2})` algorithm for :math:`m \geq 4`
-    :footcite:p:`KunLucPre1975jacm` is not implemented yet.
-
     .. seealso:: :ref:`Benchmarks of identifying nondominated points <bench-ndom>`.
 
     Parameters
@@ -1221,6 +1214,20 @@ def is_nondominated(
     filter_dominated : to filter out dominated points.
 
     pareto_rank : to rank points according to Pareto dominance (nondominated sorting).
+
+
+    Notes
+    -----
+    Given :math:`n` points of dimension :math:`m`, the current implementation
+    of :func:`is_nondominated`, :func:`filter_dominated` and
+    :func:`any_dominated` always uses the best-known :math:`O(n \log n)`
+    dimension-sweep algorithm :footcite:p:`KunLucPre1975jacm` for :math:`m \leq 3`.
+
+    For :math:`m \geq 4`, functions :func:`is_nondominated` and
+    :func:`filter_dominated` use the best-known :math:`O(n \log^{m-2} n)`
+    algorithm :footcite:p:`KunLucPre1975jacm` when :math:`n \geq 16` and the
+    naive :math:`O(m n^2)` algorithm otherwise.  Function :func:`any_dominated`
+    always uses the naive algorithm for :math:`m \geq 4`.
 
 
     References

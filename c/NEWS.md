@@ -4,6 +4,7 @@
 
  * `fpli_hv()` calculates 4D contributions as the base case, which is
    significantly faster for more than four dimensions. (Andreia P. Guerreiro)
+ * nondominated_kung.h: New.
 
 ## 0.18
 

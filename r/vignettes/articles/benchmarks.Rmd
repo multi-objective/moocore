@@ -131,7 +131,8 @@ benchmark <- function(name, x, N, setup, expr.list, prefix, title) {
 The following plots compare the speed of finding (non)dominated solutions,
 equivalent to `moocore::is_nondominated()`, in 2D, 3D, 4D and 10D.  The plots
 show that [`moocore`][moocore] is always 10 times faster than [`GPGame`][GPGame] and
-[`bbotk`][bbotk] for any number of objectives.
+[`bbotk`][bbotk] for any number of objectives.  In addition, [`GPGame`][GPGame]
+calculates wrong values with repeated coordinates ([vpicheny/GPGame#2](https://github.com/vpicheny/GPGame/issues/2)).
 
 ```{r ndom}
 #| fig.asp: 0.8
@@ -154,8 +155,8 @@ expr.list <- list(
 files <- list(
   "test2D-200k"=list(dataset="test2D-200k.inp.xz", N=geomspace(1000, 50000, 10)),
   "ran3d-40k"=list(dataset="ran.40000pts.3d.1.xz", N=geomspace(1000, 40000, 10)),
-  "ran4d"=list(dataset="ran.9000pts.4d.10.xz", N=geomspace(1000, 30000, 10)),
-  "rmnk-10d"=list(dataset="rmnk_0.0_10_16_1_0_random_search_1.txt.xz", N=geomspace(1000, 20000, 10))
+  "ran4d"=list(dataset="ran.9000pts.4d.10.xz", N=geomspace(1000, 40000, 10)),
+  "rmnk-10d"=list(dataset="rmnk_0.0_10_16_1_0_ref.txt.xz", N=geomspace(1000, 30000, 10))
 )
 
 for (name in names(files)) {

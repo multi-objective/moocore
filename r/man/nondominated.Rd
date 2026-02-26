@@ -49,12 +49,13 @@ ones with \code{\link[=filter_dominated]{filter_dominated()}}.
 which is also called nondominated sorting \citep{Deb02nsga2}.
 }
 \details{
-Given \eqn{n} points of dimension \eqn{m}, the current implementation uses
-the well-known \eqn{O(n \log n)} dimension-sweep algorithm
-\citep{KunLucPre1975jacm} for \eqn{m \leq 3} and the naive \eqn{O(m n^2)}
-algorithm for \eqn{m \geq 4}.  The best-known \eqn{O(n(\log_2 n)^{m-2})}
-algorithm for \eqn{m \geq 4} \citep{KunLucPre1975jacm} is not implemented
-yet.
+Given \eqn{n} points of dimension \eqn{m}, the current implementation always
+uses the best-known \eqn{O(n \log n)} dimension-sweep algorithm
+\citep{KunLucPre1975jacm} for \eqn{m \leq 3}. For \eqn{m \geq 4}, functions
+\code{is_nondominated()} and \code{filter_dominated()} use the best-known
+\eqn{O(n \log^{m-2} n)} algorithm \citep{KunLucPre1975jacm} when \eqn{n
+\geq 16}, and the naive \eqn{O(m n^2)} algorithm otherwise.  Function
+\code{any_dominated()} always uses the naive algorithm for \eqn{m \geq 4}.
 
 \code{\link[=pareto_rank]{pareto_rank()}} is meant to be used like \code{rank()}, but it assigns
 ranks according to Pareto dominance, where rank 1 indicates those
