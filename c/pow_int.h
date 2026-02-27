@@ -1,3 +1,5 @@
+#ifndef POW_INT_H
+#define POW_INT_H
 /**
    These functions compute base ** exp when exp is an non-negative integer.
    The fast_ variants use the fewer number of multiplications possible.
@@ -130,3 +132,5 @@ powl_uint(long double base, unsigned int exp)
     }
     return result;
 }
+
+#endif // POW_INT_H
