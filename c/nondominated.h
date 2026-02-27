@@ -117,30 +117,73 @@ nondom_init (size_t size)
     return nondom;
 }
 
+/**
+   Maybe create a copy of points (with lower dimensionality) depending on the
+   value of minmax.
+*/
 static inline const double *
-force_agree_minimize(const double * restrict points, size_t size, dimension_t dim,
+force_agree_minimize(const double * restrict points, size_t size,
+                     dimension_t * restrict dim_p,
                      _attr_maybe_unused enum objs_agree_t agree,
                      const int * restrict minmax)
 {
     assert(agree != AGREE_MINIMISE);
-    bool no_copy = true;
-    for (dimension_t d = 0; d < dim; d++) {
-        if (minmax[d] > 0) {
-            no_copy = false;
+    bool copy = false;
+    dimension_t true_dim = *dim_p;
+    for (dimension_t d = 0; d < true_dim; d++) {
+        if (minmax[d] >= 0) {
+            copy = true;
             break;
         }
     }
-    if (no_copy)
+    if (!copy)
         return points;
 
-    double * pnew = malloc(dim * size * sizeof(*pnew));
-    memcpy(pnew, points, dim * size * sizeof(*pnew));
+    dimension_t prefix = 0;
+    while (prefix < true_dim && (minmax[prefix] != 0))
+        prefix++;
 
-    for (dimension_t d = 0; d < dim; d++) {
-        assert(minmax[d] != 0);
-        if (minmax[d] > 0)
-            for (size_t k = 0; k < size; k++)
-                pnew[k * dim + d] = -pnew[k * dim + d];
+    dimension_t new_dim = prefix;
+    for (dimension_t d = prefix + 1; d < true_dim; d++)
+        new_dim = (dimension_t) (new_dim + (minmax[d] != 0));
+
+    assert(new_dim > 1);
+    double * pnew = malloc(new_dim * size * sizeof(*pnew));
+
+    if (new_dim < true_dim) { // Remove columns
+        ASSUME(true_dim < MOOCORE_DIMENSION_MAX);
+        uint8_t idx[MOOCORE_DIMENSION_MAX];
+        for (dimension_t j = prefix, t = 0; j < true_dim; j++)
+            if (minmax[j] != 0)
+                idx[t++] = (uint8_t)j;
+
+        size_t tail_active = new_dim - prefix;
+        for (size_t i = 0; i < size; i++) {
+            const double * restrict src = points + i * true_dim;
+            double * restrict dst = pnew + i * new_dim;
+            memcpy(dst, src, prefix * sizeof(*dst));
+            for (dimension_t t = 0; t < tail_active; t++) {
+                uint8_t j = idx[t];
+                dst[prefix+t] = src[j];
+            }
+        }
+        for (dimension_t t = 0, d = 0; d < true_dim; d++) {
+            if (minmax[d] == 0) continue;
+            if (minmax[d] > 0) {
+                for (size_t k = 0; k < size; k++)
+                    pnew[k * new_dim + t] = -pnew[k * new_dim + t];
+            }
+            t++;
+        }
+        *dim_p = new_dim;
+    } else {
+        memcpy(pnew, points, true_dim * size * sizeof(*pnew));
+        for (dimension_t d = 0; d < true_dim; d++) {
+            assert(minmax[d] != 0);
+            if (minmax[d] > 0)
+                for (size_t k = 0; k < size; k++)
+                    pnew[k * true_dim + d] = -pnew[k * true_dim + d];
+        }
     }
     return pnew;
 }
@@ -460,7 +503,7 @@ find_dominated_point_(const double * restrict points, size_t size, dimension_t d
 
     ASSUME(dim >= 2);
     if (dim <= 3) {
-        const double * pp = force_agree_minimize(points, size, dim, agree, minmax);
+        const double * pp = force_agree_minimize(points, size, &dim, agree, minmax);
         size_t res;
         if (dim == 2) {
             res = find_dominated_2d_(pp, size, keep_weakly);
@@ -509,7 +552,8 @@ find_nondominated_set_(const double * restrict points, size_t size, dimension_t 
     ASSUME(nondom != NULL);
 
     if (dim <= 3) {
-        const double * pp = force_agree_minimize(points, size, dim, agree, minmax);
+        const double * pp = force_agree_minimize(points, size, &dim, agree, minmax);
+        ASSUME(dim >= 2);
         size_t res;
         if (dim == 2) {
             res = find_nondominated_set_2d_(pp, size, keep_weakly, nondom);
