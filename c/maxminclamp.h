@@ -14,10 +14,10 @@
 #endif
 
 #if (defined(__GNUC__) && __GNUC__ >= 3) || defined(__clang__)
-#define STATIC_ASSERT_TYPES_COMPATIBLE(x,y, msg)                               \
+#define STATIC_ASSERT_TYPES_COMPATIBLE(x, y, msg)                              \
     STATIC_ASSERT(__builtin_types_compatible_p(__typeof__(x), __typeof__(y)), msg)
 #else
-#define STATIC_ASSERT_TYPES_COMPATIBLE(x,y, msg) ((void) (&x == &y))
+#define STATIC_ASSERT_TYPES_COMPATIBLE(x, y, msg) ((void) (&(x) == &(y)))
 #endif
 
 /**
