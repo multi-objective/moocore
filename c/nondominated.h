@@ -193,7 +193,7 @@ generate_row_pointers_asc_rev_2d(const double * points, size_t size)
 {
     const double ** p = generate_row_pointers(points, size, 2);
     // Sort in ascending lexicographic order from the last dimension.
-    qsort(p, size, sizeof(*p), cmp_ppdouble_asc_rev_2d);
+    qsort_typesafe(p, size, cmp_ppdouble_asc_rev_2d);
     return p;
 }
 
@@ -202,7 +202,7 @@ generate_row_pointers_asc_rev_3d(const double * points, size_t size)
 {
     const double ** p = generate_row_pointers(points, size, 3);
     // Sort in ascending lexicographic order from the last dimension.
-    qsort(p, size, sizeof(*p), cmp_double_asc_rev_3d);
+    qsort_typesafe(p, size, cmp_ppdouble_asc_rev_3d);
     return p;
 }
 
@@ -296,13 +296,13 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
                                 const bool keep_weakly, bool * restrict nondom)
 {
     ASSUME(size >= 2);
-    const double ** p = generate_row_pointers_asc_rev_3d(points, size);
+    const double ** rows = generate_row_pointers_asc_rev_3d(points, size);
 
     avl_tree_t tree;
-    avl_init_tree(&tree, cmp_pdouble_asc_x_nonzero);
+    avl_init_tree(&tree, qsort_cmp_pdouble_asc_x_nonzero);
     avl_node_t * tnodes = malloc((size+1) * sizeof(*tnodes));
     avl_node_t * node = tnodes;
-    node->item = p[0];
+    node->item = rows[0];
     avl_insert_top(&tree, node);
 
     const double sentinel[] = { INFINITY, -INFINITY };
@@ -311,9 +311,9 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
 
     // In this context, size means "no dominated solution found".
     size_t pos_last_dom = size, n_nondom = size, j = 1;
-    const double * restrict pk = p[0];
+    const double * restrict pk = rows[0];
     do {
-        const double * restrict pj = p[j];
+        const double * restrict pj = rows[j];
         // printf("pj: "); print_point(pj); printf("\n");
         bool dominated;
         if (pk[0] > pj[0] || pk[1] > pj[1]) {
@@ -389,15 +389,14 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
 
 early_end:
     free(tnodes);
-    free(p);
+    free(rows);
     return n_nondom;
 }
 
 static inline size_t
-find_dominated_3d_(const double * points, size_t size, const bool keep_weakly)
+find_dominated_3d_(const double * restrict points, size_t size, bool keep_weakly)
 {
-    return find_nondominated_set_3d_helper(points, size, keep_weakly,
-                                           /* nondom=*/NULL);
+    return find_nondominated_set_3d_helper(points, size, keep_weakly, /* nondom=*/NULL);
 }
 
 /*

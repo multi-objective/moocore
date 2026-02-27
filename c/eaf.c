@@ -25,6 +25,7 @@
 #include <string.h>
 #include <limits.h>
 #include "eaf.h"
+#include "sort.h"
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -34,19 +35,19 @@
 #define DEBUG_POLYGONS 0
 #endif
 
-static int compare_x_asc(const void * p1, const void * p2)
+// FIXME: Move to sort.h
+DEFINE_QSORT_CMP(compare_x_asc, objective_t **)
 {
-    objective_t x1 = **(objective_t **)p1;
-    objective_t x2 = **(objective_t **)p2;
-
+    objective_t x1 = **a;
+    objective_t x2 = **b;
     return (x1 < x2) ? -1 : ((x1 > x2) ? 1 : 0);
 }
 
-static int compare_y_desc(const void * p1, const void * p2)
+// FIXME: Move to sort.h
+DEFINE_QSORT_CMP(compare_y_desc, objective_t **)
 {
-    objective_t y1 = *(*(objective_t **)p1+1);
-    objective_t y2 = *(*(objective_t **)p2+1);
-
+    objective_t y1 = (*a)[1];
+    objective_t y2 = (*b)[1];
     return (y1 > y2) ? -1 : ((y1 < y2) ? 1 : 0);
 }
 
@@ -306,8 +307,8 @@ eaf2d(const objective_t * restrict data, const int * restrict cumsize, int nruns
         fprint_set2d(stderr, datax, ntotal);
         );
 
-    qsort(datax, ntotal, sizeof(*datax), &compare_x_asc);
-    qsort(datay, ntotal, sizeof(*datay), &compare_y_desc);
+    qsort_typesafe(datax, ntotal, compare_x_asc);
+    qsort_typesafe(datay, ntotal, compare_y_desc);
 
     DEBUG2(
         fprintf(stderr, "Sorted data (x):\n");

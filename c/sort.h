@@ -47,17 +47,16 @@ any_less_than(const double * restrict a, const double * restrict b, dimension_t 
     return false;
 }
 
-
-static inline bool
-lexicographic_less_3d(const double * restrict a, const double * restrict b)
-{
-    return a[2] < b[2] || (a[2] == b[2] && (a[1] < b[1] || (a[1] == b[1] && a[0] <= b[0])));
-}
-
 static inline bool
 lexicographic_less_2d(const double * restrict a, const double * restrict b)
 {
     return a[1] < b[1] || (a[1] == b[1] && a[0] <= b[0]);
+}
+
+static inline bool
+lexicographic_less_3d(const double * restrict a, const double * restrict b)
+{
+    return a[2] < b[2] || (a[2] == b[2] && lexicographic_less_2d(a, b));
 }
 
 static inline bool
@@ -77,6 +76,30 @@ all_equal_double(const double * restrict a, const double * restrict b, dimension
 
 // General type for comparison functions used in qsort().
 typedef int (*cmp_fun_t)(const void *, const void *);
+
+// See usage below.
+#define DEFINE_QSORT_CMP(typed_cmp_fn, elem_type)                              \
+    static inline int                                                          \
+    typed_cmp_fn(const elem_type restrict, const elem_type restrict);          \
+                                                                               \
+    static inline int                                                          \
+    qsort_##typed_cmp_fn(const void * restrict _a, const void * restrict _b)   \
+    {                                                                          \
+        const elem_type restrict a = (const elem_type)_a;                      \
+        const elem_type restrict b = (const elem_type)_b;                      \
+        return typed_cmp_fn(a, b);                                             \
+    }                                                                          \
+                                                                               \
+    static inline int                                                          \
+    typed_cmp_fn(const elem_type restrict a, const elem_type restrict b)
+
+
+/* FIXME: How to automatically check that typeof(*array) is compatible with
+   the signature of type_cmp ?
+*/
+#define qsort_typesafe(array, nmemb, typed_cmp)                                \
+    qsort((array), (nmemb), sizeof(*(array)), qsort_##typed_cmp)
+
 
 static inline int
 cmp_double_asc(double a, double b)
@@ -98,7 +121,7 @@ cmp_double_asc_x_asc_y(double ax, double ay, double bx, double by)
 }
 
 static inline int
-cmp_double_asc_rev(const double * restrict a, const double * restrict b, dimension_t dim)
+cmp_pdouble_asc_rev(const double * restrict a, const double * restrict b, dimension_t dim)
 {
     ASSUME(dim >= 2);
     int i = dim - 1;
@@ -111,89 +134,78 @@ cmp_double_asc_rev(const double * restrict a, const double * restrict b, dimensi
 }
 
 // Lexicographic order of coordinates: asc y, then asc x
-static inline int
-cmp_pdouble_asc_rev_2d(const void * restrict pa, const void * restrict pb)
+DEFINE_QSORT_CMP(cmp_pdouble_asc_rev_2d, double *)
 {
-    const double * restrict a = (const double *) pa;
-    const double * restrict b = (const double *) pb;
     int cmpx = cmp_double_asc(a[0], b[0]);
     int cmpy = cmp_double_asc(a[1], b[1]);
     return cmpy ? cmpy : cmpx;
 }
-static inline int
-cmp_ppdouble_asc_rev_2d(const void * restrict pa, const void * restrict pb)
+
+DEFINE_QSORT_CMP(cmp_ppdouble_asc_rev_2d, double **)
 {
-    return cmp_pdouble_asc_rev_2d(*(const double **) pa, *(const double **) pb);
+    return cmp_pdouble_asc_rev_2d(*a, *b);
 }
 
 // Lexicographic order of coordinates (z,y,x)
-static inline int
-cmp_double_asc_rev_3d(const void * restrict pa, const void * restrict pb)
+DEFINE_QSORT_CMP(cmp_ppdouble_asc_rev_3d, double **)
 {
-    return cmp_double_asc_rev(*(const double **)pa, *(const double **)pb, 3);
+    return cmp_pdouble_asc_rev(*a, *b, 3);
+}
+
+DEFINE_QSORT_CMP(cmp_ppdouble_asc_rev_4d, double **)
+{
+    return cmp_pdouble_asc_rev(*a, *b, 4);
 }
 
 static inline int
-cmp_double_asc_rev_4d(const void * restrict pa, const void * restrict pb)
-{
-    return cmp_double_asc_rev(*(const double **)pa, *(const double **)pb, 4);
-}
-
-static inline int
-cmp_double_asc_only_dim(const double * restrict pa, const double * restrict pb, dimension_t dim)
+cmp_pdouble_asc_only_dim(const double * restrict pa, const double * restrict pb, dimension_t dim)
 {
     const double a = pa[dim];
     const double b = pb[dim];
     return cmp_double_asc(a, b);
 }
 
-static inline int
-cmp_double_asc_only_3d(const void * restrict pa, const void * restrict pb)
+DEFINE_QSORT_CMP(cmp_ppdouble_asc_only_3d, double **)
 {
-    return cmp_double_asc_only_dim(*(const double **)pa, *(const double **)pb, 2);
+    return cmp_pdouble_asc_only_dim(*a, *b, 2);
 }
 
-static inline int
-cmp_double_asc_only_4d(const void * restrict pa, const void * restrict pb)
+DEFINE_QSORT_CMP(cmp_ppdouble_asc_only_4d, double **)
 {
-    return cmp_double_asc_only_dim(*(const double **)pa, *(const double **)pb, 3);
+    return cmp_pdouble_asc_only_dim(*a, *b, 3);
 }
 
-static inline int
-cmp_pdouble_asc_x_nonzero(const void * restrict pa, const void * restrict pb)
+DEFINE_QSORT_CMP(cmp_pdouble_asc_x_nonzero, double *)
 {
-    const double ax = *(const double *)pa;
-    const double bx = *(const double *)pb;
+    const double ax = *a;
+    const double bx = *b;
     return ax < bx ? -1 : 1;
 }
 
-static inline int
-cmp_pdouble_asc_y_des_x_nonzero(const void * restrict pa, const void * restrict pb)
+DEFINE_QSORT_CMP(cmp_pdouble_asc_y_des_x_nonzero, double *)
 {
-    const double ax = *(const double *)pa;
-    const double bx = *(const double *)pb;
-    const double ay = *((const double *)pa + 1);
-    const double by = *((const double *)pb + 1);
+    const double ax = a[0];
+    const double bx = b[0];
+    const double ay = a[1];
+    const double by = b[1];
     int cmp = cmp_double_asc(ay, by);
     return cmp ? cmp : (ax > bx ? -1 : 1);
 }
 
 // Ascending lexicographic 2D (ascending x, then ascending y)
-static inline int
-cmp_pdouble_asc_x_asc_y(const void * restrict pa, const void * restrict pb)
+DEFINE_QSORT_CMP(cmp_pdouble_asc_x_asc_y, double *)
 {
-    const double ax = *(const double *)pa;
-    const double bx = *(const double *)pb;
-    const double ay = *((const double *)pa + 1);
-    const double by = *((const double *)pb + 1);
+    const double ax = a[0];
+    const double bx = b[0];
+    const double ay = a[1];
+    const double by = b[1];
     return cmp_double_asc_x_asc_y(ax, ay, bx, by);
 }
 
 // Ascending lexicographic 2D (ascending x, then ascending y)
-static inline int
-cmp_ppdouble_asc_x_asc_y(const void * restrict pa, const void * restrict pb)
+DEFINE_QSORT_CMP(cmp_ppdouble_asc_x_asc_y, double **)
 {
-    return cmp_pdouble_asc_x_asc_y(*(const double **)pa, *(const double **)pb);
+    return cmp_pdouble_asc_x_asc_y(*a, *b);
 }
 
 static inline const double **
@@ -209,7 +221,7 @@ static inline const double **
 generate_row_pointers_asc_x_asc_y(const double * restrict points, size_t n)
 {
     const double ** p = generate_row_pointers(points, n, 2);
-    qsort(p, n, sizeof(*p), cmp_ppdouble_asc_x_asc_y);
+    qsort_typesafe(p, n, cmp_ppdouble_asc_x_asc_y);
     return p;
 }
 
@@ -233,7 +245,7 @@ generate_sorted_doublep_2d_filter_by_ref(const double * restrict points,
     if (unlikely(n == 0)) {
         free(p);
     } else {
-        qsort(p, n, sizeof(*p), cmp_ppdouble_asc_x_asc_y);
+        qsort_typesafe(p, n, cmp_ppdouble_asc_x_asc_y);
     }
 
     *size = n;

@@ -23,7 +23,7 @@ pareto_rank_3d(const double * restrict points, size_t size)
     const double ** p = generate_row_pointers_asc_rev_3d(points, size);
 
     avl_tree_t tree;
-    avl_init_tree(&tree, cmp_pdouble_asc_x_nonzero);
+    avl_init_tree(&tree, qsort_cmp_pdouble_asc_x_nonzero);
     avl_node_t * tnodes = malloc((size+1) * sizeof(*tnodes));
     const double sentinel[] = { INFINITY, -INFINITY };
     tnodes->item = sentinel;
@@ -170,7 +170,7 @@ pareto_rank_2d(const double * restrict points, size_t size)
 #endif
 
     // Sort in ascending lexicographic order from the second dimension.
-    qsort(p, size, sizeof(*p), cmp_ppdouble_asc_rev_2d);
+    qsort_typesafe(p, size, cmp_ppdouble_asc_rev_2d);
 
 #ifdef PARETO_RANK_2D_DEBUG
     for (size_t k = 0; k < size; k++) {

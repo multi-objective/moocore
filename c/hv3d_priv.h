@@ -36,9 +36,11 @@ new_avl_node(dlnode_t * restrict p, avl_node_t * restrict node)
   Vectors. Journal of the ACM, 22(4):469–476, 1975.
 
   The main difference is that the order of the points in 2D is tracked by p->cnext/p->closest.
+
+  See also find_nondominated_set_3d_helper().
 */
 static inline void
-hv3d_preprocessing(dlnode_t * list, size_t n)
+hv3d_preprocessing(dlnode_t * restrict list, size_t n)
 {
     // FIXME: Can we unify these two paths to always use either ->cnext or ->closest?
 #ifdef HVC_ONLY
@@ -60,7 +62,7 @@ hv3d_preprocessing(dlnode_t * list, size_t n)
     assert(list+2 == list->prev[0]);
 
     avl_tree_t tree;
-    avl_init_tree(&tree, cmp_pdouble_asc_y_des_x_nonzero);
+    avl_init_tree(&tree, qsort_cmp_pdouble_asc_y_des_x_nonzero);
     avl_node_t * tnodes = malloc((n+2) * sizeof(*tnodes));
 
     // At the top we insert the first point, which is never dominated.

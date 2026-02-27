@@ -1,21 +1,24 @@
+#include <float.h>
 #include "whv.h"
 #include "common.h"
-#include <float.h>
 
-static int cmp_data_y_desc (const void *p1, const void *p2)
+// FIXME: This function already exists in sort.h.
+static inline int
+cmp_data_y_desc(const void * p1, const void * p2)
 {
-    const double *x1 = (const double *)p1;
-    const double *x2 = (const double *)p2;
+    const double * x1 = (const double *)p1;
+    const double * x2 = (const double *)p2;
 
     return (x1[1] > x2[1]) ? -1 : (x1[1] < x2[1]) ? 1 :
         (x1[0] < x2[0]) ? -1 : (x1[0] > x2[0]) ? 1
         : 0;
 }
 
-static int cmp_rectangles_y_desc (const void *p1, const void *p2)
+static inline int
+cmp_rectangles_y_desc (const void * p1, const void * p2)
 {
-    const double *x1 = (const double *)p1;
-    const double *x2 = (const double *)p2;
+    const double * x1 = (const double *)p1;
+    const double * x2 = (const double *)p2;
 
     // Order by upper (top-right) corner.
     return (x1[3] > x2[3]) ? -1 : (x1[3] < x2[3]) ? 1 :
