@@ -1,6 +1,8 @@
 #ifndef NONDOMINATED_H
 #define NONDOMINATED_H
 
+#include "config.h"
+
 #include <string.h> // memcpy
 #include <math.h> // INFINITY
 #include "sort.h"
@@ -19,6 +21,37 @@ typedef struct avl_node_t {
 #include "avl_tiny.h"
 
 enum objs_agree_t { AGREE_MINIMISE = -1, AGREE_NONE = 0, AGREE_MAXIMISE = 1 };
+
+static inline void
+printf_point(const char * prefix, const double * p, dimension_t dim, const char * suffix)
+{
+    fprintf(stderr, "%s%g", prefix, p[0]);
+    for (dimension_t d = 1; d < dim; d++)
+        fprintf(stderr, " %g", p[d]);
+    fprintf(stderr, "%s", suffix);
+}
+
+static inline void
+print_rows(const double ** rows, size_t size, dimension_t dim)
+{
+    for (size_t k = 0; k < size; k++)
+        printf_point("", rows[k], dim, "\n");
+}
+
+static inline void
+printf_rows(const char * prefix,
+            const double ** rows, size_t size, dimension_t dim,
+            const char * size_lab)
+{
+    if (size > 0) {
+        fprintf(stderr, "%s", prefix);
+        printf_point(" = [ ", rows[0], dim, " ], ");
+        fprintf(stderr, "%s = %zu\n", size_lab, size);
+        print_rows(rows, size, dim);
+    } else {
+        fprintf(stderr, "%s = [ ], %s = 0\n", prefix, size_lab);
+    }
+}
 
 static inline enum objs_agree_t
 check_all_minimize_maximize(const int * restrict minmax, dimension_t dim)
@@ -48,8 +81,7 @@ check_all_minimize_maximize(const int * restrict minmax, dimension_t dim)
     minmax needs to be an int (int64 in 64 bits) so that GCC can vectorize
     loops that are conditional on minmax[d].  Using 'signed char' does not work
     in some targets, e.g, -march=tigerlake.
-
- */
+*/
 static inline int *
 minmax_from_bool(const bool * restrict maximise, dimension_t nobj)
 {
@@ -109,7 +141,7 @@ minmax_alloc(const int * restrict * minmax, bool maximise_all_flag,
 // FIXME: It would be more efficient to default to false (using calloc) and
 // change to true.
 static inline bool *
-nondom_init (size_t size)
+nondom_init(size_t size)
 {
     bool * nondom = malloc(size * sizeof(*nondom));
     for (size_t n = 0; n < size; n++)
@@ -188,8 +220,32 @@ force_agree_minimize(const double * restrict points, size_t size,
     return pnew;
 }
 
+/**
+   Get original row index from row pointer. The row pointer points to a vector
+   of dimension max_dim and may have been shifted to point to dimension dim.
+*/
+static inline size_t
+row_index_from_shifted_ptr(const double * points, const double * rowptr,
+                           dimension_t dim, dimension_t max_dim)
+{
+    ASSUME(rowptr >= points);
+    ASSUME(max_dim >= dim);
+    return (size_t)(((rowptr - (max_dim - dim)) - points) / max_dim);
+}
+
+
+/**
+   Same as row_index_from_shifted_ptr() but assumes that rowptr is not shifted.
+*/
+static inline size_t
+row_index_from_ptr(const double * points, const double * rowptr, dimension_t dim)
+{
+    return row_index_from_shifted_ptr(points, rowptr, dim, dim);
+}
+
+
 static inline const double **
-generate_row_pointers_asc_rev_2d(const double * points, size_t size)
+generate_row_pointers_asc_rev_2d(const double * restrict points, size_t size)
 {
     const double ** p = generate_row_pointers(points, size, 2);
     // Sort in ascending lexicographic order from the last dimension.
@@ -198,7 +254,7 @@ generate_row_pointers_asc_rev_2d(const double * points, size_t size)
 }
 
 static inline const double **
-generate_row_pointers_asc_rev_3d(const double * points, size_t size)
+generate_row_pointers_asc_rev_3d(const double * restrict points, size_t size)
 {
     const double ** p = generate_row_pointers(points, size, 3);
     // Sort in ascending lexicographic order from the last dimension.
@@ -210,7 +266,7 @@ static inline size_t
 find_nondominated_2d_helper_(const double * restrict points, size_t size,
                              const bool keep_weakly, bool * restrict nondom)
 {
-    ASSUME(size >= 2);
+    ASSUME(size > 1);
     const double ** p = generate_row_pointers_asc_rev_2d(points, size);
     // returning size means "no dominated solution found".
     size_t n_nondom = size, j = 1;
@@ -227,7 +283,7 @@ find_nondominated_2d_helper_(const double * restrict points, size_t size,
                 if (k_eq_j && pj < pk) // Only the first duplicated point is kept.
                     SWAP(pj, pk);
 
-                size_t pos_first_dom = (pj - points) / 2;
+                size_t pos_first_dom = row_index_from_ptr(points, pj, 2);
                 if (unlikely(nondom == NULL)) {
                     // In this context, it means "position of the first dominated solution found".
                     n_nondom = pos_first_dom;
@@ -245,19 +301,20 @@ early_end:
     return n_nondom;
 }
 
-/*
-  Stop as soon as one dominated point is found and return its position (or size
-  if no dominated point found).
-
+/**
+   Stop as soon as one dominated point is found and return its position (or size
+   if no dominated point found).
 */
 static inline size_t
 find_dominated_2d_(const double * restrict points, size_t size, const bool keep_weakly)
 {
-    return find_nondominated_2d_helper_(points, size, keep_weakly, /*nondom=*/NULL);
+    return keep_weakly
+        ? find_nondominated_2d_helper_(points, size, true, /*nondom=*/NULL)
+        : find_nondominated_2d_helper_(points, size, false, /*nondom=*/NULL);
 }
 
 
-/*
+/**
    Store which points are nondominated in nondom and return the number of
    nondominated points.
 
@@ -267,20 +324,16 @@ find_dominated_2d_(const double * restrict points, size_t size, const bool keep_
 
    Duplicated points may be removed in any order due to qsort not being stable.
 */
-
 static inline size_t
 find_nondominated_set_2d_(const double * restrict points, size_t size,
                           const bool keep_weakly, bool * restrict nondom)
 {
     ASSUME(nondom != NULL);
-    return find_nondominated_2d_helper_(points, size, keep_weakly, nondom);
+    return keep_weakly
+        ? find_nondominated_2d_helper_(points, size, true, nondom)
+        : find_nondominated_2d_helper_(points, size, false, nondom);
 }
 
-
-static inline void
-print_point(const double * p) {
-    printf("%g %g %g", p[0], p[1], p[2]);
-}
 
 /**
    3D dimension-sweep algorithm by H. T. Kung, F. Luccio, and F. P. Preparata.
@@ -314,7 +367,7 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
     const double * restrict pk = rows[0];
     do {
         const double * restrict pj = rows[j];
-        // printf("pj: "); print_point(pj); printf("\n");
+        DEBUG3(printf_point("pj: ", pj, 3, "\n"));
         bool dominated;
         if (pk[0] > pj[0] || pk[1] > pj[1]) {
             avl_node_t * nodeaux;
@@ -325,14 +378,14 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
                 assert(prev[0] != sentinel[0]);
                 assert(prev[0] <= pj[0]);
                 dominated = prev[1] <= pj[1];
-                // printf("res > 0: prev: "); print_point(prev); printf("\n");
+                DEBUG3(printf_point("res > 0: prev: ", prev, 3, "\n"));
                 nodeaux = nodeaux->next;
-            } else if (nodeaux->prev) {// nodeaux goes after pj, so move to the next one.
+            } else if (nodeaux->prev) { // nodeaux goes after pj, so move to the next one.
                 const double * restrict prev = nodeaux->prev->item;
                 assert(prev[0] != sentinel[0]);
                 assert(prev[0] <= pj[0]);
                 dominated = prev[1] <= pj[1];
-                // printf("res < 0: prev: "); print_point(prev); printf("\n");
+                DEBUG3(printf_point("res < 0: prev: ", prev, 3, "\n"));
             } else {
                 dominated = false;
             }
@@ -342,7 +395,7 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
                 assert(pj[0] <= point[0]);
                 // Delete everything in the tree that is dominated by pj.
                 while (pj[1] <= point[1]) {
-                    // printf("delete point: "); print_point(point); printf("\n");
+                    DEBUG3(printf_point("delete point: ", point, 3, "\n"));
                     assert(pj[0] <= point[0]);
                     nodeaux = nodeaux->next;
                     point = nodeaux->item;
@@ -351,7 +404,9 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
                        rebalance. */
                     avl_unlink_node(&tree, nodeaux->prev);
                 }
-                // printf("insert before point: "); print_point(point); printf("\n");
+                DEBUG3((point == sentinel)
+                       ? printf_point("insert before sentinel: ", sentinel, 2, "\n")
+                       : printf_point("insert before point: ", point, 3, "\n"));
                 (++node)->item = pj;
                 avl_insert_before(&tree, nodeaux, node);
             }
@@ -366,14 +421,14 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
             } else { // or it is not a duplicate, so it is non-weakly dominated;
                 dominated = likely(!k_eq_j)
                     // or pk was dominated, then this one is also dominated.
-                    || pos_last_dom == (size_t) ((pk - points) / 3);
+                    || pos_last_dom == row_index_from_ptr(points, pk, 3);
             }
-            // printf("dom by prev: "); print_point(prev); printf("\n");
+            DEBUG3(printf_point("weakly dominated by pk: ", pk, 3, "\n"));
         }
         if (dominated) { // pj is dominated by a point in the tree or by prev.
             /* Map the order in p[], which is sorted, to the original order in
                points. */
-            pos_last_dom = (pj - points) / 3;
+            pos_last_dom = row_index_from_ptr(points, pj, 3);
             if (unlikely(nondom == NULL)) {
                 // In this context, it means "position of the first dominated solution found".
                 n_nondom = pos_last_dom;
@@ -578,10 +633,10 @@ find_nondominated_set_(const double * restrict points, size_t size, dimension_t 
               points, size, dim, keep_weakly, AGREE_NONE, minmax, nondom);
       case AGREE_MINIMISE:
           return find_nondominated_set_agree_(
-              points, size, dim, keep_weakly, AGREE_MINIMISE, /*minmax=*/NULL, nondom);
+              points, size, dim, keep_weakly, AGREE_MINIMISE, /* minmax=*/NULL, nondom);
       case AGREE_MAXIMISE:
           return find_nondominated_set_agree_(
-              points, size, dim, keep_weakly, AGREE_MAXIMISE, /*minmax=*/NULL, nondom);
+              points, size, dim, keep_weakly, AGREE_MAXIMISE, /* minmax=*/NULL, nondom);
       default: // LCOV_EXCL_LINE # nocov
           unreachable();
     }
@@ -592,7 +647,7 @@ find_dominated_point_agree(const double * restrict points, size_t size, dimensio
                            enum objs_agree_t agree, const int * restrict minmax)
 {
     ASSUME(dim >= 2);
-    return find_dominated_point_(points, size, dim, /* keep_weakly = */false,
+    return find_dominated_point_(points, size, dim, /* keep_weakly=*/false,
                                  agree, minmax);
 }
 
@@ -601,7 +656,7 @@ find_dominated_point(const double * restrict points, size_t size, dimension_t di
                      const int * restrict minmax)
 {
     ASSUME(dim >= 2);
-    return find_dominated_point_(points, size, dim, /* keep_weakly = */false,
+    return find_dominated_point_(points, size, dim, /* keep_weakly=*/false,
                                  AGREE_NONE, minmax);
 }
 
@@ -611,7 +666,7 @@ find_weakly_dominated_point(const double * restrict points, size_t size, dimensi
 {
     ASSUME(dim >= 2);
     const int * minmax = minmax_from_bool(maximise, dim);
-    size_t pos = find_dominated_point_(points, size, dim, /* keep_weakly = */false,
+    size_t pos = find_dominated_point_(points, size, dim, /* keep_weakly=*/false,
                                        AGREE_NONE, minmax);
     free((void *)minmax);
     return pos;
@@ -624,7 +679,7 @@ find_nondominated_set_agree(const double * restrict points, size_t size, dimensi
 {
     ASSUME(dim >= 2);
     ASSUME(agree == AGREE_MINIMISE || agree == AGREE_MAXIMISE || agree == AGREE_NONE);
-    return find_nondominated_set_(points, size, dim, /* keep_weakly = */false,
+    return find_nondominated_set_(points, size, dim, /* keep_weakly=*/false,
                                   (enum objs_agree_t) agree, minmax, nondom);
 }
 
@@ -634,7 +689,7 @@ find_nondominated_set(const double * restrict points, size_t size, dimension_t d
 {
     ASSUME(dim >= 2);
     size_t new_size = find_nondominated_set_(
-        points, size, dim, /* keep_weakly = */false, AGREE_NONE, minmax, nondom);
+        points, size, dim, /* keep_weakly=*/false, AGREE_NONE, minmax, nondom);
 
     if (new_size > size || new_size == 0 || new_size == SIZE_MAX) { /* This can't happen.  */
         fatal_error ("%s:%d: a bug happened: new_size > old_size!\n"
@@ -650,7 +705,7 @@ find_weak_nondominated_set(const double * restrict points, size_t size, dimensio
                            const int * restrict minmax, bool * restrict nondom)
 {
     ASSUME(dim >= 2);
-    return find_nondominated_set_(points, size, dim, /* keep_weakly = */true,
+    return find_nondominated_set_(points, size, dim, /* keep_weakly=*/true,
                                   AGREE_NONE, minmax, nondom);
 }
 
