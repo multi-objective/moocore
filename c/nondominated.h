@@ -338,7 +338,6 @@ find_nondominated_set_2d_(const double * restrict points, size_t size,
         : find_nondominated_2d_helper_(points, size, false, nondom);
 }
 
-
 /**
    3D dimension-sweep algorithm by H. T. Kung, F. Luccio, and F. P. Preparata.
    On Finding the Maxima of a Set of Vectors. Journal of the ACM,
@@ -469,11 +468,18 @@ find_nondominated_set_3d_(const double * restrict points, size_t size, const boo
     return find_nondominated_set_3d_helper(points, size, keep_weakly, nondom);
 }
 
+/**
+   Brute-force algorithm O(size^2 * dim), with a few improvements.
+
+   This function can be used to identify nondominated solutions (nondom !=
+   NULL) or find the first dominated one (nondom == NULL).  It also handles
+   combinations of min/max objectives.
+*/
 static inline size_t
-find_nondominated_set_agree_(const double * restrict points, size_t size, dimension_t dim,
-                             const bool keep_weakly,
-                             const enum objs_agree_t agree, const int * restrict minmax,
-                             bool * restrict nondom)
+find_nondominated_set_agree_bf(const double * restrict points, size_t size, dimension_t dim,
+                               const bool keep_weakly,
+                               const enum objs_agree_t agree, const int * restrict minmax,
+                               bool * restrict nondom)
 {
     ASSUME(dim > 3);
     ASSUME(agree == AGREE_MINIMISE || agree == AGREE_MAXIMISE || agree == AGREE_NONE);
@@ -544,8 +550,8 @@ find_dominated_point_agree_(const double * restrict points, size_t size, dimensi
                             const bool keep_weakly,
                             enum objs_agree_t agree, const int * restrict minmax)
 {
-    return find_nondominated_set_agree_(points, size, dim, keep_weakly,
-                                        agree, minmax, /* nondom=*/NULL);
+    return find_nondominated_set_agree_bf(points, size, dim, keep_weakly,
+                                          agree, minmax, /* nondom=*/NULL);
 }
 
 /* Stop as soon as one dominated point is found and return its position.
@@ -593,9 +599,10 @@ find_dominated_point_(const double * restrict points, size_t size, dimension_t d
     }
 }
 
-/* Store which points are nondominated in nondom and return the number of
+/**
+   Store which points are nondominated in nondom and return the number of
    nondominated points.
-**/
+*/
 static inline size_t
 find_nondominated_set_(const double * restrict points, size_t size, dimension_t dim,
                        const bool keep_weakly,
@@ -633,13 +640,13 @@ find_nondominated_set_(const double * restrict points, size_t size, dimension_t 
 
     switch (agree) {
       case AGREE_NONE:
-          return find_nondominated_set_agree_(
+          return find_nondominated_set_agree_bf(
               points, size, dim, keep_weakly, AGREE_NONE, minmax, nondom);
       case AGREE_MINIMISE:
-          return find_nondominated_set_agree_(
+          return find_nondominated_set_agree_bf(
               points, size, dim, keep_weakly, AGREE_MINIMISE, /* minmax=*/NULL, nondom);
       case AGREE_MAXIMISE:
-          return find_nondominated_set_agree_(
+          return find_nondominated_set_agree_bf(
               points, size, dim, keep_weakly, AGREE_MAXIMISE, /* minmax=*/NULL, nondom);
       default: // LCOV_EXCL_LINE # nocov
           unreachable();

@@ -279,9 +279,11 @@ pareto_rank_2d(const double * restrict points, size_t size)
 
 /* FIXME: This takes O(n^3). Look at
 
-   M. T. Jensen. Reducing the run-time complexity of multiobjective
-   EAs: The NSGA-II and other algorithms. IEEE Transactions on
-   Evolutionary Computation, 7(5):503–515, 2003.
+   M. T. Jensen. Reducing the run-time complexity of multiobjective EAs: The
+   NSGA-II and other algorithms. IEEE Transactions on Evolutionary Computation,
+   7(5):503–515, 2003.
+
+   Similar to find_nondominated_set_agree_bf().
 */
 static int *
 pareto_rank_naive(const double * restrict points, size_t size, dimension_t dim)
