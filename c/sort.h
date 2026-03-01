@@ -160,9 +160,7 @@ DEFINE_QSORT_CMP(cmp_ppdouble_asc_rev_4d, double **)
 static inline int
 cmp_pdouble_asc_only_dim(const double * restrict pa, const double * restrict pb, dimension_t dim)
 {
-    const double a = pa[dim];
-    const double b = pb[dim];
-    return cmp_double_asc(a, b);
+    return cmp_double_asc(pa[dim], pb[dim]);
 }
 
 DEFINE_QSORT_CMP(cmp_ppdouble_asc_only_3d, double **)

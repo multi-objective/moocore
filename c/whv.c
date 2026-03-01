@@ -106,7 +106,7 @@ rect_weighted_hv2d(double *data, int n, double * rectangles,
         debug_print_point(pk, p, r, rect);                                     \
     } while(0)
 
-    // We cannot use %zu for size_t because of MingW compiler.
+    // We cannot use %zu for size_t because of MingW compiler used by CRAN.
     DEBUG2_PRINT("n = %lu\trectangles = %lu\n", (unsigned long)n, (unsigned long)rectangles_nrow);
     if (rectangles_nrow <= 0 || n <= 0) return 0;
 
