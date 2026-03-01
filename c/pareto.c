@@ -18,8 +18,6 @@ pareto_rank_3d(const double * restrict points, size_t size)
     const bool keep_weakly = true;
 
     int * rank = calloc(size, sizeof(*rank));
-    int front = 0;
-
     const double ** p = generate_row_pointers_asc_rev_3d(points, size);
 
     avl_tree_t tree;
@@ -27,6 +25,7 @@ pareto_rank_3d(const double * restrict points, size_t size)
     avl_node_t * tnodes = malloc((size+1) * sizeof(*tnodes));
     const double sentinel[] = { INFINITY, -INFINITY };
     tnodes->item = sentinel;
+    int front = 0;
 
     while (true) {
         ASSUME(size >= 2);
@@ -88,13 +87,13 @@ pareto_rank_3d(const double * restrict points, size_t size)
                 } else { // or it is not a duplicate, so it is non-weakly dominated;
                     dominated = !k_eq_j
                         // or pk was dominated, then this one is also dominated.
-                        || pos_last_dom == (size_t) ((pk - points) / 3);
+                        || pos_last_dom == row_index_from_ptr(points, pk, 3);
                 }
             }
             if (dominated) { // pj is dominated by a point in the tree or by prev.
                 /* Map the order in p[], which is sorted, to the original order in
                    points. */
-                pos_last_dom = (pj - points) / 3;
+                pos_last_dom = row_index_from_ptr(points, pj, 3);
                 assert(rank[pos_last_dom] == front);
                 rank[pos_last_dom] = front + 1;
                 n_nondom--;
@@ -116,13 +115,13 @@ pareto_rank_3d(const double * restrict points, size_t size)
             return rank;
         }
 
-        assert(rank[(p[0] - points) / 3] == front);
+        assert(rank[row_index_from_ptr(points, p[0], 3)] == front);
         size_t k = 0, n = 0;
         assert(k < size);
         do {
             do {
                 n++;
-            } while (rank[(p[n] - points) / 3] == front);
+            } while (rank[row_index_from_ptr(points, p[n], 3)] == front);
             p[k] = p[n];
             k++;
         } while (k < size);
@@ -147,10 +146,8 @@ pareto_rank_3d(const double * restrict points, size_t size)
 static int *
 pareto_rank_2d(const double * restrict points, size_t size)
 {
-    const int dim = 2;
-    const double ** p = malloc(size * sizeof(*p));
-    for (size_t k = 0; k < size; k++)
-        p[k] = points + dim * k;
+    const dimension_t dim = 2;
+    const double ** p = generate_row_pointers(points, size, dim);
 
 #if DEBUG >= 2
 #define PARETO_RANK_2D_DEBUG
@@ -176,7 +173,7 @@ pareto_rank_2d(const double * restrict points, size_t size)
     for (size_t k = 0; k < size; k++) {
        help_0[k] = p[k][0];
        help_1[k] = p[k][1];
-       help_i[k] = (p[k]  - points) / dim;
+       help_i[k] = row_index_from_ptr(points, p[k], dim);
     }
     fprintf(stderr, "%s():\n-------------------\n>>SORTED:", __FUNCTION__);
     fprintf(stderr, "\nIndex: "); vector_int_fprintf(stderr, help_i, size);
@@ -188,13 +185,13 @@ pareto_rank_2d(const double * restrict points, size_t size)
     double * front_last = malloc(size * sizeof(*front_last));
     int n_front = 0;
     front_last[0] = p[0][0];
-    rank[(p[0] - points) / dim] = 0; // The first point is in the first front.
+    rank[row_index_from_ptr(points, p[0], dim)] = 0; // The first point is in the first front.
     int last_rank = 0;
     for (size_t k = 1; k < size; k++) {
         const double * restrict pk = p[k];
         // Duplicated points are kept in the same front.
         if (pk[0] == p[k-1][0] && pk[1] == p[k-1][1]) {
-            rank[(pk - points) / dim] = last_rank;
+            rank[row_index_from_ptr(points, pk, dim)] = last_rank;
             continue;
         }
         const double plast = front_last[n_front];
@@ -202,7 +199,7 @@ pareto_rank_2d(const double * restrict points, size_t size)
             int low = 0;
             if (n_front > 0) {
                 int high = n_front + 1;
-                do {
+                do { // Binary search.
                     int mid = low + (high - low) / 2;
                     assert(mid <= n_front);
                     const double pmid = front_last[mid];
@@ -222,19 +219,19 @@ pareto_rank_2d(const double * restrict points, size_t size)
             last_rank = n_front;
         }
         front_last[last_rank] = pk[0];
-        rank[(pk - points)/dim] = last_rank;
+        rank[row_index_from_ptr(points, pk, dim)] = last_rank;
     }
     free(front_last);
 #ifdef PARETO_RANK_2D_DEBUG
     {
         n_front++; // count max + 1
         size_t f, i, k;
-        int *front_size = calloc(n_front, sizeof(int));
-        int ** front = calloc(n_front, sizeof(int *));
+        int *front_size = calloc(n_front, sizeof(*front_size));
+        int ** front = calloc(n_front, sizeof(*front));
         for (k = 0; k < size; k++) {
-            f = rank[(p[k]  - points) / dim];
+            f = rank[row_index_from_ptr(points, p[k], dim)];
             if (front_size[f] == 0) {
-                front[f] = malloc(size * sizeof(int));
+                front[f] = malloc(size * sizeof(**front));
             }
             front[f][front_size[f]] = k;
             front_size[f]++;
@@ -243,10 +240,11 @@ pareto_rank_2d(const double * restrict points, size_t size)
         f = 0, k = 0, i = 0;
         do {
             order[i] = front[f][k];
-            fprintf (stderr, "\n_front[%zu][%zu] = %d = { %g , %g, %d, %d }",
+            fprintf (stderr, "\n_front[%zu][%zu] = %d = { %g , %g, %zu, %d }",
                      f, k, order[i],
                      p[order[i]][0], p[order[i]][1],
-                     (p[order[i]] - points) / dim, rank[(p[order[i]] - points) / dim]);
+                     row_index_from_ptr(points, p[order[i]], dim),
+                     rank[row_index_from_ptr(points, p[order[i]], dim)]);
             i++, k++;
             if (k == front_size[f]) { f++; k = 0; }
         } while (f != n_front);
@@ -259,7 +257,7 @@ pareto_rank_2d(const double * restrict points, size_t size)
         for (k = 0; i < size; k++) {
             help_0[k] = p[order[k]][0];
             help_1[k] = p[order[k]][1];
-            help_i[k] = (p[order[k]] - points) / dim;
+            help_i[k] = row_index_from_ptr(points, p[order[k]], dim);
         }
         fprintf(stderr, "%s():\n-------------------\n>>OUTPUT:", __FUNCTION__);
         fprintf(stderr, "\nIndex: "); vector_int_fprintf(stderr, help_i, size);
@@ -293,12 +291,9 @@ pareto_rank_naive(const double * restrict points, size_t size, dimension_t dim)
     const size_t orig_size = size;
     const bool keep_weakly = true;
     int * rank = calloc(size, sizeof(*rank));
-    int front = 1;
-
     bool * dominated = calloc(size, sizeof(*dominated));
-    const double ** p = malloc(size * sizeof(*p));
-    for (size_t k = 0; k < size; k++)
-        p[k] = points + dim * k;
+    const double ** p = generate_row_pointers(points, size, dim);
+    int front = 1;
 
     while (true) {
         ASSUME(size >= 2);
@@ -351,7 +346,7 @@ pareto_rank_naive(const double * restrict points, size_t size, dimension_t dim)
             if (size == 1) {
                 assert(last_dom_pos < orig_size);
                 // Update the only dominated point.
-                rank[(p[last_dom_pos] - points) / dim] = front;
+                rank[row_index_from_ptr(points, p[last_dom_pos], dim)] = front;
             }
             free(dominated);
             free(p);
@@ -367,7 +362,7 @@ pareto_rank_naive(const double * restrict points, size_t size, dimension_t dim)
         }
         // Update ranks. Everything still in list p goes to the next front.
         for (k = 0; k < size; k++)
-            rank[(p[k] - points) / dim] = front;
+            rank[row_index_from_ptr(points, p[k], dim)] = front;
         for (k = 0; k < size; k++)
             dominated[k] = false;
         front++;
