@@ -30,6 +30,7 @@ _DATASETS_CHECKSUMS = {
     "test2D-200k.inp.xz": "5e211ea67d228512bd27521fae63856c74694d0aa61fe077d5d37181623671ad",
     "ran.40000pts.3d.1.xz": "69afefc93eb8e14f355a48b5e2dacc4f43d7fd01dfa7b4b4b3a35366a0504eba",
     "DTLZLinearShape.4d.front.1000pts.10": "eedfd7c9db8632133301705aaa1c68b8e5e605f219fac44abd78521cd98f5e80",
+    "rmnk_0.0_10_16_1_0_ref.txt.xz": "f9bb1f5f40b09c86b303edbcb70d26d90a17b616530b9c662a848e4095b4eac4",
 }
 
 
