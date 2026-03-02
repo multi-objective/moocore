@@ -113,10 +113,9 @@ for name in names:
         check=check_float_values,
     )
 
-    for maxrow in n:
-        values = bench(maxrow, x[:maxrow, :])
-
+    bench(lambda n: x[:n, :])
     bench.plots(file_prefix=file_prefix, title=title)
 
+# To not run interactively, use python3 -m bench_ndom (without .py)
 if "__file__" not in globals():  # Running interactively.
     plt.show()

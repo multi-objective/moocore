@@ -111,6 +111,8 @@ class Bench:
         check=None,
         report_values=None,
         return_all_values=False,
+        max_time=0,
+        baseline="moocore",
     ):
         self.name = name
         self.n = n
@@ -131,6 +133,8 @@ class Bench:
             self.value_label = None
         self.setup = setup
         self.check = check
+        self.max_time = max_time
+        self.baseline = baseline
 
     def keys(self):
         return self.bench.keys()
@@ -151,28 +155,55 @@ class Bench:
         print(f"{self.name}:{_n}:{what}:{duration}")
         return value
 
-    def __call__(self, _n, *args, **kwargs):
-        # FIXME: Ideally, bench() would call fun for each value in self.n
+    def bench_testcase(self, _n, *args, _algos=None, **kwargs):
         assert _n in self.n
+
+        if _algos is None:
+            _algos = self.keys()
+
         if self.setup and not isinstance(self.setup, dict):
             args, kwargs = _normalize(self.setup(*args, **kwargs))
 
         values = {
-            what: self.bench1(what, _n, *args, **kwargs) for what in self.keys()
+            what: self.bench1(what, _n, *args, **kwargs) for what in _algos
         }
         if self.check:
-            a = values["moocore"]
-            for what in self.keys():
-                if what == "moocore":
+            a = values[self.baseline]
+            for what in values.keys():
+                if what == self.baseline:
                     continue
                 b = values[what]
                 self.check(a, b, what=what, n=_n, name=self.name)
 
         return values
 
+    def __call__(self, get_testcase):
+        # Call fun for each value in self.n
+        algos = self.keys()
+        for _n in self.n:
+            args, kwargs = _normalize(get_testcase(n=_n))
+            self.bench_testcase(_n, *args, **kwargs, _algos=algos)
+            # Remove anything that has gone over-time.
+            # FIXME: Ideally we will stop timeit.Timer() when it goes over-time.
+            if self.max_time > 0:
+                algos = [
+                    what
+                    for what in algos
+                    if what == self.baseline
+                    or self.times[what][-1] <= self.max_time
+                ]
+
     def plots(self, title, file_prefix, log="y", relative=False):
-        for what in self.keys():
-            self.times[what] = np.asarray(self.times[what])
+
+        # Pad with nan so we don't have problems later when converting to DataFrame.
+        max_len = np.max([len(v) for v in self.times.values()])
+        for k, v in self.times.items():
+            self.times[k] = np.pad(
+                np.array(v, dtype=float),
+                (0, max_len - len(v)),
+                "constant",
+                constant_values=np.nan,
+            )
 
         logx = "x" in log
         logy = "y" in log
@@ -197,13 +228,14 @@ class Bench:
         plt.suptitle(f"{title} for {self.name}", fontsize=12)
         plt.savefig(f"{file_prefix}_bench-{self.name}-time.png")
 
-        if relative and "moocore" in self.keys():
+        if relative and self.baseline in self.keys():
+            df
             reltimes = {}
             for what in self.keys():
-                if what == "moocore":
+                if what == self.baseline:
                     continue
                 reltimes["Rel_" + what] = (
-                    self.times[what] / self.times["moocore"]
+                    self.times[what] / self.times[self.baseline]
                 )
 
             df = (

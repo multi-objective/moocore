@@ -64,9 +64,7 @@ for name in names:
         check=check_float_vector,
     )
 
-    for maxrow in n:
-        values = bench(maxrow, x[:maxrow, :])
-
+    bench(lambda n: x[:n, :])
     bench.plots(file_prefix=file_prefix, title=title, log="xy")
 
 if "__file__" not in globals():  # Running interactively.

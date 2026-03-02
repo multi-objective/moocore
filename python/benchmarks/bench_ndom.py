@@ -101,11 +101,10 @@ for name in names:
             ),
         },
         check=check_float_vector,
+        max_time=10,
     )
 
-    for maxrow in n:
-        bench(maxrow, x[:maxrow, :])
-
+    bench(lambda n: x[:n, :])
     gc.collect()
     bench.plots(file_prefix=file_prefix, title=title, log="xy")
 
@@ -133,13 +132,13 @@ for name in names:
             ),
         },
         check=check_float_vector,
+        max_time=10,
     )
 
-    for maxrow in n:
-        bench(maxrow, x[:maxrow, :])
-
+    bench(lambda n: x[:n, :])
     gc.collect()
     bench.plots(file_prefix=file_prefix, title=title, log="xy")
 
+# To not run interactively, use python3 -m bench_ndom (without .py)
 if "__file__" not in globals():  # Running interactively.
     plt.show()
