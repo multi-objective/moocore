@@ -36,8 +36,9 @@ pareto_rank_3d(const double * restrict points, size_t size)
         // Insert sentinel.
         avl_insert_after(&tree, node, tnodes);
 
-        // In this context, orig_size means "no dominated solution found".
-        size_t pos_last_dom = orig_size, n_nondom = size, j = 1;
+        // In this context, size means "no dominated solution found".
+        size_t n_nondom = size, j = 1;
+        const double * last_dom = NULL;
         do {
             const double * restrict pj = p[j];
             bool dominated;
@@ -87,15 +88,16 @@ pareto_rank_3d(const double * restrict points, size_t size)
                 } else { // or it is not a duplicate, so it is non-weakly dominated;
                     dominated = !k_eq_j
                         // or pk was dominated, then this one is also dominated.
-                        || pos_last_dom == row_index_from_ptr(points, pk, 3);
+                        || last_dom == pk;
                 }
             }
             if (dominated) { // pj is dominated by a point in the tree or by prev.
                 /* Map the order in p[], which is sorted, to the original order in
                    points. */
-                pos_last_dom = row_index_from_ptr(points, pj, 3);
+                size_t pos_last_dom = row_index_from_ptr(points, pj, 3);
                 assert(rank[pos_last_dom] == front);
                 rank[pos_last_dom] = front + 1;
+                last_dom = pj;
                 n_nondom--;
             } else {
                 pk = pj;

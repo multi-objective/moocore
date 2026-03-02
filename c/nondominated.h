@@ -366,7 +366,8 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
     avl_insert_after(&tree, node - 1, node);
 
     // In this context, size means "no dominated solution found".
-    size_t pos_last_dom = size, n_nondom = size, j = 1;
+    size_t new_size = size, j = 1;
+    const double * last_dom = NULL;
     const double * restrict pk = rows[0];
     do {
         const double * restrict pj = rows[j];
@@ -424,21 +425,22 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
             } else { // or it is not a duplicate, so it is non-weakly dominated;
                 dominated = likely(!k_eq_j)
                     // or pk was dominated, then this one is also dominated.
-                    || pos_last_dom == row_index_from_ptr(points, pk, 3);
+                    || last_dom == pk;
             }
             DEBUG3(printf_point("weakly dominated by pk: ", pk, 3, "\n"));
         }
         if (dominated) { // pj is dominated by a point in the tree or by prev.
             /* Map the order in p[], which is sorted, to the original order in
                points. */
-            pos_last_dom = row_index_from_ptr(points, pj, 3);
+            size_t pos_last_dom = row_index_from_ptr(points, pj, 3);
             if (unlikely(nondom == NULL)) {
                 // In this context, it means "position of the first dominated solution found".
-                n_nondom = pos_last_dom;
+                new_size = pos_last_dom;
                 goto early_end;
             }
             nondom[pos_last_dom] = false;
-            n_nondom--;
+            last_dom = pj;
+            new_size--;
         } else {
             pk = pj;
         }
@@ -448,7 +450,7 @@ find_nondominated_set_3d_helper(const double * restrict points, size_t size,
 early_end:
     free(tnodes);
     free(rows);
-    return n_nondom;
+    return new_size;
 }
 
 static inline size_t
