@@ -41,12 +41,12 @@ clean:
 benchmarks: install
 	$(RM) ./benchmarks/*_bench-*.png
 	cd benchmarks                             && \
-	python3 bench_epsilon.py                  && \
-	python3 bench_hv.py                       && \
-	python3 bench_hvapprox.py                 && \
-	python3 bench_igdplus.py                  && \
-	python3 bench_ndom.py                     && \
-	python3 bench_ndsort.py                   && \
+	python3 -m bench_epsilon                  && \
+	python3 -m bench_hv                       && \
+	python3 -m bench_hvapprox                 && \
+	python3 -m bench_igdplus                  && \
+	python3 -m bench_ndom                     && \
+	python3 -m bench_ndsort                   && \
 	mv *.png -t ../doc/source/_static/bench/  && \
 	cd ..
 	$(MAKE) -C doc html
