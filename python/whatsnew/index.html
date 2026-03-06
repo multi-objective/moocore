@@ -1,0 +1,629 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>What’s new &#8212; moocore 0.3.0.dev0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=79fc01cf" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=6fc6f92e"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=317740d0"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'whatsnew/index';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Contribute" href="../contribute/index.html" />
+    <link rel="prev" title="Sampling Random Nondominated Sets" href="../auto_examples/plot_generate.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.3.0.dev0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">moocore 0.3.0.dev0</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    What’s new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/multi-objective/moocore" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/moocore" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    What’s new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/multi-objective/moocore" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/moocore" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">What’s new</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="what-s-new">
+<span id="whatsnew"></span><h1>What’s new<a class="headerlink" href="#what-s-new" title="Link to this heading">#</a></h1>
+<section id="version-0-3-0-development">
+<h2>Version 0.3.0 (development)<a class="headerlink" href="#version-0-3-0-development" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://cma-es.github.io/moarchiving/">moarchiving</a> is now included in the benchmarks.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/moocore.r2_exact.html#moocore.r2_exact" title="moocore.r2_exact"><code class="xref py py-func docutils literal notranslate"><span class="pre">r2_exact()</span></code></a> implements the exact computation of the R2 indicator for bi-objective solution sets.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/moocore.hypervolume.html#moocore.hypervolume" title="moocore.hypervolume"><code class="xref py py-func docutils literal notranslate"><span class="pre">hypervolume()</span></code></a> is significantly faster for more than four dimensions (Andreia P. Guerreiro).</p></li>
+<li><p><a class="reference internal" href="../reference/generated/moocore.hypervolume.html#moocore.hypervolume" title="moocore.hypervolume"><code class="xref py py-func docutils literal notranslate"><span class="pre">hypervolume()</span></code></a> now handles 1D inputs and provides a clear error for 0D inputs (<a class="extlink-issue reference external" href="https://github.com/multi-objective/moocore/issues/58">#58</a>).</p></li>
+</ul>
+</section>
+<section id="version-0-2-0-10-01-2026">
+<h2>Version 0.2.0 (10/01/2026)<a class="headerlink" href="#version-0-2-0-10-01-2026" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Requires <code class="docutils literal notranslate"><span class="pre">numpy&gt;=1.24</span></code>.</p></li>
+<li><p><a class="reference external" href="https://optuna.org">Optuna</a> is now included in the benchmarks.</p></li>
+<li><p>New <a class="reference internal" href="../index.html#bench-ndsort"><span class="std std-ref">Nondominated Sorting (Pareto ranking)</span></a> benchmarks.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/moocore.pareto_rank.html#moocore.pareto_rank" title="moocore.pareto_rank"><code class="xref py py-func docutils literal notranslate"><span class="pre">pareto_rank()</span></code></a> is faster in 3D.</p></li>
+<li><p>HV3D+ is slightly faster with repeated coordinates (<a class="extlink-issue reference external" href="https://github.com/multi-objective/moocore/issues/41">#41</a>).</p></li>
+<li><p><a class="reference internal" href="../reference/generated/moocore.igd.html#moocore.igd" title="moocore.igd"><code class="xref py py-func docutils literal notranslate"><span class="pre">igd()</span></code></a>, <a class="reference internal" href="../reference/generated/moocore.igd_plus.html#moocore.igd_plus" title="moocore.igd_plus"><code class="xref py py-func docutils literal notranslate"><span class="pre">igd_plus()</span></code></a>, <a class="reference internal" href="../reference/generated/moocore.avg_hausdorff_dist.html#moocore.avg_hausdorff_dist" title="moocore.avg_hausdorff_dist"><code class="xref py py-func docutils literal notranslate"><span class="pre">avg_hausdorff_dist()</span></code></a> are faster.</p></li>
+<li><p>Fix wrong values returned by <a class="reference internal" href="../reference/generated/moocore.epsilon_mult.html#moocore.epsilon_mult" title="moocore.epsilon_mult"><code class="xref py py-func docutils literal notranslate"><span class="pre">epsilon_mult()</span></code></a> when mixing minimization and maximization.</p></li>
+<li><p>Fix documentation of <a class="reference internal" href="../reference/functions.metrics.html#epsilon-metric"><span class="std std-ref">Epsilon metric</span></a> (<a class="extlink-user reference external" href="https://github.com/leandrolanzieri">&#64;leandrolanzieri</a>)</p></li>
+<li><p><a class="reference internal" href="../reference/generated/moocore.hypervolume.html#moocore.hypervolume" title="moocore.hypervolume"><code class="xref py py-func docutils literal notranslate"><span class="pre">hypervolume()</span></code></a> uses the inclusion-exclusion algorithm for small inputs of up to 15 points, which is significantly faster.</p></li>
+</ul>
+</section>
+<section id="version-0-1-10-24-11-2025">
+<h2>Version 0.1.10 (24/11/2025)<a class="headerlink" href="#version-0-1-10-24-11-2025" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../reference/generated/moocore.is_nondominated.html#moocore.is_nondominated" title="moocore.is_nondominated"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_nondominated()</span></code></a>: Fix wrong assert (<a class="extlink-issue reference external" href="https://github.com/multi-objective/moocore/issues/38">#38</a>).</p></li>
+</ul>
+</section>
+<section id="version-0-1-9-31-10-2025">
+<h2>Version 0.1.9 (31/10/2025)<a class="headerlink" href="#version-0-1-9-31-10-2025" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../reference/generated/moocore.hv_contributions.html#moocore.hv_contributions" title="moocore.hv_contributions"><code class="xref py py-func docutils literal notranslate"><span class="pre">hv_contributions()</span></code></a> ignores dominated points by default.
+Set <code class="docutils literal notranslate"><span class="pre">ignore_dominated=False</span></code> to restore the previous behavior.
+The 3D case uses the HVC3D algorithm.</p></li>
+<li><p>New function <a class="reference internal" href="../reference/generated/moocore.any_dominated.html#moocore.any_dominated" title="moocore.any_dominated"><code class="xref py py-func docutils literal notranslate"><span class="pre">any_dominated()</span></code></a> to quickly detect if a set is
+nondominated.</p></li>
+<li><p>New function <a class="reference internal" href="../reference/generated/moocore.generate_ndset.html#moocore.generate_ndset" title="moocore.generate_ndset"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_ndset()</span></code></a> to generate random nondominated
+sets with different shapes.</p></li>
+<li><p>New example <a class="reference internal" href="../auto_examples/plot_generate.html#sphx-glr-auto-examples-plot-generate-py"><span class="std std-ref">Sampling Random Nondominated Sets</span></a>.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/moocore.is_nondominated.html#moocore.is_nondominated" title="moocore.is_nondominated"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_nondominated()</span></code></a>, <a class="reference internal" href="../reference/generated/moocore.any_dominated.html#moocore.any_dominated" title="moocore.any_dominated"><code class="xref py py-func docutils literal notranslate"><span class="pre">any_dominated()</span></code></a>,
+<a class="reference internal" href="../reference/generated/moocore.pareto_rank.html#moocore.pareto_rank" title="moocore.pareto_rank"><code class="xref py py-func docutils literal notranslate"><span class="pre">pareto_rank()</span></code></a> now handle single-objective inputs correctly (<a class="extlink-issue reference external" href="https://github.com/multi-objective/moocore/issues/27">#27</a>, <a class="extlink-issue reference external" href="https://github.com/multi-objective/moocore/issues/29">#29</a>).</p></li>
+<li><p>Ranks returned by <a class="reference internal" href="../reference/generated/moocore.pareto_rank.html#moocore.pareto_rank" title="moocore.pareto_rank"><code class="xref py py-func docutils literal notranslate"><span class="pre">pareto_rank()</span></code></a> are 0-based.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/moocore.is_nondominated.html#moocore.is_nondominated" title="moocore.is_nondominated"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_nondominated()</span></code></a> and <a class="reference internal" href="../reference/generated/moocore.filter_dominated.html#moocore.filter_dominated" title="moocore.filter_dominated"><code class="xref py py-func docutils literal notranslate"><span class="pre">filter_dominated()</span></code></a> are faster for dimensions larger than 3.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">moocore</span></code> wheels are now built for <code class="docutils literal notranslate"><span class="pre">aarch64</span></code> (ARM64) in Linux and Windows.
+See the <a class="reference external" href="https://github.com/multi-objective/moocore/tree/main/python#install">installation instructions</a>.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/moocore.is_nondominated.html#moocore.is_nondominated" title="moocore.is_nondominated"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_nondominated()</span></code></a> and <a class="reference internal" href="../reference/generated/moocore.filter_dominated.html#moocore.filter_dominated" title="moocore.filter_dominated"><code class="xref py py-func docutils literal notranslate"><span class="pre">filter_dominated()</span></code></a> are now stable in 2D and 3D with <code class="docutils literal notranslate"><span class="pre">!keep_weakly</span></code>, that is, only the first of duplicated points is marked as nondominated.</p></li>
+</ul>
+</section>
+<section id="version-0-1-8-15-07-2025">
+<h2>Version 0.1.8 (15/07/2025)<a class="headerlink" href="#version-0-1-8-15-07-2025" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Correct license to LGPL v2.1 or later.</p></li>
+<li><p>Bump dependencies to <code class="docutils literal notranslate"><span class="pre">cffi&gt;=1.17.1</span></code> and <code class="docutils literal notranslate"><span class="pre">setuptools&gt;=77.0.3</span></code>.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/moocore.eaf.html#moocore.eaf" title="moocore.eaf"><code class="xref py py-func docutils literal notranslate"><span class="pre">eaf()</span></code></a>, <a class="reference internal" href="../reference/generated/moocore.vorob_t.html#moocore.vorob_t" title="moocore.vorob_t"><code class="xref py py-func docutils literal notranslate"><span class="pre">vorob_t()</span></code></a> and <a class="reference internal" href="../reference/generated/moocore.vorob_dev.html#moocore.vorob_dev" title="moocore.vorob_dev"><code class="xref py py-func docutils literal notranslate"><span class="pre">vorob_dev()</span></code></a>
+take the set indices as a separate argument <code class="docutils literal notranslate"><span class="pre">sets</span></code> following the API of the
+R package.</p></li>
+<li><p>New example <a class="reference internal" href="../auto_examples/plot_eaf.html#sphx-glr-auto-examples-plot-eaf-py"><span class="std std-ref">Empirical Attainment Function</span></a>.</p></li>
+<li><p>Document EAF and Vorob’ev expectation and deviation in more detail.</p></li>
+<li><p>New online dataset: <code class="docutils literal notranslate"><span class="pre">DTLZLinearShape.8d.front.60pts.10</span></code> (see <a class="reference internal" href="../reference/generated/moocore.get_dataset.html#moocore.get_dataset" title="moocore.get_dataset"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_dataset()</span></code></a>).</p></li>
+<li><p>New default method in <a class="reference internal" href="../reference/generated/moocore.hv_approx.html#moocore.hv_approx" title="moocore.hv_approx"><code class="xref py py-func docutils literal notranslate"><span class="pre">hv_approx()</span></code></a>. Computation is now done in C, so it is much faster.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/moocore.hv_contributions.html#moocore.hv_contributions" title="moocore.hv_contributions"><code class="xref py py-func docutils literal notranslate"><span class="pre">hv_contributions()</span></code></a> is much faster for 2D inputs.</p></li>
+</ul>
+</section>
+<section id="version-0-1-7-04-06-2025">
+<h2>Version 0.1.7 (04/06/2025)<a class="headerlink" href="#version-0-1-7-04-06-2025" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../reference/generated/moocore.hypervolume.html#moocore.hypervolume" title="moocore.hypervolume"><code class="xref py py-func docutils literal notranslate"><span class="pre">hypervolume()</span></code></a> now uses the HV3D<sup>+</sup> algorithm for the 3D case and the HV4D<sup>+</sup> algorithm for the 4D case.
+For dimensions larger than 4, the recursive algorithm uses HV4D<sup>+</sup> as the base case, which is significantly faster.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/moocore.read_datasets.html#moocore.read_datasets" title="moocore.read_datasets"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_datasets()</span></code></a> is significantly faster for large files.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/moocore.is_nondominated.html#moocore.is_nondominated" title="moocore.is_nondominated"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_nondominated()</span></code></a> and <a class="reference internal" href="../reference/generated/moocore.filter_dominated.html#moocore.filter_dominated" title="moocore.filter_dominated"><code class="xref py py-func docutils literal notranslate"><span class="pre">filter_dominated()</span></code></a> are
+faster for 3D inputs.</p></li>
+<li><p>New function: <a class="reference internal" href="../reference/generated/moocore.hv_contributions.html#moocore.hv_contributions" title="moocore.hv_contributions"><code class="xref py py-func docutils literal notranslate"><span class="pre">hv_contributions()</span></code></a>.</p></li>
+<li><p>New online datasets: <code class="docutils literal notranslate"><span class="pre">test2D-200k.inp.xz</span></code> and <code class="docutils literal notranslate"><span class="pre">ran.1000pts.3d.10</span></code> (see
+<a class="reference internal" href="../reference/generated/moocore.get_dataset.html#moocore.get_dataset" title="moocore.get_dataset"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_dataset()</span></code></a>).</p></li>
+</ul>
+</section>
+<section id="version-0-1-6-14-05-2025">
+<h2>Version 0.1.6 (14/05/2025)<a class="headerlink" href="#version-0-1-6-14-05-2025" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>New function: <a class="reference internal" href="../reference/generated/moocore.largest_eafdiff.html#moocore.largest_eafdiff" title="moocore.largest_eafdiff"><code class="xref py py-func docutils literal notranslate"><span class="pre">largest_eafdiff()</span></code></a>.</p></li>
+<li><p>New class: <a class="reference internal" href="../reference/generated/moocore.RelativeHypervolume.html#moocore.RelativeHypervolume" title="moocore.RelativeHypervolume"><code class="xref py py-class docutils literal notranslate"><span class="pre">RelativeHypervolume</span></code></a>.</p></li>
+<li><p>New dataset <code class="docutils literal notranslate"><span class="pre">tpls50x20_1_MWT.csv</span></code>.</p></li>
+<li><p>Extended example <a class="reference internal" href="../auto_examples/plot_metrics.html#sphx-glr-auto-examples-plot-metrics-py"><span class="std std-ref">Computing Multi-Objective Quality Metrics</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vorobT()</span></code> and <code class="docutils literal notranslate"><span class="pre">vorobDev()</span></code> were renamed to <a class="reference internal" href="../reference/generated/moocore.vorob_t.html#moocore.vorob_t" title="moocore.vorob_t"><code class="xref py py-func docutils literal notranslate"><span class="pre">vorob_t()</span></code></a> and
+<a class="reference internal" href="../reference/generated/moocore.vorob_dev.html#moocore.vorob_dev" title="moocore.vorob_dev"><code class="xref py py-func docutils literal notranslate"><span class="pre">vorob_dev()</span></code></a> to follow Python convention.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/moocore.get_dataset_path.html#moocore.get_dataset_path" title="moocore.get_dataset_path"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_dataset_path()</span></code></a> and <a class="reference internal" href="../reference/generated/moocore.get_dataset.html#moocore.get_dataset" title="moocore.get_dataset"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_dataset()</span></code></a> can download large datasets from a remote repository.</p></li>
+</ul>
+</section>
+<section id="version-0-1-4-30-10-2024">
+<h2>Version 0.1.4 (30/10/2024)<a class="headerlink" href="#version-0-1-4-30-10-2024" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Improved example <a class="reference internal" href="../auto_examples/plot_pandas.html#sphx-glr-auto-examples-plot-pandas-py"><span class="std std-ref">Using moocore with Pandas</span></a> to work in Pandas version &gt;= 2.</p></li>
+<li><p>Changed behavior of <a class="reference internal" href="../reference/generated/moocore.apply_within_sets.html#moocore.apply_within_sets" title="moocore.apply_within_sets"><code class="xref py py-func docutils literal notranslate"><span class="pre">apply_within_sets()</span></code></a>. The previous behavior could lead to subtle bugs.</p></li>
+</ul>
+</section>
+<section id="version-0-1-3-28-10-2024">
+<h2>Version 0.1.3 (28/10/2024)<a class="headerlink" href="#version-0-1-3-28-10-2024" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>New: <a class="reference internal" href="../reference/generated/moocore.Hypervolume.html#moocore.Hypervolume" title="moocore.Hypervolume"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hypervolume</span></code></a>: Object-oriented API for hypervolume indicator.</p></li>
+<li><p>New: <a class="reference internal" href="../reference/generated/moocore.apply_within_sets.html#moocore.apply_within_sets" title="moocore.apply_within_sets"><code class="xref py py-func docutils literal notranslate"><span class="pre">apply_within_sets()</span></code></a>: Utility function to apply operations to individual datasets.</p></li>
+<li><p>New: <a class="reference internal" href="../reference/generated/moocore.is_nondominated_within_sets.html#moocore.is_nondominated_within_sets" title="moocore.is_nondominated_within_sets"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_nondominated_within_sets()</span></code></a>: Utility function to identify nondominated points within sets.</p></li>
+<li><p>New example using <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> in <a class="reference internal" href="../auto_examples/plot_pandas.html#sphx-glr-auto-examples-plot-pandas-py"><span class="std std-ref">Using moocore with Pandas</span></a>.</p></li>
+<li><p>Fix bug in <a class="reference internal" href="../reference/generated/moocore.normalise.html#moocore.normalise" title="moocore.normalise"><code class="xref py py-func docutils literal notranslate"><span class="pre">normalise()</span></code></a> when the input is <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> or some other non-contiguous array.</p></li>
+</ul>
+</section>
+<section id="version-0-1-2-18-09-2024">
+<h2>Version 0.1.2 (18/09/2024)<a class="headerlink" href="#version-0-1-2-18-09-2024" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>New: <a class="reference internal" href="../reference/generated/moocore.hv_approx.html#moocore.hv_approx" title="moocore.hv_approx"><code class="xref py py-func docutils literal notranslate"><span class="pre">hv_approx()</span></code></a></p></li>
+<li><p>Documentation improvements.</p></li>
+<li><p>New gallery examples.</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../auto_examples/plot_generate.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Sampling Random Nondominated Sets</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../contribute/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Contribute</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-3-0-development">Version 0.3.0 (development)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-2-0-10-01-2026">Version 0.2.0 (10/01/2026)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-1-10-24-11-2025">Version 0.1.10 (24/11/2025)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-1-9-31-10-2025">Version 0.1.9 (31/10/2025)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-1-8-15-07-2025">Version 0.1.8 (15/07/2025)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-1-7-04-06-2025">Version 0.1.7 (04/06/2025)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-1-6-14-05-2025">Version 0.1.6 (14/05/2025)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-1-4-30-10-2024">Version 0.1.4 (30/10/2024)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-1-3-28-10-2024">Version 0.1.3 (28/10/2024)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-1-2-18-09-2024">Version 0.1.2 (18/09/2024)</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
