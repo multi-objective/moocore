@@ -106,18 +106,7 @@ cmp_double_asc(double a, double b)
 {
     // Generates branchless code, thus faster than:
     // return a < b ? -1 : (a > b ? 1 : 0);
-    return (a > b) - (a < b); //
-}
-
-static inline int
-cmp_double_asc_x_asc_y(double ax, double ay, double bx, double by)
-{
-    // Faster than:
-    // return (ax < bx) ? -1 : ((ax > bx) ? 1 :
-    //                          ((ay < by) ? -1 : ((ay > by) ? 1 : 0)));
-    int cmpx = (ax > bx) - (ax < bx);
-    int cmpy = (ay > by) - (ay < by);
-    return cmpx ? cmpx : cmpy;
+    return (a > b) - (a < b);
 }
 
 static inline int
@@ -175,9 +164,8 @@ DEFINE_QSORT_CMP(cmp_ppdouble_asc_only_4d, double **)
 
 DEFINE_QSORT_CMP(cmp_pdouble_asc_x_nonzero, double *)
 {
-    const double ax = *a;
-    const double bx = *b;
-    return ax < bx ? -1 : 1;
+    ASSUME(a != b);
+    return *a < *b ? -1 : 1;
 }
 
 DEFINE_QSORT_CMP(cmp_pdouble_asc_y_des_x_nonzero, double *)
@@ -190,14 +178,21 @@ DEFINE_QSORT_CMP(cmp_pdouble_asc_y_des_x_nonzero, double *)
     return cmp ? cmp : (ax > bx ? -1 : 1);
 }
 
+static inline int
+cmp_double_asc_x_asc_y(double ax, double ay, double bx, double by)
+{
+    // Faster than:
+    // return (ax < bx) ? -1 : ((ax > bx) ? 1 :
+    //                          ((ay < by) ? -1 : ((ay > by) ? 1 : 0)));
+    int cmpx = cmp_double_asc(ax, bx);
+    int cmpy = cmp_double_asc(ay, by);
+    return cmpx ? cmpx : cmpy;
+}
+
 // Ascending lexicographic 2D (ascending x, then ascending y)
 DEFINE_QSORT_CMP(cmp_pdouble_asc_x_asc_y, double *)
 {
-    const double ax = a[0];
-    const double bx = b[0];
-    const double ay = a[1];
-    const double by = b[1];
-    return cmp_double_asc_x_asc_y(ax, ay, bx, by);
+    return cmp_double_asc_x_asc_y(a[0], a[1], b[0], b[1]);
 }
 
 // Ascending lexicographic 2D (ascending x, then ascending y)
