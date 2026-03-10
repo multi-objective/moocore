@@ -2,8 +2,6 @@
 #define EPSILON_H
 
 #include "config.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
 #ifndef INFINITY
 #define INFINITY (HUGE_VAL)
