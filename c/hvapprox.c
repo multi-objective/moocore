@@ -225,12 +225,11 @@ construct_polar_a(dimension_t dim, uint_fast32_t nsamples)
         61, 67, 67 };
 
     const dimension_t p = primes[dim];
-    DEBUG2_PRINT("construct_polar_a: prime: %u\n", (unsigned int)p);
+    DEBUG2_PRINT("construct_polar_a: prime: %d\n", p);
 
     uint_fast32_t * a = malloc(dim * sizeof(*a));
     a[0] = 1;
-    DEBUG2_PRINT("construct_polar_a: a[%u] = %lu",
-                 (unsigned int) dim, (unsigned long) a[0]);
+    DEBUG2_PRINT("construct_polar_a: a[%d] = %lu", dim, (unsigned long) a[0]);
     for (dimension_t k = 1; k < dim; k++) {
         long double temp = 2 * fabsl(cosl(2 * M_PIl * k / p));
         temp = fractl(temp);

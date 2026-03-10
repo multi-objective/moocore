@@ -134,7 +134,8 @@ hvc_1point_diffs_nondom(double * restrict hvc, double * restrict points,
 #undef swap_points
 }
 
-/* O(n log n) dimension-sweep algorithm.
+/**
+   O(n log n) dimension-sweep algorithm.
 
    hvc[] must be already allocated with size n.  Points that are duplicated
    have zero exclusive contribution.  Thus, the sum of contributions may
@@ -147,34 +148,35 @@ hvc2d(double * restrict hvc, const double * restrict data, size_t n,
       const double * restrict ref)
 {
     ASSUME(n > 0);
-    const double **p = generate_sorted_doublep_2d_filter_by_ref(data, &n, ref[0]);
+    const double ** p = generate_sorted_doublep_2d_filter_by_ref(data, &n, ref[0]);
     if (unlikely(n == 0)) return 0;
     if (unlikely(!p)) return -1;
 
     size_t j = 0;
     // Find first point below the reference point.
-    while (j < n && p[j][1] >= ref[1])
+    while (p[j][1] >= ref[1]) {
         j++;
-    if (unlikely(j == n)) {
-        free(p);
-        return 0;
+        if (unlikely(j == n)) {
+            free(p);
+            return 0;
+        }
     }
-    double height = ref[1] - p[j][1];
-    double hyperv = (ref[0] - p[j][0]) * height;
     const double * prev = p[j];
+    double height = ref[1] - prev[1];
+    double hyperv = (ref[0] - prev[0]) * height;
     j++;
     while (j < n) {
-        DEBUG2_PRINT("[%lld]=(%g, %g) -> [%lld]=(%g,%g) (height=%g)\n",
-                     (long long)(prev - data) / 2, prev[0], prev[1],
-                     (long long)(p[j] - data) / 2, p[j][0], p[j][1], height);
+        DEBUG2_PRINT("[%zu]=(%g, %g) -> [%zu]=(%g,%g) (height=%g)\n",
+                     ((size_t)(prev - data)) / 2, prev[0], prev[1],
+                     ((size_t)(p[j] - data)) / 2, p[j][0], p[j][1], height);
         // likely() because most points will be non-dominated.
         if (likely(prev[1] > p[j][1])) {
             assert(prev[0] < p[j][0]);
             /* Compute the contribution of prev.  We have to accumulate because
                we may have computed partial contributions.  */
             hvc[(prev - data) / 2] += (p[j][0] - prev[0]) * height;
-            DEBUG2_PRINT("hvc[%lld] += %g * %g = %g\n",
-                         (long long) (prev - data) / 2,
+            DEBUG2_PRINT("hvc[%zu] += %g * %g = %g\n",
+                         ((size_t)(prev - data)) / 2,
                          p[j][0] - prev[0], height,
                          (p[j][0] - prev[0]) * height);
             height = prev[1] - p[j][1];
@@ -183,12 +185,12 @@ hvc2d(double * restrict hvc, const double * restrict data, size_t n,
             prev = p[j];
             j++;
         } else if (prev[0] < p[j][0]) {
-            // prev[1] <= p[j][1], thus pj contributes partially to hvc[prev].
+            // prev[1] <= p[j][1], thus p[j] contributes partially to hvc[prev].
             double new_h = p[j][1] - prev[1];
             if (new_h < height) {
                 hvc[(prev - data) / 2] += (p[j][0] - prev[0]) * (height - new_h);
-                DEBUG2_PRINT("hvc[%lld] += %g * %g = %g\n",
-                             (long long) (prev - data) / 2,
+                DEBUG2_PRINT("hvc[%zu] += %g * %g = %g\n",
+                             ((size_t)(prev - data)) / 2,
                              p[j][0] - prev[0], height - new_h,
                              (p[j][0] - prev[0]) * (height - new_h));
                 height = new_h;
@@ -196,7 +198,7 @@ hvc2d(double * restrict hvc, const double * restrict data, size_t n,
             j++;
         } else if (prev[1] == p[j][1]) { // && prev[0] == p[j][0]
             // Duplicates contribute zero.
-            DEBUG2_PRINT("hvc[%lld] = %g\n", (long long)(prev - data) / 2,
+            DEBUG2_PRINT("hvc[%zu] = %g\n", ((size_t)(prev - data)) / 2,
                          hvc[(prev - data) / 2]);
             assert(hvc[(prev - data) / 2] == 0);
             /* We set height=0 here so that we set hvc[prev] = 0 when we find the
@@ -221,7 +223,7 @@ hvc2d(double * restrict hvc, const double * restrict data, size_t n,
     }
 
     hvc[(prev - data) / 2] += (ref[0] - prev[0]) * height;
-    DEBUG2_PRINT("hvc[%lld] = %g * %g = %g\n", (long long)(prev - data) / 2,
+    DEBUG2_PRINT("hvc[%zu] = %g * %g = %g\n", ((size_t)(prev - data)) / 2,
                  ref[0] - prev[0], height,  (ref[0] - prev[0]) * height);
     free(p);
     return hyperv;
@@ -232,33 +234,34 @@ hvc2d_nondom(double * restrict hvc, const double * restrict data, size_t n,
              const double * restrict ref)
 {
     ASSUME(n > 0);
-    const double **p = generate_sorted_doublep_2d_filter_by_ref(data, &n, ref[0]);
+    const double ** p = generate_sorted_doublep_2d_filter_by_ref(data, &n, ref[0]);
     if (unlikely(n == 0)) return 0;
     if (unlikely(!p)) return -1;
 
     size_t j = 0;
     // Find first point below the reference point.
-    while (j < n && p[j][1] >= ref[1])
+    while (p[j][1] >= ref[1]) {
         j++;
-    if (unlikely(j == n)) {
-        free(p);
-        return 0;
+        if (unlikely(j == n)) {
+            free(p);
+            return 0;
+        }
     }
-    double height = ref[1] - p[j][1];
-    double hyperv = (ref[0] - p[j][0]) * height;
     const double * prev = p[j];
+    double height = ref[1] - prev[1];
+    double hyperv = (ref[0] - prev[0]) * height;
     j++;
     while (j < n) {
-        DEBUG2_PRINT("[%lld]=(%g, %g) -> [%lld]=(%g,%g) (height=%g)\n",
-                     (long long)(prev - data) / 2, prev[0], prev[1],
-                     (long long)(p[j] - data) / 2, p[j][0], p[j][1], height);
+        DEBUG2_PRINT("[%zu]=(%g, %g) -> [%zu]=(%g,%g) (height=%g)\n",
+                     ((size_t)(prev - data)) / 2, prev[0], prev[1],
+                     ((size_t)(p[j] - data)) / 2, p[j][0], p[j][1], height);
         // likely() because most points will be non-dominated.
         if (likely(prev[1] > p[j][1])) {
             assert(prev[0] < p[j][0]);
-            /* Compute the contribution of prev.  */
+            // Compute the contribution of prev.
             hvc[(prev - data) / 2] = (p[j][0] - prev[0]) * height;
-            DEBUG2_PRINT("hvc[%lld] = %g * %g = %g\n",
-                         (long long) (prev - data) / 2,
+            DEBUG2_PRINT("hvc[%zu] = %g * %g = %g\n",
+                         ((size_t)(prev - data)) / 2,
                          p[j][0] - prev[0], height,
                          (p[j][0] - prev[0]) * height);
             height = prev[1] - p[j][1];
@@ -269,16 +272,16 @@ hvc2d_nondom(double * restrict hvc, const double * restrict data, size_t n,
         } else if (prev[0] == p[j][0]) { // && prev[1] <= p[j][1]
             if (prev[1] == p[j][1]) {
                 // Duplicates contribute zero.
-                DEBUG2_PRINT("hvc[%lld] = %g\n", (long long)(prev - data) / 2,
+                DEBUG2_PRINT("hvc[%zu] = %g\n", ((size_t)(prev - data)) / 2,
                              hvc[(prev - data) / 2]);
                 assert(hvc[(prev - data) / 2] == 0);
-                /* We set this here so that we set hvc[prev] = 0 when we find the next
-                   non-duplicate.  */
+                /* We set this here so that we set hvc[prev] = 0 when we find
+                   the next non-duplicate.  */
                 height = 0;
                 prev = p[j];
             }
-            /* All points with same 0-coordinate are weakly dominated by
-               prev, so they can be ignored.  */
+            /* All points with same 0-coordinate are weakly dominated by prev,
+               so they can be ignored.  */
             do {
                 j++;
             } while (j < n && prev[0] == p[j][0]);
@@ -291,7 +294,7 @@ hvc2d_nondom(double * restrict hvc, const double * restrict data, size_t n,
     }
 
     hvc[(prev - data) / 2] = (ref[0] - prev[0]) * height;
-    DEBUG2_PRINT("hvc[%lld] = %g * %g = %g\n", (long long)(prev - data) / 2,
+    DEBUG2_PRINT("hvc[%zu] = %g * %g = %g\n", ((size_t)(prev - data)) / 2,
                  ref[0] - prev[0], height,  (ref[0] - prev[0]) * height);
     free(p);
     return hyperv;

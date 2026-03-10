@@ -2,7 +2,6 @@
 #define NONDOMINATED_H
 
 #include "config.h"
-
 #include <string.h> // memcpy
 #include <math.h> // INFINITY
 #include "sort.h"
@@ -23,7 +22,8 @@ typedef struct avl_node_t {
 enum objs_agree_t { AGREE_MINIMISE = -1, AGREE_NONE = 0, AGREE_MAXIMISE = 1 };
 
 static inline void
-printf_point(const char * prefix, const double * p, dimension_t dim, const char * suffix)
+printf_point(const char * prefix, const double * p, dimension_t dim,
+             const char * suffix)
 {
     fprintf(stderr, "%s%g", prefix, p[0]);
     for (dimension_t d = 1; d < dim; d++)
@@ -46,7 +46,7 @@ printf_rows(const char * prefix,
     if (size > 0) {
         fprintf(stderr, "%s", prefix);
         printf_point(" = [ ", rows[0], dim, " ], ");
-        // We cannot use %zu for size_t because of MingW compiler used by CRAN.
+        // The 32-bit MinGW toolchain from Rtools 4.0 does not support %zu.
         fprintf(stderr, "%s = %lu\n", size_lab, (unsigned long) size);
         print_rows(rows, size, dim);
     } else {
