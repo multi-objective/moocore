@@ -28,12 +28,26 @@ development:
 
 navbar:
   structure:
+    left: [intro, reference, benchmarks, articles, tutorials, news]
     right: [search, cran, github, lightswitch]
   components:
+    benchmarks:
+      text: "Benchmarks"
+      href: articles/benchmarks.html
     cran:
       icon: fab fa-r-project
       href: https://cloud.r-project.org/package=moocore
       aria-label: View on CRAN
+
+articles:
+  - title: Articles
+    navbar: ~
+    contents:
+      - articles/generate
+      - articles/metrics
+      - articles/hv_approx
+      - articles/eaf
+      - articles/benchmarks
 
 reference:
   - title: Pareto dominance
