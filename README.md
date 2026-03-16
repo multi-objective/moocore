@@ -54,7 +54,7 @@ The following projects currently use `moocore`:
  - [`DESDEO`](https://github.com/industrial-optimization-group/DESDEO/)
  - [`GPareto`](https://github.com/mbinois/GPareto)
  - [`IOHInspector`](https://github.com/IOHprofiler/IOHinspector?tab=readme-ov-file)
- - [`Liger`](https://www.ide.uk/project-liger)
+ - [`Liger`](https://ligerdev.shef.ac.uk/liger-development-team/liger-ce)
  - [`bonobench`](https://github.com/schaepermeier/bonobench)
  - [`gMOIP`](https://cran.r-project.org/web/packages/gMOIP/index.html)
  - [`jMetalPy`](https://jmetalpy.readthedocs.io/en/develop/)
