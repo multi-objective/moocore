@@ -25,6 +25,10 @@ from nevergrad.optimization.multiobjective import HypervolumeIndicator as ng_HV
 from fast_pareto import hypervolume as fp_hv
 from optuna._hypervolume import compute_hypervolume as optuna_hv
 
+## paretobench is 2x slower than botorch, so too slow for benchmarking.
+# import paretobench as pb
+## Trieste is hundreds of times slower than botorch. It is so slow that
+## we cannot run the benchmark with the initial value of 500 points.
 # from trieste.acquisition.multi_objective import Pareto as trieste_Pareto
 # import tensorflow as tf
 from moarchiving import get_mo_archive as moarch_get_mo_archive
@@ -80,6 +84,8 @@ for name in names:
         "moarchiving (float)": lambda z, ref=ref: float(
             moarch_get_mo_archive(z, reference_point=ref).hypervolume
         ),
+        # "paretobench": lambda z, hv=pb.Hypervolume(ref_point=ref): hv(pb.Population(f=z), None),
+        # "trieste": lambda z, tf_ref=tf.convert_to_tensor(ref): float(trieste_Pareto(z, already_non_dominated=True).hypervolume_indicator(tf_ref)),
         "botorch": lambda z, hv=botorch_HV(ref_point=torch.from_numpy(-ref)): (
             hv.compute(z)
         ),
@@ -95,9 +101,7 @@ for name in names:
         # Only supports 2D, 3D and 4D
         del benchmarks["moarchiving (float)"]
     if dim >= 4:
-        ## Trieste is hundreds of times slower than botorch. It is so slow that
-        ## we cannot run the benchmark with the initial value of 500 points.
-        # benchmarks["trieste"] = lambda z, tf_ref=tf.convert_to_tensor(ref): float(trieste_Pareto(z, already_non_dominated=True).hypervolume_indicator(tf_ref))
+        # del benchmarks["trieste"]
         del benchmarks["botorch"]
         # fast_pareto is more than x10_000 slower than moocore in 4D
         del benchmarks["fast_pareto"]

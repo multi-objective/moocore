@@ -24,6 +24,8 @@ from desdeo.tools.non_dominated_sorting import (
     non_dominated as desdeo_is_nondominated,
 )
 
+## paretobench is always slower than botorch, too slower for benchmarking.
+# import paretobench
 from paretoset import paretoset
 from seqme.core.rank import is_pareto_front as seqme_is_pareto_front
 from fast_pareto import is_pareto_front as fast_pareto_is_pf
@@ -154,6 +156,8 @@ for name in names:
         "optuna": lambda z: bool2pos(
             optuna_is_pf(-z, assume_unique_lexsorted=False)
         ),
+        ## paretobench only supports deduplication.
+        # "paretobench": lambda z: bool2pos(paretobench.Population(f=-z).get_nondominated_indices()),
     }
 
     bench = Bench(

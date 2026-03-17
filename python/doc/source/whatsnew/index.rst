@@ -7,7 +7,7 @@ What's new
 Version 0.3.0 (development)
 ---------------------------
 
-- `moarchiving <https://cma-es.github.io/moarchiving/>`_ is now included in the benchmarks.
+- `moarchiving <https://cma-es.github.io/moarchiving/>`_ and `paretobench <https://github.com/electronsandstuff/ParetoBench>`_ are now included in the benchmarks.
 - :func:`~moocore.r2_exact` implements the exact computation of the R2 indicator for bi-objective solution sets.
 - :func:`~moocore.hypervolume` is significantly faster for more than four dimensions (Andreia P. Guerreiro).
 - :func:`~moocore.hypervolume` now handles 1D inputs and provides a clear error for 0D inputs (:issue:`58`).
