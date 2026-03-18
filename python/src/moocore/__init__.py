@@ -1,4 +1,6 @@
 # ruff: noqa: D104
+from ._archive import UnboundedArchive
+
 from ._moocore import (
     Hypervolume,
     ReadDatasetsError,
@@ -48,6 +50,7 @@ __all__ = [
     "Hypervolume",
     "ReadDatasetsError",
     "RelativeHypervolume",
+    "UnboundedArchive",
     "any_dominated",
     "apply_within_sets",
     "avg_hausdorff_dist",
