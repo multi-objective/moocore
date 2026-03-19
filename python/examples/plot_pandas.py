@@ -32,7 +32,7 @@ df[obj_cols] = moocore.normalise(df[obj_cols], to_range=[1, 2])
 df
 
 # %%
-# Calculate the hypervolume for each ``algo`` using :meth:`~pandas.DataFrame.groupby` and :meth:`~pandas.core.groupby.DataFrameGroupBy.apply`.
+# Calculate the hypervolume for each ``algo`` using :meth:`~pandas.DataFrame.groupby` and :meth:`~pandas.api.typing.groupby.DataFrameGroupBy.apply`.
 
 ref = 2.1
 hv = (
