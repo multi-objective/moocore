@@ -6,6 +6,8 @@
  - [ ] Merge eaf/eaf3d/uc/trunk/ command-line improvements
  - [ ] Merge hypervolume/Makefile README
  - [ ] Coverage Error Sayin 2024: is this the same as R2 indicator?
+   - Sayın, S.: Measuring the quality of discrete representations of efficient sets in multiple objective mathematical programming. Math. Program. 87(3), 543–560 (2000)
+   - Sayın, S.: A procedure to find discrete representations of the efficient set with specified coverage errors. Oper. Res. 51, 427–436 (2003
  - [ ] Appendix B of "The Hypervolume Indicator: Computational Problems and Algorithms" has more ND sets types: wave, cliff and hard.
  - [ ] Document logHYP: T. Friedrich, K. Bringmann, T. Voß, C. Igel. The Logarithmic Hypervolume Indicator. 11th ACM Foundations of Genetic Algorithms (FOGA), pages 81-92, 2009. https://hpi.de/friedrich/publications/all/Document/puma-friedrich/FriedrichBVI11.pdf/a839ddd47688611dcf92512ca010daf3.html?tx_extbibsonomycsl_publicationlist%5Baction%5D=view&tx_extbibsonomycsl_publicationlist%5Bpreview%5D=large&cHash=7cabd8bc9699c0ab3f88886a3f62976f
  - [ ] Document relation between hypervolume and attainment function.
