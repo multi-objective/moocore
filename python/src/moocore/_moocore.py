@@ -147,7 +147,7 @@ def read_datasets(filename: str | os.PathLike | StringIO) -> np.ndarray:
 
     # Create buffer with the correct array size in bytes
     data_buf = ffi.buffer(data_p[0], datasize_p[0])
-    # Convert 1d numpy array to 2d array with (n obj... , sets) columns
+    # Convert 1D numpy array to 2D array with (n obj... , sets) columns
     return np.frombuffer(data_buf).reshape((-1, ncols_p[0]))
 
 
@@ -345,7 +345,7 @@ def epsilon_additive(
     maximise :
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
-        Also accepts a 1d numpy array with value 0/1 for each objective
+        Also accepts a 1D numpy array with value 0/1 for each objective
 
     Returns
     -------
@@ -892,18 +892,24 @@ def hv_approx(
     -------
         A single numerical value, the approximate hypervolume indicator.
 
+    See Also
+    --------
+    hypervolume, whv_hype
+
     Notes
     -----
     This function implements the methods proposed by
-    :cite:t:`DenZha2019approxhv` to approximate the hypervolume:
+    :footcite:t:`DenZha2019approxhv` to approximate the hypervolume:
 
     .. math::
        \widehat{HV}_r(A) = \frac{2\pi^\frac{m}{2}}{\Gamma(\frac{m}{2})}\frac{1}{m 2^m}\frac{1}{n}\sum_{i=1}^n \max_{y \in A} s(w^{(i)}, y)^m
 
-    where :math:`m` is the number of objectives, :math:`n` is the number of
-    weights :math:`w^{(i)}` sampled, :math:`\Gamma()` is the gamma function
-    :func:`math.gamma()`, i.e., the analytical continuation of the factorial
-    function, and :math:`s(w, y) = \min_{k=1}^m (r_k - y_k)/w_k`.
+    where :math:`m` is the number of objectives, :math:`w^{(i)}` are weights
+    uniformly distributed on :math:`S_{+}`, i.e., the positive orthant of the
+    :math:`(m-1)`-D unit hypersphere, :math:`n` is the number of weights
+    sampled, :math:`\Gamma()` is the gamma function :func:`math.gamma()`, i.e.,
+    the analytical continuation of the factorial function, and :math:`s(w, y) =
+    \min_{k=1}^m (r_k - y_k)/w_k`.
 
     In the default ``method="DZ2019-HW"``, the weights :math:`w^{(i)},
     i=1\ldots n` are defined using a deterministic low-discrepancy
@@ -913,8 +919,8 @@ def hv_approx(
     the weights :math:`w^{(i)}, i=1\ldots n` are sampled from the unit normal
     vector such that each weight :math:`w = \frac{|x|}{\|x\|_2}` where each
     component of :math:`x` is independently sampled from the standard normal
-    distribution.  The original source code in C++/MATLAB for both methods can
-    be found `here
+    distribution :footcite:p:`Muller1959sphere`.  The original source code in
+    C++/MATLAB for both methods can be found `here
     <https://github.com/Ksrma/Hypervolume-Approximation-using-polar-coordinate>`_.
 
 
@@ -1576,7 +1582,7 @@ def pareto_rank(
     maximise :
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of boolean values, with one value per objective.
-        Also accepts a 1d numpy array with value 0/1 for each objective.
+        Also accepts a 1D numpy array with value 0/1 for each objective.
 
     Returns
     -------
@@ -2508,8 +2514,8 @@ def whv_hype(
     ideal: ArrayLike,
     maximise: bool | Sequence[bool] = False,
     nsamples: int = 100000,
-    dist: Literal["uniform", "point", "exponential"] = "uniform",
     seed: int | np.random.Generator | None = None,
+    dist: Literal["uniform", "point", "exponential"] = "uniform",
     mu: float | ArrayLike | None = None,
 ) -> float:
     r"""Approximation of the (weighted) hypervolume by Monte-Carlo sampling (2D only).
@@ -2526,28 +2532,22 @@ def whv_hype(
     data :
         Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
         If the array is created from the :func:`read_datasets` function, remove the last (set) column.
-
     ref :
         Reference point as a numpy array or list. Must have same length as the number of columns of the dataset.
-
     ideal :
         Ideal point as a numpy array or list. Must have same length as the number of columns of the dataset.
-
     maximise :
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
         Also accepts a 1D numpy array with values 0 or 1 for each objective.
-
     nsamples :
         Number of samples for Monte-Carlo sampling. Higher values give more
         accurate approximation of the true hypervolume but require more time.
-
     seed :
         Either an integer to seed :func:`numpy.random.default_rng`, Numpy
         default random number generator (RNG) or an instance of a
         Numpy-compatible RNG. ``None`` uses the equivalent of a random seed
         (see :func:`numpy.random.default_rng`).
-
     dist :
         Weight distribution :footcite:p:`AugBadBroZit2009gecco`. The ones currently supported are:
 
@@ -2556,24 +2556,22 @@ def whv_hype(
 
        ``'point'``
          describes a goal in the objective space, where ``mu`` gives the
-         coordinates of the goal (1d Numpy array). The resulting weight distribution is a
+         coordinates of the goal (1D Numpy array). The resulting weight distribution is a
          multivariate normal distribution centred at the goal.
 
        ``'exponential'``
          describes an exponential distribution with rate parameter ``1/mu``, i.e., :math:`\lambda = \frac{1}{\mu}`.
-
     mu :
        Parameter of ``dist``. See above for details.
 
-
     Returns
     -------
-       A single numerical value, the weighted hypervolume.
+       A single numerical value, the approximated (weighted) hypervolume.
 
 
     See Also
     --------
-    read_datasets, hypervolume
+    hypervolume, hv_approx
 
     References
     ----------

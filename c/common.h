@@ -2,6 +2,9 @@
 #define MOOCORE_COMMON_H_
 
 #include "config.h"
+#define MOOCORE_STRINGIFY(name) #name
+#define MOOCORE_STRINGIFY_MACRO(macro) MOOCORE_STRINGIFY(macro)
+
 #ifdef R_PACKAGE
 #define R_NO_REMAP
 #include <R.h>
@@ -33,9 +36,6 @@ void warnprintf(const char *format,...) ATTRIBUTE_FORMAT_PRINTF(1, 2);
         exit(EXIT_FAILURE);                                                    \
     } while(0)
 #endif // R_PACKAGE
-
-#define MOOCORE_STRINGIFY(name) #name
-#define MOOCORE_STRINGIFY_MACRO(macro) MOOCORE_STRINGIFY(macro)
 
 #include <stdbool.h>
 static inline void *

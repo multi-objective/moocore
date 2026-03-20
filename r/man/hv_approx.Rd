@@ -48,20 +48,23 @@ to approximate the hypervolume:
 
 \deqn{\widehat{HV}_r(A) = \frac{2\pi^\frac{m}{2}}{\Gamma(\frac{m}{2})}\frac{1}{m 2^m}\frac{1}{n}\sum_{i=1}^n \max_{y \in A} s(w^{(i)}, y)^m}
 
-where \eqn{m} is the number of objectives, \eqn{n} is the number of weights
-\eqn{w^{(i)}} sampled, \eqn{\Gamma()} is the gamma function \code{\link[=gamma]{gamma()}}, i.e.,
-the analytical continuation of the factorial function, and \eqn{s(w, y) =
-\min_{k=1}^m (r_k - y_k)/w_k}.
+where \eqn{m} is the number of objectives, \eqn{w^{(i)}} are weights
+uniformly distributed on \eqn{S_{+}}, i.e., the positive orthant of the
+\eqn{(m-1)}-D unit hypersphere, \eqn{n} is the number of weights sampled,
+\eqn{\Gamma()} is the gamma function \code{\link[=gamma]{gamma()}}, i.e., the analytical
+continuation of the factorial function, and \eqn{s(w, y) = \min_{k=1}^m (r_k
+- y_k)/w_k}.
 
 In the default \code{method="DZ2019-HW"}, the weights \eqn{w^{(i)}, i=1\ldots n}
 are defined using a deterministic low-discrepancy sequence. The weight
 values depend on their number (\code{nsamples}), thus increasing the number of
 weights may not necessarily increase accuracy because the set of weights
-would be different. In \code{method="DZ2019-MC"}, the weights
-\eqn{w^{(i)}, i=1\ldots n} are sampled from the unit normal vector such that
-each weight \eqn{w = \frac{|x|}{\|x\|_2}} where each component of \eqn{x} is
-independently sampled from the standard normal distribution.  The original
-source code in C++/MATLAB for both methods can be found at
+would be different. In \code{method="DZ2019-MC"}, the weights \eqn{w^{(i)},
+i=1\ldots n} are sampled from the unit normal vector such that each weight
+\eqn{w = \frac{|x|}{\|x\|_2}} where each component of \eqn{x} is
+independently sampled from the standard normal distribution
+\citep{Muller1959sphere}.  The original source code in C++/MATLAB for both
+methods can be found at
 \url{https://github.com/Ksrma/Hypervolume-Approximation-using-polar-coordinate}.
 }
 \references{
