@@ -127,7 +127,7 @@ jobs:
 
       - name: Upload check results
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: results-${{ runner.os }}-r${{ matrix.r }}
           path: r/check
