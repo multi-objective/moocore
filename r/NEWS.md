@@ -1,5 +1,6 @@
 # moocore 0.2.0.900
 
+ * `generate_ndset()`: New shapes `"inverted-simplex"` and `"concave-simplex"`. Shape `"convex-simplex"` is now equivalent to `generate_ndset(..., method="simplex")^2`, which is slightly more uniform than the previous approach.
  * `r2_exact()` implements the exact computation of the R2 indicator for bi-objective solution sets.
  * `hypervolume()` is significantly faster for more than four dimensions (Andreia P. Guerreiro).
  * `hypervolume()` now handles 1D inputs and provides a clear error for 0D inputs (#58).
