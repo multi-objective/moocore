@@ -1,4 +1,5 @@
 ci:
+  skip: [roxygenize] # Produces renv errors.
   autofix_prs: true
   autofix_commit_msg: |
         [pre-commit.ci] auto fixes from pre-commit.com hooks
@@ -15,13 +16,16 @@ repos:
         exclude: '(do\.R)'
       - id: no-debug-statement
       - id: deps-in-desc
-        args: [--root=./r/]
+        args: [--root=r]
+        files: '^r/R/'
         exclude: '(do\.R|vignettes/articles/.+\.Rmd)'
       - id: roxygenize
-        args: [--root=./r/]
+        args: [--root=r]
+        files: '^r/(R|man)/'
         additional_dependencies:
-          - doctest
           - Rdpack
+          - doctest
+          - matrixStats
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
