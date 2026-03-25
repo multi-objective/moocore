@@ -5,6 +5,7 @@
  * `hypervolume()` now handles 1D inputs and provides a clear error for 0D inputs (#58).
  *  Add `GPGame` to [Benchmarks](https://multi-objective.github.io/moocore/r/articles/benchmarks.html).
  * `is_nondominated()` and `filter_dominated()` use a significantly faster algorithm by Kung et al. for dimensions larger than 3.
+ * `generate_ndset()`: New shapes `"inverted-simplex"` and `"concave-simplex"`. Shape `"convex-simplex"` is now equivalent to `generate_ndset(..., method="simplex")^2`, which is slightly more uniform than the previous approach.
 
 
 # moocore 0.2.0

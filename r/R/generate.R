@@ -28,11 +28,21 @@
 #'   standard simplex.
 #' * `"concave-sphere"`, `"sphere"`, or `"C"`: Uniformly samples points
 #'   on the positive orthant of the unit hypersphere (concave for minimisation).
-#' * `"convex-sphere"` or `"X"`: Equivalent to `1 - generate_ndset(..., method="concave-sphere")`,
-#'   which is convex for minimisation.
-#' * `"convex-simplex"`: Equivalent to `generate_ndset(..., method="concave-sphere")^4`,
+#' * `"convex-simplex"`: Equivalent to `generate_ndset(..., method="simplex")^2`,
 #'   which is convex for minimisation. Such a set cannot be obtained by any
-#'   affine transformation of a subset of the hyper-sphere.
+#'   affine transformation of a subset of the hyper-sphere.  This sampling is
+#'   *not* uniform.
+#' * `"convex-sphere"` or `"X"`: Equivalent to `1 - generate_ndset(...,
+#'   method="concave-sphere")`, which is convex for minimisation.  This shape
+#'   has also been called *inverted convex* \citep{IshHeSha2019regular}. This
+#'   sampling is uniform.
+#' * `"inverted-simplex"` or `"inverted-linear"`: Equivalent to `1 -
+#'   generate_ndset(..., method="simplex")`. This sampling is uniform.
+#' * `"concave-simplex"`: Equivalent to `1 - generate_ndset(...,
+#'   method="convex-simplex")`, which is concave for minimisation.  This shape
+#'   has also been called *inverted concave* \citep{IshHeSha2019regular}.  This
+#'   sampling is *not* uniform because `method="convex-simplex"` is also not
+#'   uniform.
 #'
 #' Method `"simplex"` uniformly samples points on the standard
 #' \eqn{(d-1)}-simplex defined by \eqn{\{x \in R_+^d : \sum_i x_i = 1\}}. This
@@ -43,10 +53,9 @@
 #' distribution, then dividing each value by the L1-norm of the vector,
 #' \eqn{z_i = x_i / \sum_{i=1}^d x_i} \citep{RubMel1998simulation}.  Values
 #' sampled from the exponential distribution are guaranteed to be positive.
-#'
 #' Sampling from either the standard normal distribution
 #' \citep{GueFonPaq2021hv} or the uniform distribution \citep{LacKlaFon2017box}
-#' does not produce a uniform distribution when projected into the simplex.
+#' does not produce a uniform distribution when projected onto the simplex.
 #'
 #' Method `"concave-sphere"` uniformly samples points on the positive orthant
 #' of the hyper-sphere, which is concave when all objectives are minimised.
@@ -56,19 +65,26 @@
 #' then dividing each value by the l2-norm of the vector, \eqn{z_i =
 #' \frac{|x_i|}{\|\vec{x}\|_2}} \citep{Muller1959sphere}. The absolute value in
 #' the numerator ensures that points are sampled on the positive orthant of the
-#' hyper-sphere.  Sampling from the uniform distribution
-#' \citep{LacKlaFon2017box} does not result in a uniform sampling when
-#' projected onto the surface of the hyper-sphere.
+#' hyper-sphere.  Sampling from the uniform distribution \citep{LacKlaFon2017box} would
+#' not result in a uniform sampling when projected onto the surface of the
+#' hyper-sphere.
+#'
+#' Method `"convex-simplex"` is equivalent to `generate_ndset(...,
+#' method="simplex")^2`, which is convex for minimisation problems.  The
+#' corresponding surface is equivalent to a simplex curved towards the
+#' origin. Although the sampling on the simplex is uniform, the transformed
+#' points are not.
 #'
 #' Method `"convex-sphere"` is equivalent to `1 - generate_ndset(...,
 #' method="concave-sphere")`, which is convex for minimisation problems.  It
 #' corresponds to translating points from the negative orthant of the
-#' hyper-sphere to the positive orthant.
+#' hyper-sphere to the positive orthant. Thus, the sampling remains uniform.
 #'
-#' Method `"convex-simplex"` is equivalent to `generate_ndset(...,
-#' method="concave-sphere")^4`, which is convex for minimisation problems.
-#' The corresponding surface is equivalent to a simplex curved towards the
-#' origin.
+#' Methods `"inverted-simplex"` and `"concave-simplex"` are similar
+#' translations of `"simplex"` and `"convex-simplex"`, respectively.
+#' These translations have been called `inverted` shapes in the literature and
+#' have different properties than their `regular` counterparts
+#' \citep{IshHeSha2019regular}.
 #'
 #' @references
 #'
@@ -102,13 +118,17 @@ generate_ndset <- function(n, d, method, seed = NULL, integer = FALSE)
   }
 
   sample_convex_sphere <- function() 1. - sample_sphere()
-  sample_convex_simplex <- function() sample_sphere()^4L
+  sample_convex_simplex <- function() sample_simplex()^2
+  sample_inverted_simplex <- function() 1. - sample_simplex()
+  sample_concave_simplex <- function() 1. - sample_convex_simplex()
 
   sample_fun <- (
     if (method %in% c("simplex", "linear", "L")) sample_simplex
     else if (method %in% c("concave-sphere", "sphere", "C")) sample_sphere
     else if (method %in% c("convex-sphere", "X")) sample_convex_sphere
     else if (method == "convex-simplex") sample_convex_simplex
+    else if (method %in% c("inverted-simplex", "inverted-linear")) sample_inverted_simplex
+    else if (method == "concave-simplex") sample_concave_simplex
     else stop("Unknown method =", method)
   )
 

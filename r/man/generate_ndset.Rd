@@ -40,11 +40,18 @@ The available methods are:
 standard simplex.
 \item \code{"concave-sphere"}, \code{"sphere"}, or \code{"C"}: Uniformly samples points
 on the positive orthant of the unit hypersphere (concave for minimisation).
-\item \code{"convex-sphere"} or \code{"X"}: Equivalent to \code{1 - generate_ndset(..., method="concave-sphere")},
-which is convex for minimisation.
-\item \code{"convex-simplex"}: Equivalent to \code{generate_ndset(..., method="concave-sphere")^4},
+\item \code{"convex-simplex"}: Equivalent to \code{generate_ndset(..., method="simplex")^2},
 which is convex for minimisation. Such a set cannot be obtained by any
-affine transformation of a subset of the hyper-sphere.
+affine transformation of a subset of the hyper-sphere.  This sampling is
+\emph{not} uniform.
+\item \code{"convex-sphere"} or \code{"X"}: Equivalent to \code{1 - generate_ndset(..., method="concave-sphere")}, which is convex for minimisation.  This shape
+has also been called \emph{inverted convex} \citep{IshHeSha2019regular}. This
+sampling is uniform.
+\item \code{"inverted-simplex"} or \code{"inverted-linear"}: Equivalent to \code{1 - generate_ndset(..., method="simplex")}. This sampling is uniform.
+\item \code{"concave-simplex"}: Equivalent to \code{1 - generate_ndset(..., method="convex-simplex")}, which is concave for minimisation.  This shape
+has also been called \emph{inverted concave} \citep{IshHeSha2019regular}.  This
+sampling is \emph{not} uniform because \code{method="convex-simplex"} is also not
+uniform.
 }
 
 Method \code{"simplex"} uniformly samples points on the standard
@@ -56,10 +63,9 @@ distributed values \eqn{(x_1,x_2, \dots, x_d)} from the exponential
 distribution, then dividing each value by the L1-norm of the vector,
 \eqn{z_i = x_i / \sum_{i=1}^d x_i} \citep{RubMel1998simulation}.  Values
 sampled from the exponential distribution are guaranteed to be positive.
-
 Sampling from either the standard normal distribution
 \citep{GueFonPaq2021hv} or the uniform distribution \citep{LacKlaFon2017box}
-does not produce a uniform distribution when projected into the simplex.
+does not produce a uniform distribution when projected onto the simplex.
 
 Method \code{"concave-sphere"} uniformly samples points on the positive orthant
 of the hyper-sphere, which is concave when all objectives are minimised.
@@ -69,17 +75,24 @@ sampling \eqn{d} independent and identically distributed values
 then dividing each value by the l2-norm of the vector, \eqn{z_i =
 \frac{|x_i|}{\|\vec{x}\|_2}} \citep{Muller1959sphere}. The absolute value in
 the numerator ensures that points are sampled on the positive orthant of the
-hyper-sphere.  Sampling from the uniform distribution
-\citep{LacKlaFon2017box} does not result in a uniform sampling when
-projected onto the surface of the hyper-sphere.
+hyper-sphere.  Sampling from the uniform distribution \citep{LacKlaFon2017box} would
+not result in a uniform sampling when projected onto the surface of the
+hyper-sphere.
+
+Method \code{"convex-simplex"} is equivalent to \code{generate_ndset(..., method="simplex")^2}, which is convex for minimisation problems.  The
+corresponding surface is equivalent to a simplex curved towards the
+origin. Although the sampling on the simplex is uniform, the transformed
+points are not.
 
 Method \code{"convex-sphere"} is equivalent to \code{1 - generate_ndset(..., method="concave-sphere")}, which is convex for minimisation problems.  It
 corresponds to translating points from the negative orthant of the
-hyper-sphere to the positive orthant.
+hyper-sphere to the positive orthant. Thus, the sampling remains uniform.
 
-Method \code{"convex-simplex"} is equivalent to \code{generate_ndset(..., method="concave-sphere")^4}, which is convex for minimisation problems.
-The corresponding surface is equivalent to a simplex curved towards the
-origin.
+Methods \code{"inverted-simplex"} and \code{"concave-simplex"} are similar
+translations of \code{"simplex"} and \code{"convex-simplex"}, respectively.
+These translations have been called \code{inverted} shapes in the literature and
+have different properties than their \code{regular} counterparts
+\citep{IshHeSha2019regular}.
 }
 \examples{
 generate_ndset(5, 3, "simplex", seed = 42)
