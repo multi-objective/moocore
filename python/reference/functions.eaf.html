@@ -1,0 +1,657 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Empirical Attainment Function (EAF) &#8212; moocore 0.3.0.dev0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=79fc01cf" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=6fc6f92e"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=317740d0"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'reference/functions.eaf';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="eaf" href="generated/moocore.eaf.html" />
+    <link rel="prev" title="r2_exact" href="generated/moocore.r2_exact.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.3.0.dev0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">moocore 0.3.0.dev0</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../whatsnew/index.html">
+    What’s new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/multi-objective/moocore" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/moocore" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../whatsnew/index.html">
+    What’s new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/multi-objective/moocore" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/moocore" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="functions.io.html">Read, generate and transform sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.dominance.html">Identifying and filtering dominated vectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.metrics.html">Unary quality metrics</a></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Empirical Attainment Function (EAF)</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.eaf.html">eaf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.eafdiff.html">eafdiff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.largest_eafdiff.html">largest_eafdiff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.vorob_t.html">vorob_t</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/moocore.vorob_dev.html">vorob_dev</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">API reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Empirical Attainment Function (EAF)</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="empirical-attainment-function-eaf">
+<span id="empirical-attainment-function"></span><h1>Empirical Attainment Function (EAF)<a class="headerlink" href="#empirical-attainment-function-eaf" title="Link to this heading">#</a></h1>
+<section id="eaf-computation">
+<span id="id1"></span><h2>EAF Computation<a class="headerlink" href="#eaf-computation" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/moocore.eaf.html#moocore.eaf" title="moocore.eaf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eaf</span></code></a>(data, /, sets, *[, percentiles])</p></td>
+<td><p>Exact computation of the Empirical Attainment Function (EAF).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/moocore.eafdiff.html#moocore.eafdiff" title="moocore.eafdiff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eafdiff</span></code></a>(x, y, /, *[, intervals, maximise, ...])</p></td>
+<td><p>Compute empirical attainment function (EAF) differences.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/moocore.largest_eafdiff.html#moocore.largest_eafdiff" title="moocore.largest_eafdiff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">largest_eafdiff</span></code></a>(x, /, ref, *[, maximise, ...])</p></td>
+<td><p>Identify largest EAF differences.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The empirical first-order attainment function (EAF) is used to assess the
+performance of stochastic multiobjective optimisers such as multiobjective
+evolutionary algorithms <a class="footnote-reference brackets" href="#footcite-grunert01" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.  It is an estimator for the
+first-order attainment function, which provides information about the location
+and, to some extent, the variability of the random sets of nondominated
+objective vectors produced by such optimisers when applied to given problem
+instances.</p>
+<p>Given a set <span class="math notranslate nohighlight">\(A \subset \mathbb{R}^d\)</span>, the attainment function of
+<span class="math notranslate nohighlight">\(A\)</span>, denoted by <span class="math notranslate nohighlight">\(\alpha_{A}\colon \mathbb{R}^d\to \{0,1\}\)</span>,
+specifies which points in the objective space are weakly dominated by
+<span class="math notranslate nohighlight">\(A\)</span>, where <span class="math notranslate nohighlight">\(\alpha_A(\vec{z}) = 1\)</span> if <span class="math notranslate nohighlight">\(\exists \vec{a} \in A,
+\vec{a} \leq \vec{z}\)</span>, and <span class="math notranslate nohighlight">\(\alpha_A(\vec{z}) = 0\)</span>, otherwise.</p>
+<p>Let <span class="math notranslate nohighlight">\(\mathcal{A} = \{A_1, \dots, A_n\}\)</span> be a multi-set of <span class="math notranslate nohighlight">\(n\)</span> sets
+<span class="math notranslate nohighlight">\(A_i \subset \mathbb{R}^d\)</span>, the EAF
+<a class="footnote-reference brackets" href="#footcite-grunert01" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#footcite-grufon2009-emaa" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> is the function
+<span class="math notranslate nohighlight">\(\hat{\alpha}_{\mathcal{A}}\colon \mathbb{R}^d\to [0,1]\)</span>, such that:</p>
+<div class="math notranslate nohighlight">
+\[\hat{\alpha}_{\mathcal{A}}(\vec{z}) = \frac{1}{n}\sum_{i=1}^n \alpha_{A_i}(\vec{z})\]</div>
+<p>The EAF is a coordinate-wise non-decreasing step function, similar to the
+empirical cumulative distribution function (ECDF)
+<a class="footnote-reference brackets" href="#footcite-lopverdredoe2025" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>.  Thus, a finite representation of the EAF can
+be computed as the set of minima, in terms of Pareto optimality, with a value
+of the EAF not smaller than a given <span class="math notranslate nohighlight">\(t/n\)</span>, where <span class="math notranslate nohighlight">\(t=1,\dots,n\)</span>
+<a class="footnote-reference brackets" href="#footcite-fongueloppaq2011emo" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a>. Formally, the EAF can be represented by the
+sequence <span class="math notranslate nohighlight">\((L_1, L_2, \dots, L_n)\)</span>, where:</p>
+<div class="math notranslate nohighlight">
+\[L_t = \min \{\vec{z} \in \mathbb{R}^d : \hat{\alpha}_{\mathcal{A}}(\vec{z}) \geq t/n\}\]</div>
+<p>It is also common to refer to the <span class="math notranslate nohighlight">\(k\% \in [0,100]\)</span> percentile. For
+example, the <em>median</em> (or 50%) attainment surface corresponds to
+<span class="math notranslate nohighlight">\(L_{\lceil n/2\rceil}\)</span> and it is the lower boundary of the vector space
+attained by at least 50% of the input sets <span class="math notranslate nohighlight">\(A_i\)</span>. Similarly, <span class="math notranslate nohighlight">\(L_1\)</span>
+is called the <em>best</em> attainment surface (<span class="math notranslate nohighlight">\(\frac{1}{n}\)</span>%) and represents
+the lower boundary of the space attained by at least one input set, whereas
+<span class="math notranslate nohighlight">\(L_{100}\)</span> is called the <em>worst</em> attainment surface (100%) and represents
+the lower boundary of the space attained by all input sets.</p>
+</section>
+<section id="vorob-ev-expectation-and-deviation">
+<span id="vorobev-expectation-and-deviation"></span><h2>Vorob’ev Expectation and Deviation<a class="headerlink" href="#vorob-ev-expectation-and-deviation" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/moocore.vorob_t.html#moocore.vorob_t" title="moocore.vorob_t"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vorob_t</span></code></a>(data, /, sets, *, ref)</p></td>
+<td><p>Compute Vorob'ev threshold and expectation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/moocore.vorob_dev.html#moocore.vorob_dev" title="moocore.vorob_dev"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vorob_dev</span></code></a>(data, /, sets, *, ref[, ve])</p></td>
+<td><p>Compute Vorob'ev deviation.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Let <span class="math notranslate nohighlight">\(\mathcal{A} = \{A_1, \dots, A_n\}\)</span> be a multi-set of <span class="math notranslate nohighlight">\(n\)</span> sets
+<span class="math notranslate nohighlight">\(A_i \subset \mathbb{R}^d\)</span> of mutually nondominated vectors, with finite
+(but not necessarily equal) cardinality.  If bounded by a reference point
+<span class="math notranslate nohighlight">\(\vec{r}\)</span> that is strictly dominated by any point in any set, then these
+sets can be seen a samples from a random closed set
+<a class="footnote-reference brackets" href="#footcite-molchanov2005theory" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a>.</p>
+<p>Let the <span class="math notranslate nohighlight">\(\beta\)</span>-quantile be the subset of the empirical attainment
+function <span class="math notranslate nohighlight">\(\mathcal{Q}_\beta = \{\vec{z}\in \mathbb{R}^d :
+\hat{\alpha}_{\mathcal{A}}(\vec{z}) \geq \beta\}\)</span>.</p>
+<p>The Vorob’ev <em>expectation</em> is the <span class="math notranslate nohighlight">\(\beta^{*}\)</span>-quantile set
+<span class="math notranslate nohighlight">\(\mathcal{Q}_{\beta^{*}}\)</span> such that the mean value hypervolume of the
+sets is equal (or as close as possible) to the hypervolume of
+<span class="math notranslate nohighlight">\(\mathcal{Q}_{\beta^{*}}\)</span>, that is, <span class="math notranslate nohighlight">\(\text{hyp}(\mathcal{Q}_\beta)
+\leq \mathbb{E}[\text{hyp}(\mathcal{A})] \leq
+\text{hyp}(\mathcal{Q}_{\beta^{*}})\)</span>, <span class="math notranslate nohighlight">\(\forall \beta &gt; \beta^{*}\)</span>. Thus,
+the Vorob’ev expectation provides a definition of the notion of <em>mean</em>
+nondominated set.</p>
+<p>The value <span class="math notranslate nohighlight">\(\beta^{*} \in [0,1]\)</span> is called the Vorob’ev <em>threshold</em>. Large
+differences from the median quantile (0.5) indicate a skewed distribution of
+<span class="math notranslate nohighlight">\(\mathcal{A}\)</span>.</p>
+<p>The Vorob’ev <em>deviation</em> is the mean hypervolume of the symmetric difference
+between the Vorob’ev expectation and any set in <span class="math notranslate nohighlight">\(\mathcal{A}\)</span>, that is,
+<span class="math notranslate nohighlight">\(\mathbb{E}[\text{hyp}(\mathcal{Q}_{\beta^{*}} \ominus \mathcal{A})]\)</span>,
+where the symmetric difference is defined as <span class="math notranslate nohighlight">\(A \ominus B = (A
+\setminus B) \cup (B \setminus A)\)</span>.  Low deviation values indicate that the
+sets are very similar, in terms of the location of the weakly dominated
+space, to the Vorob’ev expectation.</p>
+<p>For more background, see
+Binois <em>et al.</em><a class="footnote-reference brackets" href="#footcite-binginrou2015gaupar" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a>, Molchanov<a class="footnote-reference brackets" href="#footcite-molchanov2005theory" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a>, Chevalier <em>et al.</em><a class="footnote-reference brackets" href="#footcite-cheginbecmol2013moda" id="id10" role="doc-noteref"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></a>.</p>
+</section>
+<section id="bibliography">
+<h2>Bibliography<a class="headerlink" href="#bibliography" title="Link to this heading">#</a></h2>
+<div class="docutils container" id="footbibliography-1">
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="footcite-grunert01" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id2">1</a>,<a role="doc-backlink" href="#id3">2</a>)</span>
+<p>Viviane Grunert da Fonseca, Carlos M. Fonseca, and Andreia O. Hall. Inferential performance assessment of stochastic optimisers and the attainment function. In Eckart Zitzler, Kalyanmoy Deb, Lothar Thiele, Carlos A. Coello Coello, and David Corne, editors, <em>Evolutionary Multi-criterion Optimization, EMO 2001</em>, volume 1993 of Lecture Notes in Computer Science, pages 213–225. Springer, Berlin / Heidelberg, 2001. <a class="reference external" href="https://doi.org/10.1007/3-540-44719-9_15">doi:10.1007/3-540-44719-9_15</a>, <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#Grunert01">[BibTeX]</a>.</p>
+</aside>
+<aside class="footnote brackets" id="footcite-grufon2009-emaa" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">2</a><span class="fn-bracket">]</span></span>
+<p>Viviane Grunert da Fonseca and Carlos M. Fonseca. The attainment-function approach to stochastic multiobjective optimizer assessment and comparison. In Thomas Bartz-Beielstein, Marco Chiarandini, Luís Paquete, and Mike Preuss, editors, <em>Experimental Methods for the Analysis of Optimization Algorithms</em>, pages 103–130. Springer, Berlin / Heidelberg, 2010. <a class="reference external" href="https://doi.org/10.1007/978-3-642-02538-9_5">doi:10.1007/978-3-642-02538-9_5</a>, <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#GruFon2009:emaa">[BibTeX]</a>.</p>
+</aside>
+<aside class="footnote brackets" id="footcite-lopverdredoe2025" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">3</a><span class="fn-bracket">]</span></span>
+<p>Manuel López-Ibáñez, Diederick Vermetten, Johann Dreo, and Carola Doerr. Using the empirical attainment function for analyzing single-objective black-box optimization algorithms. <em>IEEE Transactions on Evolutionary Computation</em>, 29(5):1774–1782, 2025. <a class="reference external" href="https://doi.org/10.1109/TEVC.2024.3462758">doi:10.1109/TEVC.2024.3462758</a>, <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#LopVerDreDoe2025">[BibTeX]</a>.</p>
+</aside>
+<aside class="footnote brackets" id="footcite-fongueloppaq2011emo" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">4</a><span class="fn-bracket">]</span></span>
+<p>Carlos M. Fonseca, Andreia P. Guerreiro, Manuel López-Ibáñez, and Luís Paquete. On the computation of the empirical attainment function. In R. H. C. Takahashi, Kalyanmoy Deb, Elizabeth F. Wanner, and Salvatore Greco, editors, <em>Evolutionary Multi-criterion Optimization, EMO 2011</em>, volume 6576 of Lecture Notes in Computer Science, pages 106–120. Springer, Berlin / Heidelberg, 2011. <a class="reference external" href="https://doi.org/10.1007/978-3-642-19893-9_8">doi:10.1007/978-3-642-19893-9_8</a>, <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#FonGueLopPaq2011emo">[BibTeX]</a>.</p>
+</aside>
+<aside class="footnote brackets" id="footcite-molchanov2005theory" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id7">1</a>,<a role="doc-backlink" href="#id9">2</a>)</span>
+<p>Ilya Molchanov. <em>Theory of Random Sets</em>. Springer, 2005. <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#Molchanov2005theory">[BibTeX]</a>.</p>
+</aside>
+<aside class="footnote brackets" id="footcite-binginrou2015gaupar" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">6</a><span class="fn-bracket">]</span></span>
+<p>Mickaël Binois, David Ginsbourger, and Olivier Roustant. Quantifying uncertainty on Pareto fronts with Gaussian process conditional simulations. <em>European Journal of Operational Research</em>, 243(2):386–394, 2015. <a class="reference external" href="https://doi.org/10.1016/j.ejor.2014.07.032">doi:10.1016/j.ejor.2014.07.032</a>, <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#BinGinRou2015gaupar">[BibTeX]</a>.</p>
+</aside>
+<aside class="footnote brackets" id="footcite-cheginbecmol2013moda" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id10">7</a><span class="fn-bracket">]</span></span>
+<p>Clément Chevalier, David Ginsbourger, Julien Bect, and Ilya Molchanov. Estimating and quantifying uncertainties on level sets using the Vorob’ev expectation and deviation with Gaussian process models. In Dariusz Ucinski, Anthony C. Atkinson, and Maciej Patan, editors, <em>mODa 10–Advances in Model-Oriented Design and Analysis</em>, pages 35–43. Springer International Publishing, Heidelberg, Germany, 2013. <a class="reference external" href="https://doi.org/10.1007/978-3-319-00218-7_5">doi:10.1007/978-3-319-00218-7_5</a>, <a class="reference external" href="https://iridia-ulb.github.io/references/index_bib.html#CheGinBecMol2013moda">[BibTeX]</a>.</p>
+</aside>
+</aside>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="generated/moocore.r2_exact.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">r2_exact</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="generated/moocore.eaf.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">eaf</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eaf-computation">EAF Computation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#vorob-ev-expectation-and-deviation">Vorob’ev Expectation and Deviation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bibliography">Bibliography</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
