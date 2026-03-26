@@ -28,6 +28,14 @@ transform_and_filter(const double * restrict data, size_t * restrict npoints_p,
                      dimension_t dim, const double * restrict ref,
                      const bool * restrict maximise)
 {
+    /* FIXME: This function is slow with 1M points. Some ideas for improvement:
+
+       - [ ] Skip ref - points if ref[] = { 0 }.
+       - [ ] If all minimised or all maximised, do not check maximise[k].
+       - [ ] GCC fails to vectorize any loops in this function. Process points in blocks
+             for vectorization.
+       - [ ] Maybe transpose the matrix so that each column can be processed independently.
+    */
     size_t npoints = *npoints_p;
     double * points = malloc(dim * npoints * sizeof(*points));
     size_t i, j;
@@ -53,18 +61,47 @@ transform_and_filter(const double * restrict data, size_t * restrict npoints_p,
     return points;
 }
 
+__attribute__((hot))
 _attr_optimize_finite_math // Required so that GCC will vectorize the inner loop.
 static double
 get_expected_value(const double * restrict points, size_t npoints,
                    dimension_t dim, const double * restrict w)
 {
-    ASSUME(1 <= dim && dim <= MOOCORE_DIMENSION_MAX);
+    ASSUME(2 <= dim && dim <= MOOCORE_DIMENSION_MAX);
     ASSUME(npoints > 0);
+    /* This function is the most expensive for large number of points, thus we
+       help the compiler vectorize it by processing blocks of 16 points at a
+       time.  */
+    /* FIXME: A further improvement could be to use a transposed points matrix,
+       but the computational savings would need to be measured.  */
+    enum { BLOCK_SIZE = 16 };
     // points >= 0 && w >=0 so max_s_w cannot be < 0.
-    double max_s_w = -INFINITY;
-    for (size_t i = 0; i < npoints; i++) {
+    double max_s_w = 0;
+    size_t i = 0;
+    for (; i + BLOCK_SIZE <= npoints; i += BLOCK_SIZE) {
+        double min_ratio[BLOCK_SIZE];
+        for (size_t j = 0; j < BLOCK_SIZE; j++)
+            min_ratio[j] = INFINITY;
+
+        const double * restrict base = points + i * dim;
+        for (dimension_t k = 0; k < dim; k++) {
+            double w_k = w[k];
+            const double * restrict pk = base + k;
+            for (size_t j = 0; j < BLOCK_SIZE; j++) {
+                double ratio = pk[j * dim] * w_k;
+                min_ratio[j] = MIN(ratio, min_ratio[j]);
+            }
+        }
+
+        for (size_t j = 0; j < BLOCK_SIZE; j++)
+            max_s_w = MAX(max_s_w, min_ratio[j]);
+    }
+    // Scalar tail.
+    for (; i < npoints; i++) {
         const double * restrict p = points + i * dim;
         double min_ratio = p[0] * w[0];
+        if (likely(min_ratio <= max_s_w))
+            continue;
         for (dimension_t k = 1; k < dim; k++) {
             double ratio = p[k] * w[k];
             min_ratio = MIN(min_ratio, ratio);
