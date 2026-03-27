@@ -36,6 +36,7 @@ Computation, pp. 465–472 (2012)]
    - https://github.com/rgoomes/hssp
  - [ ] Exactly computing Expected Hypervolume Improvement (EHVI) and qEHVI for any dimension: https://github.com/Ksrma/EHVI-HVI
  - [ ] Decremental greedy hypervolume subset selection: https://github.com/Ksrma/gHSSD-Tree
+ - [ ] Real-Time Hypervolume Estimation with Monotonically Reducing Error: https://github.com/fieldsend/hypervolume
  - [ ] Benchmark against: https://github.com/MOEAFramework/MOEAFramework
  - [ ] Setup https://github.com/koaning/sphinx-marimo
  - [x] Merge hypervolume/trunk README
