@@ -1,15 +1,19 @@
 # This file should be almost identical to
 # https://github.com/multi-objective/mooplot/blob/main/python/Makefile
+
+PYTHON := $(if $(VIRTUAL_ENV),$(VIRTUAL_ENV)/bin/python3,python3)
+PIP := $(PYTHON) -m pip
+
 .PHONY : install dev-install build test doc fastdoc clean docdeps pre-commit benchmarks
 
 install: build
-	python3 -m pip install . --disable-pip-version-check
+	$(PIP) install . --disable-pip-version-check
 
 dev-install: build
-	python3 -m pip install -e . --disable-pip-version-check
+	$(PIP) install -e . --disable-pip-version-check
 
 build:
-	python3 -m build
+	$(PYTHON) -m build
 
 test:
 	$(MAKE) -C src/moocore/libmoocore/ clean
@@ -20,7 +24,7 @@ pre-commit:
 	pre-commit run -a
 
 docdeps:
-	python3 -m pip install .[docs] --disable-pip-version-check --quiet
+	$(PIP) install .[docs] --disable-pip-version-check --quiet
 
 show:
 	$(MAKE) -C doc show
@@ -41,12 +45,12 @@ clean:
 benchmarks: install
 	$(RM) ./benchmarks/*_bench-*.png
 	cd benchmarks                             && \
-	python3 -m bench_epsilon                  && \
-	python3 -m bench_hv                       && \
-	python3 -m bench_hvapprox                 && \
-	python3 -m bench_igdplus                  && \
-	python3 -m bench_ndom                     && \
-	python3 -m bench_ndsort                   && \
+	$(PYTHON) -m bench_epsilon                  && \
+	$(PYTHON) -m bench_hv                       && \
+	$(PYTHON) -m bench_hvapprox                 && \
+	$(PYTHON) -m bench_igdplus                  && \
+	$(PYTHON) -m bench_ndom                     && \
+	$(PYTHON) -m bench_ndsort                   && \
 	mv *.png -t ../doc/source/_static/bench/  && \
 	cd ..
 	$(MAKE) -C doc html
