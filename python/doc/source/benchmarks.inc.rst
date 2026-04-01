@@ -3,7 +3,7 @@ Benchmarks
 
 The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, `DESDEO`_, `paretoset`_, `Nevergrad`_, `jMetalPy`_, `seqme`_, `fast-pareto`_, `Optuna`_ and `moarchiving`_.  Other Python packages are not included in the comparison because they are based on these packages for the functionality benchmarked, so they are **at least as slow** as them. For example `Xopt`_ and `BoFire`_ use `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, `DESDEO`_ already uses `moocore`_ for hypervolume and other quality metrics, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.  We do not include functions from the Bayesian optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and too slow to run the benchmarks in a reasonable time. Similarly, we do not include `paretobench`_ because it is always slower than `BoTorch`_ for identifying nondominated points and more than 2000 times slower than `moocore`_ for computing the hypervolume in 3D, which is too slow to include in any benchmarks.
 
-Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>` whereas `jMetalPy`_ does not provide the :ref:`IGD+ indicator <igd_hausdorf>`. `BoTorch`_ and `paretobench`_ provide neither of them. `paretoset`_ and `fast-pareto`_ only identify nondominated points.
+Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>`. `BoTorch`_ and `paretobench`_ only provide the hypervolume. `paretoset`_ and `fast-pareto`_ only identify nondominated points.
 
 We would like to benchmark `pygmo`_, however, it is currently impossible to install using ``pip`` (See: https://github.com/esa/pygmo2/issues/152)
 
@@ -219,7 +219,7 @@ Approximating the hypervolume becomes more useful for dimensions higher than 5, 
 Epsilon and IGD+ indicators
 ---------------------------
 
-The following plots compare the speed of computing the :ref:`epsilon indicator  <epsilon_metric>` metric and :ref:`IGD+ indicator <igd_hausdorf>`. Although  the algorithms for computing these metrics are relatively simple and easy to vectorize in Python, the `moocore`_ implementation is still 10 to 100 times faster. The implementation of IGD+ in `DESDEO`_ is almost a thousand times **slower**  than `moocore`_, so it is not included in the benchmarks below.
+The following plots compare the speed of computing the :ref:`epsilon indicator  <epsilon_metric>` metric and :ref:`IGD+ indicator <igd_hausdorf>`. Although  the algorithms for computing these metrics are relatively simple and easy to vectorize in Python, the `moocore`_ implementation is still 10 to 100 times faster. The implementation of IGD+ in `DESDEO`_ and `jMetalPy`_ is almost a thousand times **slower**  than `moocore`_, so it is not included in the benchmarks below.
 
 |pic5| |pic6|
 

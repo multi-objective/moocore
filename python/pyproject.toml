@@ -46,7 +46,7 @@ benchmarks = [
   "botorch",
   "desdeo",
   "fast-pareto",
-  "jmetalpy",
+  "jmetalpy>=1.8",
   "matplotlib",
   "moarchiving>=1.1",
   "nevergrad",

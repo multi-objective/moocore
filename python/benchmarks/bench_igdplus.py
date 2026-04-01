@@ -13,8 +13,11 @@ import pathlib
 import matplotlib.pyplot as plt
 
 from pymoo.indicators.igd_plus import IGDPlus as pymoo_IGDplus
+
 ## FIXME: Currently DESDEO is a thousand times slower than moocore, so it is not worth running it.
 # from desdeo.tools.indicators_unary import igd_plus_indicator as desdeo_igd_plus
+## FIXME: Currently jMetal is 100 times slower than moocore, so it is not worth running it.
+# from jmetal.core.quality_indicator import InvertedGenerationalDistancePlus as jmetal_IGDplus
 
 
 path_to_data = "../../testsuite/data/"
@@ -45,6 +48,8 @@ for name in names:
         n=n,
         bench={
             "moocore": lambda z, ref=ref: moocore.igd_plus(z, ref=ref),
+            # FIXME: Currently jMetal is 100 times slower than moocore, so it is not worth running it.
+            # "jMetalPy": lambda z, igdp=jmetal_IGDplus(ref): igdp.compute(z),
             "pymoo": lambda z, ind=pymoo_IGDplus(ref): ind(z),
             # FIXME: Currently DESDEO is a thousand times slower than moocore, so it is not worth running it.
             # "desdeo": lambda z, ref=ref: desdeo_igd_plus(z, reference_set=ref).igd_plus,
