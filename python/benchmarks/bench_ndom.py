@@ -27,7 +27,6 @@ from desdeo.tools.non_dominated_sorting import (
 ## paretobench is always slower than botorch, too slower for benchmarking.
 # import paretobench
 from paretoset import paretoset
-from seqme.core.rank import is_pareto_front as seqme_is_pareto_front
 from fast_pareto import is_pareto_front as fast_pareto_is_pf
 from optuna.study._multi_objective import _is_pareto_front as optuna_is_pf
 
@@ -92,9 +91,6 @@ for name in names:
             -z, only_non_dominated_front=True
         ),
         "desdeo": lambda z: bool2pos(desdeo_is_nondominated(-z)),
-        "seqme": lambda z: bool2pos(
-            seqme_is_pareto_front(-z, assume_unique_lexsorted=True)
-        ),
         "fast_pareto": lambda z: bool2pos(
             fast_pareto_is_pf(-z, assume_unique_lexsorted=False)
         ),
@@ -147,9 +143,6 @@ for name in names:
             -z, only_non_dominated_front=True
         ),
         "desdeo": lambda z: bool2pos(desdeo_is_nondominated(-z)),
-        "seqme": lambda z: bool2pos(
-            seqme_is_pareto_front(-z, assume_unique_lexsorted=True)
-        ),
         "fast_pareto": lambda z: bool2pos(
             fast_pareto_is_pf(-z, assume_unique_lexsorted=False)
         ),
