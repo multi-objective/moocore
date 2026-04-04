@@ -55,6 +55,7 @@ benchmarks = [
   "optuna",
   "pandas>=2",
   "paretoset",
+  "patatune",
   "py-cpuinfo",
   "pymoo",
 ]

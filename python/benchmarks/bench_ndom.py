@@ -29,7 +29,7 @@ from desdeo.tools.non_dominated_sorting import (
 from paretoset import paretoset
 from fast_pareto import is_pareto_front as fast_pareto_is_pf
 from optuna.study._multi_objective import _is_pareto_front as optuna_is_pf
-
+from patatune.util import get_dominated as patatune_get_dominated
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
 files = {
@@ -37,16 +37,16 @@ files = {
     "test2D-200k": dict(file="test2D-200k.inp.xz", range=(1000, 50_000, 10)),
     "ran3d-40k": dict(file="ran.40000pts.3d.1.xz", range=(1000, 40_000, 10)),
     "sphere-4d": dict(
-        generate=(30000, 4, "sphere", 42), range=(1000, 30000, 10)
+        generate=(25_000, 4, "sphere", 42), range=(500, 25_000, 10)
     ),
     "convex-4d": dict(
-        generate=(30000, 4, "convex-sphere", 42), range=(1000, 30000, 10)
+        generate=(25_000, 4, "convex-sphere", 42), range=(500, 25_000, 10)
     ),
     "sphere-5d": dict(
-        generate=(25000, 5, "sphere", 42), range=(1000, 25000, 10)
+        generate=(20_000, 5, "sphere", 42), range=(100, 20_000, 10)
     ),
     "rmnk-10d": dict(
-        file="rmnk_0.0_10_16_1_0_ref.txt.xz", range=(1000, 20000, 10)
+        file="rmnk_0.0_10_16_1_0_ref.txt.xz", range=(100, 20_000, 10)
     ),
 }
 
@@ -96,6 +96,9 @@ for name in names:
         ),
         "optuna": lambda z: bool2pos(
             optuna_is_pf(-z, assume_unique_lexsorted=False)
+        ),
+        "patatune (numba)": lambda z: bool2pos(
+            np.logical_not(patatune_get_dominated(-z, 0))
         ),
     }
 
@@ -148,6 +151,9 @@ for name in names:
         ),
         "optuna": lambda z: bool2pos(
             optuna_is_pf(-z, assume_unique_lexsorted=False)
+        ),
+        "patatune (numba)": lambda z: bool2pos(
+            np.logical_not(patatune_get_dominated(-z, 0))
         ),
         ## paretobench only supports deduplication.
         # "paretobench": lambda z: bool2pos(paretobench.Population(f=-z).get_nondominated_indices()),
