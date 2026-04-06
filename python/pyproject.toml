@@ -190,19 +190,6 @@ expand_tables = [ "project.urls", "project.optional-dependencies" ]
 # List of tables to force collapse regardless of table_format or expand_tables settings
 collapse_tables = [ "project.authors" ]
 
-[tool.pytest.ini_options]
-faulthandler_timeout = 10
-doctest_optionflags = "NUMBER"
-addopts = [ "--import-mode=importlib", "--durations=5", "--durations-min=1.0" ]
-
-[tool.coverage.report]
-exclude_also = [
-  ".*(?:#|//)\\s+nocov",
-  ".* ASSUME\\s?\\(.+\\);",
-  ".* unreachable\\s?\\(\\);",
-  ".*(?:GCOVR?|LCOV)_EXCL_LINE",
-]
-
 [tool.mypy]
 python_version = "3.11"
 # Strictness (recommended for library code)
@@ -220,6 +207,19 @@ warn_unused_configs = true
 # Imports
 ignore_missing_imports = true
 files = [ "src/" ]
+
+[tool.pytest.ini_options]
+faulthandler_timeout = 10
+doctest_optionflags = "NUMBER"
+addopts = [ "--import-mode=importlib", "--durations=5", "--durations-min=1.0" ]
+
+[tool.coverage.report]
+exclude_also = [
+  ".*(?:#|//)\\s+nocov",
+  ".* ASSUME\\s?\\(.+\\);",
+  ".* unreachable\\s?\\(\\);",
+  ".*(?:GCOVR?|LCOV)_EXCL_LINE",
+]
 
 [tool.gcovr]
 exclude-lines-by-pattern = [
