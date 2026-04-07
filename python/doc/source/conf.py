@@ -237,14 +237,14 @@ pygments_style = "sphinx"
 
 # Intersphinx mapping
 intersphinx_mapping = {
-    "matplotlib": ("https://matplotlib.org/stable/", None),
-    "mooplot": ("https://multi-objective.github.io/mooplot/python/", None),
+    "matplotlib": ("https://matplotlib.org/stable", None),
+    "mooplot": ("https://multi-objective.github.io/mooplot/python", None),
     # "neps": ("https://numpy.org/neps/", None),
-    # "numpy": ("https://numpy.org/doc/stable/", None),
-    "nx-guides": ("https://networkx.org/nx-guides/", None),
-    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
-    "python": ("https://docs.python.org/3/", None),
-    "scipy": ("https://scipy.github.io/devdocs/", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "nx-guides": ("https://networkx.org/nx-guides", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
+    "python": ("https://docs.python.org/3", None),
+    "scipy": ("https://scipy.github.io/devdocs", None),
 }
 intersphinx_timeout = 15  # seconds
 intersphinx_cache_limit = 90  # days
