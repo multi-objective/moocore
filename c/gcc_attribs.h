@@ -1,6 +1,9 @@
 #ifndef GCC_ATTRIBUTES
 #define GCC_ATTRIBUTES
 
+#define MOOCORE_STRINGIFY(name) #name
+#define MOOCORE_STRINGIFY_MACRO(macro) MOOCORE_STRINGIFY(macro)
+
 #if !defined(__GNUC__) && !defined(__clang__ ) && !defined(__ICC)
 #  define __attribute__(x) /* Elide __attribute__ */
 #endif
@@ -210,6 +213,12 @@
 
 
 #define PRAGMA(m_token_sequence) _Pragma(#m_token_sequence)
+
+#ifdef _OPENMP
+# define PRAGMA_OMP(v) _Pragma(MOOCORE_STRINGIFY_MACRO(omp v))
+#else
+# define PRAGMA_OMP(v)
+#endif
 
 #ifdef __ICC
 #define PRAGMA_ASSUME_NO_VECTOR_DEPENDENCY PRAGMA(ivdep)

@@ -665,13 +665,15 @@ hv_approx_hua_wang(const double * restrict data, size_t npoints, dimension_t dim
     const long double * int_all = compute_int_all(dim - 1);
     const uint_fast32_t * polar_a = construct_polar_a(dim - 1, nsamples);
     double expected = 0.0;
-    // FIXME: OpenMP: #pragma omp parallel
+    // WARNING: Enabling OpenMP will produce slightly different results due to
+    // floating-point imprecision.
+    PRAGMA_OMP(parallel)
     {
         long double * theta = malloc((dim - 1) * sizeof(*theta));
         double * sin_theta = malloc((dim - 1) * sizeof(*sin_theta));
         double * cos_theta = malloc((dim - 1) * sizeof(*cos_theta));
         double * w = malloc(dim * sizeof(*w));
-        // FIXME: Add OpenMP: #pragma omp for reduction(+:expected)
+        PRAGMA_OMP(for reduction(+:expected))
         for (uint_fast32_t j = 0; j < nsamples; j++) {
             compute_polar_sample(theta, dim - 1, j, nsamples, polar_a);
             compute_theta(theta, dim, int_all);
@@ -737,21 +739,25 @@ Rphi_init(dimension_t dim)
     return alpha;
 }
 
-static void
+static inline void
+Rphi_next_non_recurrent(double * restrict u, dimension_t dim,
+                        const long double * restrict alpha, uint_fast32_t i,
+                        double seed)
+{
+    ASSUME(1 <= dim);
+    for (dimension_t d = 0; d < dim; d++) {
+        u[d] = STATIC_CAST(double, fractl(STATIC_CAST(long double, i) * alpha[d] + seed));
+    }
+}
+
+// The above is equivalent to the non-recurrent version, where i=(0,1,...,n).
+static inline void
 Rphi_next(double * restrict u, dimension_t dim, const long double * restrict alpha)
 {
     ASSUME(1 <= dim);
     for (dimension_t d = 0; d < dim; d++) {
         u[d] = STATIC_CAST(double, fractl(u[d] + alpha[d]));
     }
-
-    /* The above is equivalent to the non-recurrent version, where i=(0,1,...,n):
-
-    const long double ip1 = i+1;
-    const long double seed = 0.0;
-    for (dimension_t d = 0; d < dim; d++)
-        dest[d] = STATIC_CAST(double, fractl(ip1 * alpha[d] + seed));
-    */
 
     /* When a and n are integers and n > 0, then fract(a / 2^n) = r / 2^n,
        where r is the remainder from dividing a by 2^n. In addition, we can
@@ -841,22 +847,34 @@ hv_approx_rphi_fang_wang_plus(const double * restrict data, size_t npoints, dime
         return 0;
 
     const long double * alpha = Rphi_init(dim - 1);
-    double * w = malloc(dim * sizeof(*w));
-    double * u = malloc((dim - 1) * sizeof(*u));
     const double seed = 0.5;
-    for (dimension_t d = 0; d < dim - 1; d++)
-        u[d] = seed;
     double expected = 0.0;
-    for (uint_fast32_t j = 0; j < nsamples; j++) {
-        Rphi_next(u, dim - 1, alpha);
-        fang_wang_efficient_mapping_plus(w, dim, u);
-        // Divide here so we can multiply in get_expected_value()
-        for (dimension_t d = 0; d < dim; d++)
-            w[d] = 1. / w[d];
-        expected += get_expected_value(points, npoints, dim, w);
+    // WARNING: Enabling OpenMP will produce slightly different results due to
+    // floating-point imprecision.
+    PRAGMA_OMP(parallel)
+    {
+        double * w = malloc(dim * sizeof(*w));
+        double * u = malloc((dim - 1) * sizeof(*u));
+#ifndef _OPENMP
+        for (dimension_t d = 0; d < dim - 1; d++)
+            u[d] = seed;
+#endif
+        PRAGMA_OMP(for reduction(+:expected))
+        for (uint_fast32_t j = 1; j <= nsamples; j++) {
+#ifdef _OPENMP
+            Rphi_next_non_recurrent(u, dim - 1, alpha, j, seed);
+#else
+            Rphi_next(u, dim - 1, alpha);
+#endif
+            fang_wang_efficient_mapping_plus(w, dim, u);
+            // Divide here so we can multiply in get_expected_value()
+            for (dimension_t d = 0; d < dim; d++)
+                w[d] = 1. / w[d];
+            expected += get_expected_value(points, npoints, dim, w);
+        }
+        free(w);
+        free(u);
     }
-    free(u);
-    free(w);
     free((void *)alpha);
     free((void *)points);
     const long double c_m = sphere_area_div_2_pow_d_times_d[dim];

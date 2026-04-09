@@ -2,8 +2,6 @@
 #define MOOCORE_COMMON_H_
 
 #include "config.h"
-#define MOOCORE_STRINGIFY(name) #name
-#define MOOCORE_STRINGIFY_MACRO(macro) MOOCORE_STRINGIFY(macro)
 
 #ifdef R_PACKAGE
 #define R_NO_REMAP
