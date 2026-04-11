@@ -30,7 +30,7 @@ static inline long double fractl(long double x) { return x - truncl(x); }
 static double *
 transform_and_filter(const double * restrict data, size_t * restrict npoints_p,
                      dimension_t dim, const double * restrict ref,
-                     const bool * restrict maximise)
+                     const boolvec * restrict maximise)
 {
     /* FIXME: This function is slow with 1M points. Some ideas for improvement:
 
@@ -219,7 +219,7 @@ euclidean_norm(const double * restrict w, dimension_t dim)
 */
 double
 hv_approx_normal(const double * restrict data, size_t npoints, dimension_t dim,
-                 const double * restrict ref, const bool * restrict maximise,
+                 const double * restrict ref, const boolvec * restrict maximise,
                  uint_fast32_t nsamples, uint32_t random_seed)
 {
     ASSUME(2 <= dim && dim <= MOOCORE_DIMENSION_MAX);
@@ -654,7 +654,7 @@ compute_hua_wang_direction(double * restrict direction, dimension_t dim,
 */
 double
 hv_approx_hua_wang(const double * restrict data, size_t npoints, dimension_t dim,
-                   const double * restrict ref, const bool * restrict maximise,
+                   const double * restrict ref, const boolvec * restrict maximise,
                    uint_fast32_t nsamples)
 {
     ASSUME(2 <= dim && dim <= MOOCORE_DIMENSION_MAX);
@@ -832,7 +832,7 @@ fang_wang_efficient_mapping_plus(double * restrict w, dimension_t dim,
 */
 double
 hv_approx_rphi_fang_wang_plus(const double * restrict data, size_t npoints, dimension_t dim,
-                              const double * restrict ref, const bool * restrict maximise,
+                              const double * restrict ref, const boolvec * restrict maximise,
                               uint_fast32_t nsamples)
 {
     ASSUME(2 <= dim && dim <= MOOCORE_DIMENSION_MAX);

@@ -36,7 +36,7 @@
 
 static inline bool
 check_nondom(const double * points, const double ** rows,
-             size_t size, dimension_t dim, bool * restrict nondom)
+             size_t size, dimension_t dim, boolvec * restrict nondom)
 {
     for (size_t k = 0; k < size; k++) {
         if (!nondom[row_index_from_ptr(points, rows[k], dim)])
@@ -49,7 +49,7 @@ check_nondom(const double * points, const double ** rows,
 static void
 filter_dominated(const double * points, const double ** rows,
                  size_t new_size, dimension_t dim, dimension_t max_dim,
-                 const bool * restrict nondom, size_t size)
+                 const boolvec * restrict nondom, size_t size)
 {
     DEBUG2_PRINT("filter_dominated: dim=%d, size=%zu, new_size=%zu\n",
                  dim, size, new_size);
@@ -89,7 +89,7 @@ filter_dominated(const double * points, const double ** rows,
 static size_t
 maxima_brute_force(const double * points, const double ** rows,
                    size_t size, dimension_t dim, dimension_t max_dim,
-                   bool keep_weakly, bool * restrict nondom)
+                   bool keep_weakly, boolvec * restrict nondom)
 {
     DEBUG2_PRINT("maxima_brute_force: row=%zu, size=%zu\n",
             row_index_from_ptr(points, rows[0], max_dim), size);
@@ -146,7 +146,7 @@ static size_t
 maxima_brute_force_filter_dominated(
     const double * points, const double ** rows,
     size_t size, dimension_t dim, dimension_t max_dim,
-    bool keep_weakly, bool * restrict nondom)
+    bool keep_weakly, boolvec * restrict nondom)
 {
     size_t new_size = maxima_brute_force(points, rows, size, dim, max_dim, keep_weakly, nondom);
     if (new_size < size) {
@@ -231,7 +231,7 @@ static size_t
 maxima_filter_dim3(const double * points,
                    const double ** restrict r, size_t r_size,
                    const double ** restrict s, size_t s_size,
-                   dimension_t max_dim, bool * restrict nondom)
+                   dimension_t max_dim, boolvec * restrict nondom)
 {
     // r and s should be already sorted.
     // Everything in s that is below the first element in r is nondominated.
@@ -309,7 +309,7 @@ static size_t
 maxima_filter_brute_force(const double * points,
                           const double ** restrict r, size_t r_size,
                           const double ** restrict s, size_t s_size,
-                          dimension_t dim, dimension_t max_dim, bool * restrict nondom)
+                          dimension_t dim, dimension_t max_dim, boolvec * restrict nondom)
 {
     DEBUG2_PRINT("maxima_filter_brute_force: dim=%d, r=%zu, r_size=%zu, s=%zu, s_size=%zu\n",
             dim, row_index_from_ptr(points, r[0], max_dim), r_size,
@@ -439,13 +439,13 @@ static size_t
 maxima_filter_nobase(const double * points,
                      const double ** restrict r, size_t r_size,
                      const double ** restrict s, size_t s_size,
-                     dimension_t dim, dimension_t max_dim, bool * restrict nondom);
+                     dimension_t dim, dimension_t max_dim, boolvec * restrict nondom);
 
 static size_t
 maxima_filter_rec(const double * points,
                   const double ** restrict r, size_t r_size,
                   const double ** restrict s, size_t s_size,
-                  dimension_t dim, dimension_t max_dim, bool * restrict nondom)
+                  dimension_t dim, dimension_t max_dim, boolvec * restrict nondom)
 {
     DEBUG2(printf_rows("maxima_filter_rec: R", r, r_size, dim+1, "r_size"));
     DEBUG2(printf_rows("maxima_filter_rec: S", s, s_size, dim+1, "s_size"));
@@ -495,14 +495,14 @@ static size_t
 maxima_filter(const double * points,
               const double ** restrict r, size_t r_size,
               const double ** restrict s, size_t s_size,
-              dimension_t dim, dimension_t max_dim, bool * restrict nondom);
+              dimension_t dim, dimension_t max_dim, boolvec * restrict nondom);
 
 // Find the elements of S that are not dominated by any elements of R.
 static size_t
 maxima_filter_nobase(const double * points,
                      const double ** restrict r, size_t r_size,
                      const double ** restrict s, size_t s_size,
-                     dimension_t dim, dimension_t max_dim, bool * restrict nondom)
+                     dimension_t dim, dimension_t max_dim, boolvec * restrict nondom)
 {
     DEBUG2_PRINT("maxima_filter_nobase: dim=%d, r=%zu, r_size=%zu\n", dim,
             row_index_from_ptr(points, r[0], max_dim), r_size);
@@ -576,7 +576,7 @@ static size_t
 maxima_filter(const double * points,
               const double ** restrict r, size_t r_size,
               const double ** restrict s, size_t s_size,
-              dimension_t dim, dimension_t max_dim, bool * restrict nondom)
+              dimension_t dim, dimension_t max_dim, boolvec * restrict nondom)
 {
     DEBUG2_PRINT("maxima_filter: dim=%d, r=%zu, r_size=%zu\n", dim,
             row_index_from_ptr(points, r[0], max_dim), r_size);
@@ -616,7 +616,7 @@ maxima_filter(const double * points,
 static size_t
 maxima_rec(const double * points, const double ** rows, size_t size,
            dimension_t dim, dimension_t max_dim,
-           bool keep_weakly, bool * restrict nondom)
+           bool keep_weakly, boolvec * restrict nondom)
 {
     ASSUME(size > KUNG_SMALL_THRESHOLD);
     ASSUME(dim > 3);
@@ -684,7 +684,7 @@ maxima_rec(const double * points, const double ** rows, size_t size,
 static inline size_t
 find_nondominated_set_agree_kung(const double * restrict points,
                                  size_t size, dimension_t dim,
-                                 bool keep_weakly, bool * restrict nondom)
+                                 bool keep_weakly, boolvec * restrict nondom)
 {
     ASSUME(size > KUNG_SMALL_THRESHOLD);
     ASSUME(dim > 3);

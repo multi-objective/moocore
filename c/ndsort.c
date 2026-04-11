@@ -194,7 +194,8 @@ int main(int argc, char *argv[])
         printf ("# points: %d\n", size);
     }
 
-    int * rank = pareto_rank(points, size, (dimension_t) dim);
+    int * rank = malloc(size * sizeof(*rank));
+    pareto_rank(rank, points, size, (dimension_t) dim);
 
     if (only_rank_flag) {
         fprint_rank(stdout, rank, size);

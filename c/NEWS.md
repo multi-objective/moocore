@@ -6,6 +6,12 @@
    significantly faster for more than four dimensions. (Andreia P. Guerreiro)
  * nondominated_kung.h: New.
  * hvapprox.c (hv_approx_rphi_fang_wang_plus): New function.
+ * Define `boolvec` as the type used for Boolean arrays to get zero-copy
+   conversion between C and Python/R and for helping auto-vectorization.  Use
+   it to replace most `bool *` arguments.
+ * `is_nondominated()` and `pareto_rank()` do not return pointers to newly
+   allocated memory to help zero-copy communication with Python/R.
+
 
 ## 0.18
 

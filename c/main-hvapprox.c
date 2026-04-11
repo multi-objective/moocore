@@ -145,7 +145,7 @@ hvapprox_file(const char * filename, double * restrict reference,
     }
 
     // Minimise everything by default.
-    const bool * maximise = new_bool_maximise(nobj, false);
+    const boolvec * maximise = new_boolvec_maximise(nobj, false);
     for (int n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
         Timer_start ();
 

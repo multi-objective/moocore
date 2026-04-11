@@ -1,5 +1,6 @@
 // Must be consistent with the definition in moocore.
 typedef uint_fast8_t dimension_t;
+typedef uint8_t boolvec;
 
 // From stdlib.h
 void free(void *);
@@ -10,23 +11,24 @@ int read_datasets(const char * filename, double ** restrict data_p, int * restri
 double fpli_hv(const double * restrict data, size_t n, dimension_t d, const double * restrict ref);
 void hv_contributions(double * restrict hvc, double * restrict points, size_t n, dimension_t d, const double * restrict ref, bool ignore_dominated);
 // igd.h
-double IGD(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const bool * restrict maximise);
-double IGD_plus(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const bool * restrict maximise);
-double avg_Hausdorff_dist(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const bool * restrict maximise, unsigned int p);
+double IGD(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const boolvec * restrict maximise);
+double IGD_plus(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const boolvec * restrict maximise);
+double avg_Hausdorff_dist(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const boolvec * restrict maximise, unsigned int p);
 // epsilon.h
-double epsilon_additive(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const bool * restrict maximise);
-double epsilon_mult(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const bool * restrict maximise);
+double epsilon_additive(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const boolvec * restrict maximise);
+double epsilon_mult(const double * restrict data, size_t n, dimension_t d, const double * restrict ref, size_t ref_size, const boolvec * restrict maximise);
 // r2_exact.h
 double r2_exact(const double * restrict data, size_t n, dimension_t d, const double * restrict ref);
 
 // nondominated.h
 size_t find_weakly_dominated_point(const double * restrict points, size_t n, dimension_t d,
-                                   const bool * restrict maximise);
-bool * is_nondominated(const double * restrict data, size_t n, dimension_t d,
-                       bool keep_weakly, const bool * restrict maximise);
-int * pareto_rank(const double * restrict points, size_t size, dimension_t dim);
+                                   const boolvec * restrict maximise);
+void is_nondominated(boolvec * restrict nondom,
+                     const double * restrict data, size_t n, dimension_t d,
+                     bool keep_weakly, const boolvec * restrict maximise);
+void pareto_rank(int * rank, const double * restrict points, size_t size, dimension_t dim);
 void agree_normalise(double * restrict data, size_t size, dimension_t dim,
-                     const bool * restrict maximise,
+                     const boolvec * restrict maximise,
                      const double lower_range, const double upper_range,
                      const double * restrict lbound, const double * restrict ubound);
 
@@ -55,19 +57,19 @@ double rect_weighted_hv2d(double *data, int n, double * rectangles, int rectangl
 double hv_approx_hua_wang(const double * restrict data,
                           size_t npoints, dimension_t nobjs,
                           const double * restrict ref,
-                          const bool * restrict maximise,
+                          const boolvec * restrict maximise,
                           uint_fast32_t nsamples);
 
 double hv_approx_normal(const double * restrict data,
                         size_t npoints, dimension_t nobjs,
                         const double * restrict ref,
-                        const bool * restrict maximise,
+                        const boolvec * restrict maximise,
                         uint_fast32_t nsamples, uint32_t random_seed);
 
 double hv_approx_rphi_fang_wang_plus(const double * restrict data,
                                      size_t npoints, dimension_t nobjs,
                                      const double * restrict ref,
-                                     const bool * restrict maximise,
+                                     const boolvec * restrict maximise,
                                      uint_fast32_t nsamples);
 /*
 typedef ... hype_sample_dist;

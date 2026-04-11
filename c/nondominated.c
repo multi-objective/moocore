@@ -193,7 +193,7 @@ static bool
 check_dominated(const char * filename, const double * restrict points,
                 dimension_t nobj, const int * restrict cumsizes, int nruns,
                 const int agree, const int * restrict minmax,
-                bool * restrict nondom)
+                boolvec * restrict nondom)
 {
     bool first_time = true;
     bool dominated_found = false;
@@ -255,7 +255,7 @@ print_output_header (FILE *stream, const char *filename,
                      int agree,
                      double lrange, double urange,
                      const double *lbound, const double *ubound,
-                     const bool *logarithm)
+                     const bool * logarithm)
 {
     print_file_info (stream, filename, nobj, minmax);
     fprintf (stream, "# agree: %s\n", (agree < 0) ? "min"
@@ -388,7 +388,7 @@ process_file(const char * filename,
 
     bool dominated_found = false;
     // With verbose we print the number of nondominated.
-    bool * nondom = (filter_flag || verbose_flag) ? nondom_init(cumsizes[nsets - 1]) : NULL;
+    boolvec * nondom = (filter_flag || verbose_flag) ? nondom_alloc_true(cumsizes[nsets - 1]) : NULL;
     // Check sets.
     if (check_flag || filter_flag)
         dominated_found = check_dominated(filename, points, nobj, cumsizes,

@@ -15,7 +15,7 @@ BEGIN_C_DECLS
 
 MOOCORE_API double hv_approx_normal(
     const double * restrict data, size_t npoints, dimension_t nobjs,
-    const double * restrict ref, const bool * restrict maximise,
+    const double * restrict ref, const boolvec * restrict maximise,
     uint_fast32_t nsamples, uint32_t random_seed);
 /**
    Jingda Deng, Qingfu Zhang (2019). "Approximating Hypervolume and Hypervolume
@@ -24,7 +24,7 @@ MOOCORE_API double hv_approx_normal(
 */
 MOOCORE_API double hv_approx_hua_wang(
     const double * restrict data, size_t npoints, dimension_t nobjs,
-    const double * restrict ref, const bool * restrict maximise,
+    const double * restrict ref, const boolvec * restrict maximise,
     uint_fast32_t nsamples);
 /**
    Manuel López-Ibáñez (2026). "Approximating the Hypervolume Indicator using
@@ -34,7 +34,7 @@ MOOCORE_API double hv_approx_hua_wang(
 */
 MOOCORE_API double hv_approx_rphi_fang_wang_plus(
     const double * restrict data, size_t npoints, dimension_t nobjs,
-    const double * restrict ref, const bool * restrict maximise,
+    const double * restrict ref, const boolvec * restrict maximise,
     uint_fast32_t nsamples);
 
 END_C_DECLS

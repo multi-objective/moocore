@@ -25,4 +25,14 @@ typedef uint_fast8_t dimension_t;
 // Maximum number of objectives is 31. It cannot be larger than 255.
 #define MOOCORE_DIMENSION_MAX 31
 
+// Use boolvec for boolean arrays that will be passed from/to R/Python. It also
+// helps with autovectorization.
+#ifdef R_PACKAGE
+// R uses 'int' for logical vectors.
+typedef int boolvec;
+#else
+// Numpy uses uint8_t for bool arrays.
+typedef uint8_t boolvec;
+#endif
+
 #endif // _MOOCORE_CONFIG_H_

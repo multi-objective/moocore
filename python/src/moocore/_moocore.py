@@ -145,15 +145,28 @@ def read_datasets(filename: str | os.PathLike | StringIO) -> np.ndarray:
     if err_code != 0:
         raise ReadDatasetsError(err_code)
 
-    # Create buffer with the correct array size in bytes
-    data_buf = ffi.buffer(data_p[0], datasize_p[0])
+    datasize = datasize_p[0]
+    # Ensure that Python can free the data allocated by the C library.
+    data_p = ffi.gc(data_p[0], lib.free, size=datasize)
     # Convert 1D numpy array to 2D array with (n obj... , sets) columns
-    return np.frombuffer(data_buf).reshape((-1, ncols_p[0]))
+    return np.frombuffer(ffi.buffer(data_p, datasize)).reshape(-1, ncols_p[0])
 
 
 def _parse_maximise(maximise: bool | Sequence[bool], nobj: int) -> np.ndarray:
     """Convert maximise array or single bool to ndarray format."""
     return array_1d_of_length_n(maximise, nobj).astype(bool)
+
+
+def _parse_maximise_to_bool_array(
+    maximise: bool | Sequence[bool], nobj: int
+) -> np.ndarray:
+    """Convert maximise array or single bool to C array.
+
+    In the C library, boolean arrays are of type boolvec, which is uint8_t.
+    """
+    return ffi.from_buffer(
+        "uint8_t []", _parse_maximise(maximise, nobj).view(np.uint8)
+    )
 
 
 def _all_positive(x: ArrayLike) -> bool:
@@ -187,13 +200,12 @@ def _unary_refset_common(
                 "All values must be larger than 0 in the reference set"
             )
 
-    maximise = _parse_maximise(maximise, nobj)
-    data_p, npoints, nobj = np2d_to_double_array(
+    data_p, npoints_c, nobj_c = np2d_to_double_array(
         data, ctype_shape=("size_t", "uint_fast8_t")
     )
     ref_p, ref_size = np1d_to_double_array(ref, ctype_size="size_t")
-    maximise_p = ffi.from_buffer("bool []", maximise)
-    return data_p, npoints, nobj, ref_p, ref_size, maximise_p
+    maximise_p = _parse_maximise_to_bool_array(maximise, nobj)
+    return data_p, npoints_c, nobj_c, ref_p, ref_size, maximise_p
 
 
 def igd(
@@ -1003,9 +1015,7 @@ def hv_approx(
     if not is_integer_value(nsamples):
         raise ValueError(f"nsamples must be an integer value: {nsamples}")
     nsamples = ffi.cast("uint_fast32_t", nsamples)
-
-    maximise = _parse_maximise(maximise, nobj)
-    maximise = ffi.from_buffer("bool []", maximise)
+    maximise_p = _parse_maximise_to_bool_array(maximise, nobj)
     data_p, npoints, nobj = np2d_to_double_array(
         data, ctype_shape=("size_t", "uint_fast8_t")
     )
@@ -1015,15 +1025,15 @@ def hv_approx(
         case "DZ2019-MC":
             seed = _get_seed_for_c(seed)
             hv = lib.hv_approx_normal(
-                data_p, npoints, nobj, ref, maximise, nsamples, seed
+                data_p, npoints, nobj, ref, maximise_p, nsamples, seed
             )
         case "DZ2019-HW":
             hv = lib.hv_approx_hua_wang(
-                data_p, npoints, nobj, ref, maximise, nsamples
+                data_p, npoints, nobj, ref, maximise_p, nsamples
             )
         case "Rphi-FWE+":
             hv = lib.hv_approx_rphi_fang_wang_plus(
-                data_p, npoints, nobj, ref, maximise, nsamples
+                data_p, npoints, nobj, ref, maximise_p, nsamples
             )
         case _:
             raise ValueError("Unknown method = {method}")
@@ -1303,9 +1313,8 @@ def is_nondominated(
     if nrows == 0:
         return np.array([], dtype=bool)
 
-    maximise = _parse_maximise(maximise, nobj)
-
     if nobj == 1:  # Handle single-objective inputs
+        maximise = array_1d_of_length_n(maximise, 1).astype(bool)
         if keep_weakly:
             best = data.max() if maximise else data.min()
             return (data == best).ravel()
@@ -1314,14 +1323,22 @@ def is_nondominated(
             nondom[data.argmax() if maximise else data.argmin()] = True
             return nondom
 
+    keep_weakly = ffi.cast("bool", bool(keep_weakly))
+    maximise_p = _parse_maximise_to_bool_array(maximise, nobj)
     data_p, npoints, nobj = np2d_to_double_array(
         data, ctype_shape=("size_t", "uint_fast8_t")
     )
-    maximise_p = ffi.from_buffer("bool []", maximise)
-    keep_weakly = ffi.cast("bool", bool(keep_weakly))
-    nondom = lib.is_nondominated(data_p, npoints, nobj, keep_weakly, maximise_p)
-    nondom = ffi.buffer(nondom, nrows)
-    return np.frombuffer(nondom, dtype=bool)
+    nondom = np.empty(nrows, dtype=bool)
+    # The C library uses uint8_t for boolean vectors.
+    lib.is_nondominated(
+        ffi.from_buffer("uint8_t []", nondom.view(np.uint8)),
+        data_p,
+        npoints,
+        nobj,
+        keep_weakly,
+        maximise_p,
+    )
+    return nondom
 
 
 def any_dominated(
@@ -1369,11 +1386,10 @@ def any_dominated(
         # If there are more than one row, then something is dominated.
         return True
 
-    maximise = _parse_maximise(maximise, nobj)
+    maximise_p = _parse_maximise_to_bool_array(maximise, nobj)
     data_p, npoints, nobj = np2d_to_double_array(
         data, ctype_shape=("size_t", "uint_fast8_t")
     )
-    maximise_p = ffi.from_buffer("bool []", maximise)
     res = lib.find_weakly_dominated_point(data_p, npoints, nobj, maximise_p)
     return res < nrows
 
@@ -1687,10 +1703,8 @@ def pareto_rank(
     data_p, npoints, nobj = np2d_to_double_array(
         data, ctype_shape=("size_t", "uint_fast8_t")
     )
-    ranks = lib.pareto_rank(data_p, npoints, nobj)
-    ranks = ffi.buffer(ranks, nrows * ffi.sizeof("int"))
-    ranks = np.frombuffer(ranks, dtype=np.intc())
-    assert len(ranks) == nrows
+    ranks = np.empty(nrows, dtype=np.intc())
+    lib.pareto_rank(ffi.from_buffer("int []", ranks), data_p, npoints, nobj)
     return ranks
 
 
@@ -1757,11 +1771,10 @@ def normalise(
     if np.any(np.isnan(upper)):
         upper = np.where(np.isnan(upper), data.max(axis=0), upper)
 
-    maximise = _parse_maximise(maximise, data.shape[1])
+    maximise_p = _parse_maximise_to_bool_array(maximise, nobj)
     data_p, npoints, nobj = np2d_to_double_array(
         data, ctype_shape=("size_t", "uint_fast8_t")
     )
-    maximise_p = ffi.from_buffer("bool []", maximise)
     lbound_p = ffi.from_buffer("double []", lower)
     ubound_p = ffi.from_buffer("double []", upper)
     lib.agree_normalise(
@@ -2648,7 +2661,6 @@ def whv_hype(
 
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
     ideal = array_1d_of_length_n(np.asarray(ideal, dtype=float), nobj)
-
     maximise = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
     if maximise.any():

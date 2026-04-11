@@ -194,10 +194,10 @@ epsilon_additive_minmax(const int * restrict minmax, dimension_t dim,
 _attr_maybe_unused static double
 epsilon_additive(const double * restrict data, size_t n, dimension_t dim,
                  const double * restrict ref, size_t ref_size,
-                 const bool * restrict maximise)
+                 const boolvec * restrict maximise)
 {
     ASSUME(dim >= 2);
-    const int * minmax = minmax_from_bool(maximise, dim);
+    const int * minmax = minmax_from_boolvec(maximise, dim);
     double value = epsilon_additive_minmax(minmax, dim, data, n, ref, ref_size);
     free ((void *)minmax);
     return value;
@@ -206,10 +206,10 @@ epsilon_additive(const double * restrict data, size_t n, dimension_t dim,
 _attr_maybe_unused static double
 epsilon_mult(const double * restrict data, size_t n, dimension_t dim,
              const double * restrict ref, size_t ref_size,
-             const bool * restrict maximise)
+             const boolvec * restrict maximise)
 {
     ASSUME(dim >= 2);
-    const int * minmax = minmax_from_bool(maximise, dim);
+    const int * minmax = minmax_from_boolvec(maximise, dim);
     double value = epsilon_mult_minmax(minmax, dim, data, n, ref, ref_size);
     free ((void *)minmax);
     return value;

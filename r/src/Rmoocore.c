@@ -132,7 +132,7 @@ compute_eafdiff_rectangles_C(SEXP DATA, SEXP CUMSIZES, SEXP INTERVALS)
     SEXP_2_INT_VECTOR(CUMSIZES, cumsizes, nruns);
     SEXP_2_INT(INTERVALS, intervals);
 
-    eaf_t **eaf = compute_eaf_helper(DATA, nobj, cumsizes, nruns, NULL, nruns);
+    eaf_t ** eaf = compute_eaf_helper(DATA, nobj, cumsizes, nruns, NULL, nruns);
     eaf_polygon_t * rects = eaf_compute_rectangles(eaf, nobj, nruns);
     eaf_free(eaf, nruns);
 
@@ -141,14 +141,13 @@ compute_eafdiff_rectangles_C(SEXP DATA, SEXP CUMSIZES, SEXP INTERVALS)
     // Two points per row + color
     new_real_matrix (result, nrow, 2 * nobj + 1);
     const double * p_xy = vector_objective_begin(&rects->xy);
-    int k;
-    for (k = 0; k < nrow; ++k) {
+    for (int k = 0; k < nrow; ++k) {
         for (int i = 0; i < 2 * nobj; i++, p_xy++)
             result[k + nrow * i] = *p_xy;
     }
     vector_objective_dtor (&rects->xy);
 
-    for (k = 0; k < nrow; ++k) {
+    for (int k = 0; k < nrow; ++k) {
         double color = vector_int_at(&rects->col, k);
         // Each color is within [0, nruns / 2] or [-nruns / 2, 0]
         result[k + nrow * 2 * nobj] = intervals * color / (double) division;
@@ -267,7 +266,6 @@ R_read_datasets(SEXP FILENAME)
     read_objective_t_data (filename, &data, &nobj, &cumsizes, &nruns);
 
     const int ntotal = cumsizes[nruns - 1];
-
     /* FIXME: Is this the fastest way to transfer a matrix from C to R ? */
     SEXP DATA = PROTECT(Rf_allocMatrix(REALSXP, ntotal, nobj + 1));
     double *rdata = REAL(DATA);
@@ -290,13 +288,12 @@ R_read_datasets(SEXP FILENAME)
 SEXP
 normalise_C(SEXP DATA, SEXP RANGE, SEXP LBOUND, SEXP UBOUND, SEXP MAXIMISE)
 {
-    int nprotected = 0;
     // We transpose the matrix before calling this function.
     SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
     SEXP_2_DOUBLE_VECTOR(RANGE, range, range_len);
     SEXP_2_DOUBLE_VECTOR(LBOUND, lbound, lbound_len);
     SEXP_2_DOUBLE_VECTOR(UBOUND, ubound, ubound_len);
-    SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
+    SEXP_2_LOGICAL_INT_VECTOR(MAXIMISE, maximise, maximise_len);
 
     assert(nobj == lbound_len);
     assert(nobj == ubound_len);
@@ -305,8 +302,6 @@ normalise_C(SEXP DATA, SEXP RANGE, SEXP LBOUND, SEXP UBOUND, SEXP MAXIMISE)
 
     agree_normalise(data, npoint, (dimension_t) nobj, maximise,
                     range[0], range[1], lbound, ubound);
-    free (maximise);
-    UNPROTECT(nprotected);
     return R_NilValue;
 }
 
@@ -326,28 +321,24 @@ is_nondominated_C(SEXP DATA, SEXP KEEP_WEAKLY, SEXP MAXIMISE)
     // We DO NOT transpose the matrix before calling this function.
     SEXP_2_DOUBLE_MATRIX(DATA, rdata, npoint, nobj);
     SEXP_2_LOGICAL(KEEP_WEAKLY, keep_weakly);
-    SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
+    SEXP_2_LOGICAL_INT_VECTOR(MAXIMISE, maximise, maximise_len);
     assert(nobj == maximise_len);
 
+    new_logical_vector(nondom, npoint);
     double * data = matrix_malloc_and_transpose(rdata, npoint, nobj);
-    bool * bool_is_nondom = is_nondominated(data, npoint, (dimension_t) nobj, keep_weakly, maximise);
+    is_nondominated(nondom, data, npoint, (dimension_t) nobj, keep_weakly, maximise);
     free(data);
-    free(maximise);
 
-    new_logical_vector(is_nondom, npoint);
-    bool_2_logical_vector(is_nondom, bool_is_nondom, npoint);
-    free(bool_is_nondom);
     UNPROTECT(nprotected);
-    return Rexp(is_nondom);
+    return Rexp(nondom);
 }
 
 SEXP
 any_dominated_C(SEXP DATA, SEXP MAXIMISE)
 {
-    int nprotected = 0;
     // We DO NOT transpose the matrix before calling this function.
     SEXP_2_DOUBLE_MATRIX(DATA, rdata, npoint, nobj);
-    SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
+    SEXP_2_LOGICAL_INT_VECTOR(MAXIMISE, maximise, maximise_len);
     assert(nobj == maximise_len);
 
     if (unlikely(npoint == 1))
@@ -360,8 +351,6 @@ any_dominated_C(SEXP DATA, SEXP MAXIMISE)
     double * data = matrix_malloc_and_transpose(rdata, npoint, nobj);
     size_t res = find_weakly_dominated_point(data, npoint, (dimension_t) nobj, maximise);
     free(data);
-    free(maximise);
-    UNPROTECT(nprotected);
     return Rf_ScalarLogical((res < npoint) ? 1 : 0);
 }
 
@@ -371,12 +360,10 @@ pareto_ranking_C(SEXP DATA)
     int nprotected = 0;
     /* We transpose the matrix before calling this function. */
     SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
-
     new_int_vector(rank, npoint);
-    int * restrict rank2 = pareto_rank(data, npoint, (dimension_t) nobj);
+    pareto_rank(rank, data, npoint, (dimension_t) nobj);
     for (int i = 0; i < npoint; i++)
-        rank[i] = rank2[i] + 1; // pareto_rank returns 0-based ranks.
-    free(rank2);
+        rank[i]++; // pareto_rank returns 0-based ranks.
     UNPROTECT(nprotected);
     return Rexp(rank);
 }
@@ -460,7 +447,7 @@ hv_approx_dz2019_mc_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE, SEXP NSAMPLES, S
 {
     SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoints);
     SEXP_2_DOUBLE_VECTOR(REFERENCE, ref, reference_len);
-    SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
+    SEXP_2_LOGICAL_INT_VECTOR(MAXIMISE, maximise, maximise_len);
     SEXP_2_INT(NSAMPLES, nsamples);
     SEXP_2_UINT32(SEED, seed);
 
@@ -468,7 +455,6 @@ hv_approx_dz2019_mc_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE, SEXP NSAMPLES, S
     assert(nobj == maximise_len);
 
     double hv = hv_approx_normal(data, npoints, nobj, ref, maximise, (uint_fast32_t) nsamples, seed);
-    free (maximise);
     return Rf_ScalarReal(hv);
 }
 
@@ -477,14 +463,13 @@ hv_approx_dz2019_hw_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE, SEXP NSAMPLES)
 {
     SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoints);
     SEXP_2_DOUBLE_VECTOR(REFERENCE, ref, reference_len);
-    SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
+    SEXP_2_LOGICAL_INT_VECTOR(MAXIMISE, maximise, maximise_len);
     SEXP_2_INT(NSAMPLES, nsamples);
 
     assert(nobj == reference_len);
     assert(nobj == maximise_len);
 
     double hv = hv_approx_hua_wang(data, npoints, nobj, ref, maximise, (uint_fast32_t) nsamples);
-    free(maximise);
     return Rf_ScalarReal(hv);
 }
 
@@ -493,14 +478,13 @@ hv_approx_rphi_fang_wang_plus_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE, SEXP N
 {
     SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoints);
     SEXP_2_DOUBLE_VECTOR(REFERENCE, ref, reference_len);
-    SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
+    SEXP_2_LOGICAL_INT_VECTOR(MAXIMISE, maximise, maximise_len);
     SEXP_2_INT(NSAMPLES, nsamples);
 
     assert(nobj == reference_len);
     assert(nobj == maximise_len);
 
     double hv = hv_approx_rphi_fang_wang_plus(data, npoints, nobj, ref, maximise, (uint_fast32_t) nsamples);
-    free(maximise);
     return Rf_ScalarReal(hv);
 }
 
@@ -537,7 +521,7 @@ unary_metric_ref(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE,
     double *ref = REAL(REFERENCE);
     // We transpose the matrix before calling this function.
     int ref_size = Rf_ncols(REFERENCE);
-    SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
+    SEXP_2_LOGICAL_INT_VECTOR(MAXIMISE, maximise, maximise_len);
     assert (nobj == maximise_len);
 
     double value;
@@ -563,7 +547,6 @@ unary_metric_ref(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE,
           Rf_error("unknown unary metric");
     }
 
-    free (maximise);
     return Rf_ScalarReal(value);
 }
 

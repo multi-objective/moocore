@@ -198,9 +198,9 @@ IGD_minmax(const int * restrict minmax, dimension_t dim,
 _attr_maybe_unused static double
 IGD(const double * restrict data, size_t npoints, dimension_t nobj,
     const double * restrict ref, size_t ref_size,
-    const bool *  restrict maximise)
+    const boolvec * restrict maximise)
 {
-    const int * minmax = minmax_from_bool(maximise, nobj);
+    const int * minmax = minmax_from_boolvec(maximise, nobj);
     double value = IGD_minmax(minmax, nobj, data, npoints, ref, ref_size);
     free ((void *)minmax);
     return value;
@@ -245,10 +245,10 @@ IGD_plus_minmax(const int * restrict minmax, dimension_t dim,
 _attr_maybe_unused static double
 IGD_plus(const double * restrict data, size_t npoints, dimension_t nobj,
          const double * restrict ref, size_t ref_size,
-         const bool * restrict  maximise)
+         const boolvec * restrict maximise)
 {
     ASSUME(nobj > 0);
-    const int * minmax = minmax_from_bool(maximise, nobj);
+    const int * minmax = minmax_from_boolvec(maximise, nobj);
     double value = IGD_plus_minmax(minmax, nobj, data, npoints, ref, ref_size);
     free ((void *)minmax);
     return value;
@@ -277,10 +277,10 @@ avg_Hausdorff_dist_minmax(const int * restrict minmax, dimension_t dim,
 _attr_maybe_unused static double
 avg_Hausdorff_dist(const double * restrict data, size_t npoints, dimension_t nobj,
                    const double * restrict ref, size_t ref_size,
-                   const bool * restrict maximise, unsigned int p)
+                   const boolvec * restrict maximise, unsigned int p)
 {
     ASSUME(nobj > 0);
-    const int * minmax = minmax_from_bool(maximise, nobj);
+    const int * minmax = minmax_from_boolvec(maximise, nobj);
     double value = avg_Hausdorff_dist_minmax(minmax, nobj, data, npoints, ref, ref_size, p);
     free ((void *)minmax);
     return value;

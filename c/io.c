@@ -193,7 +193,7 @@ read_datasets(const char * filename, double ** restrict data_p,
 
     int ncols = nobjs + 1; // For the column 'set'
     int nrows = cumsizes[nsets - 1];
-    int datasize = ncols * nrows * sizeof(double);
+    int datasize = ncols * nrows * sizeof(*data);
     double * newdata = malloc(datasize);
     int set = 1;
     int i = 0;
@@ -265,7 +265,8 @@ write_sets(FILE * outfile, const double * restrict data, int ncols,
 
 int
 write_sets_filtered (FILE *outfile, const double * restrict data, int ncols,
-                     const int * restrict cumsizes, int nruns, const bool * restrict write_p)
+                     const int * restrict cumsizes, int nruns,
+                     const boolvec * restrict write_p)
 {
     int size = 0;
     ASSUME(nruns > 0);

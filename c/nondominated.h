@@ -84,7 +84,7 @@ check_all_minimize_maximize(const int * restrict minmax, dimension_t dim)
     in some targets, e.g, -march=tigerlake.
 */
 static inline int *
-minmax_from_bool(const bool * restrict maximise, dimension_t nobj)
+minmax_from_boolvec(const boolvec * restrict maximise, dimension_t nobj)
 {
     ASSUME(nobj > 0 && nobj < 128);
     int * minmax = malloc(nobj * sizeof(*minmax));
@@ -94,11 +94,11 @@ minmax_from_bool(const bool * restrict maximise, dimension_t nobj)
     return minmax;
 }
 
-static inline bool *
-new_bool_maximise(dimension_t nobj, bool maximise_all)
+static inline boolvec *
+new_boolvec_maximise(dimension_t nobj, bool maximise_all)
 {
     ASSUME(nobj > 0 && nobj < 128);
-    bool * maximise = malloc(nobj * sizeof(*maximise));
+    boolvec * maximise = malloc(nobj * sizeof(*maximise));
     for (dimension_t k = 0; k < nobj; k++)
         maximise[k] = maximise_all;
     return maximise;
@@ -141,12 +141,18 @@ minmax_alloc(const int * restrict * minmax, bool maximise_all_flag,
 
 // FIXME: It would be more efficient to default to false (using calloc) and
 // change to true.
-static inline bool *
-nondom_init(size_t size)
+static inline void
+nondom_init_true(boolvec * restrict nondom, size_t size)
 {
-    bool * nondom = malloc(size * sizeof(*nondom));
     for (size_t n = 0; n < size; n++)
         nondom[n] = true;
+}
+
+static inline boolvec *
+nondom_alloc_true(size_t size)
+{
+    boolvec * nondom = malloc(size * sizeof(*nondom));
+    nondom_init_true(nondom, size);
     return nondom;
 }
 
@@ -254,7 +260,7 @@ generate_row_pointers_asc_rev_3d(const double * restrict points, size_t size)
 
 static inline size_t
 find_nondominated_2d_helper_(const double * restrict points, size_t size,
-                             const bool keep_weakly, bool * restrict nondom)
+                             const bool keep_weakly, boolvec * restrict nondom)
 {
     ASSUME(size > 1);
     const double ** p = generate_row_pointers_asc_rev_2d(points, size);
@@ -316,7 +322,7 @@ find_dominated_2d_(const double * restrict points, size_t size, const bool keep_
 */
 static inline size_t
 find_nondominated_set_2d_(const double * restrict points, size_t size,
-                          const bool keep_weakly, bool * restrict nondom)
+                          const bool keep_weakly, boolvec * restrict nondom)
 {
     ASSUME(nondom != NULL);
     return keep_weakly
@@ -340,7 +346,7 @@ static inline size_t
 find_nondominated_set_3d_helper(const double * restrict points,
                                 const double ** rows,
                                 size_t size, dimension_t max_dim,
-                                const bool keep_weakly, bool * restrict nondom)
+                                const bool keep_weakly, boolvec * restrict nondom)
 {
     ASSUME(size > 1);
     // Sort in ascending lexicographic order from the last dimension.
@@ -461,7 +467,7 @@ find_dominated_3d_(const double * restrict points, size_t size, bool keep_weakly
 */
 static inline size_t
 find_nondominated_set_3d_(const double * restrict points, size_t size,
-                          const bool keep_weakly, bool * restrict nondom)
+                          const bool keep_weakly, boolvec * restrict nondom)
 {
     const double ** rows = generate_row_pointers(points, size, 3);
     ASSUME(nondom != NULL);
@@ -483,7 +489,7 @@ static inline size_t
 find_nondominated_set_agree_bf(const double * restrict points, size_t size, dimension_t dim,
                                const bool keep_weakly,
                                const enum objs_agree_t agree, const int * restrict minmax,
-                               bool * restrict nondom)
+                               boolvec * restrict nondom)
 {
     ASSUME(dim > 3);
     ASSUME(agree == AGREE_MINIMISE || agree == AGREE_MAXIMISE || agree == AGREE_NONE);
@@ -613,7 +619,7 @@ static inline size_t
 find_nondominated_set_(const double * restrict points, size_t size, dimension_t dim,
                        const bool keep_weakly,
                        enum objs_agree_t agree, const int * restrict minmax,
-                       bool * restrict nondom)
+                       boolvec * restrict nondom)
 {
     if (size < 2)
         return size;
@@ -685,10 +691,10 @@ find_dominated_point(const double * restrict points, size_t size, dimension_t di
 
 static inline size_t
 find_weakly_dominated_point(const double * restrict points, size_t size, dimension_t dim,
-                            const bool * restrict maximise)
+                            const boolvec * restrict maximise)
 {
     ASSUME(dim >= 2);
-    const int * minmax = minmax_from_bool(maximise, dim);
+    const int * minmax = minmax_from_boolvec(maximise, dim);
     size_t pos = find_dominated_point_(points, size, dim, /* keep_weakly=*/false,
                                        AGREE_NONE, minmax);
     free((void *)minmax);
@@ -698,7 +704,7 @@ find_weakly_dominated_point(const double * restrict points, size_t size, dimensi
 static inline size_t
 find_nondominated_set_agree(const double * restrict points, size_t size, dimension_t dim,
                             const int agree, const int * restrict minmax,
-                            bool * restrict nondom)
+                            boolvec * restrict nondom)
 {
     ASSUME(dim >= 2);
     ASSUME(agree == AGREE_MINIMISE || agree == AGREE_MAXIMISE || agree == AGREE_NONE);
@@ -708,7 +714,7 @@ find_nondominated_set_agree(const double * restrict points, size_t size, dimensi
 
 static inline size_t
 find_nondominated_set(const double * restrict points, size_t size, dimension_t dim,
-                      const int * restrict minmax, bool * restrict nondom)
+                      const int * restrict minmax, boolvec * restrict nondom)
 {
     ASSUME(dim >= 2);
     size_t new_size = find_nondominated_set_(
@@ -725,7 +731,7 @@ find_nondominated_set(const double * restrict points, size_t size, dimension_t d
 
 static inline size_t
 find_weak_nondominated_set(const double * restrict points, size_t size, dimension_t dim,
-                           const int * restrict minmax, bool * restrict nondom)
+                           const int * restrict minmax, boolvec * restrict nondom)
 {
     ASSUME(dim >= 2);
     return find_nondominated_set_(points, size, dim, /* keep_weakly=*/true,
@@ -735,7 +741,7 @@ find_weak_nondominated_set(const double * restrict points, size_t size, dimensio
 static inline size_t
 find_weak_nondominated_set_minimise(const double * restrict points,
                                     size_t size, dimension_t dim,
-                                    bool * restrict nondom)
+                                    boolvec * restrict nondom)
 {
     ASSUME(dim >= 2);
     const int * minmax = minmax_minimise(dim);
@@ -748,12 +754,12 @@ find_weak_nondominated_set_minimise(const double * restrict points,
 
 
 static inline size_t
-get_nondominated_set(double **pareto_set_p,
+get_nondominated_set(double ** pareto_set_p,
                      const double * restrict points, size_t size, dimension_t dim,
                      const int * restrict minmax)
 {
     ASSUME(dim >= 2);
-    bool * nondom = nondom_init(size);
+    boolvec * nondom = nondom_alloc_true(size);
     size_t new_size = find_nondominated_set(points, size, dim, minmax, nondom);
     double * pareto_set = malloc(new_size * dim * sizeof(*pareto_set));
 
@@ -781,7 +787,7 @@ filter_dominated_set(double * restrict points, size_t size, dimension_t dim,
     ASSUME(dim >= 2);
     ASSUME(size > 0);
 
-    bool * nondom = nondom_init(size);
+    boolvec * nondom = nondom_alloc_true(size);
     size_t new_size = find_nondominated_set(points, size, dim, minmax, nondom);
 
     if (new_size < size) {
@@ -800,34 +806,38 @@ filter_dominated_set(double * restrict points, size_t size, dimension_t dim,
     return new_size;
 }
 
-static inline bool *
-is_nondominated_minmax(const double * restrict data, size_t npoint, dimension_t nobj,
+/**
+   nondom must be already initialized to all true.
+*/
+static inline void
+is_nondominated_minmax(boolvec * restrict nondom,
+                       const double * restrict data, size_t npoint, dimension_t nobj,
                        bool keep_weakly, const int * restrict minmax)
 {
-    bool * nondom = nondom_init(npoint);
     find_nondominated_set_(data, npoint, nobj, keep_weakly, AGREE_NONE, minmax, nondom);
-    return nondom;
 }
 
-static inline bool *
+static inline boolvec *
 is_nondominated_minimise(const double * restrict data, size_t npoint, dimension_t nobj,
                          bool keep_weakly)
 {
     const int * minmax = minmax_minimise(nobj);
-    bool * nondom = is_nondominated_minmax(data, npoint, nobj, keep_weakly, minmax);
+    boolvec * nondom = nondom_alloc_true(npoint);
+    is_nondominated_minmax(nondom, data, npoint, nobj, keep_weakly, minmax);
     free((void *) minmax);
     return nondom;
 }
 
-_attr_maybe_unused static bool *
-is_nondominated(const double * restrict data, size_t npoint, dimension_t nobj,
-                bool keep_weakly, const bool * restrict maximise)
+static inline void
+is_nondominated(boolvec * restrict nondom,
+                const double * restrict data, size_t npoint, dimension_t nobj,
+                bool keep_weakly, const boolvec * restrict maximise)
 {
     ASSUME(nobj >= 2);
-    const int * minmax = minmax_from_bool(maximise, nobj);
-    bool * nondom = is_nondominated_minmax(data, npoint, nobj, keep_weakly, minmax);
+    const int * minmax = minmax_from_boolvec(maximise, nobj);
+    nondom_init_true(nondom, npoint);
+    is_nondominated_minmax(nondom, data, npoint, nobj, keep_weakly, minmax);
     free((void *)minmax);
-    return nondom;
 }
 
 static inline void
@@ -868,13 +878,13 @@ normalise(double * restrict points, size_t size, dimension_t dim,
     free(diff);
 }
 
-_attr_maybe_unused static void
+static inline void
 agree_normalise(double * restrict data, size_t npoint, dimension_t nobj,
-                const bool * restrict maximise,
+                const boolvec * restrict maximise,
                 const double lower_range, const double upper_range,
                 const double * restrict lbound, const double * restrict ubound)
 {
-    const int * minmax = minmax_from_bool(maximise, nobj);
+    const int * minmax = minmax_from_boolvec(maximise, nobj);
     // We have to make the objectives agree before normalisation.
     // FIXME: Do normalisation and agree in one step.
     agree_objectives(data, npoint, nobj, AGREE_MINIMISE, minmax);
@@ -883,6 +893,6 @@ agree_normalise(double * restrict data, size_t npoint, dimension_t nobj,
     free ((void *)minmax);
 }
 
-int * pareto_rank(const double * restrict points, size_t size, dimension_t dim) _attr_malloc;
+void pareto_rank(int * restrict rank, const double * restrict points, size_t size, dimension_t dim);
 
 #endif /* NONDOMINATED_H */

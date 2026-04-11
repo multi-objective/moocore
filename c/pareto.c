@@ -10,14 +10,13 @@
    Uses the same algorithm as find_nondominated_set_3d_helper().
 */
 
-static int *
-pareto_rank_3d(const double * restrict points, size_t size)
+static void
+pareto_rank_3d(int * restrict rank, const double * restrict points, size_t size)
 {
     ASSUME(size >= 2);
     const size_t orig_size = size;
     const bool keep_weakly = true;
-
-    int * rank = calloc(size, sizeof(*rank));
+    memset(rank, 0, sizeof(*rank) * size);
     const double ** p = generate_row_pointers_asc_rev_3d(points, size);
 
     avl_tree_t tree;
@@ -114,7 +113,7 @@ pareto_rank_3d(const double * restrict points, size_t size)
         if (size <= 1) {
             free(tnodes);
             free(p);
-            return rank;
+            return;
         }
 
         assert(rank[row_index_from_ptr(points, p[0], 3)] == front);
@@ -144,9 +143,8 @@ pareto_rank_3d(const double * restrict points, size_t size)
    EAs: The NSGA-II and other algorithms. IEEE Transactions on
    Evolutionary Computation, 7(5):503–515, 2003.
 */
-
-static int *
-pareto_rank_2d(const double * restrict points, size_t size)
+static void
+pareto_rank_2d(int * restrict rank, const double * restrict points, size_t size)
 {
     const dimension_t dim = 2;
     const double ** p = generate_row_pointers(points, size, dim);
@@ -183,7 +181,6 @@ pareto_rank_2d(const double * restrict points, size_t size)
     fprintf(stderr, "\n[1]  : "); vector_fprintf (stderr, help_1, size);
 #endif
 
-    int * rank = malloc(size * sizeof(*rank));
     double * front_last = malloc(size * sizeof(*front_last));
     int n_front = 0;
     front_last[0] = p[0][0];
@@ -276,7 +273,6 @@ pareto_rank_2d(const double * restrict points, size_t size)
 #endif
 
     free(p);
-    return rank;
 }
 
 /* FIXME: This takes O(n^3). Look at
@@ -287,17 +283,19 @@ pareto_rank_2d(const double * restrict points, size_t size)
 
    Similar to find_nondominated_set_agree_bf().
 */
-static int *
-pareto_rank_naive(const double * restrict points, size_t size, dimension_t dim)
+static void
+pareto_rank_naive(int * restrict rank,
+                  const double * restrict points, size_t size, dimension_t dim)
 {
     ASSUME(dim >= 2);
     ASSUME(size >= 2);
+
     const size_t orig_size = size;
     const bool keep_weakly = true;
-    int * rank = calloc(size, sizeof(*rank));
     bool * dominated = calloc(size, sizeof(*dominated));
     const double ** p = generate_row_pointers(points, size, dim);
     int front = 1;
+    memset(rank, 0, sizeof(*rank) * size);
 
     while (true) {
         ASSUME(size >= 2);
@@ -354,7 +352,7 @@ pareto_rank_naive(const double * restrict points, size_t size, dimension_t dim)
             }
             free(dominated);
             free(p);
-            return rank;
+            return;
         }
         size_t k = 0;
         while (dominated[k]) k++; // Find first nondominated
@@ -378,7 +376,8 @@ static inline void
 check_pareto_rank(const int * restrict rank_true, const double * restrict points,
                   size_t size, dimension_t d)
 {
-    int * rank = pareto_rank_naive(points, size, d);
+    int * rank = malloc(size * sizeof(*rank));
+    pareto_rank_naive(rank, points, size, d);
     for (size_t k = 0; k < size; k++) {
         if (rank[k] != rank_true[k])
             fatal_error(__FILE__ ":%u: rank[%zu]=%d != rank_true[%zu]=%d !",
@@ -388,30 +387,33 @@ check_pareto_rank(const int * restrict rank_true, const double * restrict points
 }
 
 /**
-   Returns a 0-based rank value that indicates the level of dominance of each
-   point (lower means less dominated).
+   Returns in rank argument a 0-based rank value that indicates the level of
+   dominance of each point (lower means less dominated).
 */
-int *
-pareto_rank(const double * restrict points, size_t size, dimension_t dim)
+void
+pareto_rank(int * restrict rank,
+            const double * restrict points, size_t size, dimension_t dim)
 {
     if (unlikely(size == 0))
-        return NULL;
-    if (unlikely(size == 1))
-        return (int *) calloc(1, sizeof(int));
+        return;
+    if (unlikely(size == 1)) {
+        rank[0] = 0;
+        return;
+    }
 
-    if (likely(dim > 3))
-        return pareto_rank_naive(points, size, dim);
+    if (likely(dim > 3)) {
+        pareto_rank_naive(rank, points, size, dim);
+        return;
+    }
 
-    int * rank;
     if (dim == 3) {
-        rank = pareto_rank_3d(points, size);
+        pareto_rank_3d(rank, points, size);
     } else if (dim == 2) {
-        rank = pareto_rank_2d(points, size);
+        pareto_rank_2d(rank, points, size);
     } else {
         // FIXME: Handle dim=1 like python does.
         // FIXME: How to handle dim=0? Python returns a vector of zeros.
-        return NULL;
+        return;
     }
     DEBUG1(check_pareto_rank(rank, points, size, dim));
-    return rank;
 }
