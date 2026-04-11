@@ -25,13 +25,13 @@
 #error "Must be included from nondominated.h"
 #endif
 
-// If a sub-problem is smaller than this value, use n^2 algorithm instead of splitting it.
+// If a sub-problem is not larger than this value, use n^2 algorithm instead of splitting it.
 #ifndef KUNG_SMALL_THRESHOLD
 #define KUNG_SMALL_THRESHOLD 16
 #endif
-// When filtering, if either R or S are smaller than this value, use n^2 algorithm.
+// When filtering, if |R| * |S| is not larger than this value, use n^2 algorithm.
 #ifndef KUNG_FILTER_THRESHOLD
-#define KUNG_FILTER_THRESHOLD 32
+#define KUNG_FILTER_THRESHOLD 1024
 #endif
 
 static inline bool
@@ -461,13 +461,12 @@ maxima_filter_rec(const double * points,
     assert(check_nondom(points_shifted, r1, r_size, max_dim, nondom));
     assert(check_nondom(points_shifted, s1, s_size, max_dim, nondom));
     /* FIXME: It is unclear whether maxima_filter_dim3() is faster than
-       maxima_filter_brute_force() when r_size <= KUNG_FILTER_THRESHOLD ||
-       s_size <= KUNG_FILTER_THRESHOLD.  It is probably true that
-       maxima_filter_brute_force() is faster when r_size == 1 || s_size == 1
-       because we avoid sorting.
+       maxima_filter_brute_force() when r_size * s_size <= KUNG_FILTER_THRESHOLD.
+       It is probably true that maxima_filter_brute_force() is faster when
+       r_size == 1 || s_size == 1 because we avoid sorting.
     */
     size_t new_size;
-    if (r_size <= KUNG_FILTER_THRESHOLD || s_size <= KUNG_FILTER_THRESHOLD) {
+    if (r_size == 1 || s_size == 1 || r_size * s_size <= KUNG_FILTER_THRESHOLD) {
         // maxima_filter_brute_force() does not need sorting.
         new_size = maxima_filter_brute_force(points_shifted, r1, r_size, s1, s_size, dim, max_dim, nondom);
     } else {
@@ -515,7 +514,7 @@ maxima_filter_nobase(const double * points,
     assert(s_size > 0);
     assert(check_nondom(points, r, r_size, max_dim, nondom));
     assert(check_nondom(points, s, s_size, max_dim, nondom));
-    assert(r_size > KUNG_FILTER_THRESHOLD && s_size > KUNG_FILTER_THRESHOLD && dim > 3);
+    assert(r_size > 1 && s_size > 1 && r_size * s_size > KUNG_FILTER_THRESHOLD && dim > 3);
 
     size_t s1_size = half_size_with_duplicates(s, s_size);
     size_t s2_size = s_size - s1_size;
@@ -590,18 +589,18 @@ maxima_filter(const double * points,
     assert(check_nondom(points, r, r_size, max_dim, nondom));
     assert(check_nondom(points, s, s_size, max_dim, nondom));
     /* FIXME: It is unclear whether maxima_filter_dim3() is faster than
-       maxima_filter_brute_force() when r_size <= KUNG_FILTER_THRESHOLD ||
-       s_size <= KUNG_FILTER_THRESHOLD. It is probably true than
-       maxima_filter_brute_force() is faster when r_size == 1 || s_size == 1
-       because we avoid sorting.
+       maxima_filter_brute_force() when r_size * s_size <= KUNG_FILTER_THRESHOLD.
+       It is probably true than maxima_filter_brute_force() is faster when
+       r_size == 1 || s_size == 1 because we avoid sorting.
     */
     size_t new_size;
-    if (r_size <= KUNG_FILTER_THRESHOLD || s_size <= KUNG_FILTER_THRESHOLD) {
+    if (r_size == 1 || s_size == 1 || r_size * s_size <= KUNG_FILTER_THRESHOLD) {
         new_size = maxima_filter_brute_force(points, r, r_size, s, s_size, dim, max_dim, nondom);
     } else if (dim == 3) {
         new_size = maxima_filter_dim3(points, r, r_size, s, s_size, max_dim, nondom);
         DEBUG2_PRINT("maxima_filter_dim3: new_size=%zu\n", new_size);
     } else {
+        // maxima_filter_nobase() already filters, so we can return immediately.
         return maxima_filter_nobase(points, r, r_size, s, s_size, dim, max_dim, nondom);
     }
     if (new_size < s_size) {
