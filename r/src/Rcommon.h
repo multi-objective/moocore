@@ -45,6 +45,11 @@
     PROTECT_PLUS(Rexp_##VAR = Rf_allocVector(INTSXP, (DIM)));                  \
     int * VAR = INTEGER(Rexp_##VAR)
 
+#define new_logical_vector(VAR, DIM)                                           \
+    SEXP Rexp_##VAR;                                                           \
+    PROTECT_PLUS(Rexp_##VAR = Rf_allocVector(LGLSXP, (DIM)));                  \
+    int * VAR = LOGICAL(Rexp_##VAR)
+
 #define new_string_vector(VAR, DIM)                                            \
     SEXP Rexp_##VAR; int Rexp_##VAR##_len = 0;                                 \
     PROTECT_PLUS(Rexp_##VAR = Rf_allocVector(STRSXP, (DIM)))
@@ -97,10 +102,10 @@
     int *I = INTEGER(S);                         \
     const R_len_t N = Rf_length(S);
 
-#define SEXP_2_LOGICAL_INT_VECTOR(S, I, N)           \
-    CHECK_ARG_IS_LOGICAL_VECTOR(S);                  \
-    const R_len_t N = Rf_length(S);                  \
-    int *I = LOGICAL(S);
+#define SEXP_2_LOGICAL_INT_VECTOR(S, I, N)                                     \
+    CHECK_ARG_IS_LOGICAL_VECTOR(S);                                            \
+    int *I = LOGICAL(S);                                                       \
+    _attr_maybe_unused const R_len_t N = Rf_length(S);
 
 #define SEXP_2_LOGICAL_BOOL_VECTOR(S, I, N)          \
     CHECK_ARG_IS_LOGICAL_VECTOR(S);                  \
