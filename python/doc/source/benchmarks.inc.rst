@@ -9,6 +9,12 @@ Not all packages provide the same functionality. For example, `pymoo`_ does not 
 
 We would like to benchmark `pygmo`_, however, it is currently impossible to install using ``pip`` (See: https://github.com/esa/pygmo2/issues/152)
 
+We would also like to benchmark `platypus`_, but its API is too different from
+other packages. For example, it only supports filtering dominated points by
+creating a new list of points, but it cannot identify their position in the
+input. It cannot calculate hypervolume without normalization.  It doesn't
+support :obj:`~numpy.typing.ArrayLike` inputs.
+
 The source code for the benchmarks below can be found at https://github.com/multi-objective/moocore/tree/main/python/benchmarks .
 
 .. _bench-ndom:
@@ -256,6 +262,7 @@ The following plots compare the speed of computing the :ref:`epsilon indicator  
 .. _paretobench: https://github.com/electronsandstuff/ParetoBench
 .. _paretoset: https://github.com/tommyod/paretoset
 .. _patatune: https://cms-patatrack.github.io/patatune/
+.. _platypus: https://github.com/Project-Platypus/Platypus
 .. _pygmo: https://esa.github.io/pygmo2/
 .. _pymoo: https://pymoo.org/
 .. _pysamoo: https://anyoptimization.com/projects/pysamoo/
