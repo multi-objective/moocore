@@ -86,8 +86,8 @@ filter_dominated(const double * points, const double ** rows,
 
    Simplified version of find_nondominated_set_agree_bf().
 */
-static size_t
-maxima_brute_force(const double * points, const double ** rows,
+static inline size_t
+maxima_brute_force(const double * points, const double ** restrict rows,
                    size_t size, dimension_t dim, dimension_t max_dim,
                    bool keep_weakly, boolvec * restrict nondom)
 {
@@ -144,11 +144,14 @@ maxima_brute_force(const double * points, const double ** rows,
 
 static size_t
 maxima_brute_force_filter_dominated(
-    const double * points, const double ** rows,
+    const double * points, const double ** restrict rows,
     size_t size, dimension_t dim, dimension_t max_dim,
     bool keep_weakly, boolvec * restrict nondom)
 {
-    size_t new_size = maxima_brute_force(points, rows, size, dim, max_dim, keep_weakly, nondom);
+    // Help GCC generate specialized code for true/false.
+    size_t new_size = keep_weakly
+        ? maxima_brute_force(points, rows, size, dim, max_dim, true, nondom)
+        : maxima_brute_force(points, rows, size, dim, max_dim, false, nondom);
     if (new_size < size) {
         filter_dominated(points, rows, new_size, dim, max_dim, nondom, size);
     }
@@ -514,7 +517,8 @@ maxima_filter_nobase(const double * points,
     assert(s_size > 0);
     assert(check_nondom(points, r, r_size, max_dim, nondom));
     assert(check_nondom(points, s, s_size, max_dim, nondom));
-    assert(r_size > 1 && s_size > 1 && r_size * s_size > KUNG_FILTER_THRESHOLD && dim > 3);
+    ASSUME(dim > 3);
+    ASSUME(r_size > 1 && s_size > 1 && r_size * s_size > KUNG_FILTER_THRESHOLD);
 
     size_t s1_size = half_size_with_duplicates(s, s_size);
     size_t s2_size = s_size - s1_size;
@@ -534,8 +538,8 @@ maxima_filter_nobase(const double * points,
     DEBUG2(printf_rows("R1", r, r1_size, dim, "r1_size"));
     DEBUG2(printf_rows("S1", s, s1_size, dim, "s1_size"));
     if (r2_size == 0 && s2_size == 0) {
-        assert(r1_size > 0);
-        assert(s1_size > 0);
+        ASSUME(r1_size > 0);
+        ASSUME(s1_size > 0);
         DEBUG2_PRINT("Solve sub-problem  (R1, S1) in a lower dimension\n");
         s1_size = maxima_filter_rec(points, r, r1_size, s, s1_size, dim - 1, max_dim, nondom);
     } else {
@@ -584,30 +588,22 @@ maxima_filter(const double * points,
     DEBUG2_PRINT("maxima_filter: dim=%d, s=%zu, s_size=%zu\n", dim,
             row_index_from_ptr(points, s[0], max_dim), s_size);
     DEBUG2(print_rows(s, s_size, dim));
-    assert(r_size > 0);
-    assert(s_size > 0);
+    ASSUME(dim > 3);
+    ASSUME(r_size > 0);
+    ASSUME(s_size > 0);
     assert(check_nondom(points, r, r_size, max_dim, nondom));
     assert(check_nondom(points, s, s_size, max_dim, nondom));
-    /* FIXME: It is unclear whether maxima_filter_dim3() is faster than
-       maxima_filter_brute_force() when r_size * s_size <= KUNG_FILTER_THRESHOLD.
-       It is probably true than maxima_filter_brute_force() is faster when
-       r_size == 1 || s_size == 1 because we avoid sorting.
-    */
-    size_t new_size;
     if (r_size == 1 || s_size == 1 || r_size * s_size <= KUNG_FILTER_THRESHOLD) {
-        new_size = maxima_filter_brute_force(points, r, r_size, s, s_size, dim, max_dim, nondom);
-    } else if (dim == 3) {
-        new_size = maxima_filter_dim3(points, r, r_size, s, s_size, max_dim, nondom);
-        DEBUG2_PRINT("maxima_filter_dim3: new_size=%zu\n", new_size);
+        size_t new_size = maxima_filter_brute_force(points, r, r_size, s, s_size, dim, max_dim, nondom);
+        if (new_size < s_size) {
+            filter_dominated(points, s, new_size, dim, max_dim, nondom, s_size);
+        }
+        assert(check_nondom(points, s, new_size, max_dim, nondom));
+        return new_size;
     } else {
         // maxima_filter_nobase() already filters, so we can return immediately.
         return maxima_filter_nobase(points, r, r_size, s, s_size, dim, max_dim, nondom);
     }
-    if (new_size < s_size) {
-        filter_dominated(points, s, new_size, dim, max_dim, nondom, s_size);
-    }
-    assert(check_nondom(points, s, new_size, max_dim, nondom));
-    return new_size;
 }
 
 /**
@@ -636,8 +632,9 @@ maxima_rec(const double * points, const double ** rows, size_t size,
         const double * const points_shifted = points + 1;
         if (dim == 4) { // We can reach this base case if one dimension has all equal values.
             // find_nondominated_set_3d_helper() will sort using cmp_ppdouble_asc_rev_3d().
-            new_size = find_nondominated_set_3d_helper(
-                points_shifted, r, size, max_dim, keep_weakly, nondom);
+            new_size = keep_weakly // Help GCC generate specialized code for true/false.
+                ? find_nondominated_set_3d_helper(points_shifted, r, size, max_dim, true, nondom)
+                : find_nondominated_set_3d_helper(points_shifted, r, size, max_dim, false, nondom);
             DEBUG2_PRINT("maxima_dim3: row=%zu, size=%zu, new_size=%zu\n",
                          row_index_from_ptr(points_shifted, r[0], max_dim),
                          size, new_size);
@@ -691,9 +688,7 @@ find_nondominated_set_agree_kung(const double * restrict points,
 
     const double ** rows = generate_row_pointers(points, size, dim);
     qsort_typesafe(rows, size, cmp_ppdouble_asc_x_nonzero_stable);
-    size_t new_size = keep_weakly
-        ? maxima_rec(points, rows, size, dim, dim, true, nondom)
-        : maxima_rec(points, rows, size, dim, dim, false, nondom);
+    size_t new_size = maxima_rec(points, rows, size, dim, dim, keep_weakly, nondom);
     free(rows);
     return new_size;
 }
