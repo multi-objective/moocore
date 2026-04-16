@@ -18,7 +18,7 @@ keywords = [
   "operations research",
   "Optimization",
 ]
-license = "LGPL-2.1-OR-later"
+license = "LGPL-2.1-or-later"
 license-files = [ "COPYRIGHTS" ]
 authors = [
   { name = "Manuel López-Ibáñez", email = "manuel.lopez-ibanez@manchester.ac.uk" },
