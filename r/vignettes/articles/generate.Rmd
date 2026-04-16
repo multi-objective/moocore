@@ -186,6 +186,19 @@ fig2 <- plot_3d("simplex", moocore::generate_ndset(n, 3, "convex-simplex", seed 
 plotly_side_by_side(fig1, fig2)
 ```
 
+The method `convex-simplex` implemented in `moocore::generate_ndset()`
+is different from the *concave* method proposed by @BriFri2012tcs.
+
+```{r generate_3d_brifri2012tcs}
+n <- 2000
+
+points <- matrix(abs(rnorm(n * 3)), n, 3)
+points <- points / (rowSums(sqrt(points)))^2
+fig1 <- plot_3d("simplex", points, title = 'concave (Bringmann & Friedrich, 2012)')
+
+plotly_side_by_side(fig1, fig2)
+```
+
 # Inverted shapes
 
 @IshHeSha2019regular analyze the differences between *regular* and

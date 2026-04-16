@@ -260,6 +260,20 @@ plotly_3d_side_by_side(fig1, fig2)
 
 # %%
 #
+# The method ``convex-simplex`` implemented in :func:`~moocore.generate_ndset`
+# is different from the `concave` method proposed by :cite:t:`BriFri2012tcs`.
+
+points = np.abs(rng.normal(size=(n, 3)))
+points /= (np.sqrt(points).sum(axis=1, keepdims=True)) ** 2
+fig1 = plotly_3d(
+    "simplex", points, title="concave (Bringmann & Friedrich, 2012)"
+)
+
+plotly_3d_side_by_side(fig1, fig2)
+
+
+# %%
+#
 # Inverted shapes
 # ---------------
 #

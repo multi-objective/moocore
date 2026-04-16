@@ -1123,11 +1123,13 @@ def generate_ndset(
       It corresponds to translating points from the negative orthant of the hyper-sphere to the positive orthant. Thus, the sampling remains uniform.
 
     ``'convex-simplex'``
-      Equivalent to :code:`generate_ndset(..., method='simplex') ** 2`, which is convex for minimisation problems. Such a set cannot be obtained by any affine transformation of a subset of the hyper-sphere.  This sampling is *not* uniform.
+      Equivalent to :code:`generate_ndset(..., method='simplex') ** 2`, which is convex for minimisation problems.
+      Such a set cannot be obtained by any affine transformation of a subset of the hyper-sphere.  This sampling is *not* uniform.
 
       The corresponding surface is equivalent to a simplex curved towards the
-      origin. Although the sampling on the simplex is uniform, the transformed
-      points are not.
+      origin.  The generated points :math:`\vec{z} \in (0,1)^d \subset
+      \mathbb{R}^d` satisfy :math:`\sum_{i=1}^d \sqrt{z_i} = 1`.  Although
+      the sampling on the simplex is uniform, the transformed points are not.
 
     ``'concave-simplex'``
       Equivalent to ``1 - generate_ndset(..., method='convex-simplex')``, which is concave for minimisation problems. This shape has also been called *inverted concave* :footcite:p:`IshHeSha2019regular`.  This sampling is *not* uniform because ``method='convex-simplex'`` is not uniform.

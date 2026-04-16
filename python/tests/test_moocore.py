@@ -512,6 +512,18 @@ def test_hvc(dim):
     check_hvc(points, ref, err_msg=f"dim={dim}, seed={seed}: ")
 
 
+@pytest.mark.parametrize("dim", range(5, 11))
+def test_generate_ndset(dim):
+    n = 10
+    one = np.ones(n)
+    points = moocore.generate_ndset(n, dim, "simplex")
+    assert_allclose(points.sum(axis=1), one)
+    points = moocore.generate_ndset(n, dim, "concave-sphere")
+    assert_allclose((points**2).sum(axis=1), one)
+    points = moocore.generate_ndset(n, dim, "convex-simplex")
+    assert_allclose(np.sqrt(points).sum(axis=1), one)
+
+
 @pytest.mark.parametrize("dim", range(2, 5))
 def test_pareto_rank(dim):
     seed = np.random.default_rng().integers(2**32 - 2)
