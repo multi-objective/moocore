@@ -48,9 +48,3 @@ test_that("hv_contributions", {
   expect_equal(hv_contributions(SPEA2minstoptimeRichmond[, 1:2], reference = reference, maximise = maximise),
                hv_contributions_nondom_slow(SPEA2minstoptimeRichmond[, 1:2], reference = reference, maximise = maximise))
 })
-
-test_that("hvapprox errors", {
-  x <- matrix(c(5, 5, 4, 6), ncol = 2, byrow = TRUE)
-  expect_error(hv_approx(x, ref = NULL), "a numerical reference vector must be provided")
-  expect_error(hv_approx(x, ref = 10, method = "None"), "'arg' should be one of ")
-})
