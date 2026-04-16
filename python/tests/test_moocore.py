@@ -483,6 +483,8 @@ def test_hv_approx_errors():
     with pytest.raises(ValueError, match=r".*Unknown method.*"):
         moocore.hv_approx([[0, 0]], [1, 1], method="None")
 
+    assert moocore.hv_approx([[1, 1, 1]], ref=1) == 0
+
 
 def check_hvc(points, ref, err_msg):
     hvc = moocore.hv_contributions(points, ref=ref)
