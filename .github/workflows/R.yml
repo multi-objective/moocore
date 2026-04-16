@@ -125,13 +125,6 @@ jobs:
         shell: Rscript {0}
         working-directory: r
 
-      - name: Upload check results
-        if: failure()
-        uses: actions/upload-artifact@v6
-        with:
-          name: results-${{ runner.os }}-r${{ matrix.r }}
-          path: r/check
-
   coverage:
     needs: R-CMD-check
     name: Coverage ${{ matrix.os }} (${{ matrix.r }})
