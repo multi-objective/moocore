@@ -28,7 +28,7 @@ development:
 
 navbar:
   structure:
-    left: [intro, reference, benchmarks, articles, tutorials, news]
+    left: [intro, reference, benchmarks, articles, tutorials, news, contribute]
     right: [search, cran, github, lightswitch]
   components:
     benchmarks:
@@ -38,6 +38,9 @@ navbar:
       icon: fab fa-r-project
       href: https://cloud.r-project.org/package=moocore
       aria-label: View on CRAN
+    contribute:
+      text: Contribute
+      href: https://multi-objective.github.io/moocore/python/contribute/
 
 articles:
   - title: Articles
