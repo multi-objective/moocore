@@ -66,3 +66,26 @@ How to extend the R API
 =======================
 
 Extending the R API requires adding a C wrapper function that converts from R types to C types and export that C function to R. See [`Rmoocore.c`](https://github.com/multi-objective/moocore/blob/main/r/src/Rmoocore.c) and [`init.h`](https://github.com/multi-objective/moocore/blob/main/r/src/init.h)
+
+
+Documentation
+=============
+
+
+> [!IMPORTANT]
+> The documentation of the R and Python packages should be as consistent as possible.
+
+A major difference is that Python has top-level pages that describe common functionality, [Python example](https://multi-objective.github.io/moocore/python/reference/functions.metrics.html), and documentation for individual functions such as [`igd_plus()`](https://multi-objective.github.io/moocore/python/reference/generated/moocore.igd_plus.html#moocore.igd_plus), whereas R has the option to describe multiple related functions in the same page [R example](https://multi-objective.github.io/moocore/r/reference/igd.html).
+
+In Python, one must decide where the documentation should be placed (in the common page or in the page of an individual function). In any case, the goals are to avoid duplicating the same text in different parts of the Python documentation and that the text is as similar as possible between Python and R.
+
+References
+----------
+
+> [!IMPORTANT]
+> `moocore` provides accurate references to the original sources of mathematical concepts and algorithms.
+
+Bibliographic entries should be taken from the [IRIDIA BibTeX Repository](https://iridia-ulb.github.io/references/).
+If the BibTeX entry does not exist, [contribute it](https://github.com/iridia-ulb/references/blob/master/README.md#contributing-to-the-iridia-bibtex-repository).
+If the entry already exists, you just need to add its label to the file
+[`bibkeys.txt`](https://github.com/multi-objective/moocore/blob/main/bibkeys.txt) and run [`update_bib.sh`](https://github.com/multi-objective/moocore/blob/main/update_bib.sh).
