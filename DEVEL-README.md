@@ -1,30 +1,7 @@
+How to Contribute
+=================
 
-How to release
-==============
-
-1. Run [testsuite workflow](https://github.com/multi-objective/testsuite/actions/workflows/moocore.yml)
-
-1. `make clean`
-
-1. `./release.py`
-
-1. `git ci -a -m "Prepare to release v${PACKAGEVERSION}"`
-
-1. R release (within `r/`):
-
-    1. `make releasebuild` and check which files are included in the package.
-    1. `make releasecheck`
-    1. [Check reverse dependencies](https://github.com/multi-objective/moocore/actions/workflows/revdepcheck.yml)
-    1. Update `cran-comments.md`
-    1. Submit to CRAN: `make submit`
-    1. While waiting, run benchmarks `make benchmarks`
-
-1. [Publish a release in github](https://github.com/multi-objective/moocore/releases/new) to automatically submit to PyPi.
-
-1. `./release.py --dev NEW_VERSION`
-
-1. `git ci -a -m "Start development of v{NEW_VERSION}"`
-
+Please read [How to Contribute](https://multi-objective.github.io/moocore/python/contribute/index.html).
 
 Building the code
 =================
@@ -89,3 +66,30 @@ Bibliographic entries should be taken from the [IRIDIA BibTeX Repository](https:
 If the BibTeX entry does not exist, [contribute it](https://github.com/iridia-ulb/references/blob/master/README.md#contributing-to-the-iridia-bibtex-repository).
 If the entry already exists, you just need to add its label to the file
 [`bibkeys.txt`](https://github.com/multi-objective/moocore/blob/main/bibkeys.txt) and run [`update_bib.sh`](https://github.com/multi-objective/moocore/blob/main/update_bib.sh).
+
+
+How to release
+==============
+
+1. Run [testsuite workflow](https://github.com/multi-objective/testsuite/actions/workflows/moocore.yml)
+
+1. `make clean`
+
+1. `./release.py`
+
+1. `git ci -a -m "Prepare to release v${PACKAGEVERSION}"`
+
+1. R release (within `r/`):
+
+    1. `make releasebuild` and check which files are included in the package.
+    1. `make releasecheck`
+    1. [Check reverse dependencies](https://github.com/multi-objective/moocore/actions/workflows/revdepcheck.yml)
+    1. Update `cran-comments.md`
+    1. Submit to CRAN: `make submit`
+    1. While waiting, run benchmarks `make benchmarks`
+
+1. [Publish a release in github](https://github.com/multi-objective/moocore/releases/new) to automatically submit to PyPi.
+
+1. `./release.py --dev NEW_VERSION`
+
+1. `git ci -a -m "Start development of v{NEW_VERSION}"`

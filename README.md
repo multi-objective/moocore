@@ -73,6 +73,12 @@ If you are using specific functions in your research, for example, to [compute t
 If you want to explicitly acknowledge `moocore`, please add a link to [this Github repository](https://github.com/multi-objective/moocore).
 
 
+Contributing to `moocore`
+------------------------
+
+Please read [How to Contribute](https://multi-objective.github.io/moocore/python/contribute/index.html).
+
+
 [c-build-badge]: https://github.com/multi-objective/moocore/actions/workflows/C.yml/badge.svg?event=push
 [c-build-link]: https://github.com/multi-objective/moocore/actions/workflows/C.yml
 [c-moocore-github]: https://github.com/multi-objective/moocore/tree/main/c#readme
