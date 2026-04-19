@@ -96,6 +96,9 @@ typedef int (*cmp_fun_t)(const void *, const void *);
 
 /* FIXME: How to automatically check that typeof(*array) is compatible with
    the signature of type_cmp ?
+
+   FIXME: This doesn't work if typed_cmp is not the name of an existing
+   function, but an expression or passed as an argument to the caller.
 */
 #define qsort_typesafe(array, nmemb, typed_cmp)                                \
     qsort((array), (nmemb), sizeof(*(array)), qsort_##typed_cmp)
