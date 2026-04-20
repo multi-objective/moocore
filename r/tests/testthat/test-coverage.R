@@ -97,4 +97,38 @@ test_that("total_whv_rect scalefactor validation", {
   )
 })
 
+# -----------------------------------------------------------------------
+# utils.R error paths (from 68%)
+# -----------------------------------------------------------------------
+test_that("as_double_matrix errors", {
+  expect_error(as_double_matrix(1:5), "must be a data.frame or a matrix")
+  expect_error(as_double_matrix(matrix(nrow = 0, ncol = 3)), "not enough points")
+  expect_error(as_double_matrix(matrix(1, nrow = 1, ncol = 1)), "at least 2 columns")
+  expect_error(as_double_matrix(matrix("a", nrow = 1, ncol = 2)), "must be numeric")
+})
+
+test_that("transform_maximise length mismatch", {
+  x <- matrix(1:6, ncol = 3)
+  expect_error(transform_maximise(x, c(TRUE, FALSE)), "length of maximise")
+})
+
+# -----------------------------------------------------------------------
+# eafdiff with maximise variants (r/R/eafdiff.R from 74%)
+# -----------------------------------------------------------------------
+test_that("eafdiff maximise=TRUE", {
+  A1 <- read_datasets(text = "3 2\n2 3\n\n2.5 1\n1 2\n")
+  A2 <- read_datasets(text = "4 2.5\n3 3\n2.5 3.5\n\n3 3\n2.5 3.5\n")
+  d <- eafdiff(A1, A2, maximise = TRUE)
+  expect_true(is.matrix(d))
+  expect_true(ncol(d) == 3)
+})
+
+test_that("eafdiff rectangles with maximise vector", {
+  A1 <- read_datasets(text = "3 2\n2 3\n\n2.5 1\n1 2\n")
+  A2 <- read_datasets(text = "4 2.5\n3 3\n2.5 3.5\n\n3 3\n2.5 3.5\n")
+  d <- eafdiff(A1, A2, rectangles = TRUE, maximise = c(TRUE, FALSE))
+  expect_true(is.matrix(d))
+  expect_true(ncol(d) == 5)
+})
+
 }) # withr::with_output_sink()
