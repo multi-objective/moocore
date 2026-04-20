@@ -344,7 +344,7 @@ find_nondominated_set_2d_(const double * restrict points, size_t size,
    When find_one_dominated, return as soon as it finds one dominated point.
 */
 static __force_inline__ size_t
-find_nondominated_3d_impl_sorted(const double ** restrict rows, size_t size,
+find_nondominated_3d_impl_sorted(const double ** rows, size_t size,
                                  const bool keep_weakly,
                                  const bool find_one_dominated)
 {
@@ -367,7 +367,6 @@ find_nondominated_3d_impl_sorted(const double ** restrict rows, size_t size,
     const double * restrict pk = rows[0];
     do {
         bool dominated;
-        size_t pos_dom = j;
         const double * restrict pj = rows[j];
         DEBUG2(printf_point("pj = [ ", pj, 3, " ], "));
         if (pk[0] > pj[0] || pk[1] > pj[1]) {
@@ -416,10 +415,18 @@ find_nondominated_3d_impl_sorted(const double ** restrict rows, size_t size,
             // previous one.
             const bool k_eq_j = (pk[0] == pj[0]) & (pk[1] == pj[1]) & (pk[2] == pj[2]);
             if (!keep_weakly) { // We don't keep duplicates;
-                dominated = true;
                 if (unlikely(k_eq_j) && pj < pk) { // Only the first duplicated point is kept.
-                    pos_dom = k;
-                    pj = pk;
+                    if (find_one_dominated) {
+                        // In this context, it means "position of the first dominated solution found".
+                        new_size = k;
+                        goto early_end;
+                    }
+                    last_dom = pk;
+                    rows[k] = NULL;
+                    new_size--;
+                    dominated = false; // Do not delete pj.
+                } else {
+                    dominated = true;
                 }
             } else { // or it is not a duplicate, so it is non-weakly dominated;
                 dominated = likely(!k_eq_j)
@@ -431,11 +438,11 @@ find_nondominated_3d_impl_sorted(const double ** restrict rows, size_t size,
         if (dominated) { // pj is dominated by a point in the tree or by prev.
             if (find_one_dominated) {
                 // In this context, it means "position of the first dominated solution found".
-                new_size = pos_dom;
+                new_size = j;
                 goto early_end;
             }
             last_dom = pj;
-            rows[pos_dom] = NULL;
+            rows[j] = NULL;
             new_size--;
         } else {
             pk = pj;
