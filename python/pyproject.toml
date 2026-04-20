@@ -214,17 +214,19 @@ doctest_optionflags = "NUMBER"
 addopts = [ "--import-mode=importlib", "--durations=5", "--durations-min=1.0" ]
 
 [tool.coverage.report]
+# Same as tool.gcovr.exclude-lines-by-pattern.
 exclude_also = [
-  ".*(?:#|//)\\s+nocov",
-  ".* ASSUME\\s?\\(.+\\);",
-  ".* unreachable\\s?\\(\\);",
-  ".*(?:GCOVR?|LCOV)_EXCL_LINE",
+  "^.*(?:#|//)\\s+nocov",
+  "^.*\\b(?:ASSUME|DEBUG2|DEBUG2_PRINT)\\s?\\(",
+  "^.*\\bunreachable\\s?\\(\\)",
+  "^.*(?:GCOVR?|LCOV)_EXCL_LINE",
 ]
 
 [tool.gcovr]
+# The regex must match the start of the line.
 exclude-lines-by-pattern = [
-  ".*(?:#|//)\\s+nocov",
-  ".* ASSUME\\s?\\(.+\\);",
-  ".* unreachable\\s?\\(\\);",
-  ".*(?:GCOVR?|LCOV)_EXCL_LINE",
+  "^.*(?:#|//)\\s+nocov",
+  "^.*\\b(?:ASSUME|DEBUG2|DEBUG2_PRINT)\\s?\\(",
+  "^.*\\bunreachable\\s?\\(\\)",
+  "^.*(?:GCOVR?|LCOV)_EXCL_LINE",
 ]
