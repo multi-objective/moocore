@@ -258,9 +258,19 @@ generate_row_pointers_asc_rev_3d(const double * restrict points, size_t size)
     return p;
 }
 
-static inline size_t
-find_nondominated_2d_helper_(const double * restrict points, size_t size,
-                             const bool keep_weakly, boolvec * restrict nondom)
+/**
+   Store which points are nondominated in nondom and return the number of
+   nondominated points.
+
+   2D dimension-sweep algorithm by H. T. Kung, F. Luccio, and F. P. Preparata.
+   On Finding the Maxima of a Set of Vectors. Journal of the ACM,
+   22(4):469–476, 1975.
+
+   Duplicated points may be removed in any order due to qsort not being stable.
+*/
+static __force_inline__ size_t
+find_nondominated_2d_impl(const double * restrict points, size_t size,
+                          const bool keep_weakly, boolvec * restrict nondom)
 {
     ASSUME(size > 1);
     const double ** p = generate_row_pointers_asc_rev_2d(points, size);
@@ -280,7 +290,7 @@ find_nondominated_2d_helper_(const double * restrict points, size_t size,
                     SWAP(pj, pk);
 
                 size_t pos_first_dom = row_index_from_ptr(points, pj, 2);
-                if (unlikely(nondom == NULL)) {
+                if (nondom == NULL) {
                     // In this context, it means "position of the first dominated solution found".
                     n_nondom = pos_first_dom;
                     goto early_end;
@@ -305,29 +315,19 @@ static inline size_t
 find_dominated_2d_(const double * restrict points, size_t size, const bool keep_weakly)
 {
     return keep_weakly
-        ? find_nondominated_2d_helper_(points, size, true, /*nondom=*/NULL)
-        : find_nondominated_2d_helper_(points, size, false, /*nondom=*/NULL);
+        ? find_nondominated_2d_impl(points, size, true, /*nondom=*/NULL)
+        : find_nondominated_2d_impl(points, size, false, /*nondom=*/NULL);
 }
 
 
-/**
-   Store which points are nondominated in nondom and return the number of
-   nondominated points.
-
-   2D dimension-sweep algorithm by H. T. Kung, F. Luccio, and F. P. Preparata.
-   On Finding the Maxima of a Set of Vectors. Journal of the ACM,
-   22(4):469–476, 1975.
-
-   Duplicated points may be removed in any order due to qsort not being stable.
-*/
 static inline size_t
 find_nondominated_set_2d_(const double * restrict points, size_t size,
                           const bool keep_weakly, boolvec * restrict nondom)
 {
     ASSUME(nondom != NULL);
     return keep_weakly
-        ? find_nondominated_2d_helper_(points, size, true, nondom)
-        : find_nondominated_2d_helper_(points, size, false, nondom);
+        ? find_nondominated_2d_impl(points, size, true, nondom)
+        : find_nondominated_2d_impl(points, size, false, nondom);
 }
 
 /**
@@ -665,17 +665,17 @@ find_nondominated_set_(const double * restrict points, size_t size, dimension_t 
     if (dim <= 3 || size > KUNG_SMALL_THRESHOLD) {
         const double * pp = force_agree_minimize(points, size, &dim, agree, minmax);
         ASSUME(dim >= 2);
-        size_t res;
+        size_t new_size;
         if (dim == 2) {
-            res = find_nondominated_set_2d_(pp, size, keep_weakly, nondom);
+            new_size = find_nondominated_set_2d_(pp, size, keep_weakly, nondom);
         } else if (dim == 3) {
-            res = find_nondominated_set_3d_(pp, size, keep_weakly, nondom);
+            new_size = find_nondominated_set_3d_(pp, size, keep_weakly, nondom);
         } else {
-            res = find_nondominated_set_agree_kung(pp, size, dim, keep_weakly, nondom);
+            new_size = find_nondominated_set_agree_kung(pp, size, dim, keep_weakly, nondom);
         }
         if (pp != points)
             free((void *) pp);
-        return res;
+        return new_size;
     }
 
     /* FIXME: Do not handle agree here, assume that objectives have been fixed
