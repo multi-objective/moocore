@@ -153,7 +153,7 @@ jobs:
 
       - name: Test coverage
         env:
-          NOT_CRAN: false
+          NOT_CRAN: true
         run: |
           exclude_pattern = rex::rex(or(group(or("#", "//"), any_spaces, "nocov"),
                                         group(or("ASSUME", "unreachable"), maybe(" "), "("),
@@ -162,7 +162,7 @@ jobs:
           options(covr.gcov_additional_paths="c",
                   covr.filter_non_package=FALSE,
                   covr.exclude_pattern=exclude_pattern)
-          coverage <- withr::with_makevars(c(MOOCORE_DEBUG="1", LTO_OPT=""),
+          coverage <- withr::with_makevars(c(MOOCORE_DEBUG="1", LTO_OPT="-fno-lto"),
             covr::package_coverage(type="all", quiet=FALSE, clean=FALSE,
               commentDonttest = FALSE, commentDontrun = FALSE, flags="R",
               relative_path=normalizePath(file.path(getwd(), "..")),
