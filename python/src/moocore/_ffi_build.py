@@ -52,7 +52,7 @@ sources = [
 sources = [sources_path + f for f in sources]
 
 
-def get_config():
+def get_config():  # nocov
     from distutils.core import Distribution
     from distutils.sysconfig import get_config_vars
 
@@ -61,7 +61,7 @@ def get_config():
     return config
 
 
-def uses_msvc():
+def uses_msvc():  # nocov
     config = get_config()
     return config.try_compile('#ifndef _MSC_VER\n#error "not MSVC"\n#endif')
 
