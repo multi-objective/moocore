@@ -221,8 +221,6 @@ exclude_also = [
   "^.*\\bunreachable\\s?\\(\\)",
   "^.*(?:GCOVR?|LCOV)_EXCL_LINE",
 ]
-[tool.coverage.run]
-branch = true
 
 [tool.gcovr]
 # The regex must match the start of the line.

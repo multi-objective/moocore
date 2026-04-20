@@ -140,3 +140,70 @@ def test_pareto_rank_maximise_copy():
     assert len(ranks) == 3
     # Verify original data unchanged
     assert_allclose(data, [[1.0, 2.0], [3.0, 1.0], [2.0, 2.0]])
+
+
+# ---------------------------------------------------------------------------
+# is_nondominated_within_sets / filter_dominated_within_sets edge cases
+# ---------------------------------------------------------------------------
+def test_is_nondominated_within_sets_single_col():
+    with pytest.raises(ValueError, match="at least 2 columns"):
+        moocore.is_nondominated_within_sets([[1]], sets=[1])
+
+
+def test_filter_dominated_within_sets_too_few_cols():
+    with pytest.raises(ValueError, match="at least 3 columns"):
+        moocore.filter_dominated_within_sets(np.array([[1, 2], [3, 4]]))
+
+
+# ---------------------------------------------------------------------------
+# normalise single column error
+# ---------------------------------------------------------------------------
+def test_normalise_single_column():
+    with pytest.raises(ValueError, match="at least two columns"):
+        moocore.normalise(np.array([[1], [2], [3]]))
+
+
+# ---------------------------------------------------------------------------
+# _unary_refset_common validation (via epsilon/igd)
+# ---------------------------------------------------------------------------
+def test_unary_refset_dim_mismatch():
+    """data and ref with different number of columns."""
+    with pytest.raises(ValueError, match="same number of columns"):
+        moocore.epsilon_additive(
+            np.array([[1, 2, 3]]), np.array([[1, 2]])
+        )
+
+
+# ---------------------------------------------------------------------------
+# hv_approx dimension mismatch
+# ---------------------------------------------------------------------------
+def test_hv_approx_dim_mismatch():
+    with pytest.raises(ValueError, match="must have length"):
+        moocore.hv_approx(np.array([[1, 2], [3, 4]]), ref=[10, 10, 10])
+
+
+# ---------------------------------------------------------------------------
+# avg_hausdorff_dist validation
+# ---------------------------------------------------------------------------
+def test_avg_hausdorff_dist_invalid_p():
+    with pytest.raises(ValueError, match="larger than zero"):
+        moocore.avg_hausdorff_dist(
+            np.array([[1, 2]]), np.array([[3, 4]]), p=0
+        )
+
+
+# ---------------------------------------------------------------------------
+# check_all_positive paths via epsilon_mult
+# ---------------------------------------------------------------------------
+def test_epsilon_mult_negative_data():
+    with pytest.raises(ValueError, match="larger than 0"):
+        moocore.epsilon_mult(
+            np.array([[-1, 2]]), np.array([[1, 2]])
+        )
+
+
+def test_epsilon_mult_negative_ref():
+    with pytest.raises(ValueError, match="larger than 0"):
+        moocore.epsilon_mult(
+            np.array([[1, 2]]), np.array([[-1, 2]])
+        )
