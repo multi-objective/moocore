@@ -39,10 +39,9 @@ def test_read_datasets_data(test_datapath, test, expected_name, expected_shape):
     assert testdata.shape == expected_shape, (
         f"Read data array has incorrect shape, should be {expected_shape} but is {testdata.shape}"
     )
-    if expected_name != "":
-        check_data = np.loadtxt(
-            test_datapath("expected_output/read_datasets/" + expected_name)
-        )
+    check_data = np.loadtxt(
+        test_datapath("expected_output/read_datasets/" + expected_name)
+    )
     assert_allclose(
         testdata,
         check_data,

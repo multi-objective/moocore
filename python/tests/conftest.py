@@ -23,10 +23,10 @@ def immutable_call():
     Call a function and assert that selected arguments remain immutable.
 
     Usage:
-        immutable_call(fn, *args, **kwargs, immutable=[0, "y"], freeze=True)
+        immutable_call(fn, *args, **kwargs, immutable=[0, "y"])
     """
 
-    def _call(fn, *args, immutable=None, freeze=True, **kwargs):
+    def _call(fn, *args, immutable=None, **kwargs):
         # If immutable is None, then all positional and keyword args are
         # immutable.
         if immutable is None:
@@ -37,14 +37,13 @@ def immutable_call():
         args_copy = [deep_copy(a) for a in args]
         kwargs_copy = {k: deep_copy(v) for k, v in kwargs.items()}
 
-        # Freeze mutable args if needed
-        if freeze:
-            for idx, a in enumerate(args):
-                if idx in immutable:
-                    freeze_numpy(a)
-            for k, v in kwargs.items():
-                if k in immutable:
-                    freeze_numpy(v)
+        # Freeze mutable args.
+        for idx, a in enumerate(args):
+            if idx in immutable:
+                freeze_numpy(a)
+        for k, v in kwargs.items():
+            if k in immutable:
+                freeze_numpy(v)
 
         # Run the function — any exception is a failure
         try:
