@@ -618,6 +618,112 @@ kung_merge(const double * points,
     }
 }
 
+static inline size_t
+find_nondominated_set_3d_helper(const double * restrict points,
+                                const double ** rows,
+                                size_t size, dimension_t max_dim,
+                                const bool keep_weakly, boolvec * restrict nondom)
+{
+    ASSUME(size > 1);
+
+    avl_tree_t tree;
+    avl_init_tree(&tree, qsort_cmp_pdouble_asc_x_nonzero);
+    avl_node_t * tnodes = malloc((size+1) * sizeof(*tnodes));
+    avl_node_t * node = tnodes;
+    node->item = rows[0];
+    avl_insert_top(&tree, node);
+
+    const double sentinel[] = { INFINITY, -INFINITY };
+    (++node)->item = sentinel;
+    avl_insert_after(&tree, node - 1, node);
+
+    // In this context, size means "no dominated solution found".
+    size_t new_size = size, j = 1;
+    const double * last_dom = NULL;
+    const double * restrict pk = rows[0];
+    do {
+        bool dominated;
+        const double * restrict pj = rows[j];
+        DEBUG2(printf_point("pj = [ ", pj, 3, " ], "));
+        if (pk[0] > pj[0] || pk[1] > pj[1]) {
+            avl_node_t * nodeaux;
+            int res = avl_search_closest(&tree, pj, &nodeaux);
+            assert(res != 0);
+            if (res > 0) { // nodeaux goes before pj
+                const double * restrict prev = nodeaux->item;
+                assert(prev[0] != sentinel[0]);
+                assert(prev[0] <= pj[0]);
+                dominated = prev[1] <= pj[1];
+                DEBUG2(printf_point("res > 0: prev: ", prev, 3, "\n"));
+                nodeaux = nodeaux->next;
+            } else if (nodeaux->prev) { // nodeaux goes after pj, so move to the next one.
+                const double * restrict prev = nodeaux->prev->item;
+                assert(prev[0] != sentinel[0]);
+                assert(prev[0] <= pj[0]);
+                dominated = prev[1] <= pj[1];
+                DEBUG2(printf_point("res < 0: prev: ", prev, 3, "\n"));
+            } else {
+                dominated = false;
+            }
+
+            if (!dominated) { // pj is NOT dominated by a point in the tree.
+                const double * restrict point = nodeaux->item;
+                assert(pj[0] <= point[0]);
+                // Delete everything in the tree that is dominated by pj.
+                while (pj[1] <= point[1]) {
+                    DEBUG2(printf_point("delete point: ", point, 3, "\n"));
+                    assert(pj[0] <= point[0]);
+                    nodeaux = nodeaux->next;
+                    point = nodeaux->item;
+                    /* FIXME: A possible speed up is to delete without
+                       rebalancing the tree because avl_insert_before() will
+                       rebalance. */
+                    avl_unlink_node(&tree, nodeaux->prev);
+                }
+                DEBUG2((point == sentinel)
+                       ? printf_point("insert before sentinel: ", sentinel, 2, "\n")
+                       : printf_point("insert before point: ", point, 3, "\n"));
+                (++node)->item = pj;
+                avl_insert_before(&tree, nodeaux, node);
+            }
+        } else {
+            // Handle duplicates and points that are dominated by the immediate
+            // previous one.
+            const bool k_eq_j = (pk[0] == pj[0]) & (pk[1] == pj[1]) & (pk[2] == pj[2]);
+            if (!keep_weakly) { // We don't keep duplicates;
+                dominated = true;
+                if (unlikely(k_eq_j) && pj < pk) // Only the first duplicated point is kept.
+                    SWAP(pk, pj);
+            } else { // or it is not a duplicate, so it is non-weakly dominated;
+                dominated = likely(!k_eq_j)
+                    // or pk was dominated, then this one is also dominated.
+                    || last_dom == pk;
+            }
+            DEBUG2(printf_point("weakly dominated by pk: ", pk, 3, "\n"));
+        }
+        if (dominated) { // pj is dominated by a point in the tree or by prev.
+            /* Map the order in rows[], which is sorted, to the original order
+               in points. */
+            size_t pos_last_dom = row_index_from_ptr(points, pj, max_dim);
+            if (unlikely(nondom == NULL)) {
+                // In this context, it means "position of the first dominated solution found".
+                new_size = pos_last_dom;
+                goto early_end;
+            }
+            nondom[pos_last_dom] = false;
+            last_dom = pj;
+            new_size--;
+        } else {
+            pk = pj;
+        }
+        j++;
+    } while (j < size);
+
+early_end:
+    free(tnodes);
+    return new_size;
+}
+
 static size_t
 maxima_top(const double * points, const double ** rows, size_t size,
            dimension_t dim, dimension_t max_dim,
@@ -637,7 +743,8 @@ maxima_rec_dim(const double * points, const double ** rows, size_t size,
     shift_to_next_dimension(r, rows, size);
     const double * const points_shifted = points + 1;
     if (dim == 4) { // We can reach this base case if one dimension has all equal values.
-        // find_nondominated_set_3d_helper() will sort using cmp_ppdouble_asc_rev_3d().
+        // Sort in ascending lexicographic order from the last dimension.
+        qsort_typesafe(r, size, cmp_ppdouble_asc_rev_3d);
         new_size = keep_weakly // Help GCC generate specialized code for true/false.
             ? find_nondominated_set_3d_helper(points_shifted, r, size, max_dim, true, nondom)
             : find_nondominated_set_3d_helper(points_shifted, r, size, max_dim, false, nondom);
