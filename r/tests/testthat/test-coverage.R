@@ -131,4 +131,58 @@ test_that("eafdiff rectangles with maximise vector", {
   expect_true(ncol(d) == 5)
 })
 
+# -----------------------------------------------------------------------
+# vorob_t and vorob_dev with maximise (r/R/vorob.R from 77%)
+# -----------------------------------------------------------------------
+test_that("vorob_t maximise=TRUE", {
+  data(CPFs)
+  CPFs_neg <- CPFs
+  CPFs_neg[, 1:2] <- -CPFs_neg[, 1:2]
+  res <- vorob_t(CPFs_neg, reference = c(-2, -200), maximise = TRUE)
+  expect_true(is.numeric(res$threshold))
+  expect_true(is.matrix(res$ve))
+})
+
+test_that("vorob_dev maximise=TRUE", {
+  data(CPFs)
+  CPFs_neg <- CPFs
+  CPFs_neg[, 1:2] <- -CPFs_neg[, 1:2]
+  res <- vorob_t(CPFs_neg, reference = c(-2, -200), maximise = TRUE)
+  vd <- vorob_dev(CPFs_neg, ve = res$ve, reference = c(-2, -200), maximise = TRUE)
+  expect_true(is.numeric(vd))
+})
+
+# -----------------------------------------------------------------------
+# rbind_datasets error paths (r/R/rbind_datasets.R from 77%)
+# -----------------------------------------------------------------------
+test_that("rbind_datasets errors", {
+  x_small <- data.frame(f1 = 1:3, f2 = 4:6)
+  y <- data.frame(f1 = 7:9, f2 = 10:12, set = 1:3)
+  expect_error(rbind_datasets(x_small, x_small))
+
+  x_bad <- data.frame(f1 = 1:3, f2 = 4:6, set = 2:4)
+  expect_error(rbind_datasets(x_bad, y))
+})
+
+# -----------------------------------------------------------------------
+# r2_exact with mixed maximise (r/R/r2.R from 78%)
+# -----------------------------------------------------------------------
+test_that("r2_exact mixed maximise", {
+  dat <- matrix(c(5, 5, 4, 6, 2, 7, 7, 4), ncol = 2, byrow = TRUE)
+  result <- r2_exact(dat, reference = c(0, 10), maximise = c(FALSE, TRUE))
+  expect_true(is.numeric(result))
+  expect_true(is.finite(result))
+})
+
+# -----------------------------------------------------------------------
+# epsilon with mixed maximise (r/R/epsilon.R from 84%)
+# -----------------------------------------------------------------------
+test_that("epsilon_additive mixed maximise", {
+  A <- matrix(c(4, 2, 3, 3, 2, 4), ncol = 2, byrow = TRUE)
+  ref <- matrix(c(10, 1, 6, 1, 2, 2, 1, 6, 1, 10), ncol = 2, byrow = TRUE)
+  result <- epsilon_additive(A, ref, maximise = c(TRUE, FALSE))
+  expect_true(is.numeric(result))
+  expect_true(is.finite(result))
+})
+
 }) # withr::with_output_sink()
