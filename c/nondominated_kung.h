@@ -35,28 +35,24 @@
 #endif
 
 static inline bool
-check_nondom(const double * points, const double ** rows,
-             size_t size, dimension_t dim, boolvec * restrict nondom)
+check_nondom(const double ** rows, size_t size)
 {
     for (size_t k = 0; k < size; k++) {
-        if (!nondom[row_index_from_ptr(points, rows[k], dim)])
+        if (rows[k] == NULL)
             return false;
     }
     return true;
 }
 
 static void
-filter_dominated(const double * points, const double ** rows,
-                 size_t new_size, dimension_t dim, dimension_t max_dim,
-                 const boolvec * restrict nondom, size_t size)
+filter_dominated(const double ** restrict rows, size_t new_size, size_t size, dimension_t dim)
 {
-    DEBUG2_PRINT("filter_dominated: dim=%d, size=%zu, new_size=%zu\n",
-                 dim, size, new_size);
+    DEBUG2_PRINT("filter_dominated: dim=%d, new_size=%zu, size=%zu\n", dim, new_size, size);
+
 #if DEBUG >= 1
     size_t total = 0, j = 0;
     do {
-        size_t pos = row_index_from_ptr(points, rows[j], max_dim);
-        if (nondom[pos])
+        if (rows[j])
             total++;
         j++;
     } while (j < size);
@@ -65,17 +61,15 @@ filter_dominated(const double * points, const double ** rows,
 
     size_t k = 0;
     // Find first dominated.
-    while (nondom[row_index_from_ptr(points, rows[k], max_dim)])
-        k++;
+    while (rows[k] != NULL) k++;
     size_t n = k;
     while (k < new_size) {
         do {
             n++;
-        } while (!nondom[row_index_from_ptr(points, rows[n], max_dim)]); // Find next nondominated.
+        } while (rows[n] == NULL); // Find next nondominated.
         rows[k] = rows[n];
         k++;
     }
-
     DEBUG2(print_rows(rows, new_size, dim));
 }
 
@@ -83,15 +77,13 @@ filter_dominated(const double * points, const double ** rows,
 /**
    Brute-force algorithm O(size^2 * dim), with a few improvements.
 
-   Simplified version of find_nondominated_set_agree_bf().
+   Simplified version of find_nondominated_bf_impl().
 */
 static inline size_t
-maxima_brute_force(const double * points, const double ** restrict rows,
-                   size_t size, dimension_t dim, dimension_t max_dim,
-                   bool keep_weakly, boolvec * restrict nondom)
+maxima_brute_force(const double ** restrict rows, size_t size, dimension_t dim,
+                   bool keep_weakly)
 {
-    DEBUG2_PRINT("maxima_brute_force: row=%zu, size=%zu\n",
-            row_index_from_ptr(points, rows[0], max_dim), size);
+    DEBUG2_PRINT("maxima_brute_force: size=%zu\n", size);
     DEBUG2(print_rows(rows, size, dim));
 
     const unsigned nkw = !keep_weakly;
@@ -101,17 +93,15 @@ maxima_brute_force(const double * points, const double ** restrict rows,
     for (size_t j = 1; j < size; j++) {
         const double * restrict pj = rows[j];
         size_t k = min_k;
-        assert(nondom[row_index_from_ptr(points, pj, max_dim)]);
-        while (!nondom[row_index_from_ptr(points, rows[k], max_dim)])
+        assert(pj != NULL);
+        while (rows[k] == NULL)
             k++;
         min_k = k;
         ASSUME(k < j);
-        ASSUME(nondom[row_index_from_ptr(points, rows[k], max_dim)]);
 
         for (; k < j; k++) {
+            if (rows[k] == NULL) continue;
             const double * restrict pk = rows[k];
-            size_t pos_k = row_index_from_ptr(points, pk, max_dim);
-            if (!nondom[pos_k]) continue;
 
             // Use unsigned instead of bool to allow auto-vectorization.
             unsigned k_leq_j = true, j_leq_k = true;
@@ -129,9 +119,9 @@ maxima_brute_force(const double * points, const double ** restrict rows,
             if (!(dom_k | dom_j)) continue;
             assert(dom_k ^ dom_j); // At least one but not both can be removed.
 
-            size_t last_dom_pos = dom_j ? row_index_from_ptr(points, pj, max_dim) : pos_k;
-            assert(nondom[last_dom_pos]);
-            nondom[last_dom_pos] = false;
+            size_t last_dom_pos = dom_j ? j : k;
+            assert(rows[last_dom_pos]);
+            rows[last_dom_pos] = NULL;
             new_size--;
             if (dom_j)
                 break;
@@ -142,19 +132,17 @@ maxima_brute_force(const double * points, const double ** restrict rows,
 }
 
 static size_t
-maxima_brute_force_filter_dom(
-    const double * points, const double ** restrict rows,
-    size_t size, dimension_t dim, dimension_t max_dim,
-    bool keep_weakly, boolvec * restrict nondom)
+maxima_brute_force_filter_dom(const double ** restrict rows, size_t size,
+                              dimension_t dim, bool keep_weakly)
 {
     // Help GCC generate specialized code for true/false.
     size_t new_size = keep_weakly
-        ? maxima_brute_force(points, rows, size, dim, max_dim, true, nondom)
-        : maxima_brute_force(points, rows, size, dim, max_dim, false, nondom);
+        ? maxima_brute_force(rows, size, dim, true)
+        : maxima_brute_force(rows, size, dim, false);
     if (new_size < size) {
-        filter_dominated(points, rows, new_size, dim, max_dim, nondom, size);
+        filter_dominated(rows, new_size, size, dim);
     }
-    assert(check_nondom(points, rows, new_size, max_dim, nondom));
+    assert(check_nondom(rows, new_size));
     return new_size;
 }
 
@@ -230,10 +218,8 @@ dominated_by_tree_3d(const avl_tree_t * restrict tree,
    elements of S that are not dominated by any element of R.
 */
 static size_t
-kung_merge_dim3(const double * points,
-                const double ** restrict r, size_t r_size,
-                const double ** restrict s, size_t s_size,
-                dimension_t max_dim, boolvec * restrict nondom)
+kung_merge_dim3(const double ** restrict r, size_t r_size,
+                const double ** restrict s, size_t s_size)
 {
     // r and s should be already sorted.
     // Everything in s that is below the first element in r is nondominated.
@@ -262,8 +248,7 @@ kung_merge_dim3(const double * points,
     size_t i = 1, new_size = s_size;
     do {
         const double * restrict v = s[k];
-        DEBUG2_PRINT("i = %zu, j = %zu, s_size = %zu, v_row = %zu, ", i, k, s_size,
-                row_index_from_ptr(points, v, max_dim));
+        DEBUG2_PRINT("i = %zu, j = %zu, s_size = %zu", i, k, s_size);
         DEBUG2(printf_point("v = [ ", v, 3, " ]\n"));
 
         while (i < r_size) { // Add to the tree all points in R that could dominate v.
@@ -293,11 +278,8 @@ kung_merge_dim3(const double * points,
             i++;
         }
         if (dominated_by_tree_3d(&tree, v) == NULL) {
-            size_t pos_v = row_index_from_ptr(points, v, max_dim);
             DEBUG2(printf_point("dominated_by_tree_3d: v=[ ", v, 3, " ], "));
-            DEBUG2_PRINT("pos_v=%zu\n", pos_v);
-            assert(nondom[pos_v]);
-            nondom[pos_v] = false;
+            s[k] = NULL; // dominated
             new_size--;
         }
         k++;
@@ -308,14 +290,12 @@ kung_merge_dim3(const double * points,
 }
 
 static size_t
-kung_merge_brute_force(const double * points,
-                       const double ** restrict r, size_t r_size,
+kung_merge_brute_force(const double ** restrict r, size_t r_size,
                        const double ** restrict s, size_t s_size,
-                       dimension_t dim, dimension_t max_dim, boolvec * restrict nondom)
+                       dimension_t dim)
 {
-    DEBUG2_PRINT("kung_merge_brute_force: dim=%d, r=%zu, r_size=%zu, s=%zu, s_size=%zu\n",
-                 dim, row_index_from_ptr(points, r[0], max_dim), r_size,
-                 row_index_from_ptr(points, s[0], max_dim), s_size);
+    DEBUG2_PRINT("kung_merge_brute_force: dim=%d, r_size=%zu, s_size=%zu\n",
+                 dim, r_size, s_size);
 
     size_t new_size = s_size;
     for (size_t j = 0; j < s_size; j++) {
@@ -329,15 +309,13 @@ kung_merge_brute_force(const double * points,
                 r_leq_s &= (cmp <= 0.0);
             }
             if (unlikely(r_leq_s)) {
-                size_t idx = row_index_from_ptr(points, sj, max_dim);
-                assert(nondom[idx]);
-                nondom[idx] = false;
+                s[j] = NULL; // dominated
                 new_size--;
                 break;
             }
         }
     }
-    assert(check_nondom(points, r, r_size, max_dim, nondom));
+    assert(check_nondom(r, r_size));
     return new_size;
 }
 
@@ -438,33 +416,86 @@ compact_rows(const double ** restrict r, size_t r_size,
 }
 
 static size_t
-kung_merge_nobase(const double * points,
-                  const double ** restrict r, size_t r_size,
+kung_merge_nobase(const double ** restrict r, size_t r_size,
                   const double ** restrict s, size_t s_size,
-                  dimension_t dim, dimension_t max_dim, boolvec * restrict nondom);
+                  dimension_t dim);
+
+typedef struct shifted_row {
+    const double * row;
+    const double ** prow;
+} shifted_row_t;
+
+// Deterministic tie-break by pointer value.
+DEFINE_QSORT_CMP(cmp_shifted_row_asc_x_nonzero_stable, shifted_row_t *)
+{
+    ASSUME(a != b);
+    return cmp_pdouble_asc_x_nonzero_stable(a->row, b->row);
+}
+
+// Deterministic tie-break by pointer value.
+DEFINE_QSORT_CMP(cmp_shifted_row_asc_rev_3d, shifted_row_t *)
+{
+    ASSUME(a != b);
+    return cmp_pdouble_asc_rev(a->row, b->row, 3);
+}
+
+static shifted_row_t *
+alloc_shifted_rows(const double ** restrict r, size_t size,
+                   cmp_fun_t cmp_fun, const double ** restrict r_new)
+{
+    shifted_row_t * shifted_rows = malloc(size * sizeof(*shifted_rows));
+    for (size_t k = 0; k < size; k++) {
+        const double ** prow = r + k;
+        shifted_rows[k].row = (*prow) + 1; // Shift to next dimension.
+        shifted_rows[k].prow = prow;       // Remember the original row.
+    }
+    qsort(shifted_rows, size, sizeof(*shifted_rows), cmp_fun);
+    for (size_t k = 0; k < size; k++) {
+        r_new[k] = shifted_rows[k].row;
+    }
+    return shifted_rows;
+}
+
+/**
+   This function marks elements of shifted_rows for removal (*prow = NULL).
+   Only elements in r[] that are present in shifted_rows.row are not marked.
+   We can assume that elements in r appear in the same order as in
+   shifted_rows.
+*/
+static void
+filter_shifted(shifted_row_t * restrict shifted_rows,
+               const double ** restrict r, size_t new_size, size_t old_size)
+{
+    size_t i = 0, k = 0, n = 0;
+    while (n < new_size) {
+        while (r[i] == NULL) i++; // Find next nondominated
+        while (r[i] != shifted_rows[k].row) { // Find it in shifted_rows.
+            *(shifted_rows[k].prow) = NULL;
+            k++;
+        }
+        i++;
+        k++;
+        n++;
+    }
+    // The rest are dominated.
+    while (k < old_size) {
+        *(shifted_rows[k].prow) = NULL;
+        k++;
+    }
+}
 
 /**
    Recurse one dimension before merging.
 */
 static size_t
-kung_merge_rec(const double * points,
-               const double ** restrict r, size_t r_size,
-               const double ** restrict s, size_t s_size,
-               dimension_t dim, dimension_t max_dim, boolvec * restrict nondom)
+kung_merge_rec_dim(const double ** restrict r, size_t r_size,
+                   const double ** restrict s, size_t s_size,
+                   dimension_t dim)
 {
-    DEBUG2(printf_rows("kung_merge_rec: R", r, r_size, dim+1, "r_size"));
-    DEBUG2(printf_rows("kung_merge_rec: S", s, s_size, dim+1, "s_size"));
-    assert(check_nondom(points, r, r_size, max_dim, nondom));
-    assert(check_nondom(points, s, s_size, max_dim, nondom));
-    const double ** r1 = (const double **) malloc((r_size + s_size) * sizeof(*r));
-    shift_to_next_dimension(r1, r, r_size);
-    const double ** s1 = r1 + r_size;
-    shift_to_next_dimension(s1, s, s_size);
-    const double * const points_shifted = points + 1;
-    DEBUG2(printf_rows("kung_merge_rec2: R", r1, r_size, dim, "r_size"));
-    DEBUG2(printf_rows("kung_merge_rec2: S", s1, s_size, dim, "s_size"));
-    assert(check_nondom(points_shifted, r1, r_size, max_dim, nondom));
-    assert(check_nondom(points_shifted, s1, s_size, max_dim, nondom));
+    DEBUG2(printf_rows("kung_merge_rec_dim: R", r, r_size, dim, "r_size"));
+    DEBUG2(printf_rows("kung_merge_rec_dim: S", s, s_size, dim, "s_size"));
+    assert(check_nondom(r, r_size));
+    assert(check_nondom(s, s_size));
     /* FIXME: It is unclear whether kung_merge_dim3() is faster than
        kung_merge_brute_force() when r_size * s_size <= KUNG_MERGE_THRESHOLD.
        It is probably true that kung_merge_brute_force() is faster when
@@ -472,63 +503,78 @@ kung_merge_rec(const double * points,
     */
     size_t new_size;
     if (r_size == 1 || s_size == 1 || r_size * s_size <= KUNG_MERGE_THRESHOLD) {
-        // kung_merge_brute_force() does not need sorting.
-        new_size = kung_merge_brute_force(points_shifted, r1, r_size, s1, s_size, dim, max_dim, nondom);
+        // kung_merge_brute_force() does not need sorting, so copying r and s is not needed.
+        for (size_t k = 0; k < r_size; k++)
+            r[k]++;
+        for (size_t k = 0; k < s_size; k++)
+            s[k]++;
+        new_size = kung_merge_brute_force(r, r_size, s, s_size, dim - 1);
+        assert(check_nondom(r, r_size));
+        for (size_t k = 0; k < r_size; k++)
+            r[k]--;
+        // We filter first so we remove all NULL pointers.
+        if (new_size < s_size)
+            filter_dominated(s, new_size, s_size, dim);
+        for (size_t k = 0; k < new_size; k++)
+            s[k]--;
     } else {
+        const double ** r1 = (const double **) malloc((r_size + s_size) * sizeof(*r));
+        shift_to_next_dimension(r1, r, r_size);
         // We shifted to next dimension, so we need to sort.
         qsort_typesafe(r1, r_size, cmp_ppdouble_asc_x_nonzero_stable);
-        qsort_typesafe(s1, s_size, cmp_ppdouble_asc_x_nonzero_stable);
-        if (dim == 3) {
-            new_size = kung_merge_dim3(points_shifted, r1, r_size, s1, s_size, max_dim, nondom);
+        /* We will create new row pointers that point to the next dimension,
+           however, for s, we also want to remember the original position of
+           each row pointer to be able to filter dominated, thus shifted_rows
+           stores the new row pointer and a pointer to the previous one, so we
+           can modify it directly.  */
+        /* FIXME: This would be less awkward if we had a sort function that
+           allowed indirect sorting of parallel arrays. Then, we would not need
+           shifted_rows.
+        */
+        const double ** s1 = r1 + r_size;
+        shifted_row_t * shifted_rows = alloc_shifted_rows(
+            s, s_size, qsort_cmp_shifted_row_asc_x_nonzero_stable, s1);
+        DEBUG2(printf_rows("kung_merge_rec_dim2: R", r1, r_size, dim - 1, "r_size"));
+        DEBUG2(printf_rows("kung_merge_rec_dim2: S", s1, s_size, dim - 1, "s_size"));
+        assert(check_nondom(r1, r_size));
+        assert(check_nondom(s1, s_size));
+        if (dim == 4) {
+            new_size = kung_merge_dim3(r1, r_size, s1, s_size);
             DEBUG2_PRINT("kung_merge_dim3: new_size=%zu\n", new_size);
         } else {
-            // FIXME: kung_merge_nobase() will filter s1 but that is a waste
-            // because we will destroy it without looking at it and filter s.
-            new_size = kung_merge_nobase(points_shifted, r1, r_size, s1, s_size, dim, max_dim, nondom);
+            new_size = kung_merge_nobase(r1, r_size, s1, s_size, dim - 1);
         }
+        assert(check_nondom(r1, r_size));
+        if (new_size < s_size) {
+            filter_shifted(shifted_rows, s1, new_size, s_size);
+            filter_dominated(s, new_size, s_size, dim);
+        }
+        free(shifted_rows);
+        free(r1);
     }
-    assert(check_nondom(points_shifted, r1, r_size, max_dim, nondom));
-    free(r1);
+    assert(check_nondom(s, new_size));
     return new_size;
 }
 
 static size_t
-kung_merge_rec_filter_dom(const double * points,
-                          const double ** restrict r, size_t r_size,
-                          const double ** restrict s, size_t s_size,
-                          dimension_t dim, dimension_t max_dim, boolvec * restrict nondom)
-{
-    size_t new_size = kung_merge_rec(points, r, r_size, s, s_size, dim, max_dim, nondom);
-    if (new_size < s_size) {
-        filter_dominated(points, s, new_size, dim+1, max_dim, nondom, s_size);
-    }
-    assert(check_nondom(points, s, new_size, max_dim, nondom));
-    return new_size;
-}
-
-static size_t
-kung_merge(const double * points,
-           const double ** restrict r, size_t r_size,
+kung_merge(const double ** restrict r, size_t r_size,
            const double ** restrict s, size_t s_size,
-           dimension_t dim, dimension_t max_dim, boolvec * restrict nondom);
+           dimension_t dim);
 
 // Find the elements of S that are not dominated by any elements of R.
 static size_t
-kung_merge_nobase(const double * points,
-                  const double ** restrict r, size_t r_size,
+kung_merge_nobase(const double ** restrict r, size_t r_size,
                   const double ** restrict s, size_t s_size,
-                  dimension_t dim, dimension_t max_dim, boolvec * restrict nondom)
+                  dimension_t dim)
 {
-    DEBUG2_PRINT("kung_merge_nobase: dim=%d, r=%zu, r_size=%zu\n", dim,
-                 row_index_from_ptr(points, r[0], max_dim), r_size);
+    DEBUG2_PRINT("kung_merge_nobase: dim=%d, r_size=%zu\n", dim, r_size);
     DEBUG2(print_rows(r, r_size, dim));
-    DEBUG2_PRINT("kung_merge_nobase: dim=%d, s=%zu, s_size=%zu\n", dim,
-                 row_index_from_ptr(points, s[0], max_dim), s_size);
+    DEBUG2_PRINT("kung_merge_nobase: dim=%d, s_size=%zu\n", dim, s_size);
     DEBUG2(print_rows(s, s_size, dim));
     assert(r_size > 0);
     assert(s_size > 0);
-    assert(check_nondom(points, r, r_size, max_dim, nondom));
-    assert(check_nondom(points, s, s_size, max_dim, nondom));
+    assert(check_nondom(r, r_size));
+    assert(check_nondom(s, s_size));
     ASSUME(dim > 3);
     ASSUME(r_size > 1 && s_size > 1 && r_size * s_size > KUNG_MERGE_THRESHOLD);
 
@@ -553,214 +599,110 @@ kung_merge_nobase(const double * points,
         ASSUME(r1_size > 0);
         ASSUME(s1_size > 0);
         DEBUG2_PRINT("Solve sub-problem  (R1, S1) in a lower dimension\n");
-        s1_size = kung_merge_rec_filter_dom(points, r, r1_size, s, s1_size, dim - 1, max_dim, nondom);
-    } else {
-        // Solve sub-problem (R2, S2)
-        DEBUG2(printf_rows("R2", r2, r2_size, dim, "r2_size"));
-        DEBUG2(printf_rows("S2", s2, s2_size, dim, "s2_size"));
-        if (r2_size > 0 && s2_size > 0) {
-            DEBUG2_PRINT("Solve sub-problem  (R2, S2)\n");
-            assert(check_nondom(points, r2, r2_size, max_dim, nondom));
-            assert(check_nondom(points, s2, s2_size, max_dim, nondom));
-            s2_size = kung_merge(points, r2, r2_size, s2, s2_size, dim, max_dim, nondom);
-            assert(check_nondom(points, r2, r2_size, max_dim, nondom));
-            assert(check_nondom(points, s2, s2_size, max_dim, nondom));
-        }
-        if (r1_size > 0) {
-            DEBUG2_PRINT("Solve sub-problem  (R1, S1)\n");
-            // Solve sub-problem  (R1, S1)
-            assert(check_nondom(points, r, r1_size, max_dim, nondom));
-            assert(check_nondom(points, s, s1_size, max_dim, nondom));
-            s1_size = kung_merge(points, r, r1_size, s, s1_size, dim, max_dim, nondom);
-            assert(check_nondom(points, r, r1_size, max_dim, nondom));
-            assert(check_nondom(points, s, s1_size, max_dim, nondom));
-            if (s2_size > 0) {
-                DEBUG2_PRINT("Solve sub-problem  (R1, S2) in a lower dimension\n");
-                s2_size = kung_merge_rec_filter_dom(points, r, r1_size, s2, s2_size, dim - 1, max_dim, nondom);
-            }
+        return kung_merge_rec_dim(r, r1_size, s, s1_size, dim);
+    }
+
+    // Solve sub-problem (R2, S2)
+    DEBUG2(printf_rows("R2", r2, r2_size, dim, "r2_size"));
+    DEBUG2(printf_rows("S2", s2, s2_size, dim, "s2_size"));
+    if (r2_size > 0 && s2_size > 0) {
+        DEBUG2_PRINT("Solve sub-problem  (R2, S2)\n");
+        assert(check_nondom(r2, r2_size));
+        assert(check_nondom(s2, s2_size));
+        s2_size = kung_merge(r2, r2_size, s2, s2_size, dim);
+        assert(check_nondom(r2, r2_size));
+        assert(check_nondom(s2, s2_size));
+    }
+    if (r1_size > 0) {
+        DEBUG2_PRINT("Solve sub-problem  (R1, S1)\n");
+        // Solve sub-problem  (R1, S1)
+        assert(check_nondom(r, r1_size));
+        assert(check_nondom(s, s1_size));
+        s1_size = kung_merge(r, r1_size, s, s1_size, dim);
+        assert(check_nondom(r, r1_size));
+        assert(check_nondom(s, s1_size));
+        if (s2_size > 0) {
+            DEBUG2_PRINT("Solve sub-problem  (R1, S2) in a lower dimension\n");
+            s2_size = kung_merge_rec_dim(r, r1_size, s2, s2_size, dim);
         }
     }
     size_t new_size = compact_rows(s, s1_size, s2, s2_size, s_size);
     DEBUG2_PRINT("kung_merge: return S = %zu\n", new_size);
     DEBUG2(print_rows(s, new_size, dim));
-    assert(check_nondom(points, s, new_size, max_dim, nondom));
+    assert(check_nondom(s, new_size));
     return new_size;
 }
 
 // Find the elements of S that are not dominated by any elements of R.
 static size_t
-kung_merge(const double * points,
-           const double ** restrict r, size_t r_size,
+kung_merge(const double ** restrict r, size_t r_size,
            const double ** restrict s, size_t s_size,
-           dimension_t dim, dimension_t max_dim, boolvec * restrict nondom)
+           dimension_t dim)
 {
-    DEBUG2_PRINT("kung_merge: dim=%d, r=%zu, r_size=%zu\n", dim,
-                 row_index_from_ptr(points, r[0], max_dim), r_size);
+    DEBUG2_PRINT("kung_merge: dim=%d, r_size=%zu\n", dim, r_size);
     DEBUG2(print_rows(r, s_size, dim));
-    DEBUG2_PRINT("kung_merge: dim=%d, s=%zu, s_size=%zu\n", dim,
-                 row_index_from_ptr(points, s[0], max_dim), s_size);
+    DEBUG2_PRINT("kung_merge: dim=%d, s_size=%zu\n", dim, s_size);
     DEBUG2(print_rows(s, s_size, dim));
     ASSUME(dim > 3);
     ASSUME(r_size > 0);
     ASSUME(s_size > 0);
-    assert(check_nondom(points, r, r_size, max_dim, nondom));
-    assert(check_nondom(points, s, s_size, max_dim, nondom));
+    assert(check_nondom(r, r_size));
+    assert(check_nondom(s, s_size));
     if (r_size == 1 || s_size == 1 || r_size * s_size <= KUNG_MERGE_THRESHOLD) {
-        size_t new_size = kung_merge_brute_force(points, r, r_size, s, s_size, dim, max_dim, nondom);
+        size_t new_size = kung_merge_brute_force(r, r_size, s, s_size, dim);
         if (new_size < s_size) {
-            filter_dominated(points, s, new_size, dim, max_dim, nondom, s_size);
+            filter_dominated(s, new_size, s_size, dim);
         }
-        assert(check_nondom(points, s, new_size, max_dim, nondom));
+        assert(check_nondom(s, new_size));
         return new_size;
     } else {
         // kung_merge_nobase() already filters, so we can return immediately.
-        return kung_merge_nobase(points, r, r_size, s, s_size, dim, max_dim, nondom);
+        return kung_merge_nobase(r, r_size, s, s_size, dim);
     }
 }
 
-static inline size_t
-find_nondominated_set_3d_helper(const double * restrict points,
-                                const double ** rows,
-                                size_t size, dimension_t max_dim,
-                                const bool keep_weakly, boolvec * restrict nondom)
-{
-    ASSUME(size > 1);
-
-    avl_tree_t tree;
-    avl_init_tree(&tree, qsort_cmp_pdouble_asc_x_nonzero);
-    avl_node_t * tnodes = malloc((size+1) * sizeof(*tnodes));
-    avl_node_t * node = tnodes;
-    node->item = rows[0];
-    avl_insert_top(&tree, node);
-
-    const double sentinel[] = { INFINITY, -INFINITY };
-    (++node)->item = sentinel;
-    avl_insert_after(&tree, node - 1, node);
-
-    // In this context, size means "no dominated solution found".
-    size_t new_size = size, j = 1;
-    const double * last_dom = NULL;
-    const double * restrict pk = rows[0];
-    do {
-        bool dominated;
-        const double * restrict pj = rows[j];
-        DEBUG2(printf_point("pj = [ ", pj, 3, " ], "));
-        if (pk[0] > pj[0] || pk[1] > pj[1]) {
-            avl_node_t * nodeaux;
-            int res = avl_search_closest(&tree, pj, &nodeaux);
-            assert(res != 0);
-            if (res > 0) { // nodeaux goes before pj
-                const double * restrict prev = nodeaux->item;
-                assert(prev[0] != sentinel[0]);
-                assert(prev[0] <= pj[0]);
-                dominated = prev[1] <= pj[1];
-                DEBUG2(printf_point("res > 0: prev: ", prev, 3, "\n"));
-                nodeaux = nodeaux->next;
-            } else if (nodeaux->prev) { // nodeaux goes after pj, so move to the next one.
-                const double * restrict prev = nodeaux->prev->item;
-                assert(prev[0] != sentinel[0]);
-                assert(prev[0] <= pj[0]);
-                dominated = prev[1] <= pj[1];
-                DEBUG2(printf_point("res < 0: prev: ", prev, 3, "\n"));
-            } else {
-                dominated = false;
-            }
-
-            if (!dominated) { // pj is NOT dominated by a point in the tree.
-                const double * restrict point = nodeaux->item;
-                assert(pj[0] <= point[0]);
-                // Delete everything in the tree that is dominated by pj.
-                while (pj[1] <= point[1]) {
-                    DEBUG2(printf_point("delete point: ", point, 3, "\n"));
-                    assert(pj[0] <= point[0]);
-                    nodeaux = nodeaux->next;
-                    point = nodeaux->item;
-                    /* FIXME: A possible speed up is to delete without
-                       rebalancing the tree because avl_insert_before() will
-                       rebalance. */
-                    avl_unlink_node(&tree, nodeaux->prev);
-                }
-                DEBUG2((point == sentinel)
-                       ? printf_point("insert before sentinel: ", sentinel, 2, "\n")
-                       : printf_point("insert before point: ", point, 3, "\n"));
-                (++node)->item = pj;
-                avl_insert_before(&tree, nodeaux, node);
-            }
-        } else {
-            // Handle duplicates and points that are dominated by the immediate
-            // previous one.
-            const bool k_eq_j = (pk[0] == pj[0]) & (pk[1] == pj[1]) & (pk[2] == pj[2]);
-            if (!keep_weakly) { // We don't keep duplicates;
-                dominated = true;
-                if (unlikely(k_eq_j) && pj < pk) // Only the first duplicated point is kept.
-                    SWAP(pk, pj);
-            } else { // or it is not a duplicate, so it is non-weakly dominated;
-                dominated = likely(!k_eq_j)
-                    // or pk was dominated, then this one is also dominated.
-                    || last_dom == pk;
-            }
-            DEBUG2(printf_point("weakly dominated by pk: ", pk, 3, "\n"));
-        }
-        if (dominated) { // pj is dominated by a point in the tree or by prev.
-            /* Map the order in rows[], which is sorted, to the original order
-               in points. */
-            size_t pos_last_dom = row_index_from_ptr(points, pj, max_dim);
-            if (unlikely(nondom == NULL)) {
-                // In this context, it means "position of the first dominated solution found".
-                new_size = pos_last_dom;
-                goto early_end;
-            }
-            nondom[pos_last_dom] = false;
-            last_dom = pj;
-            new_size--;
-        } else {
-            pk = pj;
-        }
-        j++;
-    } while (j < size);
-
-early_end:
-    free(tnodes);
-    return new_size;
-}
-
-static size_t
-maxima_top(const double * points, const double ** rows, size_t size,
-           dimension_t dim, dimension_t max_dim,
-           bool keep_weakly, boolvec * restrict nondom);
+static size_t maxima_rec(const double ** rows, size_t size, dimension_t dim,
+                         bool keep_weakly);
 
 /**
    This function is called if one dimension has all equal values, so we look at
    the next dimension.
 */
 static size_t
-maxima_rec_dim(const double * points, const double ** rows, size_t size,
-               dimension_t dim, dimension_t max_dim,
-               bool keep_weakly, boolvec * restrict nondom)
+maxima_rec_dim(const double ** rows, size_t size, dimension_t dim,
+               bool keep_weakly)
 {
     size_t new_size;
-    const double ** r = (const double **) malloc(size * sizeof(*r));
-    shift_to_next_dimension(r, rows, size);
-    const double * const points_shifted = points + 1;
+    const double ** r_new = (const double **) malloc(size * sizeof(*rows));
+    /* We will create new row pointers that point to the next dimension,
+       however, we also want to remember the original position of each row
+       pointer to be able to filter dominated, thus shifted_rows stores the new
+       row pointer and a pointer to the previous one, so we can modify it
+       directly.  */
+    shifted_row_t * shifted_rows;
+
     if (dim == 4) { // We can reach this base case if one dimension has all equal values.
         // Sort in ascending lexicographic order from the last dimension.
-        qsort_typesafe(r, size, cmp_ppdouble_asc_rev_3d);
-        new_size = keep_weakly // Help GCC generate specialized code for true/false.
-            ? find_nondominated_set_3d_helper(points_shifted, r, size, max_dim, true, nondom)
-            : find_nondominated_set_3d_helper(points_shifted, r, size, max_dim, false, nondom);
-        DEBUG2_PRINT("maxima_dim3: row=%zu, size=%zu, new_size=%zu\n",
-                     row_index_from_ptr(points_shifted, r[0], max_dim),
-                     size, new_size);
+        shifted_rows = alloc_shifted_rows(
+            rows, size, qsort_cmp_shifted_row_asc_rev_3d, r_new);
+         new_size = keep_weakly // Help GCC generate specialized code for true/false.
+             ? find_nondominated_3d_impl_sorted(r_new, size,  true, /* find_one_dominated=*/false)
+             : find_nondominated_3d_impl_sorted(r_new, size, false, /* find_one_dominated=*/false);
+         DEBUG2_PRINT("maxima_dim3: size=%zu, new_size=%zu\n", size, new_size);
     } else {
         ASSUME(size > KUNG_SMALL_THRESHOLD);
-        // We need to sort here because we shifted to next dimension.
-        qsort_typesafe(r, size, cmp_ppdouble_asc_x_nonzero_stable);
-        new_size = maxima_top(points_shifted, r, size, dim - 1, max_dim, keep_weakly, nondom);
-        DEBUG2_PRINT("maxima_rec: s_size == 0: row=%zu, size=%zu, new_size=%zu\n",
-                     row_index_from_ptr(points_shifted, rows[0], max_dim),
-                     size, new_size);
+        shifted_rows = alloc_shifted_rows(
+            rows, size, qsort_cmp_shifted_row_asc_x_nonzero_stable, r_new);
+        new_size = maxima_rec(r_new, size, dim - 1, keep_weakly);
+        DEBUG2_PRINT("maxima_rec: s_size == 0: size=%zu, new_size=%zu\n", size, new_size);
     }
-    free(r);
+    if (new_size < size) {
+        filter_shifted(shifted_rows, r_new, new_size, size);
+        filter_dominated(rows, new_size, size, dim+1);
+    }
+    free(shifted_rows);
+    free(r_new);
+    assert(check_nondom(rows, new_size));
     return new_size;
 }
 
@@ -768,102 +710,63 @@ maxima_rec_dim(const double * points, const double ** rows, size_t size,
    Algorithm 4.1
 */
 static size_t
-maxima_rec(const double * points, const double ** rows, size_t size,
-           dimension_t dim, dimension_t max_dim,
-           bool keep_weakly, boolvec * restrict nondom)
+maxima_rec(const double ** restrict rows, size_t size, dimension_t dim,
+           bool keep_weakly)
 {
     if (size == 1)
         return size;
 
     ASSUME(dim > 3);
     if (size <= KUNG_SMALL_THRESHOLD)
-        return maxima_brute_force_filter_dom(points, rows, size, dim, max_dim, keep_weakly, nondom);
+        return maxima_brute_force_filter_dom(rows, size, dim, keep_weakly);
 
-    DEBUG2_PRINT("maxima_rec: dim=%d, row=%zu, size=%zu\n",
-            dim, row_index_from_ptr(points, rows[0], max_dim), size);
+    DEBUG2_PRINT("maxima_rec: dim=%d, size=%zu\n", dim, size);
     DEBUG2(printf_rows("maxima_rec: rows", rows, size, dim, "size"));
     size_t r_size = half_size_with_duplicates(rows, size);
     size_t s_size = size - r_size;
     DEBUG2(printf_rows("maxima_rec: R", rows, r_size, dim, "r_size"));
 
     if (s_size == 0) {
-        size_t new_size = maxima_rec_dim(points, rows, size, dim, max_dim, keep_weakly, nondom);
-        if (new_size < size) {
-            filter_dominated(points, rows, new_size, dim, max_dim, nondom, size);
-        }
-        assert(check_nondom(points, rows, new_size, max_dim, nondom));
-        return new_size;
+        return maxima_rec_dim(rows, size, dim, keep_weakly);
     }
 
     const double ** s = rows + r_size;
     DEBUG2(printf_rows("maxima_rec: S", s, s_size, dim, "s_size"));
 
-    r_size = maxima_rec(points, rows, r_size, dim, max_dim, keep_weakly, nondom);
+    r_size = maxima_rec(rows, r_size, dim, keep_weakly);
     DEBUG2(printf_rows("maxima_rec2: R", rows, r_size, dim, "r_size"));
 
-    s_size = maxima_rec(points, s, s_size, dim, max_dim, keep_weakly, nondom);
+    s_size = maxima_rec(s, s_size, dim, keep_weakly);
     DEBUG2(printf_rows("maxima_rec2: S", s, s_size, dim, "s_size"));
 
-    s_size = kung_merge_rec_filter_dom(points, rows, r_size, s, s_size, dim - 1, max_dim, nondom);
+    s_size = kung_merge_rec_dim(rows, r_size, s, s_size, dim);
     size_t new_size = compact_rows(rows, r_size, s, s_size, size);
     DEBUG2_PRINT("maxima_rec2: r U s = %zu\n", new_size);
     DEBUG2(print_rows(rows, new_size, dim));
-    assert(check_nondom(points, rows, new_size, max_dim, nondom));
-    return new_size;
-}
-
-/**
-   This is the entry point of the recursion, so we do not need to call
-   filter_dominated() before returning.  Apart from that, it is identical to
-   maxima_rec().
- */
-static size_t
-maxima_top(const double * points, const double ** rows, size_t size,
-                dimension_t dim, dimension_t max_dim,
-                bool keep_weakly, boolvec * restrict nondom)
-{
-    ASSUME(size > KUNG_SMALL_THRESHOLD);
-    ASSUME(dim > 3);
-    DEBUG2_PRINT("maxima_top: dim=%d, row=%zu, size=%zu\n",
-            dim, row_index_from_ptr(points, rows[0], max_dim), size);
-    DEBUG2(printf_rows("maxima_top: rows", rows, size, dim, "size"));
-    size_t r_size = half_size_with_duplicates(rows, size);
-    size_t s_size = size - r_size;
-    DEBUG2(printf_rows("maxima_top: R", rows, r_size, dim, "r_size"));
-
-    if (s_size == 0) {
-        // We do not need to filter dominated rows.
-        return maxima_rec_dim(points, rows, size, dim, max_dim, keep_weakly, nondom);
-    }
-
-    const double ** s = rows + r_size;
-    DEBUG2(printf_rows("maxima_top: S", s, s_size, dim, "s_size"));
-
-    r_size = maxima_rec(points, rows, r_size, dim, max_dim, keep_weakly, nondom);
-    DEBUG2(printf_rows("maxima_top2: R", rows, r_size, dim, "r_size"));
-
-    s_size = maxima_rec(points, s, s_size, dim, max_dim, keep_weakly, nondom);
-    DEBUG2(printf_rows("maxima_top2: S", s, s_size, dim, "s_size"));
-
-    // We do not need to filter dominated rows.
-    s_size = kung_merge_rec(points, rows, r_size, s, s_size, dim - 1, max_dim, nondom);
-    size_t new_size = r_size + s_size;
-    DEBUG2_PRINT("maxima_top2: r U s = %zu\n", new_size);
-    DEBUG2(print_rows(rows, new_size, dim));
+    assert(check_nondom(rows, new_size));
     return new_size;
 }
 
 static inline size_t
-find_nondominated_set_agree_kung(const double * restrict points,
-                                 size_t size, dimension_t dim,
-                                 bool keep_weakly, boolvec * restrict nondom)
+find_nondominated_set_kung(const double * restrict points,
+                           size_t size, dimension_t dim,
+                           bool keep_weakly, boolvec * restrict nondom)
 {
     ASSUME(size > KUNG_SMALL_THRESHOLD);
     ASSUME(dim > 3);
 
     const double ** rows = generate_row_pointers(points, size, dim);
     qsort_typesafe(rows, size, cmp_ppdouble_asc_x_nonzero_stable);
-    size_t new_size = maxima_top(points, rows, size, dim, dim, keep_weakly, nondom);
+    size_t new_size = maxima_rec(rows, size, dim, keep_weakly);
+
+    if (new_size < size) {
+        memset(nondom, 0, size * sizeof(*nondom));
+        // maxima_rec() has already filtered dominated rows.
+        for (size_t n = 0; n < new_size; n++) {
+            assert(rows[n] != NULL);
+            nondom[row_index_from_ptr(points, rows[n], dim)] = true;
+        }
+    }
     free(rows);
     return new_size;
 }

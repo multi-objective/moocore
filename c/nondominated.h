@@ -705,7 +705,7 @@ find_nondominated_set_(const double * restrict points, size_t size, dimension_t 
         } else if (dim == 3) {
             new_size = find_nondominated_set_3d_(pp, size, keep_weakly, nondom);
         } else {
-            new_size = find_nondominated_set_agree_kung(pp, size, dim, keep_weakly, nondom);
+            new_size = find_nondominated_set_kung(pp, size, dim, keep_weakly, nondom);
         }
         if (pp != points)
             free((void *) pp);
