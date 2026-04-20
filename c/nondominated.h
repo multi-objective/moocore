@@ -485,11 +485,11 @@ find_nondominated_set_3d_(const double * restrict points, size_t size,
    NULL) or find the first dominated one (nondom == NULL).  It also handles
    combinations of min/max objectives.
 */
-static inline size_t
-find_nondominated_set_agree_bf_(const double * restrict points, size_t size, dimension_t dim,
-                                const bool keep_weakly,
-                                const enum objs_agree_t agree, const int * restrict minmax,
-                                boolvec * restrict nondom)
+static __force_inline__ size_t
+find_nondominated_bf_impl(const double * restrict points, size_t size, dimension_t dim,
+                          const bool keep_weakly,
+                          const enum objs_agree_t agree, const int * restrict minmax,
+                          boolvec * restrict nondom)
 {
     ASSUME(dim > 3);
     ASSUME(agree == AGREE_MINIMISE || agree == AGREE_MAXIMISE || agree == AGREE_NONE);
@@ -499,7 +499,7 @@ find_nondominated_set_agree_bf_(const double * restrict points, size_t size, dim
     for (size_t j = 1; j < size; j++) {
         const double * restrict pj = points + j * dim;
         size_t k = min_k;
-        if (likely(nondom != NULL)) {
+        if (nondom != NULL) {
             assert(nondom[j]);
             while (!nondom[k])
                 k++;
@@ -508,7 +508,7 @@ find_nondominated_set_agree_bf_(const double * restrict points, size_t size, dim
             ASSUME(nondom[k]);
         }
         for (; k < j; k++) {
-            if (likely(nondom != NULL)) {
+            if (nondom != NULL) {
                 assert(nondom[j]);
                 if (!nondom[k]) continue;
             }
@@ -542,7 +542,7 @@ find_nondominated_set_agree_bf_(const double * restrict points, size_t size, dim
             assert(dom_k ^ dom_j); // At least one but not both can be removed.
 
             size_t last_dom_pos = dom_j ? j : k;
-            if (unlikely(nondom == NULL))
+            if (nondom == NULL)
                 return last_dom_pos;
 
             new_size--; // Something dominated.
@@ -555,56 +555,60 @@ find_nondominated_set_agree_bf_(const double * restrict points, size_t size, dim
     return new_size;
 }
 
-static inline size_t
+static __force_inline__ size_t
 find_nondominated_set_agree_bf(const double * restrict points, size_t size, dimension_t dim,
                                const bool keep_weakly,
                                const enum objs_agree_t agree, const int * restrict minmax,
                                boolvec * restrict nondom)
 {
+    ASSUME(nondom != NULL);
     // Help GCC generate all possible specializations of this function.
     switch (agree) {
       case AGREE_NONE:
-          if (nondom == NULL)
-              return keep_weakly
-                  ? find_nondominated_set_agree_bf_(points, size, dim, true, AGREE_NONE, minmax, /* nondom=*/NULL)
-                  : find_nondominated_set_agree_bf_(points, size, dim, false, AGREE_NONE, minmax, /* nondom=*/NULL);
-          else
-              return keep_weakly
-                  ? find_nondominated_set_agree_bf_(points, size, dim, true, AGREE_NONE, minmax, nondom)
-                  : find_nondominated_set_agree_bf_(points, size, dim, false, AGREE_NONE, minmax, nondom);
+          return keep_weakly
+              ? find_nondominated_bf_impl(points, size, dim, true, AGREE_NONE, minmax, nondom)
+              : find_nondominated_bf_impl(points, size, dim, false, AGREE_NONE, minmax, nondom);
 
       case AGREE_MINIMISE:
-          if (nondom == NULL)
-              return keep_weakly
-                  ? find_nondominated_set_agree_bf_(points, size, dim, true, AGREE_MINIMISE, /* minmax=*/NULL, /* nondom=*/NULL)
-                  : find_nondominated_set_agree_bf_(points, size, dim, false, AGREE_MINIMISE, /* minmax=*/NULL, /* nondom=*/NULL);
-          else
-              return keep_weakly
-                  ? find_nondominated_set_agree_bf_(points, size, dim, true, AGREE_MINIMISE, /* minmax=*/NULL, nondom)
-                  : find_nondominated_set_agree_bf_(points, size, dim, false, AGREE_MINIMISE, /* minmax=*/NULL, nondom);
+          return keep_weakly
+              ? find_nondominated_bf_impl(points, size, dim, true, AGREE_MINIMISE, /* minmax=*/NULL, nondom)
+              : find_nondominated_bf_impl(points, size, dim, false, AGREE_MINIMISE, /* minmax=*/NULL, nondom);
 
       case AGREE_MAXIMISE:
-          if (nondom == NULL)
-              return keep_weakly
-                  ? find_nondominated_set_agree_bf_(points, size, dim, true, AGREE_MAXIMISE, /* minmax=*/NULL, /* nondom=*/NULL)
-                  : find_nondominated_set_agree_bf_(points, size, dim, false, AGREE_MAXIMISE, /* minmax=*/NULL, /* nondom=*/NULL);
-          else
-              return keep_weakly
-                  ? find_nondominated_set_agree_bf_(points, size, dim, true, AGREE_MAXIMISE, /* minmax=*/NULL, nondom)
-                  : find_nondominated_set_agree_bf_(points, size, dim, false, AGREE_MAXIMISE, /* minmax=*/NULL, nondom);
+          return keep_weakly
+              ? find_nondominated_bf_impl(points, size, dim, true, AGREE_MAXIMISE, /* minmax=*/NULL, nondom)
+              : find_nondominated_bf_impl(points, size, dim, false, AGREE_MAXIMISE, /* minmax=*/NULL, nondom);
 
       default: // LCOV_EXCL_LINE # nocov
           unreachable();
     }
 }
 
-static inline size_t
-find_dominated_point_agree_(const double * restrict points, size_t size, dimension_t dim,
-                            const bool keep_weakly,
-                            enum objs_agree_t agree, const int * restrict minmax)
+static __force_inline__ size_t
+find_dominated_point_agree_bf(const double * restrict points, size_t size, dimension_t dim,
+                              const bool keep_weakly,
+                              enum objs_agree_t agree, const int * restrict minmax)
 {
-    return find_nondominated_set_agree_bf(points, size, dim, keep_weakly,
-                                          agree, minmax, /* nondom=*/NULL);
+    // Help GCC generate all possible specializations of this function.
+    switch (agree) {
+      case AGREE_NONE:
+          return keep_weakly
+              ? find_nondominated_bf_impl(points, size, dim, true, AGREE_NONE, minmax, /* nondom=*/NULL)
+              : find_nondominated_bf_impl(points, size, dim, false, AGREE_NONE, minmax, /* nondom=*/NULL);
+
+      case AGREE_MINIMISE:
+          return keep_weakly
+              ? find_nondominated_bf_impl(points, size, dim, true, AGREE_MINIMISE, /* minmax=*/NULL, /* nondom=*/NULL)
+              : find_nondominated_bf_impl(points, size, dim, false, AGREE_MINIMISE, /* minmax=*/NULL, /* nondom=*/NULL);
+
+      case AGREE_MAXIMISE:
+          return keep_weakly
+              ? find_nondominated_bf_impl(points, size, dim, true, AGREE_MAXIMISE, /* minmax=*/NULL, /* nondom=*/NULL)
+              : find_nondominated_bf_impl(points, size, dim, false, AGREE_MAXIMISE, /* minmax=*/NULL, /* nondom=*/NULL);
+
+      default: // LCOV_EXCL_LINE # nocov
+          unreachable();
+    }
 }
 
 /* Stop as soon as one dominated point is found and return its position.
@@ -637,7 +641,7 @@ find_dominated_point_(const double * restrict points, size_t size, dimension_t d
     if (agree == AGREE_NONE)
         agree = check_all_minimize_maximize(minmax, dim);
 
-    return find_dominated_point_agree_(points, size, dim, keep_weakly, agree, minmax);
+    return find_dominated_point_agree_bf(points, size, dim, keep_weakly, agree, minmax);
 }
 
 #include "nondominated_kung.h"

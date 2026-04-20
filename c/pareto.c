@@ -275,13 +275,14 @@ pareto_rank_2d(int * restrict rank, const double * restrict points, size_t size)
     free(p);
 }
 
-/* FIXME: This takes O(n^3). Look at
+/**
+   Similar to find_nondominated_bf_impl().
+
+   FIXME: This takes O(n^3). Look at:
 
    M. T. Jensen. Reducing the run-time complexity of multiobjective EAs: The
    NSGA-II and other algorithms. IEEE Transactions on Evolutionary Computation,
    7(5):503–515, 2003.
-
-   Similar to find_nondominated_set_agree_bf().
 */
 static void
 pareto_rank_naive(int * restrict rank,
