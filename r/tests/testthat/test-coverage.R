@@ -22,4 +22,28 @@ test_that("hv_contributions 3D", {
   expect_equal(hvc_fast, hvc_slow, tolerance = 1e-10)
 })
 
+# -----------------------------------------------------------------------
+# is_nondominated / filter_dominated with 4+ objectives (exercises nondominated_kung.h)
+# -----------------------------------------------------------------------
+test_that("is_nondominated 4D", {
+  set.seed(42)
+  pts <- matrix(runif(100), ncol = 4)  # 25 points in 4D
+  nd <- is_nondominated(pts)
+  expect_true(is.logical(nd))
+  expect_equal(length(nd), nrow(pts))
+  # The non-dominated points should not dominate each other
+  nd_pts <- pts[nd, , drop = FALSE]
+  if (nrow(nd_pts) > 1) {
+    expect_true(all(is_nondominated(nd_pts)))
+  }
+})
+
+test_that("filter_dominated 5D", {
+  set.seed(123)
+  pts <- matrix(runif(50), ncol = 5)  # 10 points in 5D
+  fd <- filter_dominated(pts)
+  expect_true(nrow(fd) >= 1)
+  expect_true(all(is_nondominated(fd)))
+})
+
 }) # withr::with_output_sink()
