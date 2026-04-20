@@ -26,8 +26,36 @@ component_management:
         informational: true
 
   individual_components:
-    - component_id: tests  # this is an identifier that should not be changed
-      name: tests  # this is a display name, and can be changed freely
+    - component_id: c_shared
+      name: C
+      paths:
+        - c/**
+      statuses:
+        - type: project
+          target: auto
+          threshold: 1%
+        - type: patch
+          target: auto
+          threshold: 1%
+          informational: true
+
+    - component_id: r_src
+      name: R
+      paths:
+        - r/R/**
+        - r/src/**
+      statuses:
+        - type: project
+          target: auto
+          threshold: 1%
+          informational: true
+        - type: patch
+          target: auto
+          threshold: 1%
+          informational: true
+
+    - component_id: python_tests
+      name: Python tests
       paths:
         - python/tests/**
         - python/examples/**
@@ -40,8 +68,8 @@ component_management:
           threshold: 1%
           informational: true
 
-    - component_id: src
-      name: src
+    - component_id: python_src
+      name: Python src
       paths:
         - python/src/**
       statuses:
