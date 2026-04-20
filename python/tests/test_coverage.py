@@ -68,3 +68,75 @@ def test_any_dominated_single_point():
 
 def test_any_dominated_single_objective():
     assert moocore.any_dominated([[1], [2], [1]]) is True
+
+
+# ---------------------------------------------------------------------------
+# Hypervolume class edge cases
+# ---------------------------------------------------------------------------
+def test_hypervolume_class_broadcast_ref():
+    """Test Hypervolume with scalar ref and multi-objective maximise."""
+    hv = moocore.Hypervolume(ref=[10], maximise=[True, False])
+    result = hv(np.array([[5, 5], [4, 6]]))
+    assert result >= 0
+
+
+def test_hypervolume_class_ref_maximise_mismatch():
+    with pytest.raises(ValueError, match="same length"):
+        moocore.Hypervolume(ref=[10, 20], maximise=[True, False, True])
+
+
+def test_hypervolume_class_data_nobj_mismatch():
+    hv = moocore.Hypervolume(ref=[10, 10])
+    with pytest.raises(ValueError, match="same number of objectives"):
+        hv(np.array([[1, 2, 3]]))
+
+
+def test_hypervolume_class_maximise_copy():
+    """Exercise the copy-and-transform path when maximise is set."""
+    hv = moocore.Hypervolume(ref=[10, 10], maximise=[True, False])
+    data = np.array([[5.0, 5.0], [4.0, 6.0]])
+    result = hv(data)
+    assert result >= 0
+    # Verify original data is not modified
+    assert_allclose(data, [[5.0, 5.0], [4.0, 6.0]])
+
+
+# ---------------------------------------------------------------------------
+# RelativeHypervolume edge cases
+# ---------------------------------------------------------------------------
+def test_relative_hypervolume_zero_refset_hv():
+    with pytest.raises(ValueError, match="zero"):
+        moocore.RelativeHypervolume(
+            ref=[10, 10], ref_set=[[10, 10]], maximise=False
+        )
+
+
+# ---------------------------------------------------------------------------
+# hv_contributions edge cases
+# ---------------------------------------------------------------------------
+def test_hv_contributions_ref_mismatch():
+    with pytest.raises(ValueError, match="must have length"):
+        moocore.hv_contributions(
+            np.array([[1, 2], [3, 4]]), ref=np.array([10, 10, 10])
+        )
+
+
+def test_hv_contributions_maximise_copy():
+    """Exercise the copy path with maximise in hv_contributions."""
+    x = np.array([[1.0, 2.0], [3.0, 1.0]])
+    ref = np.array([10.0, 10.0])
+    result = moocore.hv_contributions(x, ref=ref, maximise=[True, False])
+    assert len(result) == 2
+    # Verify original data unchanged
+    assert_allclose(x, [[1.0, 2.0], [3.0, 1.0]])
+
+
+# ---------------------------------------------------------------------------
+# pareto_rank with maximise (copy path)
+# ---------------------------------------------------------------------------
+def test_pareto_rank_maximise_copy():
+    data = np.array([[1.0, 2.0], [3.0, 1.0], [2.0, 2.0]])
+    ranks = moocore.pareto_rank(data, maximise=[True, False])
+    assert len(ranks) == 3
+    # Verify original data unchanged
+    assert_allclose(data, [[1.0, 2.0], [3.0, 1.0], [2.0, 2.0]])
