@@ -1,0 +1,30 @@
+name: spack-ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  spack-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout Spack
+        uses: actions/checkout@v4
+        with:
+          repository: spack/spack
+          path: spack
+
+      - name: Set up Spack
+        run: |
+          git clone https://github.com/spack/spack.git
+          . spack/share/spack/setup-env.sh
+          spack compiler find
+          spack repo add $GITHUB_WORKSPACE/spack
+          spack env create ci ./spack.yaml
+          spack env activate ci
+          spack concretize -f
+          spack install --fail-fast
+        shell: bash
