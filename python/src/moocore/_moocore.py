@@ -1268,8 +1268,8 @@ def is_nondominated(
 
     For :math:`m \geq 4`, functions :func:`is_nondominated` and
     :func:`filter_dominated` use the best-known :math:`O(n \log^{m-2} n)`
-    algorithm :footcite:p:`KunLucPre1975jacm` when :math:`n \geq 16` and the
-    naive :math:`O(m n^2)` algorithm otherwise.  Function :func:`any_dominated`
+    algorithm :footcite:p:`KunLucPre1975jacm` when :math:`n > 16`, and the naive
+    :math:`O(m n^2)` algorithm otherwise.  Function :func:`any_dominated`
     always uses the naive algorithm for :math:`m \geq 4`.
 
 

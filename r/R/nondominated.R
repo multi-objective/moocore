@@ -26,10 +26,10 @@
 #' Given \eqn{n} points of dimension \eqn{m}, the current implementation always
 #' uses the best-known \eqn{O(n \log n)} dimension-sweep algorithm
 #' \citep{KunLucPre1975jacm} for \eqn{m \leq 3}. For \eqn{m \geq 4}, functions
-#' `is_nondominated()` and `filter_dominated()` use the best-known
-#' \eqn{O(n \log^{m-2} n)} algorithm \citep{KunLucPre1975jacm} when \eqn{n
-#' \geq 16}, and the naive \eqn{O(m n^2)} algorithm otherwise.  Function
-#' `any_dominated()` always uses the naive algorithm for \eqn{m \geq 4}.
+#' `is_nondominated()` and `filter_dominated()` use the best-known \eqn{O(n
+#' \log^{m-2} n)} algorithm \citep{KunLucPre1975jacm} when \eqn{n > 16}, and
+#' the naive \eqn{O(m n^2)} algorithm otherwise.  Function `any_dominated()`
+#' always uses the naive algorithm for \eqn{m \geq 4}.
 #'
 #' @doctest
 #' S = matrix(c(1,1,0,1,1,0,1,0), ncol = 2, byrow = TRUE)
