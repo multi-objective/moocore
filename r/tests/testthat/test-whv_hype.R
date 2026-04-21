@@ -41,7 +41,24 @@ test_that("whv_hype", {
   whv_x <- whv_hype(x_list[[1]], reference = ref, ideal = ideal,
                     dist = "exponential", mu=0.2)
   expect_equal(whv_x, 1903385037871, tolerance=10)
+})
+
+
+test_that("whv_hype mixed min/max", {
+  expect_equal(whv_hype(matrix(-2, ncol = 2), reference = -4, ideal = -1, seed = 42, maximise=TRUE),
+    3.99807)
+  expect_equal(whv_hype(matrix(c(-2, 2), ncol = 2), reference = c(-4, 4), ideal = c(-1, 1), seed = 42, maximise=c(TRUE,FALSE)),
+    3.99807)
 
 })
 
+test_that("whv_hype requires mu for non-uniform dist", {
+  expect_error(
+    whv_hype(matrix(2, ncol = 2), reference = 4, ideal = 1, dist = "point"),
+    "mu.*required"
+  )
 })
+
+
+
+}) # withr::with_output_sink
