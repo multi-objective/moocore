@@ -260,20 +260,19 @@ R_read_datasets(SEXP FILENAME)
 {
     SEXP_2_STRING(FILENAME, filename);
     /* Rprintf ("filename: %s\n", filename); */
-    objective_t * data = NULL;
+    double * data = NULL;
     int * cumsizes = NULL;
     int nobj = 0, nruns = 0;
-    read_objective_t_data (filename, &data, &nobj, &cumsizes, &nruns);
+    read_double_data(filename, &data, &nobj, &cumsizes, &nruns);
 
     const int ntotal = cumsizes[nruns - 1];
     /* FIXME: Is this the fastest way to transfer a matrix from C to R ? */
     SEXP DATA = PROTECT(Rf_allocMatrix(REALSXP, ntotal, nobj + 1));
-    double *rdata = REAL(DATA);
+    double * rdata = REAL(DATA);
     matrix_transpose_double (rdata, data, ntotal, nobj);
 
-    int k, j;
     size_t pos = ntotal * nobj;
-    for (k = 0, j = 0; k < ntotal; k++, pos++) {
+    for (int k = 0, j = 0; k < ntotal; k++, pos++) {
         if (k == cumsizes[j]) j++;
         rdata[pos] = j + 1;
     }
