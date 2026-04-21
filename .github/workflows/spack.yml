@@ -15,11 +15,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: spack/spack
-          path: spack
+          path: spack-tool
 
       - name: Set up Spack
         run: |
-          . spack/share/spack/setup-env.sh
+          . spack-tool/share/spack/setup-env.sh
           spack compiler find
           spack repo add $GITHUB_WORKSPACE/./spack
           spack env create ci spack.yaml
