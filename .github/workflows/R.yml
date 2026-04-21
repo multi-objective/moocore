@@ -156,8 +156,8 @@ jobs:
           NOT_CRAN: true
         run: |
           exclude_pattern = rex::rex(or(group(or("#", "//"), any_spaces, "nocov"),
-                                        group(or("ASSUME", "unreachable"), maybe(" "), "("),
-                                        group(or("DEBUG2_PRINT", "DEBUG2")),
+                                        group(or("ASSUME", "unreachable", "assert"), maybe(" "), "("),
+                                        group(or("DEBUG1", "DEBUG2", "DEBUG3"), maybe("_PRINT")),
                                         group(or("GCOV", "GCOVR", "LCOV"), "_EXCL_LINE")))
           options(covr.gcov_additional_paths="c",
                   covr.filter_non_package=FALSE,

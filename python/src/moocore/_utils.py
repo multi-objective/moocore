@@ -61,14 +61,14 @@ def np1d_to_int_array(
     return np1d_to_c_array(x, ctype_data="int", ctype_size=ctype_size)
 
 
-def array_1d_of_length_n(x: ArrayLike, n: int) -> np.ndarray:
+def array_1d_of_length_n(x: ArrayLike, n: int, name: str = "x") -> np.ndarray:
     x = np.ravel(x)
     if len(x) == 1:
         return np.full((n), x[0])
     if x.shape[0] == n:
         return x
     raise ValueError(
-        f"1D array must have length {n} but it has length {x.shape[0]}"
+        f"{name!r} must have length {n}, but it has length {x.shape[0]}"
     )
 
 

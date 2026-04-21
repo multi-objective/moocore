@@ -154,7 +154,7 @@ def read_datasets(filename: str | os.PathLike | StringIO) -> np.ndarray:
 
 def _parse_maximise(maximise: bool | Sequence[bool], nobj: int) -> np.ndarray:
     """Convert maximise array or single bool to ndarray format."""
-    return array_1d_of_length_n(maximise, nobj).astype(bool)
+    return array_1d_of_length_n(maximise, nobj, name="maximise").astype(bool)
 
 
 def _parse_maximise_to_bool_array(
@@ -532,14 +532,10 @@ def hypervolume(
     # an int array.
     data, data_copied = asarray_maybe_copy(data)
     nobj = data.shape[1]
-    # Make sure it is a 1D array of length nobj.
-    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
-    if nobj != ref.shape[0]:
-        raise ValueError(
-            f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
-        )
     if nobj == 0:
         raise ValueError("input data must have at least 1 column")
+    # Make sure it is a 1D array of length nobj.
+    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
 
     maximise = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
@@ -826,12 +822,7 @@ def hv_contributions(
     # an int array.
     x, x_copied = asarray_maybe_copy(x)
     nobj = x.shape[1]
-    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
-    if nobj != ref.shape[0]:
-        raise ValueError(
-            f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
-        )
-
+    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
     maximise = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
     if maximise.any():
@@ -1006,11 +997,7 @@ def hv_approx(
     # an int array.
     data = np.asarray(data, dtype=float)
     nobj = data.shape[1]
-    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
-    if nobj != ref.shape[0]:
-        raise ValueError(
-            f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
-        )
+    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
 
     if not is_integer_value(nsamples):
         raise ValueError(f"nsamples must be an integer value: {nsamples}")
@@ -1766,8 +1753,12 @@ def normalise(
     to_range = np.asarray(to_range, dtype=float)
     if to_range.shape[0] != 2:
         raise ValueError("'to_range' must have length 2")
-    lower = array_1d_of_length_n(np.asarray(lower, dtype=float), nobj)
-    upper = array_1d_of_length_n(np.asarray(upper, dtype=float), nobj)
+    lower = array_1d_of_length_n(
+        np.asarray(lower, dtype=float), nobj, name="lower"
+    )
+    upper = array_1d_of_length_n(
+        np.asarray(upper, dtype=float), nobj, name="upper"
+    )
     if np.any(np.isnan(lower)):
         lower = np.where(np.isnan(lower), data.min(axis=0), lower)
     if np.any(np.isnan(upper)):
@@ -2295,7 +2286,7 @@ def whv_rect(
     #     else:
     #         pos = np.flatnonzero(maximise) + [0,2]
     #         rectangles[:, pos] = -rectangles[:, pos]
-    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
+    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
     ref = ffi.from_buffer("double []", ref)
     x, npoints, _ = np2d_to_double_array(x)
     rectangles, rectangles_nrow, _ = np2d_to_double_array(rectangles)
@@ -2401,14 +2392,16 @@ def total_whv_rect(
     if scalefactor <= 0 or scalefactor > 1:
         raise ValueError("'scalefactor' must be within (0,1]")
 
-    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
+    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
     whv = whv_rect(x, rectangles, ref=ref, maximise=maximise)
     hv = hypervolume(x, ref=ref)  # FIXME: maximise = maximise)
     if ideal is None:
         # FIXME: Should we include the range of the rectangles here?
         ideal = get_ideal(x, maximise=maximise)
     else:
-        ideal = array_1d_of_length_n(np.asarray(ideal, dtype=float), nobj)
+        ideal = array_1d_of_length_n(
+            np.asarray(ideal, dtype=float), nobj, name="ideal"
+        )
 
     beta = scalefactor * abs((ref - ideal).prod())
     return float(hv + beta * whv)
@@ -2661,8 +2654,10 @@ def whv_hype(
     if nobj != 2:
         raise NotImplementedError("Only 2D datasets are currently supported")
 
-    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
-    ideal = array_1d_of_length_n(np.asarray(ideal, dtype=float), nobj)
+    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
+    ideal = array_1d_of_length_n(
+        np.asarray(ideal, dtype=float), nobj, name="ideal"
+    )
     maximise = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
     if maximise.any():
@@ -2688,7 +2683,7 @@ def whv_hype(
         mu = ffi.cast("double", mu)
         hv = lib.whv_hype_expo(data_p, npoints, ideal, ref, nsamples, seed, mu)
     elif dist == "point":
-        mu = array_1d_of_length_n(np.asarray(mu, dtype=float), nobj)
+        mu = array_1d_of_length_n(np.asarray(mu, dtype=float), nobj, name="mu")
         mu, _ = np1d_to_double_array(mu)
         hv = lib.whv_hype_gaus(data_p, npoints, ideal, ref, nsamples, seed, mu)
     else:
@@ -2880,14 +2875,10 @@ def r2_exact(
     # an int array.
     data, data_copied = asarray_maybe_copy(data)
     nobj = data.shape[1]
-    # Make sure it is a 1D array of length nobj.
-    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj)
-    if nobj != ref.shape[0]:
-        raise ValueError(
-            f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
-        )
     if nobj != 2:
         raise NotImplementedError("Only 2D datasets are currently supported")
+    # Make sure it is a 1D array of length nobj.
+    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
 
     maximise = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.

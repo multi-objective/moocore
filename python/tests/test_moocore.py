@@ -100,22 +100,35 @@ class TestHypervolume:
 
         ref = np.array([2, -2, 2], dtype=float)
         x = [[1, 0, 1], [0, -1, 0]]
+        maximise = [False, True, False]
         assert (
-            immutable_call(
-                moocore.hypervolume, x, ref, maximise=[False, True, False]
-            )
+            immutable_call(moocore.hypervolume, x, ref, maximise=maximise)
             == 5.0
         )
+        hv = moocore.Hypervolume(ref=ref, maximise=maximise)
+        assert immutable_call(hv, x) == 5.0
 
         ref = [-2, -2, -2]
         x = [[-1, 0, -1], [0, -1, 0]]
         assert immutable_call(moocore.hypervolume, x, ref, maximise=True) == 5.0
 
-    def test_hv_wrong_ref(self, test_datapath):
-        """Check that the moocore.hypervolume() fails correctly after a ref with the wrong dimensions is input."""
-        X = self.input1
-        with pytest.raises(ValueError):
-            moocore.hypervolume(X[X[:, 2] == 1, :2], ref=np.array([10, 10, 10]))
+
+def test_wrong_ref():
+    """Check that the moocore.hypervolume() fails correctly after a ref with the wrong dimensions is input."""
+    x = [[1, 1, 1]]
+    ref = [10, 10]
+    hv = moocore.Hypervolume(ref=ref)
+    with pytest.raises(ValueError, match="same number of"):
+        hv(x)
+
+    with pytest.raises(ValueError, match="must have length 3"):
+        moocore.hypervolume(x, ref=ref)
+
+    with pytest.raises(ValueError, match="must have length 3"):
+        moocore.hv_contributions(x, ref=ref)
+
+    with pytest.raises(ValueError, match="must have length 3"):
+        moocore.hv_approx(x, ref=ref)
 
 
 @pytest.mark.parametrize("dim", range(5, 9))
@@ -229,6 +242,7 @@ def test_igd():
 
 @pytest.mark.parametrize("dim", range(0, 3))
 def test_is_nondominated_keep_weakly(dim):
+
     def check_keep_weakly(x, true_ndom, true_wndom):
         true_ndom = np.array(true_ndom)
         true_wndom = np.array(true_wndom)
@@ -242,6 +256,17 @@ def test_is_nondominated_keep_weakly(dim):
         test_weak_filter = moocore.filter_dominated(x, keep_weakly=True)
         assert_array_equal(test_weak_filter, x[true_wndom, :])
 
+    def check_roll_column(x, dim):
+        true_ndom = moocore.is_nondominated(x)
+        true_wndom = moocore.is_nondominated(x, keep_weakly=True)
+        a = np.append(np.zeros((len(x), dim)), x, axis=1)
+        for i in range(a.shape[1]):
+            x = np.roll(a, i, axis=1)
+            assert_array_equal(true_ndom, moocore.is_nondominated(x))
+            assert_array_equal(
+                true_wndom, moocore.is_nondominated(x, keep_weakly=True)
+            )
+
     x = np.array(
         [[2, 0], [1, 1], [3, 0], [2, 0], [1, 2], [3, 0], [0, 2], [1, 1], [1, 1]]
     )
@@ -250,6 +275,7 @@ def test_is_nondominated_keep_weakly(dim):
         true_ndom=[True, True, False, False, False, False, True, False, False],
         true_wndom=[True, True, False, True, False, False, True, True, True],
     )
+    check_roll_column(np.vstack((x, x)), dim)
 
     x = np.array(
         [[1, 0, 1], [1, 1, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0], [1, 1, 1]]
@@ -259,6 +285,8 @@ def test_is_nondominated_keep_weakly(dim):
         true_ndom=[True, False, True, False, True, False],
         true_wndom=[True, False, True, True, True, False],
     )
+    # KUNG_SMALL_THRESHOLD is 16, so use 18 points.
+    check_roll_column(np.vstack((x, x, x)), dim)
 
 
 def test_is_nondominated(test_datapath):
@@ -299,7 +327,7 @@ def test_is_nondominated(test_datapath):
     )
 
 
-def test_epsilon(immutable_call):
+def test_epsilon():
     """Same as in R package."""
     ref = np.array([10, 1, 6, 1, 2, 2, 1, 6, 1, 10]).reshape((-1, 2))
     A = np.array([4, 2, 3, 3, 2, 4]).reshape((-1, 2))
@@ -311,6 +339,15 @@ def test_epsilon(immutable_call):
     assert_expected(6.0, moocore.epsilon_additive, -A, -ref, maximise=False)
     assert_expected(2.5, moocore.epsilon_mult, A, ref, maximise=[True, False])
     assert_expected(2.5, moocore.epsilon_mult, A, ref, maximise=[False, True])
+
+
+def test_epsilon_mult_negative_input():
+    x = np.array([[-1, 2]])
+    y = np.array([[1, 2]])
+    with pytest.raises(ValueError, match="larger than 0"):
+        moocore.epsilon_mult(x, ref=y)
+    with pytest.raises(ValueError, match="larger than 0"):
+        moocore.epsilon_mult(y, ref=x)
 
 
 @pytest.mark.parametrize("dim", range(3, 6))
