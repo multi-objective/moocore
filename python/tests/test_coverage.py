@@ -9,6 +9,29 @@ import moocore
 
 
 # ---------------------------------------------------------------------------
+# eafdiff: both matrix (points) and rectangles modes (exercises c/eafdiff.c)
+# ---------------------------------------------------------------------------
+def test_eafdiff_matrix():
+    """eafdiff with rectangles=False calls eafdiff_compute_matrix in c/eafdiff.c."""
+    A1 = moocore.load_dataset("wrots_l10w100_dat")
+    A2 = moocore.load_dataset("wrots_l100w10_dat")
+    result = moocore.eafdiff(A1, A2)
+    assert result.ndim == 2
+    assert result.shape[1] == 3  # 2 objectives + colour column
+    assert result.shape[0] > 0
+
+
+def test_eafdiff_rectangles():
+    """eafdiff with rectangles=True calls eafdiff_compute_rectangles in c/eafdiff.c."""
+    A1 = moocore.load_dataset("wrots_l10w100_dat")
+    A2 = moocore.load_dataset("wrots_l100w10_dat")
+    result = moocore.eafdiff(A1, A2, rectangles=True)
+    assert result.ndim == 2
+    assert result.shape[1] == 5  # 2 x 2 objective bounds + colour column
+    assert result.shape[0] > 0
+
+
+# ---------------------------------------------------------------------------
 # generate_ndset additional methods (exercises match/case branches)
 # ---------------------------------------------------------------------------
 def test_generate_ndset_inverted_simplex():
