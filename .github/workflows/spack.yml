@@ -22,7 +22,7 @@ jobs:
           . spack/share/spack/setup-env.sh
           spack compiler find
           spack repo add $GITHUB_WORKSPACE/spack
-          spack env create ci ./spack.yaml
+          spack env create ci spack.yaml
           spack env activate ci
           spack concretize -f
           spack install --fail-fast
