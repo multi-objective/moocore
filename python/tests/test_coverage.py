@@ -56,7 +56,7 @@ def test_generate_ndset_unknown_method():
 
 def test_generate_ndset_integer():
     pts = moocore.generate_ndset(5, 3, "simplex", seed=42, integer=True)
-    assert pts.dtype == int or np.issubdtype(pts.dtype, np.integer)
+    assert np.issubdtype(pts.dtype, np.integer)
     assert pts.shape == (5, 3)
 
 

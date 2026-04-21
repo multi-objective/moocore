@@ -14,6 +14,10 @@ test_that("compute_eafdiff_polygon", {
                                     intervals = 5L)
   expect_true(is.list(result))
   expect_equal(length(result), 2L)
+  # Also exercise with a single interval to cover the interval edge case
+  result1 <- compute_eafdiff_polygon(A1[, 1:2], A2[, 1:2], A1[, 3], A2[, 3],
+                                     intervals = 1L)
+  expect_true(is.list(result1))
 })
 
 # -----------------------------------------------------------------------
