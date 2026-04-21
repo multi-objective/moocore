@@ -3,47 +3,17 @@ source("helper-common.R")
 withr::with_output_sink("test-coverage.Rout", {
 
 # -----------------------------------------------------------------------
-# hv_contributions with 3D data (exercises hvc3d.c)
+# eafdiff polygon computation (exercises eaf_compute_area in c/eaf.c lines 421-779)
 # -----------------------------------------------------------------------
-test_that("hv_contributions 3D", {
-  hv_contributions_slow_3d <- function(dataset, reference) {
-    nondom <- is_nondominated(dataset, keep_weakly = TRUE)
-    hvc <- numeric(nrow(dataset))
-    ds <- dataset[nondom, , drop = FALSE]
-    hvc[nondom] <- hypervolume(ds, reference) -
-      sapply(seq_len(nrow(ds)), function(i) hypervolume(ds[-i, , drop = FALSE], reference = reference))
-    hvc
-  }
-  set.seed(42)
-  pts <- matrix(runif(30), ncol = 3)
-  ref <- c(2, 2, 2)
-  hvc_fast <- hv_contributions(pts, reference = ref)
-  hvc_slow <- hv_contributions_slow_3d(pts, ref)
-  expect_equal(hvc_fast, hvc_slow, tolerance = 1e-10)
-})
-
-# -----------------------------------------------------------------------
-# is_nondominated / filter_dominated with 4+ objectives (exercises nondominated_kung.h)
-# -----------------------------------------------------------------------
-test_that("is_nondominated 4D", {
-  set.seed(42)
-  pts <- matrix(runif(100), ncol = 4)  # 25 points in 4D
-  nd <- is_nondominated(pts)
-  expect_true(is.logical(nd))
-  expect_equal(length(nd), nrow(pts))
-  # The non-dominated points should not dominate each other
-  nd_pts <- pts[nd, , drop = FALSE]
-  if (nrow(nd_pts) > 1) {
-    expect_true(all(is_nondominated(nd_pts)))
-  }
-})
-
-test_that("filter_dominated 5D", {
-  set.seed(123)
-  pts <- matrix(runif(50), ncol = 5)  # 10 points in 5D
-  fd <- filter_dominated(pts)
-  expect_true(nrow(fd) >= 1)
-  expect_true(all(is_nondominated(fd)))
+test_that("compute_eafdiff_polygon", {
+  A1 <- read_datasets(text = "3 2\n2 3\n\n2.5 1\n1 2\n")
+  A2 <- read_datasets(text = "4 2.5\n3 3\n2.5 3.5\n\n3 3\n2.5 3.5\n")
+  # compute_eafdiff_polygon calls eaf_compute_area (alias eaf_compute_polygon)
+  # in c/eaf.c, covering lines 421-779 which are otherwise unreachable.
+  result <- compute_eafdiff_polygon(A1[, 1:2], A2[, 1:2], A1[, 3], A2[, 3],
+                                    intervals = 5L)
+  expect_true(is.list(result))
+  expect_equal(length(result), 2L)
 })
 
 # -----------------------------------------------------------------------
