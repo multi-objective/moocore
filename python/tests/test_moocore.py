@@ -326,6 +326,92 @@ def test_is_nondominated(test_datapath):
         np.array([[1, 2], [5, 6]]),
     )
 
+    # Large 4D Pareto front with dominated copies exercises kung_merge_dim3
+    # (nondominated_kung.h lines 282-283: dominated S points removed in merge).
+    # The r_size * s_size product must exceed KUNG_MERGE_THRESHOLD (1024) so
+    # that kung_merge_dim3 is called instead of the brute-force fallback.
+    t = np.linspace(0.01, 0.99, 20)
+    s = np.linspace(0.01, 0.99, 20)
+    T, S = np.meshgrid(t, s)
+    front_4d = np.column_stack([T.ravel(), 1 - T.ravel(), S.ravel(), 1 - S.ravel()])
+    dominated_4d = front_4d[:20] + 0.001  # each is dominated by the matching front point
+    pts_4d = np.vstack([front_4d, dominated_4d])
+    result_4d = moocore.is_nondominated(pts_4d)
+    n_front = len(front_4d)
+    assert result_4d[:n_front].all(), "all Pareto-front points should be non-dominated"
+    assert not result_4d[n_front:].any(), "dominated copies should be identified"
+    assert not moocore.any_dominated(pts_4d[result_4d])
+
+    # 5D data with a constant obj1 value per half exercises kung_merge_nobase
+    # (nondominated_kung.h line 602: r2_size == 0 && s2_size == 0 branch).
+    # Constructing all-nondominated R and S halves:
+    #   R: (t, 0.5, a, 1-a, 0)  with t in [0.01,0.49], a in [0.01,0.99]
+    #   S: (t, 1.0, a, 1-a, 0)  with t in [0.51,0.99], a in [0.02,0.98]
+    # After Kung splits by obj0 and shifts to obj1, all S have obj1=1.0
+    # (s2_size=0) and all R have obj1=0.5 <= 1.0 (r2_size=0), so line 602 fires.
+    n5 = 50
+    t_r = np.linspace(0.01, 0.49, n5)
+    a_r = np.linspace(0.01, 0.99, n5)
+    r_pts = np.column_stack([t_r, np.full(n5, 0.5), a_r, 1 - a_r, np.zeros(n5)])
+    t_s = np.linspace(0.51, 0.99, n5)
+    a_s = np.linspace(0.02, 0.98, n5)  # distinct from a_r to avoid cross-domination
+    s_pts = np.column_stack([t_s, np.full(n5, 1.0), a_s, 1 - a_s, np.zeros(n5)])
+    pts_5d = np.vstack([r_pts, s_pts])
+    result_5d = moocore.is_nondominated(pts_5d)
+    assert result_5d.all(), "all 5D points should be globally non-dominated"
+    assert not moocore.any_dominated(pts_5d)
+
+
+def test_any_dominated_higher_dims():
+    # 3D: any_dominated with a clearly dominated point exercises
+    # find_dominated_3d_ (nondominated.h lines 449, 480).
+    pts_3d = np.array(
+        [[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [2.0, 0.0, 2.0], [0.0, 2.0, 0.0]]
+    )
+    assert moocore.any_dominated(pts_3d)
+    assert not moocore.any_dominated(moocore.filter_dominated(pts_3d))
+
+    # 3D with a maximise objective: force_agree_minimize allocates a copy, so
+    # the free() at nondominated.h line 665 is exercised.
+    pts_3d_max = np.array(
+        [[1.0, 1.0, 1.0], [2.0, 2.0, 2.0], [0.0, 3.0, 0.0]]
+    )
+    assert moocore.any_dominated(pts_3d_max, maximise=[False, False, True])
+    assert not moocore.any_dominated(
+        moocore.filter_dominated(pts_3d_max, maximise=[False, False, True]),
+        maximise=[False, False, True],
+    )
+
+    # 4D mixed objectives (agree=AGREE_NONE): exercises nondominated.h lines
+    # 624 (case AGREE_NONE) and 627 (false branch).
+    pts_4d_mixed = np.array(
+        [
+            [1.0, 1.0, 1.0, 1.0],
+            [2.0, 2.0, 0.0, 0.0],
+            [0.0, 0.0, 2.0, 2.0],
+        ]
+    )
+    # minimise obj1,obj2 and maximise obj3,obj4: [2,2,0,0] is dominated by [1,1,1,1]
+    assert moocore.any_dominated(pts_4d_mixed, maximise=[False, False, True, True])
+    assert not moocore.any_dominated(
+        moocore.filter_dominated(pts_4d_mixed, maximise=[False, False, True, True]),
+        maximise=[False, False, True, True],
+    )
+
+    # 4D all-maximize (agree=AGREE_MAXIMISE): exercises nondominated.h lines
+    # 634 (case AGREE_MAXIMISE) and 637 (false branch).
+    pts_4d_max = np.array(
+        [
+            [1.0, 1.0, 1.0, 1.0],
+            [0.0, 0.0, 0.0, 0.0],
+            [2.0, 0.0, 2.0, 0.0],
+        ]
+    )
+    assert moocore.any_dominated(pts_4d_max, maximise=True)
+    assert not moocore.any_dominated(
+        moocore.filter_dominated(pts_4d_max, maximise=True), maximise=True
+    )
+
 
 def test_epsilon():
     """Same as in R package."""
@@ -405,6 +491,18 @@ def test_normalise(immutable_call):
     A = np.array([[1.0, 2.0], [2.0, 1.0]])
     B = immutable_call(moocore.normalise, A)
     assert_allclose(B, [[0.0, 1.0], [1.0, 0.0]])
+
+    # maximise=True reverses the scale for maximised objectives, exercising
+    # nondominated.h lines 902-903 (flip sign), 918 and 925 (scaled result).
+    C = np.array([[0.0, 10.0], [5.0, 5.0], [10.0, 0.0]])
+    assert_allclose(
+        moocore.normalise(C, to_range=[1, 2], maximise=[False, True]),
+        [[1.0, 1.0], [1.5, 1.5], [2.0, 2.0]],
+    )
+    assert_allclose(
+        moocore.normalise(C, to_range=[0, 1], maximise=True),
+        [[1.0, 0.0], [0.5, 0.5], [0.0, 1.0]],
+    )
 
 
 @pytest.mark.parametrize(
