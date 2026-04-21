@@ -87,7 +87,7 @@ as_double_matrix_1 <- function(x)
 }
 
 is_wholenumber <- function(x, tol = .Machine$double.eps^0.5)
-  is.finite(x) && abs(x - round(x)) < tol
+  is.finite(x) & (abs(x - round(x)) < tol)
 
 as_integer <- function(x)
 {
