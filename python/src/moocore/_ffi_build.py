@@ -95,7 +95,7 @@ MSVC_CFLAGS = [
 ]
 MSVC_LDFLAGS = ["/LTCG"]  # Link-time optimization
 GCC_CFLAGS = ["-O3", "-flto", "-fvisibility=hidden"]
-GCC_LDFLAGS = [*GCC_CFLAGS]
+GCC_LDFLAGS = []
 if is_x86_64:
     # Compile for sufficiently old x86-64 architecture.
     MSVC_arch = ["/arch:AVX"]
@@ -109,12 +109,14 @@ if is_windows and uses_msvc():
     ldflags = MSVC_LDFLAGS + MSVC_arch
 else:
     cflags = GCC_CFLAGS + GCC_arch
-    ldflags = GCC_LDFLAGS + GCC_arch
+    # We have to include again CFLAGS so that the linking step includes them.
+    ldflags = GCC_CFLAGS + GCC_arch + GCC_LDFLAGS
     if not is_macos:
         ldflags += ["-Wl,-z,now"]
 
-cflags += os.environ.get("CFLAGS", "").split()
-ldflags += os.environ.get("LDFLAGS", "").split()
+cflags_env = os.environ.get("CFLAGS", "").split()
+cflags += cflags_env
+ldflags += cflags_env + os.environ.get("LDFLAGS", "").split()
 
 ffibuilder = FFI()
 file_path = os.path.dirname(os.path.realpath(__file__))
