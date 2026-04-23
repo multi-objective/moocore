@@ -341,12 +341,12 @@ find_nondominated_set_2d_(const double * restrict points, size_t size,
 
    rows should be already sorted by cmp_ppdouble_asc_rev_3d().
 
-   When find_one_dominated, return as soon as it finds one dominated point.
+   When find_dominated, return as soon as it finds one dominated point.
 */
 static __force_inline__ size_t
 find_nondominated_3d_impl_sorted(const double ** rows, size_t size,
                                  const bool keep_weakly,
-                                 const bool find_one_dominated)
+                                 const bool find_dominated)
 {
     ASSUME(size > 1);
 
@@ -416,15 +416,20 @@ find_nondominated_3d_impl_sorted(const double ** rows, size_t size,
             // Handle duplicates and points that are dominated by the immediate
             // previous one.
             DEBUG2(printf_point("weakly dominated by pk: ", pk, 3, "\n"));
-            const bool k_eq_j = (pk[0] == pj[0]) & (pk[1] == pj[1]) & (pk[2] == pj[2]);
-            if (likely(!k_eq_j)) {
-                goto j_is_dominated; // It is not a duplicate, so it is dominated.
-            } else if (!keep_weakly) { // Don't keep duplicates.
-                // Only the first duplicated point is kept.
-                if (pk < pj)
+            const bool k_not_equal_j = (pk[0] < pj[0]) | (pk[1] < pj[1]) | (pk[2] < pj[2]);
+
+            if (likely(k_not_equal_j)) { // It is not a duplicate, so it is dominated.
+                goto j_is_dominated;
+            } else if (keep_weakly) {
+                // If pk was dominated, then this one is also dominated.
+                if (last_dom_pos == k)
+                    goto j_is_dominated;
+                // Fall-through to j_is_NOT_dominated.
+            } else { // Don't keep duplicates.
+                if (pk < pj) // Only the first duplicated point is kept.
                     goto j_is_dominated;
 
-                if (find_one_dominated) {
+                if (find_dominated) {
                     // In this context, it means "position of the first dominated solution found".
                     new_size = k;
                     goto early_end;
@@ -433,9 +438,7 @@ find_nondominated_3d_impl_sorted(const double ** rows, size_t size,
                 rows[k] = NULL;
                 new_size--;
                 // Fall-through to j_is_NOT_dominated.
-            } else if (last_dom_pos == k) // pk was dominated, then this one is also dominated.
-                goto j_is_dominated;
-            // Fall-through j_is_NOT_dominated.
+            }
         }
         // j_is_NOT_dominated
         pk = pj;
@@ -443,7 +446,7 @@ find_nondominated_3d_impl_sorted(const double ** rows, size_t size,
         continue;
 
     j_is_dominated: // pj is dominated by a point in the tree or by pk.
-        if (find_one_dominated) {
+        if (find_dominated) {
             // In this context, it means "position of the first dominated solution found".
             new_size = j;
             goto early_end;
@@ -461,21 +464,21 @@ early_end:
 static __force_inline__ size_t
 find_nondominated_3d_impl(const double ** restrict rows, size_t size,
                           const bool keep_weakly,
-                          const bool find_one_dominated)
+                          const bool find_dominated)
 {
     // Sort in ascending lexicographic order from the last dimension.
     qsort_typesafe(rows, size, cmp_ppdouble_asc_rev_3d);
     // Help GCC generate all possible specializations of this function.
     return keep_weakly
-        ? find_nondominated_3d_impl_sorted(rows, size,  true, find_one_dominated)
-        : find_nondominated_3d_impl_sorted(rows, size, false, find_one_dominated);
+        ? find_nondominated_3d_impl_sorted(rows, size,  true, find_dominated)
+        : find_nondominated_3d_impl_sorted(rows, size, false, find_dominated);
 }
 
 static inline size_t
 find_dominated_3d_(const double * restrict points, size_t size, bool keep_weakly)
 {
     const double ** rows = generate_row_pointers(points, size, 3);
-    size_t pos = find_nondominated_3d_impl(rows, size, keep_weakly, /* find_one_dominated=*/true);
+    size_t pos = find_nondominated_3d_impl(rows, size, keep_weakly, /* find_dominated=*/true);
     if (pos < size)
         pos = row_index_from_ptr(points, rows[pos], 3);
     free(rows);
@@ -492,7 +495,7 @@ find_nondominated_set_3d_(const double * restrict points, size_t size,
 {
     ASSUME(nondom != NULL);
     const double ** rows = generate_row_pointers(points, size, 3);
-    size_t new_size = find_nondominated_3d_impl(rows, size, keep_weakly, /* find_one_dominated=*/false);
+    size_t new_size = find_nondominated_3d_impl(rows, size, keep_weakly, /* find_dominated=*/false);
 
     if (new_size < size) {
         memset(nondom, false, size * sizeof(*nondom));
