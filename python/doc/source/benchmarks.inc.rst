@@ -3,7 +3,18 @@ Benchmarks
 
 The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, `DESDEO`_, `paretoset`_, `Nevergrad`_, `jMetalPy`_, `fast-pareto`_, `Optuna`_, `moarchiving`_, and `patatune`_.
 
-Other Python packages are not included in the comparison because they are based on these packages for the functionality benchmarked, so they are **at least as slow** as them. For example `Xopt`_ and `BoFire`_ use `BoTorch`_, `pysamoo`_ is an extension of `pymoo`_, and most of the multi-objective functionality of `DEAP`_ is shared by `pymoo`_.  We do not include functions from the Bayesian optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and too slow to run the benchmarks in a reasonable time. Similarly, we do not include `paretobench`_ because it is always slower than `BoTorch`_ for identifying nondominated points and more than 2000 times slower than `moocore`_ for computing the hypervolume in 3D, which is too slow to include in any benchmarks.
+Other Python packages are not included in the comparison because they are based
+on these packages for the functionality benchmarked, so they are **at least as
+slow** as them. For example `Xopt`_ and `BoFire`_ use `BoTorch`_, `pysamoo`_ is
+an extension of `pymoo`_, and `DEAP`_ uses `moocore`_ since version 1.4.4.  We
+do not include functions from the Bayesian optimization toolbox `trieste`_,
+because it is much slower than `BoTorch`_ and too slow to run the benchmarks in
+a reasonable time (https://github.com/secondmind-labs/trieste/issues/917).
+Similarly, we do not include `paretobench`_ because it is always slower than
+`BoTorch`_ for identifying nondominated points and more than 2000 times slower
+than `moocore`_ for computing the hypervolume in 3D
+(https://github.com/electronsandstuff/ParetoBench/issues/57), which is too slow
+to include in any benchmarks.
 
 Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>`. `BoTorch`_ and `paretobench`_ only provide the hypervolume. `paretoset`_ and `fast-pareto`_ only identify nondominated points. `seqme`_ already uses `moocore`_, and `DESDEO`_ also uses `moocore`_ for hypervolume and some other quality metrics, but not all.
 
