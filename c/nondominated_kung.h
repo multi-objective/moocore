@@ -75,78 +75,6 @@ filter_dominated(const double ** restrict rows, size_t new_size, size_t size, di
 
 
 /**
-   Brute-force algorithm O(size^2 * dim), with a few improvements.
-
-   Simplified version of find_nondominated_bf_impl().
-*/
-static inline size_t
-maxima_brute_force(const double ** restrict rows, size_t size, dimension_t dim,
-                   bool keep_weakly)
-{
-    DEBUG2_PRINT("maxima_brute_force: size=%zu\n", size);
-    DEBUG2(print_rows(rows, size, dim));
-
-    const unsigned nkw = !keep_weakly;
-    size_t new_size = size;
-    size_t min_k = 0;
-
-    for (size_t j = 1; j < size; j++) {
-        const double * restrict pj = rows[j];
-        size_t k = min_k;
-        assert(pj != NULL);
-        while (rows[k] == NULL)
-            k++;
-        min_k = k;
-        ASSUME(k < j);
-
-        for (; k < j; k++) {
-            if (rows[k] == NULL) continue;
-            const double * restrict pk = rows[k];
-
-            // Use unsigned instead of bool to allow auto-vectorization.
-            unsigned k_leq_j = true, j_leq_k = true;
-            for (dimension_t d = 0; d < dim; d++) {
-                double cmp = pj[d] - pk[d];
-                k_leq_j &= (cmp >= 0.0);
-                j_leq_k &= (cmp <= 0.0);
-            }
-            // When j_leq_k & k_leq_j & nkw, we compare pj < pk to decide which
-            // one should be removed (the one with the highest pointer value).
-            unsigned dom_k = j_leq_k & ((!k_leq_j) | (nkw & (pj < pk)));
-            unsigned dom_j = k_leq_j & ((!j_leq_k) | (nkw & (pj > pk)));
-            /* As soon as j_leq_k and k_leq_j become false, neither k or j will
-               be removed, so skip the rest.  */
-            if (!(dom_k | dom_j)) continue;
-            assert(dom_k ^ dom_j); // At least one but not both can be removed.
-
-            size_t last_dom_pos = dom_j ? j : k;
-            assert(rows[last_dom_pos]);
-            rows[last_dom_pos] = NULL;
-            new_size--;
-            if (dom_j)
-                break;
-        }
-    }
-    assert(new_size > 0);
-    return new_size;
-}
-
-static size_t
-maxima_brute_force_filter_dom(const double ** restrict rows, size_t size,
-                              dimension_t dim, bool keep_weakly)
-{
-    // Help GCC generate specialized code for true/false.
-    size_t new_size = keep_weakly
-        ? maxima_brute_force(rows, size, dim, true)
-        : maxima_brute_force(rows, size, dim, false);
-    if (new_size < size) {
-        filter_dominated(rows, new_size, size, dim);
-    }
-    assert(check_nondom(rows, new_size));
-    return new_size;
-}
-
-/**
    Returns k, 0 <= k <= size, such that:
 
    * if k == 0, then v < u[j][0] for 0 <= j < size
@@ -278,7 +206,7 @@ kung_merge_dim3(const double ** restrict r, size_t r_size,
             i++;
         }
         if (dominated_by_tree_3d(&tree, v) == NULL) {
-            DEBUG2(printf_point("dominated_by_tree_3d: v=[ ", v, 3, " ], "));
+            DEBUG2(printf_point("dominated_by_tree_3d: v=[ ", v, 3, " ]\n"));
             s[k] = NULL; // dominated
             new_size--;
         }
@@ -296,6 +224,7 @@ kung_merge_brute_force(const double ** restrict r, size_t r_size,
 {
     DEBUG2_PRINT("kung_merge_brute_force: dim=%d, r_size=%zu, s_size=%zu\n",
                  dim, r_size, s_size);
+    ASSUME(dim >= 3);
 
     size_t new_size = s_size;
     for (size_t j = 0; j < s_size; j++) {
@@ -304,10 +233,9 @@ kung_merge_brute_force(const double ** restrict r, size_t r_size,
             const double * restrict ri = r[i];
             // Use unsigned instead of bool to allow auto-vectorization.
             unsigned r_leq_s = true;
-            for (dimension_t d = 0; d < dim; d++) {
-                double cmp = ri[d] - sj[d];
-                r_leq_s &= (cmp <= 0.0);
-            }
+            for (dimension_t d = 0; d < dim; d++)
+                r_leq_s &= (ri[d] <= sj[d]);
+
             if (unlikely(r_leq_s)) {
                 s[j] = NULL; // dominated
                 new_size--;
@@ -320,7 +248,7 @@ kung_merge_brute_force(const double ** restrict r, size_t r_size,
 }
 
 // Move to the next dimension and sort the rows again.
-static void
+static inline void
 shift_to_next_dimension(const double ** restrict dest,
                         const double ** restrict src, size_t size)
 {
@@ -415,11 +343,6 @@ compact_rows(const double ** restrict r, size_t r_size,
     return new_size;
 }
 
-static size_t
-kung_merge_nobase(const double ** restrict r, size_t r_size,
-                  const double ** restrict s, size_t s_size,
-                  dimension_t dim);
-
 typedef struct shifted_row {
     const double * row;
     const double ** prow;
@@ -484,6 +407,10 @@ filter_shifted(shifted_row_t * restrict shifted_rows,
     }
 }
 
+static size_t kung_merge_nobase(const double ** restrict r, size_t r_size,
+                                const double ** restrict s, size_t s_size,
+                                dimension_t dim);
+
 /**
    Recurse one dimension before merging.
 */
@@ -502,14 +429,13 @@ kung_merge_rec_dim(const double ** restrict r, size_t r_size,
        r_size == 1 || s_size == 1 because we avoid sorting.
     */
     size_t new_size;
-    if (r_size == 1 || s_size == 1 || r_size * s_size <= KUNG_MERGE_THRESHOLD) {
+    if (r_size * s_size <= KUNG_MERGE_THRESHOLD || r_size == 1 || s_size == 1) {
         // kung_merge_brute_force() does not need sorting, so copying r and s is not needed.
         for (size_t k = 0; k < r_size; k++)
             r[k]++;
         for (size_t k = 0; k < s_size; k++)
             s[k]++;
         new_size = kung_merge_brute_force(r, r_size, s, s_size, dim - 1);
-        assert(check_nondom(r, r_size));
         for (size_t k = 0; k < r_size; k++)
             r[k]--;
         // We filter first so we remove all NULL pointers.
@@ -518,19 +444,15 @@ kung_merge_rec_dim(const double ** restrict r, size_t r_size,
         for (size_t k = 0; k < new_size; k++)
             s[k]--;
     } else {
-        const double ** r1 = (const double **) malloc((r_size + s_size) * sizeof(*r));
-        shift_to_next_dimension(r1, r, r_size);
-        // We shifted to next dimension, so we need to sort.
-        qsort_typesafe(r1, r_size, cmp_ppdouble_asc_x_nonzero_stable);
         /* We will create new row pointers that point to the next dimension,
            however, for s, we also want to remember the original position of
            each row pointer to be able to filter dominated, thus shifted_rows
            stores the new row pointer and a pointer to the previous one, so we
            can modify it directly.  */
-        /* FIXME: This would be less awkward if we had a sort function that
-           allowed indirect sorting of parallel arrays. Then, we would not need
-           shifted_rows.
-        */
+        const double ** r1 = (const double **) malloc((r_size + s_size) * sizeof(*r));
+        shift_to_next_dimension(r1, r, r_size);
+        // We shifted to next dimension, so we need to sort.
+        qsort_typesafe(r1, r_size, cmp_ppdouble_asc_x_nonzero_stable);
         const double ** s1 = r1 + r_size;
         shifted_row_t * shifted_rows = alloc_shifted_rows(
             s, s_size, qsort_cmp_shifted_row_asc_x_nonzero_stable, s1);
@@ -542,6 +464,7 @@ kung_merge_rec_dim(const double ** restrict r, size_t r_size,
             new_size = kung_merge_dim3(r1, r_size, s1, s_size);
             DEBUG2_PRINT("kung_merge_dim3: new_size=%zu\n", new_size);
         } else {
+            assert(dim > 4);
             new_size = kung_merge_nobase(r1, r_size, s1, s_size, dim - 1);
         }
         assert(check_nondom(r1, r_size));
@@ -585,9 +508,10 @@ kung_merge_nobase(const double ** restrict r, size_t r_size,
     assert(s1_size > 0);
     // s2_size may be zero if all values in s are duplicated. In that case, the
     // pivot_value should just be one of the values of s1. Otherwise, it should
-    // be the minimum of s2, which is already sorted
-    const double pivot_value = (s2_size > 0) ? s[s1_size][0] : s[s1_size - 1][0];
-    DEBUG2_PRINT("kung_merge_nobase: maxima_partition: s[%zu][0] = %g\n", s1_size,  pivot_value);
+    // be the minimum of s2, which is already sorted, so s[s1_size][0].
+    const double pivot_value = s[(s2_size == 0) ? s1_size - 1 : s1_size][0];
+    DEBUG2_PRINT("kung_merge_nobase: s2_size = %zu, maxima_partition: s[%zu][0] = %g\n",
+                 s2_size, (s2_size == 0) ? s1_size - 1 : s1_size,  pivot_value);
     const size_t r1_size = maxima_partition(r, r_size, pivot_value);
     const size_t r2_size = r_size - r1_size;
     const double ** r2 = r + r1_size;
@@ -607,8 +531,6 @@ kung_merge_nobase(const double ** restrict r, size_t r_size,
     DEBUG2(printf_rows("S2", s2, s2_size, dim, "s2_size"));
     if (r2_size > 0 && s2_size > 0) {
         DEBUG2_PRINT("Solve sub-problem  (R2, S2)\n");
-        assert(check_nondom(r2, r2_size));
-        assert(check_nondom(s2, s2_size));
         s2_size = kung_merge(r2, r2_size, s2, s2_size, dim);
         assert(check_nondom(r2, r2_size));
         assert(check_nondom(s2, s2_size));
@@ -616,8 +538,6 @@ kung_merge_nobase(const double ** restrict r, size_t r_size,
     if (r1_size > 0) {
         DEBUG2_PRINT("Solve sub-problem  (R1, S1)\n");
         // Solve sub-problem  (R1, S1)
-        assert(check_nondom(r, r1_size));
-        assert(check_nondom(s, s1_size));
         s1_size = kung_merge(r, r1_size, s, s1_size, dim);
         assert(check_nondom(r, r1_size));
         assert(check_nondom(s, s1_size));
@@ -648,7 +568,7 @@ kung_merge(const double ** restrict r, size_t r_size,
     ASSUME(s_size > 0);
     assert(check_nondom(r, r_size));
     assert(check_nondom(s, s_size));
-    if (r_size == 1 || s_size == 1 || r_size * s_size <= KUNG_MERGE_THRESHOLD) {
+    if (r_size * s_size <= KUNG_MERGE_THRESHOLD || r_size == 1 || s_size == 1) {
         size_t new_size = kung_merge_brute_force(r, r_size, s, s_size, dim);
         if (new_size < s_size) {
             filter_dominated(s, new_size, s_size, dim);
@@ -707,36 +627,135 @@ maxima_rec_dim(const double ** rows, size_t size, dimension_t dim,
 }
 
 /**
+   Brute-force algorithm O(size^2 * dim), with a few improvements.
+
+   Simplified version of find_nondominated_bf_impl().
+*/
+typedef enum {
+    VEC_A_LT_B = -1,
+    VEC_INCOMPARABLE = 0,
+    VEC_A_GT_B = 1,
+} dominance_cmp_t;
+
+static inline dominance_cmp_t
+vec_cmp_dominance(const double * restrict a, const double * restrict b,
+                  dimension_t dim, bool keep_weakly)
+{
+    // Use unsigned instead of bool to allow auto-vectorization.
+    unsigned lt = 0; // any a[i] < b[i]
+    unsigned gt = 0; // any a[i] > b[i]
+    for (dimension_t d = 0; d < 4; d++) {
+        lt |= (a[d] < b[d]);
+        gt |= (a[d] > b[d]);
+    }
+    if (lt & gt)
+        return VEC_INCOMPARABLE;
+
+    for (dimension_t d = 4; d < dim; d++) {
+        lt |= (a[d] < b[d]);
+        gt |= (a[d] > b[d]);
+    }
+    if (lt & gt)
+        return VEC_INCOMPARABLE;
+
+    if (lt) return VEC_A_LT_B;
+    if (gt) return VEC_A_GT_B;
+    // They are equal.
+    if (keep_weakly)
+        return VEC_INCOMPARABLE;
+    // Remove the one with the highest pointer value.
+    return (a < b) ? VEC_A_LT_B : VEC_A_GT_B;
+}
+
+static __force_inline__ size_t
+maxima_brute_force(const double ** restrict rows, size_t size, dimension_t dim,
+                   bool keep_weakly)
+{
+    DEBUG2_PRINT("maxima_brute_force: size=%zu\n", size);
+    DEBUG2(print_rows(rows, size, dim));
+
+    size_t new_size = size;
+    size_t min_k = 0;
+    for (size_t j = 1; j < size; j++) {
+        size_t k = min_k;
+        while (rows[k] == NULL)
+            k++;
+        min_k = k;
+        const double * restrict pj = rows[j];
+        ASSUME(pj != NULL);
+        ASSUME(rows[k] != NULL);
+        ASSUME(k < j);
+        for (; k < j; k++) {
+            const double * restrict pk = rows[k];
+            if (pk == NULL) continue;
+
+            dominance_cmp_t res = vec_cmp_dominance(pk, pj, dim, keep_weakly);
+            if (likely(res == VEC_INCOMPARABLE)) {
+                continue;
+            } else if (res == VEC_A_LT_B) {
+                // pk[i] <= pj[i] for all i, and pk[i] < pj[i] for at least one i.
+                new_size--;
+                assert(rows[j]);
+                rows[j] = NULL;
+                break;
+            } else {
+                assert(res == VEC_A_GT_B);
+                // pj[i] <= pk[i] for all i, and pj[i] < pk[i] for at least one i.
+                new_size--;
+                assert(rows[k]);
+                rows[k] = NULL;
+            }
+        }
+    }
+    assert(new_size > 0);
+    return new_size;
+}
+
+static __force_inline__ size_t
+maxima_brute_force_filter_dom(const double ** restrict rows, size_t size,
+                              dimension_t dim, bool keep_weakly)
+{
+    // Help GCC generate specialized code for true/false.
+    size_t new_size = keep_weakly
+        ? maxima_brute_force(rows, size, dim, true)
+        : maxima_brute_force(rows, size, dim, false);
+    if (new_size < size) {
+        filter_dominated(rows, new_size, size, dim);
+    }
+    assert(check_nondom(rows, new_size));
+    return new_size;
+}
+
+/**
    Algorithm 4.1
 */
 static size_t
 maxima_rec(const double ** restrict rows, size_t size, dimension_t dim,
            bool keep_weakly)
 {
-    if (size == 1)
-        return size;
-
     ASSUME(dim > 3);
-    if (size <= KUNG_SMALL_THRESHOLD)
-        return maxima_brute_force_filter_dom(rows, size, dim, keep_weakly);
-
     DEBUG2_PRINT("maxima_rec: dim=%d, size=%zu\n", dim, size);
     DEBUG2(printf_rows("maxima_rec: rows", rows, size, dim, "size"));
     size_t r_size = half_size_with_duplicates(rows, size);
     size_t s_size = size - r_size;
     DEBUG2(printf_rows("maxima_rec: R", rows, r_size, dim, "r_size"));
 
-    if (s_size == 0) {
+    if (s_size == 0)
         return maxima_rec_dim(rows, size, dim, keep_weakly);
-    }
 
     const double ** s = rows + r_size;
     DEBUG2(printf_rows("maxima_rec: S", s, s_size, dim, "s_size"));
 
-    r_size = maxima_rec(rows, r_size, dim, keep_weakly);
+    if (r_size > 1)
+        r_size = (r_size <= KUNG_SMALL_THRESHOLD)
+            ? maxima_brute_force_filter_dom(rows, r_size, dim, keep_weakly)
+            : maxima_rec(rows, r_size, dim, keep_weakly);
     DEBUG2(printf_rows("maxima_rec2: R", rows, r_size, dim, "r_size"));
 
-    s_size = maxima_rec(s, s_size, dim, keep_weakly);
+    if (s_size > 1)
+        s_size = (s_size <= KUNG_SMALL_THRESHOLD)
+            ? maxima_brute_force_filter_dom(s, s_size, dim, keep_weakly)
+            : maxima_rec(s, s_size, dim, keep_weakly);
     DEBUG2(printf_rows("maxima_rec2: S", s, s_size, dim, "s_size"));
 
     s_size = kung_merge_rec_dim(rows, r_size, s, s_size, dim);
