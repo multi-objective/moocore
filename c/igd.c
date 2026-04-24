@@ -94,6 +94,9 @@ OPTION_QUIET_STR
 " -r, --reference FILE file that contains the reference set                  \n"
 OPTION_OBJ_STR
 OPTION_MAXIMISE_STR
+"   , --[no]-check     The reference set must be nondominated. By default, \n"
+"                      dominated pointers are filtered out.  Option --no-check\n"
+"                      skips the filtering, which may lead to wrong results."
 " -s, --suffix=STRING Create an output file for each input file by appending\n"
 "                     this suffix. This is ignored when reading from stdin. \n"
 "                     If missing, output is sent to stdout.                 \n"
@@ -196,6 +199,8 @@ int main(int argc, char *argv[])
         {"version",    no_argument,       NULL, 'V'},
         {"verbose",    no_argument,       NULL, 'v'},
         {"quiet",      no_argument,       NULL, 'q'},
+        {"check",      no_argument,       NULL, 'c'},
+        {"no-check",   no_argument,       NULL, 'C'},
         {"gd",         no_argument,       NULL, GD_opt},
         {"igd",        no_argument,       NULL, IGD_opt},
         {"gd-p",       no_argument,       NULL, GD_p_opt},
@@ -213,6 +218,7 @@ int main(int argc, char *argv[])
     };
     set_program_invocation_short_name(argv[0]);
 
+    bool check_flag = true;
     double * reference = NULL;
     size_t reference_size = 0;
     const int * minmax = NULL;
@@ -224,6 +230,12 @@ int main(int argc, char *argv[])
     while (0 < (opt = getopt_long(argc, argv, short_options,
                                   long_options, &longopt_index))) {
         switch (opt) {
+
+          case 'c': // --check
+          case 'C': // --no-check
+              check_flag = (opt == 'c');
+              break;
+
           case 'p':
               // FIXME: Use strtol
               exponent_p = atoi(optarg);
@@ -302,7 +314,15 @@ int main(int argc, char *argv[])
     if (minmax == NULL) {
         minmax = maximise_all_flag ? minmax_maximise((dimension_t) nobj) : minmax_minimise((dimension_t) nobj);
     }
-    reference_size = filter_dominated_set(reference, reference_size, (dimension_t)nobj, minmax);
+
+    if (check_flag) {
+        // Ensure the reference set is nondominated.
+        size_t prev_reference_size = reference_size;
+        reference_size = filter_dominated_set(reference, reference_size, (dimension_t)nobj, minmax);
+        if (prev_reference_size > reference_size)
+            warnprintf("removed %zd dominated points from the reference set",
+                       prev_reference_size - reference_size);
+    }
 
     int numfiles = argc - optind;
     if (numfiles < 1) {/* Read stdin.  */

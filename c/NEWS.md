@@ -11,6 +11,7 @@
    it to replace most `bool *` arguments.
  * `is_nondominated()` and `pareto_rank()` do not return pointers to newly
    allocated memory to help zero-copy communication with Python/R.
+ * Add `--no-check` option to `epsilon` and `igd` executables.
 
 
 ## 0.18

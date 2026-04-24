@@ -77,6 +77,9 @@ OPTION_QUIET_STR
 " -r, --reference FILE file that contains the reference set                  \n"
 OPTION_OBJ_STR
 OPTION_MAXIMISE_STR
+"   , --[no]-check     The reference set must be nondominated. By default, \n"
+"                      dominated pointers are filtered out.  Option --no-check\n"
+"                      skips the filtering, which may lead to wrong results."
 " -s, --suffix=STRING  Create an output file for each input file by appending\n"
 "                      this suffix. This is ignored when reading from stdin. \n"
 "                      If missing, output is sent to stdout.                 \n"
@@ -141,18 +144,19 @@ int main(int argc, char *argv[])
     // See the man page for getopt_long for an explanation of these fields.
     static const char short_options[] = "hVvqamMr:s:o:";
     static const struct option long_options[] = {
-        {"help",       no_argument,       NULL, 'h'},
-        {"version",    no_argument,       NULL, 'V'},
-        {"verbose",    no_argument,       NULL, 'v'},
-        {"quiet",      no_argument,       NULL, 'q'},
-        {"no-check",   no_argument,       NULL, 'c'},
-        {"additive",   no_argument,       NULL, 'a'},
-        {"multiplicative",   no_argument, NULL, 'm'},
-        {"maximise",   no_argument,       NULL, 'M'},
-        {"maximize",   no_argument,       NULL, 'M'},
-        {"reference",  required_argument, NULL, 'r'},
-        {"suffix",     required_argument, NULL, 's'},
-        {"obj",        required_argument, NULL, 'o'},
+        {"help",            no_argument,        NULL, 'h'},
+        {"version",         no_argument,        NULL, 'V'},
+        {"verbose",         no_argument,        NULL, 'v'},
+        {"quiet",           no_argument,        NULL, 'q'},
+        {"check",           no_argument,        NULL, 'c'},
+        {"no-check",        no_argument,        NULL, 'C'},
+        {"additive",        no_argument,        NULL, 'a'},
+        {"multiplicative",  no_argument,        NULL, 'm'},
+        {"maximise",        no_argument,        NULL, 'M'},
+        {"maximize",        no_argument,        NULL, 'M'},
+        {"reference",       required_argument,  NULL, 'r'},
+        {"suffix",          required_argument,  NULL, 's'},
+        {"obj",             required_argument,  NULL, 'o'},
         {NULL, 0, NULL, 0} /* marks end of list */
     };
 
@@ -170,9 +174,11 @@ int main(int argc, char *argv[])
     while (0 < (opt = getopt_long(argc, argv, short_options,
                                   long_options, &longopt_index))) {
         switch (opt) {
-          case 'c': // --no-check
-            check_flag = false;
-            break;
+
+          case 'c': // --check
+          case 'C': // --no-check
+              check_flag = (opt == 'c');
+              break;
 
         case 'a': // --additive
             additive_flag = true;
