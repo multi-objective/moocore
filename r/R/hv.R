@@ -41,7 +41,9 @@
 #' former in terms of Pareto-optimality.
 #'
 #' Like most measures of unions of high-dimensional geometric objects,
-#' computing the hypervolume is #P-hard \citep{BriFri2010approx}.
+#' computing the hypervolume is #P-hard \citep{BriFri2010approx}, which means
+#' that the best possible algorithm takes an exponential time on the number of
+#' objectives or points, in the worst-case.
 #'
 #' For 2D and 3D, the algorithms used
 #' \citep{FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec} have \eqn{O(n \log n)}
@@ -156,6 +158,8 @@ hypervolume <- function(x, reference, maximise = FALSE)
 #' When the input only consists of mutually nondominated points, the value of
 #' `ignore_dominated` does not change the result, but the default value is
 #' significantly faster.
+#'
+#' Like the hypervolume, computing the hypervolume contribution is #P-hard \citep{BriFri2012tcs}.
 #'
 #' The current implementation uses a \eqn{O(n\log n)} dimension-sweep
 #' algorithm for 2D.  With `ignore_dominated=TRUE`, the 3D case uses the HVC3D

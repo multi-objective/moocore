@@ -55,6 +55,8 @@ When the input only consists of mutually nondominated points, the value of
 \code{ignore_dominated} does not change the result, but the default value is
 significantly faster.
 
+Like the hypervolume, computing the hypervolume contribution is #P-hard \citep{BriFri2012tcs}.
+
 The current implementation uses a \eqn{O(n\log n)} dimension-sweep
 algorithm for 2D.  With \code{ignore_dominated=TRUE}, the 3D case uses the HVC3D
 algorithm \citep{GueFon2017hv4d}, which has \eqn{O(n\log n)} complexity.

@@ -53,7 +53,9 @@ another, then we know for sure than the latter set cannot be better than the
 former in terms of Pareto-optimality.
 
 Like most measures of unions of high-dimensional geometric objects,
-computing the hypervolume is #P-hard \citep{BriFri2010approx}.
+computing the hypervolume is #P-hard \citep{BriFri2010approx}, which means
+that the best possible algorithm takes an exponential time on the number of
+objectives or points, in the worst-case.
 
 For 2D and 3D, the algorithms used
 \citep{FonPaqLop06:hypervolume,BeuFonLopPaqVah09:tec} have \eqn{O(n \log n)}

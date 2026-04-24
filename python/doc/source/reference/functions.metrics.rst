@@ -143,7 +143,6 @@ Hypervolume metric
    hypervolume
    Hypervolume
    RelativeHypervolume
-   hv_contributions
    total_whv_rect
    whv_rect
 
@@ -156,12 +155,12 @@ dominate :math:`\vec{r}` do not contribute to the hypervolume value, thus,
 ideally, the reference point must be strictly dominated by all points in the
 true Pareto front.
 
-More precisely, the hypervolume is the `Lebesgue measure <https://en.wikipedia.org/wiki/Lebesgue_measure>`_ of the union of
-axis-aligned hyperrectangles
-(`orthotopes <https://en.wikipedia.org/wiki/Hyperrectangle>`_), where each
-hyperrectangle is defined by one point from :math:`\vec{a} \in A` and the
-reference point.  The union of axis-aligned hyperrectangles is also called an
-*orthogonal polytope*.
+More precisely, the hypervolume is the `Lebesgue measure
+<https://en.wikipedia.org/wiki/Lebesgue_measure>`_ of the union of axis-aligned
+hyperrectangles (`orthotopes <https://en.wikipedia.org/wiki/Hyperrectangle>`_),
+where each hyperrectangle is defined by one point from :math:`\vec{a} \in A`
+and the reference point.  The union of axis-aligned hyperrectangles is also
+called an *orthogonal polytope*.
 
 The hypervolume is compatible with Pareto-optimality
 :cite:p:`KnoCor2002cec,ZitThiLauFon2003:tec`, that is, :math:`\nexists A,B
@@ -173,7 +172,24 @@ Conversely, if the hypervolume of a set is larger than the hypervolume of
 another, then we know for sure than the latter set cannot be better than the
 former in terms of Pareto-optimality.
 
-Like most measures of unions of high-dimensional geometric objects, computing the hypervolume is #P-hard :cite:p:`BriFri2010approx`.
+Like most measures of unions of high-dimensional geometric objects, computing
+the hypervolume is #P-hard :cite:p:`BriFri2010approx`, which means that the
+best possible algorithm takes an exponential time on the number of objectives
+or points, in the worst-case.
+
+
+Hypervolume contribution
+------------------------
+
+.. autosummary::
+   :toctree: generated/
+
+   hv_contributions
+
+The hypervolume contribution of point :math:`\vec{p} \in X` is defined as
+:math:`\text{hvc}(\vec{p}) = \text{hyp}(X) - \text{hyp}(X \setminus
+\{\vec{p}\})`.  Like the hypervolume, computing the hypervolume contribution is #P-hard :cite:p:`BriFri2012tcs`.
+
 
 
 .. _hv_approximation:
