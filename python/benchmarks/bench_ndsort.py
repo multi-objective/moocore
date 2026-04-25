@@ -5,11 +5,11 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
-from bench import Bench, get_geomrange, check_float_vector
+from bench import Bench, get_geomrange, check_array_equal
 
 import numpy as np
-import moocore
 import matplotlib.pyplot as plt
+import moocore
 
 from pymoo.util.nds.non_dominated_sorting import (
     NonDominatedSorting as pymoo_NDS,
@@ -17,20 +17,19 @@ from pymoo.util.nds.non_dominated_sorting import (
 from desdeo.tools.non_dominated_sorting import (
     fast_non_dominated_sort as desdeo_nds,
 )
-
 from paretoset import paretorank as paretoset_paretorank
 ## It cannot be installed: https://github.com/esa/pygmo2/issues/152
 # from pygmo import pareto_dominance as pg_pareto_dominance
 
-# See https://github.com/multi-objective/testsuite/tree/main/data
 files = {
     # range are the (start, stop, num) parameters for np.geomspace()
     "ran-2d": dict(generate=(50_000, 2), range=(100, 50_000, 10)),
     "ran-3d": dict(generate=(40_000, 3), range=(100, 40_000, 10)),
-    "ran-4d": dict(generate=(30_000, 4), range=(100, 30000, 10)),
-    "ran-5d": dict(generate=(20_000, 5), range=(100, 20000, 10)),
+    "ran-4d": dict(generate=(30_000, 4), range=(100, 30_000, 10)),
+    "ran-5d": dict(generate=(20_000, 5), range=(100, 20_000, 10)),
+    "ran-9d": dict(generate=(10_000, 9), range=(100, 10_000, 10)),
+    "ran-10d": dict(generate=(10_000, 10), range=(100, 10_000, 10)),
 }
-
 
 rng = np.random.default_rng(42)
 
@@ -46,7 +45,7 @@ def get_dataset(name):
 title = "pareto_rank()"
 file_prefix = "ndsort"
 
-print(f"Running benchmark: {title}")
+print(f"# Running benchmark: {title}")
 names = files.keys()
 for name in names:
     x = get_dataset(name)
@@ -61,7 +60,7 @@ for name in names:
             "pymoo": lambda z, nds=pymoo_NDS(): nds.do(z, return_rank=True)[1],
             "desdeo": lambda z: desdeo_nds(z).argmax(axis=0),
         },
-        check=check_float_vector,
+        check=check_array_equal,
     )
 
     bench(lambda n: x[:n, :])
