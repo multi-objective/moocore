@@ -38,7 +38,7 @@
 #include "hvc4d_priv.h"
 
 #define STOP_DIMENSION 3 // stop on dimension 4.
-#define MAX_ROWS_HV_INEX 15
+#define MAX_ROWS_HV_INEX 12
 
 static int compare_node(const void * restrict p1, const void * restrict p2)
 {
@@ -317,13 +317,12 @@ hv_inex_list(const dlnode_t * restrict list, int n, dimension_t dim,
     double hv[] = {0.0, 0.0}; // 0 is negative, 1 is positive.
 
     // Process individual points.
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; i++) {
         const double * restrict px = list[i].x;
         hv[1] += one_point_hv(px, ref, dim);
+        DEBUG2_PRINT("hv[%d]=%g:i = %2d\n", 1, one_point_hv(px, ref, dim), i);
     }
 
-    // Depth-first-search state.
-    int start_stack[MAX_ROWS_HV_INEX - 1];
     double * buffer = malloc((n-1) * dim * sizeof(*buffer));
     if (!buffer)
         return -1;
@@ -334,33 +333,51 @@ hv_inex_list(const dlnode_t * restrict list, int n, dimension_t dim,
     }
 
     // Build all possible subsets starting from each possible pair.
-    for (int i = 0; i < n - 1; ++i) {
+    for (int i = 0; i < n - 1; i++) {
         const double * restrict pi = list[i].x;
-        for (int j = i + 1; j < n; ++j) {
+        int j = i + 1;
+        while (true) {
             const double * restrict pj = list[j].x;
             double * restrict child = subset_max[0];
             upper_bound(child, pi, pj, dim);
             hv[0] += one_point_hv(child, ref, dim);
+            DEBUG2_PRINT("hv[%d]=%g  i=%2d, j=%2d\n",
+                         0, one_point_hv(child, ref, dim), i, j);
+            DEBUG2(printf_point(" child: ", child, dim, "\n");
+                   printf_point("    pi: ", pi, dim, "\n");
+                   printf_point("    pj: ", pj, dim, "\n"));
 
+            if (j == n - 1)
+                break;
+
+            int idx = ++j;
             int top = 0;
-            int idx = j + 1;
+            // Depth-first-search state.
+            int start_stack[MAX_ROWS_HV_INEX - 2];
             while (true) {
+                const double * restrict parent = subset_max[top];
+                ++top;
+                // At this point, subset size == top + 2.
+                child = subset_max[top];
+                upper_bound(child, list[idx].x, parent, dim);
+                // Inclusion–exclusion accumulation.
+                hv[top & 1] += one_point_hv(child, ref, dim);
+                DEBUG2_PRINT("hv[%d]=%g  i=%2d, j=%2d, top=%2d, idx=%2d\n",
+                             top & 1, one_point_hv(child, ref, dim), i, j, top, idx);
+                DEBUG2(printf_point(" child: ", child, dim, "\n");
+                       printf_point("     x: ", list[idx].x, dim, "\n");
+                       printf_point("parent: ", parent, dim, "\n"));
+
+                ++idx;
                 if (idx < n) {
-                    start_stack[top] = idx + 1;
-                    const double * restrict parent = subset_max[top];
-                    ++top;
-                    // At this point, subset size == top + 2.
-                    child = subset_max[top];
-                    upper_bound(child, list[idx].x, parent, dim);
-                    // Inclusion–exclusion accumulation.
-                    hv[top & 1] += one_point_hv(child, ref, dim);
-                    idx++;
-                } else if (top > 0) {
-                    --top;
+                    DEBUG2_PRINT("i=%2d, j=%2d: start_stack[%2d]=%2d\n", i, j, top - 1, idx);
+                    start_stack[top - 1] = idx;
+                } else if (top > 1) { // Recurse back
+                    top -= 2;
                     idx = start_stack[top];
-                } else {
+                    DEBUG2_PRINT("i=%2d, j=%2d: %2d=start_stack[%2d]\n", i, j, idx, top);
+                } else
                     break;
-                }
             }
         }
     }

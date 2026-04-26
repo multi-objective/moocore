@@ -139,4 +139,14 @@ matrix_transpose_double(double * restrict dst, const double * restrict src,
 	}
 }
 
+static inline void
+printf_point(const char * prefix, const double * p, dimension_t dim,
+             const char * suffix)
+{
+    fprintf(stderr, "%s%g", prefix, p[0]);
+    for (dimension_t d = 1; d < dim; d++)
+        fprintf(stderr, " %g", p[d]);
+    fprintf(stderr, "%s", suffix);
+}
+
 #endif 	    /* !MOOCORE_COMMON_H_ */
