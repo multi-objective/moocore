@@ -151,14 +151,14 @@ pareto_rank_2d(int * restrict rank, const double * restrict points, size_t size)
 
 #if DEBUG >= 2
 #define PARETO_RANK_2D_DEBUG
-    double *help_0 = malloc(size * sizeof(double));
-    double *help_1 = malloc(size * sizeof(double));
-    int *   help_i = malloc(size * sizeof(int));
+    double * help_0 = malloc(size * sizeof(*help_0));
+    double * help_1 = malloc(size * sizeof(*help_1));
+    int * help_i = malloc(size * sizeof(*help_i));
 
     for (size_t k = 0; k < size; k++) {
         help_0[k] = p[k][0];
         help_1[k] = p[k][1];
-        help_i[k] = k;
+        help_i[k] = (int) k;
     }
     fprintf(stderr, "%s():\n-------------------\n>>INPUT:", __FUNCTION__);
     fprintf(stderr, "\nIndex: "); vector_int_fprintf(stderr, help_i, size);
