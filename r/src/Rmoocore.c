@@ -255,6 +255,25 @@ compute_eafdiff_polygon_C(SEXP DATA, SEXP CUMSIZES, SEXP INTERVALS)
     return Rexp(poly);
 }
 
+static inline void
+matrix_transpose_double(double * restrict dst, const double * restrict src,
+                        const size_t nrows, const size_t ncols)
+{
+    ASSUME(nrows < SIZE_MAX/2 && ncols < SIZE_MAX/2);
+    if (nrows <= 0 || ncols <= 0)
+        return;
+
+    const size_t len_1 = (nrows * ncols) - 1;
+    size_t i = 0, j = 0;
+    for (; j <= len_1; i++, j += nrows)
+        dst[j] = src[i];
+
+    for (; i <= len_1; i++, j += nrows) {
+	    if (j > len_1) j -= len_1;
+	    dst[j] = src[i];
+	}
+}
+
 SEXP
 R_read_datasets(SEXP FILENAME)
 {
