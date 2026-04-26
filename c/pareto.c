@@ -14,9 +14,10 @@ static void
 pareto_rank_3d(int * restrict rank, const double * restrict points, size_t size)
 {
     ASSUME(size >= 2);
+    memset(rank, 0, sizeof(*rank) * size);
+
     const size_t orig_size = size;
     const bool keep_weakly = true;
-    memset(rank, 0, sizeof(*rank) * size);
     const double ** p = generate_row_pointers_asc_rev_3d(points, size);
 
     avl_tree_t tree;
@@ -276,13 +277,187 @@ pareto_rank_2d(int * restrict rank, const double * restrict points, size_t size)
 }
 
 /**
-   Similar to find_nondominated_bf_impl().
+   Brute-force but using find_nondominated_set_kung().
 
-   FIXME: This takes O(n^3). Look at:
+   This takes O(n^2 log^(d-2)(n)). A better algorithm is given by:
 
    M. T. Jensen. Reducing the run-time complexity of multiobjective EAs: The
    NSGA-II and other algorithms. IEEE Transactions on Evolutionary Computation,
    7(5):503–515, 2003.
+*/
+static void
+pareto_rank_kung(int * restrict rank,
+                 const double * restrict points, size_t size, dimension_t dim)
+{
+    ASSUME(dim >= 2);
+    ASSUME(size >= 2);
+    memset(rank, 0, sizeof(*rank) * size);
+
+    const bool keep_weakly = true;
+    const double ** rows = malloc(2 * size * sizeof(*rows));
+    const double ** prev_rows = rows + size;
+    for (size_t k = 0; k < size; k++)
+        prev_rows[k] = points + dim * k;
+    // Same as find_nondominated_set_kung()
+    qsort_typesafe(prev_rows, size, cmp_ppdouble_asc_x_nonzero_stable);
+
+    int front = 1;
+    while (true) {
+        ASSUME(size >= 2);
+        for (size_t k = 0; k < size; k++)
+            rows[k] = prev_rows[k];
+        size_t new_size = maxima_rec(rows, size, dim, keep_weakly);
+        // If everything is nondominated or there is only one dominated point,
+        // we can stop.
+        size -= new_size;
+        // size is now the number of dominated points.
+        if (size <= 2)
+            break;
+        // If something is in rows[], it is nondominated -> remove it!
+        size_t j = 0;
+        while (prev_rows[j] == rows[j]) j++;
+        // j was dominated, so it goes in the next front.
+        prev_rows[0] = prev_rows[j];
+        rank[row_index_from_ptr(points, prev_rows[j], dim)] = front;
+        size_t n = 1;
+        size_t i = j + 1;
+        do  {
+            while (prev_rows[i] == rows[j]) {
+                i++, j++;
+            }
+            prev_rows[n] = prev_rows[i];
+            rank[row_index_from_ptr(points, prev_rows[i], dim)] = front;
+            n++, i++;
+        } while (n < size);
+        front++;
+    }
+
+    if (size != 0) {
+        size_t n = 0;
+        while (prev_rows[n] == rows[n])
+            n++;
+        const double * first = prev_rows[n];
+        if (size == 1) {
+            // Update the only dominated point.
+            rank[row_index_from_ptr(points, first, dim)] = front;
+        } else {
+            assert(size == 2);
+            while (prev_rows[n+1] == rows[n])
+                n++;
+            const double * second = prev_rows[n+1];
+            dominance_cmp_t res = vec_cmp_dominance(first, second, dim, keep_weakly);
+            if (res == VEC_INCOMPARABLE) {
+                rank[row_index_from_ptr(points, first, dim)] = front;
+                rank[row_index_from_ptr(points, second, dim)] = front;
+            }  else if (res == VEC_A_LT_B) {
+                // first[i] <= second[i] for all i, and first[i] < second[i] for at least one i.
+                rank[row_index_from_ptr(points, first, dim)] = front;
+                rank[row_index_from_ptr(points, second, dim)] = front+1;
+            }  else {
+                assert(res == VEC_A_GT_B);
+                // second[i] <= first[i] for all i, and second[i] < first[i] for at least one i.
+                rank[row_index_from_ptr(points, first, dim)] = front+1;
+                rank[row_index_from_ptr(points, second, dim)] = front;
+            }
+        }
+    }
+    free(rows);
+}
+
+/**
+   Similar to find_nondominated_bf_impl().
+
+   This takes O(n^3). A better algorithm is given by:
+
+   M. T. Jensen. Reducing the run-time complexity of multiobjective EAs: The
+   NSGA-II and other algorithms. IEEE Transactions on Evolutionary Computation,
+   7(5):503–515, 2003.
+*/
+_attr_maybe_unused
+static inline void
+pareto_rank_brute_force(int * restrict rank,
+                        const double * restrict points, size_t size, dimension_t dim)
+{
+    ASSUME(dim >= 2);
+    ASSUME(size >= 2);
+    memset(rank, 0, sizeof(*rank) * size);
+
+    const bool keep_weakly = true;
+    const double ** rows = malloc(2 * size * sizeof(*rows));
+    const double ** new_rows = rows + size;
+    for (size_t k = 0; k < size; k++)
+        rows[k] = points + dim * k;
+
+    int front = 1;
+    while (true) {
+        ASSUME(size >= 2);
+        size_t new_size = 0;
+        size_t min_k = 0;
+        for (size_t j = 1; j < size; j++) {
+            size_t k = min_k;
+            while (rows[k] == NULL)
+                k++;
+            min_k = k;
+            const double * restrict pj = rows[j];
+            ASSUME(pj != NULL);
+            ASSUME(rows[k] != NULL);
+            ASSUME(k < j);
+            do {
+                const double * restrict pk = rows[k];
+                dominance_cmp_t res = vec_cmp_dominance(pk, pj, dim, keep_weakly);
+                if (res == VEC_A_LT_B) {
+                    // pk[i] <= pj[i] for all i, and pk[i] < pj[i] for at least one i.
+                    assert(rows[j]);
+                    new_rows[new_size++] = rows[j];
+                    rows[j] = NULL;
+                    break;
+                } else if (res == VEC_A_GT_B) {
+                    // pj[i] <= pk[i] for all i, and pj[i] < pk[i] for at least one i.
+                    assert(rows[k]);
+                    new_rows[new_size++] = rows[k];
+                    rows[k] = NULL;
+                }
+                do {
+                    k++;
+                } while (k < j && rows[k] == NULL);
+            } while (k < j);
+        }
+        size = new_size;
+        if (size <= 2)
+            break;
+        for (size_t k = 0; k < size; k++)
+            rank[row_index_from_ptr(points, new_rows[k], dim)] = front;
+        SWAP(rows, new_rows);
+        front++;
+    }
+
+    if (size == 1) {
+        // Update the only dominated point.
+        rank[row_index_from_ptr(points, new_rows[0], dim)] = front;
+    } else if (size == 2) {
+        const double * row0 = new_rows[0];
+        const double * row1 = new_rows[1];
+        dominance_cmp_t res = vec_cmp_dominance(row0, row1, dim, keep_weakly);
+        if (res == VEC_INCOMPARABLE) {
+            rank[row_index_from_ptr(points, row0, dim)] = front;
+            rank[row_index_from_ptr(points, row1, dim)] = front;
+        }  else if (res == VEC_A_LT_B) {
+            // row0[i] <= row1[i] for all i, and row0[i] < row1[i] for at least one i.
+            rank[row_index_from_ptr(points, row0, dim)] = front;
+            rank[row_index_from_ptr(points, row1, dim)] = front+1;
+        }  else {
+            assert(res == VEC_A_GT_B);
+            // row1[i] <= row0[i] for all i, and row1[i] < row0[i] for at least one i.
+            rank[row_index_from_ptr(points, row0, dim)] = front+1;
+            rank[row_index_from_ptr(points, row1, dim)] = front;
+        }
+    }
+    free(rows);
+}
+
+/**
+   This is a different implementation of pareto_rank_brute_force() for
+   validation.
 */
 static void
 pareto_rank_naive(int * restrict rank,
@@ -290,13 +465,13 @@ pareto_rank_naive(int * restrict rank,
 {
     ASSUME(dim >= 2);
     ASSUME(size >= 2);
+    memset(rank, 0, sizeof(*rank) * size);
 
     const size_t orig_size = size;
     const bool keep_weakly = true;
     bool * dominated = calloc(size, sizeof(*dominated));
     const double ** p = generate_row_pointers(points, size, dim);
     int front = 1;
-    memset(rank, 0, sizeof(*rank) * size);
 
     while (true) {
         ASSUME(size >= 2);
@@ -403,11 +578,8 @@ pareto_rank(int * restrict rank,
     }
 
     if (likely(dim > 3)) {
-        pareto_rank_naive(rank, points, size, dim);
-        return;
-    }
-
-    if (dim == 3) {
+        pareto_rank_kung(rank, points, size, dim);
+    } else if (dim == 3) {
         pareto_rank_3d(rank, points, size);
     } else if (dim == 2) {
         pareto_rank_2d(rank, points, size);
