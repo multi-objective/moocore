@@ -6,19 +6,29 @@ The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_,
 Other Python packages are not included in the comparison because they are based
 on these packages for the functionality benchmarked, so they are **at least as
 slow** as them. For example `Xopt`_ and `BoFire`_ use `BoTorch`_, `pysamoo`_ is
-an extension of `pymoo`_, and `DEAP`_ uses `moocore`_ since version 1.4.4.  We
-do not include functions from the Bayesian optimization toolbox `trieste`_,
-because it is much slower than `BoTorch`_ and too slow to run the benchmarks in
-a reasonable time (https://github.com/secondmind-labs/trieste/issues/917).
-Similarly, we do not include `paretobench`_ because it is always slower than
-`BoTorch`_ for identifying nondominated points and more than 2000 times slower
-than `moocore`_ for computing the hypervolume in 3D
+an extension of `pymoo`_.  We do not include functions from the Bayesian
+optimization toolbox `trieste`_, because it is much slower than `BoTorch`_ and
+too slow to run the benchmarks in a reasonable time
+(https://github.com/secondmind-labs/trieste/issues/917).  Similarly, we do not
+include `paretobench`_ because it is always slower than `BoTorch`_ for
+identifying nondominated points and more than 2000 times slower than `moocore`_
+for computing the hypervolume in 3D
 (https://github.com/electronsandstuff/ParetoBench/issues/57), which is too slow
-to include in any benchmarks.
+to include in the benchmarks.  Nondominated sorting and hypervolume computation
+in `dmosopt`_ are 100-1000 times lower than the equivalent functions in
+`moocore`_ even in 3D (See https://github.com/dmosopt/dmosopt/issues/118 and
+https://github.com/dmosopt/dmosopt/issues/119), which is too slow to include in
+the benchmarks.
 
-Not all packages provide the same functionality. For example, `pymoo`_ does not provide the :ref:`epsilon indicator <epsilon_metric>`. `BoTorch`_ and `paretobench`_ only provide the hypervolume. `paretoset`_ and `fast-pareto`_ only identify nondominated points. `seqme`_ already uses `moocore`_, and `DESDEO`_ also uses `moocore`_ for hypervolume and some other quality metrics, but not all.
+Not all packages provide the same functionality. For example, `pymoo`_ does not
+provide the :ref:`epsilon indicator <epsilon_metric>`. `BoTorch`_ and
+`paretobench`_ only provide the hypervolume. `paretoset`_ and `fast-pareto`_
+only identify nondominated points. `seqme`_ already uses `moocore`_, and
+`DESDEO`_, `DEAP`_, `pymoo`_ and `jMetalPy`_ also use `moocore`_ for
+hypervolume, but other functionality, such as filtering dominated points, is
+still slower than `moocore`_.
 
-We would like to benchmark `pygmo`_, however, it is currently impossible to install using ``pip`` (See: https://github.com/esa/pygmo2/issues/152)
+We would like to benchmark `pygmo`_, however, it is currently impossible to install using ``pip`` (See https://github.com/esa/pygmo2/issues/152).
 
 We would also like to benchmark `platypus`_, but its API is too different from
 other packages. For example, it only supports filtering dominated points by
@@ -140,8 +150,9 @@ Exact computation of hypervolume
 
 The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D, 4D, 5D and 6D. As the plots show, `moocore`_ is 100 times faster than the other packages and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_ and `BoFire`_.
 
-For 3D, `Optuna`_ uses a :math:`O(n^2)` algorithm, while `moocore`_ uses the best-known :math:`O(n\log n)` one, so the gap between the two will get significantly larger with a larger number of points than those tested here. `moarchiving`_ uses the same algorithms as `moocore`_ for 3D and 4D, but a pure Python implementation, so it is still 10-100 times slower than `moocore`_'s C implementation.  `BoTorch`_ and `fast-pareto`_ are not included for more than 3 objectives because **they are tens of thousands of times slower** than `moocore`_.  `Nevergrad`_ and `Optuna`_ are not included for more than 5 objectives for the same reason.
+For 3D, `Optuna`_ uses a :math:`O(n^2)` algorithm, while `moocore`_ uses the best-known :math:`O(n\log n)` one, so the gap between the two will get significantly larger with a larger number of points than those tested here. `moarchiving`_ uses the same algorithms as `moocore`_ for 3D and 4D, but a pure Python implementation, so it is still 10-100 times slower than `moocore`_'s C implementation.  `BoTorch`_ and `fast-pareto`_ are not included for more than 3 objectives because **they are tens of thousands of times slower** than `moocore`_.
 
+Recent versions of `DESDEO`_, `DEAP`_ (≥1.4.4), `pymoo`_ (≥0.6.1.6) and `jMetalPy`_ (≥1.9.0) already use `moocore`_ for hypervolume computation.
 
 |hv_bench-DTLZLinearShape-3d| |hv_bench-DTLZLinearShape-4d|
 
@@ -268,6 +279,7 @@ The following plots compare the speed of computing the :ref:`epsilon indicator  
 .. _Xopt: https://xopt.xopt.org/index.html
 .. _fast-pareto: https://github.com/nabenabe0928/fast-pareto
 .. _jMetalPy: https://jmetal.github.io/jMetalPy/index.html
+.. _dmosopt: https://dmosopt.github.io/dmosopt/
 .. _moarchiving: https://cma-es.github.io/moarchiving/
 .. _moocore: https://multi-objective.github.io/moocore/python/
 .. _paretobench: https://github.com/electronsandstuff/ParetoBench
