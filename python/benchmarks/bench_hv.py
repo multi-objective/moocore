@@ -8,7 +8,7 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 from bench import (
     Bench,
     read_datasets_and_filter_dominated,
-    get_range,
+    get_geomrange,
     check_float_values,
 )
 
@@ -19,24 +19,27 @@ import matplotlib.pyplot as plt
 
 from botorch.utils.multi_objective.hypervolume import Hypervolume as botorch_HV
 import torch
-from pymoo.indicators.hv import Hypervolume as pymoo_HV
-from jmetal.core.quality_indicator import HyperVolume as jmetal_HV
 from nevergrad.optimization.multiobjective import HypervolumeIndicator as ng_HV
 from fast_pareto import hypervolume as fp_hv
 from optuna._hypervolume import compute_hypervolume as optuna_hv
 
 ## paretobench is 2x slower than botorch, so too slow for benchmarking.
+## https://github.com/electronsandstuff/ParetoBench/issues/57
 # import paretobench as pb
 ## Trieste is hundreds of times slower than botorch. It is so slow that
 ## we cannot run the benchmark with the initial value of 500 points.
+## https://github.com/secondmind-labs/trieste/issues/917
 # from trieste.acquisition.multi_objective import Pareto as trieste_Pareto
 # import tensorflow as tf
+## dmosopt is too slow to benchmark
+## https://github.com/dmosopt/dmosopt/issues/119
+# from dmosopt.hv_box_decomposition import compute_hypervolume_box_decomposition
+
 from moarchiving import get_mo_archive as moarch_get_mo_archive
 
 # FIXME: How to test both float and Fractions?
 moarch_get_mo_archive.hypervolume_computation_float_type = float
 moarch_get_mo_archive.hypervolume_final_float_type = float
-
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
 path_to_data = "../../testsuite/data/"
@@ -45,19 +48,19 @@ assert pathlib.Path(path_to_data).expanduser().exists()
 files = {
     "DTLZLinearShape.3d": dict(
         file=path_to_data + "DTLZLinearShape.3d.front.1000pts.10",
-        range=(500, 3000, 500),
+        range=(200, 2000, 10),
     ),
     "DTLZLinearShape.4d": dict(
         file=path_to_data + "DTLZLinearShape.4d.front.1000pts.10",
-        range=(100, 1300, 150),
+        range=(100, 1200, 10),
     ),
     "DTLZLinearShape.5d": dict(
         file=path_to_data + "DTLZLinearShape.5d.front.500pts.10",
-        range=(100, 600, 100),
+        range=(10, 600, 10),
     ),
     "DTLZLinearShape.6d": dict(
         file=path_to_data + "DTLZLinearShape.6d.front.700pts.10.xz",
-        range=(100, 500, 100),
+        range=(10, 300, 10),
     ),
 }
 
@@ -65,18 +68,16 @@ files = {
 title = "HV computation"
 file_prefix = "hv"
 
-print(f"Running benchmark: {title}")
+print(f"# Running benchmark: {title}")
 names = files.keys()
 for name in names:
     x = read_datasets_and_filter_dominated(files[name]["file"])
     dim = x.shape[1]
     ref = np.ones(dim)
-    n = get_range(len(x), *files[name]["range"])
+    n = get_geomrange(len(x), *files[name]["range"])
 
     benchmarks = {
         "moocore": moocore.Hypervolume(ref=ref),
-        "pymoo": lambda z, hv=pymoo_HV(ref_point=ref): hv(z),
-        "jMetalPy": lambda z, hv=jmetal_HV(ref): hv.compute(z),
         "nevergrad": lambda z, hv=ng_HV(ref): hv.compute(z),
         "optuna": lambda z, ref=ref: optuna_hv(
             z, reference_point=ref, assume_pareto=False
@@ -92,11 +93,12 @@ for name in names:
         "fast_pareto": lambda z, ref=ref: fp_hv(
             z, ref_point=ref, assume_pareto=False
         ),
+        # "dmosopt": lambda z, ref=ref: compute_hypervolume_box_decomposition(z, ref_point=ref),
     }
     # Too slow to run.
     if dim >= 6:
         del benchmarks["nevergrad"]
-        del benchmarks["optuna"]
+        #     del benchmarks["optuna"]
     if dim >= 5:
         # Only supports 2D, 3D and 4D
         del benchmarks["moarchiving (float)"]
@@ -118,7 +120,7 @@ for name in names:
     )
 
     bench(lambda n: x[:n, :])
-    bench.plots(file_prefix=file_prefix, title=title)
+    bench.plots(file_prefix=file_prefix, title=title, log="xy")
 
 # To not run interactively, use python3 -m bench_ndom (without .py)
 if "__file__" not in globals():  # Running interactively.
