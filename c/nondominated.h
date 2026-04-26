@@ -22,16 +22,6 @@ typedef struct avl_node_t {
 enum objs_agree_t { AGREE_MINIMISE = -1, AGREE_NONE = 0, AGREE_MAXIMISE = 1 };
 
 static inline void
-printf_point(const char * prefix, const double * p, dimension_t dim,
-             const char * suffix)
-{
-    fprintf(stderr, "%s%g", prefix, p[0]);
-    for (dimension_t d = 1; d < dim; d++)
-        fprintf(stderr, " %g", p[d]);
-    fprintf(stderr, "%s", suffix);
-}
-
-static inline void
 print_rows(const double ** rows, size_t size, dimension_t dim)
 {
     for (size_t k = 0; k < size; k++)
