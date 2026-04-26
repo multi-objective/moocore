@@ -2,7 +2,7 @@ import pathlib
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.ticker import FixedLocator, FixedFormatter
+import matplotlib.ticker as mticker
 import moocore
 import timeit
 import cpuinfo
@@ -226,12 +226,17 @@ class Bench:
             logy=logy,
             style="o-",
             title="",
-            xticks=df.index,
             ylabel="CPU time (seconds)",
         )
         if logx:
-            ax.xaxis.set_major_locator(FixedLocator(df.index))
-            ax.xaxis.set_major_formatter(FixedFormatter(df.index))
+            # Set only the major ticks you want
+            ax.xaxis.set_major_locator(mticker.FixedLocator(df.index))
+            ax.xaxis.set_major_formatter(
+                mticker.FixedFormatter([f"{x:g}" for x in df.index])
+            )
+            # Hide any scientific-notation offset text
+            ax.xaxis.get_offset_text().set_visible(False)
+
         plt.title(f"({self.cpu_model})", fontsize=10)
         plt.suptitle(f"{title} for {self.name}", fontsize=12)
         plt.savefig(f"{file_prefix}_bench-{self.name}-time.png")
@@ -257,12 +262,17 @@ class Bench:
                 logy=False,  # Looks bad with logy
                 style="o-",
                 title="",
-                xticks=df.index,
                 ylabel="Time relative to moocore",
             )
             if logx:
-                ax.xaxis.set_major_locator(FixedLocator(df.index))
-                ax.xaxis.set_major_formatter(FixedFormatter(df.index))
+                # Set only the major ticks you want
+                ax.xaxis.set_major_locator(mticker.FixedLocator(df.index))
+                ax.xaxis.set_major_formatter(
+                    mticker.FixedFormatter([f"{x:g}" for x in df.index])
+                )
+                # Hide any scientific-notation offset text
+                ax.xaxis.get_offset_text().set_visible(False)
+
             plt.title(f"({self.cpu_model})", fontsize=10)
             plt.suptitle(f"{title} for {self.name}", fontsize=12)
             plt.savefig(f"{file_prefix}_bench-{self.name}-reltime.png")
