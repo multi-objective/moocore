@@ -1599,8 +1599,8 @@ def pareto_rank(
     The function :func:`pareto_rank` is meant to be used like
     :func:`numpy.argsort`, but it assigns indexes according to Pareto
     dominance, where rank 0 indicates those solutions not dominated by any
-    other solution in the input set.  Duplicated points are kept on the same
-    front.  The resulting ranking can be used to partition points into different
+    other solution in the input set.  Duplicated points are assigned the same
+    rank.  The resulting ranking can be used to partition points into different
     lists or arrays, each of them being mutually nondominated
     :footcite:p:`Deb02nsga2` (see examples below).
 
@@ -1634,11 +1634,12 @@ def pareto_rank(
     :math:`F_c`, with :math:`c=0,1,\dots,k-1`, partition :math:`X` into :math:`k`
     `fronts`, that is, mutually nondominated subsets of :math:`X`.
 
-    For 2D points, the code uses the :math:`O(n \log n)` algorithm by
-    :footcite:t:`Jen03`. For 3D points, it uses a :math:`O(k \cdot n \log n)`
-    algorithm, where :math:`k` is the number of fronts in the output.  With
-    higher dimensions, it uses the naive :math:`O(k m n^2)` algorithm, where
-    :math:`m` is the number of dimensions.
+    With :math:`m=2`, the code uses the best-known :math:`O(n \log n)`
+    algorithm by :footcite:t:`Jen03`.  When :math:`m \geq 3`, it uses the naive
+    algorithm that identifies one `front` at a time, which requires
+    :math:`O(n^2\log n)` for :math:`m=3`, and :math:`O(n^2 \log^{m-2} n)` for
+    :math:`m \geq 4`.
+
 
     References
     ----------

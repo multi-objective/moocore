@@ -14,6 +14,7 @@ Version 0.3.0 (development)
 - :func:`~moocore.is_nondominated` and :func:`~moocore.filter_dominated`
   implement the best-known :math:`O(n(\log_2 n)^{m-2})` algorithm, thus they
   are significantly faster for 4D and above. See :ref:`bench-ndom` benchmarks.
+- :func:`~moocore.pareto_rank` is also significantly faster for for 4D and above.  See :ref:`bench-ndsort` benchmarks.
 - New shapes ``"inverted-simplex"`` and ``"concave-simplex"`` added to
   :func:`~moocore.generate_ndset`. Shape ``"convex-simplex"`` is now equivalent
   to ``generate_ndset(..., method="simplex") ** 2``, which is slightly more
