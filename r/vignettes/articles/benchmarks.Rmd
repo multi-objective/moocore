@@ -41,8 +41,12 @@ library(data.table)
 library(ggplot2)
 library(moocore)
 
-geomspace <- function(start, stop, num)
-  round(exp(seq(log(start), log(stop), length.out = num)), 0)
+geomspace <- function(start, stop, num) {
+  x <- round(10^(seq(log10(start), log10(stop), length.out = num)), 0)
+  x[1] <- start
+  x[length(x)] <- stop
+  x
+}
 
 read_ndset <- function(filename, filter=FALSE) {
   cat("Get file '", filename, "'\n")
@@ -84,12 +88,16 @@ benchmark_plot <- function (x, title = "", only_seconds=TRUE, ...) {
   } else {
     ylab <- "median line, min/max band"
   }
+
   gg <- ggplot() + theme_bw(base_size=12) +
     geom_ribbon(aes(N, ymin = min, ymax = max, fill = expr.name),
       data = data.table(meas, unit = "seconds"), alpha = 0.25, show.legend=FALSE) +
     geom_line(aes(N, median, color = expr.name), data = tall) +
     geom_point(aes(N, median, color = expr.name), data = tall) +
-    scale_y_log10(ylab) + labs(subtitle = title)
+    scale_x_log10(breaks = unique(tall$N), labels = unique(tall$N)) +
+    scale_y_log10(ylab, labels = scales::label_log(), guide="axis_logticks") +
+    labs(subtitle = title) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
   if (only_seconds) {
     gg <- gg + theme(legend.title = element_blank(),
       legend.background = element_rect(fill=alpha("white", alpha=0.5)),
@@ -181,11 +189,11 @@ expr.list <- list(
 
 files <- list(
   "test2D-200k"=list(file="test2D-200k.inp.xz", N=geomspace(1000, 50000, 10)),
-  "ran3d-40k"=list(file="ran.40000pts.3d.1.xz", N=geomspace(1000, 40000, 10)),
-  "ran4d"=list(file="ran.9000pts.4d.10.xz", N=geomspace(1000, 90000, 10)),
-  "convex-4d"=list(generate=list(25000, 4, "convex-sphere", 42), N=geomspace(1000, 25000, 10)),
-  "sphere-5d"=list(generate=list(20000, 5, "sphere", 42), N=geomspace(1000, 20000, 10)),
-  "rmnk-10d"=list(file="rmnk_0.0_10_16_1_0_ref.txt.xz", N=geomspace(1000, 30000, 10))
+  "ran3d-40k"=list(file="ran.40000pts.3d.1.xz", N=geomspace(1000, 25000, 10)),
+  "ran4d"=list(file="ran.9000pts.4d.10.xz", N=geomspace(1000, 60000, 10)),
+  "convex-4d"=list(generate=list(25000, 4, "convex-sphere", 42), N=geomspace(500, 25000, 10)),
+  "sphere-5d"=list(generate=list(20000, 5, "sphere", 42), N=geomspace(100, 20000, 10)),
+  "rmnk-10d"=list(file="rmnk_0.0_10_16_1_0_ref.txt.xz", N=geomspace(100, 20000, 10))
 )
 
 benchmark_all(files, prefix="ndom", title = "is_(non)dominated()",
@@ -217,17 +225,17 @@ expr.list <- list(
 
 files <- list(
   "DTLZLinearShape.3d"=list(
-    file = "DTLZLinearShape.3d.front.1000pts.10",
-    N = seq(1000, 6000, 1000)),
+    file = "DTLZSphereShape.3d.front.1000pts.10",
+    N = geomspace(200, 6500, 10)),
   "DTLZLinearShape.4d"=list(
     file = "DTLZLinearShape.4d.front.1000pts.10",
-    N = seq(700, 1500, 100)),
+    N = geomspace(100, 2000, 10)),
   "DTLZLinearShape.5d"=list(
     file = "DTLZLinearShape.5d.front.500pts.10",
-    N = seq(400, 1000, 100)),
+    N = geomspace(100, 1000, 10)),
   "DTLZLinearShape.6d"=list(
     file = "DTLZLinearShape.6d.front.700pts.10.xz",
-    N = seq(200, 700, 100))
+    N = geomspace(100, 1000, 10))
 )
 
 benchmark_all(files, prefix="hv", title = "HV Computation",
