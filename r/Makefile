@@ -118,3 +118,4 @@ covr:
 benchmarks: quick-install
 	$(RM) ./vignettes/articles/bench/*.rds
 	$(Reval) "rmarkdown::render('vignettes/articles/benchmarks.Rmd', output_dir='./', params = list(run_benchmarks=TRUE))"
+	@$(MAKE) doc
