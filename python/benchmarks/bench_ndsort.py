@@ -20,15 +20,17 @@ from desdeo.tools.non_dominated_sorting import (
 from paretoset import paretorank as paretoset_paretorank
 ## It cannot be installed: https://github.com/esa/pygmo2/issues/152
 # from pygmo import pareto_dominance as pg_pareto_dominance
+## dmosopt is 100-1000x slower, i.e., too slow.
+# from dmosopt.dda import dda_ens as dmosopt_paretorank
 
 files = {
     # range are the (start, stop, num) parameters for np.geomspace()
-    "ran-2d": dict(generate=(50_000, 2), range=(100, 50_000, 10)),
-    "ran-3d": dict(generate=(40_000, 3), range=(100, 40_000, 10)),
-    "ran-4d": dict(generate=(30_000, 4), range=(100, 30_000, 10)),
+    "ran-2d": dict(generate=(20_000, 2), range=(100, 20_000, 10)),
+    "ran-3d": dict(generate=(20_000, 3), range=(100, 20_000, 10)),
+    "ran-4d": dict(generate=(20_000, 4), range=(100, 20_000, 10)),
     "ran-5d": dict(generate=(20_000, 5), range=(100, 20_000, 10)),
-    "ran-9d": dict(generate=(10_000, 9), range=(100, 10_000, 10)),
-    "ran-10d": dict(generate=(10_000, 10), range=(100, 10_000, 10)),
+    "ran-9d": dict(generate=(10_000, 9), range=(10, 10_000, 10)),
+    "ran-10d": dict(generate=(10_000, 10), range=(10, 10_000, 10)),
 }
 
 rng = np.random.default_rng(42)
@@ -59,6 +61,7 @@ for name in names:
             "paretoset": lambda z: paretoset_paretorank(z, use_numba=True) - 1,
             "pymoo": lambda z, nds=pymoo_NDS(): nds.do(z, return_rank=True)[1],
             "desdeo": lambda z: desdeo_nds(z).argmax(axis=0),
+            # "dmosopt": lambda z: dmosopt_paretorank(z),
         },
         check=check_array_equal,
     )
