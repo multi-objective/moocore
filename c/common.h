@@ -119,26 +119,6 @@ moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
 #define STATIC_CAST(TYPE,OP) ((TYPE)(OP))
 #endif
 
-/* FIXME: Move this to a better place: matrix.h ? */
-static inline void
-matrix_transpose_double(double * restrict dst, const double * restrict src,
-                        const size_t nrows, const size_t ncols)
-{
-    ASSUME(nrows < SIZE_MAX/2 && ncols < SIZE_MAX/2);
-    if (nrows <= 0 || ncols <= 0)
-        return;
-
-    const size_t len_1 = (nrows * ncols) - 1;
-    size_t i = 0, j = 0;
-    for (; j <= len_1; i++, j += nrows)
-        dst[j] = src[i];
-
-    for (; i <= len_1; i++, j += nrows) {
-	    if (j > len_1) j -= len_1;
-	    dst[j] = src[i];
-	}
-}
-
 static inline void
 printf_point(const char * prefix, const double * p, dimension_t dim,
              const char * suffix)
