@@ -12,6 +12,7 @@
  * `is_nondominated()` and `pareto_rank()` do not return pointers to newly
    allocated memory to help zero-copy communication with Python/R.
  * Add `--no-check` option to `epsilon` and `igd` executables.
+ * `pareto_rank()` is now O(n^2 log^{d-2} n) in >=4 dimensions, which is faster than the naive O(n^3).
 
 
 ## 0.18

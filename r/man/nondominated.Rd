@@ -60,9 +60,9 @@ always uses the naive algorithm for \eqn{m \geq 4}.
 \code{\link[=pareto_rank]{pareto_rank()}} is meant to be used like \code{rank()}, but it assigns
 ranks according to Pareto dominance, where rank 1 indicates those
 solutions not dominated by any other solution in the input set.
-Duplicated points are kept on the same front. The resulting ranking can be
-used to partition points into a list of matrices, each matrix representing
-a nondominated front (see examples below)
+Duplicated points are assigned the same rank.  The resulting ranking can
+be used to partition points into a list of matrices, each matrix
+representing a nondominated front (see examples below).
 
 More formally, given a finite set of points \eqn{X \subset \mathbb{R}^m},
 the rank of a point \eqn{x \in X} is defined as:
@@ -75,11 +75,11 @@ Pareto optimality, \eqn{F^c_r = X \setminus \bigcup_{i=1}^{r-1} F_i} and
 \eqn{F_c}, with \eqn{c=1,\dots,k}, partition \eqn{X} into \eqn{k}
 \emph{fronts}, that is, mutually nondominated subsets of \eqn{X}.
 
-Let \eqn{m} be the number of dimensions. With \eqn{m=2}, i.e.,
-\code{ncol(data)=2}, the code uses the \eqn{O(n \log n)} algorithm by
-\citet{Jen03}.  When \eqn{m=3}, it uses a \eqn{O(k\cdot n \log n)}
-algorithm, where \eqn{k} is the number of fronts in the output.  With
-higher dimensions, it uses the naive \eqn{O(k m n^2)} algorithm.
+With \eqn{m=2}, i.e., \code{ncol(data)=2}, the code uses the best-known
+\eqn{O(n \log n)} algorithm by \citet{Jen03}.  When \eqn{m \geq 3}, it
+uses the naive algorithm that identifies one \emph{front} at a time, which
+requires \eqn{O(n^2\log n)} for \eqn{m=3}, and \eqn{O(n^2 \log^{m-2} n)}
+for \eqn{m \geq 4}.
 }
 \references{
 \insertAllCited{}
