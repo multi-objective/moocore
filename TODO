@@ -20,6 +20,7 @@ Computation, pp. 465–472 (2012)]
        and https://dl.acm.org/doi/pdf/10.1145/3205455.3205469 and http://www.cmap.polytechnique.fr/~nikolaus.hansen/proceedings/2016/GECCO/proceedings/p613.pdf
  - Online nondominated filter
    - [ ] [A Fast Incremental BSP Tree Archive for Non-dominated Points](https://doi.org/10.1007/978-3-319-54157-0_18)
+   - [ ] ND-tree: https://github.com/thibautlust/NDTree-c
  - [ ] Faster nondominated algorithm (is_nondominated, filter_dominated) for very many points: [Worst-case I/O-efficient Skyline Algorithms](https://www.cse.cuhk.edu.hk/~taoyf/paper/tods12-sky.pdf)
  - [ ] Faster nondominated sorting:
     - Jensen improvement: [Fortin et al. 2013](https://dl.acm.org/doi/epdf/10.1145/2463372.2463454)
