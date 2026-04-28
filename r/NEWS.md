@@ -1,4 +1,4 @@
-# moocore 0.2.0.900
+# moocore 0.3.0
 
  * `r2_exact()` implements the exact computation of the R2 indicator for bi-objective solution sets.
  * `hypervolume()` is significantly faster for more than four dimensions (Andreia P. Guerreiro).

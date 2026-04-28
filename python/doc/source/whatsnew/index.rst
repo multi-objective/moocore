@@ -4,8 +4,8 @@
 What's new
 **********
 
-Version 0.3.0 (development)
----------------------------
+Version 0.3.0 (03/05/2026)
+--------------------------
 
 - `moarchiving <https://cma-es.github.io/moarchiving/>`_, `paretobench <https://github.com/electronsandstuff/ParetoBench>`_ and `patatune <https://cms-patatrack.github.io/patatune/>`_ are now included in the benchmarks.
 - :func:`~moocore.r2_exact` implements the exact computation of the R2 indicator for bi-objective solution sets.
