@@ -292,3 +292,16 @@ sphinx_gallery_conf = {
     # "plot_gallery": "True",
     # "recommender": {"enable": True, "n_examples": 5, "min_df": 12},
 }
+
+CONSTANTS = {
+    name: getattr(moocore._libmoocore.lib, name)
+    for name in ["HV_INEX_MAX_ROWS", "KUNG_SMALL_THRESHOLD"]
+}
+
+rst_epilog = "\n".join(f".. |{k}| replace:: {v}" for k, v in CONSTANTS.items())
+
+mathjax3_config = {
+    "tex": {
+        "macros": {k.replace("_", ""): str(v) for k, v in CONSTANTS.items()}
+    }
+}

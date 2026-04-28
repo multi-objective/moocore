@@ -1,3 +1,6 @@
+static const int HV_INEX_MAX_ROWS;
+static const int KUNG_SMALL_THRESHOLD;
+
 // Must be consistent with the definition in moocore.
 typedef uint_fast8_t dimension_t;
 typedef uint8_t boolvec;

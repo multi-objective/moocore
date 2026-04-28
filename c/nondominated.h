@@ -714,7 +714,6 @@ find_nondominated_set_(const double * restrict points, size_t size, dimension_t 
     ASSUME(nondom != NULL);
     return find_nondominated_set_agree_bf(points, size, dim, keep_weakly, agree, minmax, nondom);
 }
-#undef KUNG_SMALL_THRESHOLD
 
 static inline size_t
 find_dominated_point_agree(const double * restrict points, size_t size, dimension_t dim,
