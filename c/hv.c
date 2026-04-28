@@ -38,7 +38,6 @@
 #include "hvc4d_priv.h"
 
 #define STOP_DIMENSION 3 // stop on dimension 4.
-#define MAX_ROWS_HV_INEX 12
 
 static int compare_node(const void * restrict p1, const void * restrict p2)
 {
@@ -81,7 +80,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
         }
     }
     n = i - 1;
-    if (unlikely(n <= MAX_ROWS_HV_INEX))
+    if (unlikely(n <= HV_INEX_MAX_ROWS))
         goto finish;
 
 
@@ -309,7 +308,7 @@ static double
 hv_inex_list(const dlnode_t * restrict list, int n, dimension_t dim,
              const double * restrict ref)
 {
-    ASSUME(3 <= n && n <= MAX_ROWS_HV_INEX);
+    ASSUME(3 <= n && n <= HV_INEX_MAX_ROWS);
     ASSUME(2 <= dim && dim <= MOOCORE_DIMENSION_MAX);
     // Accumulate positive and negative values separately to improve accuracy.
     // If more accuracy is needed, we could use Neumaier compensated
@@ -327,7 +326,7 @@ hv_inex_list(const dlnode_t * restrict list, int n, dimension_t dim,
     if (!buffer)
         return -1;
     // Pre-compute to speed-up access.
-    double * subset_max[MAX_ROWS_HV_INEX - 1];
+    double * subset_max[HV_INEX_MAX_ROWS - 1];
     for (int i = 0; i < n - 1; i++) {
         subset_max[i] = buffer + i * dim;
     }
@@ -353,7 +352,7 @@ hv_inex_list(const dlnode_t * restrict list, int n, dimension_t dim,
             int idx = ++j;
             int top = 0;
             // Depth-first-search state.
-            int start_stack[MAX_ROWS_HV_INEX - 2];
+            int start_stack[HV_INEX_MAX_ROWS - 2];
             while (true) {
                 const double * restrict parent = subset_max[top];
                 ++top;
@@ -638,7 +637,7 @@ double fpli_hv(const double * restrict data, size_t n, dimension_t dim,
 
     dlnode_t * list = fpli_setup_cdllist(data, dim, &n, ref);
     double hyperv;
-    if (likely(n > MAX_ROWS_HV_INEX)) {
+    if (likely(n > HV_INEX_MAX_ROWS)) {
         hyperv = fpli_hv_ge5d(list, dim - 1, n, ref);
         fpli_free_cdllist(list);
         return hyperv;

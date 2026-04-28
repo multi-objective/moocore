@@ -23,6 +23,8 @@
 #include <stdbool.h>
 #include "libmoocore-config.h"
 
+#define HV_INEX_MAX_ROWS 12
+
 // C++ needs to know that types and declarations are C, not C++.
 BEGIN_C_DECLS
 
