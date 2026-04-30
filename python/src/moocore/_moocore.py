@@ -541,7 +541,7 @@ def hypervolume(
     >>> len(dat)
     100
 
-    Dominated points are ignored, so this:
+    Weakly-dominated points are ignored, so this:
 
     >>> moocore.hypervolume(dat, ref=[10, 10])
     93.55331425585321
@@ -881,7 +881,7 @@ def hv_approx(
     seed: int | np.random.Generator | None = None,
     method: Literal["DZ2019-HW", "DZ2019-MC", "Rphi-FWE+"] = "Rphi-FWE+",
 ) -> float:
-    r"""Approximate the hypervolume indicator.
+    r"""Approximate the hypervolume indicator via (quasi)-Monte-Carlo sampling.
 
     Approximate the value of the hypervolume metric with respect to a given
     reference point assuming minimization of all objectives. Methods
@@ -983,21 +983,30 @@ def hv_approx(
     Merge all the sets of a dataset by removing the set number column:
 
     >>> x = moocore.get_dataset("input1.dat")[:, :-1]
+    >>> len(x)
+    100
 
-    Dominated points are ignored, so this:
+    Weakly-dominated points increase the runtime, but do not change the returned value,
+    so the following:
 
     >>> moocore.hv_approx(x, ref=10)
     93.5533
     >>> moocore.hv_approx(x, ref=10, method="DZ2019-HW")
     93.5533
+    >>> moocore.hv_approx(x, ref=10, method="DZ2019-MC", seed=42)
+    93.5919
 
-    gives the same hypervolume approximation as this:
+    give the same hypervolume approximation as:
 
     >>> x = moocore.filter_dominated(x)
+    >>> len(x)
+    6
     >>> moocore.hv_approx(x, ref=10)
     93.5533
     >>> moocore.hv_approx(x, ref=10, method="DZ2019-HW")
     93.5533
+    >>> moocore.hv_approx(x, ref=10, method="DZ2019-MC", seed=42)
+    93.5919
 
     The approximation is far from perfect for large number of dimensions:
 
@@ -1047,6 +1056,138 @@ def hv_approx(
         case _:
             raise ValueError("Unknown method = {method}")
 
+    return hv
+
+
+@DocSubstitute()
+def hv_approx_fpras(
+    points: ArrayLike,
+    /,
+    ref: ArrayLike,
+    *,
+    maximise: bool | Sequence[bool] = False,
+    seed: int | np.random.Generator | None = None,
+    epsilon: float = 0.01,
+    delta: float = 0.1,
+) -> float:
+    r"""Approximate the hypervolume indicator via a fully polynomial-time randomized approximation scheme (FPRAS).
+
+    This function implements the approximation algorithm by
+    :footcite:t:`BriFri2010approx`.  This FPRAS returns, with probability
+    :math:`(1 - \delta)`, an :math:`\epsilon`-approximation of the hypervolume
+    metric with respect to the given reference point, assuming minimization of
+    all objectives by default.
+
+    .. warning:: Lower values of ``epsilon`` (:math:`\epsilon`) or ``delta`` (:math:`\delta`) require significantly longer computation time.
+
+    .. seealso:: For details of the calculation, see the Notes section below.
+
+       See :ref:`Benchmarks: Approximation of the hypervolume <bench-hvapprox>`.
+
+
+    Parameters
+    ----------
+    points :
+        ${points}
+    ref :
+        ${ref_point}
+    maximise :
+        ${maximise}
+    seed :
+        ${random_seed}
+    epsilon :
+        Desired relative error of the approximation, :math:`\epsilon > 0`.
+    delta :
+        Desired failure probability :math:`0 < \delta < 1`, :math:`(1 - \delta)` gives the confidence level.
+
+    Returns
+    -------
+        A single numerical value, the approximate hypervolume indicator.
+
+    See Also
+    --------
+    hypervolume, whv_hype, hv_approx
+
+    Notes
+    -----
+    This function computes an approximation :math:`\hat{v}` of the
+    true hypervolume :math:`v = \text{hyp}_r(A)` of the input points in :math:`A
+    \subset \mathbb{R}^m` with respect to the reference point :math:`r \in
+    \mathbb{R}^m`, such that
+
+    .. math::
+       \text{Pr}[(1-\epsilon)v  \leq \hat{v} \leq (1+\epsilon)v] \geq (1 - \delta)
+
+    where :math:`\epsilon > 0` and :math:`0 < \delta < 1`.
+
+    The algorithm requires :math:`O(\frac{nm}{\epsilon^2\log\delta})`. That is,
+    it is linear on the number of points and dimensions, but quadratic in the
+    approximation error. In other words, more accurate approximations require
+    significantly more time.
+
+    In contrast to the (quasi)-Monte-Carlo methods provided by
+    :func:`~moocore.hv_approx`, the presence of weakly-dominated points not
+    only increases the runtime, but also changes the returned approximation for
+    a fixed random seed.
+
+
+    References
+    ----------
+    .. footbibliography::
+
+    Examples
+    --------
+    >>> x = np.array([[5, 5], [4, 6], [2, 7], [7, 4]])
+    >>> moocore.hypervolume(x, ref=[10, 10])
+    38.0
+    >>> moocore.hv_approx(x, ref=[10, 10], method="Rphi-FWE+")
+    37.99998
+    >>> moocore.hv_approx_fpras(x, ref=[10, 10], epsilon=0.1, delta=0.2, seed=42)
+    38.17619
+    >>> moocore.hv_approx_fpras(x, ref=[10, 10], epsilon=0.01, delta=0.2, seed=42)
+    38.08557
+
+    Contrary to :func:`~moocore.hv_approx`, the presence of dominated points
+    not only increases the runtime, but also changes the output for the same random
+    seed, so this:
+
+    >>> x = moocore.get_dataset("input1.dat")[:, :-1]
+    >>> moocore.hv_approx_fpras(x, ref=10, seed=42)
+    93.6140
+
+    does NOT give the same hypervolume approximation as this:
+
+    >>> x = moocore.filter_dominated(x)
+    >>> moocore.hv_approx_fpras(x, ref=10, seed=42)
+    93.5539
+
+    """
+    # Convert to numpy.array in case the user provides a list.  We use
+    # np.asarray to convert it to floating-point, otherwise if a user inputs
+    # something like ref = np.array([10, 10]) then numpy would interpret it as
+    # an int array.
+    points = np.asarray(points, dtype=float)
+    nobj = points.shape[1]
+    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
+
+    if epsilon <= 0:
+        raise ValueError(f"epsilon must be positive: {epsilon}")
+    if delta <= 0 or delta >= 1:
+        raise ValueError(f"delta must be strictly within (0, 1): {delta}")
+
+    maximise_p = _parse_maximise_to_bool_array(maximise, nobj)
+    points_p, npoints, nobj = np2d_to_double_array(
+        points, ctype_shape=("size_t", "uint_fast8_t")
+    )
+    ref = ffi.from_buffer("double []", ref)
+    seed = _get_seed_for_c(seed)
+    epsilon = ffi.cast("double", float(epsilon))
+    delta = ffi.cast("double", float(delta))
+    hv = lib.hv_approx_fpras(
+        points_p, npoints, nobj, ref, maximise_p, seed, epsilon, delta
+    )
+    if hv < 0:
+        raise ValueError("The requested approximation would run for too long")
     return hv
 
 

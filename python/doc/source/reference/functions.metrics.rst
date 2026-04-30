@@ -201,6 +201,7 @@ Approximating the hypervolume metric
    :toctree: generated/
 
    hv_approx
+   hv_approx_fpras
    whv_hype
 
 Computing the hypervolume can be time consuming, thus several approaches have

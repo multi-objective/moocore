@@ -16,6 +16,7 @@ times to account for stochasticity.
 """
 
 # sphinx_gallery_multi_image = "single"
+import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -141,4 +142,62 @@ for dataset in datasets:
     ax.set_xscale("log", base=2)
     plt.tight_layout()
 
+plt.show()
+
+
+# %%
+#
+# Fully polynomial-time randomized approximation scheme (FPRAS)
+# -------------------------------------------------------------
+#
+# :func:`moocore.hv_approx_fpras()` allows obtaining an approximation with
+# relative error smaller than :math:`\epsilon` (``epsilon``) with a given
+# probability :math:`1-\delta` (``delta``).  As the plot below shows, the
+# approximation error is often better than the requested value, but the
+# computation time increases very quickly for smaller ``epsilon``.
+#
+shape = "convex-sphere"
+ref = 1.1
+npoints = 50
+dim = 6
+reps = 5
+rng = np.random.default_rng(42)
+res = []
+for r in range(reps):
+    z = moocore.generate_ndset(npoints, dim, method=shape, seed=42 + r)
+    t_start = time.perf_counter()
+    exact = moocore.hypervolume(z, ref=ref)
+    t_end = time.perf_counter() - t_start
+    for epsilon in [0.1, 0.025, 0.01, 0.005]:
+        for delta in [0.25, 0.1, 0.05]:
+            t_start = time.perf_counter()
+            hv = moocore.hv_approx_fpras(
+                z, ref=ref, seed=rng, epsilon=epsilon, delta=delta
+            )
+            t_end = time.perf_counter() - t_start
+            res.append(
+                dict(
+                    r=r,
+                    epsilon=epsilon,
+                    delta=delta,
+                    hverror=np.abs(1 - hv / exact),
+                    time=t_end,
+                )
+            )
+
+
+df = pd.DataFrame(res)
+df["delta"] = df["delta"].astype("category")
+plt.figure()
+ax = sns.lineplot(data=df, x="epsilon", y="hverror", hue="delta", marker="o")
+ax.set_title(f"{shape}-{npoints}-{dim}d", fontsize=10)
+ax.set(yscale="log", ylabel="Relative error")
+ax.set_xscale("log", base=10)
+plt.tight_layout()
+plt.figure()
+ax = sns.lineplot(data=df, x="epsilon", y="time", hue="delta", marker="o")
+ax.set_title(f"{shape}-{npoints}-{dim}d", fontsize=10)
+ax.set(yscale="log", ylabel="CPU time (s)")
+ax.set_xscale("log", base=10)
+plt.tight_layout()
 plt.show()

@@ -74,6 +74,10 @@ double hv_approx_rphi_fang_wang_plus(const double * restrict data,
                                      const double * restrict ref,
                                      const boolvec * restrict maximise,
                                      uint_fast32_t nsamples);
+
+double hv_approx_fpras(const double * restrict data, size_t npoints, dimension_t dim,
+                       const double * restrict ref, const boolvec * restrict maximise,
+                       uint32_t random_seed, double epsilon, double delta);
 /*
 typedef ... hype_sample_dist;
 hype_sample_dist * hype_dist_unif_new(unsigned long seed);
