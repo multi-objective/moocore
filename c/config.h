@@ -28,6 +28,13 @@ typedef uint_fast8_t dimension_t;
 #define MOOCORE_HVAPPROX_DIMENSION_MAX 31
 #define MOOCORE_HV_DIMENSION_MAX 31
 
+#ifndef UINT32_MAX
+# define UINT32_MAX ((uint32_t)-1)
+#endif
+#ifndef UINT64_MAX
+# define UINT64_MAX ((uint64_t)-1)
+#endif
+
 // Use boolvec for boolean arrays that will be passed from/to R/Python. It also
 // helps with autovectorization.
 #ifdef R_PACKAGE

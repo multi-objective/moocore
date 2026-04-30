@@ -41,6 +41,7 @@ RubMel1998simulation
 SchEsqLarCoe2012tec
 SchKer2025r2v2
 VelLam1998gp
+Vose1991alias
 WuAza2001metrics
 ZhoZhaJin2009igdx
 ZitThi1998ppsn

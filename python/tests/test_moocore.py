@@ -553,6 +553,11 @@ def test_hv_approx(dim):
     signif = 4 if dim < 8 else 3 if dim < 10 else 2
     np.testing.assert_approx_equal(true_hv, appr_hv, significant=signif)
 
+    appr_hv = moocore.hv_approx_fpras(x, ref=ref)
+    print(f"{dim}: {(true_hv - appr_hv) / true_hv}")
+    signif = 4
+    np.testing.assert_approx_equal(true_hv, appr_hv, significant=signif)
+
 
 def test_hv_approx_default_seed():
     x = np.full((1, 5), 0.5)
@@ -571,9 +576,23 @@ def test_hv_approx_errors():
         ValueError, match=r".*must be a positive integer value.*"
     ):
         moocore.hv_approx([[0, 0]], [1, 1], method="DZ2019-MC", nsamples="10")
-
-    with pytest.raises(ValueError, match=r".*Unknown method.*"):
+    with pytest.raises(
+        ValueError, match=r".*must be a positive integer value smaller than.*"
+    ):
+        moocore.hv_approx([[0, 0]], [1, 1], method="DZ2019-MC", nsamples=2**31)
+    with pytest.raises(ValueError, match=r".*Unknown method.*None"):
         moocore.hv_approx([[0, 0]], [1, 1], method="None")
+
+    assert moocore.hv_approx([[1, 1, 1]], ref=1) == 0
+
+
+def test_hv_approx_fpras_errors():
+    with pytest.raises(ValueError, match=r"epsilon must be positive"):
+        moocore.hv_approx_fpras([[0, 0]], [1, 1], epsilon=0)
+    with pytest.raises(ValueError, match=r"delta must be strictly within"):
+        moocore.hv_approx_fpras([[0, 0]], [1, 1], delta=0)
+    with pytest.raises(ValueError, match=r"a very long time"):
+        moocore.hv_approx_fpras([[0, 0]], [1, 1], epsilon=1e-9, delta=0.001)
 
     assert moocore.hv_approx([[1, 1, 1]], ref=1) == 0
 

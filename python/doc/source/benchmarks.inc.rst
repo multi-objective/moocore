@@ -182,16 +182,17 @@ Approximation of the hypervolume
 --------------------------------
 
 The following plots compare the accuracy and speed of approximating the
-hypervolume with the various methods provided by :func:`moocore.hv_approx`. The
-plots show that there is no clear winner, in terms of approximation error,
-between methods ``Rphi-FWE+`` (default) and ``DZ2019-HW``, but both produce
-consistently lower approximation errors than method ``DZ2019-MC``.  However, ``Rphi-FWE+`` is as fast as ``DZ2019-MC`` and both are consistently faster than ``DZ2019-HW``, in particular with higher number of objectives.
+hypervolume with the various methods provided by :func:`moocore.hv_approx` and
+:func:`moocore.hv_approx_fpras`.  The plots show that there is no clear winner,
+in terms of approximation error, between methods ``Rphi-FWE+`` (default) and
+``DZ2019-HW``, but both produce consistently lower approximation errors than
+method ``DZ2019-MC``.  However, ``Rphi-FWE+`` is as fast as ``DZ2019-MC`` and
+both are consistently faster than ``DZ2019-HW``, in particular with higher
+number of objectives.
 
-If you compare the plots of **DTLZLinearShape-3d** and **DTLZLinearShape-4d** below to the ones above in the previous section, you can see that the exact computation of the hypervolume in 3D or 4D for thousands of points takes milliseconds, whereas approximating the hypervolume is significantly slower and, thus, not worth doing.
-
-|hvapprox_bench-DTLZLinearShape-3d-values| |hvapprox_bench-DTLZLinearShape-3d-time|
-
-|hvapprox_bench-DTLZLinearShape-4d-values| |hvapprox_bench-DTLZLinearShape-4d-time|
+The exact computation of the hypervolume for less than 5D takes milliseconds
+for thousands of points, whereas approximating the hypervolume is significantly
+slower and, thus, not worth doing.
 
 Approximating the hypervolume becomes more useful for dimensions higher than 5,
 where the exact computation becomes noticeably slower with hundreds of points.
@@ -209,18 +210,6 @@ For such problems, method ``DZ2019-HW`` becomes significantly slower than
 |hvapprox_bench-ran-9d-values| |hvapprox_bench-ran-9d-time|
 
 |hvapprox_bench-DTLZSphereShape-10d-values| |hvapprox_bench-DTLZSphereShape-10d-time|
-
-.. |hvapprox_bench-DTLZLinearShape-3d-values| image:: _static/bench/hvapprox_bench-DTLZLinearShape.3d-values.png
-   :width: 49%
-
-.. |hvapprox_bench-DTLZLinearShape-3d-time| image:: _static/bench/hvapprox_bench-DTLZLinearShape.3d-time.png
-   :width: 49%
-
-.. |hvapprox_bench-DTLZLinearShape-4d-values| image:: _static/bench/hvapprox_bench-DTLZLinearShape.4d-values.png
-   :width: 49%
-
-.. |hvapprox_bench-DTLZLinearShape-4d-time| image:: _static/bench/hvapprox_bench-DTLZLinearShape.4d-time.png
-   :width: 49%
 
 .. |hvapprox_bench-DTLZSphereShape-6d-values| image:: _static/bench/hvapprox_bench-DTLZSphereShape.6d-values.png
    :width: 49%

@@ -5,6 +5,8 @@
 #include "hvapprox.h"
 #include "pow_int.h"
 #include "rng.h"
+#include "rng_alias.h"
+#include "sort.h"
 
 #define ALMOST_ZERO_WEIGHT 1e-20
 
@@ -862,4 +864,95 @@ hv_approx_rphi_fang_wang_plus(const double * restrict data, size_t npoints, dime
     free((void *)points);
     const long double c_m = sphere_area_div_2_pow_d_times_d[dim];
     return STATIC_CAST(double, c_m * (expected / STATIC_CAST(long double, nsamples)));
+}
+
+
+// FIXME: Make sure that this is vectorized.
+static double *
+compute_vols(const double * restrict points, size_t npoints, dimension_t dim)
+{
+    double * vol = malloc(npoints * sizeof(*vol));
+    for (size_t i = 0; i < npoints; i++) {
+        const double * restrict pi = points + i * dim;
+        double tmp = pi[0];
+        for (dimension_t d = 1; d < dim; d++)
+            tmp *= pi[d];
+        vol[i] = tmp;
+    }
+    return vol;
+}
+
+/**
+   FPRAS (fully polynomial-time randomized approximation scheme)
+
+   This function returns, with probability :math:`(1 - \delta)`, an
+   :math:`\epsilon`-approximation of the hypervolume metric with respect to the
+   given reference point.
+
+   delta : Probability of failure.
+
+   K. Bringmann, T. Friedrich. Approximating the volume of unions and
+   intersections of high-dimensional geometric objects. Computational Geometry:
+   Theory and Applications, vol. 43, pages 601-610, 2010.
+   https://doi.org/10.1016/j.comgeo.2010.03.004
+
+   This implementation uses Walker-Vose's Alias method to sample from a
+   discrete distribution in O(1). The naive roulette-wheel approach requires
+   O(log n).
+*/
+double
+hv_approx_fpras(const double * restrict data, size_t npoints, dimension_t dim,
+                const double * restrict ref, const boolvec * restrict maximise,
+                uint32_t random_seed, double epsilon, double delta)
+{
+    ASSUME(2 <= dim && dim <= MOOCORE_HVAPPROX_DIMENSION_MAX);
+    const double * points = transform_and_filter(data, &npoints, dim, ref, maximise);
+    if (points == NULL)
+        return 0;
+
+    ASSUME(0 < npoints && npoints < UINT32_MAX);
+    ASSUME(0 < epsilon && epsilon < 1);
+    ASSUME(0 < delta && delta < 1);
+
+    const double T_factor = 8 * (log(2) - log(delta)) * (1. + epsilon) / (epsilon * epsilon);
+    const double T_double = T_factor * (double)npoints;
+    if (T_double >= (double)UINT64_MAX)
+        return -1; // This will run for too long!
+
+    const uint64_t T = (uint64_t) ceil(T_double);
+    double * vols = compute_vols(points, npoints, dim); // VolumeQuery(B_i)
+    double total_vol = kahan_sum_of_vector_double(vols, npoints);
+
+    rng_state * rng = rng_new(random_seed);
+    rng_alias_sampler_t * sampler = rng_alias_sampler_new(vols, (uint32_t) npoints);
+
+    uint64_t t_sum = 0, m  = 0;
+    while (true) {
+        // Sampling should be done in O(1).
+        uint32_t i = rng_alias_sampler_choose(rng, sampler);
+
+        // SampleQuery(B_i)
+        double x[MOOCORE_HVAPPROX_DIMENSION_MAX + 1];
+        for (dimension_t d = 0; d < dim; d++)
+            x[d] = rng_random(rng);
+        const double * restrict p_i = points + i * dim;
+        for (dimension_t d = 0; d < dim; d++)
+            x[d] *= p_i[d];
+
+        while (true) {
+            if (unlikely(t_sum >= T)) {
+                free(vols);
+                rng_free(rng);
+                rng_alias_sampler_free(sampler);
+                free((void *) points);
+                return total_vol * (T_factor / (double) m);
+            }
+            t_sum++;
+            uint32_t j = rng_uniform_u32_ubound(rng, (uint32_t) npoints);
+            const double * restrict p_j = points + j * dim;
+            if (weakly_dominates(x, p_j, dim)) // PointQuery(x, B_j)
+                break;
+        }
+        m++;
+    }
 }

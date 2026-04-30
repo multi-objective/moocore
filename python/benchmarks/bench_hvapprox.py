@@ -24,16 +24,7 @@ path_to_data = "../../testsuite/data/"
 assert pathlib.Path(path_to_data).expanduser().exists()
 
 files = {
-    "DTLZLinearShape.3d": dict(
-        file="DTLZLinearShape.3d.front.1000pts.10",
-        ref=1,
-        range=(100, 1000, 100),
-    ),
-    "DTLZLinearShape.4d": dict(
-        file="DTLZLinearShape.4d.front.1000pts.10",
-        ref=1,
-        range=(100, 1000, 100),
-    ),
+    # It does not make sense to approximate the hypervolume in less than 6D.
     "DTLZLinearShape.6d": dict(
         file="DTLZLinearShape.6d.front.700pts.10.xz",
         ref=1,
@@ -101,6 +92,9 @@ for name in names:
         ),
         "moocore Rphi-FWE+": lambda z, exact: relerror(
             exact, moocore.hv_approx(z, ref=ref, method="Rphi-FWE+")
+        ),
+        "moocore FPRAS(eps=0.01, d=0.1)": lambda z, exact: relerror(
+            exact, moocore.hv_approx_fpras(z, ref=ref)
         ),
     }
     bench = Bench(
