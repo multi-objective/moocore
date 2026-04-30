@@ -57,6 +57,7 @@ The following projects currently use `moocore`:
  - [`IOHInspector`](https://github.com/IOHprofiler/IOHinspector?tab=readme-ov-file)
  - [`Liger`](https://ligerdev.shef.ac.uk/liger-development-team/liger-ce)
  - [`bonobench`](https://github.com/schaepermeier/bonobench)
+ - [`dmosopt`](https://dmosopt.github.io/dmosopt/)
  - [`gMOIP`](https://cran.r-project.org/web/packages/gMOIP/index.html)
  - [`jMetalPy`](https://jmetalpy.readthedocs.io/en/develop/)
  - [`pymoo`](https://pymoo.org/)
