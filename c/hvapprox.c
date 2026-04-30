@@ -207,6 +207,7 @@ euclidean_norm(const double * restrict w, dimension_t dim)
     double norm = (w[0] * w[0]) + (w[1] * w[1]);
     for (dimension_t k = 2; k < dim; k++)
         norm += w[k] * w[k];
+    ASSUME(norm >= 0); // GCC is not able to infer this.
     return sqrt(norm);
 }
 
