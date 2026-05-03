@@ -1,3 +1,8 @@
+# moocore 0.3.0.900
+
+ * Separate documentation of `pareto_rank()` to its own page.
+
+
 # moocore 0.3.0
 
  * `r2_exact()` implements the exact computation of the R2 indicator for bi-objective solution sets.

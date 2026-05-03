@@ -4,16 +4,13 @@
 \alias{is_nondominated}
 \alias{filter_dominated}
 \alias{any_dominated}
-\alias{pareto_rank}
-\title{Identify, remove and rank dominated points according to Pareto optimality}
+\title{Identify and remove dominated points according to Pareto optimality}
 \usage{
 is_nondominated(x, maximise = FALSE, keep_weakly = FALSE)
 
 filter_dominated(x, maximise = FALSE, keep_weakly = FALSE)
 
 any_dominated(x, maximise = FALSE, keep_weakly = FALSE)
-
-pareto_rank(x, maximise = FALSE)
 }
 \arguments{
 \item{x}{\code{matrix()}|\code{data.frame()}\cr Matrix or data frame of numerical
@@ -34,19 +31,12 @@ point is not dominated by any other point.
 \code{\link[=filter_dominated]{filter_dominated()}} returns a matrix or data.frame with only mutually nondominated points.
 
 \code{\link[=any_dominated]{any_dominated()}} returns \code{TRUE} if \code{x} contains any (weakly-)dominated points, \code{FALSE} otherwise.
-
-\code{\link[=pareto_rank]{pareto_rank()}} returns an integer vector of the same length as
-the number of rows of \code{data}, where each value gives the rank of each
-point.
 }
 \description{
 Identify nondominated points with \code{\link[=is_nondominated]{is_nondominated()}} and remove dominated
 ones with \code{\link[=filter_dominated]{filter_dominated()}}.
 
 \code{\link[=any_dominated]{any_dominated()}} quickly detects if a set contains any dominated point.
-
-\code{\link[=pareto_rank]{pareto_rank()}} ranks points according to Pareto-optimality,
-which is also called nondominated sorting \citep{Deb02nsga2}.
 }
 \details{
 Given \eqn{n} points of dimension \eqn{m}, the current implementation always
@@ -56,33 +46,12 @@ uses the best-known \eqn{O(n \log n)} dimension-sweep algorithm
 \log^{m-2} n)} algorithm \citep{KunLucPre1975jacm} when \eqn{n > 16}, and
 the naive \eqn{O(m n^2)} algorithm otherwise.  Function \code{any_dominated()}
 always uses the naive algorithm for \eqn{m \geq 4}.
-
-\code{\link[=pareto_rank]{pareto_rank()}} is meant to be used like \code{rank()}, but it assigns
-ranks according to Pareto dominance, where rank 1 indicates those
-solutions not dominated by any other solution in the input set.
-Duplicated points are assigned the same rank.  The resulting ranking can
-be used to partition points into a list of matrices, each matrix
-representing a nondominated front (see examples below).
-
-More formally, given a finite set of points \eqn{X \subset \mathbb{R}^m},
-the rank of a point \eqn{x \in X} is defined as:
-
-\deqn{\operatorname{rank}(x) = r \iff x \in F^c_{r} \land \nexists y \in F^c_{r}, y \prec x}
-
-where \eqn{y \prec x} means that \eqn{y} dominates \eqn{x} according to
-Pareto optimality, \eqn{F^c_r = X \setminus \bigcup_{i=1}^{r-1} F_i} and
-\eqn{F_r = \{x \in X \land \operatorname{rank}(x) = r\}}.  The sets
-\eqn{F_c}, with \eqn{c=1,\dots,k}, partition \eqn{X} into \eqn{k}
-\emph{fronts}, that is, mutually nondominated subsets of \eqn{X}.
-
-With \eqn{m=2}, i.e., \code{ncol(data)=2}, the code uses the best-known
-\eqn{O(n \log n)} algorithm by \citet{Jen03}.  When \eqn{m \geq 3}, it
-uses the naive algorithm that identifies one \emph{front} at a time, which
-requires \eqn{O(n^2\log n)} for \eqn{m=3}, and \eqn{O(n^2 \log^{m-2} n)}
-for \eqn{m \geq 4}.
 }
 \references{
 \insertAllCited{}
+}
+\seealso{
+\code{\link[=pareto_rank]{pareto_rank()}}
 }
 \author{
 Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
@@ -97,19 +66,6 @@ filter_dominated(S, keep_weakly = TRUE)
 any_dominated(S)
 any_dominated(S, keep_weakly = TRUE)
 any_dominated(filter_dominated(S))
-
-three_fronts = matrix(c(1, 2, 3,
-                        3, 1, 2,
-                        2, 3, 1,
-                        10, 20, 30,
-                        30, 10, 20,
-                        20, 30, 10,
-                        100, 200, 300,
-                        300, 100, 200,
-                        200, 300, 100), ncol=3, byrow=TRUE)
-pareto_rank(three_fronts)
-
-split.data.frame(three_fronts, pareto_rank(three_fronts))
 path_A1 <- file.path(system.file(package="moocore"),"extdata","ALG_1_dat.xz")
 set <- read_datasets(path_A1)[,1:2]
 is_nondom <- is_nondominated(set)
@@ -119,12 +75,5 @@ if (requireNamespace("graphics", quietly = TRUE)) {
    plot(set, col = "blue", type = "p", pch = 20)
    ndset <- filter_dominated(set)
    points(ndset[order(ndset[,1]),], col = "red", pch = 21)
-}
-
-ranks <- pareto_rank(set)
-str(ranks)
-if (requireNamespace("graphics", quietly = TRUE)) {
-   colors <- colorRampPalette(c("red","yellow","springgreen","royalblue"))(max(ranks))
-   plot(set, col = colors[ranks], type = "p", pch = 20)
 }
 }

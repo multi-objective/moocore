@@ -1,4 +1,4 @@
-#' Identify, remove and rank dominated points according to Pareto optimality
+#' Identify and remove dominated points according to Pareto optimality
 #'
 #' Identify nondominated points with [is_nondominated()] and remove dominated
 #' ones with [filter_dominated()].
@@ -54,20 +54,6 @@
 #' @expect equal(FALSE)
 #' any_dominated(filter_dominated(S))
 #'
-#' three_fronts = matrix(c(1, 2, 3,
-#'                         3, 1, 2,
-#'                         2, 3, 1,
-#'                         10, 20, 30,
-#'                         30, 10, 20,
-#'                         20, 30, 10,
-#'                         100, 200, 300,
-#'                         300, 100, 200,
-#'                         200, 300, 100), ncol=3, byrow=TRUE)
-#' @expect equal(c(1,1,1,2,2,2,3,3,3))
-#' pareto_rank(three_fronts)
-#'
-#' split.data.frame(three_fronts, pareto_rank(three_fronts))
-#'
 #' @omit
 #' path_A1 <- file.path(system.file(package="moocore"),"extdata","ALG_1_dat.xz")
 #' set <- read_datasets(path_A1)[,1:2]
@@ -80,14 +66,13 @@
 #'    points(ndset[order(ndset[,1]),], col = "red", pch = 21)
 #' }
 #'
-#' ranks <- pareto_rank(set)
-#' str(ranks)
-#' if (requireNamespace("graphics", quietly = TRUE)) {
-#'    colors <- colorRampPalette(c("red","yellow","springgreen","royalblue"))(max(ranks))
-#'    plot(set, col = colors[ranks], type = "p", pch = 20)
-#' }
-#' @export
+#' @references
+#'
+#' \insertAllCited{}
+#'
+#' @seealso [pareto_rank()]
 #' @concept dominance
+#' @export
 is_nondominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 {
   x <- as_double_matrix_1(x)
@@ -132,23 +117,24 @@ any_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
     rep_len(as.logical(maximise), nobjs))
 }
 
-#' @description [pareto_rank()] ranks points according to Pareto-optimality,
-#'   which is also called nondominated sorting \citep{Deb02nsga2}.
+#' Rank points according to Pareto-optimality (nondominated sorting).
 #'
-#' @rdname nondominated
-#' @concept dominance
-#' @return [pareto_rank()] returns an integer vector of the same length as
-#'   the number of rows of `data`, where each value gives the rank of each
-#'   point.
+#' [pareto_rank()] is meant to be used like `rank()`, but it assigns ranks
+#' according to Pareto dominance, where rank 1 indicates those solutions not
+#' dominated by any other solution in the input set.  Duplicated points are
+#' assigned the same rank.  The resulting ranking can be used to partition
+#' points into a list of matrices, each matrix representing a nondominated
+#' front \citep{Deb02nsga2} (see examples below).
 #'
-#' @details [pareto_rank()] is meant to be used like `rank()`, but it assigns
-#'   ranks according to Pareto dominance, where rank 1 indicates those
-#'   solutions not dominated by any other solution in the input set.
-#'   Duplicated points are assigned the same rank.  The resulting ranking can
-#'   be used to partition points into a list of matrices, each matrix
-#'   representing a nondominated front (see examples below).
+#' @inherit is_nondominated params
 #'
-#'   More formally, given a finite set of points \eqn{X \subset \mathbb{R}^m},
+#' @return An integer vector of the same length as the number of rows of the
+#'   input `x`, where each value gives the rank of each point (lower is
+#'   better).
+#'
+#' @details
+#'
+#'   Given a finite set of points \eqn{X \subset \mathbb{R}^m},
 #'   the rank of a point \eqn{x \in X} is defined as:
 #'
 #'   \deqn{\operatorname{rank}(x) = r \iff x \in F^c_{r} \land \nexists y \in F^c_{r}, y \prec x}
@@ -165,10 +151,38 @@ any_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 #'   requires \eqn{O(n^2\log n)} for \eqn{m=3}, and \eqn{O(n^2 \log^{m-2} n)}
 #'   for \eqn{m \geq 4}.
 #'
+#' @doctest
+#'
+#' three_fronts = matrix(c(1, 2, 3,
+#'                         3, 1, 2,
+#'                         2, 3, 1,
+#'                         10, 20, 30,
+#'                         30, 10, 20,
+#'                         20, 30, 10,
+#'                         100, 200, 300,
+#'                         300, 100, 200,
+#'                         200, 300, 100), ncol=3, byrow=TRUE)
+#' @expect equal(c(1,1,1,2,2,2,3,3,3))
+#' pareto_rank(three_fronts)
+#'
+#' split.data.frame(three_fronts, pareto_rank(three_fronts))
+#'
+#' @omit
+#' path_A1 <- file.path(system.file(package="moocore"),"extdata","ALG_1_dat.xz")
+#' set <- read_datasets(path_A1)[,1:2]
+#' ranks <- pareto_rank(set)
+#' str(ranks)
+#' if (requireNamespace("graphics", quietly = TRUE)) {
+#'    colors <- colorRampPalette(c("red","yellow","springgreen","royalblue"))(max(ranks))
+#'    plot(set, col = colors[ranks], type = "p", pch = 20)
+#' }
+#'
 #' @references
 #'
 #' \insertAllCited{}
 #'
+#' @seealso [is_nondominated()]
+#' @concept dominance
 #' @export
 pareto_rank <- function(x, maximise = FALSE)
 {
