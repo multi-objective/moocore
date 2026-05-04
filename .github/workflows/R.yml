@@ -125,6 +125,63 @@ jobs:
         shell: Rscript {0}
         working-directory: r
 
+  asan-check:
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ${{ matrix.os }}
+    name: Check under ASAN (${{ matrix.os }}, ${{ matrix.r }})
+    strategy:
+      # When set to true, GitHub cancels all in-progress jobs if any matrix job fails.
+      fail-fast: true
+      matrix:
+        os: [ ubuntu-latest ]
+        r: [ release ]
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      MAKEFLAGS: "-j 2"
+
+    steps:
+      - name: Disable autocrlf
+        if: runner.os == 'Windows'
+        run: git config --global core.autocrlf false
+
+      - uses: actions/checkout@v6
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.r }}
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          needs: check
+          working-directory: r
+
+      - name: Check with ASAN
+        env:
+          CC: clang
+          ASAN_OPTIONS: detect_leaks=0:abort_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_invalid_pointer_pairs=2
+        run: |
+          mkdir -p ~/.R
+          echo <<EOF > ~/.R/Makevars
+          CC=clang
+          CXX=clang++
+          CFLAGS += -O2 -g -fno-omit-frame-pointer -fsanitize=address
+          CXXFLAGS += -O2 -g -fno-omit-frame-pointer -fsanitize=address
+          LDFLAGS += -fsanitize=address
+          PKG_LIBS += -fsanitize=address
+          EOF
+          R CMD build --no-manual r
+          export LD_PRELOAD=$(clang -print-file-name=libasan.so)
+          R CMD check --no-manual --as-cran moocore_*.tar.gz
+        shell: bash
+
+      - name: Show testthat output
+        if: failure()
+        run: find moocore.Rcheck -name 'testthat.Rout*' -exec cat '{}' \; || true
+        shell: bash
+
+
   coverage:
     needs: R-CMD-check
     name: Coverage ${{ matrix.os }} (${{ matrix.r }})
