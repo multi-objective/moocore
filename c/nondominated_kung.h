@@ -330,13 +330,14 @@ debug_half_size_with_duplicates(const double ** restrict rows, size_t size)
 #define half_size_with_duplicates debug_half_size_with_duplicates
 #endif
 
+// The pointers cannot be restrict because the memory regions overlap.
 static inline size_t
-compact_rows(const double ** restrict r, size_t r_size,
-             const double ** restrict s, size_t s_size, size_t size)
+compact_rows(const double ** r, size_t r_size,
+             const double ** s, size_t s_size, size_t old_r_size)
 {
     size_t new_size = r_size + s_size;
-    ASSUME(new_size <= size);
-    if (new_size < size) { // Compact nondominated rows
+    ASSUME(r_size <= old_r_size);
+    if (r_size < old_r_size) { // Compact nondominated rows
         for (size_t k = 0; k < s_size; k++)
             r[r_size + k] = s[k];
     }
@@ -535,6 +536,8 @@ kung_merge_nobase(const double ** restrict r, size_t r_size,
         assert(check_nondom(r2, r2_size));
         assert(check_nondom(s2, s2_size));
     }
+
+    size_t old_s1_size = s1_size;
     if (r1_size > 0) {
         DEBUG2_PRINT("Solve sub-problem  (R1, S1)\n");
         // Solve sub-problem  (R1, S1)
@@ -546,7 +549,7 @@ kung_merge_nobase(const double ** restrict r, size_t r_size,
             s2_size = kung_merge_rec_dim(r, r1_size, s2, s2_size, dim);
         }
     }
-    size_t new_size = compact_rows(s, s1_size, s2, s2_size, s_size);
+    size_t new_size = compact_rows(s, s1_size, s2, s2_size, old_s1_size);
     DEBUG2_PRINT("kung_merge: return S = %zu\n", new_size);
     DEBUG2(print_rows(s, new_size, dim));
     assert(check_nondom(s, new_size));
@@ -746,6 +749,7 @@ maxima_rec(const double ** restrict rows, size_t size, dimension_t dim,
     const double ** s = rows + r_size;
     DEBUG2(printf_rows("maxima_rec: S", s, s_size, dim, "s_size"));
 
+    size_t old_r_size = r_size;
     if (r_size > 1)
         r_size = (r_size <= KUNG_SMALL_THRESHOLD)
             ? maxima_brute_force_filter_dom(rows, r_size, dim, keep_weakly)
@@ -759,7 +763,7 @@ maxima_rec(const double ** restrict rows, size_t size, dimension_t dim,
     DEBUG2(printf_rows("maxima_rec2: S", s, s_size, dim, "s_size"));
 
     s_size = kung_merge_rec_dim(rows, r_size, s, s_size, dim);
-    size_t new_size = compact_rows(rows, r_size, s, s_size, size);
+    size_t new_size = compact_rows(rows, r_size, s, s_size, old_r_size);
     DEBUG2_PRINT("maxima_rec2: r U s = %zu\n", new_size);
     DEBUG2(print_rows(rows, new_size, dim));
     assert(check_nondom(rows, new_size));
