@@ -4,6 +4,12 @@
 What's new
 **********
 
+Version 0.3.1  (04/05/2026)
+---------------------------
+
+- Fix potential undefined behavior in :func:`moocore.is_nondominated`.
+
+
 Version 0.3.0 (03/05/2026)
 --------------------------
 

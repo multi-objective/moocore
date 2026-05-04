@@ -1,6 +1,7 @@
-# moocore 0.3.0.900
+# moocore 0.3.1
 
  * Separate documentation of `pareto_rank()` to its own page.
+ * Fix potential undefined behavior in `is_nondominated()`.
 
 
 # moocore 0.3.0

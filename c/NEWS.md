@@ -1,5 +1,9 @@
 # moocore C library
 
+## 0.19.1
+
+ * nondominated_kung.h: Fix potential undefined behavior.
+
 ## 0.19
 
  * `fpli_hv()` calculates 4D contributions as the base case, which is
