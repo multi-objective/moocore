@@ -8,6 +8,7 @@ Version 0.4.0
 -------------
 
 - Requires ``numpy>=2.1``.
+- :func:`~moocore.vorob_t` returns a :class:`~typing.NamedTuple` instead of a dictionary.
 
 
 Version 0.3.2 (11/07/2026)

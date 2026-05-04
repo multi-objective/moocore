@@ -4,7 +4,7 @@ import os
 from io import StringIO
 from collections.abc import Callable, Sequence
 from numpy.typing import ArrayLike  # For type hints
-from typing import Literal, Any
+from typing import Literal, Any, NamedTuple
 
 # NOTE: if we ever start using SciPy, we can use
 # from scipy.special import gamma_function
@@ -2104,8 +2104,16 @@ def eaf(
     return np.frombuffer(eaf_buf).reshape((eaf_npoints, -1))
 
 
+class VorobtResult(NamedTuple):
+    threshold: float
+    ve: np.ndarray
+    avg_hyp: float
+
+
 @DocSubstitute()
-def vorob_t(points: ArrayLike, /, sets: ArrayLike, *, ref: ArrayLike) -> dict:
+def vorob_t(
+    points: ArrayLike, /, sets: ArrayLike, *, ref: ArrayLike
+) -> VorobtResult:
     r"""Compute Vorob'ev threshold and expectation.
 
     .. seealso:: For the definition of these concepts, see :ref:`vorobev_expectation_and_deviation`.
@@ -2122,7 +2130,16 @@ def vorob_t(points: ArrayLike, /, sets: ArrayLike, *, ref: ArrayLike) -> dict:
 
     Returns
     -------
-        A dictionary with elements ``threshold``, ``ve``, and ``avg_hyp`` (average hypervolume).  The threshold is returned as a percentile :math:`\beta^{*} \in [0,100]`.  The expectation :math:`\mathcal{Q}_{\beta^{*}}` is returned as a 2D array (:class:`numpy.ndarray`).  In addition, the hypervolume of the expectation is returned as ``avg_hyp``.
+        The return value is a :class:`~typing.NamedTuple` with the following attributes:
+
+        threshold : float
+            The threshold is returned as a percentile :math:`\beta^{*} \in [0,100]`.
+
+        avg_hyp : float
+            The hypervolume of the expectation (average hypervolume).
+
+        ve : np.ndarray
+            The expectation :math:`\mathcal{Q}_{\beta^{*}}` as a 2D array.
 
 
     See Also
@@ -2133,11 +2150,11 @@ def vorob_t(points: ArrayLike, /, sets: ArrayLike, *, ref: ArrayLike) -> dict:
     --------
     >>> CPFs = moocore.get_dataset("CPFs.txt.xz")
     >>> res = moocore.vorob_t(CPFs[:, :-1], sets=CPFs[:, -1], ref=(2, 200))
-    >>> res["threshold"]
+    >>> res.threshold
     44.140625
-    >>> res["avg_hyp"]
+    >>> res.avg_hyp
     8943.333191728081
-    >>> res["ve"].shape
+    >>> res.ve.shape
     (213, 2)
     """
     points = np.asarray(points, dtype=float)
@@ -2161,7 +2178,7 @@ def vorob_t(points: ArrayLike, /, sets: ArrayLike, *, ref: ArrayLike) -> dict:
         diff = prev_hyp - tmp
         prev_hyp = tmp
 
-    return dict(threshold=c, ve=eaf_res, avg_hyp=float(avg_hyp))
+    return VorobtResult(threshold=c, ve=eaf_res, avg_hyp=float(avg_hyp))
 
 
 @DocSubstitute()
@@ -2222,8 +2239,8 @@ def vorob_dev(
 
     if ve is None:
         res = vorob_t(points, sets=sets, ref=ref)
-        ve = res["ve"]
-        h1 = res["avg_hyp"]
+        ve = res.ve
+        h1 = res.avg_hyp
     else:
         h1 = np.mean(apply_within_sets(points, sets, hv_ind))
 
