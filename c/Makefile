@@ -161,6 +161,7 @@ EXE_CFLAGS += $(SANITIZERS) $(OPT_CFLAGS) $(MARCH_FLAGS) $(WARN_CFLAGS) \
 # List of test target base names
 TEST_NAMES := eaf nondominated hv hvapprox igd epsilon dominatedsets ndsort
 ASAN_TARGETS := $(addprefix asan-,$(TEST_NAMES))
+UBSAN_TARGETS:= $(addprefix ubsan-,$(TEST_NAMES))
 TEST_TARGETS := $(addprefix test-,$(TEST_NAMES))
 TIME_TARGETS := $(addprefix time-,$(TEST_NAMES))
 ALL_NAMES := $(TEST_NAMES)
@@ -248,25 +249,44 @@ clean:
 	@$(RM) $(OBJS) $(HV_OBJS) $(HV_LIB)
 
 TESTSUITE:="../testsuite"
-asan: OPT_CFLAGS ?=-Og -g3
-asan: SANITIZERS ?=$(DEFAULT_SANITIZERS)
+asan: OPT_CFLAGS ?=-O3 -g3
+asan: SANITIZERS ?=$(DEFAULT_ASAN_FLAGS)
 asan:
 	@if ! test -d $(TESTSUITE); then  		    	         \
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
-	$(MAKE) all DEBUG=1 SANITIZERS="$(SANITIZERS)" OPT_CFLAGS="$(OPT_CFLAGS)"
+	$(MAKE) all DEBUG=$(DEBUG) SANITIZERS="$(SANITIZERS)" OPT_CFLAGS="$(OPT_CFLAGS)"
 	$(MAKE) $(ASAN_TARGETS)
 
 $(ASAN_TARGETS): target=$(subst asan-,,$@)
-$(ASAN_TARGETS): OPT_CFLAGS ?=-Og -g3
-$(ASAN_TARGETS): SANITIZERS ?=$(DEFAULT_SANITIZERS)
+$(ASAN_TARGETS): OPT_CFLAGS ?=-O3 -g3
+$(ASAN_TARGETS): SANITIZERS ?=$(DEFAULT_ASAN_FLAGS)
 $(ASAN_TARGETS):
-	$(MAKE) $(target) DEBUG=1 SANITIZERS="$(SANITIZERS)" OPT_CFLAGS="$(OPT_CFLAGS)"
-	$(call ECHO,---> Testing $(target) for errors (DEBUG=1, $(SANITIZERS)) <--- )
+	$(MAKE) $(target) DEBUG=$(DEBUG) SANITIZERS="$(SANITIZERS)" OPT_CFLAGS="$(OPT_CFLAGS)"
+	$(call ECHO,---> Testing $(target) for errors (DEBUG=$(DEBUG), $(SANITIZERS)) <--- )
 
-	@cd $(TESTSUITE)/$(target) && \
-	export ASAN_OPTIONS='detect_leaks=0:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_invalid_pointer_pairs=2:abort_on_error=1' && \
-	export UBSAN_OPTIONS='print_stacktrace=1:halt_on_error=1' && \
+	cd $(TESTSUITE)/$(target) && \
+	export ASAN_OPTIONS='$(ASAN_OPTIONS)' && \
+	../regtest.py $(BINDIR)/$(target)$(EXE) && cd $(PWD)
+
+ubsan: OPT_CFLAGS ?=-O2 -g3
+ubsan: SANITIZERS ?=$(DEFAULT_UBSAN_FLAGS)
+ubsan:
+	@if ! test -d $(TESTSUITE); then  		    	         \
+	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
+	fi
+	$(MAKE) all DEBUG=$(DEBUG) SANITIZERS="$(SANITIZERS)" OPT_CFLAGS="$(OPT_CFLAGS)"
+	$(MAKE) $(UBSAN_TARGETS)
+
+$(UBSAN_TARGETS): target=$(subst ubsan-,,$@)
+$(UBSAN_TARGETS): OPT_CFLAGS ?=-O2 -g3
+$(UBSAN_TARGETS): SANITIZERS ?=$(DEFAULT_UBSAN_FLAGS)
+$(UBSAN_TARGETS):
+	$(MAKE) $(target) DEBUG=$(DEBUG) SANITIZERS="$(SANITIZERS)" OPT_CFLAGS="$(OPT_CFLAGS)"
+	$(call ECHO,---> Testing $(target) for errors (DEBUG=$(DEBUG), $(SANITIZERS)) <--- )
+
+	cd $(TESTSUITE)/$(target) && \
+	export UBSAN_OPTIONS='$(UBSAN_OPTIONS)' && \
 	../regtest.py $(BINDIR)/$(target)$(EXE) && cd $(PWD)
 
 test: OPT_CFLAGS ?=-Og -g3
