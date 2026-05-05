@@ -10,22 +10,31 @@ from ._moocore import (
     _parse_maximise,
 )
 
+from ._utils import (
+    array_1d_of_length_n,
+)
+
 
 class UnboundedArchive:
     r"""Archive that accepts an unlimited number of solutions.
 
     Parameters
     ----------
-    fvals :
+    f :
          Matrix of numerical values, where each row gives the coordinates of a point, typically in objective space.
-    xvals :
+    x :
          List of objects associated to points. These are not copied for efficiency, so modifying the original may modify the copy stored in the archive.
     m :
-       Number of dimensions of the input points to be stored. Only needed if 'fvals' is not given.
+       Number of dimensions of the input points to be stored. Only needed if 'f' is not given.
     maximise :
         Whether the objectives must be maximised instead of minimised.
         Either a single boolean value that applies to all objectives or a list of boolean values, with one value per objective.
         Also accepts a 1D numpy array with value 0/1 for each objective.
+    online_metrics :
+        List of unary indicators that will be updated online when adding/removing points. Supported values are TODO.
+    ref_point :
+        Reference point for hypervolume computation. Required if ``"hypervolume"`` appears in ``online_metrics``.
+
 
     Examples
     --------
@@ -59,11 +68,11 @@ class UnboundedArchive:
     list or a 2D numpy array).  The data associated with each input points is
     stored in `archive.xvals` as a list.
 
-    >>> moa.append([1, 2, 3], "a")
+    >>> moa.add([1, 2, 3], "a")
     >>> print(f"points: {list(moa)}\nxvals : {moa.xvals}")
     points: [array([1, 2, 3])]
     xvals : ['a']
-    >>> moa.append([[3, 2, 1], [2, 3, 2], [2, 2, 2]], ["b", "c", "d"])
+    >>> moa.add([[3, 2, 1], [2, 3, 2], [2, 2, 2]], ["b", "c", "d"])
     >>> print(f"points: {list(moa)}\nxvals : {moa.xvals}")
     points: [array([1, 2, 3]), array([3, 2, 1]), array([2, 2, 2])]
     xvals : ['a', 'b', 'd']
@@ -84,40 +93,76 @@ class UnboundedArchive:
 
     def __init__(
         self,
-        fvals: ArrayLike = [],
+        f: ArrayLike = [],
         /,
-        xvals: Sequence[Any] | None = None,
+        x: Sequence[Any] | None = None,
         *,
         m: int = 0,
         maximise: bool | Sequence[bool] = False,
         online_metrics=None,
+        ref_point: ArrayLike | None = None,
     ):
-        self.fvals = np.atleast_2d(fvals)
+        self.fvals = np.atleast_2d(f)
+        # np.atleast_2d([]).shape is (1,0), so we may need to correct it.
         self._dim = self.fvals.shape[1]
-        if self.dim() < 2:
+        if self._dim < 2:
             if m < 2:
-                raise ValueError("either 'fvals' or 'm' must be provided")
+                raise ValueError("either 'f' or 'm' must be provided")
             self.fvals = []
             self._dim = m
 
-        self.xvals = [] if xvals is None else xvals
-        self.maximise = _parse_maximise(maximise, self.dim())
+        self.xvals = [] if x is None else x
+        self.maximise = _parse_maximise(maximise, self._dim())
         nrows = len(self.fvals)
         if nrows > 0:
             if len(self.xvals):
                 assert len(self.fvals) == len(self.xvals)
         self.is_nondom = nrows == 0
         self._filter_dominated()
+        if "hypervolume" in online_metrics:
+            # Make sure it is a 1D array of length nobj.
+            self._ref_point = array_1d_of_length_n(
+                np.asarray(ref_point, dtype=float), self._dim, name="ref_point"
+            )
 
-    def append(self, f, x=None, check=True) -> bool | Sequence[bool]:
+    def add(
+        self,
+        f: ArrayLike,
+        /,
+        *,
+        x: Sequence[Any] | None = None,
+        check: bool = True,
+    ) -> bool | Sequence[bool]:
+        """Add one or more points to the archive.
+
+        Parameters
+        ----------
+        f :
+             One or more input points.
+        x :
+            Optional objects (e.g., decision vectors) associated to the input points.
+        check :
+             If ``False``, assume that points are mutually nondominated.
+
+
+        """
         self._push_back(f, x)
         self._filter_dominated()
 
     def to_numpy(self) -> np.ndarray:
+        """Return the contents of the archive as a NumPy array.
+
+        If the archive stores associated ``x`` objects, they are returned as a second argument.
+        """
+        if len(self.xvals):
+            return np.array(self.fvals), self.xvals
         return np.array(self.fvals)
 
     def __len__(self):
         return len(self.fvals)
+
+    def max_len(self):
+        return np.inf
 
     def __iter__(self):
         return iter(self.fvals)
@@ -129,7 +174,6 @@ class UnboundedArchive:
     def dim(self):
         return self._dim
 
-    @property
     def hypervolume(self):
         """Return the hypervolume of the archive."""
         if self._hypervolume is None:
@@ -142,7 +186,6 @@ class UnboundedArchive:
             )
         return self._hypervolume
 
-    @property
     def hv_contributions(self):
         """Return the hypervolume contribution of the points in the archive."""
         if self._hvc is None:
@@ -155,11 +198,20 @@ class UnboundedArchive:
             )
         return self._hvc
 
-    def dominates(self, fvals) -> Sequence[bool]:
+    def dominates(self, f: ArrayLike) -> Sequence[bool]:
         pass
 
-    def weakly_dominates(self, fvals) -> Sequence[bool]:
+    def weakly_dominates(self, f: ArrayLike) -> Sequence[bool]:
         pass
 
-    def one_hv_contribution(self, fvals) -> Sequence[float]:
+    def one_hv_contribution(self, f: ArrayLike) -> Sequence[float]:
+        """Return the hypervolume contribution of the points given as input with respect to the archive."""
+        pass
+
+    def optimal_for_chebychev(self, w: ArrayLike, ref: ArrayLike) -> np.ndarray:
+        """Return point in the archive that is optimal with respect the given weight vector."""
+        pass
+
+    def optimal_for_weighted_sum(self, w: ArrayLike) -> np.ndarray:
+        """Return point in the archive that is optimal with respect the given weight vector."""
         pass
