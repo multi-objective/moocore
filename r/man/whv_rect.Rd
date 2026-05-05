@@ -51,21 +51,6 @@ are given by \citet{DiaLop2020ejor}.
 \details{
 TODO
 }
-\examples{
-rectangles <- as.matrix(read.table(header=FALSE, text='
- 1.0  3.0  2.0  Inf    1
- 2.0  3.5  2.5  Inf    2
- 2.0  3.0  3.0  3.5    3
-'))
-whv_rect (matrix(2, ncol=2), rectangles, reference = 6)
-whv_rect (matrix(c(2, 1), ncol=2), rectangles, reference = 6)
-whv_rect (matrix(c(1, 2), ncol=2), rectangles, reference = 6)
-
-total_whv_rect (matrix(2, ncol=2), rectangles, reference = 6, ideal = c(1,1))
-total_whv_rect (matrix(c(2, 1), ncol=2), rectangles, reference = 6, ideal = c(1,1))
-total_whv_rect (matrix(c(1, 2), ncol=2), rectangles, reference = 6, ideal = c(1,1))
-
-}
 \references{
 \insertAllCited{}
 }
@@ -73,3 +58,16 @@ total_whv_rect (matrix(c(1, 2), ncol=2), rectangles, reference = 6, ideal = c(1,
 \code{\link[=read_datasets]{read_datasets()}}, \code{\link[=eafdiff]{eafdiff()}}, \code{\link[=choose_eafdiff]{choose_eafdiff()}}, \code{\link[=whv_hype]{whv_hype()}}
 }
 \concept{metrics}
+\examples{
+rectangles <- as.matrix(read.table(header=FALSE, text='
+ 1.0  3.0  2.0  Inf    1
+ 2.0  3.5  2.5  Inf    2
+ 2.0  3.0  3.0  3.5    3
+'))
+whv_rect(matrix(2, ncol=2), rectangles, reference = 6)
+whv_rect(matrix(c(2, 1), ncol=2), rectangles, reference = 6)
+whv_rect(matrix(c(1, 2), ncol=2), rectangles, reference = 6)
+total_whv_rect(matrix(2, ncol=2), rectangles, reference = 6, ideal = c(1,1))
+total_whv_rect(matrix(c(2, 1), ncol=2), rectangles, reference = 6, ideal = c(1,1))
+total_whv_rect(matrix(c(1, 2), ncol=2), rectangles, reference = 6, ideal = c(1,1))
+}

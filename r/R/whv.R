@@ -17,15 +17,25 @@
 #'
 #' @seealso [read_datasets()], [eafdiff()], [choose_eafdiff()], [whv_hype()]
 #'
-#' @examples
+#' @doctest
 #' rectangles <- as.matrix(read.table(header=FALSE, text='
 #'  1.0  3.0  2.0  Inf    1
 #'  2.0  3.5  2.5  Inf    2
 #'  2.0  3.0  3.0  3.5    3
 #' '))
-#' whv_rect (matrix(2, ncol=2), rectangles, reference = 6)
-#' whv_rect (matrix(c(2, 1), ncol=2), rectangles, reference = 6)
-#' whv_rect (matrix(c(1, 2), ncol=2), rectangles, reference = 6)
+#' @expect equal(4)
+#' whv_rect(matrix(2, ncol=2), rectangles, reference = 6)
+#' @expect equal(4)
+#' whv_rect(matrix(c(2, 1), ncol=2), rectangles, reference = 6)
+#' @expect equal(7)
+#' whv_rect(matrix(c(1, 2), ncol=2), rectangles, reference = 6)
+#'
+#' @expect equal(26)
+#' total_whv_rect(matrix(2, ncol=2), rectangles, reference = 6, ideal = c(1,1))
+#' @expect equal(30)
+#' total_whv_rect(matrix(c(2, 1), ncol=2), rectangles, reference = 6, ideal = c(1,1))
+#' @expect equal(37.5)
+#' total_whv_rect(matrix(c(1, 2), ncol=2), rectangles, reference = 6, ideal = c(1,1))
 #'
 #' @references
 #' \insertAllCited{}
@@ -66,13 +76,7 @@ whv_rect <- function(x, rectangles, reference, maximise = FALSE)
 #'   the overall weight of the differences. This is parameter psi (\eqn{\psi})
 #'   in \citet{DiaLop2020ejor}.
 #'
-#' @examples
-#' total_whv_rect (matrix(2, ncol=2), rectangles, reference = 6, ideal = c(1,1))
-#' total_whv_rect (matrix(c(2, 1), ncol=2), rectangles, reference = 6, ideal = c(1,1))
-#' total_whv_rect (matrix(c(1, 2), ncol=2), rectangles, reference = 6, ideal = c(1,1))
-#'
 #' @rdname whv_rect
-#'
 #' @concept metrics
 #' @export
 total_whv_rect <- function(x, rectangles, reference, maximise = FALSE, ideal = NULL, scalefactor = 0.1)
