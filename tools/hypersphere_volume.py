@@ -1,42 +1,12 @@
+# Requires
+# sympy >= 1.14.0
+# mpmath>=1.4.1
 import sympy as sp
 import mpmath as mpmath
 import numpy as np
-import re
 
 # Set the precision to 128 bits
 mpmath.mp.dps = 128
-
-
-# Recent versions of mpmpath support this already.
-# See https://github.com/mpmath/mpmath/issues/345
-def hex(a, prec=128):
-    """
-    Convert multiprecison float to hexadecimal representation with a defined precision
-    """
-    a2 = mpmath.mpmathify(a)
-    if a2 == mpmath.mpf("0.0"):
-        return "0.0"
-    if a2 == mpmath.mpf("1.0"):
-        return "1.0"
-    minus = False
-    if a2 < 0:
-        a2 = -a2
-        minus = True
-    e = mpmath.floor(mpmath.log(a2) / mpmath.log(mpmath.mpf("2.0")))
-    a2 = a2 * mpmath.power(mpmath.mpf("2.0"), -e) - mpmath.mpf("1.0")
-    if minus:
-        retstr = "-0x1."
-    else:
-        retstr = "0x1."
-    for l_i in range(prec):
-        a2 = a2 * mpmath.mpf("16")
-        b = int(a2)
-        a2 = a2 - mpmath.mpf(b)
-        retstr += "%.1x" % b
-
-    retstr += "p%+.2d" % e
-    retstr = re.sub("0+p", "p", retstr)
-    return retstr
 
 
 def hypersphere_area_div_2m(d):
@@ -60,7 +30,7 @@ def print_c_array(values, name):
             value = mpmath.mpf("0.0")
         else:
             value = value.num
-        c_array += f"    {hex(value)}L, // d = {d}, value = {np.float128(value)}\n"
+        c_array += f"    {value:a}L, // d = {d}, value = {np.float128(value)}\n"
     c_array += "};\n"
     print(c_array)
 
