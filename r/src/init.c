@@ -17,18 +17,24 @@
 
 #define DECLARE_CALL(NAME, ...)                                                \
     extern SEXP NAME(__VA_ARGS__);
+#define DECLARE_CALL_VOID(NAME) DECLARE_CALL(NAME, void)
 #include "init.h"
 #undef DECLARE_CALL
+#undef DECLARE_CALL_VOID
 
 
 #define DECLARE_CALL(NAME, ...)                                                \
     {#NAME, (DL_FUNC) &NAME, VA_NARGS(__VA_ARGS__)},
+
+#define DECLARE_CALL_VOID(NAME)                                                \
+    {#NAME, (DL_FUNC) &NAME, 0},
 
 static const R_CallMethodDef CallEntries[] = {
     #include "init.h"
     {NULL, NULL, 0}
 };
 #undef DECLARE_CALL
+#undef DECLARE_CALL_VOID
 
 #if defined(__clang__)
 #  pragma clang diagnostic pop
