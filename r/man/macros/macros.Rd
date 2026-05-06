@@ -1,5 +1,7 @@
 \newcommand{\citep}{\insertCite{#1}{moocore}}%
 \newcommand{\citet}{\insertCite{#1;textual}{moocore}}%
+\newcommand{\geq}{\ge}
+\newcommand{\leq}{\le}
 
 % Macro to create link to an HTML vignette from a help page.
 % arg 1 is the name of the vignette (without .html)
