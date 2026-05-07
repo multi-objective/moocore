@@ -257,7 +257,6 @@ generate_row_pointers_asc_rev_3d(const double * restrict points, size_t size)
    On Finding the Maxima of a Set of Vectors. Journal of the ACM,
    22(4):469–476, 1975.
 
-   Duplicated points may be removed in any order due to qsort not being stable.
 */
 static __force_inline__ size_t
 find_nondominated_2d_impl(const double * restrict points, size_t size,
@@ -269,26 +268,23 @@ find_nondominated_2d_impl(const double * restrict points, size_t size,
     size_t n_nondom = size, j = 1;
     // When compiling with -O3, GCC is able to create two versions of this loop
     // and move keep_weakly out.
-    const double * restrict pk = p[0];
+    double f1_prev = p[0][0], f2_prev = p[0][1]; // Smallest f2, then smallest f1.
     do {
         const double * restrict pj = p[j];
-        if (pk[0] > pj[0]) {
-            pk = pj;
-        } else {
-            const bool k_eq_j = (pk[0] == pj[0]) & (pk[1] == pj[1]);
-            if (!keep_weakly || likely(!k_eq_j)) {
-                if (k_eq_j && pj < pk) // Only the first duplicated point is kept.
-                    SWAP(pj, pk);
-
-                size_t pos_first_dom = row_index_from_ptr(points, pj, 2);
-                if (nondom == NULL) {
-                    // In this context, it means "position of the first dominated solution found".
-                    n_nondom = pos_first_dom;
-                    goto early_end;
-                }
-                nondom[pos_first_dom] = false;
-                n_nondom--;
+        if (f1_prev > pj[0]) {
+            f1_prev = pj[0];
+            f2_prev = pj[1];
+        } else if (!keep_weakly || likely(f1_prev != pj[0] || f2_prev != pj[1])) {
+            // The sorting function must be stable so that we keep only the
+            // first duplicated point.
+            size_t pos_first_dom = row_index_from_ptr(points, pj, 2);
+            if (nondom == NULL) {
+                // In this context, it means "position of the first dominated solution found".
+                n_nondom = pos_first_dom;
+                goto early_end;
             }
+            nondom[pos_first_dom] = false;
+            n_nondom--;
         }
         j++;
     } while (j < size);
