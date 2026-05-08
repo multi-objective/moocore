@@ -117,8 +117,9 @@ jobs:
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
     permissions:
       contents: write
+      pull-requests: write # post PR preview comment
     concurrency: # Recommended if you intend to make multiple deployments in quick succession.
-      group: web-${{ github.workflow }}-${{ github.ref }}
+      group: web-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
     timeout-minutes: 10
     runs-on:  ubuntu-latest
     steps:
@@ -164,6 +165,46 @@ jobs:
           target-folder: python
           single-commit: true
           clean: true
+
+      - name: Deploy PR preview 🚀
+        if: success() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: python/doc/_build/html/
+          target-folder: previews/pr-${{ github.event.pull_request.number }}/python
+          single-commit: true
+          clean: true
+
+      - name: Comment PR preview link
+        if: success() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- docs-preview-python-marker -->';
+            const prNumber = context.issue.number;
+            const url = `https://multi-objective.github.io/moocore/previews/pr-${prNumber}/python/`;
+            const body = `${marker}\n📚 **Python docs preview** for this PR is available at:\n\n${url}`;
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            const existing = comments.data.find(c => c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+            }
 
   coverage:
     timeout-minutes: 15
