@@ -40,6 +40,7 @@ hvc_1point_diffs(double * restrict hvc, double * restrict points, size_t size, d
         if (unlikely(keep_uevs && uev[i])) {
             hvc[i] = hv_total;
         } else if (nondom[i] && strongly_dominates(points + i * dim, ref, dim)) {
+            assert(i < size); /* bounds check: i must be within the allocated points buffer */
             memcpy(tmp, points + i * dim, sizeof(double) * dim);
             memcpy(points + i * dim, last, sizeof(double) * dim);
             hvc[i] = hvc_1point_diff(points, size - 1, dim, ref, hv_total);
