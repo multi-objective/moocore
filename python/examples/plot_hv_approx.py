@@ -160,7 +160,7 @@ shape = "convex-sphere"
 ref = 1.1
 npoints = 50
 dim = 6
-reps = 5
+reps = 10
 rng = np.random.default_rng(42)
 res = []
 for r in range(reps):
@@ -189,7 +189,14 @@ for r in range(reps):
 df = pd.DataFrame(res)
 df["delta"] = df["delta"].astype("category")
 plt.figure()
-ax = sns.lineplot(data=df, x="epsilon", y="hverror", hue="delta", marker="o")
+ax = sns.lineplot(
+    data=df,
+    x="epsilon",
+    y="hverror",
+    hue="delta",
+    marker="o",
+    errorbar=("pi", 100),
+)
 ax.set_title(f"{shape}-{npoints}-{dim}d", fontsize=10)
 ax.set(yscale="log", ylabel="Relative error")
 ax.set_xscale("log", base=10)
