@@ -183,7 +183,7 @@ jobs:
             const marker = '<!-- docs-preview-python-marker -->';
             const prNumber = context.issue.number;
             const url = `https://multi-objective.github.io/moocore/previews/pr-${prNumber}/python/`;
-            const body = `${marker}\n📚 **Python docs preview** for this PR is available at:\n\n${url}`;
+            const body = `${marker}\n📚 [**Python docs preview** for this PR](${url})\n\n`;
             const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
