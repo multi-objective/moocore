@@ -188,18 +188,12 @@ for r in range(reps):
 
 df = pd.DataFrame(res)
 df["delta"] = df["delta"].astype("category")
+df["epsilon"] = df["epsilon"].astype("category")
 plt.figure()
-ax = sns.lineplot(
-    data=df,
-    x="epsilon",
-    y="hverror",
-    hue="delta",
-    marker="o",
-    errorbar=("pi", 100),
-)
+ax = sns.boxplot(df, x="epsilon", y="hverror", hue="delta", whis=[0, 100])
 ax.set_title(f"{shape}-{npoints}-{dim}d", fontsize=10)
 ax.set(yscale="log", ylabel="Relative error")
-ax.set_xscale("log", base=10)
+ax.yaxis.grid(True)
 plt.tight_layout()
 plt.figure()
 ax = sns.lineplot(data=df, x="epsilon", y="time", hue="delta", marker="o")
