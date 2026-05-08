@@ -1,0 +1,34 @@
+name: Cleanup docs preview
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    name: Remove docs preview for closed PR
+    runs-on: ubuntu-latest
+    # Only run for same-repo PRs; fork PRs never get a preview deployed
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+
+      - name: Remove preview folder
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          PREVIEW_DIR="previews/pr-${PR_NUMBER}"
+          if [ -d "${PREVIEW_DIR}" ]; then
+            git rm -rf "${PREVIEW_DIR}"
+            git config user.email "actions@github.com"
+            git config user.name "GitHub Actions"
+            git commit -m "Remove docs preview for PR #${PR_NUMBER}"
+            git push
+            echo "Removed ${PREVIEW_DIR}"
+          else
+            echo "No preview directory found for PR #${PR_NUMBER}, nothing to clean up"
+          fi
