@@ -881,11 +881,13 @@ compute_vols(const double * restrict points, size_t npoints, dimension_t dim)
     return vol;
 }
 
-static void
+static double
 cumsum_of_vector(double * restrict v, size_t n)
 {
+    ASSUME(n > 0);
     for (size_t i = 1; i < n; i++)
         v[i] += v[i-1];
+    return v[n - 1];
 }
 
 /**
@@ -919,8 +921,7 @@ hv_approx_fpras(const double * restrict data, size_t npoints, dimension_t dim,
     const uint64_t T = (uint64_t) ceil(T_double);
     double * vols = compute_vols(points, npoints, dim); // VolumeQuery(B_i)
     // Convert vols into a piece-wise cdf.
-    cumsum_of_vector(vols, npoints);
-    double total_vol = vols[npoints - 1];
+    double total_vol = cumsum_of_vector(vols, npoints);
     for (size_t k = 0; k < npoints; k++)
         vols[k] /= total_vol;
 
