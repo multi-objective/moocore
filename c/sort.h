@@ -74,20 +74,28 @@ all_equal_double(const double * restrict a, const double * restrict b, dimension
 
 // ---------- Comparison functions (e.g, qsort). Return 'int' ----------------
 
-// General type for comparison functions used in qsort().
+// General type for comparison functions used in qsort() and qsort_r().
 typedef int (*cmp_fun_t)(const void *, const void *);
+typedef int (*cmp_r_fun_t) (const void *, const void *, void *);
 
 // See usage below.
 #define DEFINE_QSORT_CMP(typed_cmp_fn, elem_type)                              \
     static inline int                                                          \
     typed_cmp_fn(const elem_type restrict, const elem_type restrict);          \
                                                                                \
-    static inline int                                                          \
+    _attr_maybe_unused static inline int                                       \
     qsort_##typed_cmp_fn(const void * restrict _a, const void * restrict _b)   \
     {                                                                          \
         const elem_type restrict a = (const elem_type)_a;                      \
         const elem_type restrict b = (const elem_type)_b;                      \
         return typed_cmp_fn(a, b);                                             \
+    }                                                                          \
+                                                                               \
+    _attr_maybe_unused static inline int                                       \
+    qsort_r_##typed_cmp_fn(const void * restrict _a, const void * restrict _b, \
+                           void * arg _attr_maybe_unused)                      \
+    {                                                                          \
+        return qsort_##typed_cmp_fn(_a, _b);                                   \
     }                                                                          \
                                                                                \
     static inline int                                                          \
@@ -128,6 +136,16 @@ cmp_pdouble_asc_rev(const double * restrict a, const double * restrict b, dimens
     return res;
 }
 
+static inline int
+qsort_r_cmp_pdouble_asc_rev(const void * restrict _a, const void * restrict _b, void * restrict arg)
+{
+    const double * restrict a = (const double *)_a;
+    const double * restrict b = (const double *)_b;
+    const dimension_t dim = *(const dimension_t *)arg;
+
+    return cmp_pdouble_asc_rev(a, b, dim);
+}
+
 // Lexicographic order of coordinates: asc y, then asc x
 DEFINE_QSORT_CMP(cmp_pdouble_asc_rev_2d, double *)
 {
@@ -136,20 +154,13 @@ DEFINE_QSORT_CMP(cmp_pdouble_asc_rev_2d, double *)
     return cmpy ? cmpy : cmpx;
 }
 
-DEFINE_QSORT_CMP(cmp_ppdouble_asc_rev_2d, double **)
+DEFINE_QSORT_CMP(cmp_pdouble_asc_rev_3d, double *)
 {
-    return cmp_pdouble_asc_rev_2d(*a, *b);
-}
-
-// Lexicographic order of coordinates (z,y,x)
-DEFINE_QSORT_CMP(cmp_ppdouble_asc_rev_3d, double **)
-{
-    return cmp_pdouble_asc_rev(*a, *b, 2);
-}
-
-DEFINE_QSORT_CMP(cmp_ppdouble_asc_rev_4d, double **)
-{
-    return cmp_pdouble_asc_rev(*a, *b, 3);
+    int res = cmp_double_asc(a[2], b[2]);
+    if (res) return res;
+    res = cmp_double_asc(a[1], b[1]);
+    if (res) return res;
+    return cmp_double_asc(a[0], b[0]);
 }
 
 static inline int
@@ -158,14 +169,19 @@ cmp_pdouble_asc_only_dim(const double * restrict pa, const double * restrict pb,
     return cmp_double_asc(pa[dim], pb[dim]);
 }
 
-DEFINE_QSORT_CMP(cmp_ppdouble_asc_only_3d, double **)
+DEFINE_QSORT_CMP(cmp_pdouble_asc_1d, double *)
 {
-    return cmp_pdouble_asc_only_dim(*a, *b, 2);
+    return cmp_pdouble_asc_only_dim(a, b, 0);
 }
 
-DEFINE_QSORT_CMP(cmp_ppdouble_asc_only_4d, double **)
+DEFINE_QSORT_CMP(cmp_pdouble_asc_only_3d, double *)
 {
-    return cmp_pdouble_asc_only_dim(*a, *b, 3);
+    return cmp_pdouble_asc_only_dim(a, b, 2);
+}
+
+DEFINE_QSORT_CMP(cmp_pdouble_asc_only_4d, double *)
+{
+    return cmp_pdouble_asc_only_dim(a, b, 3);
 }
 
 DEFINE_QSORT_CMP(cmp_pdouble_asc_x_nonzero, double *)
@@ -175,22 +191,6 @@ DEFINE_QSORT_CMP(cmp_pdouble_asc_x_nonzero, double *)
 }
 
 // Deterministic tie-break by pointer value.
-DEFINE_QSORT_CMP(cmp_pdouble_asc_x_nonzero_stable, double *)
-{
-    ASSUME(a != b);
-    int cmp = cmp_double_asc(*a, *b);
-    // Deterministic tie-break by pointer value.
-    uintptr_t pa = (uintptr_t)a;
-    uintptr_t pb = (uintptr_t)b;
-    return cmp ? cmp : (pa < pb ? -1 : 1);
-}
-
-// Deterministic tie-break by pointer value.
-DEFINE_QSORT_CMP(cmp_ppdouble_asc_x_nonzero_stable, double * const *)
-{
-    return cmp_pdouble_asc_x_nonzero_stable(*a, *b);
-}
-
 DEFINE_QSORT_CMP(cmp_pdouble_asc_y_des_x_nonzero, double *)
 {
     const double ax = a[0];

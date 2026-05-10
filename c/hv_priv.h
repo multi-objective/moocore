@@ -8,7 +8,7 @@
 #include <float.h> // DBL_MAX
 #include <string.h> // memcpy
 #include "sort.h"
-
+#include "radixsort.h"
 // ----------------------- Data Structure -------------------------------------
 
 /*
@@ -220,11 +220,11 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     if (likely(n > 1)) {
 #ifdef HVC_ONLY
         // Lexicographic ordering ensures that we do not have dominated points in the AVL-tree.
-        qsort_typesafe(scratch, n, cmp_ppdouble_asc_rev_3d);
+        radix_sort_asc_rev_3d(scratch, n);
 #else
         (HV_DIMENSION == 3)
-            ? qsort_typesafe(scratch, n, cmp_ppdouble_asc_only_3d)
-            : qsort_typesafe(scratch, n, cmp_ppdouble_asc_only_4d);
+            ? radix_sort_asc_only_3d(scratch, n)
+            : radix_sort_asc_only_4d(scratch, n);
 #endif
     }
 
