@@ -52,7 +52,7 @@ lex_sort_equal_z_and_setup_nodes(lex_sort_buffer_t * restrict buff,
         x += 3;
     }
 
-    qsort_typesafe(scratch, n, cmp_ppdouble_asc_rev_2d);
+    radix_sort_asc_rev_2d(scratch, n);
 
     for (size_t i = 0; i < n; i++) {
         newp_aux->x = scratch[i];

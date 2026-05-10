@@ -5,6 +5,7 @@
 #include <string.h> // memcpy
 #include <math.h> // INFINITY
 #include "sort.h"
+#include "radixsort.h"
 
 typedef const double avl_item_t;
 typedef struct avl_node_t {
@@ -235,7 +236,7 @@ generate_row_pointers_asc_rev_2d(const double * restrict points, size_t size)
 {
     const double ** p = generate_row_pointers(points, size, 2);
     // Sort in ascending lexicographic order from the last dimension.
-    qsort_typesafe(p, size, cmp_ppdouble_asc_rev_2d);
+    radix_sort_asc_rev_2d(p, size);
     return p;
 }
 
@@ -244,7 +245,7 @@ generate_row_pointers_asc_rev_3d(const double * restrict points, size_t size)
 {
     const double ** p = generate_row_pointers(points, size, 3);
     // Sort in ascending lexicographic order from the last dimension.
-    qsort_typesafe(p, size, cmp_ppdouble_asc_rev_3d);
+    radix_sort_asc_rev_3d(p, size);
     return p;
 }
 
@@ -329,7 +330,7 @@ find_nondominated_set_2d_(const double * restrict points, size_t size,
    D. Jesus, Luís Paquete, A software library for archiving nondominated
    points, GECCO 2021. https://github.com/TLDart/nondLib/blob/main/nondlib.hpp
 
-   rows should be already sorted by cmp_ppdouble_asc_rev_3d().
+   rows should be already sorted by cmp_pdouble_asc_rev_3d().
 
    When find_dominated, return as soon as it finds one dominated point.
 */

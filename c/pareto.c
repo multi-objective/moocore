@@ -168,7 +168,7 @@ pareto_rank_2d(int * restrict rank, const double * restrict points, size_t size)
 #endif
 
     // Sort in ascending lexicographic order from the second dimension.
-    qsort_typesafe(p, size, cmp_ppdouble_asc_rev_2d);
+    radix_sort_asc_rev_2d(p, size);
 
 #ifdef PARETO_RANK_2D_DEBUG
     for (size_t k = 0; k < size; k++) {
@@ -299,7 +299,7 @@ pareto_rank_kung(int * restrict rank,
     for (size_t k = 0; k < size; k++)
         prev_rows[k] = points + dim * k;
     // Same as find_nondominated_set_kung()
-    qsort_typesafe(prev_rows, size, cmp_ppdouble_asc_x_nonzero_stable);
+    radix_sort_asc_1d(prev_rows, size);
 
     int front = 1;
     while (true) {

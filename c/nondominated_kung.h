@@ -73,6 +73,31 @@ filter_dominated(const double ** restrict rows, size_t new_size, size_t size, di
     DEBUG2(print_rows(rows, new_size, dim));
 }
 
+static void
+filter_dominated_ord(const double ** restrict shifted_rows, size_t new_size,
+                     const double ** restrict rows, size_t old_size,
+                     uint32_t * restrict ord)
+{
+    size_t i = 0, k = 0, n = 0;
+    while (n < new_size) {
+        while (shifted_rows[i] == NULL) i++; // Find next nondominated
+        shifted_rows[i]--; // shift back
+        // The next loop marks everything that was dominated.
+        while (shifted_rows[i] != rows[ord[k]]) { // Find the original row.
+            rows[ord[k]] = NULL;
+            k++;
+        }
+        i++;
+        k++;
+        n++;
+    }
+    // The rest are dominated.
+    while (k < old_size) {
+        rows[ord[k]] = NULL;
+        k++;
+    }
+}
+
 
 /**
    Returns k, 0 <= k <= size, such that:
@@ -164,6 +189,7 @@ kung_merge_dim3(const double ** restrict r, size_t r_size,
 
     avl_tree_t tree;
     avl_init_tree(&tree, qsort_cmp_pdouble_asc_y_asc_z);
+    // FIXME: Use a workspace to allocate this once and re-alloc only if a larger number is needed.
     avl_node_t * tnodes = malloc((r_size + 1) * sizeof(*tnodes));
     avl_node_t * node = tnodes;
     node->item = r[0];
@@ -344,70 +370,6 @@ compact_rows(const double ** r, size_t r_size,
     return new_size;
 }
 
-typedef struct shifted_row {
-    const double * row;
-    const double ** prow;
-} shifted_row_t;
-
-// Deterministic tie-break by pointer value.
-DEFINE_QSORT_CMP(cmp_shifted_row_asc_x_nonzero_stable, shifted_row_t *)
-{
-    ASSUME(a != b);
-    return cmp_pdouble_asc_x_nonzero_stable(a->row, b->row);
-}
-
-// Deterministic tie-break by pointer value.
-DEFINE_QSORT_CMP(cmp_shifted_row_asc_rev_3d, shifted_row_t *)
-{
-    ASSUME(a != b);
-    return cmp_pdouble_asc_rev(a->row, b->row, 2);
-}
-
-static shifted_row_t *
-alloc_shifted_rows(const double ** restrict r, size_t size,
-                   cmp_fun_t cmp_fun, const double ** restrict r_new)
-{
-    shifted_row_t * shifted_rows = malloc(size * sizeof(*shifted_rows));
-    for (size_t k = 0; k < size; k++) {
-        const double ** prow = r + k;
-        shifted_rows[k].row = (*prow) + 1; // Shift to next dimension.
-        shifted_rows[k].prow = prow;       // Remember the original row.
-    }
-    qsort(shifted_rows, size, sizeof(*shifted_rows), cmp_fun);
-    for (size_t k = 0; k < size; k++) {
-        r_new[k] = shifted_rows[k].row;
-    }
-    return shifted_rows;
-}
-
-/**
-   This function marks elements of shifted_rows for removal (*prow = NULL).
-   Only elements in r[] that are present in shifted_rows.row are not marked.
-   We can assume that elements in r appear in the same order as in
-   shifted_rows.
-*/
-static void
-filter_shifted(shifted_row_t * restrict shifted_rows,
-               const double ** restrict r, size_t new_size, size_t old_size)
-{
-    size_t i = 0, k = 0, n = 0;
-    while (n < new_size) {
-        while (r[i] == NULL) i++; // Find next nondominated
-        while (r[i] != shifted_rows[k].row) { // Find it in shifted_rows.
-            *(shifted_rows[k].prow) = NULL;
-            k++;
-        }
-        i++;
-        k++;
-        n++;
-    }
-    // The rest are dominated.
-    while (k < old_size) {
-        *(shifted_rows[k].prow) = NULL;
-        k++;
-    }
-}
-
 static size_t kung_merge_nobase(const double ** restrict r, size_t r_size,
                                 const double ** restrict s, size_t s_size,
                                 dimension_t dim);
@@ -445,18 +407,20 @@ kung_merge_rec_dim(const double ** restrict r, size_t r_size,
         for (size_t k = 0; k < new_size; k++)
             s[k]--;
     } else {
-        /* We will create new row pointers that point to the next dimension,
-           however, for s, we also want to remember the original position of
-           each row pointer to be able to filter dominated, thus shifted_rows
-           stores the new row pointer and a pointer to the previous one, so we
-           can modify it directly.  */
         const double ** r1 = (const double **) malloc((r_size + s_size) * sizeof(*r));
         shift_to_next_dimension(r1, r, r_size);
         // We shifted to next dimension, so we need to sort.
-        qsort_typesafe(r1, r_size, cmp_ppdouble_asc_x_nonzero_stable);
+        radix_sort_asc_1d(r1, r_size);
         const double ** s1 = r1 + r_size;
-        shifted_row_t * shifted_rows = alloc_shifted_rows(
-            s, s_size, qsort_cmp_shifted_row_asc_x_nonzero_stable, s1);
+        shift_to_next_dimension(s1, s, s_size);
+        /* We will create new row pointers that point to the next dimension,
+           however, for s, we also want to remember the original position of
+           each row pointer to be able to filter dominated, thus we also sort
+           an order array.  */
+        uint32_t * order = malloc(s_size * sizeof(*order));
+        assert(s_size <= UINT32_MAX);
+        identity_u32(order, (uint32_t)s_size);
+        radix_argsort_asc_1d(s1, s_size, order);
         DEBUG2(printf_rows("kung_merge_rec_dim2: R", r1, r_size, dim - 1, "r_size"));
         DEBUG2(printf_rows("kung_merge_rec_dim2: S", s1, s_size, dim - 1, "s_size"));
         assert(check_nondom(r1, r_size));
@@ -470,10 +434,10 @@ kung_merge_rec_dim(const double ** restrict r, size_t r_size,
         }
         assert(check_nondom(r1, r_size));
         if (new_size < s_size) {
-            filter_shifted(shifted_rows, s1, new_size, s_size);
+            filter_dominated_ord(s1, new_size, s, s_size, order);
             filter_dominated(s, new_size, s_size, dim);
         }
-        free(shifted_rows);
+        free(order);
         free(r1);
     }
     assert(check_nondom(s, new_size));
@@ -597,33 +561,33 @@ maxima_rec_dim(const double ** rows, size_t size, dimension_t dim,
 {
     size_t new_size;
     const double ** r_new = (const double **) malloc(size * sizeof(*rows));
+    shift_to_next_dimension(r_new, rows, size);
     /* We will create new row pointers that point to the next dimension,
        however, we also want to remember the original position of each row
-       pointer to be able to filter dominated, thus shifted_rows stores the new
-       row pointer and a pointer to the previous one, so we can modify it
-       directly.  */
-    shifted_row_t * shifted_rows;
+       pointer to be able to filter dominated, thus we also sort an order
+       array.  */
+    uint32_t * order = malloc(size * sizeof(*order));
+    assert(size <= UINT32_MAX);
+    identity_u32(order, (uint32_t) size);
 
     if (dim == 4) { // We can reach this base case if one dimension has all equal values.
         // Sort in ascending lexicographic order from the last dimension.
-        shifted_rows = alloc_shifted_rows(
-            rows, size, qsort_cmp_shifted_row_asc_rev_3d, r_new);
+        radix_argsort_asc_rev_3d(r_new, size, order);
          new_size = keep_weakly // Help GCC generate specialized code for true/false.
              ? find_nondominated_3d_impl_sorted(r_new, size,  true, /* find_one_dominated=*/false)
              : find_nondominated_3d_impl_sorted(r_new, size, false, /* find_one_dominated=*/false);
          DEBUG2_PRINT("maxima_dim3: size=%zu, new_size=%zu\n", size, new_size);
     } else {
         ASSUME(size > KUNG_SMALL_THRESHOLD);
-        shifted_rows = alloc_shifted_rows(
-            rows, size, qsort_cmp_shifted_row_asc_x_nonzero_stable, r_new);
+        radix_argsort_asc_1d(r_new, size, order);
         new_size = maxima_rec(r_new, size, dim - 1, keep_weakly);
         DEBUG2_PRINT("maxima_rec: s_size == 0: size=%zu, new_size=%zu\n", size, new_size);
     }
     if (new_size < size) {
-        filter_shifted(shifted_rows, r_new, new_size, size);
+        filter_dominated_ord(r_new, new_size, rows, size, order);
         filter_dominated(rows, new_size, size, dim+1);
     }
-    free(shifted_rows);
+    free(order);
     free(r_new);
     assert(check_nondom(rows, new_size));
     return new_size;
@@ -779,7 +743,7 @@ find_nondominated_set_kung(const double * restrict points,
     ASSUME(dim > 3);
 
     const double ** rows = generate_row_pointers(points, size, dim);
-    qsort_typesafe(rows, size, cmp_ppdouble_asc_x_nonzero_stable);
+    radix_sort_asc_1d(rows, size);
     size_t new_size = maxima_rec(rows, size, dim, keep_weakly);
 
     if (new_size < size) {
