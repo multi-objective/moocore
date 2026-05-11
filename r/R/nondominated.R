@@ -77,7 +77,8 @@ is_nondominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 {
   x <- as_double_matrix_1(x)
   nobjs <- ncol(x)
-  # FIXME: Implement this in is_nondominated_C
+  keep_weakly <- as.logical(keep_weakly)
+  maximise <- as.logical(maximise)
   if (nobjs == 1L) { # Handle single-objective
     if (keep_weakly) {
       best <- if (maximise) max(x) else min(x)
@@ -90,8 +91,8 @@ is_nondominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
   }
   .Call(is_nondominated_C,
     x,
-    as.logical(keep_weakly),
-    rep_len(as.logical(maximise), nobjs))
+    keep_weakly,
+    rep_len(maximise, nobjs))
 }
 
 #' @rdname nondominated
