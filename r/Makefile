@@ -3,7 +3,7 @@ PACKAGE=$(shell sh -c 'grep -F "Package: " DESCRIPTION | cut -f2 -d" "')
 REALVERSION=$(PACKAGEVERSION)$(REVNUM)
 
 BINDIR=$(CURDIR)/..
-INSTALL_FLAGS="--with-keep.source"
+INSTALL_FLAGS=--with-keep.source
 PACKAGEDIR=$(CURDIR)
 Reval=R --slave -e
 
