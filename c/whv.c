@@ -37,7 +37,7 @@ whv_preprocess_rectangles(double * rectangles, int nrow,
         rectangles[k * ncol + 2] = MIN(rectangles[k * ncol + 2], reference[0]);
         rectangles[k * ncol + 3] = MIN(rectangles[k * ncol + 3], reference[1]);
     }
-    int * skip = malloc(nrow * sizeof(int));
+    int * skip = malloc(nrow * sizeof(*skip));
     int skip_nrow = 0;
     for (int k = 0; k < nrow; k++) {
         if (rectangles[k * ncol + 0] == rectangles[k * ncol + 2]
@@ -56,7 +56,7 @@ whv_preprocess_rectangles(double * rectangles, int nrow,
         *new_nrow_p = 0;
         return NULL;
     }
-    double *dest = malloc(sizeof(double) * 5 * new_nrow);
+    double *dest = malloc(sizeof(*dest) * 5 * new_nrow);
     skip[skip_nrow] = nrow;
     int j = 0, k = 0;
     for (int s = 0; s <= skip_nrow; s++) {
