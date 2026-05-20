@@ -7,7 +7,7 @@
 /**
    Nondominated sorting in 3D in O(k * n log n), where k is the number of fronts.
 
-   Uses the same algorithm as find_nondominated_set_3d_helper().
+   Uses the same algorithm as find_nondominated_set_3d_impl().
 */
 
 static void

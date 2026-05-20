@@ -37,7 +37,7 @@ new_avl_node(dlnode_t * restrict p, avl_node_t * restrict node)
 
   The main difference is that the order of the points in 2D is tracked by p->cnext/p->closest.
 
-  See also find_nondominated_set_3d_helper().
+  See also find_nondominated_set_3d_impl().
 */
 static inline void
 hv3d_preprocessing(dlnode_t * restrict list, size_t n)
