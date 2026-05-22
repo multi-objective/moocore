@@ -112,15 +112,18 @@ cmp_double_asc(double a, double b)
     return (a > b) - (a < b);
 }
 
+/**
+   Compare vectors starting from the last component, where dim is the last
+   valid component.
+*/
 static inline int
 cmp_pdouble_asc_rev(const double * restrict a, const double * restrict b, dimension_t dim)
 {
-    ASSUME(dim >= 2);
-    int i = dim - 1;
-    int res = cmp_double_asc(a[i], b[i]);
-    while (!res && i > 0) {
-        i--;
-        res = cmp_double_asc(a[i], b[i]);
+    ASSUME(dim >= 1);
+    int res = cmp_double_asc(a[dim], b[dim]);
+    while (!res && dim > 0) {
+        dim--;
+        res = cmp_double_asc(a[dim], b[dim]);
     }
     return res;
 }
@@ -141,12 +144,12 @@ DEFINE_QSORT_CMP(cmp_ppdouble_asc_rev_2d, double **)
 // Lexicographic order of coordinates (z,y,x)
 DEFINE_QSORT_CMP(cmp_ppdouble_asc_rev_3d, double **)
 {
-    return cmp_pdouble_asc_rev(*a, *b, 3);
+    return cmp_pdouble_asc_rev(*a, *b, 2);
 }
 
 DEFINE_QSORT_CMP(cmp_ppdouble_asc_rev_4d, double **)
 {
-    return cmp_pdouble_asc_rev(*a, *b, 4);
+    return cmp_pdouble_asc_rev(*a, *b, 3);
 }
 
 static inline int

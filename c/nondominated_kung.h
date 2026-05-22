@@ -360,7 +360,7 @@ DEFINE_QSORT_CMP(cmp_shifted_row_asc_x_nonzero_stable, shifted_row_t *)
 DEFINE_QSORT_CMP(cmp_shifted_row_asc_rev_3d, shifted_row_t *)
 {
     ASSUME(a != b);
-    return cmp_pdouble_asc_rev(a->row, b->row, 3);
+    return cmp_pdouble_asc_rev(a->row, b->row, 2);
 }
 
 static shifted_row_t *
