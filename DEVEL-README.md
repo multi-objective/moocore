@@ -68,6 +68,31 @@ If the entry already exists, you just need to add its label to the file
 [`bibkeys.txt`](https://github.com/multi-objective/moocore/blob/main/bibkeys.txt) and run [`update_bib.sh`](https://github.com/multi-objective/moocore/blob/main/update_bib.sh).
 
 
+How to profile the code
+=======================
+
+## How to profile the C code called by R
+
+We will use https://github.com/gperftools/gperftools
+
+1. Compile with
+
+```make
+env PKG_LIBS='-L/usr/lib/x86_64-linux-gnu -lprofiler' R CMD INSTALL --clean --preclean --build --no-docs --no-help --with-keep.source .
+```
+
+1. Write a `test.R` file that exercises the code that you want to profile.
+
+1. Run it with:
+
+```bash
+rm -f ./moocore.prof*
+env LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libprofiler.so CPUPROFILE=./moocore.prof CPUPROFILE_FREQUENCY=100000 r test.R
+google-pprof --callgrind /usr/bin/r ./moocore.prof > callgrind.out
+kcachegrind callgrind.out
+```
+
+
 How to release
 ==============
 
