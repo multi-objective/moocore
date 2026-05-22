@@ -177,19 +177,24 @@ nondominated), while the other testcases are mostly nondominated sets.
 setup <- quote({
   stopifnot(nrow(x) >= N)
   z <- as.matrix(x[1L:N, ])
+  nz <- -z
   tz <- t(z)
+  gc() # clean state before timing
 })
 
 expr.list <- list(
   moocore = quote(which(moocore::is_nondominated(z))),
   bbotk = quote(which(bbotk::is_dominated(tz))),
   GPGame = quote(GPGame::nonDom(z)),
-  targeted = quote(targeted::nondom(z))
+  targeted = quote(targeted::nondom(z)),
+  caRamel = quote(caRamel::pareto(nz))
 )
 
 files <- list(
   "test2D-200k"=list(file="test2D-200k.inp.xz", N=geomspace(1000, 50000, 10)),
   "ran3d-40k"=list(file="ran.40000pts.3d.1.xz", N=geomspace(1000, 25000, 10)),
+  "convex-3d"=list(generate=list(25000, 3, "convex-sphere", 42), N=geomspace(1000, 25000, 10)),
+  "sphere-3d"=list(generate=list(25000, 3, "sphere", 42), N=geomspace(1000, 25000, 10)),
   "ran4d"=list(file="ran.9000pts.4d.10.xz", N=geomspace(1000, 60000, 10)),
   "convex-4d"=list(generate=list(25000, 4, "convex-sphere", 42), N=geomspace(500, 25000, 10)),
   "sphere-5d"=list(generate=list(20000, 5, "sphere", 42), N=geomspace(100, 20000, 10)),
@@ -217,6 +222,7 @@ setup <- quote({
   stopifnot(nrow(x) >= N)
   z <- x[1L:N, ]
   tz <- t(z)
+  gc() # clean state before timing
 })
 
 expr.list <- list(
@@ -224,9 +230,9 @@ expr.list <- list(
   emoa = quote(emoa::dominated_hypervolume(tz, ref = ref)))
 
 files <- list(
-  "DTLZLinearShape.3d"=list(
-    file = "DTLZSphereShape.3d.front.1000pts.10",
-    N = geomspace(200, 6500, 10)),
+  "spherical-3d"=list(
+    file = "spherical-3d-2000pts-10.dat.xz",
+    N = geomspace(100, 20000, 10)),
   "DTLZLinearShape.4d"=list(
     file = "DTLZLinearShape.4d.front.1000pts.10",
     N = geomspace(100, 2000, 10)),
