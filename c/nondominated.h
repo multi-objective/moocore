@@ -331,7 +331,7 @@ find_nondominated_set_2d_(const double * restrict points, size_t size,
    When find_dominated, return as soon as it finds one dominated point.
 */
 static __force_inline__ size_t
-find_nondominated_3d_impl_sorted(const double ** rows, size_t size,
+find_nondominated_3d_impl_sorted(const double ** restrict rows, size_t size,
                                  const bool keep_weakly,
                                  const bool find_dominated)
 {
@@ -349,16 +349,15 @@ find_nondominated_3d_impl_sorted(const double ** rows, size_t size,
     avl_insert_after(&tree, node - 1, node);
 
     // In this context, size means "no dominated solution found".
-    size_t new_size = size, k = 0;
-    size_t last_dom_pos = size;
-    const double * restrict pk = rows[0];
+    size_t new_size = size;
+    size_t prev_dominated = false;
+    double pk0 = rows[0][0], pk1 = rows[0][1], pk2 = rows[0][2];
     for (size_t j = 1; j < size; j++) {
         const double * restrict pj = rows[j];
         DEBUG2(printf_point("pj = [ ", pj, 3, " ], "));
-
-        if (pk[0] > pj[0] || pk[1] > pj[1]) {
+        const double pj0 = pj[0], pj1 = pj[1], pj2 = pj[2];
+        if ((pk0 > pj0) | (pk1 > pj1)) {
             // Check if pj is dominated by a point in the tree.
-            assert(pk[0] > pj[0] || pk[1] > pj[1]);
             avl_node_t * nodeaux;
             int res = avl_search_closest(&tree, pj, &nodeaux);
             assert(res != 0);
@@ -366,26 +365,26 @@ find_nondominated_3d_impl_sorted(const double ** rows, size_t size,
                 const double * restrict prev = nodeaux->item;
                 DEBUG2(printf_point("res > 0: prev: ", prev, 3, "\n"));
                 assert(prev[0] != sentinel[0]);
-                assert(prev[0] <= pj[0]);
-                if (prev[1] <= pj[1])
+                assert(prev[0] <= pj0);
+                if (prev[1] <= pj1)
                     goto j_is_dominated;
                 nodeaux = nodeaux->next;
             } else if (nodeaux->prev) { // nodeaux goes after pj, so move to the next one.
                 const double * restrict prev = nodeaux->prev->item;
                 DEBUG2(printf_point("res < 0: prev: ", prev, 3, "\n"));
                 assert(prev[0] != sentinel[0]);
-                assert(prev[0] <= pj[0]);
-                if (prev[1] <= pj[1])
+                assert(prev[0] <= pj0);
+                if (prev[1] <= pj1)
                     goto j_is_dominated;
             }
 
             // pj is NOT dominated by a point in the tree.
             const double * restrict point = nodeaux->item;
-            assert(pj[0] <= point[0]);
+            assert(pj0 <= point[0]);
             // Delete everything in the tree that is dominated by pj.
-            while (pj[1] <= point[1]) {
+            while (pj1 <= point[1]) {
                 DEBUG2(printf_point("delete point: ", point, 3, "\n"));
-                assert(pj[0] <= point[0]);
+                assert(pj0 <= point[0]);
                 nodeaux = nodeaux->next;
                 point = nodeaux->item;
                 /* FIXME: A possible speed up is to delete without
@@ -399,37 +398,21 @@ find_nondominated_3d_impl_sorted(const double ** rows, size_t size,
             (++node)->item = pj;
             avl_insert_before(&tree, nodeaux, node);
             // Fall-through to j_is_NOT_dominated.
-        } else {
-            // Handle duplicates and points that are dominated by the immediate
-            // previous one.
-            DEBUG2(printf_point("weakly dominated by pk: ", pk, 3, "\n"));
-            const bool k_not_equal_j = (pk[0] < pj[0]) | (pk[1] < pj[1]) | (pk[2] < pj[2]);
-
-            if (likely(k_not_equal_j)) { // It is not a duplicate, so it is dominated.
-                goto j_is_dominated;
-            } else if (keep_weakly) {
-                // If pk was dominated, then this one is also dominated.
-                if (last_dom_pos == k)
-                    goto j_is_dominated;
-                // Fall-through to j_is_NOT_dominated.
-            } else { // Don't keep duplicates.
-                if (pk < pj) // Only the first duplicated point is kept.
-                    goto j_is_dominated;
-
-                if (find_dominated) {
-                    // In this context, it means "position of the first dominated solution found".
-                    new_size = k;
-                    goto early_end;
-                }
-                last_dom_pos = k;
-                rows[k] = NULL;
-                new_size--;
-                // Fall-through to j_is_NOT_dominated.
-            }
+        } // Handle duplicates and points that are dominated by the immediate previous one.
+        else if (!keep_weakly // Don't keep duplicates.
+                 // or the previous was dominated, then this one is also dominated.
+                 || prev_dominated
+                 // or it is not a duplicate, so it is dominated.
+                 || pk0 != pj0 || pk1 != pj1 || pk2 != pj2) {
+            // The sorting function must be stable so that we keep only the
+            // first duplicated point.
+            DEBUG2(printf_point("weakly dominated by pk: ",
+                                (double[3]){pk0, pk1, pk2}, 3, "\n"));
+            goto j_is_dominated;
         }
         // j_is_NOT_dominated
-        pk = pj;
-        k = j;
+        pk0 = pj0; pk1 = pj1; pk2 = pj2;
+        prev_dominated = false;
         continue;
 
     j_is_dominated: // pj is dominated by a point in the tree or by pk.
@@ -438,7 +421,7 @@ find_nondominated_3d_impl_sorted(const double ** rows, size_t size,
             new_size = j;
             goto early_end;
         }
-        last_dom_pos = j;
+        prev_dominated = true;
         rows[j] = NULL;
         new_size--;
     }
