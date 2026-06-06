@@ -222,7 +222,8 @@ kung_merge_dim3(const double ** restrict r, size_t r_size,
                     point = nodeaux->item;
                     /* FIXME: A possible speed up is to delete without
                        rebalancing the tree because avl_insert_before() will
-                       rebalance. */
+                       rebalance, but we need to know which is the highest node
+                       that needs rebalancing. */
                     avl_unlink_node(&tree, nodeaux->prev);
                 }
                 // printf("insert before point: "); print_point(point); printf("\n");
