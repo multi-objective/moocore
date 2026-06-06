@@ -70,8 +70,9 @@ pareto_rank_3d(int * restrict rank, const double * restrict points, size_t size)
                         nodeaux = nodeaux->next;
                         point = nodeaux->item;
                         /* FIXME: A possible speed up is to delete without
-                           rebalancing the tree because avl_insert_before() will
-                           rebalance. */
+                           rebalancing the tree because avl_insert_before()
+                           will rebalance, but we need to know which is the
+                           highest node that needs rebalancing. */
                         avl_unlink_node(&tree, nodeaux->prev);
                     }
                     (++node)->item = pj;

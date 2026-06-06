@@ -336,7 +336,13 @@ find_nondominated_3d_impl_sorted(const double ** restrict rows, size_t size,
                                  const bool find_dominated)
 {
     ASSUME(size > 1);
-
+    /* FIXME: The AVL-tree is the bottleneck of this algorithm. A Treap
+       [R. Seidel and C. R. Aragon. Randomized search trees.  Algorithmica,
+       16:464–497, 1996] may be far more efficient by allowing to remove a
+       range of items without rebalancing.  See
+       https://alexdremov.me/treap-algorithm-explained/
+       Instead of using randomized priorities, hash the node pointer or the node index.
+    */
     avl_tree_t tree;
     avl_init_tree(&tree, qsort_cmp_pdouble_asc_x_nonzero);
     avl_node_t * tnodes = malloc((size+1) * sizeof(*tnodes));
@@ -387,9 +393,10 @@ find_nondominated_3d_impl_sorted(const double ** restrict rows, size_t size,
                 assert(pj0 <= point[0]);
                 nodeaux = nodeaux->next;
                 point = nodeaux->item;
-                /* FIXME: A possible speed up is to delete without
-                   rebalancing the tree because avl_insert_before() will
-                   rebalance. */
+                /* FIXME: A possible speed up is to delete without rebalancing
+                   the tree because avl_insert_before() will rebalance, but we
+                   need to know which is the highest node that needs
+                   rebalancing. */
                 avl_unlink_node(&tree, nodeaux->prev);
             }
             DEBUG2((point == sentinel)

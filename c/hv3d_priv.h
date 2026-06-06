@@ -117,7 +117,9 @@ hv3d_preprocessing(dlnode_t * restrict list, size_t n)
                 assert(node_point(nodeaux)[1] >= px[1]);
                 nodeaux = nodeaux->next;
                 /* FIXME: A possible speed up is to delete without rebalancing
-                   the tree because avl_insert_before() will rebalance. */
+                   the tree because avl_insert_before() will rebalance, but we
+                   need to know which is the highest node that needs
+                   rebalancing. */
                 avl_unlink_node(&tree, nodeaux->prev);
             }
             node = new_avl_node(p, node + 1);
