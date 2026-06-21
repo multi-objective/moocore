@@ -56,6 +56,7 @@ The following projects currently use `moocore`:
  - [`GPareto`](https://github.com/mbinois/GPareto)
  - [`IOHInspector`](https://github.com/IOHprofiler/IOHinspector?tab=readme-ov-file)
  - [`Liger`](https://ligerdev.shef.ac.uk/liger-development-team/liger-ce)
+ - [`bbotk`](https://bbotk.mlr-org.com/)
  - [`bonobench`](https://github.com/schaepermeier/bonobench)
  - [`dmosopt`](https://dmosopt.github.io/dmosopt/)
  - [`gMOIP`](https://cran.r-project.org/web/packages/gMOIP/index.html)
