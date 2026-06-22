@@ -1,5 +1,10 @@
 # moocore C library
 
+## 0.20
+
+ * radixsort.h, insort.h: New.
+
+
 ## 0.19.2
 
  * nondominated_kung.h (maxima_rec_dim): Avoid crash with size <= KUNG_SMALL_THRESHOLD.

@@ -1,3 +1,8 @@
+# moocore (development)
+
+ * `is_nondominated` is up to 10x faster in some inputs thanks to a customized radixsort implementation.
+
+
 # moocore 0.3.2
 
  * Fix crash in `pareto_rank()` with duplicated points (#74).
