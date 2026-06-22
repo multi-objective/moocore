@@ -9,7 +9,7 @@ Version 0.4.0
 
 - Requires ``numpy>=2.1``.
 - :func:`~moocore.vorob_t` returns a :class:`~typing.NamedTuple` instead of a dictionary.
-- :func:`moocore.is_nondominated` is up to 10x faster in some inputs thanks to a customized radixsort implementation.
+- :func:`~moocore.is_nondominated` is up to 10x faster in some inputs thanks to a customized radixsort implementation.
 
 
 Version 0.3.2 (11/07/2026)
@@ -28,7 +28,7 @@ Version 0.3.2 (11/07/2026)
 Version 0.3.1  (04/05/2026)
 ---------------------------
 
-- Fix potential undefined behavior in :func:`moocore.is_nondominated`.
+- Fix potential undefined behavior in :func:`~moocore.is_nondominated`.
 
 
 Version 0.3.0 (03/05/2026)
