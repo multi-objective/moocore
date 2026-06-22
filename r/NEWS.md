@@ -1,3 +1,8 @@
+# moocore (development)
+
+ * `is_nondominated` is up to 10x faster in some inputs thanks to a customized radixsort implementation.
+
+
 # moocore 0.3.1
 
  * Separate documentation of `pareto_rank()` to its own page.

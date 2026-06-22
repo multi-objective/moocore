@@ -1,5 +1,9 @@
 # moocore C library
 
+## 0.20
+
+ * radixsort.h, insort.h: New.
+
 ## 0.19.1
 
  * nondominated_kung.h: Fix potential undefined behavior.
