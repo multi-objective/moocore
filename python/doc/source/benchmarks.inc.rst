@@ -14,11 +14,7 @@ include `paretobench`_ because it is always slower than `BoTorch`_ for
 identifying nondominated points and more than 2000 times slower than `moocore`_
 for computing the hypervolume in 3D
 (https://github.com/electronsandstuff/ParetoBench/issues/57), which is too slow
-to include in the benchmarks.  Nondominated sorting and hypervolume computation
-in `dmosopt`_ are 100-1000 times lower than the equivalent functions in
-`moocore`_ even in 3D (See https://github.com/dmosopt/dmosopt/issues/118 and
-https://github.com/dmosopt/dmosopt/issues/119), which is too slow to include in
-the benchmarks.
+to include in the benchmarks.
 
 Not all packages provide the same functionality. For example, `pymoo`_ does not
 provide the :ref:`epsilon indicator <epsilon_metric>`. `BoTorch`_ and

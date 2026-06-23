@@ -20,8 +20,6 @@ from desdeo.tools.non_dominated_sorting import (
 from paretoset import paretorank as paretoset_paretorank
 ## It cannot be installed: https://github.com/esa/pygmo2/issues/152
 # from pygmo import pareto_dominance as pg_pareto_dominance
-## dmosopt is 100-1000x slower, i.e., too slow.
-# from dmosopt.dda import dda_ens as dmosopt_paretorank
 
 files = {
     # range are the (start, stop, num) parameters for np.geomspace()
@@ -61,7 +59,6 @@ for name in names:
             "paretoset": lambda z: paretoset_paretorank(z, use_numba=True) - 1,
             "pymoo": lambda z, nds=pymoo_NDS(): nds.do(z, return_rank=True)[1],
             "desdeo": lambda z: desdeo_nds(z).argmax(axis=0),
-            # "dmosopt": lambda z: dmosopt_paretorank(z),
         },
         check=check_array_equal,
     )
