@@ -31,9 +31,6 @@ from optuna._hypervolume import compute_hypervolume as optuna_hv
 ## https://github.com/secondmind-labs/trieste/issues/917
 # from trieste.acquisition.multi_objective import Pareto as trieste_Pareto
 # import tensorflow as tf
-## dmosopt is too slow to benchmark
-## https://github.com/dmosopt/dmosopt/issues/119
-# from dmosopt.hv_box_decomposition import compute_hypervolume_box_decomposition
 
 from moarchiving import get_mo_archive as moarch_get_mo_archive
 
@@ -93,7 +90,6 @@ for name in names:
         "fast_pareto": lambda z, ref=ref: fp_hv(
             z, ref_point=ref, assume_pareto=False
         ),
-        # "dmosopt": lambda z, ref=ref: compute_hypervolume_box_decomposition(z, ref_point=ref),
     }
     # Too slow to run.
     if dim >= 6:
