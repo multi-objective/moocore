@@ -21,6 +21,7 @@ Computation, pp. 465–472 (2012)]
  - Online nondominated filter
    - [ ] [A Fast Incremental BSP Tree Archive for Non-dominated Points](https://doi.org/10.1007/978-3-319-54157-0_18)
    - [ ] ND-tree: https://github.com/thibautlust/NDTree-c
+   - [ ] B. Lang, "Space-Partitioned ND-Trees for the Dynamic Nondominance Problem," in IEEE Transactions on Evolutionary Computation, vol. 26, no. 5, pp. 1004-1014, Oct. 2022, doi: 10.1109/TEVC.2022.3145631
  - [ ] Faster nondominated algorithm (is_nondominated, filter_dominated) for very many points: [Worst-case I/O-efficient Skyline Algorithms](https://www.cse.cuhk.edu.hk/~taoyf/paper/tods12-sky.pdf)
  - [ ] Faster nondominated sorting:
     - Jensen improvement: [Fortin et al. 2013](https://dl.acm.org/doi/epdf/10.1145/2463372.2463454)
@@ -32,6 +33,8 @@ Computation, pp. 465–472 (2012)]
     - [Merge non-dominated sorting](https://github.com/jMetal/jMetal/blob/main/jmetal-core/src/main/java/org/uma/jmetal/util/ranking/impl/MergeNonDominatedSortRanking.java
 )
     - Jensen-style divide-and-conquer with small-size subroutines?
+ - Merging of Pareto sets:
+  - [ ] Efficient dominance filtering for unions and Minkowski sums of non-dominated sets. https://doi.org/10.1016/j.cor.2023.106506
  - [ ] 3D Nondominated sorting:
      Y. Nekrich. A fast algorithm for three-dimensional layers of maxima problem. In Algorithms and Data Structures, number 6844 in Lecture Notes in Computer Science, pages 607–618. 2011. [Paper](https://link.springer.com/chapter/10.1007/978-3-642-22300-6_51)
  - [ ] Epsilon-dominance:
