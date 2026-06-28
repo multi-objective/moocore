@@ -113,14 +113,15 @@ License
 
 This software is Copyright (C) 2024 Manuel López-Ibáñez, Carlos M. Fonseca, Luís Paquete, Mickaël Binois.
 
-This program is free software (software libre); you can redistribute it and/or
-modify it under the terms of the GNU General Public License as published by the
-Free Software Foundation; either version 2 of the License, or (at your option)
-any later version.
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the [GNU General Public License](http://www.gnu.org/licenses/gpl.html) for more details.
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the [GNU
+Lesser General Public License](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html) for more details.
 
 **IMPORTANT NOTE**: Please be aware that the fact that this program is released
 as Free Software does not excuse you from scientific propriety, which obligates
