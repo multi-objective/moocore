@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+whv\_rect
+=========
+
+.. currentmodule:: moocore
+
+.. autofunction:: whv_rect
+
+.. _sphx_glr_backref_moocore.whv_rect:
+
+.. minigallery:: moocore.whv_rect
+   :add-heading: Gallery examples
+   :heading-level: -
