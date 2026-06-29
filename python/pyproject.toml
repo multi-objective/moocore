@@ -1,10 +1,6 @@
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = [
-  "cffi>=1.17.1",
-  "setuptools>=77.0.3",
-  "wheel",
-]
+requires = [ "cffi>=1.17.1", "setuptools>=77.0.3" ]
 
 [project]
 name = "moocore"
@@ -93,11 +89,11 @@ Source = "https://github.com/multi-objective/moocore/"
 Tracker = "https://github.com/multi-objective/moocore/issues"
 
 [tool.setuptools]
-zip-safe = false
 package-dir = { "" = "src" }
+zip-safe = false
 [tool.setuptools.package-data]
 "*" = [ "*.c", "*.h" ]
-"moocore.data" = [ "*.txt", "*.dat", "*.xz", "*.csv", "*.10" ]
+"moocore.data" = [ "*.10", "*.csv", "*.dat", "*.txt", "*.xz" ]
 
 [tool.distutils.bdist_wheel]
 py_limited_api = "cp310"
@@ -111,23 +107,23 @@ skip = [
   "cp310-win_arm64", # Numpy wheels not available for Python 3.10 on Windows-arm
 ]
 build-verbosity = 2
-# Will cause the wheel to be installed with these optional-dependencies
-test-extras = [ "test" ]
 test-command = [
   "pytest --doctest-modules --doctest-continue-on-failure {package}/tests {package}/src/moocore/_moocore.py",
 ]
+# Will cause the wheel to be installed with these optional-dependencies
+test-extras = [ "test" ]
 [tool.cibuildwheel.linux]
 archs = [ "native" ]
-manylinux-x86_64-image = "manylinux_2_28"
-manylinux-aarch64-image = "manylinux_2_28"
-musllinux-x86_64-image = "musllinux_1_2"
-musllinux-aarch64-image = "musllinux_1_2"
 # Use abi3audit to catch issues with Limited API wheels
 before-build = "pip install abi3audit"
 repair-wheel-command = [
   "auditwheel repair -w {dest_dir} {wheel}",
   "abi3audit --verbose --strict --report {wheel}",
 ]
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+musllinux-x86_64-image = "musllinux_1_2"
+musllinux-aarch64-image = "musllinux_1_2"
 [tool.cibuildwheel.macos]
 archs = [ "universal2" ]
 before-build = "pip install abi3audit"
@@ -192,22 +188,22 @@ expand_tables = [ "project.urls", "project.optional-dependencies" ]
 collapse_tables = [ "project.authors" ]
 
 [tool.mypy]
+files = [ "src/" ]
+# Imports
+ignore_missing_imports = true
 python_version = "3.11"
+disallow_untyped_calls = true
 # Strictness (recommended for library code)
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 check_untyped_defs = true
-disallow_untyped_calls = true
 disallow_untyped_decorators = true
-no_implicit_optional = true
+warn_redundant_casts = true
 # Warnings
 warn_unused_ignores = true
 warn_return_any = true
-warn_redundant_casts = true
 warn_unused_configs = true
-# Imports
-ignore_missing_imports = true
-files = [ "src/" ]
+no_implicit_optional = true
 
 [tool.pytest.ini_options]
 faulthandler_timeout = 10
