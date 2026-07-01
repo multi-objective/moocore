@@ -117,17 +117,23 @@ benchmark_plot <- function (x, title = "", only_seconds=TRUE, ...) {
 get_package_version <- function(package)
   paste0(package, " (", as.character(packageVersion(package)), ")")
 
-benchmark <- function(name, x, N, setup, expr.list, prefix, title) {
+benchmark <- function(name, x, N, setup, expr.list, prefix, title, check)
+{
   rds_file <- paste0("bench/bench-", prefix, "-", name, ".rds")
   if (run_benchmarks || !file.exists(rds_file)) {
     lapply(names(expr.list), library, character.only = TRUE)
     names(expr.list) <- sapply(names(expr.list), get_package_version, USE.NAMES=FALSE)
+    if (!requireNamespace("atime", quietly = TRUE)
+      || packageVersion("atime") < "2026.7.1") {
+      stop("Please install atime >= 2026.7.1")
+    }
     res <- substitute(atime::atime(
       N = N,
       expr.list = expr.list,
       setup = SETUP,
       result=FALSE,
       times=5,
+      check=check,
       seconds.limit=10), list(SETUP=setup))
     res <- eval(res)
     saveRDS(res, file = rds_file)
@@ -144,12 +150,12 @@ get_ndset <- function(x, filter)
   do.call(moocore::generate_ndset, x$generate)
 }
 
-benchmark_all <- function(files, prefix, title, setup, expr.list, filter)
+benchmark_all <- function(files, prefix, title, setup, expr.list, filter, check=TRUE)
 {
   for (name in names(files)) {
     p <- benchmark(name = name, x = get_ndset(files[[name]], filter=filter),
       N = files[[name]]$N, prefix = prefix, title = title,
-      setup = setup,  expr.list = expr.list)
+      setup = setup,  expr.list = expr.list, check=check)
     print(p)
   }
 }
@@ -201,7 +207,7 @@ files <- list(
 )
 
 benchmark_all(files, prefix="ndom", title = "is_(non)dominated()",
-  setup = setup, expr.list = expr.list, filter=FALSE)
+  setup = setup, expr.list = expr.list, filter=FALSE, check=FALSE)
 ```
 
 
