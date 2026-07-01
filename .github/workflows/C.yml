@@ -2,7 +2,7 @@ name: C
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'v[0-9]+*' ]
     tags-ignore: ["**"]
     paths:
       - '.github/workflows/C.yml'
