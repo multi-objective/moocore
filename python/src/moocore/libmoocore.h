@@ -1,5 +1,8 @@
 static const int HV_INEX_MAX_ROWS;
 static const int KUNG_SMALL_THRESHOLD;
+static const int MOOCORE_DIMENSION_MAX;
+static const int MOOCORE_HV_DIMENSION_MAX;
+static const int MOOCORE_HVAPPROX_DIMENSION_MAX;
 
 // Must be consistent with the definition in moocore.
 typedef uint_fast8_t dimension_t;

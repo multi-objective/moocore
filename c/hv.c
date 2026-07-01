@@ -280,7 +280,7 @@ _attr_optimize_finite_and_associative_math // Required for auto-vectorization: h
 static double
 one_point_hv(const double * restrict x, const double * restrict ref, dimension_t d)
 {
-    ASSUME(2 <= d && d <= MOOCORE_DIMENSION_MAX);
+    ASSUME(2 <= d && d <= MOOCORE_HV_DIMENSION_MAX);
     double hv = 1.0;
     for (dimension_t i = 0; i < d; i++)
         hv *= (ref[i] - x[i]);
@@ -292,9 +292,9 @@ static double
 hv_two_points(const double * restrict x1, const double * restrict x2,
               const double * restrict ref, dimension_t d)
 {
-    ASSUME(2 <= d && d <= MOOCORE_DIMENSION_MAX);
+    ASSUME(2 <= d && d <= MOOCORE_HV_DIMENSION_MAX);
     double hv = one_point_hv(x1, ref, d) + one_point_hv(x2, ref, d);
-    double bound[MOOCORE_DIMENSION_MAX+1];
+    double bound[MOOCORE_HV_DIMENSION_MAX+1];
     upper_bound(bound, x1, x2, d);
     hv -= one_point_hv(bound, ref, d);
     return hv;
@@ -309,7 +309,7 @@ hv_inex_list(const dlnode_t * restrict list, int n, dimension_t dim,
              const double * restrict ref)
 {
     ASSUME(3 <= n && n <= HV_INEX_MAX_ROWS);
-    ASSUME(2 <= dim && dim <= MOOCORE_DIMENSION_MAX);
+    ASSUME(2 <= dim && dim <= MOOCORE_HV_DIMENSION_MAX);
     // Accumulate positive and negative values separately to improve accuracy.
     // If more accuracy is needed, we could use Neumaier compensated
     // accumulators.
@@ -515,7 +515,7 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
     ASSUME(c > 1);
     ASSUME(dim > STOP_DIMENSION);
     const dimension_t d_stop = dim - STOP_DIMENSION;
-    ASSUME(0 < d_stop && d_stop < MOOCORE_DIMENSION_MAX); // Silence -Walloc-size-larger-than= warning
+    ASSUME(0 < d_stop && d_stop < MOOCORE_HV_DIMENSION_MAX); // Silence -Walloc-size-larger-than= warning
     double * bound = malloc(d_stop * sizeof(*bound));
     for (dimension_t i = 0; i < d_stop; i++)
         bound[i] = -DBL_MAX;

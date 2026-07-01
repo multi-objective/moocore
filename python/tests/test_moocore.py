@@ -8,6 +8,15 @@ from numpy.testing import (
 import math
 import moocore
 
+fun_c2py = {
+    "avg_hausdorff_dist": moocore._moocore._avg_hausdorff_dist_python,
+    "epsilon_additive": moocore._moocore._epsilon_addi_python,
+    "epsilon_mult": moocore._moocore._epsilon_mult_python,
+    "igd": moocore._moocore._igd_python,
+    "igd_plus": moocore._moocore._igd_plus_python,
+    "hypervolume": None,
+}
+
 
 def assert_expected(value, fun, *args, **kwargs):
     """Check that fun return the expected value.
@@ -15,6 +24,10 @@ def assert_expected(value, fun, *args, **kwargs):
     Once we require numpy>=2, we can use assert_allclose(strict=True) and avoid importing math.
     """
     assert math.isclose(fun(*args, **kwargs), value)
+    if hasattr(fun, "__name__"):
+        py_fun = fun_c2py[fun.__name__]
+        if py_fun is not None:
+            assert math.isclose(py_fun(*args, **kwargs), value)
 
 
 @pytest.mark.parametrize(
@@ -238,6 +251,49 @@ def test_igd():
     ref = np.array([[1, 1, 1], [2, 2, 2]])
     x = np.array([[1, 1, 1]])
     assert_expected(0.8660254037844386, moocore.igd, x, ref)
+
+    ref = np.eye(5, 255)
+    x = (ref + 1) * 5
+    assert_expected(80.19351594736, moocore.igd, x, ref)
+    assert_expected(80.19351594736, moocore.igd_plus, x, ref)
+    assert_expected(80.19351594736, moocore.avg_hausdorff_dist, x, ref)
+    assert_expected(80.19351594736, moocore.igd, x, ref, maximise=True)
+    assert_expected(0, moocore.igd_plus, x, ref, maximise=True)
+    assert_expected(
+        80.19351594736, moocore.avg_hausdorff_dist, x, ref, maximise=True
+    )
+
+    ref = np.eye(5, 256)
+    x = (ref + 1) * 5
+    assert_expected(80.3492377064, moocore.igd, x, ref)
+    assert_expected(80.3492377064, moocore.igd_plus, x, ref)
+    assert_expected(80.3492377064, moocore.avg_hausdorff_dist, x, ref)
+    assert_expected(80.3492377064, moocore.igd, x, ref, maximise=True)
+    assert_expected(0, moocore.igd_plus, x, ref, maximise=True)
+    assert_expected(
+        80.3492377064, moocore.avg_hausdorff_dist, x, ref, maximise=True
+    )
+
+    x = np.arange(5.0).reshape(-1, 1)
+    assert moocore.igd(x, ref=x) == 0.0
+
+
+def test_unary_setref_single_column():
+    rng = np.random.default_rng()
+    a = rng.random((6, 1))
+    r = rng.random((4, 1))
+
+    gd_ref = np.mean([np.min(np.abs(r - a_k)) for a_k in a.ravel()])
+    igd_ref = np.mean([np.min(np.abs(a - r_k)) for r_k in r.ravel()])
+    igdp_ref = np.mean([np.min(np.maximum(a - r_k, 0)) for r_k in r.ravel()])
+    eps_add = (a - r.T).min(axis=0).max()
+    eps_mul = (a / r.T).min(axis=0).max()
+
+    assert_expected(eps_add, moocore.epsilon_additive, a, ref=r)
+    assert_expected(eps_mul, moocore.epsilon_mult, a, ref=r)
+    assert_expected(igd_ref, moocore.igd, a, ref=r)
+    assert_expected(igdp_ref, moocore.igd_plus, a, ref=r)
+    assert_expected(max(igd_ref, gd_ref), moocore.avg_hausdorff_dist, a, ref=r)
 
 
 @pytest.mark.parametrize("dim", range(0, 3))
@@ -512,7 +568,7 @@ def test_hv_approx_default_seed():
 
 def test_hv_approx_errors():
     with pytest.raises(
-        ValueError, match=r".*nsamples must be an integer value.*"
+        ValueError, match=r".*must be a positive integer value.*"
     ):
         moocore.hv_approx([[0, 0]], [1, 1], method="DZ2019-MC", nsamples="10")
 

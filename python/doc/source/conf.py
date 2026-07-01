@@ -295,7 +295,13 @@ sphinx_gallery_conf = {
 
 CONSTANTS = {
     name: getattr(moocore._libmoocore.lib, name)
-    for name in ["HV_INEX_MAX_ROWS", "KUNG_SMALL_THRESHOLD"]
+    for name in [
+        "HV_INEX_MAX_ROWS",
+        "KUNG_SMALL_THRESHOLD",
+        "MOOCORE_DIMENSION_MAX",
+        "MOOCORE_HV_DIMENSION_MAX",
+        "MOOCORE_HVAPPROX_DIMENSION_MAX",
+    ]
 }
 
 rst_epilog = "\n".join(f".. |{k}| replace:: {v}" for k, v in CONSTANTS.items())

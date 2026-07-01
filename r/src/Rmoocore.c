@@ -600,10 +600,12 @@ avg_hausdorff_dist_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE, SEXP P)
     return(unary_metric_ref(DATA, REFERENCE, MAXIMISE, AVG_HAUSDORFF, P));
 }
 
-#define MOOCORE_CONSTANT_LIST(NEW_CONSTANT) \
-    NEW_CONSTANT(HV_INEX_MAX_ROWS)          \
-    NEW_CONSTANT(KUNG_SMALL_THRESHOLD)      \
-    NEW_CONSTANT(MOOCORE_DIMENSION_MAX)
+#define MOOCORE_CONSTANT_LIST(NEW_CONSTANT)                                    \
+    NEW_CONSTANT(HV_INEX_MAX_ROWS)                                             \
+    NEW_CONSTANT(KUNG_SMALL_THRESHOLD)                                         \
+    NEW_CONSTANT(MOOCORE_DIMENSION_MAX)                                        \
+    NEW_CONSTANT(MOOCORE_HV_DIMENSION_MAX)                                     \
+    NEW_CONSTANT(MOOCORE_HVAPPROX_DIMENSION_MAX)
 
 /* Compute the number of constants at compile time */
 enum {

@@ -3,6 +3,9 @@
 ## 0.19.2
 
  * nondominated_kung.h (maxima_rec_dim): Avoid crash with size <= KUNG_SMALL_THRESHOLD.
+ * The maximum number of dimensions supported by most functions is now raised
+   to 255, except for hypervolume and hypervolume approximation, where it
+   remains 31.
 
 
 ## 0.19.1

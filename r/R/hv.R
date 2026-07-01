@@ -112,6 +112,8 @@ hypervolume <- function(x, reference, maximise = FALSE)
       reference[maximise] <- -reference[maximise]
     }
   }
+  # hypervolume_C already handles nobjs==1.
+  check_dimension_max(nobjs, .libmoocore_constants[["MOOCORE_HV_DIMENSION_MAX"]])
   .Call(hypervolume_C,
     t(x),
     as.double(reference))
@@ -223,6 +225,7 @@ hv_contributions <- function(x, reference, maximise = FALSE, ignore_dominated = 
       reference[maximise] <- -reference[maximise]
     }
   }
+  check_dimension_max(nobjs, .libmoocore_constants[["MOOCORE_HV_DIMENSION_MAX"]])
   .Call(hv_contributions_C,
     t(x),
     as.double(reference),

@@ -89,6 +89,7 @@ is_nondominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
       return(nondom)
     }
   }
+  check_dimension_max(nobjs, .libmoocore_constants[["MOOCORE_DIMENSION_MAX"]])
   .Call(is_nondominated_C,
     x,
     keep_weakly,
@@ -113,6 +114,7 @@ any_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
   if (keep_weakly) # FIXME: Do this in C.
     x <- x[!duplicated(x), , drop = FALSE]
   nobjs <- ncol(x)
+  check_dimension_max(nobjs, .libmoocore_constants[["MOOCORE_DIMENSION_MAX"]])
   .Call(any_dominated_C,
     x,
     rep_len(as.logical(maximise), nobjs))
@@ -188,13 +190,14 @@ any_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 pareto_rank <- function(x, maximise = FALSE)
 {
   x <- as_double_matrix_1(x)
-  if (ncol(x) == 1L) { # Handle single-objective
+  nobjs <- ncol(x)
+  if (nobjs == 1L) { # Handle single-objective
     x <- as.vector(x)
     if (maximise)
       x <- -x
-    # FIXME: Can we do this faster?
-    return(match(x, sort(unique(x))))
+    return(match(x, sort(unique(x)))) # FIXME: Can we do this faster?
   }
+  check_dimension_max(nobjs, .libmoocore_constants[["MOOCORE_DIMENSION_MAX"]])
   x <- transform_maximise(x, maximise)
   .Call(pareto_ranking_C, t(x))
 }

@@ -1,6 +1,11 @@
 # moocore 0.3.2
 
  * Fix crash in `pareto_rank()` with duplicated points (#74).
+ * The maximum number of dimensions supported by most functions is now raised
+   to 255, except for hypervolume and hypervolume approximation, where it
+   remains 31.  Functions now give a clear error to the user when the limits
+   are reached (#72)
+
 
 # moocore 0.3.1
 

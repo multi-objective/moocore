@@ -91,6 +91,10 @@ hv_approx <- function(x, reference, maximise = FALSE, nsamples = 262144L, seed =
 
   if (length(maximise) == 1L) maximise <- rep_len(maximise, nobjs)
   stopifnot(length(maximise) == nobjs)
+  check_dimension_max(nobjs, .libmoocore_constants[["MOOCORE_HVAPPROX_DIMENSION_MAX"]])
+
+  if (!is_wholenumber(nsamples) || nsamples <= 0 || nsamples > 2147483648)
+    stop("nsamples (", nsamples, ") must be a positive integer value smaller than 2147483648")
 
   if (method == "DZ2019-MC") {
     seed <- if (is.null(seed)) get_seed() else as_integer(seed)

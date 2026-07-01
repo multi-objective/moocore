@@ -5,9 +5,16 @@ What's new
 **********
 
 Version 0.3.2  (development)
----------------------------
+----------------------------
 
-- Fix crash in :func:`moocore.pareto_rank` with duplicated points (:issue:`74`).
+- Fix crash in :func:`~moocore.pareto_rank` with duplicated points (:issue:`74`).
+- The maximum number of dimensions supported by most functions is now raised to
+  255, except for hypervolume and hypervolume approximation, where it
+  remains 31.  Functions :func:`~moocore.igd`, :func:`~moocore.igd_plus`,
+  :func:`~moocore.avg_hausdorff_dist`, :func:`~moocore.epsilon_additive` and
+  :func:`~moocore.epsilon_mult` use a slower implementation when reaching that
+  limit.  Other functions now give a clear error to the user when the limits
+  are reached (:issue:`72`).
 
 
 Version 0.3.1  (04/05/2026)

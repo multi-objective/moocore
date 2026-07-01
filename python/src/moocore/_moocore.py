@@ -30,6 +30,14 @@ from ._docsubstitute import DocSubstitute
 ## The CFFI library is used to create C bindings.
 from ._libmoocore import lib, ffi
 
+# Maximum number of objectives (columns) supported by the C library. These
+# mirror the limits defined in c/config.h: most functions support up to 255
+# (the range of dimension_t == uint_fast8_t), while the hypervolume and
+# hypervolume-approximation functions use a smaller limit for efficiency.
+DIMENSION_MAX = lib.MOOCORE_DIMENSION_MAX
+HV_DIMENSION_MAX = lib.MOOCORE_HV_DIMENSION_MAX
+HVAPPROX_DIMENSION_MAX = lib.MOOCORE_HVAPPROX_DIMENSION_MAX
+
 
 class ReadDatasetsError(Exception):
     """Custom exception class for an error returned by the :func:`read_datasets()` function.
@@ -54,6 +62,13 @@ class ReadDatasetsError(Exception):
         self.error = error_code
         self.message = self._error_strings[abs(error_code)]
         super().__init__(self.message)
+
+
+def _check_dimension_max(dim: int, max_dim: int):
+    if dim > max_dim:
+        raise ValueError(
+            f"This function supports at most {max_dim} columns, but input has {dim}"
+        )
 
 
 def read_datasets(filename: str | os.PathLike | StringIO) -> np.ndarray:
@@ -174,6 +189,89 @@ def _all_positive(x: ArrayLike) -> bool:
     return x.min() > 0
 
 
+def _igd_python(
+    points: ArrayLike,
+    ref: ArrayLike,
+    maximise: bool | Sequence[bool] = False,
+    p: int = 1,
+) -> float:
+    points = np.asarray(points, dtype=float)
+    points_sq = (points * points).sum(axis=1)
+    ref = np.atleast_2d(np.asarray(ref, dtype=float))
+    ref_sq = (ref * ref).sum(axis=1)
+    # Exploit that ||r - a||^2 = ||r||^2 + ||a||^2 - 2 r^T \cdot a
+    sq_dists = ref_sq[:, None] + points_sq[None, :] - 2 * (ref @ points.T)
+    # (avoid tiny negative values from numerical cancellation)
+    np.maximum(sq_dists, 0, out=sq_dists)
+    res = (sq_dists.min(axis=1) ** (p / 2.0)).mean() ** (1.0 / p)
+    return float(res)
+
+
+def _igd_plus_python(points, ref, maximise: bool | Sequence[bool] = False):
+    points, points_copied = asarray_maybe_copy(points)
+    ref, ref_copied = asarray_maybe_copy(ref)
+    ref = np.atleast_2d(ref)
+    nobj = points.shape[1]
+    maximise = _parse_maximise(maximise, nobj)
+    # FIXME: Do this in C.
+    if maximise.any():
+        if not points_copied:
+            points = points.copy()
+        points[:, maximise] = -points[:, maximise]
+        if not ref_copied:
+            ref = ref.copy()
+        ref[:, maximise] = -ref[:, maximise]
+
+    res = np.sqrt(
+        [(np.maximum(points - r, 0) ** 2).sum(axis=1).min() for r in ref]
+    ).mean()
+    return float(res)
+
+
+def _avg_hausdorff_dist_python(
+    points, ref, maximise: bool | Sequence[bool] = False, p: int = 1
+):
+    return max(_igd_python(points, ref, p), _igd_python(ref, points, p))
+
+
+def _epsilon_addi_python(points, ref, maximise: bool | Sequence[bool] = False):
+    points, points_copied = asarray_maybe_copy(points)
+    ref, ref_copied = asarray_maybe_copy(ref)
+    ref = np.atleast_2d(ref)
+    nobj = points.shape[1]
+    maximise = _parse_maximise(maximise, nobj)
+    # FIXME: Do this in C.
+    if maximise.any():
+        if not points_copied:
+            points = points.copy()
+        points[:, maximise] = -points[:, maximise]
+        if not ref_copied:
+            ref = ref.copy()
+        ref[:, maximise] = -ref[:, maximise]
+
+    res = np.array([np.max(points - r, axis=1).min() for r in ref]).max()
+    return float(res)
+
+
+def _epsilon_mult_python(points, ref, maximise: bool | Sequence[bool] = False):
+    points, points_copied = asarray_maybe_copy(points)
+    ref, ref_copied = asarray_maybe_copy(ref)
+    ref = np.atleast_2d(ref)
+    nobj = points.shape[1]
+    maximise = _parse_maximise(maximise, nobj)
+    # FIXME: Do this in C.
+    if maximise.any():
+        if not points_copied:
+            points = points.copy()
+        points[:, maximise] = 1.0 / points[:, maximise]
+        if not ref_copied:
+            ref = ref.copy()
+        ref[:, maximise] = 1.0 / ref[:, maximise]
+
+    res = np.array([np.max(points / r, axis=1).min() for r in ref]).max()
+    return float(res)
+
+
 def _unary_refset_common(
     points: ArrayLike,
     ref: ArrayLike,
@@ -186,11 +284,6 @@ def _unary_refset_common(
     # interpret it as an int array.
     points = np.asarray(points, dtype=float)
     ref = np.atleast_2d(np.asarray(ref, dtype=float))
-    nobj = points.shape[1]
-    if nobj != ref.shape[1]:
-        raise ValueError(
-            f"points and ref need to have the same number of columns ({nobj} != {ref.shape[1]})"
-        )
     if check_all_positive:
         if not _all_positive(points):
             raise ValueError(
@@ -200,13 +293,20 @@ def _unary_refset_common(
             raise ValueError(
                 "All values must be larger than 0 in the reference set"
             )
+    nobj = points.shape[1]
+    if nobj != ref.shape[1]:
+        raise ValueError(
+            f"points and ref need to have the same number of columns ({nobj} != {ref.shape[1]})"
+        )
+    if nobj == 0:
+        raise ValueError("The number of columns cannot be 0")
 
     points_p, npoints_c, nobj_c = np2d_to_double_array(
         points, ctype_shape=("size_t", "uint_fast8_t")
     )
     ref_p, ref_size = np1d_to_double_array(ref, ctype_size="size_t")
     maximise_p = _parse_maximise_to_bool_array(maximise, nobj)
-    return points_p, npoints_c, nobj_c, ref_p, ref_size, maximise_p
+    return nobj, points_p, npoints_c, nobj_c, ref_p, ref_size, maximise_p
 
 
 @DocSubstitute()
@@ -236,9 +336,11 @@ def igd(
         A single numerical value.
 
     """
-    points_p, n, d, ref_p, ref_size, maximise_p = _unary_refset_common(
+    nobj, points_p, n, d, ref_p, ref_size, maximise_p = _unary_refset_common(
         points, ref, maximise
     )
+    if nobj == 1 or nobj > DIMENSION_MAX:
+        return _igd_python(points, ref)
     return lib.IGD(points_p, n, d, ref_p, ref_size, maximise_p)
 
 
@@ -302,9 +404,11 @@ def igd_plus(
 
 
     """  # noqa: D401
-    points_p, n, d, ref_p, ref_size, maximise_p = _unary_refset_common(
+    nobj, points_p, n, d, ref_p, ref_size, maximise_p = _unary_refset_common(
         points, ref, maximise
     )
+    if nobj == 1 or nobj > DIMENSION_MAX:
+        return _igd_plus_python(points, ref, maximise)
     return lib.IGD_plus(points_p, n, d, ref_p, ref_size, maximise_p)
 
 
@@ -337,14 +441,17 @@ def avg_hausdorff_dist(
         A single numerical value.
 
     """
+    nobj, points_p, n, d, ref_p, ref_size, maximise_p = _unary_refset_common(
+        points, ref, maximise
+    )
     if not is_integer_value(p):
         raise ValueError("'p' must be an integer")
     if p <= 0:
         raise ValueError("'p' must be larger than zero")
 
-    points_p, n, d, ref_p, ref_size, maximise_p = _unary_refset_common(
-        points, ref, maximise
-    )
+    if nobj == 1 or nobj > DIMENSION_MAX:
+        return _avg_hausdorff_dist_python(points, ref, p)
+
     p = ffi.cast("unsigned int", p)
     return lib.avg_Hausdorff_dist(
         points_p, n, d, ref_p, ref_size, maximise_p, p
@@ -395,9 +502,12 @@ def epsilon_additive(
     3.5
 
     """
-    points_p, n, d, ref_p, ref_size, maximise_p = _unary_refset_common(
+    nobj, points_p, n, d, ref_p, ref_size, maximise_p = _unary_refset_common(
         points, ref, maximise
     )
+    if nobj == 1 or nobj > DIMENSION_MAX:
+        return _epsilon_addi_python(points, ref, maximise)
+
     return lib.epsilon_additive(points_p, n, d, ref_p, ref_size, maximise_p)
 
 
@@ -431,13 +541,17 @@ def epsilon_mult(
         A single numerical value.
 
     """
-    points_p, n, d, ref_p, ref_size, maximise_p = _unary_refset_common(
+    nobj, points_p, n, d, ref_p, ref_size, maximise_p = _unary_refset_common(
         points, ref, maximise, check_all_positive=True
     )
+    if nobj == 1 or nobj > DIMENSION_MAX:
+        return _epsilon_mult_python(points, ref, maximise)
+
     return lib.epsilon_mult(points_p, n, d, ref_p, ref_size, maximise_p)
 
 
 def _hypervolume(points: ArrayLike, ref: ArrayLike) -> float:
+    _check_dimension_max(points.shape[1], HV_DIMENSION_MAX)
     points_p, npoints, nobj = np2d_to_double_array(
         points, ctype_shape=("size_t", "uint_fast8_t")
     )
@@ -565,7 +679,6 @@ def hypervolume(
         raise ValueError("input points must have at least 1 column")
     # Make sure it is a 1D array of length nobj.
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
-
     maximise = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
     if maximise.any():
@@ -847,6 +960,10 @@ def hv_contributions(
     # an int array.
     points, points_copied = asarray_maybe_copy(points)
     nobj = points.shape[1]
+    if nobj < 2:
+        raise ValueError("input points must have at least 2 columns")
+    _check_dimension_max(nobj, HV_DIMENSION_MAX)
+
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
     maximise = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
@@ -1019,10 +1136,20 @@ def hv_approx(
     # an int array.
     points = np.asarray(points, dtype=float)
     nobj = points.shape[1]
+    if nobj < 2:
+        if nobj == 1:  # Just return the exact hypervolume.
+            return hypervolume(points, ref, maximise=maximise)
+        else:  # nobj == 0
+            raise ValueError("input points must have at least 1 column")
+
+    _check_dimension_max(nobj, HVAPPROX_DIMENSION_MAX)
+
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
 
-    if not is_integer_value(nsamples):
-        raise ValueError(f"nsamples must be an integer value: {nsamples}")
+    if not is_integer_value(nsamples) or nsamples <= 0 or nsamples > 2147483648:
+        raise ValueError(
+            f"nsamples ({nsamples}) must be a positive integer value smaller than 2147483648"
+        )
     nsamples = ffi.cast("uint_fast32_t", nsamples)
     maximise_p = _parse_maximise_to_bool_array(maximise, nobj)
     points_p, npoints, nobj = np2d_to_double_array(
@@ -1323,15 +1450,20 @@ def is_nondominated(
     if nrows == 0:
         return np.array([], dtype=bool)
 
-    if nobj == 1:  # Handle single-objective inputs
-        maximise = array_1d_of_length_n(maximise, 1).astype(bool)
-        if keep_weakly:
-            best = points.max() if maximise else points.min()
-            return (points == best).ravel()
-        else:
-            nondom = np.zeros(len(points), dtype=bool)
-            nondom[points.argmax() if maximise else points.argmin()] = True
-            return nondom
+    if nobj < 2:
+        if nobj == 1:  # Handle single-objective inputs
+            maximise = array_1d_of_length_n(maximise, 1).astype(bool)
+            if keep_weakly:
+                best = points.max() if maximise else points.min()
+                return (points == best).ravel()
+            else:
+                nondom = np.zeros(len(points), dtype=bool)
+                nondom[points.argmax() if maximise else points.argmin()] = True
+                return nondom
+        else:  # nobj == 0
+            raise ValueError("input points must have at least 1 column")
+
+    _check_dimension_max(nobj, DIMENSION_MAX)
 
     keep_weakly = ffi.cast("bool", bool(keep_weakly))
     maximise_p = _parse_maximise_to_bool_array(maximise, nobj)
@@ -1400,13 +1532,19 @@ def any_dominated(
     if len(points.shape) != 2:
         raise ValueError("'points' must be a matrix")
     nrows, nobj = points.shape
-    if nrows == 0:
-        raise ValueError("no points in the input points")
-    if nrows == 1:
-        return False
-    if nobj == 1:  # Handle single-objective inputs
-        # If there are more than one row, then something is dominated.
-        return True
+    if nrows < 2:
+        if nrows == 0:
+            raise ValueError("no points in the input points")
+        else:
+            return False
+    if nobj < 2:
+        if nobj == 1:  # Handle single-objective inputs
+            # If there are more than one row, then something is dominated.
+            return True
+        else:  # nobj == 0
+            raise ValueError("input points must have at least 1 column")
+
+    _check_dimension_max(nobj, DIMENSION_MAX)
 
     maximise_p = _parse_maximise_to_bool_array(maximise, nobj)
     points_p, npoints, nobj = np2d_to_double_array(
@@ -1713,8 +1851,6 @@ def pareto_rank(
     """
     points, points_copied = asarray_maybe_copy(points)
     nrows, nobj = points.shape
-    maximise = _parse_maximise(maximise, nobj)
-
     if nobj < 2:
         if nobj == 1:
             points = points.ravel()
@@ -1722,9 +1858,12 @@ def pareto_rank(
                 points = -points
                 # FIXME: Can we do the same faster?
             return np.unique(points, return_inverse=True)[1]
-        if nobj == 0:
+        else:  # nobj == 0
             return np.zeros(shape=nrows, dtype=int)
 
+    _check_dimension_max(nobj, DIMENSION_MAX)
+
+    maximise = _parse_maximise(maximise, nobj)
     if maximise.any():
         # FIXME: Do this in C.
         if not points_copied:
@@ -1790,8 +1929,10 @@ def normalise(
     # order='C' is needed for np2d_to_double_array()
     points = np.array(points, dtype=float, order="C")
     npoints, nobj = points.shape
-    if nobj == 1:
+    if nobj < 2:
         raise ValueError("'points' must have at least two columns")
+    _check_dimension_max(nobj, DIMENSION_MAX)
+
     to_range = np.asarray(to_range, dtype=float)
     if to_range.shape[0] != 2:
         raise ValueError("'to_range' must have length 2")

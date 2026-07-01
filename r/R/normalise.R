@@ -32,6 +32,8 @@ normalise <- function(x, to_range = c(1, 2), lower = NA, upper = NA, maximise = 
 {
   x <- as_double_matrix(x)
   nobjs <- ncol(x)
+  check_dimension_max(nobjs, .libmoocore_constants[["MOOCORE_DIMENSION_MAX"]])
+
   lower <- rep_len(as.double(lower), nobjs)
   upper <- rep_len(as.double(upper), nobjs)
   # Handle NA

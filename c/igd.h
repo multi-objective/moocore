@@ -65,7 +65,7 @@ gd_common_helper_(const enum objs_agree_t agree,
                   const double * restrict points_r, size_t size_r,
                   bool plus, bool psize, uint_fast8_t p)
 {
-    ASSUME(2 <= dim && dim <= MOOCORE_DIMENSION_MAX);
+    ASSUME(2 <= dim);
     if (size_a == 0) return INFINITY;
     ASSUME(size_a > 0);
     ASSUME(size_r > 0);

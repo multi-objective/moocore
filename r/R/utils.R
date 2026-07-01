@@ -96,3 +96,9 @@ as_integer <- function(x)
   }
   as.integer(x)
 }
+
+check_dimension_max <- function(ncol, ncol_max)
+{
+  if (ncol > ncol_max)
+    stop("number of columns (", ncol, ") cannot be larger than ", ncol_max)
+}

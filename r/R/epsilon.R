@@ -116,5 +116,8 @@ unary_common <- function(data, reference, maximise, fn)
   reference <- as_double_matrix(reference)
   if (ncol(reference) != nobjs)
     stop("data and reference must have the same number of columns")
+  if (nobjs < 2L)
+    stop("the input must have a least 2 columns")
+  check_dimension_max(nobjs, .libmoocore_constants[["MOOCORE_DIMENSION_MAX"]])
   fn(t(data), t(reference), as.logical(rep_len(maximise, nobjs)))
 }

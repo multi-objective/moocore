@@ -76,7 +76,7 @@ check_all_minimize_maximize(const int * restrict minmax, dimension_t dim)
 static inline int *
 minmax_from_boolvec(const boolvec * restrict maximise, dimension_t nobj)
 {
-    ASSUME(nobj > 0 && nobj < 128);
+    ASSUME(nobj > 0);
     int * minmax = malloc(nobj * sizeof(*minmax));
     for (dimension_t k = 0; k < nobj; k++) {
         minmax[k] = maximise[k] ? AGREE_MAXIMISE : AGREE_MINIMISE;
@@ -87,7 +87,7 @@ minmax_from_boolvec(const boolvec * restrict maximise, dimension_t nobj)
 static inline boolvec *
 new_boolvec_maximise(dimension_t nobj, bool maximise_all)
 {
-    ASSUME(nobj > 0 && nobj < 128);
+    ASSUME(nobj > 0);
     boolvec * maximise = malloc(nobj * sizeof(*maximise));
     for (dimension_t k = 0; k < nobj; k++)
         maximise[k] = maximise_all;
@@ -97,7 +97,7 @@ new_boolvec_maximise(dimension_t nobj, bool maximise_all)
 static inline const int *
 default_minmax(dimension_t nobj, int default_value)
 {
-    ASSUME(nobj > 0 && nobj < 128);
+    ASSUME(nobj > 0);
     ASSUME(default_value == AGREE_MINIMISE || default_value == AGREE_MAXIMISE);
     int * minmax = malloc(nobj * sizeof(*minmax));
     for (dimension_t i = 0; i < nobj; i++)
@@ -180,8 +180,7 @@ force_agree_minimize(const double * restrict points, size_t size,
     double * pnew = malloc(new_dim * size * sizeof(*pnew));
 
     if (new_dim < true_dim) { // Remove columns
-        ASSUME(true_dim < MOOCORE_DIMENSION_MAX);
-        uint8_t idx[MOOCORE_DIMENSION_MAX];
+        uint8_t idx[MOOCORE_DIMENSION_MAX + 1];
         for (dimension_t j = prefix, t = 0; j < true_dim; j++)
             if (minmax[j] != 0)
                 idx[t++] = (uint8_t)j;
