@@ -22,8 +22,11 @@
 
 #include <stdint.h>
 typedef uint_fast8_t dimension_t;
-// Maximum number of objectives is 31. It cannot be larger than 255.
-#define MOOCORE_DIMENSION_MAX 31
+// Maximum number is 255 due to the data type of dimension_t.  However, some
+// functions may use a smaller number for efficiency.
+#define MOOCORE_DIMENSION_MAX 255
+#define MOOCORE_HVAPPROX_DIMENSION_MAX 31
+#define MOOCORE_HV_DIMENSION_MAX 31
 
 // Use boolvec for boolean arrays that will be passed from/to R/Python. It also
 // helps with autovectorization.
