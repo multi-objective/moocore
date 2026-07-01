@@ -32,13 +32,14 @@
 #' The hypervolume is compatible with Pareto-optimality
 #' \citep{KnoCor2002cec,ZitThiLauFon2003:tec}, that is, \eqn{\nexists A,B
 #' \subset \mathbb{R}^m}{it does not exist A,B subsets of R^m}, such that
-#' \eqn{A} is better than \eqn{B} in terms of Pareto-optimality and
+#' \eqn{A} is better than \eqn{B} according to Pareto-optimality and
 #' \eqn{\text{hyp}(A) \leq \text{hyp}(B)}{hyp(A) <= hyp(B)}. In other words, if
-#' a set is better than another in terms of Pareto-optimality, the hypervolume
-#' of the former must be strictly larger than the hypervolume of the latter.
-#' Conversely, if the hypervolume of a set is larger than the hypervolume of
-#' another, then we know for sure than the latter set cannot be better than the
-#' former in terms of Pareto-optimality.
+#' the hypervolume of a set is larger than the hypervolume of another, then we
+#' know for sure than the latter set cannot be better than the former in terms
+#' of Pareto-optimality. The hypervolume is also the only unary metric known
+#' that is complete according to Pareto-optimality
+#' \citep{ZitThiLauFon2003:tec}, that is, if \eqn{A} is better than \eqn{B}
+#' according to Pareto-optimality, then \eqn{\text{hyp}(A) > \text{hyp}(B)}.
 #'
 #' Like most measures of unions of high-dimensional geometric objects,
 #' computing the hypervolume is #P-hard \citep{BriFri2010approx}, which means

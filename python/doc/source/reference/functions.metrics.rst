@@ -164,13 +164,14 @@ called an *orthogonal polytope*.
 
 The hypervolume is compatible with Pareto-optimality
 :cite:p:`KnoCor2002cec,ZitThiLauFon2003:tec`, that is, :math:`\nexists A,B
-\subset \mathbb{R}^m`, such that :math:`A` is better than :math:`B` in terms of
+\subset \mathbb{R}^m`, such that :math:`A` is better than :math:`B` according to
 Pareto-optimality and :math:`\text{hyp}(A) \leq \text{hyp}(B)`. In other words,
-if a set is better than another in terms of Pareto-optimality, the hypervolume
-of the former must be strictly larger than the hypervolume of the latter.
-Conversely, if the hypervolume of a set is larger than the hypervolume of
-another, then we know for sure than the latter set cannot be better than the
-former in terms of Pareto-optimality.
+if the hypervolume of a set is larger than the hypervolume of another, then we
+know for sure than the latter set cannot be better than the former according to
+Pareto-optimality. The hypervolume is also the only unary metric known that is
+complete according to Pareto-optimality :cite:p:`ZitThiLauFon2003:tec`, that is,
+if :math:`A` is better than :math:`B` according to Pareto-optimality, then
+:math:`\text{hyp}(A) > \text{hyp}(B)`.
 
 Like most measures of unions of high-dimensional geometric objects, computing
 the hypervolume is #P-hard :cite:p:`BriFri2010approx`, which means that the
