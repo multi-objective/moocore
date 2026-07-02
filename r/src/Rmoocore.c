@@ -600,21 +600,31 @@ avg_hausdorff_dist_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE, SEXP P)
     return(unary_metric_ref(DATA, REFERENCE, MAXIMISE, AVG_HAUSDORFF, P));
 }
 
+#define MOOCORE_CONSTANT_LIST(NEW_CONSTANT) \
+    NEW_CONSTANT(HV_INEX_MAX_ROWS)          \
+    NEW_CONSTANT(KUNG_SMALL_THRESHOLD)      \
+    NEW_CONSTANT(MOOCORE_DIMENSION_MAX)
+
+/* Compute the number of constants at compile time */
+enum {
+#define NEW_CONSTANT(name) +1
+    MOOCORE_NUM_CONSTANTS = 0 MOOCORE_CONSTANT_LIST(NEW_CONSTANT)
+#undef NEW_CONSTANT
+};
+
 SEXP libmoocore_constants(void)
 {
   int nprotected = 0;
-  const int n = 2;
-  SEXP list = PROTECT_PLUS(Rf_allocVector(VECSXP, n));
-  SEXP names = PROTECT_PLUS(Rf_allocVector(STRSXP, n));
+  SEXP list = PROTECT_PLUS(Rf_allocVector(VECSXP, MOOCORE_NUM_CONSTANTS));
+  SEXP names = PROTECT_PLUS(Rf_allocVector(STRSXP, MOOCORE_NUM_CONSTANTS));
   int k = 0;
-#define NEW_CONSTANT(NAME)                                                     \
-  SET_VECTOR_ELT(list, k, Rf_ScalarInteger(NAME));                             \
-  SET_STRING_ELT(names, k++, Rf_mkChar(#NAME))
 
-  NEW_CONSTANT(HV_INEX_MAX_ROWS);
-  NEW_CONSTANT(KUNG_SMALL_THRESHOLD);
+#define NEW_CONSTANT(NAME)                         \
+  SET_VECTOR_ELT(list, k, Rf_ScalarInteger(NAME)); \
+  SET_STRING_ELT(names, k++, Rf_mkChar(#NAME));
+
+  MOOCORE_CONSTANT_LIST(NEW_CONSTANT)
 #undef NEW_CONSTANT
-  assert(k == n);
 
   Rf_setAttrib(list, R_NamesSymbol, names);
   UNPROTECT(nprotected);
