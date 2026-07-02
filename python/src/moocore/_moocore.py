@@ -460,7 +460,12 @@ def epsilon_mult(
 
     """
     points_p, n, d, ref_p, ref_size, maximise_p = _unary_refset_common(
-        points, ref, maximise, check_all_positive=True, name="epsilon_mult", min_dim=2
+        points,
+        ref,
+        maximise,
+        check_all_positive=True,
+        name="epsilon_mult",
+        min_dim=2,
     )
     return lib.epsilon_mult(points_p, n, d, ref_p, ref_size, maximise_p)
 

@@ -24,9 +24,7 @@ def igd_plus_bruteforce(data, ref):
 
 def epsilon_additive_bruteforce(data, ref):
     # min factor eps s.t. some data point + eps dominates each ref point
-    return float(
-        max(min(max(a - r) for a in data) for r in ref)
-    )
+    return float(max(min(max(a - r) for a in data) for r in ref))
 
 
 def ranks_from_fronts_reference(F):
@@ -110,9 +108,7 @@ def test_pareto_rank_large_dim_matches_reference(dim):
     rng = np.random.default_rng(dim + 4)
     base = rng.random((40, 3))
     F = np.hstack([base, np.zeros((40, dim - 3))])
-    assert_allclose(
-        moocore.pareto_rank(F), ranks_from_fronts_reference(F)
-    )
+    assert_allclose(moocore.pareto_rank(F), ranks_from_fronts_reference(F))
 
 
 @pytest.mark.parametrize("dim", DIMS)
