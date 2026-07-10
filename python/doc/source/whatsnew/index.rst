@@ -4,8 +4,8 @@
 What's new
 **********
 
-Version 0.3.2  (development)
-----------------------------
+Version 0.3.2 (11/07/2026)
+--------------------------
 
 - Fix crash in :func:`~moocore.pareto_rank` with duplicated points (:issue:`74`).
 - The maximum number of dimensions supported by most functions is now raised to
