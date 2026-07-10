@@ -46,10 +46,14 @@ The inverted generational distance (IGD) is calculated as \eqn{IGD_p(A,R) = GD_p
 
 The modified inverted generational distanced (IGD+) was proposed by
 \citet{IshMasTanNoj2015igd} to ensure that IGD+ is weakly Pareto compliant,
-similarly to \code{\link[=epsilon_additive]{epsilon_additive()}} or \code{\link[=epsilon_mult]{epsilon_mult()}}. It modifies the
-distance measure as:
+similarly to \code{\link[=epsilon_additive]{epsilon_additive()}} or \code{\link[=epsilon_mult]{epsilon_mult()}}. Formally,
 
-\deqn{d^+(r,a) = \sqrt{\sum_{k=1}^m (\max\{r_k - a_k, 0\})^2}}{d^+(r,a) = sqrt(sum_{k=1}^m (max {r_k - a_k, 0 })^2)}
+\deqn{IGD^+(A,R) = \left(\frac{1}{|R|}\sum_{r\in R}\min_{a\in A} d^+(r,a)\right)}{IGD+(A,R) = (1/|R|) * ( sum_{r in R} min_{a in A} d^+(r,a))}
+
+Assuming minimization of all objectives, IGD+ uses the following modified
+distance:
+
+\deqn{d^+(r,a) = \sqrt{\sum_{k=1}^m (\max\{a_k - r_k, 0\})^2}}{d^+(r,a) = sqrt(sum_{k=1}^m (max {a_k - r_k, 0 })^2)}
 
 The average Hausdorff distance (\eqn{\Delta_p}) was proposed by
 \citet{SchEsqLarCoe2012tec} and it is calculated as:
