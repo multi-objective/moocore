@@ -4,6 +4,12 @@
 What's new
 **********
 
+Version 0.3.2  (development)
+---------------------------
+
+- Fix crash in :func:`moocore.pareto_rank` with duplicated points (:issue:`74`).
+
+
 Version 0.3.1  (04/05/2026)
 ---------------------------
 

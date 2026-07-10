@@ -1,5 +1,10 @@
 # moocore C library
 
+## 0.19.2
+
+ * nondominated_kung.h (maxima_rec_dim): Avoid crash with size <= KUNG_SMALL_THRESHOLD.
+
+
 ## 0.19.1
 
  * nondominated_kung.h: Fix potential undefined behavior.

@@ -584,51 +584,6 @@ kung_merge(const double ** restrict r, size_t r_size,
     }
 }
 
-static size_t maxima_rec(const double ** rows, size_t size, dimension_t dim,
-                         bool keep_weakly);
-
-/**
-   This function is called if one dimension has all equal values, so we look at
-   the next dimension.
-*/
-static size_t
-maxima_rec_dim(const double ** rows, size_t size, dimension_t dim,
-               bool keep_weakly)
-{
-    size_t new_size;
-    const double ** r_new = (const double **) malloc(size * sizeof(*rows));
-    /* We will create new row pointers that point to the next dimension,
-       however, we also want to remember the original position of each row
-       pointer to be able to filter dominated, thus shifted_rows stores the new
-       row pointer and a pointer to the previous one, so we can modify it
-       directly.  */
-    shifted_row_t * shifted_rows;
-
-    if (dim == 4) { // We can reach this base case if one dimension has all equal values.
-        // Sort in ascending lexicographic order from the last dimension.
-        shifted_rows = alloc_shifted_rows(
-            rows, size, qsort_cmp_shifted_row_asc_rev_3d, r_new);
-         new_size = keep_weakly // Help GCC generate specialized code for true/false.
-             ? find_nondominated_3d_impl_sorted(r_new, size,  true, /* find_one_dominated=*/false)
-             : find_nondominated_3d_impl_sorted(r_new, size, false, /* find_one_dominated=*/false);
-         DEBUG2_PRINT("maxima_dim3: size=%zu, new_size=%zu\n", size, new_size);
-    } else {
-        ASSUME(size > KUNG_SMALL_THRESHOLD);
-        shifted_rows = alloc_shifted_rows(
-            rows, size, qsort_cmp_shifted_row_asc_x_nonzero_stable, r_new);
-        new_size = maxima_rec(r_new, size, dim - 1, keep_weakly);
-        DEBUG2_PRINT("maxima_rec: s_size == 0: size=%zu, new_size=%zu\n", size, new_size);
-    }
-    if (new_size < size) {
-        filter_shifted(shifted_rows, r_new, new_size, size);
-        filter_dominated(rows, new_size, size, dim+1);
-    }
-    free(shifted_rows);
-    free(r_new);
-    assert(check_nondom(rows, new_size));
-    return new_size;
-}
-
 /**
    Brute-force algorithm O(size^2 * dim), with a few improvements.
 
@@ -725,6 +680,54 @@ maxima_brute_force_filter_dom(const double ** restrict rows, size_t size,
     if (new_size < size) {
         filter_dominated(rows, new_size, size, dim);
     }
+    assert(check_nondom(rows, new_size));
+    return new_size;
+}
+
+static size_t maxima_rec(const double ** rows, size_t size, dimension_t dim,
+                         bool keep_weakly);
+
+/**
+   This function is called if one dimension has all equal values, so we look at
+   the next dimension.
+*/
+static size_t
+maxima_rec_dim(const double ** rows, size_t size, dimension_t dim,
+               bool keep_weakly)
+{
+    size_t new_size;
+    const double ** r_new = (const double **) malloc(size * sizeof(*rows));
+    /* We will create new row pointers that point to the next dimension,
+       however, we also want to remember the original position of each row
+       pointer to be able to filter dominated, thus shifted_rows stores the new
+       row pointer and a pointer to the previous one, so we can modify it
+       directly.  */
+    shifted_row_t * shifted_rows;
+
+    if (dim == 4) { // We can reach this base case if one dimension has all equal values.
+        // Sort in ascending lexicographic order from the last dimension.
+        shifted_rows = alloc_shifted_rows(
+            rows, size, qsort_cmp_shifted_row_asc_rev_3d, r_new);
+         new_size = keep_weakly // Help GCC generate specialized code for true/false.
+             ? find_nondominated_3d_impl_sorted(r_new, size,  true, /* find_one_dominated=*/false)
+             : find_nondominated_3d_impl_sorted(r_new, size, false, /* find_one_dominated=*/false);
+         DEBUG2_PRINT("maxima_dim3: size=%zu, new_size=%zu\n", size, new_size);
+    } else {
+        shifted_rows = alloc_shifted_rows(
+            rows, size, qsort_cmp_shifted_row_asc_x_nonzero_stable, r_new);
+        // We can reach size <= KUNG_SMALL_THRESHOLD maxima_rec is called
+        // directly.
+        new_size = (size <= KUNG_SMALL_THRESHOLD)
+            ? maxima_brute_force_filter_dom(r_new, size, dim - 1, keep_weakly)
+            : maxima_rec(r_new, size, dim - 1, keep_weakly);
+        DEBUG2_PRINT("maxima_rec: s_size == 0: size=%zu, new_size=%zu\n", size, new_size);
+    }
+    if (new_size < size) {
+        filter_shifted(shifted_rows, r_new, new_size, size);
+        filter_dominated(rows, new_size, size, dim+1);
+    }
+    free(shifted_rows);
+    free(r_new);
     assert(check_nondom(rows, new_size));
     return new_size;
 }

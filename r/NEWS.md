@@ -1,3 +1,7 @@
+# moocore 0.3.2
+
+ * Fix crash in `pareto_rank()` with duplicated points (#74).
+
 # moocore 0.3.1
 
  * Separate documentation of `pareto_rank()` to its own page.
