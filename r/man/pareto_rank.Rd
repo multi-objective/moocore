@@ -28,22 +28,40 @@ points into a list of matrices, each matrix representing a nondominated
 front \citep{Deb02nsga2} (see examples below).
 }
 \details{
-Given a finite set of points \eqn{X \subset \mathbb{R}^m},
-the rank of a point \eqn{x \in X} is defined as:
+Given a finite set of points \eqn{X \subset \mathbb{R}^m} and \eqn{x,y \in
+X}, let \eqn{x \prec y} denote that \eqn{x} dominates \eqn{y} according to
+Pareto optimality. Nondominated sorting partitions the set \eqn{X} into an
+ordered sequence of fronts, \eqn{F_0, F_1, \dots, F_k}, where \eqn{0 \leq k
+\leq |X|}, satisfying the following conditions:
 
-\deqn{\operatorname{rank}(x) = r \iff x \in F^c_{r} \land \nexists y \in F^c_{r}, y \prec x}
+\enumerate{
+\item All points are allocated to a front:
+\deqn{\bigcup_{i=0}^{k} F_i = X}
 
-where \eqn{y \prec x} means that \eqn{y} dominates \eqn{x} according to
-Pareto optimality, \eqn{F^c_r = X \setminus \bigcup_{i=1}^{r-1} F_i} and
-\eqn{F_r = \{x \in X \land \operatorname{rank}(x) = r\}}.  The sets
-\eqn{F_c}, with \eqn{c=1,\dots,k}, partition \eqn{X} into \eqn{k}
-\emph{fronts}, that is, mutually nondominated subsets of \eqn{X}.
+\item Each point is allocated to only one front:
+\deqn{F_i \cap F_j = \emptyset,\; \forall i,j \in \{0,1,\dots,k\},\, i \neq j}
 
-With \eqn{m=2}, i.e., \code{ncol(data)=2}, the code uses the best-known
-\eqn{O(n \log n)} algorithm by \citet{Jen03}.  When \eqn{m \geq 3}, it
-uses the naive algorithm that identifies one \emph{front} at a time, which
-requires \eqn{O(n^2\log n)} for \eqn{m=3}, and \eqn{O(n^2 \log^{m-2} n)}
-for \eqn{m \geq 4}.
+\item Fronts are mutually nondominated:
+\deqn{\nexists x,y \in F_i,\; x \prec y,\; \forall i=0,1,\dots,k}
+
+\item The first front contains points not dominated by any other point:
+\deqn{\forall y \in F_0,\; \nexists x \in X,\; x \prec y}
+
+\item Every point in front \eqn{i} is dominated by at least one point in front
+\eqn{i-1}:
+\deqn{\forall y \in F_i,\; \exists x \in F_{i-1},\; x \prec y,\; \forall i=1,2,\dots,k}
+}
+
+The rank returned by \code{\link[=pareto_rank]{pareto_rank()}} is the index \eqn{i \in
+\{0,1,\dots,k\}} of the front \eqn{F_i} allocated to each point. If all
+points are mutually nondominated, there is only one front (\eqn{k = 0}). If
+each front contains one point, then \eqn{k = n = |X|}.
+
+With \eqn{m=2}, i.e., \code{ncol(data)=2}, the code uses the best-known \eqn{O(n
+\log n)} algorithm by \citet{Jen03}.  When \eqn{m \geq 3}, it uses the naive
+algorithm that identifies one \emph{front} at a time, which requires
+\eqn{O(n^2\log n)} for \eqn{m=3}, and \eqn{O(n^2 \log^{m-2} n)} for \eqn{m
+\geq 4}.
 }
 \references{
 \insertAllCited{}

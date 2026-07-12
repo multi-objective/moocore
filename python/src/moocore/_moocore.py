@@ -1801,17 +1801,22 @@ def pareto_rank(
 
     Notes
     -----
-    Given a finite set of points :math:`X \subset \mathbb{R}^m`, the
-    rank of a point :math:`x \in X` is defined as:
+    Given a finite set of points :math:`X \subset \mathbb{R}^m` and :math:`x,y
+    \in X`, let :math:`x \prec y` denote that :math:`x` dominates :math:`y`
+    according to Pareto optimality.  Nondominated sorting partitions the set
+    :math:`X` into an ordered sequence of `fronts`, :math:`F_0, F_1, \dots,
+    F_k`, where :math:`0 \leq k \leq |X|`, satisfying the following conditions:
 
-    .. math::
-       \operatorname{rank}(x) = r \iff x \in F^c_{r} \land \nexists y \in F^c_{r}, y \prec x
+    #. All points are allocated to a front: :math:`\bigcup_{i=0}^{k} F_i = X`
+    #. Each point is allocated to only one front: :math:`F_i \cap F_j = \emptyset,\; \forall i,j \in\{0,1,\dots,k\},\,i\neq j`
+    #. Fronts are mutually nondominated: :math:`\nexists x,y \in F_i, \,x \prec y,\; \forall i=0,1,\dots,k`
+    #. The first front contains points not dominated by any other point: :math:`\forall y \in F_0,\,\nexists x \in X,\, x\prec y`
+    #. Every point in front :math:`i` is dominated by at least one point in front :math:`i-1`: :math:`\forall y \in F_i,\, \exists x \in F_{i-1},\, x\prec y,\; \forall i=1,2,\dots,k`
 
-    where :math:`y \prec x` means that :math:`y` dominates :math:`x` according to Pareto
-    optimality, :math:`F^c_r = X \setminus \bigcup_{i=0}^{r-1} F_i`
-    and :math:`F_r = \{x \in X \land \operatorname{rank}(x) = r\}`.  The sets
-    :math:`F_c`, with :math:`c=0,1,\dots,k-1`, partition :math:`X` into :math:`k`
-    `fronts`, that is, mutually nondominated subsets of :math:`X`.
+    The rank returned by :func:`pareto_rank` is the index :math:`i \in
+    \{0,1,\dots,k\}` of the front :math:`F_i` allocated to each point. If all
+    points are mutually nondominated, there is only one front :math:`(k=0)`. If
+    each front contains one point, then :math:`k=n=|X|`.
 
     With :math:`m=2`, the code uses the best-known :math:`O(n \log n)`
     algorithm by :footcite:t:`Jen03`.  When :math:`m \geq 3`, it uses the naive
