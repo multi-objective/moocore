@@ -8,7 +8,7 @@ ci:
 
 repos:
   - repo: https://github.com/lorenzwalthert/precommit
-    rev: v0.4.3.9021
+    rev: v0.4.3.9029
     hooks:
       - id: parsable-R
       - id: no-browser-statement
@@ -49,19 +49,19 @@ repos:
         exclude: '(\.Rd|python/doc/source/reference/.*|test-doctest-.*)'
 
   - repo: https://github.com/tox-dev/tox-ini-fmt
-    rev: 1.7.1
+    rev: 1.7.2
     hooks:
       - id: tox-ini-fmt
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.21.0
+    rev: v2.25.2
     hooks:
       - id: pyproject-fmt
         additional_dependencies: ["tox>=4.12.1"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.15.9
+    rev: v0.15.21
     hooks:
       # Run the formatter.
       - id: ruff-format
