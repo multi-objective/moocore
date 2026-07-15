@@ -65,13 +65,13 @@ There are different formulations of the GD and IGD metrics in the literature
 that differ on the value of :math:`p`, on the distance metric used and on
 whether the term :math:`|A|^{-1}` is inside (as above) or outside the exponent
 :math:`1/p`.  GD was first proposed by :cite:t:`VelLam1998gp` with :math:`p=2`
-and the term :math:`|A|^{-1}` outside the exponent. IGD seems to have been
-mentioned first by :cite:t:`CoeSie2004igd`, however, some people also used the
-name D-metric for the same concept with :math:`p=1` and later papers have often
-used IGD/GD with :math:`p=1`. :cite:t:`SchEsqLarCoe2012tec` proposed to place
-the term :math:`|A|^{-1}` inside the exponent, as in the formulation shown
-above.  This has a significant effect for GD and less so for IGD given a
-constant reference set. IGD+ also follows this formulation.  We refer to
+and the term :math:`|A|^{-1}` outside the exponent.
+:cite:t:`BosThi2003balance` proposed the idea of IGD with :math:`p=1` under the
+name D-metric.  The name IGD seems to have been mentioned first by
+:cite:t:`CoeSie2004igd`.  :cite:t:`SchEsqLarCoe2012tec` proposed to place the
+term :math:`|A|^{-1}` inside the exponent, as in the formulation shown above.
+This has a significant effect for GD and less so for IGD, given a constant
+reference set.  IGD+ also follows this formulation.  We refer to
 :cite:t:`IshMasTanNoj2015igd` and :cite:t:`BezLopStu2017emo` for a more
 detailed historical perspective and a comparison of the various variants.
 

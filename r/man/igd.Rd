@@ -69,15 +69,15 @@ There are different formulations of the GD and IGD metrics in the literature
 that differ on the value of \eqn{p}, on the distance metric used and on
 whether the term \eqn{|A|^{-1}} is inside (as above) or outside the exponent
 \eqn{1/p}.  GD was first proposed by \citet{VelLam1998gp} with \eqn{p=2} and
-the term \eqn{|A|^{-1}} outside the exponent. IGD seems to have been
-mentioned first by \citet{CoeSie2004igd}, however, some people also used the
-name D-metric for the same concept with \eqn{p=1} and later papers have
-often used IGD/GD with \eqn{p=1}. \citet{SchEsqLarCoe2012tec} proposed to
-place the term \eqn{|A|^{-1}} inside the exponent, as in the formulation
-shown above.  This has a significant effect for GD and less so for IGD given
-a constant reference set. IGD+ also follows this formulation.  We refer to
-\citet{IshMasTanNoj2015igd} and \citet{BezLopStu2017emo} for a more detailed
-historical perspective and a comparison of the various variants.
+the term \eqn{|A|^{-1}} outside the exponent.  \citet{BosThi2003balance}
+proposed the idea of IGD with \eqn{p=1} under the name D-metric. The name
+IGD seems to have been mentioned first by \citet{CoeSie2004igd}.
+\citet{SchEsqLarCoe2012tec} proposed to place the term \eqn{|A|^{-1}} inside
+gthe exponent, as in the formulation shown above.  This has a significant
+effect for GD and less so for IGD given a constant reference set.  IGD+ also
+follows this formulation.  We refer to \citet{IshMasTanNoj2015igd} and
+\citet{BezLopStu2017emo} for a more detailed historical perspective and a
+comparison of the various variants.
 
 Following \citet{IshMasTanNoj2015igd}, we always use \eqn{p=1} in our
 implementation of IGD and IGD+ because (1) it is the setting most used in
