@@ -33,7 +33,6 @@ LazyLoad: true
 LazyData: true
 Encoding: UTF-8
 UseLTO: true
-RoxygenNote: 7.3.3
 Roxygen: list(markdown = TRUE,
               roclets = c("collate", "rd", "namespace",
                           "doctest::dt_roclet"))
@@ -53,3 +52,4 @@ Config/Needs/website:
         rmarkdown,
         scales,
         tidyr
+Config/roxygen2/version: 8.0.0

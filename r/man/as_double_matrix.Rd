@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{as_double_matrix}
 \alias{as_double_matrix}
-\title{Convert input to a matrix with \code{"double"} storage mode (\code{\link[base:mode]{base::storage.mode()}}).}
+\title{Convert input to a matrix with \code{"double"} storage mode (\code{\link[base:storage.mode]{base::storage.mode()}}).}
 \usage{
 as_double_matrix(x)
 }
@@ -13,5 +13,5 @@ as_double_matrix(x)
 \code{x} is coerced to a numerical \code{matrix()}.
 }
 \description{
-Convert input to a matrix with \code{"double"} storage mode (\code{\link[base:mode]{base::storage.mode()}}).
+Convert input to a matrix with \code{"double"} storage mode (\code{\link[base:storage.mode]{base::storage.mode()}}).
 }

@@ -20,6 +20,11 @@ Useful links:
 \author{
 \strong{Maintainer}: Manuel López-Ibáñez \email{manuel.lopez-ibanez@manchester.ac.uk} (\href{https://orcid.org/0000-0001-9974-1295}{ORCID})
 
+Authors:
+\itemize{
+  \item Manuel López-Ibáñez \email{manuel.lopez-ibanez@manchester.ac.uk} (\href{https://orcid.org/0000-0001-9974-1295}{ORCID})
+}
+
 Other contributors:
 \itemize{
   \item Carlos Fonseca [contributor]
