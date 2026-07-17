@@ -20,9 +20,9 @@ Not all packages provide the same functionality. For example, `pymoo`_ does not
 provide the :ref:`epsilon indicator <epsilon_metric>`. `BoTorch`_ and
 `paretobench`_ only provide the hypervolume. `paretoset`_ and `fast-pareto`_
 only identify nondominated points. `seqme`_ already uses `moocore`_, and
-`DESDEO`_, `DEAP`_, `pymoo`_ and `jMetalPy`_ also use `moocore`_ for
-hypervolume, but other functionality, such as filtering dominated points, is
-still slower than `moocore`_.
+`DESDEO`_, `DEAP`_, `pymoo`_ and `jMetalPy`_ also use `moocore`_ for computing
+the hypervolume, but other functionality, such as filtering dominated points,
+is still slower than `moocore`_.
 
 We would like to benchmark `pygmo`_, however, it is currently impossible to install using ``pip`` (See https://github.com/esa/pygmo2/issues/152).
 
@@ -184,8 +184,7 @@ The following plots compare the accuracy and speed of approximating the
 hypervolume with the various methods provided by :func:`moocore.hv_approx`. The
 plots show that there is no clear winner, in terms of approximation error,
 between methods ``Rphi-FWE+`` (default) and ``DZ2019-HW``, but both produce
-consistently lower approximation errors than method ``DZ2019-MC`` and than
-`pymoo`_.  However, ``Rphi-FWE+`` is as fast as ``DZ2019-MC`` and both are consistently faster than ``DZ2019-HW``, in particular with higher number of objectives. The computation time of `pymoo`_ grows rapidly with the number of input points.
+consistently lower approximation errors than method ``DZ2019-MC``.  However, ``Rphi-FWE+`` is as fast as ``DZ2019-MC`` and both are consistently faster than ``DZ2019-HW``, in particular with higher number of objectives.
 
 If you compare the plots of **DTLZLinearShape-3d** and **DTLZLinearShape-4d** below to the ones above in the previous section, you can see that the exact computation of the hypervolume in 3D or 4D for thousands of points takes milliseconds, whereas approximating the hypervolume is significantly slower and, thus, not worth doing.
 

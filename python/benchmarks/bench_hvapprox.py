@@ -19,10 +19,6 @@ from bench import (
     timeit_template_return_1_value,  # time_hv_exact
 )
 
-from pymoo.indicators.hv.monte_carlo import (
-    ApproximateMonteCarloHypervolume as pymoo_hvapprox,
-)
-
 # See https://github.com/multi-objective/testsuite/tree/main/data
 path_to_data = "../../testsuite/data/"
 assert pathlib.Path(path_to_data).expanduser().exists()
@@ -105,9 +101,6 @@ for name in names:
         ),
         "moocore Rphi-FWE+": lambda z, exact: relerror(
             exact, moocore.hv_approx(z, ref=ref, method="Rphi-FWE+")
-        ),
-        "pymoo": lambda z, exact, hv=pymoo_hvapprox(ref_point=ref): relerror(
-            exact, hv.add(z).hv
         ),
     }
     bench = Bench(
