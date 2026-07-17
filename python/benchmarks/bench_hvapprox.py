@@ -19,10 +19,6 @@ from bench import (
     timeit_template_return_1_value,  # time_hv_exact
 )
 
-from pymoo.indicators.hv.monte_carlo import (
-    ApproximateMonteCarloHypervolume as pymoo_hvapprox,
-)
-
 # See https://github.com/multi-objective/testsuite/tree/main/data
 path_to_data = "../../testsuite/data/"
 assert pathlib.Path(path_to_data).expanduser().exists()
@@ -41,17 +37,17 @@ files = {
     "DTLZLinearShape.6d": dict(
         file="DTLZLinearShape.6d.front.700pts.10.xz",
         ref=1,
-        range=(50, 600, 50),
+        range=(100, 1000, 100),
     ),
     "DTLZSphereShape.6d": dict(
         file="DTLZSphereShape.6d.front.500pts.10.xz",
         ref=1.1,
-        range=(50, 600, 50),
+        range=(100, 1000, 100),
     ),
     "ran.6d": dict(
         file="ran.800pts.6d.10",
         ref=10,
-        range=(50, 600, 50),
+        range=(100, 1000, 100),
     ),
     "ran.9d": dict(
         file="ran.80pts.9d.10",
@@ -96,6 +92,9 @@ for name in names:
     ref = np.full(x.shape[1], files[name]["ref"], dtype=float)
     n = get_range(len(x), *files[name]["range"])
 
+    def setup(z):
+        return dict(z=z, exact=time_hv_exact(name, len(z), z, ref))
+
     benchmarks = {
         "moocore DZ2019-MC": lambda z, exact: relerror(
             exact, moocore.hv_approx(z, ref=ref, method="DZ2019-MC")
@@ -106,16 +105,15 @@ for name in names:
         "moocore Rphi-FWE+": lambda z, exact: relerror(
             exact, moocore.hv_approx(z, ref=ref, method="Rphi-FWE+")
         ),
-        "pymoo": lambda z, exact, hv=pymoo_hvapprox(ref_point=ref): relerror(
-            exact, hv.add(z).hv
-        ),
     }
     bench = Bench(
-        name=name, n=n, bench=benchmarks, report_values="HV Relative Error"
+        name=name,
+        n=n,
+        setup=setup,
+        bench=benchmarks,
+        report_values="HV Relative Error",
     )
-    bench(
-        lambda n: dict(z=x[:n, :], exact=time_hv_exact(name, n, x[:n, :], ref))
-    )
+    bench(lambda n: x[:n, :])
     bench.plots(file_prefix=file_prefix, title=title)
 
 if "__file__" not in globals():  # Running interactively.
