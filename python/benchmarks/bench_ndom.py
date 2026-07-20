@@ -16,9 +16,6 @@ import torch
 from botorch.utils.multi_objective.pareto import (
     is_non_dominated as botorch_is_nondominated,
 )
-from pymoo.util.nds.non_dominated_sorting import (
-    NonDominatedSorting as pymoo_NonDominatedSorting,
-)
 
 from desdeo.tools.non_dominated_sorting import (
     non_dominated as desdeo_is_nondominated,
@@ -87,9 +84,6 @@ for name in names:
                 z, sense=z.shape[1] * ["max"], distinct=False, use_numba=True
             )
         ),
-        "pymoo": lambda z, nds=pymoo_NonDominatedSorting(): nds.do(
-            -z, only_non_dominated_front=True
-        ),
         "desdeo": lambda z: bool2pos(desdeo_is_nondominated(-z)),
         "fast_pareto": lambda z: bool2pos(
             fast_pareto_is_pf(-z, assume_unique_lexsorted=False)
@@ -139,11 +133,6 @@ for name in names:
             paretoset(
                 z, sense=z.shape[1] * ["max"], distinct=True, use_numba=True
             )
-        ),
-        # The following packages do not support deduplication so they are
-        # actually slower because the user needs to remove duplicates.
-        "pymoo": lambda z, nds=pymoo_NonDominatedSorting(): nds.do(
-            -z, only_non_dominated_front=True
         ),
         "desdeo": lambda z: bool2pos(desdeo_is_nondominated(-z)),
         "fast_pareto": lambda z: bool2pos(
