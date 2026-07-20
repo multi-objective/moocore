@@ -19,10 +19,11 @@ to include in the benchmarks.
 Not all packages provide the same functionality. For example, `pymoo`_ does not
 provide the :ref:`epsilon indicator <epsilon_metric>`. `BoTorch`_ and
 `paretobench`_ only provide the hypervolume. `paretoset`_ and `fast-pareto`_
-only identify nondominated points. `seqme`_ already uses `moocore`_, and
-`DESDEO`_, `DEAP`_, `pymoo`_ and `jMetalPy`_ also use `moocore`_ for computing
-the hypervolume, but other functionality, such as filtering dominated points,
-is still slower than `moocore`_.
+only identify nondominated points.  `DESDEO`_, `DEAP`_, and `jMetalPy`_ use
+`moocore`_ for computing the hypervolume, but other functionality, such as
+filtering dominated points, is still slower than `moocore`_.  Recent versions
+of `seqme`_ and `pymoo`_ (≥0.6.2) already use `moocore`_ for most functionality
+benchmarked here.
 
 We would like to benchmark `pygmo`_, however, it is currently impossible to install using ``pip`` (See https://github.com/esa/pygmo2/issues/152).
 
