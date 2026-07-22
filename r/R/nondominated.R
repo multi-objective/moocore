@@ -132,38 +132,40 @@ any_dominated <- function(x, maximise = FALSE, keep_weakly = FALSE)
 #' @inherit is_nondominated params
 #'
 #' @return An integer vector of the same length as the number of rows of the
-#'   input `x`, where each value gives the rank of each point (lower is
-#'   better).
+#'   input `x` with values within `[1, nrow(points)]`, where each value gives
+#'   the rank of each point (lower is better).
 #'
 #' @details
 #'
-#' Given a finite set of points \eqn{X \subset \mathbb{R}^m} and \eqn{x,y \in
-#' X}, let \eqn{x \prec y} denote that \eqn{x} dominates \eqn{y} according to
-#' Pareto optimality. Nondominated sorting partitions the set \eqn{X} into an
-#' ordered sequence of fronts, \eqn{F_0, F_1, \dots, F_k}, where \eqn{0 \leq k
-#' \leq |X|}, satisfying the following conditions:
+#' Given \eqn{x,y \in\mathbb{R}^m}, let \eqn{x \prec y} denote that \eqn{x}
+#' dominates \eqn{y} according to Pareto optimality.
+#'
+#' Nondominated sorting, also called the *layers-of-maxima problem* \citep{BucGoo2004maxima},
+#' partitions a finite set of points \eqn{X \subset \mathbb{R}^m} into an ordered
+#' sequence of *fronts*, \eqn{F_1, F_2, \dots, F_k}, where
+#' \eqn{1 \leq k \leq |X|}, satisfying the following conditions:
 #'
 #' \enumerate{
 #'   \item All points are allocated to a front:
-#'   \deqn{\bigcup_{i=0}^{k} F_i = X}
+#'   \deqn{\bigcup_{i=1}^{k} F_i = X}
 #'
 #'   \item Each point is allocated to only one front:
-#'   \deqn{F_i \cap F_j = \emptyset,\; \forall i,j \in \{0,1,\dots,k\},\, i \neq j}
+#'   \deqn{F_i \cap F_j = \emptyset,\; \forall i,j \in \{1,2,\dots,k\},\, i \neq j}
 #'
-#'   \item Fronts are mutually nondominated:
-#'   \deqn{\nexists x,y \in F_i,\; x \prec y,\; \forall i=0,1,\dots,k}
+#'   \item Points within a front are mutually nondominated:
+#'   \deqn{\nexists x,y \in F_i,\; x \prec y,\; \forall i\in\{1,2,\dots,k\}}
 #'
 #'   \item The first front contains points not dominated by any other point:
-#'   \deqn{\forall y \in F_0,\; \nexists x \in X,\; x \prec y}
+#'   \deqn{\forall y \in F_1,\; \nexists x \in X,\; x \prec y}
 #'
 #'   \item Every point in front \eqn{i} is dominated by at least one point in front
 #'   \eqn{i-1}:
-#'   \deqn{\forall y \in F_i,\; \exists x \in F_{i-1},\; x \prec y,\; \forall i=1,2,\dots,k}
+#'   \deqn{\forall y \in F_i,\; \exists x \in F_{i-1},\; x \prec y,\; \forall i\in\{2,3,\dots,k\}}
 #' }
 #'
 #' The rank returned by [pareto_rank()] is the index \eqn{i \in
-#' \{0,1,\dots,k\}} of the front \eqn{F_i} allocated to each point. If all
-#' points are mutually nondominated, there is only one front (\eqn{k = 0}). If
+#' \{1,2,\dots,k\}} of the front \eqn{F_i} allocated to each point. If all
+#' points are mutually nondominated, there is only one front (\eqn{k = 1}). If
 #' each front contains one point, then \eqn{k = n = |X|}.
 #'
 #' With \eqn{m=2}, i.e., `ncol(data)=2`, the code uses the best-known \eqn{O(n

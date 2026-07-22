@@ -1797,32 +1797,34 @@ def pareto_rank(
 
     Returns
     -------
-        An integer vector of the same length as the number of rows of ``points`` with values within ``[0, len(points) - 1]``, where each value gives the Pareto rank of each point (lower is better).
+        An integer vector of the same length as the number of rows of ``points`` with values within ``[0, len(points) - 1]``, where each value gives the rank of each point (lower is better).
 
     Notes
     -----
-    Given a finite set of points :math:`X \subset \mathbb{R}^m` and :math:`x,y
-    \in X`, let :math:`x \prec y` denote that :math:`x` dominates :math:`y`
-    according to Pareto optimality.  Nondominated sorting partitions the set
-    :math:`X` into an ordered sequence of `fronts`, :math:`F_0, F_1, \dots,
-    F_k`, where :math:`0 \leq k \leq |X|`, satisfying the following conditions:
+    Given  :math:`x,y \in\mathbb{R}^m`, let :math:`x \prec y` denote that
+    :math:`x` dominates :math:`y` according to Pareto optimality.
+
+    Nondominated sorting, also called the *layers-of-maxima problem* :footcite:p:`BucGoo2004maxima`,
+    partitions a finite set of points :math:`X \subset \mathbb{R}^m` into an
+    ordered sequence of `fronts`, :math:`F_0, F_1, \dots, F_k`, where
+    :math:`0 \leq k < |X|`, satisfying the following conditions:
 
     #. All points are allocated to a front: :math:`\bigcup_{i=0}^{k} F_i = X`
     #. Each point is allocated to only one front: :math:`F_i \cap F_j = \emptyset,\; \forall i,j \in\{0,1,\dots,k\},\,i\neq j`
-    #. Fronts are mutually nondominated: :math:`\nexists x,y \in F_i, \,x \prec y,\; \forall i=0,1,\dots,k`
+    #. Points within a front are mutually nondominated: :math:`\nexists x,y \in F_i, \,x \prec y,\; \forall i\in\{0,1,\dots,k\}`
     #. The first front contains points not dominated by any other point: :math:`\forall y \in F_0,\,\nexists x \in X,\, x\prec y`
-    #. Every point in front :math:`i` is dominated by at least one point in front :math:`i-1`: :math:`\forall y \in F_i,\, \exists x \in F_{i-1},\, x\prec y,\; \forall i=1,2,\dots,k`
+    #. Every point in front :math:`i` is dominated by at least one point in front :math:`i-1`: :math:`\forall y \in F_i,\, \exists x \in F_{i-1},\, x\prec y,\; \forall i\in\{1,2,\dots,k\}`
 
     The rank returned by :func:`pareto_rank` is the index :math:`i \in
     \{0,1,\dots,k\}` of the front :math:`F_i` allocated to each point. If all
     points are mutually nondominated, there is only one front :math:`(k=0)`. If
-    each front contains one point, then :math:`k=n=|X|`.
+    each front contains one point, then :math:`k=|X| - 1`.
 
     With :math:`m=2`, the code uses the best-known :math:`O(n \log n)`
-    algorithm by :footcite:t:`Jen03`.  When :math:`m \geq 3`, it uses the naive
-    algorithm that identifies one `front` at a time, which requires
-    :math:`O(n^2\log n)` for :math:`m=3`, and :math:`O(n^2 \log^{m-2} n)` for
-    :math:`m \geq 4`.
+    algorithm by :footcite:t:`Jen03`, where :math:`n=|X|`.  When :math:`m \geq
+    3`, it uses the naive algorithm that identifies one `front` at a time,
+    which requires :math:`O(n^2\log n)` for :math:`m=3`, and :math:`O(n^2
+    \log^{m-2} n)` for :math:`m \geq 4`.
 
 
     References
