@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+whv\_hype
+=========
+
+.. currentmodule:: moocore
+
+.. autofunction:: whv_hype
+
+.. _sphx_glr_backref_moocore.whv_hype:
+
+.. minigallery:: moocore.whv_hype
+   :add-heading: Gallery examples
+   :heading-level: -
