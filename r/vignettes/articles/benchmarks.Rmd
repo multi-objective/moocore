@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 run_benchmarks <- params$run_benchmarks
 ```
 
-The following plots compare the performance of [`moocore`][moocore] against [`emoa`][emoa] and [`bbotk`][bbotk]. Other R packages are not included in the comparison because they are based on these packages for the functionality benchmarked, so they are **at least as slow** as them. For example [`GPareto`][GPareto], [`mlr3mbo`][mlr3mbo], [`rmoo`][rmoo] and [`bbotk`][bbotk] use [`emoa`][emoa] to compute the hypervolume.  Not all packages provide the same functionality.
+The following plots compare the performance of [`moocore`][moocore] against [`emoa`][emoa], [`targeted`][targeted] and [`caRamel`][caRamel]. Other R packages are not included in the comparison because they are based on these packages for the functionality benchmarked, so they are **at least as slow** as them. For example, [`GPareto`][GPareto] and [`rmoo`][rmoo] use [`emoa`][emoa] to compute the hypervolume.  [`bbotk`][bbotk] already uses [`moocore`][moocore]. Not all packages provide the same functionality.
 
 <details><summary>Show benchmarking setup code</summary>
 
@@ -161,7 +161,7 @@ benchmark_all <- function(files, prefix, title, setup, expr.list, filter)
 The following plots compare the speed of finding (non)dominated solutions,
 equivalent to `moocore::is_nondominated()`, in 2D, 3D, 4D, 5D and 10D.  The
 plots show that [`moocore`][moocore] is always 10 times faster than [`GPGame`][GPGame],
-[`targeted`][targeted] and [`bbotk`][bbotk] for any number of objectives.  In addition,
+[`caRamel`][caRamel] and [`targeted`][targeted] for any number of objectives.  In addition,
 [`GPGame`][GPGame] calculates wrong values with repeated coordinates
 ([vpicheny/GPGame#2](https://github.com/vpicheny/GPGame/issues/2)). The `rand4d` testcase is somewhat different from the
 others, as it is mostly composed of dominated points (only 10590 points are
@@ -184,7 +184,6 @@ setup <- quote({
 
 expr.list <- list(
   moocore = quote(which(moocore::is_nondominated(z))),
-  bbotk = quote(which(bbotk::is_dominated(tz))),
   GPGame = quote(GPGame::nonDom(z)),
   targeted = quote(targeted::nondom(z)),
   caRamel = quote(caRamel::pareto(nz))
@@ -248,7 +247,7 @@ benchmark_all(files, prefix="hv", title = "HV Computation",
   setup = setup, expr.list = expr.list, filter=TRUE)
 ```
 
-As the plots show, [`moocore`][moocore] is always faster than [`emoa`][emoa] and, hence, faster than [`GPareto`][GPareto], [`mlr3mbo`][mlr3mbo], [`rmoo`][rmoo] and [`bbotk`][bbotk].
+As the plots show, [`moocore`][moocore] is always faster than [`emoa`][emoa] and, hence, faster than [`GPareto`][GPareto] and [`rmoo`][rmoo].
 
 # Hypervolume contribution
 
@@ -258,6 +257,7 @@ The only R package, other than [`moocore`][moocore], able to compute hypervolume
 [GPGame]: https://cran.r-project.org/package=GPGame
 [GPareto]: http://cran.r-project.org/package=GPareto
 [bbotk]:  https://cran.r-project.org/package=bbotk
+[caRamel]:  https://cran.r-project.org/package=caRamel
 [emoa]: https://cran.r-project.org/package=emoa
 [mlr3mbo]: https://cran.r-project.org/package=mlr3mbo
 [rmoo]: https://cran.r-project.org/package=rmoo
