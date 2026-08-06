@@ -1,9 +1,8 @@
 name: Matlab
 
 on:
-  push:
-    branches: [main, 'v[0-9]+*' ]
-    tags-ignore: ["**"]
+  pull_request:
+    branches-ignore: [gh-pages]
     paths:
       - '.github/workflows/matlab.yml'
       - 'c/hv*.[ch]p?p?'
@@ -11,9 +10,9 @@ on:
       - 'matlab/Make*'
       - 'matlab/*.[ch]p?p?'
       - 'matlab/*.m'
-
-  pull_request:
-    branches-ignore: [gh-pages]
+  push:
+    branches: [main, 'v[0-9]+*' ]
+    tags-ignore: ["**"]
     paths:
       - '.github/workflows/matlab.yml'
       - 'c/hv*.[ch]p?p?'
@@ -25,7 +24,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
