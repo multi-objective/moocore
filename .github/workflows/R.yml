@@ -1,9 +1,8 @@
 name: R
 
 on:
-  push:
-    branches: [main, 'v[0-9]+*' ]
-    tags-ignore: ["**"]
+  pull_request:
+    branches-ignore: [gh-pages]
     paths:
       - ".github/workflows/rchk.yml"
       - ".github/workflows/R.yml"
@@ -12,8 +11,9 @@ on:
       - 'c/Make*'
       - 'c/*.mk'
       - 'c/**/*.[ch]p?p?'
-  pull_request:
-    branches-ignore: [gh-pages]
+  push:
+    branches: [main, 'v[0-9]+*' ]
+    tags-ignore: ["**"]
     paths:
       - ".github/workflows/rchk.yml"
       - ".github/workflows/R.yml"
@@ -31,7 +31,7 @@ env:
   _R_CHECK_CRAN_INCOMING_REMOTE_: false
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
