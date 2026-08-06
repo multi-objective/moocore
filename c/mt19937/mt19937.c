@@ -1,5 +1,5 @@
 /*
-   From https://github.com/numpy/numpy/blob/b79be4888136c43805307c0151068089c68dd43c/numpy/random/src/mt19937/mt19937.c
+   From https://github.com/numpy/numpy/blob/5b00a4d86134b9c190dccd519ba500af776f2ab0/numpy/random/src/mt19937/mt19937.c
 */
 #include "mt19937.h"
 
@@ -36,16 +36,16 @@ mt19937/mt19937.c:97:55: warning: higher order bits are zeroes after implicit co
 #  pragma clang diagnostic ignored "-Wimplicit-int-conversion"
 #endif
 
-  for (i = 0; i < N - M; i++) {
+  for (i = 0; i < _MT19937_N - _MT19937_M; i++) {
     y = (state->key[i] & UPPER_MASK) | (state->key[i + 1] & LOWER_MASK);
-    state->key[i] = state->key[i + M] ^ (y >> 1) ^ (-(y & 1) & MATRIX_A);
+    state->key[i] = state->key[i + _MT19937_M] ^ (y >> 1) ^ (-(y & 1) & MATRIX_A);
   }
-  for (; i < N - 1; i++) {
+  for (; i < _MT19937_N - 1; i++) {
     y = (state->key[i] & UPPER_MASK) | (state->key[i + 1] & LOWER_MASK);
-    state->key[i] = state->key[i + (M - N)] ^ (y >> 1) ^ (-(y & 1) & MATRIX_A);
+    state->key[i] = state->key[i + (_MT19937_M - _MT19937_N)] ^ (y >> 1) ^ (-(y & 1) & MATRIX_A);
   }
-  y = (state->key[N - 1] & UPPER_MASK) | (state->key[0] & LOWER_MASK);
-  state->key[N - 1] = state->key[M - 1] ^ (y >> 1) ^ (-(y & 1) & MATRIX_A);
+  y = (state->key[_MT19937_N - 1] & UPPER_MASK) | (state->key[0] & LOWER_MASK);
+  state->key[_MT19937_N - 1] = state->key[_MT19937_M - 1] ^ (y >> 1) ^ (-(y & 1) & MATRIX_A);
 
 #if defined(__clang__)
 #  pragma clang diagnostic pop
