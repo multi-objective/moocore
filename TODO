@@ -49,6 +49,11 @@ Computation, pp. 465–472 (2012)]
  - [ ] Real-Time Hypervolume Estimation with Monotonically Reducing Error: https://github.com/fieldsend/hypervolume
  - [ ] Benchmark against: https://github.com/MOEAFramework/MOEAFramework
  - [ ] Setup https://github.com/koaning/sphinx-marimo
+ - [ ] Crowding distance (NSGA-II):
+       - [pymoo](https://github.com/anyoptimization/pymoo/blob/23110c155aa8f31b5f1b86928227fb3931ba7f00/pymoo/operators/survival/rank_and_crowding/metrics.py#L85)
+       - [patatune](https://github.com/KristupasPr/patatune/blob/1a2ac1c84d3ef4e61847c136e3c08e88c5bbf104/src/patatune/mopso/mopso.py#L340)
+       - [DESDEO](https://github.com/industrial-optimization-group/DESDEO/blob/ff931406744ee778a96485da863f2d8171a41289/desdeo/emo/operators/selection.py#L1478)
+       - [jMetalPy](https://github.com/jMetal/jMetalPy/blob/5c6a505879f257c72ed6f4daf273870415d00f91/src/jmetal/util/density_estimator.py#L42)
  - [x] Merge hypervolume/trunk README
  - [x] hv2d contributions
  - [X] pre-commit for R: https://lorenzwalthert.github.io/precommit/articles/ci.html
