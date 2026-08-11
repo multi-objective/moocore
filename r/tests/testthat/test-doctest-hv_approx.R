@@ -11,3 +11,13 @@ test_that("Doctest: hv_approx", {
   expect_equal(hv_approx(x, ref = 10, seed = 42, method = "DZ2019-MC"), 38.000806)
 })
 
+test_that("Doctest: hv_approx_fpras", {
+  # Created from @doctest for `hv_approx_fpras`
+  # Source file: R/hv_approx.R
+  x <- matrix(c(5, 5, 4, 6, 2, 7, 7, 4), ncol = 2, byrow = TRUE)
+  expect_equal(hypervolume(x, ref = 10), 38)
+  expect_equal(hv_approx(x, ref = 10, method = "Rphi-FWE+"), 37.999979)
+  expect_equal(hv_approx_fpras(x, ref = 10, epsilon = 0.1, delta = 0.2, seed = 42), 38.1446, tolerance = 1e-4)
+  expect_equal(hv_approx_fpras(x, ref = 10, epsilon = 0.01, delta = 0.2, seed = 42), 37.9541, tolerance = 1e-4)
+})
+

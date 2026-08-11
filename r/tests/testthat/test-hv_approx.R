@@ -13,7 +13,7 @@ test_that("hv_approx_fpras errors", {
     "delta must be strictly within")
   expect_error(hv_approx_fpras(x, reference = c(1, 1), epsilon = 1e-9, delta = 0.001),
     "would require a very long time")
-  expect_equal(hv_approx_fpras(x, reference = c(1, 1)), 0)
+  expect_equal(hv_approx_fpras(matrix(c(2, 2), ncol = 2), reference = c(1, 1)), 0)
 })
 
 for (dim in seq(3L, 10L)) {
