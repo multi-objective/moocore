@@ -944,6 +944,7 @@ hv_approx_fpras(const double * restrict data, size_t npoints, dimension_t dim,
                 rng_free(rng);
                 rng_alias_sampler_free(sampler);
                 free((void *) points);
+                if (unlikely(m == 0)) return 0.0;
                 return total_vol * (T_factor / (double) m);
             }
             t_sum++;

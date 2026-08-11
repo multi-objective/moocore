@@ -42,7 +42,7 @@ MOOCORE_API double hv_approx_rphi_fang_wang_plus(
 
    K. Bringmann, T. Friedrich. Approximating the volume of unions and
    intersections of high-dimensional geometric objects. Computational Geometry:
-   Theory and Applications, Vol. 43, pages 601-610,. 2010.
+   Theory and Applications, Vol. 43, pages 601-610. 2010.
 */
 MOOCORE_API double hv_approx_fpras(
     const double * restrict data, size_t npoints, dimension_t dim,

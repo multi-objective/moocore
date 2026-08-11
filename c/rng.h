@@ -42,7 +42,7 @@ rng_uniform(rng_state * rng, double low, double high)
 
    Lemire, Daniel. "Fast Random Integer Generation in an Interval", ACM
    Transactions on Modeling and Computer Simulation (TOMACS), 29(1):1-12,
-   2019. https://doi.org/10.1145/323063
+   2019. https://doi.org/10.1145/32306366
 
 */
 static inline uint32_t
