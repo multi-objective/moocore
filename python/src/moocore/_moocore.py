@@ -301,12 +301,14 @@ def _unary_refset_common(
     if nobj == 0:
         raise ValueError("The number of columns cannot be 0")
 
-    points_p, npoints_c, nobj_c = np2d_to_double_array(
+    points, npoints, nobj_c = np2d_to_double_array(
         points, ctype_shape=("size_t", "uint_fast8_t")
     )
-    ref_p, ref_size = np1d_to_double_array(ref, ctype_size="size_t")
-    maximise_p = _parse_maximise_to_bool_array(maximise, nobj)
-    return nobj, points_p, npoints_c, nobj_c, ref_p, ref_size, maximise_p
+    ref, ref_size, _ = np2d_to_double_array(
+        ref, ctype_shape=("size_t", "uint_fast8_t")
+    )
+    maximise = _parse_maximise_to_bool_array(maximise, nobj)
+    return nobj, points, npoints, nobj_c, ref, ref_size, maximise
 
 
 @DocSubstitute()
