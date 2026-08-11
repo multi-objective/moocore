@@ -3,6 +3,10 @@
 ## 0.20
 
  * radixsort.h, insort.h: New.
+ * rng_alias.h: New. Walker-Vose alias method.
+ * rng.h: New functions for sampling uniformly distributed 32-bits integer in a
+   bounded interval and for sampling with a given CDF (roulette-wheel method).
+ * hvapprox.c (hv_approx_fpras): New function.
 
 
 ## 0.19.2

@@ -120,3 +120,106 @@ hv_approx <- function(x, reference, maximise = FALSE, nsamples = 262144L, seed =
       as.integer(nsamples)))
   }
 }
+
+
+#' Approximate the hypervolume indicator via a fully polynomial-time randomized approximation scheme (FPRAS).
+#'
+#' This function implements the approximation algorithm by
+#' \citet{BriFri2010approx}.  This algorithm returns, with probability
+#' \eqn{(1 - \delta)}, an \eqn{\epsilon}-approximation of the hypervolume
+#' metric with respect to the given reference point, assuming minimization of
+#' all objectives by default.
+#'
+#' @details
+#'
+#' This function computes an approximation \eqn{\hat{v}} of the true
+#' hypervolume \eqn{v = \text{hyp}_r(A)} of the input points in \eqn{A
+#' \subset \mathbb{R}^m} with respect to the reference point \eqn{r \in
+#' \mathbb{R}^m}, such that
+#'
+#' \deqn{\text{Pr}[(1-\epsilon)v \leq \hat{v} \leq (1+\epsilon)v] \geq (1 - \delta)}
+#'
+#' where \eqn{\epsilon > 0} and \eqn{0 < \delta < 1}.
+#'
+#' The algorithm requires \eqn{O(\frac{nm}{\epsilon^2}\log\frac{1}{\delta})}.
+#' That is, it is linear on the number of points and dimensions, but quadratic
+#' in the approximation error.  In other words, more accurate approximations
+#' require significantly more time.
+#'
+#' In contrast to the (quasi)-Monte-Carlo methods provided by [hv_approx()],
+#' the presence of weakly-dominated points not only increases the runtime, but
+#' also changes the returned approximation for a fixed random seed.
+#'
+#' The implementation uses Walker-Vose's alias method for sampling from a
+#' discrete probability distribution \citep{Vose1991alias}, which requires
+#' \eqn{O(1)} per sample.  Using the naive roulette-wheel method would add, at
+#' least, a factor of \eqn{O(\log n)} to the above runtime.
+#'
+#' @inheritParams hv_approx
+#'
+#' @return A single numerical value.
+#'
+#' @param epsilon `double(1)`\cr Desired relative error of the approximation,
+#'   \eqn{\epsilon > 0}.
+#'
+#' @param delta `double(1)`\cr Desired failure probability
+#'   \eqn{0 < \delta < 1}; \eqn{(1 - \delta)} gives the confidence level.
+#'
+#' @warning Lower values of `epsilon` (\eqn{\epsilon}) or `delta`
+#'   (\eqn{\delta}) require significantly longer computation time.
+#'
+#' @seealso [hypervolume()], [whv_hype()], [hv_approx()]
+#'
+#' @author Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
+#'
+#' @references
+#'
+#' \insertAllCited{}
+#'
+#' @doctest
+#'
+#' x <- matrix(c(5, 5, 4, 6, 2, 7, 7, 4), ncol=2, byrow=TRUE)
+#' @expect equal(38.0)
+#' hypervolume(x, ref=10)
+#' @expect equal(37.999979)
+#' hv_approx(x, ref=10, method="Rphi-FWE+")
+#' @expect equal(38.1446, tolerance=1e-4)
+#' hv_approx_fpras(x, ref=10, epsilon=0.1, delta=0.2, seed=42)
+#' @expect equal(37.9541, tolerance=1e-4)
+#' hv_approx_fpras(x, ref=10, epsilon=0.01, delta=0.2, seed=42)
+#'
+#' @export
+#' @concept metrics
+hv_approx_fpras <- function(x, reference, maximise = FALSE, seed = NULL,
+                            epsilon = 0.01, delta = 0.1)
+{
+  x <- as_double_matrix(x)
+  nobjs <- ncol(x)
+
+  if (!is.numeric(reference))
+    stop("a numerical reference vector must be provided")
+  if (length(reference) == 1L) reference <- rep_len(reference, nobjs)
+  stopifnot(length(reference) == nobjs)
+
+  if (length(maximise) == 1L) maximise <- rep_len(maximise, nobjs)
+  stopifnot(length(maximise) == nobjs)
+  check_dimension_max(nobjs, .libmoocore_constants[["MOOCORE_HVAPPROX_DIMENSION_MAX"]])
+
+  if (!is.numeric(epsilon) || length(epsilon) != 1L || epsilon <= 0)
+    stop("epsilon must be a positive numeric value")
+  if (!is.numeric(delta) || length(delta) != 1L || delta <= 0 || delta >= 1)
+    stop("delta must be strictly within (0, 1)")
+
+  seed <- if (is.null(seed)) get_seed() else as_integer(seed)
+  hv <- .Call(hv_approx_fpras_C,
+    t(x),
+    as.double(reference),
+    as.logical(maximise),
+    seed,
+    as.double(epsilon),
+    as.double(delta))
+  if (hv < 0)
+    stop("The requested approximation (epsilon=", epsilon, ", delta=", delta,
+         ") would require a very long time")
+  hv
+}

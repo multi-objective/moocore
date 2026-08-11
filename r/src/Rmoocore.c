@@ -512,6 +512,23 @@ hv_approx_rphi_fang_wang_plus_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE, SEXP N
     return Rf_ScalarReal(hv);
 }
 
+SEXP
+hv_approx_fpras_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE, SEXP SEED, SEXP EPSILON, SEXP DELTA)
+{
+    SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoints);
+    SEXP_2_DOUBLE_VECTOR(REFERENCE, ref, reference_len);
+    SEXP_2_LOGICAL_INT_VECTOR(MAXIMISE, maximise, maximise_len);
+    SEXP_2_UINT32(SEED, seed);
+
+    assert(nobj == reference_len);
+    assert(nobj == maximise_len);
+
+    double epsilon = Rf_asReal(EPSILON);
+    double delta = Rf_asReal(DELTA);
+    double hv = hv_approx_fpras(data, npoints, nobj, ref, maximise, seed, epsilon, delta);
+    return Rf_ScalarReal(hv);
+}
+
 #include "r2_exact.h"
 
 SEXP

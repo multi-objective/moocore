@@ -158,4 +158,61 @@ ggplot(df, aes(x = samples, y = hverror, color = Method)) +
   theme_bw()
 ```
 
+# FPRAS: Fully Polynomial-Time Randomized Approximation Scheme
+
+`hv_approx_fpras()` allows obtaining an approximation with relative error
+smaller than $\epsilon$ (`epsilon`) with a given probability $1-\delta$
+(`delta`).  As the plot below shows, the approximation error is often better
+than the requested value, but the computation time increases very quickly for
+smaller `epsilon`.
+
+```{r fpras}
+#| fig.alt = "Boxplot of relative error and line plot of CPU time for FPRAS with varying epsilon and delta."
+library(ggplot2)
+library(scales)
+shape <- "convex-sphere"
+ref <- 1.1
+npoints <- 50
+dim <- 6
+nreps <- 10
+set.seed(42)
+res <- NULL
+for (r in seq_len(nreps)) {
+  z <- generate_ndset(npoints, dim, method = shape, seed = 42 + r)
+  exact <- hypervolume(z, reference = ref)
+  for (epsilon in c(0.1, 0.025, 0.01, 0.005)) {
+    for (delta in c(0.25, 0.1, 0.05)) {
+      t_start <- proc.time()[["elapsed"]]
+      hv <- hv_approx_fpras(z, reference = ref, epsilon = epsilon, delta = delta)
+      t_end <- proc.time()[["elapsed"]] - t_start
+      res <- rbind(res, data.frame(
+        r = r,
+        epsilon = epsilon,
+        delta = delta,
+        hverror = abs(1 - hv / exact),
+        time = t_end
+      ))
+    }
+  }
+}
+res[["delta"]] <- as.factor(res[["delta"]])
+res[["epsilon"]] <- as.factor(res[["epsilon"]])
+
+ggplot(res, aes(x = epsilon, y = hverror, fill = delta)) +
+  geom_boxplot() +
+  scale_y_log10(labels = label_log()) +
+  labs(y = "Relative error") +
+  ggtitle(paste0(shape, "-", npoints, "-", dim, "d")) +
+  theme_bw()
+
+ggplot(res, aes(x = epsilon, y = time, color = delta, group = delta)) +
+  stat_summary(fun = mean, geom = "line") +
+  stat_summary(fun = mean, geom = "point") +
+  scale_y_log10(labels = label_log()) +
+  scale_x_discrete() +
+  labs(y = "CPU time (s)") +
+  ggtitle(paste0(shape, "-", npoints, "-", dim, "d")) +
+  theme_bw()
+```
+
 # References
