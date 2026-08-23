@@ -454,7 +454,6 @@ def avg_hausdorff_dist(
     if nobj == 1 or nobj > DIMENSION_MAX:
         return _avg_hausdorff_dist_python(points, ref, p)
 
-    p = ffi.cast("unsigned int", p)
     return lib.avg_Hausdorff_dist(
         points_p, n, d, ref_p, ref_size, maximise_p, p
     )
@@ -982,7 +981,7 @@ def hv_contributions(
         points, ctype_shape=("size_t", "uint_fast8_t")
     )
     ref_buf = ffi.from_buffer("double []", ref)
-    ignore_dominated = ffi.cast("bool", bool(ignore_dominated))
+    ignore_dominated = bool(ignore_dominated)
     lib.hv_contributions(
         hvc_p, points_p, npoints, nobj, ref_buf, ignore_dominated
     )
@@ -1152,7 +1151,6 @@ def hv_approx(
         raise ValueError(
             f"nsamples ({nsamples}) must be a positive integer value smaller than 2147483648"
         )
-    nsamples = ffi.cast("uint_fast32_t", nsamples)
     maximise_p = _parse_maximise_to_bool_array(maximise, nobj)
     points_p, npoints, nobj = np2d_to_double_array(
         points, ctype_shape=("size_t", "uint_fast8_t")
@@ -1467,7 +1465,7 @@ def is_nondominated(
 
     _check_dimension_max(nobj, DIMENSION_MAX)
 
-    keep_weakly = ffi.cast("bool", bool(keep_weakly))
+    keep_weakly = bool(keep_weakly)
     maximise_p = _parse_maximise_to_bool_array(maximise, nobj)
     points_p, npoints, nobj = np2d_to_double_array(
         points, ctype_shape=("size_t", "uint_fast8_t")
@@ -2386,7 +2384,6 @@ def eafdiff(
     data_p, _, nobj_int = np2d_to_double_array(data)
     cumsizes_p, nsets = np1d_to_int_array(cumsizes)
     eaf_npoints = ffi.new("int *")
-    intervals = ffi.cast("int", intervals)
 
     if rectangles:
         eaf_data = lib.eafdiff_compute_rectangles(
@@ -2894,12 +2891,10 @@ def whv_hype(
     ideal = ffi.from_buffer("double []", ideal)
     # FIXME: Check ranges.
     seed = _get_seed_for_c(seed)
-    nsamples = ffi.cast("int", nsamples)
 
     if dist == "uniform":
         hv = lib.whv_hype_unif(points_p, npoints, ideal, ref, nsamples, seed)
     elif dist == "exponential":
-        mu = ffi.cast("double", mu)
         hv = lib.whv_hype_expo(
             points_p, npoints, ideal, ref, nsamples, seed, mu
         )
