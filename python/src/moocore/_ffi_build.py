@@ -12,8 +12,7 @@ import os
 import platform
 from cffi import FFI
 
-# Compile in debug mode.
-DEBUG = int(os.environ.get("MOOCORE_DEBUG", "0"))
+DEBUG = 0  # Default value.
 
 libmoocore_h = "src/moocore/libmoocore.h"
 sources_path = "src/moocore/libmoocore/"
@@ -114,6 +113,28 @@ else:
     if not is_macos:
         ldflags += ["-Wl,-z,now"]
 
+# Optional sanitizer build.
+if os.environ.get("MOOCORE_SANITIZE", "0") == "1":
+    DEBUG = 1
+    sanitizer_flags = [
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+    ]
+    cflags += sanitizer_flags
+    ldflags += sanitizer_flags
+
+
+undef_macros = []
+# Compile in debug mode.
+# This is not done automatically by ffibuilder.compile(debug=True) !
+DEBUG = int(os.environ.get("MOOCORE_DEBUG", DEBUG))
+if DEBUG >= 1:
+    debug_flags = ["-Og", "-g3", "-fno-lto", "-Werror"]
+    cflags += debug_flags
+    ldflags += debug_flags
+    undef_macros = ["NDEBUG"]
+
+# All the above can be overridden by CFLAGS and LDFLAGS.
 cflags_env = os.environ.get("CFLAGS", "").split()
 cflags += cflags_env
 ldflags += cflags_env + os.environ.get("LDFLAGS", "").split()
@@ -125,8 +146,6 @@ libmoocore_path = os.path.join(file_path, "libmoocore")
 with open(libmoocore_h) as f:
     ffibuilder.cdef(f.read())
 
-# This is not done automatically by ffibuilder.compile(debug=True) !
-undef_macros = ["NDEBUG"] if DEBUG >= 1 else []
 
 ffibuilder.set_source(
     "moocore._libmoocore",

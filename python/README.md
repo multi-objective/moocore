@@ -60,6 +60,38 @@ python3 -m pip install https://github.com/multi-objective/moocore/raw/refs/heads
 
 If the URL does not have the word `raw` then you are not using the **View Raw** link.
 
+Development
+-----------
+
+You can build the package with:
+```
+make dev-install
+```
+
+For enabling asserts (`DEBUG=1`) use:
+```
+make dev-install MOOCORE_DEBUG=1
+```
+
+You can then debug a testcase `test.py` with:
+```
+gdb --args python3 -m test
+```
+
+For enabling sanitizers (asan, ubsan) use:
+```
+make dev-install MOOCORE_SANITIZE=1
+```
+
+To enable the sanitizers you may need to run with:
+```
+LD_PRELOAD=$(clang -print-file-name=libasan.so) \
+ASAN_OPTIONS=detect_leaks=0 \
+python3 -m test
+```
+
+ASAN reports many irrelevant leaks by Python. For detecting actual leaks, you need to use `valgrind`.
+
 
 R package
 ---------
