@@ -366,17 +366,16 @@ find_nondominated_3d_impl_sorted(const double ** restrict rows, size_t size,
             avl_node_t * nodeaux;
             int res = avl_search_closest(&tree, pj, &nodeaux);
             assert(res != 0);
-            if (res > 0) { // nodeaux goes before pj
-                const double * restrict prev = nodeaux->item;
-                DEBUG2(printf_point("res > 0: prev: ", prev, 3, "\n"));
-                assert(prev[0] != sentinel[0]);
-                assert(prev[0] <= pj0);
-                if (prev[1] <= pj1)
-                    goto j_is_dominated;
-                nodeaux = nodeaux->next;
-            } else if (nodeaux->prev) { // nodeaux goes after pj, so move to the next one.
-                const double * restrict prev = nodeaux->prev->item;
-                DEBUG2(printf_point("res < 0: prev: ", prev, 3, "\n"));
+            if (res > 0 || nodeaux->prev) {
+                const double * restrict prev;
+                if (res > 0) { // nodeaux goes before pj
+                    prev = nodeaux->item;
+                    nodeaux = nodeaux->next;
+                    DEBUG2(printf_point("res > 0: prev: ", prev, 3, "\n"));
+                } else { // nodeaux goes after pj, so move to the previous one.
+                    prev = nodeaux->prev->item;
+                    DEBUG2(printf_point("res < 0: prev: ", prev, 3, "\n"));
+                }
                 assert(prev[0] != sentinel[0]);
                 assert(prev[0] <= pj0);
                 if (prev[1] <= pj1)
