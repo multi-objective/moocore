@@ -1,6 +1,9 @@
 #ifndef _HV3D_PRIV_H
 #define _HV3D_PRIV_H
 
+#define USE_AVL 0
+
+#if USE_AVL == 1
 typedef const double avl_item_t;
 typedef struct avl_node_t {
     struct avl_node_t *next;
@@ -28,6 +31,29 @@ new_avl_node(dlnode_t * restrict p, avl_node_t * restrict node)
     node->item = p->x;
     return node;
 }
+
+#else
+typedef struct TreapItem {
+    const double * z;
+    dlnode_t * dlnode;
+} TreapItem;
+
+static inline const double *
+treap_item_get_z(TreapItem item)
+{
+    return item.z;
+}
+
+#include "treap.h"
+
+static inline void
+hv3d_init_treap_node(TreapNode * restrict node, dlnode_t * restrict p)
+{
+    // Shift by -1 so that the split dimension is [0].
+    treap_node_init(node, p->x[1], (TreapItem) { .z = p->x - 1, .dlnode = p });
+}
+
+#endif
 
 /* Used by hvc3d.c and hv3dplus.c.
 
@@ -61,6 +87,7 @@ hv3d_preprocessing(dlnode_t * restrict list, size_t n)
     assert(list+1 == list->next[0]);
     assert(list+2 == list->prev[0]);
 
+#if USE_AVL == 1
     avl_tree_t tree;
     avl_init_tree(&tree, qsort_cmp_pdouble_asc_y_des_x_nonzero);
     avl_node_t * tnodes = malloc((n+2) * sizeof(*tnodes));
@@ -131,6 +158,67 @@ hv3d_preprocessing(dlnode_t * restrict list, size_t n)
         }
         p = p->next[0];
     }
+#else
+    TreapNode *tnodes = malloc((n+2) * sizeof(*tnodes));
+    assert(tnodes != NULL);
+    // At the top we insert the first point, which is never dominated.
+    dlnode_t * p = (list+1)->next[0];
+    hv3d_init_treap_node(tnodes, p);
+    Treap tree;
+    treap_init_with_single_node(&tree, tnodes);
+    set_delimiters(p, list+1, list);
+
+    // After the top node, we insert sentinel 1 (-INF, ref[1])
+    hv3d_init_treap_node(tnodes + 1, list);
+    tnodes->right = tnodes + 1;
+    tnodes->right->priority = 0; // Push to the bottom
+    // Before the top node, we insert sentinel 2 (ref[0], -INF)
+    hv3d_init_treap_node(tnodes + 2, list + 1);
+    tnodes->left = tnodes + 2;
+    tnodes->left->priority = 0; // Push to the bottom
+    set_delimiters(p, tnodes->left->item.dlnode, tnodes->right->item.dlnode);
+
+    TreapNode * node = tnodes + 3;
+    const dlnode_t * stop = list+2;
+    _attr_maybe_unused dlnode_t * prev_p = p;
+    double pk0 = p->x[0], pk1 = p->x[1], _attr_maybe_unused pk2 = p->x[2];
+    for (p = p->next[0]; p != stop; p = p->next[0]) {
+        const double pj0 = p->x[0], pj1 = p->x[1], pj2 = p->x[2];
+        if ((pk0 > pj0) | (pk1 > pj1)) {
+            TreapNode *pred = treap_find_le(&tree, pj1);
+            assert(pred != NULL);
+            const double * prev_x = pred->item.dlnode->x;
+            if (prev_x[0] <= pj0) {
+                // pj is dominated by a point in the tree.
+#ifdef HVC_ONLY
+                if (all_equal_double(prev_x, p->x, 3))
+                    pred->item.dlnode->ignore = true; // It will have zero hvc.
+#endif
+                remove_from_z(p);
+                continue;
+            }
+            // pj is NOT dominated
+            hv3d_init_treap_node(node, p);
+            TreapNode * prev, *next;
+            (void) treap_insert_and_displace_get_bounds(&tree, node, &prev, &next);
+            node++;
+            // Check if the data structure is properly setup
+            assert(prev->item.dlnode->x[0] > pj0 && prev->item.dlnode->x[1] < pj1);
+            assert(next->item.dlnode->x[0] < pj0 && next->item.dlnode->x[1] > pj1);
+            set_delimiters(p, prev->item.dlnode, next->item.dlnode);
+
+            pk0 = pj0; pk1 = pj1; pk2 = pj2;
+            prev_p = p;
+        } else {
+            // pj is dominated by a previous point.
+#ifdef HVC_ONLY
+            if (pk0 == pj0 && pk1 == pj1 && pk2 == pj2)
+                prev_p->ignore = true; // It will have zero hvc.
+#endif
+            remove_from_z(p);
+        }
+    }
+#endif
     free(tnodes);
 #undef set_delimiters
 }

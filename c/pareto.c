@@ -20,22 +20,34 @@ pareto_rank_3d(int * restrict rank, const double * restrict points, size_t size)
     const bool keep_weakly = true;
     const double ** p = generate_row_pointers_asc_rev_3d(points, size);
 
+#if USE_AVL == 1
     avl_tree_t tree;
     avl_init_tree(&tree, qsort_cmp_pdouble_asc_x_nonzero);
     avl_node_t * tnodes = malloc((size+1) * sizeof(*tnodes));
     const double sentinel[] = { INFINITY, -INFINITY };
     tnodes->item = sentinel;
+#else
+    TreapNode *tnodes = malloc(size * sizeof(*tnodes));
+    assert(tnodes != NULL);
+    Treap tree;
+#endif
     int front = 0;
 
     while (true) {
         ASSUME(size >= 2);
         const double * restrict pk = p[0];
+#if USE_AVL == 1
         avl_node_t * node = tnodes + 1;
         node->item = pk;
         avl_insert_top(&tree, node);
         // Insert sentinel.
         avl_insert_after(&tree, node, tnodes);
-
+#else
+        TreapNode * node = tnodes;
+        treap_node_init(node, pk[0], pk);
+        treap_init_with_single_node(&tree, node);
+        node++;
+#endif
         // In this context, size means "no dominated solution found".
         size_t n_nondom = size, j = 1;
         const double * last_dom = NULL;
@@ -43,6 +55,7 @@ pareto_rank_3d(int * restrict rank, const double * restrict points, size_t size)
             const double * restrict pj = p[j];
             bool dominated;
             if (pk[0] > pj[0] || pk[1] > pj[1]) {
+#if USE_AVL == 1
                 avl_node_t * nodeaux;
                 int res = avl_search_closest(&tree, pj, &nodeaux);
                 assert(res != 0);
@@ -78,6 +91,15 @@ pareto_rank_3d(int * restrict rank, const double * restrict points, size_t size)
                     (++node)->item = pj;
                     avl_insert_before(&tree, nodeaux, node);
                 }
+#else
+                TreapNode *pred = treap_find_le(&tree, pj[0]);
+                dominated = (pred != NULL && pred->item[1] <= pj[1]);
+                if (!dominated) {
+                    treap_node_init(node, pj[0], pj);
+                    (void) treap_insert_and_displace(&tree, node);
+                    node++;
+                }
+#endif
             } else {
                 // Handle duplicates and points that are dominated by the immediate
                 // previous one.
@@ -134,7 +156,9 @@ pareto_rank_3d(int * restrict rank, const double * restrict points, size_t size)
                          k, p[k][0], p[k][1], p[k][2]);
 
         front++;
+#if USE_AVL == 1
         avl_clear_tree(&tree);
+#endif
     }
 }
 

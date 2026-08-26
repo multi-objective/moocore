@@ -3,7 +3,11 @@
 ## 0.20
 
  * radixsort.h, insort.h: New.
-
+ * treap.h: New.
+ * pareto.c (pareto_rank_3d): Replace AVL-tree with Treap.
+ * nondominated.h (find_nondominated_3d_impl_sorted): Likewise.
+ * nondominated_kung.h (kung_merge_dim3): Likewise.
+ * hv3d_priv.h (hv3d_preprocessing): Likewise.
 
 ## 0.19.2
 

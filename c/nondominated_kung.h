@@ -134,7 +134,24 @@ maxima_partition(const double * restrict * restrict u, size_t size, double v)
     DEBUG1(for (size_t j = low; j < size; j++) assert(v < u[j][0]));
     return low;
 }
+#undef USE_AVL
+#define USE_AVL 0
+#if USE_AVL == 1
+typedef const double avl_item_t;
+typedef struct avl_node_t {
+    struct avl_node_t *next;
+    struct avl_node_t *prev;
+    struct avl_node_t *parent;
+    struct avl_node_t *left;
+    struct avl_node_t *right;
+    avl_item_t *item;
+    unsigned char depth;
+} avl_node_t;
 
+#include "avl_tiny.h"
+#endif
+
+#if USE_AVL == 1
 /**
    Returns NULL if point is dominated by a different point in the tree.
 */
@@ -165,6 +182,51 @@ dominated_by_tree_3d(const avl_tree_t * restrict tree,
     return nodeaux; // point is not dominated
 }
 
+#else
+static inline bool
+dominated_by_tree_3d(Treap *tree, const double *point)
+{
+    DEBUG1(treap_validate_tree(tree->root));
+    // Find the rightmost point with prev_node->key <= point[1].
+    TreapNode *prev_node = treap_find_le(tree, point[1]);
+    if (prev_node != NULL) {
+        const double * prev = prev_node->item - 1;
+        if (prev[2] <= point[2]) {
+            assert(prev[0] <= point[0]);
+            assert(prev[1] <= point[1]);
+            return true; // p is dominated
+        }
+    }
+    return false; // p is not dominated
+}
+
+// FIXME: How to merge this function and the one above?
+static inline bool
+insert_if_not_dominated_by_tree_3d(Treap *tree, TreapNode *node, const double *point)
+{
+    DEBUG1(treap_validate_tree(tree->root));
+    // Find the rightmost point with prev->key <= point[1].
+    TreapNode **prev_link = treap_find_le_link(tree, point[1]);
+    if (prev_link != NULL) {
+        const double * prev = (*prev_link)->item - 1;
+        if (prev[2] <= point[2]) {
+            assert(prev[0] <= point[0]);
+            assert(prev[1] <= point[1]);
+            return false; // p is dominated
+        } else if (prev[1] == point[1]) {
+            // p dominates prev. Remove the already found node.
+            treap_erase_at(prev_link);
+            DEBUG1(treap_validate_tree(tree->root));
+        }
+    }
+    treap_node_init(node, point[1], point + 1);
+    // FIXME: This will call split_lt, but we just called find_le above, so can
+    // we avoid one of them?
+    (void)treap_insert_and_displace(tree, node);
+    return true; // p was inserted.
+}
+#endif
+
 /**
    ALGORITHM 5.1. This algorithm accepts two sets R and S of 3-dimensional
    vectors with r_size and s_size elements, respectively, and finds all the
@@ -187,6 +249,7 @@ kung_merge_dim3(const double ** restrict r, size_t r_size,
     DEBUG1(for (size_t j = 0; j < k; j++) assert(s[j][0] < r0));
     DEBUG1(for (size_t j = k; j < s_size; j++) assert(r0 <= s[j][0]));
 
+#if USE_AVL == 1
     avl_tree_t tree;
     avl_init_tree(&tree, qsort_cmp_pdouble_asc_y_asc_z);
     // FIXME: Use a workspace to allocate this once and re-alloc only if a larger number is needed.
@@ -198,20 +261,31 @@ kung_merge_dim3(const double ** restrict r, size_t r_size,
     const double sentinel[] = { INFINITY, INFINITY, -INFINITY};
     (++node)->item = sentinel;
     avl_insert_after(&tree, node - 1, node);
-
+#else
+    TreapNode *tnodes = malloc(r_size * sizeof(*tnodes));
+    assert(tnodes != NULL);
+    Treap tree;
+    TreapNode * node = tnodes;
+    treap_node_init(node, r[0][1], r[0] + 1);
+    treap_init_with_single_node(&tree, node);
+    node++;
+#endif
+    DEBUG2(printf_point("insert in tree: r=[ ", r[0], 3, " ]\n"));
     size_t i = 1, new_size = s_size;
     do {
         const double * restrict v = s[k];
-        DEBUG2_PRINT("i = %zu, j = %zu, s_size = %zu", i, k, s_size);
+        DEBUG2_PRINT("i = %zu, j = %zu, s_size = %zu, ", i, k, s_size);
         DEBUG2(printf_point("v = [ ", v, 3, " ]\n"));
 
         while (i < r_size) { // Add to the tree all points in R that could dominate v.
             const double * restrict u = r[i];
-            if (u[0] > v[0]) {
+            if (u[0] > v[0])
                 break;
-            }
+
+#if USE_AVL == 1
             avl_node_t * nodeaux = dominated_by_tree_3d(&tree, u);
             if (nodeaux != NULL) { // u is NOT dominated by a point in the tree.
+                DEBUG2(printf_point("!dominated_by_tree_3d: u=[ ", u, 3, " ]\n"));
                 const double * restrict point = nodeaux->item;
                 assert(u[1] <= point[1]);
                 // Delete everything in the tree that is dominated by u.
@@ -233,6 +307,16 @@ kung_merge_dim3(const double ** restrict r, size_t r_size,
             i++;
         }
         if (dominated_by_tree_3d(&tree, v) == NULL) {
+#else
+            if (insert_if_not_dominated_by_tree_3d(&tree, node, u)) {
+                // u is NOT dominated by a point in the tree.
+                DEBUG2(printf_point("!dominated_by_tree_3d: u=[ ", u, 3, " ]\n"));
+                node++;
+            }
+            i++;
+        }
+        if (dominated_by_tree_3d(&tree, v)) {
+#endif
             DEBUG2(printf_point("dominated_by_tree_3d: v=[ ", v, 3, " ]\n"));
             s[k] = NULL; // dominated
             new_size--;

@@ -1,5 +1,19 @@
 #ifndef NONDOMINATED_H
 #define NONDOMINATED_H
+/*****************************************************************************
+
+ Various algorithm for filtering dominated solutions
+
+ ---------------------------------------------------------------------
+
+ Copyright (C) 2026
+ Manuel Lopez-Ibanez <manuel.lopez-ibanez@manchester.ac.uk>
+
+ This Source Code Form is subject to the terms of the Mozilla Public
+ License, v. 2.0. If a copy of the MPL was not distributed with this
+ file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+*****************************************************************************/
 
 #include "config.h"
 #include <string.h> // memcpy
@@ -7,6 +21,9 @@
 #include "sort.h"
 #include "radixsort.h"
 
+#define USE_AVL 0
+
+#if USE_AVL == 1
 typedef const double avl_item_t;
 typedef struct avl_node_t {
     struct avl_node_t *next;
@@ -19,6 +36,16 @@ typedef struct avl_node_t {
 } avl_node_t;
 
 #include "avl_tiny.h"
+#else
+typedef const double * TreapItem;
+static inline const double *
+treap_item_get_z(TreapItem item)
+{
+    return item;
+}
+
+#include "treap.h"
+#endif
 
 enum objs_agree_t { AGREE_MINIMISE = -1, AGREE_NONE = 0, AGREE_MAXIMISE = 1 };
 
@@ -335,6 +362,7 @@ find_nondominated_3d_impl_sorted(const double ** restrict rows, size_t size,
                                  const bool find_dominated)
 {
     ASSUME(size > 1);
+#if USE_AVL == 1
     /* FIXME: The AVL-tree is the bottleneck of this algorithm. A Treap
        [R. Seidel and C. R. Aragon. Randomized search trees.  Algorithmica,
        16:464–497, 1996] may be far more efficient by allowing to remove a
@@ -402,6 +430,42 @@ find_nondominated_3d_impl_sorted(const double ** restrict rows, size_t size,
                    : printf_point("insert before point: ", point, 3, "\n"));
             (++node)->item = pj;
             avl_insert_before(&tree, nodeaux, node);
+#else
+    TreapNode *tnodes = malloc(size * sizeof(*tnodes));
+    assert(tnodes != NULL);
+    TreapNode * node = tnodes;
+    double pk0 = rows[0][0], pk1 = rows[0][1], pk2 = rows[0][2];
+    treap_node_init(node, pk0, rows[0]);
+    Treap tree;
+    treap_init_with_single_node(&tree, node);
+    node++;
+
+    // In this context, size means "no dominated solution found".
+    size_t new_size = size;
+    bool prev_dominated = false;
+    for (size_t j = 1; j < size; ++j) {
+        const double * restrict pj = rows[j];
+        DEBUG2(printf_point("pj = [ ", pj, 3, " ], "));
+        const double pj0 = pj[0], pj1 = pj[1], pj2 = pj[2];
+        if ((pk0 > pj0) | (pk1 > pj1)) {
+            // Check if pj is dominated by a point in the tree.
+            /* In a valid 2-D frontier, x increases and y decreases.  Therefore
+               the only existing point that can dominate pj is the frontier
+               predecessor with the largest key <= pj0.  */
+            TreapNode *pred = treap_find_le(&tree, pj0);
+            if (pred != NULL && pred->item[1] <= pj1)
+                goto j_is_dominated;
+            /* pj is not dominated by an existing frontier point.
+
+               Insert it and detach every existing point dominated by it.
+
+               The returned treap contains exactly those displaced nodes, but
+               we do not need to traverse it here because those nodes will
+               never again participate in dominance queries.  */
+            treap_node_init(node, pj0, pj);
+            (void) treap_insert_and_displace(&tree, node);
+            node++;
+#endif
             // Fall-through to j_is_NOT_dominated.
         } // Handle duplicates and points that are dominated by the immediate previous one.
         else if (!keep_weakly // Don't keep duplicates.
@@ -430,7 +494,6 @@ find_nondominated_3d_impl_sorted(const double ** restrict rows, size_t size,
         rows[j] = NULL;
         new_size--;
     }
-
 early_end:
     free(tnodes);
     return new_size;
