@@ -219,7 +219,8 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
     n = i; // Update number of points.
     if (likely(n > 1)) {
 #ifdef HVC_ONLY
-        // Lexicographic ordering ensures that we do not have dominated points in the AVL-tree.
+        // Lexicographic ordering ensures that we do not have dominated points
+        // when building the trees later during preprocessing.
         radix_sort_asc_rev_3d(scratch, n);
 #else
         (HV_DIMENSION == 3)
