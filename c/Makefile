@@ -221,7 +221,7 @@ main-hv.o: cmdline.h io.h hv.h timer.h libmoocore-config.h nondominated.h hvappr
 main-hvapprox.o: cmdline.h io.h hvapprox.h
 ndsort.o: cmdline.h io.h nondominated.h hv.h
 nondominated.h: avl_tiny.h nondominated_kung.h
-nondominated.o : cmdline.h io.h nondominated.h
+nondominated.o : cmdline.h io.h nondominated.h nondominated_kung.h
 pareto.o: nondominated.h
 rng.o: rng.h mt19937/mt19937.h ziggurat_constants.h
 timer.o: timer.h
