@@ -201,7 +201,7 @@ class Bench:
                     or self.times[what][-1] <= self.max_time
                 ]
 
-    def plots(self, title, file_prefix, log="y", relative=False):
+    def plots(self, title, file_prefix, log="y", relative=False, xlabel="n"):
 
         # Pad with nan so we don't have problems later when converting to DataFrame.
         max_len = np.max([len(v) for v in self.times.values()])
@@ -226,6 +226,7 @@ class Bench:
             logy=logy,
             style="o-",
             title="",
+            xlabel=xlabel,
             ylabel="CPU time (seconds)",
         )
         if logx:
@@ -242,7 +243,6 @@ class Bench:
         plt.savefig(f"{file_prefix}_bench-{self.name}-time.png")
 
         if relative and self.baseline in self.keys():
-            df
             reltimes = {}
             for what in self.keys():
                 if what == self.baseline:
@@ -262,6 +262,7 @@ class Bench:
                 logy=False,  # Looks bad with logy
                 style="o-",
                 title="",
+                xlabel=xlabel,
                 ylabel="Time relative to moocore",
             )
             if logx:
@@ -295,6 +296,7 @@ class Bench:
             style="o-",
             title="",
             xticks=df.index,
+            xlabel=xlabel,
             ylabel=self.value_label,
         )
         plt.title(f"({self.cpu_model})", fontsize=10)
