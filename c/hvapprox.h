@@ -37,5 +37,18 @@ MOOCORE_API double hv_approx_rphi_fang_wang_plus(
     const double * restrict ref, const boolvec * restrict maximise,
     uint_fast32_t nsamples);
 
+/**
+   FPRAS (fully polynomial-time randomized approximation scheme)
+
+   K. Bringmann, T. Friedrich. Approximating the volume of unions and
+   intersections of high-dimensional geometric objects. Computational Geometry:
+   Theory and Applications, vol. 43, pages 601-610, 2010.
+   https://doi.org/10.1016/j.comgeo.2010.03.004
+*/
+MOOCORE_API double hv_approx_fpras(
+    const double * restrict data, size_t npoints, dimension_t dim,
+    const double * restrict ref, const boolvec * restrict maximise,
+    uint32_t random_seed, double epsilon, double delta);
+
 END_C_DECLS
 #endif // HV_APPROX_H_

@@ -5,6 +5,17 @@ test_that("hv_approx errors", {
   expect_equal(hv_approx(x, ref = 1), 0)
 })
 
+test_that("hv_approx_fpras errors", {
+  x <- matrix(c(0, 0), ncol = 2)
+  expect_error(hv_approx_fpras(x, reference = c(1, 1), epsilon = 0),
+    "epsilon must be a positive numeric value")
+  expect_error(hv_approx_fpras(x, reference = c(1, 1), delta = 0),
+    "delta must be strictly within")
+  expect_error(hv_approx_fpras(x, reference = c(1, 1), epsilon = 1e-9, delta = 0.001),
+    "would require a very long time")
+  expect_equal(hv_approx_fpras(matrix(c(2, 2), ncol = 2), reference = c(1, 1)), 0)
+})
+
 for (dim in seq(3L, 10L)) {
   test_that(paste0("hv_approx dim=", dim), {
     x <- matrix(replicate(dim, 0.5), ncol=dim)
@@ -25,6 +36,12 @@ for (dim in seq(3L, 10L)) {
     # method="Rphi-FWE+" is the default
     signif <- if (dim < 6) 4 else if (dim < 8) 3 else 2
     expect_equal(hv_approx(x, ref=ref), true_hv,
+      tolerance = 10**-signif, info = paste0("dim=", dim, ", signif=", signif,
+        " error=", log10(abs(true_hv - appr_hv) / true_hv)))
+
+    appr_hv <- hv_approx_fpras(x, ref=ref)
+    signif <- 4
+    expect_equal(appr_hv, true_hv,
       tolerance = 10**-signif, info = paste0("dim=", dim, ", signif=", signif,
         " error=", log10(abs(true_hv - appr_hv) / true_hv)))
   })

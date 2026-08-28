@@ -1,6 +1,7 @@
 # moocore (development)
 
  * `is_nondominated` is up to 10x faster in some inputs thanks to a customized radixsort implementation.
+ * `hv_approx_fpras()`: New function. Approximates the hypervolume indicator via a fully polynomial-time randomized approximation scheme (FPRAS) [@BriFri2010approx].
 
 
 # moocore 0.3.2

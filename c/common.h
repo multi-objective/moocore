@@ -129,4 +129,29 @@ printf_point(const char * prefix, const double * p, dimension_t dim,
     fprintf(stderr, "%s", suffix);
 }
 
+static inline double
+cumsum_of_vector_double(double * restrict v, size_t n)
+{
+    ASSUME(n > 0);
+    for (size_t i = 1; i < n; i++)
+        v[i] += v[i-1];
+    return v[n - 1];
+}
+
+/** Uses Kahan summation. */
+static inline double
+kahan_sum_of_vector_double(const double * restrict v, size_t n)
+{
+    double sum = 0.0, compensation = 0.0;
+    for (size_t i = 0; i < n; i++) {
+        double y = v[i] - compensation;
+        double z = sum + y;
+        compensation = (z - sum) - y;
+        sum = z;
+    }
+    return sum;
+}
+
+
+
 #endif 	    /* !MOOCORE_COMMON_H_ */

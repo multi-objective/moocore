@@ -236,4 +236,15 @@
 # define ASAN_POISON_MEMORY_REGION(addr, size) ((void) (addr), (void) (size))
 #endif
 
+/* GCC/Clang: use builtins to avoid MinGW isfinite/isnormal macro oddities and
+             -Werror=float-conversion false positives.
+*/
+#if defined(__clang__) || defined(__GNUC__)
+#  define is_finite(x) __builtin_isfinite(x)
+#  define is_normal(x) __builtin_isnormal(x)
+#else
+#  define is_finite(x) isfinite(x) // C99
+#  define is_normal(x) isnormal(x) // C99
+#endif
+
 #endif /* GCC_ATTRIBUTES */

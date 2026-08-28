@@ -4,12 +4,12 @@
 
  ---------------------------------------------------------------------
 
-                       Copyright (c) 2025
+                       Copyright (c) 2026
              Manuel Lopez-Ibanez <manuel.lopez-ibanez@manchester.ac.uk>
 
  This Source Code Form is subject to the terms of the Mozilla Public
  License, v. 2.0. If a copy of the MPL was not distributed with this
- file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ file, you can obtain one at https://mozilla.org/MPL/2.0/.
 
  ----------------------------------------------------------------------
 
@@ -31,7 +31,7 @@
 #include "timer.h"
 #include "nondominated.h"
 #include "hvapprox.h"
-#define CMDLINE_COPYRIGHT_YEARS "2025"
+#define CMDLINE_COPYRIGHT_YEARS "2026"
 #define CMDLINE_AUTHORS "Manuel Lopez-Ibanez <manuel.lopez-ibanez@manchester.ac.uk>\n"
 #include "cmdline.h"
 
@@ -39,8 +39,15 @@ static int verbose_flag = 1;
 static bool union_flag = false;
 static char *suffix = NULL;
 
-enum approx_method_t { DZ2019_MC=1, DZ2019_HW=2, Rphi_FWEp=3 };
-static const char * approx_method_str[] = {"DZ2019-MC", "DZ2019-HW", "Rphi-FWE+"};
+enum approx_method_t { DZ2019_MC=1, DZ2019_HW=2, Rphi_FWEp=3, FPRAS=4 };
+struct hvapprox_params_t {
+    enum approx_method_t method;
+    uint32_t seed;
+    uint_fast32_t nsamples;
+    double epsilon;
+    double delta;
+};
+static const char * approx_method_str[] = {"DZ2019-MC", "DZ2019-HW", "Rphi-FWE+", "FPRAS"};
 
 static void usage(void)
 {
@@ -64,12 +71,17 @@ OPTION_VERSION_STR
 " -s, --suffix=STRING Create an output file for each input file by appending\n"
 "                     this suffix. This is ignored when reading from stdin. \n"
 "                     If missing, output is sent to stdout.                 \n"
-" -n, --nsamples=N    Number of Monte-Carlo samples (N is a positive integer).\n"
 " -m, --method=M      1: Monte-Carlo sampling using normal distribution;    \n"
 "                     2: Hua-Wang deterministic sampling.                   \n"
 "                     3: Rphi-FWE+ deterministic sampling (default).        \n"
+"                     4: FPRAS (Bringmann, Friedrich, 2010).                \n"
+" -n, --nsamples=N    Number of Monte-Carlo samples (N is a positive integer).\n"
 OPTION_SEED_STR
-"                     Only method=1.                                        \n"
+"                     Only method=1 or method=4.\n"
+" -e, --epsilon=E     Desired relative error of the approximation, E > 0.\n"
+"                     Only method=4.\n"
+" -d, --delta=D       Desired failure probability 0 < D < 1, where (1 - D) \n"
+"                     gives the confidence level. Only method=4.\n"
 "\n");
 }
 
@@ -90,8 +102,7 @@ OPTION_SEED_STR
 static void
 hvapprox_file(const char * filename, double * restrict reference,
               double * restrict maximum, double * restrict minimum,
-              int * restrict nobj_p,
-              uint_fast32_t nsamples, enum approx_method_t hv_approx_method, uint32_t seed)
+              int * restrict nobj_p, struct hvapprox_params_t hvapprox)
 {
     double * data = NULL;
     int * cumsizes = NULL;
@@ -150,15 +161,18 @@ hvapprox_file(const char * filename, double * restrict reference,
         Timer_start ();
 
         double volume;
-        switch (hv_approx_method) {
+        switch (hvapprox.method) {
           case DZ2019_MC:
-              volume = hv_approx_normal(&data[nobj * cumsize], cumsizes[n] - cumsize, nobj, reference, maximise, nsamples, seed);
+              volume = hv_approx_normal(&data[nobj * cumsize], cumsizes[n] - cumsize, nobj, reference, maximise, hvapprox.nsamples, hvapprox.seed);
               break;
           case DZ2019_HW:
-              volume = hv_approx_hua_wang(&data[nobj * cumsize], cumsizes[n] - cumsize, nobj, reference, maximise, nsamples);
+              volume = hv_approx_hua_wang(&data[nobj * cumsize], cumsizes[n] - cumsize, nobj, reference, maximise, hvapprox.nsamples);
               break;
           case Rphi_FWEp:
-              volume = hv_approx_rphi_fang_wang_plus(&data[nobj * cumsize], cumsizes[n] - cumsize, nobj, reference, maximise, nsamples);
+              volume = hv_approx_rphi_fang_wang_plus(&data[nobj * cumsize], cumsizes[n] - cumsize, nobj, reference, maximise, hvapprox.nsamples);
+              break;
+          case FPRAS:
+              volume = hv_approx_fpras(&data[nobj * cumsize], cumsizes[n] - cumsize, nobj, reference, maximise, hvapprox.seed, hvapprox.epsilon, hvapprox.delta);
               break;
           default:  // LCOV_EXCL_LINE # nocov
               unreachable();
@@ -186,7 +200,7 @@ hvapprox_file(const char * filename, double * restrict reference,
 int main(int argc, char *argv[])
 {
     // See the man page for getopt_long for an explanation of these fields.
-    static const char short_options[] = "hVvqur:s:n:m:S:";
+    static const char short_options[] = "hVvqur:s:n:m:S:e:d:";
     static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
         {"version",    no_argument,       NULL, 'V'},
@@ -198,6 +212,8 @@ int main(int argc, char *argv[])
         {"method",     required_argument, NULL, 'm'},
         {"nsamples",   required_argument, NULL, 'n'},
         {"seed",       required_argument, NULL, 'S'},
+        {"epsilon",    required_argument, NULL, 'e'},
+        {"delta",      required_argument, NULL, 'd'},
         {NULL, 0, NULL, 0} /* marks end of list */
     };
 
@@ -205,9 +221,9 @@ int main(int argc, char *argv[])
 
     double * reference = NULL;
     int nobj = 0;
-    uint32_t seed = 0;
-    uint_fast32_t nsamples = 0;
-    enum approx_method_t hv_approx_method = Rphi_FWEp;
+    struct hvapprox_params_t hvapprox = {
+        .method = Rphi_FWEp, .seed = 0, .nsamples = 0, .epsilon = 0.01, .delta = 0.1
+    };
 
     int opt; /* it's actually going to hold a char.  */
     int longopt_index;
@@ -229,33 +245,51 @@ int main(int argc, char *argv[])
           case 'n': { // --nsamples
               char *endp;
               long int value = strtol(optarg, &endp, 10);
-              if (endp == optarg || *endp != '\0' || value <= 0 || value == LONG_MAX) {
+              if (endp == optarg || *endp != '\0' || value <= 0 || value == LONG_MAX)
                   fatal_error("value of --nsamples must be a positive integer '%s'", optarg);
-              }
-              nsamples = (uint_fast32_t) value;
+              hvapprox.nsamples = (uint_fast32_t) value;
+              break;
+          }
+
+          case 'e': { // --epsilon
+              char *endp;
+              double value = strtod(optarg, &endp);
+              if (endp == optarg || *endp != '\0' || value <= 0 || value == HUGE_VAL || !is_normal(value))
+                  fatal_error("value of --epsilon must be a positive floating-point value, not '%s'", optarg);
+              hvapprox.epsilon = value;
+              break;
+          }
+
+          case 'd': { // --delta
+              char *endp;
+              double value = strtod(optarg, &endp);
+              if (endp == optarg || *endp != '\0' || value <= 0 || value >= 1 || !is_normal(value))
+                  fatal_error("value of --delta must be a floating-point value within (0, 1), not '%s'", optarg);
+              hvapprox.delta = value;
               break;
           }
 
           case 'm': // --method
               switch (*optarg) {
                 case '1':
-                    hv_approx_method = DZ2019_MC; break;
+                    hvapprox.method = DZ2019_MC; break;
                 case '2':
-                    hv_approx_method = DZ2019_HW; break;
+                    hvapprox.method = DZ2019_HW; break;
                 case '3':
-                    hv_approx_method = Rphi_FWEp; break;
+                    hvapprox.method = Rphi_FWEp; break;
+                case '4':
+                    hvapprox.method = FPRAS; break;
                 default:
-                    fatal_error("valid values of --method (-m) are: 1, 2 or 3, not '%s'", optarg);
+                    fatal_error("valid values of --method (-m) are: 1, 2, 3, or 4 not '%s'", optarg);
               }
               break;
 
           case 'S': {// --seed
               char *endp;
               long int value = strtol(optarg, &endp, 10);
-              if (endp == optarg || *endp != '\0' || value <= 0) {
+              if (endp == optarg || *endp != '\0' || value <= 0)
                   fatal_error("value of --seed must be a positive integer '%s'", optarg);
-              }
-              seed = (uint32_t) value;
+              hvapprox.seed = (uint32_t) value;
               break;
           }
         case 'q': // --quiet
@@ -271,27 +305,33 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (nsamples == 0)
+    if (hvapprox.nsamples == 0 && hvapprox.method != FPRAS)
         fatal_error("must specify a value for --nsamples, for example, --nsamples 524288");
+    if (hvapprox.nsamples != 0 && hvapprox.method == FPRAS)
+        fatal_error("--nsamples does not make sense with --method=4");
 
-    if (seed == 0) {
-        if (hv_approx_method == DZ2019_MC)
-            seed = (uint32_t) time(NULL);
-    } else if (hv_approx_method != DZ2019_MC) {
-        fatal_error("--seed only makes sense with --method=1");
+    if (hvapprox.method == DZ2019_MC || hvapprox.method == FPRAS) {
+        if (hvapprox.seed == 0)
+            hvapprox.seed = (uint32_t) time(NULL);
+    } else if (hvapprox.seed != 0)
+        fatal_error("--seed only makes sense with --method=1 or --method=4");
+
+    if (verbose_flag >= 2) {
+        printf("# Method: %s\n", approx_method_str[hvapprox.method - 1]);
+        if (hvapprox.method == DZ2019_MC || hvapprox.method != FPRAS)
+            printf("# seed: %"PRIu32 "\n", hvapprox.seed);
+        if (hvapprox.method != FPRAS)
+            printf("# nsamples: %lu\n", (unsigned long) hvapprox.nsamples);
+        else
+            printf("# epsilon: %g\n# delta: %g\n", hvapprox.epsilon, hvapprox.delta);
     }
-
-    if (verbose_flag >= 2)
-        printf("# Method: %s\n# seed: %"PRIu32 "\n# nsamples: %lu\n",
-               approx_method_str[hv_approx_method - 1],
-               seed, (unsigned long) nsamples);
 
     int numfiles = argc - optind;
     if (numfiles < 1) /* Read stdin.  */
-        hvapprox_file(NULL, reference, NULL, NULL, &nobj, nsamples, hv_approx_method, seed);
+        hvapprox_file(NULL, reference, NULL, NULL, &nobj, hvapprox);
 
     else if (numfiles == 1) {
-        hvapprox_file (argv[optind], reference, NULL, NULL, &nobj, nsamples, hv_approx_method, seed);
+        hvapprox_file (argv[optind], reference, NULL, NULL, &nobj, hvapprox);
     } else {
         int k;
         double * maximum = NULL;
@@ -312,7 +352,8 @@ int main(int argc, char *argv[])
             }
         }
         for (k = 0; k < numfiles; k++)
-            hvapprox_file (argv[optind + k], reference, maximum, minimum, &nobj, nsamples, hv_approx_method, seed);
+            hvapprox_file (argv[optind + k], reference, maximum, minimum, &nobj,
+                           hvapprox);
 
         free(minimum);
         free(maximum);
