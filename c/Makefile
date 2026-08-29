@@ -171,7 +171,7 @@ EXE_FILES := $(addsuffix $(EXE), $(addprefix $(BINDIR)/,$(ALL_NAMES)))
 SHLIB=libmoocore.$(SHLIB_EXT)
 CXXSHLIB=libmoocorepp.$(SHLIB_EXT)
 
-.PHONY : all clean default dist $(ALL_NAMES) test time shlibs
+.PHONY : default all clean-obj clean dist $(ALL_NAMES) test time shlibs
 
 default: $(EXE_FILES)
 
@@ -237,7 +237,11 @@ $(CXXSHLIB): CFLAGS += $(SHLIB_CFLAGS)
 $(CXXSHLIB): $(LIBHV_OBJS)
 	$(QUIET_CXX)$(CXX) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $^ $(SHLIB_LDFLAGS)
 
-clean:
+clean-obj:
+	$(call ECHO,---> Removing object files: $(OBJS) <---)
+	@$(RM) $(OBJS) $(HV_OBJS) $(HV_LIB)
+
+clean: clean-obj
 	@-$(RM) *.s *.i *.gcda mt19937/*.gcda
 	@-$(RM) config.status config.log
 	@-$(RM) $(SHLIB) $(CXXSHLIB)
@@ -245,8 +249,6 @@ clean:
 		echo "---> Removing $$exe <---"; \
 		$(RM) $$exe; \
 	done
-	$(call ECHO,---> Removing object files: $(OBJS) <---)
-	@$(RM) $(OBJS) $(HV_OBJS) $(HV_LIB)
 
 TESTSUITE:="../testsuite"
 asan: OPT_CFLAGS ?=-O3 -g3
