@@ -129,4 +129,17 @@ printf_point(const char * prefix, const double * p, dimension_t dim,
     fprintf(stderr, "%s", suffix);
 }
 
+#include <math.h> // sqrt()
+
+_attr_pure_func static inline double
+euclidean_norm(const double * restrict w, dimension_t dim)
+{
+    ASSUME(dim >= 2);
+    double norm = (w[0] * w[0]) + (w[1] * w[1]);
+    for (dimension_t k = 2; k < dim; k++)
+        norm += w[k] * w[k];
+    ASSUME(norm >= 0); // GCC is not able to infer this.
+    return sqrt(norm);
+}
+
 #endif 	    /* !MOOCORE_COMMON_H_ */

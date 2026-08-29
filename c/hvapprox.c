@@ -200,17 +200,6 @@ static const long double sphere_area_div_2_pow_d_times_d[] = {
     0x1.4866e45924c71ba782251a99649c76cd10bffad1bdp-48L, // d = 31, value = 4.5574921866587215e-15
 };
 
-_attr_pure_func static double
-euclidean_norm(const double * restrict w, dimension_t dim)
-{
-    ASSUME(2 <= dim);
-    double norm = (w[0] * w[0]) + (w[1] * w[1]);
-    for (dimension_t k = 2; k < dim; k++)
-        norm += w[k] * w[k];
-    ASSUME(norm >= 0); // GCC is not able to infer this.
-    return sqrt(norm);
-}
-
 /**
    Hypervolume approximation DZ2019-MC.
 
