@@ -93,8 +93,8 @@
 /* The warn_unused_result attribute causes a warning to be emitted if
    a caller of the function with this attribute does not use its
    return value.  */
-#ifndef __must_check
-# define __must_check	__attribute__((__warn_unused_result__))
+#ifndef _attr_warn_unused_result
+# define _attr_warn_unused_result __attribute__((__warn_unused_result__))
 #endif
 
 /* The deprecated attribute results in a warning if the function is
