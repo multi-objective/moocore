@@ -2983,9 +2983,8 @@ def apply_within_sets(
 
     >>> moocore.apply_within_sets(
     ...     x, sets, lambda x: x.max(axis=0)
-    ... )  # doctest: +ELLIPSIS
+    ... )  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
-        ...
     ValueError: `func` returned an array of length 3 but the input has length 2 for rows [0 5]
 
     """
