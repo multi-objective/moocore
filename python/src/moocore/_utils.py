@@ -14,7 +14,8 @@ def asarray_maybe_copy(
     x: ArrayLike, dtype: type = float
 ) -> tuple[np.ndarray, bool]:
     """Convert to numpy array of dtype=float and detect copies."""
-    return get1_and_is_copied(np.asarray(x, dtype=dtype), x)
+    x_arr: np.ndarray = np.asarray(x, dtype=dtype)
+    return x_arr, id(x_arr) != id(x)
 
 
 def unique_nosort(array: ArrayLike, **kwargs: Any) -> np.ndarray:
@@ -24,29 +25,27 @@ def unique_nosort(array: ArrayLike, **kwargs: Any) -> np.ndarray:
 
     """
     uniq, index = np.unique(array, return_index=True, **kwargs)
-    return uniq[index.argsort()]
+    return np.asarray(uniq[index.argsort()])
 
 
 def np2d_to_double_array(
     x: ArrayLike, ctype_shape: tuple[str, str] = ("int", "int")
 ) -> tuple[ffi.CData, ffi.CData, ffi.CData]:
-    nrows = ffi.cast(ctype_shape[0], x.shape[0])
-    ncols = ffi.cast(ctype_shape[1], x.shape[1])
-    # FIXME: This may cause an unexpected copy. Make this an assert and force
-    # the caller to enforce it if needed.
-    x = np.ascontiguousarray(x)
-    x = ffi.from_buffer("double []", x)
-    return x, nrows, ncols
+    x_arr = np.ascontiguousarray(x)
+    nrows = ffi.cast(ctype_shape[0], x_arr.shape[0])
+    ncols = ffi.cast(ctype_shape[1], x_arr.shape[1])
+    x_buf = ffi.from_buffer("double []", x_arr)
+    return x_buf, nrows, ncols
 
 
 def np1d_to_c_array(
     x: ArrayLike, ctype_data: str, ctype_size: str
 ) -> tuple[ffi.CData, ffi.CData]:
-    size = ffi.cast(ctype_size, x.shape[0])
     ctype_dtype = np.intc() if ctype_data == "int" else None
-    x = np.ascontiguousarray(x, dtype=ctype_dtype)
-    x = ffi.from_buffer(ctype_data + "[]", x)
-    return x, size
+    x_arr = np.ascontiguousarray(x, dtype=ctype_dtype)
+    size = ffi.cast(ctype_size, x_arr.shape[0])
+    x_buf = ffi.from_buffer(ctype_data + "[]", x_arr)
+    return x_buf, size
 
 
 def np1d_to_double_array(
@@ -79,7 +78,7 @@ def is_integer_value(n: Any) -> bool:
         return False
     # FIXME: When we bump to Python 3.12, we can use float().is_integer()
     try:
-        return int(n) == n
+        return bool(int(n) == n)
     except ValueError:
         return False
     except TypeError:

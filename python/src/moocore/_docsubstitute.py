@@ -1,5 +1,8 @@
 from string import Template
 import inspect
+from typing import Any, TypeVar
+
+_T = TypeVar("_T")
 
 COMMON_PARAMS = {
     "points": """Array of numerical values, where each row gives the coordinates of a point in objective space.
@@ -26,18 +29,19 @@ COMMON_PARAMS = {
 
 
 class DocSubstitute:
-    def __init__(self):
+    def __init__(self) -> None:
         self.params = COMMON_PARAMS
 
-    def __call__(self, func):
-        if func.__doc__:
+    def __call__(self, func: _T) -> _T:
+        func_any: Any = func
+        if func_any.__doc__:
             try:
-                func.__doc__ = Template(
-                    inspect.cleandoc(func.__doc__)
+                func_any.__doc__ = Template(
+                    inspect.cleandoc(func_any.__doc__)
                 ).substitute(self.params)
             except KeyError as e:
                 missing = e.args[0]
                 raise RuntimeError(
-                    f"Missing docstring substitution for '{missing}' in {func.__name__}"
+                    f"Missing docstring substitution for '{missing}' in {func_any.__name__}"
                 )
         return func
