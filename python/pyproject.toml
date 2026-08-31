@@ -191,7 +191,7 @@ collapse_tables = [ "project.authors" ]
 files = [ "src/" ]
 # Imports
 ignore_missing_imports = true
-python_version = "3.11"
+python_version = "3.12"
 disallow_untyped_calls = true
 # Strictness (recommended for library code)
 disallow_untyped_defs = true

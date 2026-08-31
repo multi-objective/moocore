@@ -1,3 +1,6 @@
+from typing import Any
+from collections.abc import Callable
+
 from string import Template
 import inspect
 
@@ -26,10 +29,10 @@ COMMON_PARAMS = {
 
 
 class DocSubstitute:
-    def __init__(self):
+    def __init__(self) -> None:
         self.params = COMMON_PARAMS
 
-    def __call__(self, func):
+    def __call__(self, func: Callable[..., Any]) -> Callable[..., Any]:
         if func.__doc__:
             try:
                 func.__doc__ = Template(

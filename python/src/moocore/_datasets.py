@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Any
 
 import hashlib
 import numpy as np
@@ -35,7 +36,7 @@ _DATASETS_CHECKSUMS = {
 
 
 # FIXME: Python >=3.11 has hashlib.file_digest()
-def _file_checksum(path) -> str:
+def _file_checksum(path: Path | str) -> str:
     """Calculate the sha256 hash of the file at path."""
     sha256hash = hashlib.sha256()
     chunk_size = 8192
@@ -221,7 +222,7 @@ def get_dataset_path(
     )
 
 
-def get_dataset(filename: str, /, **kwargs) -> np.ndarray:
+def get_dataset(filename: str, /, **kwargs: Any) -> np.ndarray:
     """Return dataset provided by ``moocore`` as a NumPy array.
 
     Parameters

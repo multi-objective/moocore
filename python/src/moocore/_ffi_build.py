@@ -8,6 +8,8 @@ The header files required must be placed in the first argument of `ffibuilder.se
 
 """
 
+from typing import Any
+
 import os
 import platform
 from cffi import FFI
@@ -51,7 +53,7 @@ sources = [
 sources = [sources_path + f for f in sources]
 
 
-def get_config():  # nocov
+def get_config() -> Any:  # nocov
     from distutils.core import Distribution
     from distutils.sysconfig import get_config_vars
 
@@ -60,12 +62,14 @@ def get_config():  # nocov
     return config
 
 
-def uses_msvc():  # nocov
+def uses_msvc() -> bool:  # nocov
     config = get_config()
-    return config.try_compile('#ifndef _MSC_VER\n#error "not MSVC"\n#endif')
+    return bool(
+        config.try_compile('#ifndef _MSC_VER\n#error "not MSVC"\n#endif')
+    )
 
 
-def _get_target_platform():
+def _get_target_platform() -> str:
     arch_flags = os.environ.get("ARCHFLAGS", "")
     flags = [f for f in arch_flags.split(" ") if f.strip() != ""]
     try:
@@ -94,7 +98,7 @@ MSVC_CFLAGS = [
 ]
 MSVC_LDFLAGS = ["/LTCG"]  # Link-time optimization
 GCC_CFLAGS = ["-O3", "-flto", "-fvisibility=hidden"]
-GCC_LDFLAGS = []
+GCC_LDFLAGS: list[str] = []
 if is_x86_64:
     # Compile for sufficiently old x86-64 architecture.
     MSVC_arch = ["/arch:AVX"]
