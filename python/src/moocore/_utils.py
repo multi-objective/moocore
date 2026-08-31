@@ -17,18 +17,18 @@ def asarray_maybe_copy(
     return get1_and_is_copied(np.asarray(x, dtype=dtype), x)
 
 
-def unique_nosort(array: ArrayLike, **kwargs: Any) -> np.ndarray:
+def unique_nosort(array: ArrayLike, axis: int | None = None) -> np.ndarray:
     """Return unique values without sorting them.
 
     See https://github.com/numpy/numpy/issues/7265
 
     """
-    uniq, index = np.unique(array, return_index=True, **kwargs)
+    uniq, index = np.unique(array, return_index=True, axis=axis)
     return uniq[index.argsort()]
 
 
 def np2d_to_double_array(
-    x: ArrayLike, ctype_shape: tuple[str, str] = ("int", "int")
+    x: np.ndarray, ctype_shape: tuple[str, str] = ("int", "int")
 ) -> tuple[ffi.CData, ffi.CData, ffi.CData]:
     nrows = ffi.cast(ctype_shape[0], x.shape[0])
     ncols = ffi.cast(ctype_shape[1], x.shape[1])
@@ -77,16 +77,13 @@ def is_integer_value(n: Any) -> bool:
         return True
     if n is None:
         return False
-    # FIXME: When we bump to Python 3.12, we can use float().is_integer()
     try:
-        return int(n) == n
-    except ValueError:
-        return False
-    except TypeError:
+        return bool(n.is_integer())
+    except AttributeError:
         return False
 
 
-def _get_seed_for_c(seed: Any) -> ffi.CData:
+def _get_seed_for_c(seed: int | np.random.Generator | None) -> ffi.CData:
     if not is_integer_value(seed):
         seed = np.random.default_rng(seed).integers(2**32 - 2, dtype=np.uint32)
     return ffi.cast("uint32_t", seed)

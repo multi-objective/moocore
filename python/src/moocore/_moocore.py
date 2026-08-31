@@ -64,14 +64,14 @@ class ReadDatasetsError(Exception):
         super().__init__(self.message)
 
 
-def _check_dimension_max(dim: int, max_dim: int):
+def _check_dimension_max(dim: int, max_dim: int) -> None:
     if dim > max_dim:
         raise ValueError(
             f"This function supports at most {max_dim} columns, but input has {dim}"
         )
 
 
-def read_datasets(filename: str | os.PathLike | StringIO) -> np.ndarray:
+def read_datasets(filename: str | os.PathLike[str] | StringIO) -> np.ndarray:
     """Read an input dataset file, parsing the file and returning a numpy array.
 
     Parameters
@@ -175,7 +175,7 @@ def _parse_maximise(maximise: bool | Sequence[bool], nobj: int) -> np.ndarray:
 
 def _parse_maximise_to_bool_array(
     maximise: bool | Sequence[bool], nobj: int
-) -> np.ndarray:
+) -> ffi.CData:
     """Convert maximise array or single bool to C array.
 
     In the C library, boolean arrays are of type boolvec, which is uint8_t.
@@ -185,7 +185,7 @@ def _parse_maximise_to_bool_array(
     )
 
 
-def _all_positive(x: ArrayLike) -> bool:
+def _all_positive(x: np.ndarray) -> bool:
     return x.min() > 0
 
 
@@ -207,7 +207,9 @@ def _igd_python(
     return float(res)
 
 
-def _igd_plus_python(points, ref, maximise: bool | Sequence[bool] = False):
+def _igd_plus_python(
+    points: ArrayLike, ref: ArrayLike, maximise: bool | Sequence[bool] = False
+) -> float:
     points, points_copied = asarray_maybe_copy(points)
     ref, ref_copied = asarray_maybe_copy(ref)
     ref = np.atleast_2d(ref)
@@ -229,12 +231,20 @@ def _igd_plus_python(points, ref, maximise: bool | Sequence[bool] = False):
 
 
 def _avg_hausdorff_dist_python(
-    points, ref, maximise: bool | Sequence[bool] = False, p: int = 1
-):
-    return max(_igd_python(points, ref, p), _igd_python(ref, points, p))
+    points: ArrayLike,
+    ref: ArrayLike,
+    maximise: bool | Sequence[bool] = False,
+    p: int = 1,
+) -> float:
+    return max(
+        _igd_python(points, ref, maximise, p),
+        _igd_python(ref, points, maximise, p),
+    )
 
 
-def _epsilon_addi_python(points, ref, maximise: bool | Sequence[bool] = False):
+def _epsilon_addi_python(
+    points: ArrayLike, ref: ArrayLike, maximise: bool | Sequence[bool] = False
+) -> float:
     points, points_copied = asarray_maybe_copy(points)
     ref, ref_copied = asarray_maybe_copy(ref)
     ref = np.atleast_2d(ref)
@@ -253,7 +263,9 @@ def _epsilon_addi_python(points, ref, maximise: bool | Sequence[bool] = False):
     return float(res)
 
 
-def _epsilon_mult_python(points, ref, maximise: bool | Sequence[bool] = False):
+def _epsilon_mult_python(
+    points: ArrayLike, ref: ArrayLike, maximise: bool | Sequence[bool] = False
+) -> float:
     points, points_copied = asarray_maybe_copy(points)
     ref, ref_copied = asarray_maybe_copy(ref)
     ref = np.atleast_2d(ref)
@@ -277,7 +289,9 @@ def _unary_refset_common(
     ref: ArrayLike,
     maximise: bool | Sequence[bool],
     check_all_positive: bool = False,
-):
+) -> tuple[
+    int, ffi.CData, ffi.CData, ffi.CData, ffi.CData, ffi.CData, np.ndarray
+]:
     # Convert to numpy.array in case the user provides a list.  We use
     # np.asarray(dtype=float) to convert it to floating-point, otherwise if a
     # user inputs something like ref = np.array([10, 10]) then numpy would
@@ -342,7 +356,7 @@ def igd(
         points, ref, maximise
     )
     if nobj == 1 or nobj > DIMENSION_MAX:
-        return _igd_python(points, ref)
+        return _igd_python(points, ref, maximise)
     return lib.IGD(points_p, n, d, ref_p, ref_size, maximise_p)
 
 
@@ -452,7 +466,7 @@ def avg_hausdorff_dist(
         raise ValueError("'p' must be larger than zero")
 
     if nobj == 1 or nobj > DIMENSION_MAX:
-        return _avg_hausdorff_dist_python(points, ref, p)
+        return _avg_hausdorff_dist_python(points, ref, maximise, p)
 
     return lib.avg_Hausdorff_dist(
         points_p, n, d, ref_p, ref_size, maximise_p, p
@@ -1319,26 +1333,26 @@ def generate_ndset(
 
     size = (n, d)
 
-    def _sample_simplex():
+    def _sample_simplex() -> np.ndarray:
         x = seed.exponential(size=size)
         x /= x.sum(axis=1, keepdims=True)
         return x
 
-    def _sample_sphere():
+    def _sample_sphere() -> np.ndarray:
         x = np.abs(seed.normal(size=size))
         x /= np.linalg.norm(x, axis=1, keepdims=True)
         return x
 
-    def _sample_convex_sphere():
+    def _sample_convex_sphere() -> np.ndarray:
         return 1.0 - _sample_sphere()
 
-    def _sample_convex_simplex():
+    def _sample_convex_simplex() -> np.ndarray:
         return _sample_simplex() ** 2
 
-    def _sample_inverted_simplex():
+    def _sample_inverted_simplex() -> np.ndarray:
         return 1.0 - _sample_simplex()
 
-    def _sample_concave_simplex():
+    def _sample_concave_simplex() -> np.ndarray:
         return 1.0 - _sample_convex_simplex()
 
     match method:
@@ -2190,7 +2204,7 @@ def vorob_dev(
     sets: ArrayLike,
     *,
     ref: ArrayLike,
-    ve: ArrayLike = None,
+    ve: ArrayLike | None = None,
 ) -> float:
     r"""Compute Vorob'ev deviation.
 
@@ -2524,7 +2538,7 @@ def whv_rect(
     return hv
 
 
-def get_ideal(x, maximise):
+def get_ideal(x: np.ndarray, maximise: np.ndarray) -> np.ndarray:
     # FIXME: Is there a better way to do this?
     lower = x.min(axis=0)
     upper = x.max(axis=0)
@@ -2539,7 +2553,7 @@ def total_whv_rect(
     *,
     ref: ArrayLike,
     maximise: bool | Sequence[bool] = False,
-    ideal: ArrayLike = None,
+    ideal: ArrayLike | None = None,
     scalefactor: float = 0.1,
 ) -> float:
     r"""Compute total weighted hypervolume given a set of rectangles.
@@ -2615,6 +2629,7 @@ def total_whv_rect(
         raise ValueError("'scalefactor' must be within (0,1]")
 
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
+    maximise = _parse_maximise(maximise, nobj)
     whv = whv_rect(points, rectangles, ref=ref, maximise=maximise)
     hv = hypervolume(points, ref=ref)  # FIXME: maximise = maximise)
     if ideal is None:
@@ -2637,7 +2652,7 @@ def largest_eafdiff(
     *,
     maximise: bool | Sequence[bool] = False,
     intervals: int = 5,
-    ideal: ArrayLike = None,
+    ideal: ArrayLike | None = None,
 ) -> tuple[tuple[int, int], float]:
     """Identify largest EAF differences.
 
@@ -2911,7 +2926,7 @@ def whv_hype(
 
 
 def apply_within_sets(
-    x: ArrayLike, sets: ArrayLike, func: Callable[..., Any], **kwargs
+    x: ArrayLike, sets: ArrayLike, func: Callable[..., Any], **kwargs: Any
 ) -> np.ndarray:
     """Split ``x`` by row according to ``sets`` and apply ``func`` to each sub-array.
 
