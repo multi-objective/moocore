@@ -143,7 +143,9 @@ def read_datasets(filename: str | os.PathLike[str] | StringIO) -> np.ndarray:
 
     if filename.endswith(".xz"):
         with lzma.open(filename, "rb") as fsrc:
-            with tempfile.NamedTemporaryFile(mode="wb", delete=False) as fdst_tmp:
+            with tempfile.NamedTemporaryFile(
+                mode="wb", delete=False
+            ) as fdst_tmp:
                 shutil.copyfileobj(fsrc, fdst_tmp)
         filename = fdst_tmp.name
     else:
@@ -227,7 +229,10 @@ def _igd_plus_python(
         ref_arr[:, maximise_arr] = -ref_arr[:, maximise_arr]
 
     res = np.sqrt(
-        [(np.maximum(points_arr - r, 0) ** 2).sum(axis=1).min() for r in ref_arr]
+        [
+            (np.maximum(points_arr - r, 0) ** 2).sum(axis=1).min()
+            for r in ref_arr
+        ]
     ).mean()
     return float(res)
 
@@ -238,7 +243,10 @@ def _avg_hausdorff_dist_python(
     maximise: bool | Sequence[bool] = False,
     p: int = 1,
 ) -> float:
-    return max(_igd_python(points, ref, maximise, p), _igd_python(ref, points, maximise, p))
+    return max(
+        _igd_python(points, ref, maximise, p),
+        _igd_python(ref, points, maximise, p),
+    )
 
 
 def _epsilon_addi_python(
@@ -260,7 +268,9 @@ def _epsilon_addi_python(
             ref_arr = ref_arr.copy()
         ref_arr[:, maximise_arr] = -ref_arr[:, maximise_arr]
 
-    res = np.array([np.max(points_arr - r, axis=1).min() for r in ref_arr]).max()
+    res = np.array(
+        [np.max(points_arr - r, axis=1).min() for r in ref_arr]
+    ).max()
     return float(res)
 
 
@@ -283,7 +293,9 @@ def _epsilon_mult_python(
             ref_arr = ref_arr.copy()
         ref_arr[:, maximise_arr] = 1.0 / ref_arr[:, maximise_arr]
 
-    res = np.array([np.max(points_arr / r, axis=1).min() for r in ref_arr]).max()
+    res = np.array(
+        [np.max(points_arr / r, axis=1).min() for r in ref_arr]
+    ).max()
     return float(res)
 
 
@@ -469,9 +481,9 @@ def avg_hausdorff_dist(
     if nobj == 1 or nobj > DIMENSION_MAX:
         return _avg_hausdorff_dist_python(points, ref, maximise, p)
 
-    return float(lib.avg_Hausdorff_dist(
-        points_p, n, d, ref_p, ref_size, maximise_p, p
-    ))
+    return float(
+        lib.avg_Hausdorff_dist(points_p, n, d, ref_p, ref_size, maximise_p, p)
+    )
 
 
 @DocSubstitute()
@@ -524,7 +536,9 @@ def epsilon_additive(
     if nobj == 1 or nobj > DIMENSION_MAX:
         return _epsilon_addi_python(points, ref, maximise)
 
-    return float(lib.epsilon_additive(points_p, n, d, ref_p, ref_size, maximise_p))
+    return float(
+        lib.epsilon_additive(points_p, n, d, ref_p, ref_size, maximise_p)
+    )
 
 
 @DocSubstitute()
@@ -1468,13 +1482,17 @@ def is_nondominated(
 
     if nobj < 2:
         if nobj == 1:  # Handle single-objective inputs
-            maximise_1d = bool(array_1d_of_length_n(maximise, 1).astype(bool)[0])
+            maximise_1d = bool(
+                array_1d_of_length_n(maximise, 1).astype(bool)[0]
+            )
             if keep_weakly:
                 best = points.max() if maximise_1d else points.min()
                 return np.asarray((points == best).ravel())
             else:
                 nondom = np.zeros(len(points), dtype=bool)
-                nondom[points.argmax() if maximise_1d else points.argmin()] = True
+                nondom[points.argmax() if maximise_1d else points.argmin()] = (
+                    True
+                )
                 return nondom
         else:  # nobj == 0
             raise ValueError("input points must have at least 1 column")
@@ -1690,7 +1708,9 @@ def filter_dominated(
 
     """
     points_arr = np.asarray(points, dtype=float)
-    mask = is_nondominated(points_arr, maximise=maximise, keep_weakly=keep_weakly)
+    mask = is_nondominated(
+        points_arr, maximise=maximise, keep_weakly=keep_weakly
+    )
     return np.asarray(points_arr[mask])
 
 

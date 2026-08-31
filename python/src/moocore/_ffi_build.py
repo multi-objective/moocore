@@ -63,7 +63,9 @@ def get_config() -> Any:  # nocov
 
 def uses_msvc() -> bool:  # nocov
     config = get_config()
-    return bool(config.try_compile('#ifndef _MSC_VER\n#error "not MSVC"\n#endif'))
+    return bool(
+        config.try_compile('#ifndef _MSC_VER\n#error "not MSVC"\n#endif')
+    )
 
 
 def _get_target_platform() -> str:
