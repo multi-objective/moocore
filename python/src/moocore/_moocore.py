@@ -64,14 +64,14 @@ class ReadDatasetsError(Exception):
         super().__init__(self.message)
 
 
-def _check_dimension_max(dim: int, max_dim: int):
+def _check_dimension_max(dim: int, max_dim: int) -> None:
     if dim > max_dim:
         raise ValueError(
             f"This function supports at most {max_dim} columns, but input has {dim}"
         )
 
 
-def read_datasets(filename: str | os.PathLike | StringIO) -> np.ndarray:
+def read_datasets(filename: str | os.PathLike[str] | StringIO) -> np.ndarray:
     """Read an input dataset file, parsing the file and returning a numpy array.
 
     Parameters
@@ -129,7 +129,7 @@ def read_datasets(filename: str | os.PathLike | StringIO) -> np.ndarray:
 
     """  # noqa: D301
     if isinstance(filename, os.PathLike):
-        filename = os.fspath(filename)
+        filename = os.fsdecode(filename)
     elif isinstance(filename, StringIO):
         with tempfile.NamedTemporaryFile(mode="wt", delete=False) as fdst:
             shutil.copyfileobj(filename, fdst)
@@ -143,21 +143,21 @@ def read_datasets(filename: str | os.PathLike | StringIO) -> np.ndarray:
 
     if filename.endswith(".xz"):
         with lzma.open(filename, "rb") as fsrc:
-            with tempfile.NamedTemporaryFile(delete=False) as fdst:
-                shutil.copyfileobj(fsrc, fdst)
-        filename = fdst.name
+            with tempfile.NamedTemporaryFile(mode="wb", delete=False) as fdst_tmp:
+                shutil.copyfileobj(fsrc, fdst_tmp)
+        filename = fdst_tmp.name
     else:
-        fdst = None
+        fdst_tmp = None
 
     # Encode filename to a binary string
-    filename = filename.encode("utf-8")
+    filename_bytes = filename.encode("utf-8")
     # Create return pointers for function
     data_p = ffi.new("double **")
     ncols_p = ffi.new("int *")
     datasize_p = ffi.new("int *")
-    err_code = lib.read_datasets(filename, data_p, ncols_p, datasize_p)
-    if fdst:
-        os.remove(fdst.name)
+    err_code = lib.read_datasets(filename_bytes, data_p, ncols_p, datasize_p)
+    if fdst_tmp:
+        os.remove(fdst_tmp.name)
     if err_code != 0:
         raise ReadDatasetsError(err_code)
 
@@ -175,7 +175,7 @@ def _parse_maximise(maximise: bool | Sequence[bool], nobj: int) -> np.ndarray:
 
 def _parse_maximise_to_bool_array(
     maximise: bool | Sequence[bool], nobj: int
-) -> np.ndarray:
+) -> Any:
     """Convert maximise array or single bool to C array.
 
     In the C library, boolean arrays are of type boolvec, which is uint8_t.
@@ -185,8 +185,8 @@ def _parse_maximise_to_bool_array(
     )
 
 
-def _all_positive(x: ArrayLike) -> bool:
-    return x.min() > 0
+def _all_positive(x: np.ndarray) -> bool:
+    return bool(x.min() > 0)
 
 
 def _igd_python(
@@ -207,68 +207,83 @@ def _igd_python(
     return float(res)
 
 
-def _igd_plus_python(points, ref, maximise: bool | Sequence[bool] = False):
-    points, points_copied = asarray_maybe_copy(points)
-    ref, ref_copied = asarray_maybe_copy(ref)
-    ref = np.atleast_2d(ref)
-    nobj = points.shape[1]
-    maximise = _parse_maximise(maximise, nobj)
+def _igd_plus_python(
+    points: ArrayLike,
+    ref: ArrayLike,
+    maximise: bool | Sequence[bool] = False,
+) -> float:
+    points_arr, points_copied = asarray_maybe_copy(points)
+    ref_arr, ref_copied = asarray_maybe_copy(ref)
+    ref_arr = np.atleast_2d(ref_arr)
+    nobj = points_arr.shape[1]
+    maximise_arr = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
-    if maximise.any():
+    if maximise_arr.any():
         if not points_copied:
-            points = points.copy()
-        points[:, maximise] = -points[:, maximise]
+            points_arr = points_arr.copy()
+        points_arr[:, maximise_arr] = -points_arr[:, maximise_arr]
         if not ref_copied:
-            ref = ref.copy()
-        ref[:, maximise] = -ref[:, maximise]
+            ref_arr = ref_arr.copy()
+        ref_arr[:, maximise_arr] = -ref_arr[:, maximise_arr]
 
     res = np.sqrt(
-        [(np.maximum(points - r, 0) ** 2).sum(axis=1).min() for r in ref]
+        [(np.maximum(points_arr - r, 0) ** 2).sum(axis=1).min() for r in ref_arr]
     ).mean()
     return float(res)
 
 
 def _avg_hausdorff_dist_python(
-    points, ref, maximise: bool | Sequence[bool] = False, p: int = 1
-):
-    return max(_igd_python(points, ref, p), _igd_python(ref, points, p))
+    points: ArrayLike,
+    ref: ArrayLike,
+    maximise: bool | Sequence[bool] = False,
+    p: int = 1,
+) -> float:
+    return max(_igd_python(points, ref, maximise, p), _igd_python(ref, points, maximise, p))
 
 
-def _epsilon_addi_python(points, ref, maximise: bool | Sequence[bool] = False):
-    points, points_copied = asarray_maybe_copy(points)
-    ref, ref_copied = asarray_maybe_copy(ref)
-    ref = np.atleast_2d(ref)
-    nobj = points.shape[1]
-    maximise = _parse_maximise(maximise, nobj)
+def _epsilon_addi_python(
+    points: ArrayLike,
+    ref: ArrayLike,
+    maximise: bool | Sequence[bool] = False,
+) -> float:
+    points_arr, points_copied = asarray_maybe_copy(points)
+    ref_arr, ref_copied = asarray_maybe_copy(ref)
+    ref_arr = np.atleast_2d(ref_arr)
+    nobj = points_arr.shape[1]
+    maximise_arr = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
-    if maximise.any():
+    if maximise_arr.any():
         if not points_copied:
-            points = points.copy()
-        points[:, maximise] = -points[:, maximise]
+            points_arr = points_arr.copy()
+        points_arr[:, maximise_arr] = -points_arr[:, maximise_arr]
         if not ref_copied:
-            ref = ref.copy()
-        ref[:, maximise] = -ref[:, maximise]
+            ref_arr = ref_arr.copy()
+        ref_arr[:, maximise_arr] = -ref_arr[:, maximise_arr]
 
-    res = np.array([np.max(points - r, axis=1).min() for r in ref]).max()
+    res = np.array([np.max(points_arr - r, axis=1).min() for r in ref_arr]).max()
     return float(res)
 
 
-def _epsilon_mult_python(points, ref, maximise: bool | Sequence[bool] = False):
-    points, points_copied = asarray_maybe_copy(points)
-    ref, ref_copied = asarray_maybe_copy(ref)
-    ref = np.atleast_2d(ref)
-    nobj = points.shape[1]
-    maximise = _parse_maximise(maximise, nobj)
+def _epsilon_mult_python(
+    points: ArrayLike,
+    ref: ArrayLike,
+    maximise: bool | Sequence[bool] = False,
+) -> float:
+    points_arr, points_copied = asarray_maybe_copy(points)
+    ref_arr, ref_copied = asarray_maybe_copy(ref)
+    ref_arr = np.atleast_2d(ref_arr)
+    nobj = points_arr.shape[1]
+    maximise_arr = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
-    if maximise.any():
+    if maximise_arr.any():
         if not points_copied:
-            points = points.copy()
-        points[:, maximise] = 1.0 / points[:, maximise]
+            points_arr = points_arr.copy()
+        points_arr[:, maximise_arr] = 1.0 / points_arr[:, maximise_arr]
         if not ref_copied:
-            ref = ref.copy()
-        ref[:, maximise] = 1.0 / ref[:, maximise]
+            ref_arr = ref_arr.copy()
+        ref_arr[:, maximise_arr] = 1.0 / ref_arr[:, maximise_arr]
 
-    res = np.array([np.max(points / r, axis=1).min() for r in ref]).max()
+    res = np.array([np.max(points_arr / r, axis=1).min() for r in ref_arr]).max()
     return float(res)
 
 
@@ -277,7 +292,7 @@ def _unary_refset_common(
     ref: ArrayLike,
     maximise: bool | Sequence[bool],
     check_all_positive: bool = False,
-):
+) -> tuple[int, Any, Any, Any, Any, Any, Any]:
     # Convert to numpy.array in case the user provides a list.  We use
     # np.asarray(dtype=float) to convert it to floating-point, otherwise if a
     # user inputs something like ref = np.array([10, 10]) then numpy would
@@ -307,8 +322,8 @@ def _unary_refset_common(
     ref, ref_size, _ = np2d_to_double_array(
         ref, ctype_shape=("size_t", "uint_fast8_t")
     )
-    maximise = _parse_maximise_to_bool_array(maximise, nobj)
-    return nobj, points, npoints, nobj_c, ref, ref_size, maximise
+    maximise_p = _parse_maximise_to_bool_array(maximise, nobj)
+    return nobj, points, npoints, nobj_c, ref, ref_size, maximise_p
 
 
 @DocSubstitute()
@@ -343,7 +358,7 @@ def igd(
     )
     if nobj == 1 or nobj > DIMENSION_MAX:
         return _igd_python(points, ref)
-    return lib.IGD(points_p, n, d, ref_p, ref_size, maximise_p)
+    return float(lib.IGD(points_p, n, d, ref_p, ref_size, maximise_p))
 
 
 @DocSubstitute()
@@ -411,7 +426,7 @@ def igd_plus(
     )
     if nobj == 1 or nobj > DIMENSION_MAX:
         return _igd_plus_python(points, ref, maximise)
-    return lib.IGD_plus(points_p, n, d, ref_p, ref_size, maximise_p)
+    return float(lib.IGD_plus(points_p, n, d, ref_p, ref_size, maximise_p))
 
 
 @DocSubstitute()
@@ -452,11 +467,11 @@ def avg_hausdorff_dist(
         raise ValueError("'p' must be larger than zero")
 
     if nobj == 1 or nobj > DIMENSION_MAX:
-        return _avg_hausdorff_dist_python(points, ref, p)
+        return _avg_hausdorff_dist_python(points, ref, maximise, p)
 
-    return lib.avg_Hausdorff_dist(
+    return float(lib.avg_Hausdorff_dist(
         points_p, n, d, ref_p, ref_size, maximise_p, p
-    )
+    ))
 
 
 @DocSubstitute()
@@ -509,7 +524,7 @@ def epsilon_additive(
     if nobj == 1 or nobj > DIMENSION_MAX:
         return _epsilon_addi_python(points, ref, maximise)
 
-    return lib.epsilon_additive(points_p, n, d, ref_p, ref_size, maximise_p)
+    return float(lib.epsilon_additive(points_p, n, d, ref_p, ref_size, maximise_p))
 
 
 @DocSubstitute()
@@ -548,10 +563,10 @@ def epsilon_mult(
     if nobj == 1 or nobj > DIMENSION_MAX:
         return _epsilon_mult_python(points, ref, maximise)
 
-    return lib.epsilon_mult(points_p, n, d, ref_p, ref_size, maximise_p)
+    return float(lib.epsilon_mult(points_p, n, d, ref_p, ref_size, maximise_p))
 
 
-def _hypervolume(points: ArrayLike, ref: ArrayLike) -> float:
+def _hypervolume(points: np.ndarray, ref: np.ndarray) -> float:
     _check_dimension_max(points.shape[1], HV_DIMENSION_MAX)
     points_p, npoints, nobj = np2d_to_double_array(
         points, ctype_shape=("size_t", "uint_fast8_t")
@@ -560,7 +575,7 @@ def _hypervolume(points: ArrayLike, ref: ArrayLike) -> float:
     hv = lib.fpli_hv(points_p, npoints, nobj, ref_buf)
     if hv < 0:
         raise MemoryError("memory allocation failed")
-    return hv
+    return float(hv)
 
 
 @DocSubstitute()
@@ -680,14 +695,14 @@ def hypervolume(
         raise ValueError("input points must have at least 1 column")
     # Make sure it is a 1D array of length nobj.
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
-    maximise = _parse_maximise(maximise, nobj)
+    maximise_arr = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
-    if maximise.any():
+    if maximise_arr.any():
         if not points_copied:
             points = points.copy()
-        points[:, maximise] = -points[:, maximise]
+        points[:, maximise_arr] = -points[:, maximise_arr]
         ref = ref.copy()
-        ref[maximise] = -ref[maximise]
+        ref[maximise_arr] = -ref[maximise_arr]
 
     return _hypervolume(points, ref)
 
@@ -966,14 +981,14 @@ def hv_contributions(
     _check_dimension_max(nobj, HV_DIMENSION_MAX)
 
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
-    maximise = _parse_maximise(maximise, nobj)
+    maximise_arr = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
-    if maximise.any():
+    if maximise_arr.any():
         if not points_copied:
             points = points.copy()
-        points[:, maximise] = -points[:, maximise]
+        points[:, maximise_arr] = -points[:, maximise_arr]
         ref = ref.copy()
-        ref[maximise] = -ref[maximise]
+        ref[maximise_arr] = -ref[maximise_arr]
 
     hvc = np.empty(len(points), dtype=float)
     hvc_p, _ = np1d_to_double_array(hvc)
@@ -1174,7 +1189,7 @@ def hv_approx(
         case _:
             raise ValueError("Unknown method = {method}")
 
-    return hv
+    return float(hv)
 
 
 # FIXME: Implement also WFG hard type described here:
@@ -1317,29 +1332,30 @@ def generate_ndset(
     if seed is None or is_integer_value(seed):
         seed = np.random.default_rng(seed)
 
+    rng: Any = seed
     size = (n, d)
 
-    def _sample_simplex():
-        x = seed.exponential(size=size)
+    def _sample_simplex() -> np.ndarray:
+        x: np.ndarray = rng.exponential(size=size)
         x /= x.sum(axis=1, keepdims=True)
         return x
 
-    def _sample_sphere():
-        x = np.abs(seed.normal(size=size))
+    def _sample_sphere() -> np.ndarray:
+        x: np.ndarray = np.abs(rng.normal(size=size))
         x /= np.linalg.norm(x, axis=1, keepdims=True)
         return x
 
-    def _sample_convex_sphere():
-        return 1.0 - _sample_sphere()
+    def _sample_convex_sphere() -> np.ndarray:
+        return np.asarray(1.0 - _sample_sphere())
 
-    def _sample_convex_simplex():
-        return _sample_simplex() ** 2
+    def _sample_convex_simplex() -> np.ndarray:
+        return np.asarray(_sample_simplex() ** 2)
 
-    def _sample_inverted_simplex():
-        return 1.0 - _sample_simplex()
+    def _sample_inverted_simplex() -> np.ndarray:
+        return np.asarray(1.0 - _sample_simplex())
 
-    def _sample_concave_simplex():
-        return 1.0 - _sample_convex_simplex()
+    def _sample_concave_simplex() -> np.ndarray:
+        return np.asarray(1.0 - _sample_convex_simplex())
 
     match method:
         case "simplex" | "linear" | "L":
@@ -1452,13 +1468,13 @@ def is_nondominated(
 
     if nobj < 2:
         if nobj == 1:  # Handle single-objective inputs
-            maximise = array_1d_of_length_n(maximise, 1).astype(bool)
+            maximise_1d = bool(array_1d_of_length_n(maximise, 1).astype(bool)[0])
             if keep_weakly:
-                best = points.max() if maximise else points.min()
-                return (points == best).ravel()
+                best = points.max() if maximise_1d else points.min()
+                return np.asarray((points == best).ravel())
             else:
                 nondom = np.zeros(len(points), dtype=bool)
-                nondom[points.argmax() if maximise else points.argmin()] = True
+                nondom[points.argmax() if maximise_1d else points.argmin()] = True
                 return nondom
         else:  # nobj == 0
             raise ValueError("input points must have at least 1 column")
@@ -1551,7 +1567,7 @@ def any_dominated(
         points, ctype_shape=("size_t", "uint_fast8_t")
     )
     res = lib.find_weakly_dominated_point(points_p, npoints, nobj, maximise_p)
-    return res < nrows
+    return bool(res < nrows)
 
 
 @DocSubstitute()
@@ -1629,9 +1645,9 @@ def is_nondominated_within_sets(
         raise ValueError("'points' must have at least 2 columns (2 objectives)")
 
     # FIXME: How can we make this faster?
-    _, idx, inv = np.unique(sets, return_index=True, return_inverse=True)
+    _, idx_sort, inv = np.unique(sets, return_index=True, return_inverse=True)
     # Remember the original position of each element of each set.
-    idx = [np.flatnonzero(inv == i) for i in idx.argsort()]
+    idx = [np.flatnonzero(inv == i) for i in idx_sort.argsort()]
     points = np.concatenate(
         [
             is_nondominated(
@@ -1642,8 +1658,8 @@ def is_nondominated_within_sets(
             for g_idx in idx
         ]
     )
-    idx = np.concatenate(idx).argsort()
-    return points.take(idx, axis=0)
+    idx_order = np.concatenate(idx).argsort()
+    return points.take(idx_order, axis=0)
 
 
 @DocSubstitute()
@@ -1673,9 +1689,9 @@ def filter_dominated(
         Returns the rows of ``points`` where :func:`is_nondominated` is ``True``.
 
     """
-    return points[
-        is_nondominated(points, maximise=maximise, keep_weakly=keep_weakly)
-    ]
+    points_arr = np.asarray(points, dtype=float)
+    mask = is_nondominated(points_arr, maximise=maximise, keep_weakly=keep_weakly)
+    return np.asarray(points_arr[mask])
 
 
 @DocSubstitute()
@@ -1870,12 +1886,12 @@ def pareto_rank(
 
     _check_dimension_max(nobj, DIMENSION_MAX)
 
-    maximise = _parse_maximise(maximise, nobj)
-    if maximise.any():
+    maximise_arr = _parse_maximise(maximise, nobj)
+    if maximise_arr.any():
         # FIXME: Do this in C.
         if not points_copied:
             points = points.copy()
-        points[:, maximise] = -points[:, maximise]
+        points[:, maximise_arr] = -points[:, maximise_arr]
 
     points_p, npoints, nobj = np2d_to_double_array(
         points, ctype_shape=("size_t", "uint_fast8_t")
@@ -2064,6 +2080,7 @@ def eaf(
 
     """
     points = np.asarray(points, dtype=float)
+    sets_arr = np.asarray(sets)
     ncols = points.shape[1]
     if ncols < 2:
         raise ValueError("'points' must have at least 2 columns")
@@ -2071,21 +2088,21 @@ def eaf(
         raise NotImplementedError(
             "Only 2D or 3D datasets are currently supported for computing the EAF"
         )
-    if len(sets) != points.shape[0]:
+    if len(sets_arr) != points.shape[0]:
         raise ValueError(
             "'sets' must have the same length as the number of rows of 'points'"
         )
 
-    _, cumsizes = np.unique(sets, return_counts=True)
+    _, cumsizes = np.unique(sets_arr, return_counts=True)
     nsets = len(cumsizes)
     cumsizes = np.cumsum(cumsizes)
     cumsizes_p, ncumsizes = np1d_to_int_array(cumsizes)
-    percentiles = np.ravel(percentiles)
-    if len(percentiles) == 0:
-        percentiles = np.arange(1.0, nsets + 1) * (100.0 / nsets)
+    percentiles_arr = np.ravel(percentiles)
+    if len(percentiles_arr) == 0:
+        percentiles_arr = np.arange(1.0, nsets + 1) * (100.0 / nsets)
     else:
-        percentiles = np.unique(np.asarray(percentiles, dtype=float))
-    percentile_p, npercentiles = np1d_to_double_array(percentiles)
+        percentiles_arr = np.unique(np.asarray(percentiles_arr, dtype=float))
+    percentile_p, npercentiles = np1d_to_double_array(percentiles_arr)
 
     # Get C pointers + matrix size for calling CFFI generated extension module
     points_p, _, nobj = np2d_to_double_array(points)
@@ -2171,7 +2188,7 @@ def vorob_t(
     b = 100.0
     while diff != 0:
         c = (a + b) / 2.0
-        eaf_res = eaf(points, sets=sets, percentiles=c)[:, :nobj]
+        eaf_res = eaf(points, sets=sets, percentiles=[c])[:, :nobj]
         tmp = hv_ind(eaf_res)
         if tmp > avg_hyp:
             a = c
@@ -2190,7 +2207,7 @@ def vorob_dev(
     sets: ArrayLike,
     *,
     ref: ArrayLike,
-    ve: ArrayLike = None,
+    ve: ArrayLike | None = None,
 ) -> float:
     r"""Compute Vorob'ev deviation.
 
@@ -2360,7 +2377,7 @@ def eafdiff(
     )
     nobj = x.shape[1] - 1
     assert nobj == 2
-    maximise = _parse_maximise(maximise, nobj=nobj)
+    maximise_arr = _parse_maximise(maximise, nobj=nobj)
     # The C code expects points within a set to be contiguous.
     x = x[x[:, -1].argsort(), :]
     y = y[y[:, -1].argsort(), :]
@@ -2372,8 +2389,8 @@ def eafdiff(
     nsets = len(cumsizes)
 
     data = np.vstack((x[:, :-1], y[:, :-1]))
-    if maximise.any():
-        data[:, maximise] = -data[:, maximise]
+    if maximise_arr.any():
+        data[:, maximise_arr] = -data[:, maximise_arr]
 
     if intervals is None:
         intervals = int(nsets / 2.0)
@@ -2404,13 +2421,13 @@ def eafdiff(
     # FIXME: Check that we do not generate duplicated nor overlapping
     # rectangles with different colors. That would be a bug.
 
-    if maximise.any():
+    if maximise_arr.any():
         if rectangles:
-            maximise = np.concatenate((maximise, maximise))
-        maximise = np.flatnonzero(
-            maximise
+            maximise_arr = np.concatenate((maximise_arr, maximise_arr))
+        maximise_arr = np.flatnonzero(
+            maximise_arr
         )  # Using bool directly misses the color column.
-        eaf_data[:, maximise] = -eaf_data[:, maximise]
+        eaf_data[:, maximise_arr] = -eaf_data[:, maximise_arr]
 
     return eaf_data
 
@@ -2496,35 +2513,36 @@ def whv_rect(
     nobj = points.shape[1]
     if nobj != 2:
         raise NotImplementedError("Only 2D points are currently supported")
-    if rectangles.shape[1] != 5:
+    rectangles_arr = np.asarray(rectangles, dtype=float)
+    if rectangles_arr.shape[1] != 5:
         raise ValueError(
             "Invalid number of columns in 'rectangles' (should be 5)"
         )
 
-    maximise = _parse_maximise(maximise, nobj)
-    if maximise.any():
+    maximise_arr = _parse_maximise(maximise, nobj)
+    if maximise_arr.any():
         raise NotImplementedError("Only minimization is currently supported")
     # FIXME: Move to C code.
-    # maximise = _parse_maximise(maximise, nobj)
-    # if maximise.any():
-    #     x[:, maximise] = -x[:, maximise]
-    #     ref[maximise] = -ref[maximise]
-    #     if maximise.all():
-    #         rectangles[:, :4] = -rectangles[:, :4]
+    # maximise_arr = _parse_maximise(maximise, nobj)
+    # if maximise_arr.any():
+    #     x[:, maximise_arr] = -x[:, maximise_arr]
+    #     ref[maximise_arr] = -ref[maximise_arr]
+    #     if maximise_arr.all():
+    #         rectangles_arr[:, :4] = -rectangles_arr[:, :4]
     #     else:
-    #         pos = np.flatnonzero(maximise) + [0,2]
-    #         rectangles[:, pos] = -rectangles[:, pos]
+    #         pos = np.flatnonzero(maximise_arr) + [0,2]
+    #         rectangles_arr[:, pos] = -rectangles_arr[:, pos]
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
     ref = ffi.from_buffer("double []", ref)
-    points, npoints, _ = np2d_to_double_array(points)
-    rectangles, rectangles_nrow, _ = np2d_to_double_array(rectangles)
+    points_p, npoints, _ = np2d_to_double_array(points)
+    rects_p, rectangles_nrow, _ = np2d_to_double_array(rectangles_arr)
     hv = lib.rect_weighted_hv2d(
-        points, npoints, rectangles, rectangles_nrow, ref
+        points_p, npoints, rects_p, rectangles_nrow, ref
     )
-    return hv
+    return float(hv)
 
 
-def get_ideal(x, maximise):
+def get_ideal(x: np.ndarray, maximise: np.ndarray) -> np.ndarray:
     # FIXME: Is there a better way to do this?
     lower = x.min(axis=0)
     upper = x.max(axis=0)
@@ -2539,7 +2557,7 @@ def total_whv_rect(
     *,
     ref: ArrayLike,
     maximise: bool | Sequence[bool] = False,
-    ideal: ArrayLike = None,
+    ideal: ArrayLike | None = None,
     scalefactor: float = 0.1,
 ) -> float:
     r"""Compute total weighted hypervolume given a set of rectangles.
@@ -2607,25 +2625,27 @@ def total_whv_rect(
     nobj = points.shape[1]
     if nobj != 2:
         raise NotImplementedError("Only 2D datasets are currently supported")
-    if rectangles.shape[1] != 5:
+    rectangles_arr = np.asarray(rectangles, dtype=float)
+    if rectangles_arr.shape[1] != 5:
         raise ValueError(
             "Invalid number of columns in 'rectangles' (should be 5)"
         )
     if scalefactor <= 0 or scalefactor > 1:
         raise ValueError("'scalefactor' must be within (0,1]")
 
+    maximise_arr = _parse_maximise(maximise, nobj)
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
-    whv = whv_rect(points, rectangles, ref=ref, maximise=maximise)
+    whv = whv_rect(points, rectangles_arr, ref=ref, maximise=maximise)
     hv = hypervolume(points, ref=ref)  # FIXME: maximise = maximise)
     if ideal is None:
         # FIXME: Should we include the range of the rectangles here?
-        ideal = get_ideal(points, maximise=maximise)
+        ideal_arr = get_ideal(points, maximise=maximise_arr)
     else:
-        ideal = array_1d_of_length_n(
+        ideal_arr = array_1d_of_length_n(
             np.asarray(ideal, dtype=float), nobj, name="ideal"
         )
 
-    beta = scalefactor * abs((ref - ideal).prod())
+    beta = scalefactor * abs((ref - ideal_arr).prod())
     return float(hv + beta * whv)
 
 
@@ -2637,7 +2657,7 @@ def largest_eafdiff(
     *,
     maximise: bool | Sequence[bool] = False,
     intervals: int = 5,
-    ideal: ArrayLike = None,
+    ideal: ArrayLike | None = None,
 ) -> tuple[tuple[int, int], float]:
     """Identify largest EAF differences.
 
@@ -2718,20 +2738,22 @@ def largest_eafdiff(
     if nobj != 2:
         raise NotImplementedError("Only 2D datasets are currently supported")
 
-    maximise = _parse_maximise(maximise, nobj)
+    maximise_arr = _parse_maximise(maximise, nobj)
 
     if ideal is None:
-        ideal = get_ideal(
+        ideal_arr = get_ideal(
             np.concatenate(
                 [[z[:, :-1].min(axis=0), z[:, :-1].max(axis=0)] for z in x],
                 axis=0,
             ),
-            maximise=maximise,
+            maximise=maximise_arr,
         )
+    else:
+        ideal_arr = np.asarray(ideal, dtype=float)
 
-    ideal = ideal.reshape(1, -1)
+    ideal_arr = ideal_arr.reshape(1, -1)
 
-    best_value = 0
+    best_value: float = 0.0
     for a in range(n - 1):
         for b in range(a + 1, n):
             diff = eafdiff(
@@ -2745,13 +2767,13 @@ def largest_eafdiff(
             a_rectangles = diff[diff[:, -1] >= 1, :]
             a_rectangles[:, -1] = 1
             a_value = whv_rect(
-                ideal, rectangles=a_rectangles, ref=ref, maximise=maximise
+                ideal_arr, rectangles=a_rectangles, ref=ref, maximise=maximise
             )
 
             b_rectangles = diff[diff[:, -1] <= -1, :]
             b_rectangles[:, -1] = 1
             b_value = whv_rect(
-                ideal, rectangles=b_rectangles, ref=ref, maximise=maximise
+                ideal_arr, rectangles=b_rectangles, ref=ref, maximise=maximise
             )
 
             value = min(a_value, b_value)
@@ -2874,17 +2896,17 @@ def whv_hype(
     ideal = array_1d_of_length_n(
         np.asarray(ideal, dtype=float), nobj, name="ideal"
     )
-    maximise = _parse_maximise(maximise, nobj)
+    maximise_arr = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
-    if maximise.any():
+    if maximise_arr.any():
         if not points_copied:
             points = points.copy()
-        points[:, maximise] = -points[:, maximise]
+        points[:, maximise_arr] = -points[:, maximise_arr]
         # These are so small that is ok to just copy them.
         ref = ref.copy()
-        ref[maximise] = -ref[maximise]
+        ref[maximise_arr] = -ref[maximise_arr]
         ideal = ideal.copy()
-        ideal[maximise] = -ideal[maximise]
+        ideal[maximise_arr] = -ideal[maximise_arr]
 
     points_p, npoints, nobj = np2d_to_double_array(points)
     ref = ffi.from_buffer("double []", ref)
@@ -2907,11 +2929,11 @@ def whv_hype(
     else:
         raise ValueError("Unknown value of dist = {dist}")
 
-    return hv
+    return float(hv)
 
 
 def apply_within_sets(
-    x: ArrayLike, sets: ArrayLike, func: Callable[..., Any], **kwargs
+    x: ArrayLike, sets: ArrayLike, func: Callable[..., Any], **kwargs: Any
 ) -> np.ndarray:
     """Split ``x`` by row according to ``sets`` and apply ``func`` to each sub-array.
 
@@ -2989,12 +3011,12 @@ def apply_within_sets(
 
     """
     x = np.asarray(x)
-    _, idx, inv = np.unique(sets, return_index=True, return_inverse=True)
+    _, idx_sort, inv = np.unique(sets, return_index=True, return_inverse=True)
     # Remember the original position of each element of each set.
-    idx = [np.flatnonzero(inv == i) for i in idx.argsort()]
+    idx_groups = [np.flatnonzero(inv == i) for i in idx_sort.argsort()]
     res = []
     shorter = False
-    for g_idx in idx:
+    for g_idx in idx_groups:
         z = func(x.take(g_idx, axis=0), **kwargs)
         z = np.atleast_1d(z)
         if len(z) != len(g_idx):
@@ -3005,10 +3027,10 @@ def apply_within_sets(
             shorter = True
         res.append(z)
 
-    res = np.concatenate(res)
+    res_arr = np.concatenate(res)
     if not shorter:
-        res = res.take(np.concatenate(idx).argsort(), axis=0)
-    return res
+        res_arr = res_arr.take(np.concatenate(idx_groups).argsort(), axis=0)
+    return res_arr
 
 
 @DocSubstitute()
@@ -3095,14 +3117,14 @@ def r2_exact(
     # Make sure it is a 1D array of length nobj.
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
 
-    maximise = _parse_maximise(maximise, nobj)
+    maximise_arr = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
-    if maximise.any():
+    if maximise_arr.any():
         if not points_copied:
             points = points.copy()
-        points[:, maximise] = -points[:, maximise]
+        points[:, maximise_arr] = -points[:, maximise_arr]
         ref = ref.copy()
-        ref[maximise] = -ref[maximise]
+        ref[maximise_arr] = -ref[maximise_arr]
 
     points_p, npoints, nobj = np2d_to_double_array(
         points, ctype_shape=("size_t", "uint_fast8_t")
@@ -3112,4 +3134,4 @@ def r2_exact(
     # if r2 < 0:
     #     raise MemoryError("memory allocation failed")
 
-    return r2
+    return float(r2)
