@@ -1,10 +1,7 @@
-from __future__ import annotations
-
 from numpy.typing import ArrayLike  # For type hints
 from typing import Any
 
 import numpy as np
-from cffi import FFI
 from ._libmoocore import ffi
 
 
@@ -17,49 +14,50 @@ def asarray_maybe_copy(
     x: ArrayLike, dtype: type = float
 ) -> tuple[np.ndarray, bool]:
     """Convert to numpy array of dtype=float and detect copies."""
-    x_arr: np.ndarray = np.asarray(x, dtype=dtype)
-    return x_arr, id(x_arr) != id(x)
+    return get1_and_is_copied(np.asarray(x, dtype=dtype), x)
 
 
-def unique_nosort(array: ArrayLike, **kwargs: Any) -> np.ndarray:
+def unique_nosort(array: ArrayLike, axis: int | None = None) -> np.ndarray:
     """Return unique values without sorting them.
 
     See https://github.com/numpy/numpy/issues/7265
 
     """
-    uniq, index = np.unique(array, return_index=True, **kwargs)
-    return np.asarray(uniq[index.argsort()])
+    uniq, index = np.unique(array, return_index=True, axis=axis)
+    return uniq[index.argsort()]
 
 
 def np2d_to_double_array(
-    x: ArrayLike, ctype_shape: tuple[str, str] = ("int", "int")
-) -> tuple[FFI.CData, FFI.CData, FFI.CData]:
-    x_arr = np.ascontiguousarray(x)
-    nrows = ffi.cast(ctype_shape[0], x_arr.shape[0])
-    ncols = ffi.cast(ctype_shape[1], x_arr.shape[1])
-    x_buf = ffi.from_buffer("double []", x_arr)
-    return x_buf, nrows, ncols
+    x: np.ndarray, ctype_shape: tuple[str, str] = ("int", "int")
+) -> tuple[ffi.CData, ffi.CData, ffi.CData]:
+    nrows = ffi.cast(ctype_shape[0], x.shape[0])
+    ncols = ffi.cast(ctype_shape[1], x.shape[1])
+    # FIXME: This may cause an unexpected copy. Make this an assert and force
+    # the caller to enforce it if needed.
+    x = np.ascontiguousarray(x)
+    x = ffi.from_buffer("double []", x)
+    return x, nrows, ncols
 
 
 def np1d_to_c_array(
     x: ArrayLike, ctype_data: str, ctype_size: str
-) -> tuple[FFI.CData, FFI.CData]:
+) -> tuple[ffi.CData, ffi.CData]:
+    size = ffi.cast(ctype_size, x.shape[0])
     ctype_dtype = np.intc() if ctype_data == "int" else None
-    x_arr = np.ascontiguousarray(x, dtype=ctype_dtype)
-    size = ffi.cast(ctype_size, x_arr.shape[0])
-    x_buf = ffi.from_buffer(ctype_data + "[]", x_arr)
-    return x_buf, size
+    x = np.ascontiguousarray(x, dtype=ctype_dtype)
+    x = ffi.from_buffer(ctype_data + "[]", x)
+    return x, size
 
 
 def np1d_to_double_array(
     x: ArrayLike, ctype_size: str = "int"
-) -> tuple[FFI.CData, FFI.CData]:
+) -> tuple[ffi.CData, ffi.CData]:
     return np1d_to_c_array(x, ctype_data="double", ctype_size=ctype_size)
 
 
 def np1d_to_int_array(
     x: ArrayLike, ctype_size: str = "int"
-) -> tuple[FFI.CData, FFI.CData]:
+) -> tuple[ffi.CData, ffi.CData]:
     return np1d_to_c_array(x, ctype_data="int", ctype_size=ctype_size)
 
 
@@ -79,16 +77,13 @@ def is_integer_value(n: Any) -> bool:
         return True
     if n is None:
         return False
-    # FIXME: When we bump to Python 3.12, we can use float().is_integer()
     try:
-        return bool(int(n) == n)
-    except ValueError:
-        return False
-    except TypeError:
+        return bool(n.is_integer())
+    except AttributeError:
         return False
 
 
-def _get_seed_for_c(seed: Any) -> FFI.CData:
+def _get_seed_for_c(seed: int | np.random.Generator | None) -> ffi.CData:
     if not is_integer_value(seed):
         seed = np.random.default_rng(seed).integers(2**32 - 2, dtype=np.uint32)
     return ffi.cast("uint32_t", seed)

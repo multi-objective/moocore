@@ -9,7 +9,6 @@ import warnings
 import time
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Any, cast
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
@@ -200,8 +199,10 @@ def get_dataset_path(
 
     """
     local_path = files("moocore.data") / filename
-    if local_path.is_file():
-        return cast(Path, local_path)
+    if not isinstance(local_path, Path):
+        raise ValueError("{local_path} is not a file-system path")
+    if local_path.exists():
+        return local_path
 
     checksum = _DATASETS_CHECKSUMS.get(filename)
     if checksum is None:
