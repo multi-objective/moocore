@@ -169,13 +169,15 @@ def read_datasets(filename: str | os.PathLike[str] | StringIO) -> np.ndarray:
     return np.frombuffer(ffi.buffer(data_p, datasize)).reshape(-1, ncols_p[0])
 
 
-def _parse_maximise(maximise: bool | Sequence[bool], nobj: int) -> np.ndarray:
+def _parse_maximise(
+    maximise: bool | Sequence[bool | int], nobj: int
+) -> np.ndarray:
     """Convert maximise array or single bool to ndarray format."""
     return array_1d_of_length_n(maximise, nobj, name="maximise").astype(bool)
 
 
 def _parse_maximise_to_bool_array(
-    maximise: bool | Sequence[bool], nobj: int
+    maximise: bool | Sequence[bool | int], nobj: int
 ) -> ffi.CData:
     """Convert maximise array or single bool to C array.
 
@@ -193,7 +195,7 @@ def _all_positive(x: np.ndarray) -> bool:
 def _igd_python(
     points: ArrayLike,
     ref: ArrayLike,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
     p: int = 1,
 ) -> float:
     points = np.asarray(points, dtype=float)
@@ -209,7 +211,9 @@ def _igd_python(
 
 
 def _igd_plus_python(
-    points: ArrayLike, ref: ArrayLike, maximise: bool | Sequence[bool] = False
+    points: ArrayLike,
+    ref: ArrayLike,
+    maximise: bool | Sequence[bool | int] = False,
 ) -> float:
     points, points_copied = asarray_maybe_copy(points)
     ref, ref_copied = asarray_maybe_copy(ref)
@@ -234,7 +238,7 @@ def _igd_plus_python(
 def _avg_hausdorff_dist_python(
     points: ArrayLike,
     ref: ArrayLike,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
     p: int = 1,
 ) -> float:
     return max(
@@ -244,7 +248,9 @@ def _avg_hausdorff_dist_python(
 
 
 def _epsilon_addi_python(
-    points: ArrayLike, ref: ArrayLike, maximise: bool | Sequence[bool] = False
+    points: ArrayLike,
+    ref: ArrayLike,
+    maximise: bool | Sequence[bool | int] = False,
 ) -> float:
     points, points_copied = asarray_maybe_copy(points)
     ref, ref_copied = asarray_maybe_copy(ref)
@@ -265,7 +271,9 @@ def _epsilon_addi_python(
 
 
 def _epsilon_mult_python(
-    points: ArrayLike, ref: ArrayLike, maximise: bool | Sequence[bool] = False
+    points: ArrayLike,
+    ref: ArrayLike,
+    maximise: bool | Sequence[bool | int] = False,
 ) -> float:
     points, points_copied = asarray_maybe_copy(points)
     ref, ref_copied = asarray_maybe_copy(ref)
@@ -288,7 +296,7 @@ def _epsilon_mult_python(
 def _unary_refset_common(
     points: ArrayLike,
     ref: ArrayLike,
-    maximise: bool | Sequence[bool],
+    maximise: bool | Sequence[bool | int],
     check_all_positive: bool = False,
 ) -> tuple[
     int, ffi.CData, ffi.CData, ffi.CData, ffi.CData, ffi.CData, np.ndarray
@@ -332,7 +340,7 @@ def igd(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
 ) -> float:
     """Inverted Generational Distance (IGD).
 
@@ -367,7 +375,7 @@ def igd_plus(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
 ) -> float:
     r"""Modified IGD (IGD+).
 
@@ -435,7 +443,7 @@ def avg_hausdorff_dist(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
     p: int = 1,
 ) -> float:
     """Average Hausdorff distance.
@@ -480,7 +488,7 @@ def epsilon_additive(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
 ) -> float:
     r"""Additive epsilon metric.
 
@@ -533,7 +541,7 @@ def epsilon_mult(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
 ) -> float:
     """Multiplicative epsilon metric.
 
@@ -584,7 +592,7 @@ def hypervolume(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
 ) -> float:
     r"""Hypervolume indicator.
 
@@ -739,7 +747,7 @@ class Hypervolume:
     """
 
     def __init__(
-        self, ref: ArrayLike, maximise: bool | Sequence[bool] = False
+        self, ref: ArrayLike, maximise: bool | Sequence[bool | int] = False
     ) -> None:
         self._ref = np.array(ref, dtype=float, ndmin=1)
         self._maximise = np.array(maximise, dtype=bool, ndmin=1)
@@ -846,7 +854,7 @@ class RelativeHypervolume(Hypervolume):
         self,
         ref: ArrayLike,
         ref_set: ArrayLike,
-        maximise: bool | Sequence[bool] = False,
+        maximise: bool | Sequence[bool | int] = False,
     ) -> None:
         super().__init__(ref=ref, maximise=maximise)
         self._ref_set_hv = super().__call__(ref_set)
@@ -876,7 +884,7 @@ def hv_contributions(
     points: ArrayLike,
     /,
     ref: ArrayLike,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
     ignore_dominated: bool = True,
 ) -> np.ndarray:
     r"""Hypervolume contributions of a set of points.
@@ -1009,7 +1017,7 @@ def hv_approx(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
     nsamples: int = 262_144,
     seed: int | np.random.Generator | None = None,
     method: Literal["DZ2019-HW", "DZ2019-MC", "Rphi-FWE+"] = "Rphi-FWE+",
@@ -1393,7 +1401,7 @@ def is_nondominated(
     points: ArrayLike,
     /,
     *,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
     keep_weakly: bool = False,
 ) -> np.ndarray:
     r"""Identify dominated points according to Pareto optimality.
@@ -1503,7 +1511,7 @@ def any_dominated(
     points: ArrayLike,
     /,
     *,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
     keep_weakly: bool = False,
 ) -> bool:
     r"""Test whether the input points contains any (weakly-)dominated point.
@@ -1575,7 +1583,7 @@ def is_nondominated_within_sets(
     /,
     sets: ArrayLike,
     *,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
     keep_weakly: bool = False,
 ) -> np.ndarray:
     r"""Identify dominated points according to Pareto optimality within each set.
@@ -1666,7 +1674,7 @@ def filter_dominated(
     points: ArrayLike,
     /,
     *,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
     keep_weakly: bool = False,
 ) -> np.ndarray:
     """Remove dominated points according to Pareto optimality.
@@ -1698,7 +1706,7 @@ def filter_dominated_within_sets(
     data: ArrayLike,
     /,
     *,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
     keep_weakly: bool = False,
 ) -> np.ndarray:
     """Given a matrix that represents multiple sets of points (last column gives the set index), filter dominated points within each set.
@@ -1789,7 +1797,7 @@ def filter_dominated_within_sets(
 
 @DocSubstitute()
 def pareto_rank(
-    points: ArrayLike, /, *, maximise: bool | Sequence[bool] = False
+    points: ArrayLike, /, *, maximise: bool | Sequence[bool | int] = False
 ) -> np.ndarray:
     r"""Rank points according to Pareto-optimality (nondominated sorting).
 
@@ -1908,7 +1916,7 @@ def normalise(
     *,
     lower: ArrayLike = np.nan,
     upper: ArrayLike = np.nan,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
 ) -> np.ndarray:
     """Normalise points per coordinate to a range, e.g., ``to_range = [1,2]``, where the minimum value will correspond to 1 and the maximum to 2.
 
@@ -2275,7 +2283,7 @@ def eafdiff(
     /,
     *,
     intervals: int | None = None,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
     rectangles: bool = False,
 ) -> np.ndarray:
     """Compute empirical attainment function (EAF) differences.
@@ -2476,7 +2484,7 @@ def whv_rect(
     rectangles: ArrayLike,
     *,
     ref: ArrayLike,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
 ) -> float:
     """Compute weighted hypervolume given a set of rectangles.
 
@@ -2553,7 +2561,7 @@ def total_whv_rect(
     rectangles: ArrayLike,
     *,
     ref: ArrayLike,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
     ideal: ArrayLike | None = None,
     scalefactor: float = 0.1,
 ) -> float:
@@ -2651,7 +2659,7 @@ def largest_eafdiff(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
     intervals: int = 5,
     ideal: ArrayLike | None = None,
 ) -> tuple[tuple[int, int], float]:
@@ -2785,7 +2793,7 @@ def whv_hype(
     *,
     ref: ArrayLike,
     ideal: ArrayLike,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
     nsamples: int = 100000,
     seed: int | np.random.Generator | None = None,
     dist: Literal["uniform", "point", "exponential"] = "uniform",
@@ -3040,7 +3048,7 @@ def r2_exact(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool] = False,
+    maximise: bool | Sequence[bool | int] = False,
 ) -> float:
     r"""Exact R2 indicator.
 

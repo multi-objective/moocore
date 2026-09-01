@@ -5,19 +5,19 @@ from string import Template
 import inspect
 
 COMMON_PARAMS = {
-    "points": """Array of numerical values, where each row gives the coordinates of a point in objective space.
+    "points": """2D array of numerical values, where each row gives the coordinates of a point in objective space.
     If the array is created by the :func:`read_datasets()` function, remove the last column.""",
     #
     "maximise": """Whether the objectives must be maximised instead of minimised.
     Either a single boolean value that applies to all objectives or a list of boolean values, with one value per objective.
-    Also accepts a 1D numpy array with value 0/1 for each objective.""",
+    Also accepts a 1D array with values 0 or 1 for each objective.""",
     #
-    "ref_set": """Reference set as a matrix of numerical values. Must have the same number of columns as ``points``.""",
+    "ref_set": """Reference set as a 2D array of numerical values. Must have the same number of columns as ``points``.""",
     #
     "ref_point": """Reference point as a 1D vector. Must be either a single value, which will be used for all coordinates,
     or the same length as a single point in ``points``.""",
     #
-    "random_seed": """Either an integer to seed :func:`numpy.random.default_rng`, Numpy
+    "random_seed": """Either an integer to seed :func:`numpy.random.default_rng`, a Numpy
     default random number generator (RNG) or an instance of a
     Numpy-compatible RNG. ``None`` uses the equivalent of a random seed, as in :func:`numpy.random.default_rng`.""",
     #

@@ -95,7 +95,22 @@ napoleon_use_param = True
 napoleon_type_aliases = {
     "numpy.typing.ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
     "ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
+    "NDArray": ":py:data:`~numpy.typing.NDArray`",
 }
+
+# If true, '()' will be appended to :func: etc. cross-reference text.
+add_function_parentheses = True
+
+autodoc_typehints = "none"  # Conflicts with sphinx_autodoc_typehints
+typehints_document_rtype = True
+typehints_use_rtype = False
+typehints_defaults = "braces-after"
+always_use_bars_union = True
+autodoc_type_aliases = {
+    "ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
+}
+
+# nitpicky = True
 
 bibtex_bibfiles = ["REFERENCES.bib"]
 bibtex_reference_style = "super_with_brackets"
@@ -105,19 +120,6 @@ bibtex_footcite_id = "footcite-{key}"
 bibtex_bibliography_id = "bibliography-{bibliography_count}"
 bibtex_footbibliography_id = "footbibliography-{footbibliography_count}"
 
-# If true, '()' will be appended to :func: etc. cross-reference text.
-add_function_parentheses = True
-
-autodoc_typehints = "none"  # Conflicts with sphinx_autodoc_typehints
-typehints_document_rtype = True
-typehints_use_rtype = False
-typehints_defaults = "comma"
-always_use_bars_union = True
-autodoc_type_aliases = {
-    "ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
-}
-
-# nitpicky = True
 
 # FIXME: This is not working!
 logger = sphinx.util.logging.getLogger("sphinx.ext.autodoc")
