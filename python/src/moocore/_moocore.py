@@ -1426,7 +1426,10 @@ def is_nondominated(
     --------
     filter_dominated : to filter out dominated points.
 
+    any_dominated : to quickly test if any point is (weakly)-dominated.
+
     pareto_rank : to rank points according to Pareto dominance (nondominated sorting).
+
 
 
     Notes
