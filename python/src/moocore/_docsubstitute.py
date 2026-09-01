@@ -1,8 +1,10 @@
+from __future__ import annotations
+
+from typing import Any
+from collections.abc import Callable
+
 from string import Template
 import inspect
-from typing import Any, TypeVar
-
-_T = TypeVar("_T")
 
 COMMON_PARAMS = {
     "points": """Array of numerical values, where each row gives the coordinates of a point in objective space.
@@ -32,7 +34,7 @@ class DocSubstitute:
     def __init__(self) -> None:
         self.params = COMMON_PARAMS
 
-    def __call__(self, func: _T) -> _T:
+    def __call__(self, func: Callable[..., Any]) -> Callable[..., Any]:
         func_any: Any = func
         if func_any.__doc__:
             try:

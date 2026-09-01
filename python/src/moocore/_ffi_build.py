@@ -8,6 +8,8 @@ The header files required must be placed in the first argument of `ffibuilder.se
 
 """
 
+from typing import Any
+
 import os
 import platform
 from typing import Any
