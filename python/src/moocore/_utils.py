@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from numpy.typing import ArrayLike  # For type hints
 from typing import Any
 
 import numpy as np
+from cffi import FFI
 from ._libmoocore import ffi
 
 
@@ -30,7 +33,7 @@ def unique_nosort(array: ArrayLike, **kwargs: Any) -> np.ndarray:
 
 def np2d_to_double_array(
     x: ArrayLike, ctype_shape: tuple[str, str] = ("int", "int")
-) -> tuple[ffi.CData, ffi.CData, ffi.CData]:
+) -> tuple[FFI.CData, FFI.CData, FFI.CData]:
     x_arr = np.ascontiguousarray(x)
     nrows = ffi.cast(ctype_shape[0], x_arr.shape[0])
     ncols = ffi.cast(ctype_shape[1], x_arr.shape[1])
@@ -40,7 +43,7 @@ def np2d_to_double_array(
 
 def np1d_to_c_array(
     x: ArrayLike, ctype_data: str, ctype_size: str
-) -> tuple[ffi.CData, ffi.CData]:
+) -> tuple[FFI.CData, FFI.CData]:
     ctype_dtype = np.intc() if ctype_data == "int" else None
     x_arr = np.ascontiguousarray(x, dtype=ctype_dtype)
     size = ffi.cast(ctype_size, x_arr.shape[0])
@@ -50,13 +53,13 @@ def np1d_to_c_array(
 
 def np1d_to_double_array(
     x: ArrayLike, ctype_size: str = "int"
-) -> tuple[ffi.CData, ffi.CData]:
+) -> tuple[FFI.CData, FFI.CData]:
     return np1d_to_c_array(x, ctype_data="double", ctype_size=ctype_size)
 
 
 def np1d_to_int_array(
     x: ArrayLike, ctype_size: str = "int"
-) -> tuple[ffi.CData, ffi.CData]:
+) -> tuple[FFI.CData, FFI.CData]:
     return np1d_to_c_array(x, ctype_data="int", ctype_size=ctype_size)
 
 
@@ -85,7 +88,7 @@ def is_integer_value(n: Any) -> bool:
         return False
 
 
-def _get_seed_for_c(seed: Any) -> ffi.CData:
+def _get_seed_for_c(seed: Any) -> FFI.CData:
     if not is_integer_value(seed):
         seed = np.random.default_rng(seed).integers(2**32 - 2, dtype=np.uint32)
     return ffi.cast("uint32_t", seed)

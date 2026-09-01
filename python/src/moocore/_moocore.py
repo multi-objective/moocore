@@ -4,7 +4,7 @@ import os
 from io import StringIO
 from collections.abc import Callable, Sequence
 from numpy.typing import ArrayLike  # For type hints
-from typing import Literal, Any, NamedTuple
+from typing import Literal, Any, NamedTuple, cast
 
 # NOTE: if we ever start using SciPy, we can use
 # from scipy.special import gamma_function
@@ -161,7 +161,7 @@ def read_datasets(filename: str | os.PathLike[str] | StringIO) -> np.ndarray:
     if fdst_tmp:
         os.remove(fdst_tmp.name)
     if err_code != 0:
-        raise ReadDatasetsError(err_code)
+        raise ReadDatasetsError(int(err_code))
 
     datasize = datasize_p[0]
     # Ensure that Python can free the data allocated by the C library.
@@ -328,14 +328,14 @@ def _unary_refset_common(
     if nobj == 0:
         raise ValueError("The number of columns cannot be 0")
 
-    points, npoints, nobj_c = np2d_to_double_array(
+    points_p, npoints, nobj_c = np2d_to_double_array(
         points, ctype_shape=("size_t", "uint_fast8_t")
     )
-    ref, ref_size, _ = np2d_to_double_array(
+    ref_p, ref_size, _ = np2d_to_double_array(
         ref, ctype_shape=("size_t", "uint_fast8_t")
     )
     maximise_p = _parse_maximise_to_bool_array(maximise, nobj)
-    return nobj, points, npoints, nobj_c, ref, ref_size, maximise_p
+    return nobj, points_p, npoints, nobj_c, ref_p, ref_size, maximise_p
 
 
 @DocSubstitute()
@@ -1184,21 +1184,21 @@ def hv_approx(
     points_p, npoints, nobj = np2d_to_double_array(
         points, ctype_shape=("size_t", "uint_fast8_t")
     )
-    ref = ffi.from_buffer("double []", ref)
+    ref_p = ffi.from_buffer("double []", ref)
 
     match method:
         case "DZ2019-MC":
-            seed = _get_seed_for_c(seed)
+            seed_p = _get_seed_for_c(seed)
             hv = lib.hv_approx_normal(
-                points_p, npoints, nobj, ref, maximise_p, nsamples, seed
+                points_p, npoints, nobj, ref_p, maximise_p, nsamples, seed_p
             )
         case "DZ2019-HW":
             hv = lib.hv_approx_hua_wang(
-                points_p, npoints, nobj, ref, maximise_p, nsamples
+                points_p, npoints, nobj, ref_p, maximise_p, nsamples
             )
         case "Rphi-FWE+":
             hv = lib.hv_approx_rphi_fang_wang_plus(
-                points_p, npoints, nobj, ref, maximise_p, nsamples
+                points_p, npoints, nobj, ref_p, maximise_p, nsamples
             )
         case _:
             raise ValueError("Unknown method = {method}")
@@ -2419,23 +2419,23 @@ def eafdiff(
         intervals = min(intervals, int(nsets / 2.0))
 
     data_p, _, nobj_int = np2d_to_double_array(data)
-    cumsizes_p, nsets = np1d_to_int_array(cumsizes)
+    cumsizes_p, nsets_p = np1d_to_int_array(cumsizes)
     eaf_npoints = ffi.new("int *")
 
     if rectangles:
-        eaf_data = lib.eafdiff_compute_rectangles(
-            eaf_npoints, data_p, nobj_int, cumsizes_p, nsets, intervals
+        eaf_data_p = lib.eafdiff_compute_rectangles(
+            eaf_npoints, data_p, nobj_int, cumsizes_p, nsets_p, intervals
         )
         ncols = 2 * nobj + 1  # 2x2D points + color
     else:
-        eaf_data = lib.eafdiff_compute_matrix(
-            eaf_npoints, data_p, nobj_int, cumsizes_p, nsets, intervals
+        eaf_data_p = lib.eafdiff_compute_matrix(
+            eaf_npoints, data_p, nobj_int, cumsizes_p, nsets_p, intervals
         )
         ncols = nobj + 1  # 2D points + color
 
-    eaf_npoints = eaf_npoints[0]
-    eaf_data = ffi.buffer(eaf_data, ffi.sizeof("double") * eaf_npoints * ncols)
-    eaf_data = np.frombuffer(eaf_data).reshape((eaf_npoints, -1))
+    eaf_npoints_val = int(eaf_npoints[0])
+    eaf_buf = ffi.buffer(eaf_data_p, ffi.sizeof("double") * eaf_npoints_val * ncols)
+    eaf_data = np.frombuffer(eaf_buf).reshape((eaf_npoints_val, -1))
     # FIXME: We should remove duplicated rows in C code.
     eaf_data = unique_nosort(eaf_data, axis=0)
     # FIXME: Check that we do not generate duplicated nor overlapping
@@ -2552,12 +2552,12 @@ def whv_rect(
     #     else:
     #         pos = np.flatnonzero(maximise_arr) + [0,2]
     #         rectangles_arr[:, pos] = -rectangles_arr[:, pos]
-    ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
-    ref = ffi.from_buffer("double []", ref)
+    ref_arr = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
+    ref_p = ffi.from_buffer("double []", ref_arr)
     points_p, npoints, _ = np2d_to_double_array(points)
     rects_p, rectangles_nrow, _ = np2d_to_double_array(rectangles_arr)
     hv = lib.rect_weighted_hv2d(
-        points_p, npoints, rects_p, rectangles_nrow, ref
+        points_p, npoints, rects_p, rectangles_nrow, ref_p
     )
     return float(hv)
 
@@ -2928,23 +2928,23 @@ def whv_hype(
         ideal = ideal.copy()
         ideal[maximise_arr] = -ideal[maximise_arr]
 
-    points_p, npoints, nobj = np2d_to_double_array(points)
-    ref = ffi.from_buffer("double []", ref)
-    ideal = ffi.from_buffer("double []", ideal)
+    points_p, npoints, _ = np2d_to_double_array(points)
+    ref_p = ffi.from_buffer("double []", ref)
+    ideal_p = ffi.from_buffer("double []", ideal)
     # FIXME: Check ranges.
-    seed = _get_seed_for_c(seed)
+    seed_p = _get_seed_for_c(seed)
 
     if dist == "uniform":
-        hv = lib.whv_hype_unif(points_p, npoints, ideal, ref, nsamples, seed)
+        hv = lib.whv_hype_unif(points_p, npoints, ideal_p, ref_p, nsamples, seed_p)
     elif dist == "exponential":
         hv = lib.whv_hype_expo(
-            points_p, npoints, ideal, ref, nsamples, seed, mu
+            points_p, npoints, ideal_p, ref_p, nsamples, seed_p, cast(float, mu)
         )
     elif dist == "point":
         mu = array_1d_of_length_n(np.asarray(mu, dtype=float), nobj, name="mu")
-        mu, _ = np1d_to_double_array(mu)
+        mu_p, _ = np1d_to_double_array(mu)
         hv = lib.whv_hype_gaus(
-            points_p, npoints, ideal, ref, nsamples, seed, mu
+            points_p, npoints, ideal_p, ref_p, nsamples, seed_p, mu_p
         )
     else:
         raise ValueError("Unknown value of dist = {dist}")
@@ -3149,8 +3149,8 @@ def r2_exact(
     points_p, npoints, nobj = np2d_to_double_array(
         points, ctype_shape=("size_t", "uint_fast8_t")
     )
-    ref = ffi.from_buffer("double []", ref)
-    r2 = lib.r2_exact(points_p, npoints, nobj, ref)
+    ref_p = ffi.from_buffer("double []", ref)
+    r2 = lib.r2_exact(points_p, npoints, nobj, ref_p)
     # if r2 < 0:
     #     raise MemoryError("memory allocation failed")
 

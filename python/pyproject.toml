@@ -59,7 +59,7 @@ coverage = [
   "coverage[toml]",
   "gcovr",
 ]
-dev = [ "pre-commit>=3.3.2", "ruff>=0.11.2", "tox>=4.6.2" ]
+dev = [ "cffi-stubgen>=1.0.2", "pre-commit>=3.3.2", "ruff>=0.11.2", "tox>=4.6.2" ]
 docs = [
   "ipykernel",
   "ipywidgets",
@@ -92,7 +92,7 @@ Tracker = "https://github.com/multi-objective/moocore/issues"
 package-dir = { "" = "src" }
 zip-safe = false
 [tool.setuptools.package-data]
-"*" = [ "*.c", "*.h" ]
+"*" = [ "*.c", "*.h", "*.pyi", "py.typed" ]
 "moocore.data" = [ "*.10", "*.csv", "*.dat", "*.txt", "*.xz" ]
 
 [tool.distutils.bdist_wheel]
