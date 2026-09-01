@@ -5,6 +5,7 @@ from io import StringIO
 from collections.abc import Callable, Sequence
 from numpy.typing import ArrayLike  # For type hints
 from typing import Literal, Any, NamedTuple
+import numbers
 
 # NOTE: if we ever start using SciPy, we can use
 # from scipy.special import gamma_function
@@ -2788,7 +2789,7 @@ def whv_hype(
     nsamples: int = 100000,
     seed: int | np.random.Generator | None = None,
     dist: Literal["uniform", "point", "exponential"] = "uniform",
-    mu: float | ArrayLike | None = None,
+    mu: numbers.Real | ArrayLike | None = None,
 ) -> float:
     r"""Approximation of the (weighted) hypervolume by Monte-Carlo sampling (2D only).
 
@@ -2907,20 +2908,27 @@ def whv_hype(
     # FIXME: Check ranges.
     seed = _get_seed_for_c(seed)
 
-    if dist == "uniform":
-        hv = lib.whv_hype_unif(points_p, npoints, ideal, ref, nsamples, seed)
-    elif dist == "exponential":
-        hv = lib.whv_hype_expo(
-            points_p, npoints, ideal, ref, nsamples, seed, mu
-        )
-    elif dist == "point":
-        mu = array_1d_of_length_n(np.asarray(mu, dtype=float), nobj, name="mu")
-        mu, _ = np1d_to_double_array(mu)
-        hv = lib.whv_hype_gaus(
-            points_p, npoints, ideal, ref, nsamples, seed, mu
-        )
-    else:
-        raise ValueError("Unknown value of dist = {dist}")
+    match dist:
+        case "uniform":
+            hv = lib.whv_hype_unif(
+                points_p, npoints, ideal, ref, nsamples, seed
+            )
+        case "exponential":
+            if not isinstance(mu, numbers.Real):
+                raise ValueError("'mu' must be a single number")
+            hv = lib.whv_hype_expo(
+                points_p, npoints, ideal, ref, nsamples, seed, float(mu)
+            )
+        case "point":
+            mu = array_1d_of_length_n(
+                np.asarray(mu, dtype=float), nobj, name="mu"
+            )
+            mu, _ = np1d_to_double_array(mu)
+            hv = lib.whv_hype_gaus(
+                points_p, npoints, ideal, ref, nsamples, seed, mu
+            )
+        case _:
+            raise ValueError("Unknown value of dist = '{dist}'")
 
     return hv
 

@@ -745,3 +745,15 @@ class TestR2Exact:
         moocore.r2_exact(dat, ref=[10, 10])
 
         assert_allclose(r2, 0.33360768789505657)
+
+
+def test_whv_hype_errors():
+    """Check error handling of whv_hype()."""
+    with pytest.raises(ValueError, match=r"must be a single number"):
+        moocore.whv_hype(
+            [[2, 2]], ref=4, ideal=1, dist="exponential", mu=[2.9, 0.9]
+        )
+    with pytest.raises(NotImplementedError, match=r"Only 2D"):
+        moocore.whv_hype([[2, 2, 2]], ref=4, ideal=1)
+    with pytest.raises(ValueError, match=r"Unknown value of dist"):
+        moocore.whv_hype([[2, 2]], ref=4, ideal=1, dist="unif")
