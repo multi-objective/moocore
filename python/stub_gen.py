@@ -225,7 +225,8 @@ print(f"Written: {ffi_stub_path}")
 for d in (_STUB_DIR, _LIB_STUB_DIR):
     pt = os.path.join(d, "py.typed")
     if not os.path.exists(pt):
-        open(pt, "w").close()
+        with open(pt, "w"):
+            pass
     print(f"Verified: {pt}")
 
 if failed_funcs:

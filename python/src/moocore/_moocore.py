@@ -14,6 +14,7 @@ import shutil
 import tempfile
 
 import numpy as np
+from cffi import FFI
 
 from ._utils import (
     asarray_maybe_copy,
@@ -177,7 +178,7 @@ def _parse_maximise(maximise: bool | Sequence[bool], nobj: int) -> np.ndarray:
 
 def _parse_maximise_to_bool_array(
     maximise: bool | Sequence[bool], nobj: int
-) -> Any:
+) -> FFI.CData:
     """Convert maximise array or single bool to C array.
 
     In the C library, boolean arrays are of type boolvec, which is uint8_t.
