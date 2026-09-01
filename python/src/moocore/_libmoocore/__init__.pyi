@@ -15,4 +15,4 @@ class _FFI_T(FFI):
 
 ffi : _FFI_T = ...
 
-from . import lib
+from . import lib as lib
