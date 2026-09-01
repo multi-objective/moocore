@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+hypervolume
+===========
+
+.. currentmodule:: moocore
+
+.. autofunction:: hypervolume
+
+.. _sphx_glr_backref_moocore.hypervolume:
+
+.. minigallery:: moocore.hypervolume
+   :add-heading: Gallery examples
+   :heading-level: -

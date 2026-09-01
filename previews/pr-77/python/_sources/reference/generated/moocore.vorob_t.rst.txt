@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+vorob\_t
+========
+
+.. currentmodule:: moocore
+
+.. autofunction:: vorob_t
+
+.. _sphx_glr_backref_moocore.vorob_t:
+
+.. minigallery:: moocore.vorob_t
+   :add-heading: Gallery examples
+   :heading-level: -

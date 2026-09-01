@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+largest\_eafdiff
+================
+
+.. currentmodule:: moocore
+
+.. autofunction:: largest_eafdiff
+
+.. _sphx_glr_backref_moocore.largest_eafdiff:
+
+.. minigallery:: moocore.largest_eafdiff
+   :add-heading: Gallery examples
+   :heading-level: -

@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+any\_dominated
+==============
+
+.. currentmodule:: moocore
+
+.. autofunction:: any_dominated
+
+.. _sphx_glr_backref_moocore.any_dominated:
+
+.. minigallery:: moocore.any_dominated
+   :add-heading: Gallery examples
+   :heading-level: -
