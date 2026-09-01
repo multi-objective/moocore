@@ -40,7 +40,9 @@ class DocSubstitute:
                 ).substitute(self.params)
             except KeyError as e:
                 missing = e.args[0]
+                # Functors don't have __name__
+                name = getattr(func, "__name__", "__call__")
                 raise RuntimeError(
-                    f"Missing docstring substitution for '{missing}' in {func.__name__}"
+                    f"Missing docstring substitution for '{missing}' in {name}"
                 )
         return func
