@@ -96,6 +96,14 @@ def check_float_vector(a, b, what, n, name):
     )
 
 
+def save2png(filename):
+    plt.savefig(filename)
+    # Optimize with optipng if available.
+    optipng = shutil.which("optipng")
+    if optipng:
+        subprocess.run([optipng, "-quiet", filename])
+
+
 def _normalize(result):
     if isinstance(result, tuple):
         # (args, kwargs)
@@ -240,7 +248,7 @@ class Bench:
 
         plt.title(f"({self.cpu_model})", fontsize=10)
         plt.suptitle(f"{title} for {self.name}", fontsize=12)
-        plt.savefig(f"{file_prefix}_bench-{self.name}-time.png")
+        save2png(f"{file_prefix}_bench-{self.name}-time.png")
 
         if relative and self.baseline in self.keys():
             reltimes = {}
@@ -276,7 +284,7 @@ class Bench:
 
             plt.title(f"({self.cpu_model})", fontsize=10)
             plt.suptitle(f"{title} for {self.name}", fontsize=12)
-            plt.savefig(f"{file_prefix}_bench-{self.name}-reltime.png")
+            save2png(f"{file_prefix}_bench-{self.name}-reltime.png")
 
         if self.values is None:
             return
@@ -301,9 +309,4 @@ class Bench:
         )
         plt.title(f"({self.cpu_model})", fontsize=10)
         plt.suptitle(f"{title} for {self.name}", fontsize=12)
-        png_file = f"{file_prefix}_bench-{self.name}-values.png"
-        plt.savefig(png_file)
-        # Optimize with optipng if available.
-        optipng = shutil.which("optipng")
-        if optipng:
-            subprocess.run([optipng, "-quiet", png_file])
+        save2png(f"{file_prefix}_bench-{self.name}-values.png")
