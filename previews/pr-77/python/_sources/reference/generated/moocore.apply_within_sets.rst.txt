@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+apply\_within\_sets
+===================
+
+.. currentmodule:: moocore
+
+.. autofunction:: apply_within_sets
+
+.. _sphx_glr_backref_moocore.apply_within_sets:
+
+.. minigallery:: moocore.apply_within_sets
+   :add-heading: Gallery examples
+   :heading-level: -

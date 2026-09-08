@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+hv\_contributions
+=================
+
+.. currentmodule:: moocore
+
+.. autofunction:: hv_contributions
+
+.. _sphx_glr_backref_moocore.hv_contributions:
+
+.. minigallery:: moocore.hv_contributions
+   :add-heading: Gallery examples
+   :heading-level: -
