@@ -74,9 +74,9 @@ SRCS =  avl.c                                                                \
         libutil.c                                                            \
         main-hv.c                                                            \
         main-hvapprox.c                                                      \
+	main-nondominated.c                                                  \
         mt19937/mt19937.c                                                    \
         ndsort.c                                                             \
-        nondominated.c                                                       \
         pareto.c                                                             \
         rng.c                                                                \
         timer.c                                                              \
@@ -195,7 +195,7 @@ $(BINDIR)/hv$(EXE): main-hv.o timer.o $(LIBHV_OBJS)
 $(BINDIR)/hvapprox$(EXE): main-hvapprox.o timer.o hvapprox.o rng.o mt19937/mt19937.o
 $(BINDIR)/igd$(EXE): igd.o
 $(BINDIR)/ndsort$(EXE): ndsort.o pareto.o $(LIBHV_OBJS)
-$(BINDIR)/nondominated$(EXE): nondominated.o timer.o
+$(BINDIR)/nondominated$(EXE): main-nondominated.o timer.o
 
 $(EXE_FILES): cmdline.o io.o
 	$(call MKDIR, $(BINDIR)/)
@@ -219,9 +219,9 @@ igd.o: cmdline.h io.h nondominated.h igd.h pow_int.h
 io.o: io.h io_priv.h
 main-hv.o: cmdline.h io.h hv.h timer.h libmoocore-config.h nondominated.h hvapprox.h
 main-hvapprox.o: cmdline.h io.h hvapprox.h
+main-nondominated.o : cmdline.h io.h nondominated.h nondominated_kung.h
 ndsort.o: cmdline.h io.h nondominated.h hv.h
 nondominated.h: avl_tiny.h nondominated_kung.h
-nondominated.o : cmdline.h io.h nondominated.h nondominated_kung.h
 pareto.o: nondominated.h
 rng.o: rng.h mt19937/mt19937.h ziggurat_constants.h
 timer.o: timer.h
