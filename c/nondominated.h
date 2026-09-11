@@ -611,8 +611,6 @@ find_dominated_point_agree_bf(const double * restrict points, size_t size, dimen
     }
 }
 
-/* Stop as soon as one dominated point is found and return its position.
-**/
 static inline size_t
 find_dominated_point_(const double * restrict points, size_t size, dimension_t dim,
                       const bool keep_weakly,
@@ -701,6 +699,13 @@ find_dominated_point_agree(const double * restrict points, size_t size, dimensio
                                  agree, minmax);
 }
 
+/**
+   Stop as soon as one dominated point is found and return its position.  If no
+   point is dominated, return a value not smaller than size.
+
+   minmax is a vector of length dim with values AGREE_MINIMISE or
+   AGREE_MAXIMISE.
+*/
 static inline size_t
 find_dominated_point(const double * restrict points, size_t size, dimension_t dim,
                      const int * restrict minmax)
