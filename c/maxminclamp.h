@@ -40,8 +40,8 @@
             __cmp(op, _x__, _y__);                                             \
         })
 
-#define MAX(x,y) __careful_cmp(MAX, x, y)
-#define MIN(x,y) __careful_cmp(MIN, x, y)
+#define MAX(x,y) __careful_cmp(MAX, (x), (y))
+#define MIN(x,y) __careful_cmp(MIN, (x), (y))
 #define CLAMP(x, xmin, xmax) __extension__({                                   \
             __auto_type _x__ = (x);                                            \
             __auto_type _xmin__ = (xmin);                                      \
