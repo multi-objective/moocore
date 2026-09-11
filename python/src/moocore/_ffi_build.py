@@ -97,7 +97,7 @@ MSVC_CFLAGS = [
     "/DMOOCORE_SHARED_LIB",
 ]
 MSVC_LDFLAGS = ["/LTCG"]  # Link-time optimization
-GCC_CFLAGS = ["-O3", "-flto", "-fvisibility=hidden"]
+GCC_CFLAGS = ["-O3", "-flto", "-fvisibility=hidden", "-g0"]
 GCC_LDFLAGS: list[str] = []
 if is_x86_64:
     # Compile for sufficiently old x86-64 architecture.
