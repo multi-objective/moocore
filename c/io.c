@@ -86,6 +86,7 @@ skip_comment_line(FILE *instream)
     return 0;
 }
 
+
 int
 fread_double(FILE *instream, double *number)
 {
@@ -161,6 +162,70 @@ fread_int(FILE *instream, int *number)
 
     *number = (int) value;
     return 1; // Success !
+}
+
+/**
+   This function is used to read one point at a time.
+
+   When *dim == 0, any empty/comment lines are skipped. Then a complete line of
+   double values is read, stored in point, and *dim is set to the number of
+   values read, the function returns 1.
+
+   When *dim > 0, if a sequence of empty/comment lines is found, it is skipped and the function returns 0.
+   Otherwise, a line of *dim double values is read and stored in point, and the function returns 1.
+
+   If EOF is found, return READ_INPUT_FILE_EMPTY.
+
+   If *dim > 0 but a different number of values is found, return READ_INPUT_WRONG_INITIAL_DIM.
+
+   If something different from a number is found, return ERROR_CONVERSION.
+
+   If the number to read is larger than 128 characters, return ERROR_COLUMNS.
+
+*/
+int
+fread_next_double_point(FILE * restrict input, double * restrict point, dimension_t * restrict dim)
+{
+    assert(input != NULL && point != NULL && dim != NULL);
+    int status = skip_comment_line(input);
+    bool found_empty_line = (status == 1);
+    while (status == 1)
+        status = skip_comment_line(input);
+
+    if (unlikely(status == EOF))
+        return READ_INPUT_FILE_EMPTY;
+
+    dimension_t expected = *dim;
+    if (expected > 0 && found_empty_line)
+        return 0;
+
+    // A non-empty line starts here.
+    // skip_comment_line() has pushed its first character back.
+    dimension_t n = 0;
+    do {
+        if (unlikely(n == MOOCORE_DIMENSION_MAX))
+            return ERROR_COLUMNS;
+        if (unlikely(expected > 0 && n == expected))
+            return READ_INPUT_WRONG_INITIAL_DIM;
+
+        double value;
+        status = fread_double(input, &value);
+        if (status == 0)
+            return ERROR_CONVERSION;
+        if (status == EOF)
+            break; // Completed line.
+
+        point[n++] = value;
+        status = skip_comment_line(input);
+    } while (status == 0);
+
+    if (expected > 0 && n != expected)
+        return READ_INPUT_WRONG_INITIAL_DIM;
+
+    if (expected == 0)
+        *dim = n;
+
+    return 1;
 }
 
 #define objective_t int

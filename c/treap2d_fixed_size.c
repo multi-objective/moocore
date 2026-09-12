@@ -1,5 +1,15 @@
 #include "treap2d_fixed_size.h"
 
+#define TREAP_ITEM_IS_EMPTY
+#include "treap2d.h"
+
+typedef struct Treap2D {
+    Treap treap;
+    TreapNode * last_node;
+    TreapNode node_pool[]; // Flexible array
+} Treap2D;
+
+
 Treap2D *
 treap2d_new(size_t n)
 {

@@ -12,6 +12,7 @@ Version 0.4.0
 - :func:`~moocore.is_nondominated` is up to 10x faster in some inputs thanks to a customized radixsort implementation.
 - New shapes ``"cliff-concave"`` and ``"cliff-convex"`` added to :func:`~moocore.generate_ndset`.
 - New function :func:`~moocore.generate_sequence` to generate sequences of dominated and nondominated points.
+- New unbounded nondominated archive :func:`~moocore.UnboundedArchive`.
 
 
 Version 0.3.2 (11/07/2026)
