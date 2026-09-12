@@ -1,0 +1,11 @@
+
+# Unbounded Archive
+ - [ ] .add_many() is currently a loop in Python and it is not available in C.
+       First, it could loop in C.
+       Also, it could filter before adding unless the user specifies "nondominated=True".
+       If it is nondominated, it could do a faster merge operation.
+
+# Bounded size archives.
+
+ - [ ] Hypervolume archiver
+ - [ ] MGA
