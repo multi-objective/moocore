@@ -44,6 +44,9 @@ int write_sets(FILE *outfile, const double *data, int ncols, const int *cumsizes
 int write_sets_filtered (FILE * outfile, const double * data, int ncols,
                          const int * cumsizes, int nruns,
                          const boolvec * write_p);
+int fread_double(FILE *instream, double *number);
+int fread_next_double_point(FILE * restrict input, double * restrict point, dimension_t * restrict dim);
+
 
 static inline const int *
 read_minmax (const char *str, int *nobj_p)
