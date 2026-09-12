@@ -66,7 +66,7 @@ typedef struct radix_doublep_ws {
 
 typedef enum { NOT_SORTED = 0, SORTED = 1, REV_SORTED = 2 } sort_result_t;
 
-static void
+static inline void
 radix_doublep_ws_alloc(radix_doublep_ws * ws, uint32_t n, dimension_t dim)
 {
     ws->idxbuf = malloc(2 * n * sizeof(*ws->idxbuf));
@@ -426,7 +426,7 @@ radix_sort_asc_only(const double **rows, size_t len, dimension_t col)
     radix_argsort_asc_only(rows, len, col, /*order=*/NULL);
 }
 
-static void
+static inline void
 radix_argsort_asc_rev(const double ** restrict rows, size_t len, dimension_t col, uint32_t * restrict order)
 {
     if (len <= RADIX_INSERTION_THRESHOLD) {
@@ -444,7 +444,7 @@ radix_argsort_asc_rev(const double ** restrict rows, size_t len, dimension_t col
     radix_doublep_ws_free(&ws);
 }
 
-static void
+static inline void
 radix_sort_asc_rev(const double **rows, size_t len, dimension_t col)
 {
     radix_argsort_asc_rev(rows, len, col, /*order=*/NULL);
