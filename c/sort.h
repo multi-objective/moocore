@@ -72,6 +72,21 @@ all_equal_double(const double * restrict a, const double * restrict b, dimension
     return (bool) a_eq_b;
 }
 
+/**
+   Return true if a <= b but a != b, false otherwise.
+*/
+static inline bool
+dominates_2d(const double * restrict a, const double * restrict b)
+{
+    return a[0] <= b[0] && a[1] <= b[1] && (a[0] != b[0] || a[1] != b[1]);
+}
+
+static inline bool
+dominates(const double * restrict a, const double * restrict b, dimension_t dim)
+{
+    return weakly_dominates(a, b, dim) && !all_equal_double(a, b, dim);
+}
+
 // ---------- Comparison functions (e.g, qsort). Return 'int' ----------------
 
 // General type for comparison functions used in qsort() and qsort_r().
