@@ -29,3 +29,4 @@ indentation.
    functions.dominance
    functions.metrics
    functions.eaf
+   functions.archiving

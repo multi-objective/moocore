@@ -1,11 +1,10 @@
-#define TREAP_ITEM_IS_EMPTY
-#include "treap2d.h"
+#ifndef TREAP_2D_FIXED_SIZE_H_
+#define TREAP_2D_FIXED_SIZE_H_
 
-typedef struct {
-    Treap treap;
-    TreapNode * last_node;
-    TreapNode node_pool[]; // Flexible array
-} Treap2D;
+#include <stdlib.h>
+
+typedef struct Treap2D Treap2D;
+typedef struct TreapNode TreapNode;
 
 Treap2D * treap2d_new(size_t n);
 void treap2d_free(Treap2D * tree);
@@ -17,3 +16,5 @@ double treap2d_node_get_y(const TreapNode *node);
 void treap2d_validate_tree(Treap2D * tree);
 TreapNode * treap2d_erase_at(TreapNode **link);
 void treap2d_insert(Treap2D *tree, double x, double y);
+
+#endif // TREAP_2D_FIXED_SIZE_H_

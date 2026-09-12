@@ -1,9 +1,12 @@
-#ifndef _TREAP_2D_DLNODE_H
-#define _TREAP_2D_DLNODE_H
+#ifndef TREAP_2D_DLNODE_H
+#define TREAP_2D_DLNODE_H
 
 #include <stdlib.h>
+#include "gcc_attribs.h"
 
 typedef dlnode_t * TreapItem;
+static inline void treap_item_free(TreapItem item _attr_maybe_unused) { return; }
+
 #include "treap2d.h"
 
 typedef struct Treap2D {
@@ -68,4 +71,4 @@ treap2d_insert_and_displace_get_bounds(Treap2D *tree, dlnode_t * restrict p, Tre
     tree->last_node++;
 }
 
-#endif // _TREAP_2D_DLNODE_H
+#endif // TREAP_2D_DLNODE_H
