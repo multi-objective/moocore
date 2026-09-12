@@ -72,6 +72,7 @@ SRCS =  avl.c                                                                \
         igd.c                                                                \
         io.c                                                                 \
         libutil.c                                                            \
+        main-archiver.o                                                      \
         main-hv.c                                                            \
         main-hvapprox.c                                                      \
 	main-nondominated.c                                                  \
@@ -81,7 +82,8 @@ SRCS =  avl.c                                                                \
         pareto.c                                                             \
         rng.c                                                                \
         timer.c                                                              \
-	treap2d_fixed_size.c                                                  \
+	treap2d_fixed_size.c                                                 \
+	treap_archive.c                                                      \
         whv.c                                                                \
         whv_hype.c
 
@@ -163,7 +165,7 @@ EXE_CFLAGS += $(SANITIZERS) $(OPT_CFLAGS) $(MARCH_FLAGS) $(WARN_CFLAGS) \
 
 
 # List of test target base names
-TEST_NAMES := eaf nondominated hv hvapprox igd epsilon dominatedsets ndsort
+TEST_NAMES := archiver eaf nondominated hv hvapprox igd epsilon dominatedsets ndsort
 ASAN_TARGETS := $(addprefix asan-,$(TEST_NAMES))
 UBSAN_TARGETS:= $(addprefix ubsan-,$(TEST_NAMES))
 TEST_TARGETS := $(addprefix test-,$(TEST_NAMES))
@@ -195,6 +197,7 @@ $(ALL_NAMES): %: $(BINDIR)/%$(EXE)
 
 include libhv.mk
 
+$(BINDIR)/archiver$(EXE): main-archiver.o io.o treap_archive.o nondominated.o treap2d_fixed_size.o
 $(BINDIR)/dominatedsets$(EXE): dominatedsets.o nondominated.o treap2d_fixed_size.o
 $(BINDIR)/eaf$(EXE): eaf.o eaf_main.o eaf3d.o avl.o
 $(BINDIR)/epsilon$(EXE): epsilon.o nondominated.o treap2d_fixed_size.o
@@ -224,6 +227,7 @@ hvapprox.o: hvapprox.h pow_int.h rng.h mt19937/mt19937.h
 hvc3d.o: hv_priv.h sort.h hv3d_priv.h treap2d.h
 igd.o: cmdline.h io.h nondominated.h igd.h pow_int.h
 io.o: io.h io_priv.h
+main-archiver.o: cmdline.h io.h treap_archive.h treap2d.h nd_tree.h libmoocore-config.h
 main-hv.o: cmdline.h io.h hv.h timer.h libmoocore-config.h nondominated.h hvapprox.h
 main-hvapprox.o: cmdline.h io.h hvapprox.h
 main-nondominated.o : cmdline.h io.h nondominated.h nondominated_kung.h
