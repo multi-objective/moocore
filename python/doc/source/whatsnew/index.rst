@@ -13,6 +13,7 @@ Version 0.4.0
 - New shapes ``"concave-cliff"`` and ``"convex-cliff"`` added to :func:`~moocore.generate_ndset`.
 - New function :func:`~moocore.generate_sequence` to generate sequences of dominated and nondominated points.
 - `pygmo <https://esa.github.io/pygmo2/>`_ is now included in the :ref:`bench-ndsort` and :ref:`bench-hv` benchmarks.
+- New unbounded nondominated archive :func:`~moocore.UnboundedArchive`.
 
 
 Version 0.3.2 (11/07/2026)

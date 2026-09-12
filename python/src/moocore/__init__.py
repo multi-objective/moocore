@@ -1,6 +1,9 @@
 # ruff: noqa: D104
 from importlib.metadata import version as _metadata_version
 
+# The redundant alias silences a ruff warning.
+from ._archive import BaseUnboundedArchive as BaseUnboundedArchive
+from ._archive import UnboundedArchive
 from ._datasets import (
     get_dataset,
     get_dataset_path,
@@ -47,6 +50,7 @@ __all__ = [
     "Hypervolume",
     "ReadDatasetsError",
     "RelativeHypervolume",
+    "UnboundedArchive",
     "any_dominated",
     "apply_within_sets",
     "avg_hausdorff_dist",
