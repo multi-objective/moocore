@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+eaf
+===
+
+.. currentmodule:: moocore
+
+.. autofunction:: eaf
+
+.. _sphx_glr_backref_moocore.eaf:
+
+.. minigallery:: moocore.eaf
+   :add-heading: Gallery examples
+   :heading-level: -
