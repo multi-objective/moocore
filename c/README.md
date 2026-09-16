@@ -127,10 +127,13 @@ nondominated
 
 Check dominance, filter and transform the sets given as input.
 
+<!-- BEGIN nondominated --help -->
 ```
 Usage:
        nondominated [OPTIONS] [FILES]
        nondominated [OPTIONS] < [INPUT] > [OUTPUT]
+
+Check dominance, filter and transform the sets given as input.
 
 Options:
  -h, --help          print this summary and exit;
@@ -143,7 +146,7 @@ Options:
      --maximise      all objectives must be maximised;
  -u, --upper-bound POINT defines an upper bound to check, e.g. "10 5 30";
  -l, --lower-bound POINT defines a lower bound to check;
- -U, --union         consider each file as a whole approximation set,
+ -U, --union         process each FILE as a single approximation set;
                      (by default, approximation sets are separated by an
                      empty line within a file);
  -s, --suffix=STRING suffix to add to output files. Default is "_dat".
@@ -162,6 +165,7 @@ Options:
  -L, --log=[1|0]...  specify whether each objective should be transformed
                      to logarithmic scale (1) or not (0).
 ```
+<!-- END nondominated --help -->
 
 hv
 --
@@ -184,16 +188,22 @@ approximation uses (quasi-)Monte-Carlo sampling, thus gets more accurate with
 larger values of `--nsamples`. With no file, or when file is `-`, read standard
 input.
 
+<!-- BEGIN hvapprox --help -->
 ```
 Usage: hvapprox [OPTIONS] [FILE...]
-       hvapprox [OPTIONS] < [INPUT] > [OUTPUT]
+
+Approximate the hypervolume value of each input set of each FILE.
+The approximation uses (quasi-)Monte-Carlo sampling, thus gets more accurate with larger
+values of --nsamples. With no FILE, or when FILE is -, read standard input.
 
 Options:
  -h, --help          print this summary and exit;
      --version       print version number (and compilation flags) and exit;
  -v, --verbose       print some information (time, maximum, etc).
  -q, --quiet         print just the hypervolume (as opposed to --verbose).
- -u, --union         treat all input sets within a FILE as a single set.
+ -U, --union         process each FILE as a single approximation set;
+                     (by default, approximation sets are separated by an
+                     empty line within a file);
  -r, --reference=POINT use POINT as reference point. POINT must be within
                      quotes, e.g., "10 10 10". If no reference point is
                      given, it is taken as max + 0.1 * (max - min) for each
@@ -203,20 +213,25 @@ Options:
                      If missing, output is sent to stdout.
  -n, --nsamples=N    Number of Monte-Carlo samples (N is a positive integer).
  -m, --method=M      1: Monte-Carlo sampling using normal distribution;
-                     2: Hua-Wang deterministic sampling (default).
+                     2: Hua-Wang deterministic sampling.
+                     3: Rphi-FWE+ deterministic sampling (default).
  -S, --seed=SEED     Seed of the random number generator (positive integer).
                      Only method=1.
 ```
+<!-- END hvapprox --help -->
 
 epsilon
 -------
 
 Calculates the epsilon measure for the sets given as input.
 
+<!-- BEGIN epsilon --help -->
 ```
 Usage:
        epsilon [OPTIONS] [FILES]
        epsilon [OPTIONS] < [INPUT] > [OUTPUT]
+
+Calculates the epsilon measure for the sets given as input
 
 Options:
  -h, --help          print this summary and exit;
@@ -229,21 +244,27 @@ Options:
  -o, --obj=[+|-]...  specify whether each objective should be minimised (-)
                      or maximised (+). By default all are minimised;
      --maximise      all objectives must be maximised;
+   , --[no]-check    The reference set must be nondominated. By default,
+                     dominated pointers are filtered out.  Option --no-check
+                     skips the filtering, which may lead to wrong results.
  -s, --suffix=STRING  Create an output file for each input file by appending
                       this suffix. This is ignored when reading from stdin.
                       If missing, output is sent to stdout.
 ```
+<!-- END epsilon --help -->
 
 igd
 ---
 
 Calculates quality metrics related to the generational distance (GD, IGD, IGD+, avg Hausdorff distance).
 
+<!-- BEGIN igd --help -->
 ```
 Usage:
        igd [OPTIONS] [FILES]
        igd [OPTIONS] < [INPUT] > [OUTPUT]
 
+Calculates quality metrics related to the generational distance (GD, IGD, IGD+, avg Hausdorff distance).
 
 Options:
  -h, --help          print this summary and exit;
@@ -262,10 +283,14 @@ Options:
  -o, --obj=[+|-]...  specify whether each objective should be minimised (-)
                      or maximised (+). By default all are minimised;
      --maximise      all objectives must be maximised;
+   , --[no]-check    The reference set must be nondominated. By default,
+                     dominated pointers are filtered out.  Option --no-check
+                     skips the filtering, which may lead to wrong results.
  -s, --suffix=STRING Create an output file for each input file by appending
                      this suffix. This is ignored when reading from stdin.
                      If missing, output is sent to stdout.
 ```
+<!-- END igd --help -->
 
 eaf
 ---
@@ -273,8 +298,12 @@ eaf
 Computes the empirical attainment function (EAF) of all input files.
 With no file, or when file is `-`, read standard input.
 
+<!-- BEGIN eaf --help -->
 ```
-Usage:  eaf [OPTIONS] [FILE...]
+Usage:	eaf [OPTIONS] [FILE...]
+
+Computes the empirical attainment function (EAF) of all input FILEs.
+With no FILE, or when FILE is -, read standard input.
 
 Options:
  -h, --help          print this summary and exit;
@@ -296,6 +325,7 @@ Options:
                      If FILE is missing use the same file as for output.
         , --polygons Write EAF as R polygons.
 ```
+<!-- END eaf --help -->
 
 dominatedsets
 -------------
@@ -303,8 +333,11 @@ dominatedsets
 Calculates the number of sets from one file that dominate the sets of the other
 files.
 
+<!-- BEGIN dominatedsets --help -->
 ```
 Usage: dominatedsets [OPTIONS] [FILE...]
+
+Calculates the number of sets from one file that dominate the sets of the other files.
 
 Options:
  -h, --help          print this summary and exit;
@@ -316,14 +349,18 @@ Options:
  -o, --obj=[+|-]...  specify whether each objective should be minimised (-)
                      or maximised (+). By default all are minimised;
 ```
+<!-- END dominatedsets --help -->
 
 ndsort
 ------
 
 Perform nondominated sorting in a list of points.
 
+<!-- BEGIN ndsort --help -->
 ```
 Usage: ndsort [OPTIONS] [FILE...]
+
+Perform nondominated sorting in a list of points.
 
 Options:
  -h, --help          print this summary and exit;
@@ -335,6 +372,7 @@ Options:
  -o, --obj=[+|-]...  specify whether each objective should be minimised (-)
                      or maximised (+). By default all are minimised;
 ```
+<!-- END ndsort --help -->
 
 License
 ========

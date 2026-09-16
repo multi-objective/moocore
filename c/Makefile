@@ -171,12 +171,15 @@ EXE_FILES := $(addsuffix $(EXE), $(addprefix $(BINDIR)/,$(ALL_NAMES)))
 SHLIB=libmoocore.$(SHLIB_EXT)
 CXXSHLIB=libmoocorepp.$(SHLIB_EXT)
 
-.PHONY : default all clean-obj clean dist $(ALL_NAMES) test time shlibs
+.PHONY : default doc all clean-obj clean dist $(ALL_NAMES) test time shlibs
 
 default: $(EXE_FILES)
 
 all: clean
 	$(MAKE) default
+
+doc: all
+	python3 update_readme.py
 
 %.o : %.cpp
 	$(QUIET_CXX)$(CXX) $(CPPFLAGS) $(EXE_CFLAGS) $(CFLAGS) -c -o $@ $<
