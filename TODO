@@ -37,7 +37,7 @@ Computation, pp. 465–472 (2012)]
     - [GBOS: Generalized Best Order Sort algorithm for non-dominated sorting](https://doi.org/10.1016/j.swevo.2018.06.003)
 
  - Merging of Pareto sets:
-  - [ ] Efficient dominance filtering for unions and Minkowski sums of non-dominated sets. https://doi.org/10.1016/j.cor.2023.106506
+  - [ ] [Efficient dominance filtering for unions and Minkowski sums of non-dominated sets, C&OR, 2024](https://doi.org/10.1016/j.cor.2023.106506)
  - [ ] 3D Nondominated sorting:
      Y. Nekrich. A fast algorithm for three-dimensional layers of maxima problem. In Algorithms and Data Structures, number 6844 in Lecture Notes in Computer Science, pages 607–618. 2011. [Paper](https://link.springer.com/chapter/10.1007/978-3-642-22300-6_51)
  - [ ] Epsilon-dominance:
