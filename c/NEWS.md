@@ -3,6 +3,7 @@
 ## 0.20
 
  * radixsort.h, insort.h: New.
+ * main-nondominated.c: Renamed from nondominated.c.
 
 
 ## 0.19.2
