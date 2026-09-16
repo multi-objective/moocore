@@ -94,9 +94,7 @@ OPTION_QUIET_STR
 " -r, --reference FILE file that contains the reference set                  \n"
 OPTION_OBJ_STR
 OPTION_MAXIMISE_STR
-"   , --[no]-check     The reference set must be nondominated. By default, \n"
-"                      dominated pointers are filtered out.  Option --no-check\n"
-"                      skips the filtering, which may lead to wrong results."
+OPTION_NO_CHECK_REFSET_STR
 " -s, --suffix=STRING Create an output file for each input file by appending\n"
 "                     this suffix. This is ignored when reading from stdin. \n"
 "                     If missing, output is sent to stdout.                 \n"

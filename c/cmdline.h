@@ -24,8 +24,17 @@
     "     --maximise      all objectives must be maximised;\n"
 #define OPTION_NOCHECK_STR \
     "     --no-check      do not check nondominance of sets (faster but unsafe);\n"
+#define OPTION_NO_CHECK_REFSET_STR \
+    "   , --[no]-check    The reference set must be nondominated. By default, \n" \
+    "                     dominated pointers are filtered out.  Option --no-check\n" \
+    "                     skips the filtering, which may lead to wrong results.\n"
 #define OPTION_SEED_STR \
     " -S, --seed=SEED     Seed of the random number generator (positive integer).\n"
+#define OPTION_UNION_STR \
+    " -U, --union         process each FILE as a single approximation set;     \n" \
+    "                     (by default, approximation sets are separated by an  \n" \
+    "                     empty line within a file);                           \n"
+
 
 #include <stdbool.h>
 #include <ctype.h> // for isspace()

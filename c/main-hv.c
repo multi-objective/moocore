@@ -64,7 +64,7 @@ OPTION_HELP_STR
 OPTION_VERSION_STR
 " -v, --verbose       print some information (time, maximum, etc).          \n"
 " -q, --quiet         print just the hypervolume (as opposed to --verbose). \n"
-" -u, --union         treat all input sets within a FILE as a single set.   \n"
+OPTION_UNION_STR
 " -r, --reference=POINT use POINT as reference point. POINT must be within  \n"
 "                     quotes, e.g., \"10 10 10\". If no reference point is  \n"
 "                     given, it is taken as max + 0.1 * (max - min) for each\n"
@@ -194,14 +194,14 @@ hv_file(const char *filename, double * restrict reference,
 int main(int argc, char *argv[])
 {
     // See the man page for getopt_long for an explanation of these fields.
-    static const char short_options[] = "hVvqucr:s:S";
+    static const char short_options[] = "hVvqUcr:s:S";
     static const struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
         {"version",    no_argument,       NULL, 'V'},
         {"verbose",    no_argument,       NULL, 'v'},
         {"quiet",      no_argument,       NULL, 'q'},
         {"reference",  required_argument, NULL, 'r'},
-        {"union",      no_argument,       NULL, 'u'},
+        {"union",      no_argument,       NULL, 'U'},
         {"contributions", no_argument,    NULL, 'c'},
         {"suffix",     required_argument, NULL, 's'},
         {NULL, 0, NULL, 0} /* marks end of list */
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
               reference = robust_read_point(optarg, &nobj, "invalid reference point '%s'");
               break;
 
-          case 'u': // --union
+          case 'U': // --union
               union_flag = true;
               break;
 

@@ -4,6 +4,8 @@
 
  * radixsort.h, insort.h: New.
  * main-nondominated.c: Renamed from nondominated.c.
+ * hv and hvapprox executables now use -U instead of -u for --union to be
+   consistent with nondominated.
 
 
 ## 0.19.2

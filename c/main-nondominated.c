@@ -73,9 +73,7 @@ OPTION_OBJ_STR
 OPTION_MAXIMISE_STR
 " -u, --upper-bound POINT defines an upper bound to check, e.g. \"10 5 30\";\n"
 " -l, --lower-bound POINT defines a lower bound to check;\n"
-" -U, --union         consider each file as a whole approximation set,      \n"
-"                     (by default, approximation sets are separated by an   \n"
-"                     empty line within a file);                            \n"
+OPTION_UNION_STR
 " -s, --suffix=STRING suffix to add to output files. Default is \"%s\".     \n"
 "                     The empty string means overwrite the input file.      \n"
 "                     This is ignored when reading from stdin because output\n"
