@@ -13,7 +13,6 @@ from ._moocore import (
     r2_exact,
     filter_dominated,
     filter_dominated_within_sets,
-    generate_ndset,
     hv_approx,
     hv_contributions,
     hypervolume,
@@ -36,6 +35,8 @@ from ._datasets import (
     get_dataset,
     get_dataset_path,
 )
+
+from ._generate import generate_ndset
 
 from importlib.metadata import version as _metadata_version
 
