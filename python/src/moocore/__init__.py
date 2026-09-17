@@ -36,7 +36,7 @@ from ._datasets import (
     get_dataset_path,
 )
 
-from ._generate import generate_ndset
+from ._generate import generate_ndset, generate_sequence
 
 from importlib.metadata import version as _metadata_version
 
@@ -59,6 +59,7 @@ __all__ = [
     "filter_dominated",
     "filter_dominated_within_sets",
     "generate_ndset",
+    "generate_sequence",
     "get_dataset",
     "get_dataset_path",
     "hv_approx",
