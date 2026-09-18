@@ -128,11 +128,21 @@ class Bench:
         report_values=None,
         return_all_values=False,
         max_time=0,
+        reps=3,
         baseline="moocore",
     ):
+        """
+
+        setup:
+               Function or dictionary of functions to be called for each value of n.
+        reps:
+               Number of repetitions of the bench function (minimum time is kept).
+               This should be set to 1 when calls are not independent.
+        """
         self.name = name
         self.n = n
         self.bench = bench
+        self.n_exe = []
         self.times = {k: [] for k in bench.keys()}
         self.versions = {
             what: f"{what} ({get_package_version(what)})"
@@ -150,12 +160,15 @@ class Bench:
         self.setup = setup
         self.check = check
         self.max_time = max_time
+        self.reps = reps
         self.baseline = baseline
 
     def keys(self):
         return self.bench.keys()
 
-    def bench1(self, what, _n, *args, **kwargs):
+    def bench1(self, what, _n, *args, quiet=False, **kwargs):
+        # If setup is a dictionary, it is called once for each algorithm and
+        # for each value of n.
         if self.setup and isinstance(self.setup, dict):
             setup = self.setup.get(what)
             if setup:
@@ -163,25 +176,29 @@ class Bench:
 
         fun = self.bench[what]
         duration, value = timeit.Timer(lambda: fun(*args, **kwargs)).timeit(
-            number=3
+            number=self.reps
         )
         self.times[what] += [duration]
         if self.values is not None:
             self.values[what] += [value]
-        print(f"{self.name}:{_n}:{what}:{duration}")
+        if not quiet:
+            print(f"{self.name}:{_n}:{what}:{duration}")
         return value
 
     def bench_testcase(self, _n, *args, _algos=None, **kwargs):
         assert _n in self.n
-
+        self.n_exe += [_n]
         if _algos is None:
             _algos = self.keys()
 
+        # If setup is not a dictionary, it is called once before each value of n.
         if self.setup and not isinstance(self.setup, dict):
             args, kwargs = _normalize(self.setup(*args, **kwargs))
 
+        quiet = len(self.n) > 100 and (_n & (_n - 1) != 0)
         values = {
-            what: self.bench1(what, _n, *args, **kwargs) for what in _algos
+            what: self.bench1(what, _n, *args, quiet=quiet, **kwargs)
+            for what in _algos
         }
         if self.check:
             a = values[self.baseline]
@@ -209,7 +226,15 @@ class Bench:
                     or self.times[what][-1] <= self.max_time
                 ]
 
-    def plots(self, title, file_prefix, log="y", relative=False, xlabel="n"):
+    def plots(
+        self,
+        title,
+        file_prefix,
+        log="y",
+        logx_base=10,
+        relative=False,
+        xlabel="n",
+    ):
 
         # Pad with nan so we don't have problems later when converting to DataFrame.
         max_len = np.max([len(v) for v in self.times.values()])
@@ -224,8 +249,9 @@ class Bench:
         logx = "x" in log
         logy = "y" in log
         df = (
-            pd.DataFrame(dict(n=self.n, **self.times))
-            .set_index("n")
+            pd.DataFrame(dict(n=self.n_exe, **self.times))
+            .groupby("n")
+            .mean()
             .rename(columns=self.versions)
         )
         ax = df.plot(
@@ -238,11 +264,17 @@ class Bench:
             ylabel="CPU time (seconds)",
         )
         if logx:
+            ax.set_xscale("log", base=logx_base)
             # Set only the major ticks you want
             ax.xaxis.set_major_locator(mticker.FixedLocator(df.index))
-            ax.xaxis.set_major_formatter(
-                mticker.FixedFormatter([f"{x:g}" for x in df.index])
-            )
+            if logx_base == 2:
+                ax.xaxis.set_major_formatter(
+                    lambda x, pos: rf"$2^{{{int(np.log2(x))}}}$"
+                )
+            else:
+                ax.xaxis.set_major_formatter(
+                    mticker.FixedFormatter([f"{x:g}" for x in df.index])
+                )
             # Hide any scientific-notation offset text
             ax.xaxis.get_offset_text().set_visible(False)
 
@@ -260,8 +292,9 @@ class Bench:
                 )
 
             df = (
-                pd.DataFrame(dict(n=self.n, **reltimes))
-                .set_index("n")
+                pd.DataFrame(dict(n=self.n_exe, **reltimes))
+                .groupby("n")
+                .mean()
                 .rename(columns=self.versions)
             )
             ax = df.plot(
@@ -274,6 +307,7 @@ class Bench:
                 ylabel="Time relative to moocore",
             )
             if logx:
+                ax.set_xscale("log", base=logx_base)
                 # Set only the major ticks you want
                 ax.xaxis.set_major_locator(mticker.FixedLocator(df.index))
                 ax.xaxis.set_major_formatter(
