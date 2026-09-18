@@ -3,6 +3,7 @@ import pathlib
 import shutil
 import subprocess
 import timeit
+from datetime import datetime
 
 import cpuinfo
 import matplotlib.pyplot as plt
@@ -76,25 +77,40 @@ def get_package_version(package):
     return importlib.metadata.version(package)
 
 
-def check_float_values(a, b, what, n, name):
+def check_float_values(a, b, what, n, name, baseline):
     assert np.isclose(a, b), (
-        f"In {name}, maxrow={n}, {what}={b}  not equal to moocore={a}"
+        f"In {name}, maxrow={n}, {what}={b}  not equal to {baseline}={a}"
     )
 
 
-def check_array_equal(a, b, what, n, name):
-    np.testing.assert_equal(
+def check_array_equal(a, b, what, n, name, baseline):
+    # print(f"{datetime.now()}:{name}:{n}:{what}:check: |a|={len(a)} ({type(a)}), |b|={len(b)} ({type(b)})")
+    np.testing.assert_array_equal(
         a,
         b,
-        err_msg=f"In {name}, maxrow={n}, {what}={b}  not equal to moocore={a}",
+        err_msg=f"In {name}, maxrow={n}, {what}={b}  not equal to {baseline}={a}",
     )
 
 
-def check_float_vector(a, b, what, n, name):
+def check_float_vector(a, b, what, n, name, baseline):
     np.testing.assert_allclose(
         a,
         b,
-        err_msg=f"In {name}, maxrow={n}, {what}={b}  not equal to moocore={a}",
+        err_msg=f"In {name}, maxrow={n}, {what}={b}  not equal to {baseline}={a}",
+    )
+
+
+def check_bool_array_equal(a, b, what, n, name, baseline):
+    # print(
+    #     f"{datetime.now()}:{name}:{n}:{what}:check: |a|={len(a)} ({type(a)}), |b|={len(b)} ({type(b)})"
+    # )
+    a = np.asarray(a, dtype=bool)
+    b = np.asarray(b, dtype=bool)
+    np.testing.assert_array_equal(
+        a,
+        b,
+        err_msg=f"In {name}, maxrow={n}, {what}={b}  not equal to {baseline}={a}",
+        strict=True,
     )
 
 
@@ -132,6 +148,7 @@ class Bench:
         max_time: float = 0,
         reps: int = 3,
         baseline: str = "moocore",
+        skip_check: set[str] | None = None,
     ):
         """
 
@@ -164,10 +181,25 @@ class Bench:
             self.values = None
             self.value_label = None
         self.setup = setup
+        if isinstance(setup, dict):
+            for key in setup:
+                if key not in bench:
+                    raise ValueError(
+                        f"key '{key}' in 'setup' is not in 'bench'"
+                    )
+
         self.check = check
         self.max_time = max_time
         self.reps = reps
         self.baseline = baseline
+        if baseline not in bench:
+            raise ValueError(f"baseline {baseline} is not in 'bench'")
+
+        self.skip_check = set() if skip_check is None else skip_check
+        if not self.skip_check.issubset(bench):
+            raise ValueError(
+                f"skip_check={self.skip_check} is not a subset of 'bench'"
+            )
 
     def keys(self):
         return self.bench.keys()
@@ -188,7 +220,7 @@ class Bench:
         if self.values is not None:
             self.values[what] += [value]
         if not quiet:
-            print(f"{self.name}:{_n}:{what}:{duration}")
+            print(f"{datetime.now()}:{self.name}:{_n}:{what}:{duration}")
         return value
 
     def bench_testcase(self, _n, *args, _algos=None, **kwargs):
@@ -208,9 +240,16 @@ class Bench:
         if self.check:
             a = values[self.baseline]
             for what, b in values.items():
-                if what == self.baseline:
+                if what == self.baseline or what in self.skip_check:
                     continue
-                self.check(a, b, what=what, n=_n, name=self.name)
+                self.check(
+                    a,
+                    b,
+                    what=what,
+                    n=_n,
+                    name=self.name,
+                    baseline=self.baseline,
+                )
 
         return values
 
@@ -245,15 +284,15 @@ class Bench:
                 if self.values is not None:
                     self.values[what].extend([np.nan] * n_missing)
 
-    def normalise_times(self, what: dict | list):
+    def normalise_times(self, what: set | list):
         """Normalise times by dividing by each value of 'n'"""
         if isinstance(what, list):
-            what = {x: x for x in what}
+            what = set(what)
 
-        for k, v in what.items():
-            times_v = np.asarray(self.times[v])
+        for key in what:
+            times_v = np.asarray(self.times[key])
             n_exe = np.tile(self.n, len(times_v) // len(self.n))
-            self.times[k] = times_v / n_exe
+            self.times[key] = times_v / n_exe
 
     def plots(
         self,
