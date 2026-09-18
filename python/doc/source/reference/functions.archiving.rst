@@ -16,9 +16,3 @@ Unbounded Archiving of a Nondominated Set
 
    UnboundedArchive
    BaseUnboundedArchive
-
-
-Bibliography
-============
-
-.. footbibliography::
