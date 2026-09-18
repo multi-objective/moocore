@@ -273,6 +273,11 @@ The following plots benchmark the speed of computing the :ref:`epsilon indicator
    :width: 48%
 
 
+Archiving Benchmarks
+--------------------
+
+See :ref:`Archiving Benchmarks  <benchmarks_archiving>`.
+
 
 .. _BoFire: https://experimental-design.github.io/bofire/
 .. _BoTorch: https://botorch.org/
