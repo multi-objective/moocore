@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+total\_whv\_rect
+================
+
+.. currentmodule:: moocore
+
+.. autofunction:: total_whv_rect
+
+.. _sphx_glr_backref_moocore.total_whv_rect:
+
+.. minigallery:: moocore.total_whv_rect
+   :add-heading: Gallery examples
+   :heading-level: -

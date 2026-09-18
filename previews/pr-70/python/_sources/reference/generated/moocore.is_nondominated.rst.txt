@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+is\_nondominated
+================
+
+.. currentmodule:: moocore
+
+.. autofunction:: is_nondominated
+
+.. _sphx_glr_backref_moocore.is_nondominated:
+
+.. minigallery:: moocore.is_nondominated
+   :add-heading: Gallery examples
+   :heading-level: -
