@@ -120,29 +120,34 @@ class Bench:
 
     def __init__(
         self,
-        name,
+        name: str,
         n,
-        bench,
-        setup=None,
+        bench: dict,
+        setup: dict | None = None,
         check=None,
         report_values=None,
         return_all_values=False,
-        max_time=0,
-        reps=3,
-        baseline="moocore",
+        max_time: float = 0,
+        reps: int = 3,
+        baseline: str = "moocore",
     ):
         """
 
+        name:
+            Name of this benchmark.
+        n:
+            List of numerical values.
+        bench:
+            A dictionary of functions or lambdas. Each element will be called for each value of n
         setup:
-               Function or dictionary of functions to be called for each value of n.
+            Function or dictionary of functions to be called for each value of n.
         reps:
-               Number of repetitions of the bench function (minimum time is kept).
-               This should be set to 1 when calls are not independent.
+            Number of repetitions of the bench function (minimum time is kept).
+            This should be set to 1 when calls are not independent.
         """
         self.name = name
         self.n = n
         self.bench = bench
-        self.n_exe = []
         self.times = {k: [] for k in bench.keys()}
         self.versions = {
             what: f"{what} ({get_package_version(what)})"
@@ -187,7 +192,6 @@ class Bench:
 
     def bench_testcase(self, _n, *args, _algos=None, **kwargs):
         assert _n in self.n
-        self.n_exe += [_n]
         if _algos is None:
             _algos = self.keys()
 
@@ -211,8 +215,13 @@ class Bench:
         return values
 
     def __call__(self, get_testcase):
-        # Call fun for each value in self.n
+        """Run the benchmark for one testcase, that is, call get_testcase(n=_n) for _n in self.n"""
         algos = self.keys()
+
+        # Remember where this particular call starts, since self.times and
+        # self.values may already contain results from previous calls.
+        start_len = {what: len(self.times[what]) for what in self.keys()}
+
         for _n in self.n:
             args, kwargs = _normalize(get_testcase(n=_n))
             self.bench_testcase(_n, *args, **kwargs, _algos=algos)
@@ -226,6 +235,16 @@ class Bench:
                     or self.times[what][-1] <= self.max_time
                 ]
 
+        # Complete this call's result arrays with NaN so that every algorithm
+        # contributed exactly len(self.n) entries for this invocation.
+        for what in self.keys():
+            n_results = len(self.times[what]) - start_len[what]
+            n_missing = len(self.n) - n_results
+            if n_missing > 0:
+                self.times[what].extend([np.nan] * n_missing)
+                if self.values is not None:
+                    self.values[what].extend([np.nan] * n_missing)
+
     def plots(
         self,
         title,
@@ -234,113 +253,142 @@ class Bench:
         logx_base=10,
         relative=False,
         xlabel="n",
+        show_ci=False,
     ):
+        """Plots the results after running the benchmark one or more times.
 
-        # Pad with nan so we don't have problems later when converting to DataFrame.
-        max_len = np.max([len(v) for v in self.times.values()])
-        for k, v in self.times.items():
-            self.times[k] = np.pad(
-                np.array(v, dtype=float),
-                (0, max_len - len(v)),
-                "constant",
-                constant_values=np.nan,
-            )
-
+        __call__() is expected to pad each algorithm's results with np.nan so
+        that every call contributes exactly len(self.n) entries.
+        """
         logx = "x" in log
         logy = "y" in log
-        df = (
-            pd.DataFrame(dict(n=self.n_exe, **self.times))
-            .groupby("n")
-            .mean()
-            .rename(columns=self.versions)
-        )
-        ax = df.plot(
-            grid=True,
-            logx=logx,
-            logy=logy,
-            style="o-",
-            title="",
-            xlabel=xlabel,
-            ylabel="CPU time (seconds)",
-        )
-        if logx:
-            ax.set_xscale("log", base=logx_base)
-            # Set only the major ticks you want
-            ax.xaxis.set_major_locator(mticker.FixedLocator(df.index))
-            if logx_base == 2:
-                ax.xaxis.set_major_formatter(
-                    lambda x, pos: rf"$2^{{{int(np.log2(x))}}}$"
-                )
-            else:
-                ax.xaxis.set_major_formatter(
-                    mticker.FixedFormatter([f"{x:g}" for x in df.index])
-                )
-            # Hide any scientific-notation offset text
-            ax.xaxis.get_offset_text().set_visible(False)
 
-        plt.title(f"({self.cpu_model})", fontsize=10)
-        plt.suptitle(f"{title} for {self.name}", fontsize=12)
-        save2png(f"{file_prefix}_bench-{self.name}-time.png")
-
-        if relative and self.baseline in self.keys():
-            reltimes = {}
-            for what in self.keys():
-                if what == self.baseline:
-                    continue
-                reltimes["Rel_" + what] = (
-                    self.times[what] / self.times[self.baseline]
+        def single_plot(results, ylabel, file_suffix):
+            """Summarise and plot a set of benchmark results."""
+            lengths = {what: len(values) for what, values in results.items()}
+            if len(set(lengths.values())) != 1:
+                raise ValueError(
+                    f"In {self.name}, result lengths are inconsistent: {lengths}"
                 )
 
-            df = (
-                pd.DataFrame(dict(n=self.n_exe, **reltimes))
-                .groupby("n")
-                .mean()
-                .rename(columns=self.versions)
+            # Get the first value of lengths.
+            nresults = next(iter(lengths.values()))
+            if nresults % len(self.n) != 0:
+                raise ValueError(
+                    f"In {self.name}, number of results ({nresults}) is not "
+                    f"a multiple of len(n) ({len(self.n)})."
+                )
+
+            # Each consecutive block of len(self.n) values is one call to
+            # __call__.  Repeating self.n gives the corresponding n for every
+            # observation.
+            results = {
+                what: np.asarray(values, dtype=float)
+                for what, values in results.items()
+            }
+            df = pd.DataFrame(
+                {
+                    "n": np.tile(self.n, nresults // len(self.n)),
+                    **results,
+                }
             )
+
+            if show_ci:
+                ci = 1.96  # 95% CI
+                if logy:
+                    # Geometric mean + 95% CI, calculated in log space.
+                    log_raw = (
+                        df.drop(columns="n").apply(np.log).groupby(df["n"])
+                    )
+                    df = log_raw.mean()
+                    sem = log_raw.sem()
+                    lower = np.exp(df - ci * sem)
+                    upper = np.exp(df + ci * sem)
+                    df = np.exp(df)
+                else:
+                    # Arithmetic mean and ordinary CI
+                    grouped = df.groupby("n")
+                    df = grouped.mean(numeric_only=True)
+                    sem = grouped.sem(numeric_only=True)
+                    lower = df - ci * sem
+                    upper = df + ci * sem
+
+                lower = lower.rename(columns=self.versions)
+                upper = upper.rename(columns=self.versions)
+            else:
+                df = df.groupby("n").mean(numeric_only=True)
+                lower = upper = None
+
+            df = df.rename(columns=self.versions)
             ax = df.plot(
                 grid=True,
                 logx=logx,
-                logy=False,  # Looks bad with logy
+                logy=logy,
                 style="o-",
                 title="",
+                ylabel=ylabel,
                 xlabel=xlabel,
-                ylabel="Time relative to moocore",
             )
+
             if logx:
                 ax.set_xscale("log", base=logx_base)
-                # Set only the major ticks you want
+                # Set only the benchmark sizes as major ticks.
                 ax.xaxis.set_major_locator(mticker.FixedLocator(df.index))
-                ax.xaxis.set_major_formatter(
-                    mticker.FixedFormatter([f"{x:g}" for x in df.index])
-                )
-                # Hide any scientific-notation offset text
+                if logx_base == 2:
+                    ax.xaxis.set_major_formatter(
+                        lambda x, pos: rf"$2^{{{int(np.log2(x))}}}$"
+                    )
+                else:
+                    ax.xaxis.set_major_formatter(
+                        mticker.FixedFormatter([f"{x:g}" for x in df.index])
+                    )
+
+                # Hide any scientific-notation offset text.
                 ax.xaxis.get_offset_text().set_visible(False)
+
+            if lower is not None:
+                x = df.index.to_numpy()
+                for col in df.columns:
+                    y1 = lower[col].to_numpy()
+                    y2 = upper[col].to_numpy()
+                    # Avoid problems with NaN CI bounds, which can occur when
+                    # there are fewer than two valid observations.
+                    valid = np.isfinite(y1) & np.isfinite(y2)
+                    if np.any(valid):
+                        ax.fill_between(x, y1, y2, where=valid, alpha=0.2)
 
             plt.title(f"({self.cpu_model})", fontsize=10)
             plt.suptitle(f"{title} for {self.name}", fontsize=12)
-            save2png(f"{file_prefix}_bench-{self.name}-reltime.png")
+            save2png(f"{file_prefix}_bench-{self.name}-{file_suffix}.png")
 
-        if self.values is None:
-            return
+        # CPU times.
+        single_plot(self.times, ylabel="CPU time (seconds)", file_suffix="time")
 
-        for what in self.keys():
-            self.values[what] = np.asarray(self.values[what])
+        # Relative CPU times.
+        if relative and self.baseline in self.keys():
+            baseline = np.asarray(self.times[self.baseline], dtype=float)
+            relative_results = {}
+            for what in self.keys():
+                if what == self.baseline:
+                    continue
+                values = np.asarray(self.times[what], dtype=float)
+                if len(values) != len(baseline):
+                    raise ValueError(
+                        f"In {self.name}, number of results for {what!r} "
+                        f"({len(values)}) does not match baseline ({len(baseline)})."
+                    )
 
-        df = (
-            pd.DataFrame(dict(n=self.n, **self.values))
-            .set_index("n")
-            .rename(columns=self.versions)
-        )
-        df.plot(
-            grid=True,
-            logx=logx,
-            logy=logy,
-            style="o-",
-            title="",
-            xticks=df.index,
-            xlabel=xlabel,
-            ylabel=self.value_label,
-        )
-        plt.title(f"({self.cpu_model})", fontsize=10)
-        plt.suptitle(f"{title} for {self.name}", fontsize=12)
-        save2png(f"{file_prefix}_bench-{self.name}-values.png")
+                with np.errstate(divide="ignore", invalid="ignore"):
+                    relative_results[f"Rel_{what}"] = values / baseline
+
+            single_plot(
+                relative_results,
+                ylabel=f"Time relative to {self.baseline}",
+                file_suffix="reltime",
+            )
+
+        # Reported values.
+        if self.values is not None:
+            single_plot(
+                self.values, ylabel=self.value_label, file_suffix="values"
+            )
