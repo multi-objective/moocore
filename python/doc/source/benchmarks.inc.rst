@@ -121,7 +121,7 @@ makes `moocore`_ significantly faster than `paretoset`_, `pymoo`_ and
 `DESDEO`_.  With higher dimensions, `moocore`_ uses a :math:`O(n^2\log^{m-2}n)`
 algorithm instead of the :math:`O(n^3)` algorithm in `paretoset`_ and `DESDEO`_
 (latter is compiled with `Numba`_).  In these benchmarks points are sampled
-uniformly at random within the hyper-cube.
+uniformly at random within the hypercube.
 
 |ndsort_bench-ran-2d| |ndsort_bench-ran-3d|
 
