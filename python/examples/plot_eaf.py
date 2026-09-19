@@ -1,5 +1,6 @@
-r"""Empirical Attainment Function
-=================================
+r"""
+Empirical Attainment Function
+=============================
 
 This example illustrates functionality related to the EAF.
 

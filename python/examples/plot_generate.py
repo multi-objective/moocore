@@ -1,4 +1,5 @@
-r"""Sampling Random Nondominated Sets
+r"""
+Sampling Random Nondominated Sets
 =================================
 
 This example illustrates how to sample random sets with

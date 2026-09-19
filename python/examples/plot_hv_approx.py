@@ -1,4 +1,5 @@
-r"""Comparing methods for approximating the hypervolume
+r"""
+Comparing methods for approximating the hypervolume
 ===================================================
 
 The following examples compare various ways of approximating the hypervolume of

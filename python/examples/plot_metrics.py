@@ -1,4 +1,5 @@
-"""Computing Multi-Objective Quality Metrics
+"""
+Computing Multi-Objective Quality Metrics
 =========================================
 
 Several examples of computing multi-objective unary quality metrics.
