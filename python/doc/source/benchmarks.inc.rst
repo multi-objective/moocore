@@ -262,14 +262,14 @@ For such problems, method ``DZ2019-HW`` becomes significantly slower than
 Epsilon and IGD+ indicators
 ---------------------------
 
-The following plots compare the speed of computing the :ref:`epsilon indicator  <epsilon_metric>` metric and :ref:`IGD+ indicator <igd_hausdorf>`. Although  the algorithms for computing these metrics are relatively simple and easy to vectorize in Python, the `moocore`_ implementation is still 10 to 100 times faster. The implementation of IGD+ in `DESDEO`_ and `jMetalPy`_ is almost a thousand times **slower**  than `moocore`_, so it is not included in the benchmarks below.
+The following plots benchmark the speed of computing the :ref:`epsilon indicator  <epsilon_metric>` metric and :ref:`IGD+ indicator <igd_hausdorf>`. Although  the algorithms for computing these metrics are relatively simple and easy to vectorize in Python, the `moocore`_ implementation is still 10 to 100 times faster.
 
-|pic5| |pic6|
+|fig_eps_bench| |fig_igd_plus_bench|
 
-.. |pic5| image:: _static/bench/eps_bench-rmnk_10D_random_search-time.png
+.. |fig_eps_bench| image:: _static/bench/eps_bench-rmnk_10D_random_search-time.png
    :width: 48%
 
-.. |pic6| image:: _static/bench/igd_plus_bench-ran.40000pts.3d-time.png
+.. |fig_igd_plus_bench| image:: _static/bench/igd_plus_bench-ran.1000pts.3d-time.png
    :width: 48%
 
 
