@@ -52,7 +52,7 @@ The following projects currently use `moocore`:
 
  - [`mooplot`](https://github.com/multi-objective/mooplot)
  - [`DEAP`](http://deap.readthedocs.org/)
- - [`DEAP-er`](https://deap-er.readthedocs.io/)
+ - [`DEAP-er`](https://aabmets.github.io/deap-er/)
  - [`DESDEO`](https://github.com/industrial-optimization-group/DESDEO/)
  - [`GPareto`](https://github.com/mbinois/GPareto)
  - [`IOHInspector`](https://github.com/IOHprofiler/IOHinspector?tab=readme-ov-file)
