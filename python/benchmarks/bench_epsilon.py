@@ -35,7 +35,7 @@ names = files.keys()
 for name in names:
     x = read_data(files[name][0])
     ref = read_data(files[name][1])
-    n = np.arange(200, min(len(x), 1000) + 1, 200)
+    n = np.arange(10, min(len(x), 100) + 1, 10)
 
     bench = Bench(
         name=name,
