@@ -5,32 +5,19 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
-from bench import Bench, read_data, check_float_values
+from bench import Bench, check_float_values, get_range
 
 import numpy as np
 import moocore
-import pathlib
 import matplotlib.pyplot as plt
 
-from pymoo.indicators.igd_plus import IGDPlus as pymoo_IGDplus
-
-## FIXME: Currently DESDEO is a thousand times slower than moocore, so it is not worth running it.
-# from desdeo.tools.indicators_unary import igd_plus_indicator as desdeo_igd_plus
-## FIXME: Currently jMetal is 100 times slower than moocore, so it is not worth running it.
-# from jmetal.core.quality_indicator import InvertedGenerationalDistancePlus as jmetal_IGDplus
-
-
-path_to_data = "../../testsuite/data/"
-if not pathlib.Path(path_to_data).expanduser().exists():
-    path_to_data = (
-        "https://github.com/multi-objective/testsuite/raw/refs/heads/main/data/"
-    )
+from desdeo.tools.indicators_unary import igd_plus_indicator as desdeo_igd_plus
+from jmetal.core.quality_indicator import (
+    InvertedGenerationalDistancePlus as jmetal_IGDplus,
+)
 
 files = {
-    "ran.40000pts.3d": (
-        path_to_data + "ran.40000pts.3d.1.xz",
-        path_to_data + "ran.40001pts.3d.1.xz",
-    ),
+    "ran.1000pts.3d": "ran.1000pts.3d.10",
 }
 
 title = "IGD+ computation"
@@ -39,20 +26,22 @@ file_prefix = "igd_plus"
 print(f"Running benchmark: {title}")
 names = files.keys()
 for name in names:
-    x = read_data(files[name][0])
-    ref = read_data(files[name][1])
-    n = np.arange(100, min(len(x), 1300) + 1, 200)
+    ref = moocore.get_dataset(files[name])
+    n = get_range(len(ref), 10, 100, 10)
+
+    x = ref.copy()
+    rng = np.random.default_rng(42)
+    rng.shuffle(x, axis=0)
 
     bench = Bench(
         name=name,
         n=n,
         bench={
             "moocore": lambda z, ref=ref: moocore.igd_plus(z, ref=ref),
-            # FIXME: Currently jMetal is 100 times slower than moocore, so it is not worth running it.
-            # "jMetalPy": lambda z, igdp=jmetal_IGDplus(ref): igdp.compute(z),
-            "pymoo": lambda z, ind=pymoo_IGDplus(ref): ind(z),
-            # FIXME: Currently DESDEO is a thousand times slower than moocore, so it is not worth running it.
-            # "desdeo": lambda z, ref=ref: desdeo_igd_plus(z, reference_set=ref).igd_plus,
+            "jMetalPy": lambda z, igdp=jmetal_IGDplus(ref): igdp.compute(z),
+            "desdeo": lambda z, ref=ref: (
+                desdeo_igd_plus(z, reference_set=ref).igd_plus
+            ),
         },
         check=check_float_values,
     )
