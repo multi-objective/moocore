@@ -1,4 +1,4 @@
-# moocore (development)
+# moocore 0.3.2.900
 
  * `is_nondominated` is up to 10x faster in some inputs thanks to a customized radixsort implementation.
  * New shapes `"cliff-concave"` and `"cliff-convex"` added to `generate_ndset()`.
