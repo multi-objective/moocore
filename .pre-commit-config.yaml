@@ -8,7 +8,7 @@ ci:
 
 repos:
   - repo: https://github.com/lorenzwalthert/precommit
-    rev: v0.4.3.9029
+    rev: a62d29d6b2c785637593e03010c5cac7c2916777 # frozen v0.4.3.9029
     hooks:
       - id: parsable-R
       - id: no-browser-statement
