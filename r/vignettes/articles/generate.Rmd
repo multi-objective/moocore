@@ -229,6 +229,19 @@ fig2 <- plot_3d("simplex", moocore::generate_ndset(n, 3, "concave-simplex", seed
 plotly_side_by_side(fig1, fig2)
 ```
 
+# Cliff sets (3D)
+
+The `cliff` type is often used to test the performance of algorithms for
+computing the hypervolume [@EmmFon2011emo; @GueFon2017hv4d], due to its
+particular structure.
+
+```{r generate_3d_cliff}
+fig1 <- plot_3d("simplex", moocore::generate_ndset(n, 3, "cliff-concave", seed = 42), title = 'method="cliff-concave"')
+fig2 <- plot_3d("simplex", moocore::generate_ndset(n, 3, "cliff-convex", seed = 42), title = 'method="cliff-convex"')
+
+plotly_side_by_side(fig1, fig2)
+```
+
 # Uniform sampling (moocore) vs projections of uniform samples (naive)
 
 Naive methods for sampling such sets usually sample points uniformly in the

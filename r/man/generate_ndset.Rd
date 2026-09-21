@@ -82,6 +82,31 @@ It corresponds to translating points from the negative orthant of the
 hypersphere to the positive orthant. Thus, the sampling remains uniform.
 
 }
+\item{\code{'cliff-concave'}}{
+
+Equivalent to generating a 2D set using
+\code{method='concave-sphere'}, then generating the other \code{d-2} columns
+uniformly at random within the unit hypercube
+\citep{EmmFon2011emo,GueFon2017hv4d}. This method does not make sense
+for \code{d=2}.
+
+In the resulting set, the first two columns are mutually nondominated,
+that is, no point can dominate another regardless of the other
+objectives, while the remaining \code{d-2} columns do not provide any
+ordering. These sets are adversarial for algorithms that aim to exploit
+dominance structure.
+
+The dimensions that are generated uniformly at random should be chosen
+adversarially according to the algorithm being tested. Alternatively, the
+columns may be randomly shuffled.
+
+}
+\item{\code{'cliff-convex'}}{
+
+Equivalent to \code{1 - generate_ndset(..., method='cliff-concave')}.
+This method does not make sense for \code{d=2}.
+
+}
 \item{\code{'convex-simplex'}}{
 
 Equivalent to \code{generate_ndset(..., method='simplex')^2}, which is convex
@@ -122,6 +147,7 @@ generate_ndset(5, 3, "simplex", seed = 42)
 generate_ndset(5, 3, "simplex", seed = 42, integer = TRUE)
 generate_ndset(4, 2, "sphere", seed = 123)
 generate_ndset(3, 5, "convex-sphere", seed = 123)
+generate_ndset(3, 5, "cliff-convex", seed = 42)
 generate_ndset(4, 4, "convex-simplex", seed = 123)
 
 }
