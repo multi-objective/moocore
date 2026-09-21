@@ -611,11 +611,18 @@ def test_generate_ndset(dim):
     n = 10
     one = np.ones(n)
     points = moocore.generate_ndset(n, dim, "simplex")
+    assert not moocore.any_dominated(points)
     assert_allclose(points.sum(axis=1), one)
     points = moocore.generate_ndset(n, dim, "concave-sphere")
+    assert not moocore.any_dominated(points)
     assert_allclose((points**2).sum(axis=1), one)
     points = moocore.generate_ndset(n, dim, "convex-simplex")
+    assert not moocore.any_dominated(points)
     assert_allclose(np.sqrt(points).sum(axis=1), one)
+    points = moocore.generate_ndset(n, dim, "cliff-concave")
+    assert not moocore.any_dominated(points)
+    points = moocore.generate_ndset(n, dim, "cliff-convex")
+    assert not moocore.any_dominated(points)
 
 
 @pytest.mark.parametrize("dim", range(2, 5))

@@ -10,6 +10,7 @@ Version 0.4.0
 - Requires ``numpy>=2.1``.
 - :func:`~moocore.vorob_t` returns a :class:`~typing.NamedTuple` instead of a dictionary.
 - :func:`~moocore.is_nondominated` is up to 10x faster in some inputs thanks to a customized radixsort implementation.
+- New shapes ``"cliff-concave"`` and ``"cliff-convex"`` added to :func:`~moocore.generate_ndset`.
 
 
 Version 0.3.2 (11/07/2026)

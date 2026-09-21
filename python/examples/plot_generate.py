@@ -262,7 +262,7 @@ plotly_3d_side_by_side(fig1, fig2)
 # %%
 #
 # The method ``convex-simplex`` implemented in :func:`~moocore.generate_ndset`
-# is different from the `concave` method proposed by :cite:t:`BriFri2012tcs`.
+# is different from the `concave` method proposed by :footcite:t:`BriFri2012tcs`.
 
 points = np.abs(rng.normal(size=(n, 3)))
 points /= (np.sqrt(points).sum(axis=1, keepdims=True)) ** 2
@@ -278,7 +278,7 @@ plotly_3d_side_by_side(fig1, fig2)
 # Inverted shapes
 # ---------------
 #
-# :cite:t:`IshHeSha2019regular` analyze the differences between `regular` and
+# :footcite:t:`IshHeSha2019regular` analyze the differences between `regular` and
 # `inverted` shapes, shown below on the left and right figures,
 # respectively. The differences between ``simplex`` and ``inverted-simplex``
 # are not noticeable in 2D, but are significant in higher dimensions.
@@ -308,12 +308,30 @@ plotly_3d_side_by_side(fig1, fig2)
 
 # %%
 #
+# Cliff sets (3D)
+# ---------------
+#
+# The 'cliff' type is often used to test the performance of algorithms for
+# computing the hypervolume :footcite:p:`EmmFon2011emo,GueFon2017hv4d`, due to
+# its particular structure.
+#
+
+n = 2000
+rng = np.random.default_rng(42)
+
+fig1 = generate_ndset_plotly_3d(n, "cliff-concave", seed=rng)
+fig2 = generate_ndset_plotly_3d(n, "cliff-convex", seed=rng)
+
+plotly_3d_side_by_side(fig1, fig2)
+
+# %%
+#
 # Uniform sampling (moocore) vs projections of uniform samples (naive)
 # --------------------------------------------------------------------
 #
 # Naive methods for sampling such sets usually sample points uniformly in the
 # hypercube and project them into a lower dimensional manifold
-# :cite:p:`LacKlaFon2017box`, e.g., the standard simplex or the positive orthant
+# :footcite:p:`LacKlaFon2017box`, e.g., the standard simplex or the positive orthant
 # of the hypersphere.  However, such projections do not preserve the uniformity
 # of the sampling, that is, not all points in the manifold have the same
 # probability of being sampled.
@@ -354,3 +372,9 @@ points /= np.linalg.norm(points, axis=1, keepdims=True)
 fig2 = plotly_3d("convex", 1.0 - points, title="Convex-sphere (naive)")
 
 plotly_3d_side_by_side(fig1, fig2)
+
+# %%
+# References
+# ----------
+# .. footbibliography::
+#
