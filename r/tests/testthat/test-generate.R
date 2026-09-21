@@ -14,8 +14,12 @@ test_that("generate_ndset", {
     expect_equal(rowSums(sqrt(points)), one)
     points <- generate_ndset(n, dim, "cliff-concave")
     expect_false(any_dominated(points))
+    expect_equal(rowSums(points[, 1:2]^2), one)
+    expect_true(all(points[, 3:dim] >= 0 & points[, 3:dim] <= 1))
     points <- generate_ndset(n, dim, "cliff-convex")
     expect_false(any_dominated(points))
+    expect_equal(rowSums((1 - points[, 1:2])^2), one)
+    expect_true(all(points[, 3:dim] >= 0 & points[, 3:dim] <= 1))
   }
 
   expect_error(
