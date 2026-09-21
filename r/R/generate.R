@@ -167,7 +167,7 @@ generate_ndset <- function(n, d, method, seed = NULL, integer = FALSE)
     y <- abs(rnorm(n * 2L))
     dim(y) <- c(n, 2L)
     x[, 1:2] <- y / sqrt(rowSums(y * y))
-    x[, 3:d] <- runif(n * (d - 2L))
+    x[, 3:d] <- matrix(runif(n * (d - 2L)), nrow = n, ncol = d - 2L)
     x
   }
 
