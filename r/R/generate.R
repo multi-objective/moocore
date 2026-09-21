@@ -70,6 +70,31 @@
 #'    hypersphere to the positive orthant. Thus, the sampling remains uniform.
 #'
 #'   }
+#'   \item{`'cliff-concave'`}{
+#'
+#'    Equivalent to generating a 2D set using
+#'    `method='concave-sphere'`, then generating the other `d-2` columns
+#'    uniformly at random within the unit hypercube
+#'    \citep{EmmFon2011emo,GueFon2017hv4d}. This method does not make sense
+#'    for `d=2`.
+#'
+#'    In the resulting set, the first two columns are mutually nondominated,
+#'    that is, no point can dominate another regardless of the other
+#'    objectives, while the remaining `d-2` columns do not provide any
+#'    ordering. These sets are adversarial for algorithms that aim to exploit
+#'    dominance structure.
+#'
+#'    The dimensions that are generated uniformly at random should be chosen
+#'    adversarially according to the algorithm being tested. Alternatively, the
+#'    columns may be randomly shuffled.
+#'
+#'   }
+#'   \item{`'cliff-convex'`}{
+#'
+#'    Equivalent to `1 - generate_ndset(..., method='cliff-concave')`.
+#'    This method does not make sense for `d=2`.
+#'
+#'   }
 #'   \item{`'convex-simplex'`}{
 #'
 #'    Equivalent to `generate_ndset(..., method='simplex')^2`, which is convex
@@ -114,6 +139,7 @@
 #' generate_ndset(5, 3, "simplex", seed = 42, integer = TRUE)
 #' generate_ndset(4, 2, "sphere", seed = 123)
 #' generate_ndset(3, 5, "convex-sphere", seed = 123)
+#' generate_ndset(3, 5, "cliff-convex", seed = 42)
 #' generate_ndset(4, 4, "convex-simplex", seed = 123)
 #'
 #' @export
@@ -129,14 +155,23 @@ generate_ndset <- function(n, d, method, seed = NULL, integer = FALSE)
     x
   }
 
-  sample_sphere <- function() {
-    x <- abs(rnorm(n * d))
-    dim(x) <- c(n, d)
+  sample_sphere <- function(dims = d) {
+    x <- abs(rnorm(n * dims))
+    dim(x) <- c(n, dims)
     x <- x / sqrt(rowSums(x * x))
     x
   }
 
+  sample_cliff_concave <- function() {
+    x <- matrix(0, nrow = n, ncol = d)
+    x[, 1:2] <- sample_sphere(2L)
+    cols <- seq.int(3L, d)
+    x[, cols] <- matrix(runif(n * (d - 2L)), nrow = n, ncol = d - 2L)
+    x
+  }
+
   sample_convex_sphere <- function() 1. - sample_sphere()
+  sample_cliff_convex <- function() 1. - sample_cliff_concave()
   sample_convex_simplex <- function() sample_simplex()^2
   sample_inverted_simplex <- function() 1. - sample_simplex()
   sample_concave_simplex <- function() 1. - sample_convex_simplex()
@@ -145,6 +180,11 @@ generate_ndset <- function(n, d, method, seed = NULL, integer = FALSE)
     if (method %in% c("simplex", "linear", "L")) sample_simplex
     else if (method %in% c("concave-sphere", "sphere", "C")) sample_sphere
     else if (method %in% c("convex-sphere", "X")) sample_convex_sphere
+    else if (method %in% c("cliff-concave", "cliff-convex")) {
+      if (d <= 2L)
+        stop("method='", method, "' requires at least 3 dimensions")
+      if (method == "cliff-concave") sample_cliff_concave else sample_cliff_convex
+    }
     else if (method == "convex-simplex") sample_convex_simplex
     else if (method %in% c("inverted-simplex", "inverted-linear")) sample_inverted_simplex
     else if (method == "concave-simplex") sample_concave_simplex

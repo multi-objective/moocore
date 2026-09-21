@@ -5,7 +5,7 @@
 #' @importFrom matrixStats colRanges
 #' @importFrom Rdpack reprompt
 #' @importFrom utils modifyList write.table tail
-#' @importFrom stats rexp rnorm
+#' @importFrom stats rexp rnorm runif
 #' @useDynLib moocore, .registration = TRUE
 ## usethis namespace: end
 NULL
