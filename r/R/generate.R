@@ -155,18 +155,16 @@ generate_ndset <- function(n, d, method, seed = NULL, integer = FALSE)
     x
   }
 
-  sample_sphere <- function() {
-    x <- abs(rnorm(n * d))
-    dim(x) <- c(n, d)
+  sample_sphere <- function(dims = d) {
+    x <- abs(rnorm(n * dims))
+    dim(x) <- c(n, dims)
     x <- x / sqrt(rowSums(x * x))
     x
   }
 
   sample_cliff_concave <- function() {
     x <- matrix(0, nrow = n, ncol = d)
-    y <- abs(rnorm(n * 2L))
-    dim(y) <- c(n, 2L)
-    x[, 1:2] <- y / sqrt(rowSums(y * y))
+    x[, 1:2] <- sample_sphere(2L)
     cols <- seq.int(3L, d)
     x[, cols] <- matrix(runif(n * (d - 2L)), nrow = n, ncol = d - 2L)
     x
