@@ -4,22 +4,7 @@
 #include "io.h"
 #endif
 
-#ifdef USE_AVL
-typedef const double avl_item_t;
-typedef struct avl_node_t {
-    struct avl_node_t *next;
-    struct avl_node_t *prev;
-    struct avl_node_t *parent;
-    struct avl_node_t *left;
-    struct avl_node_t *right;
-    avl_item_t *item;
-    unsigned char depth;
-} avl_node_t;
-
-#include "avl_tiny.h"
-#else
 #include "treap2d_fixed_size.h"
-#endif
 
 /**
    Nondominated sorting in 3D in O(k * n log n), where k is the number of fronts.
@@ -37,30 +22,14 @@ pareto_rank_3d(int * restrict rank, const double * restrict points, size_t size)
     const bool keep_weakly = true;
     const double ** p = generate_row_pointers_asc_rev_3d(points, size);
 
-#ifdef USE_AVL
-    avl_tree_t tree;
-    avl_init_tree(&tree, qsort_cmp_pdouble_asc_x_nonzero);
-    avl_node_t * tnodes = malloc((size+1) * sizeof(*tnodes));
-    const double sentinel[] = { INFINITY, -INFINITY };
-    tnodes->item = sentinel;
-#else
     Treap2D * tree = treap2d_new(size);
     assert(tree != NULL);
-#endif
     int front = 0;
 
     while (true) {
         ASSUME(size >= 2);
         const double * restrict pk = p[0];
-#ifdef USE_AVL
-        avl_node_t * node = tnodes + 1;
-        node->item = pk;
-        avl_insert_top(&tree, node);
-        // Insert sentinel.
-        avl_insert_after(&tree, node, tnodes);
-#else
         treap2d_init_with_single_node(tree, pk[0], pk[1]);
-#endif
 
         // In this context, size means "no dominated solution found".
         size_t n_nondom = size, j = 1;
@@ -69,48 +38,10 @@ pareto_rank_3d(int * restrict rank, const double * restrict points, size_t size)
             const double * restrict pj = p[j];
             bool dominated;
             if (pk[0] > pj[0] || pk[1] > pj[1]) {
-#ifdef USE_AVL
-                avl_node_t * nodeaux;
-                int res = avl_search_closest(&tree, pj, &nodeaux);
-                assert(res != 0);
-                if (res > 0) { // nodeaux goes before pj
-                    const double * restrict prev = nodeaux->item;
-                    assert(prev[0] != sentinel[0]);
-                    assert(prev[0] <= pj[0]);
-                    dominated = prev[1] <= pj[1];
-                    nodeaux = nodeaux->next;
-                } else if (nodeaux->prev) {// nodeaux goes after pj, so move to the next one.
-                    const double * restrict prev = nodeaux->prev->item;
-                    assert(prev[0] != sentinel[0]);
-                    assert(prev[0] <= pj[0]);
-                    dominated = prev[1] <= pj[1];
-                } else {
-                    dominated = false;
-                }
-
-                if (!dominated) { // pj is NOT dominated by a point in the tree.
-                    const double * restrict point = nodeaux->item;
-                    assert(pj[0] <= point[0]);
-                    // Delete everything in the tree that is dominated by pj.
-                    while (pj[1] <= point[1]) {
-                        assert(pj[0] <= point[0]);
-                        nodeaux = nodeaux->next;
-                        point = nodeaux->item;
-                        /* FIXME: A possible speed up is to delete without
-                           rebalancing the tree because avl_insert_before()
-                           will rebalance, but we need to know which is the
-                           highest node that needs rebalancing. */
-                        avl_unlink_node(&tree, nodeaux->prev);
-                    }
-                    (++node)->item = pj;
-                    avl_insert_before(&tree, nodeaux, node);
-                }
-#else
                 TreapNode *pred = treap2d_find_le(tree, pj[0]);
                 dominated = (pred != NULL && treap2d_node_get_y(pred) <= pj[1]);
                 if (!dominated)
                     treap2d_insert(tree, pj[0], pj[1]);
-#endif
             } else {
                 // Handle duplicates and points that are dominated by the immediate
                 // previous one.
@@ -146,11 +77,7 @@ pareto_rank_3d(int * restrict rank, const double * restrict points, size_t size)
         // we can stop.
         size -= n_nondom;
         if (size <= 1) {
-#ifdef USE_AVL
-            free(tnodes);
-#else
             treap2d_free(tree);
-#endif
             free(p);
             return;
         }
@@ -171,9 +98,6 @@ pareto_rank_3d(int * restrict rank, const double * restrict points, size_t size)
                          k, p[k][0], p[k][1], p[k][2]);
 
         front++;
-#ifdef USE_AVL
-        avl_clear_tree(&tree);
-#endif
     }
 }
 
