@@ -247,7 +247,7 @@ vector_int_printf (const int * vector, int size)
 
 int
 write_sets(FILE * outfile, const double * restrict data, int ncols,
-           const int * restrict cumsizes, int nruns)
+           const int * restrict cumsizes, int nruns, const char * prefix)
 {
     int size = 0;
     ASSUME(nruns > 0);
@@ -256,6 +256,7 @@ write_sets(FILE * outfile, const double * restrict data, int ncols,
         if (set > 0)
             fprintf (outfile, "\n");
         for (; size < cumsizes[set]; size++) {
+            if (prefix) fprintf(outfile, "%s", prefix);
             vector_fprintf (outfile, &data[ncols * size], ncols);
             fprintf (outfile, "\n");
         }

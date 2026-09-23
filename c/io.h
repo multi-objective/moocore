@@ -40,8 +40,7 @@ void vector_printf (const double *vector, int size);
 void vector_int_fprintf (FILE *stream, const int * vector, int size);
 void vector_int_printf (const int *vector, int size);
 int read_datasets(const char * filename, double ** restrict data_p, int * restrict ncols_p, int * restrict datasize_p);
-int write_sets (FILE *outfile, const double *data, int ncols,
-                const int *cumsizes, int nruns);
+int write_sets(FILE *outfile, const double *data, int ncols, const int *cumsizes, int nruns, const char * prefix);
 int write_sets_filtered (FILE * outfile, const double * data, int ncols,
                          const int * cumsizes, int nruns,
                          const boolvec * write_p);
