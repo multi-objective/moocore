@@ -217,11 +217,11 @@ eaf3d.o: eaf.h io.h bit_array.h cvector.h avl.h
 eaf_main.o: cmdline.h io.h eaf.h bit_array.h cvector.h
 epsilon.o: cmdline.h io.h nondominated.h epsilon.h
 hv.o: hv.h hv_priv.h hvc4d_priv.h sort.h libmoocore-config.h
-hv3dplus.o: hv_priv.h sort.h hv3d_priv.h avl_tiny.h treap2d.h
+hv3dplus.o: hv_priv.h sort.h hv3d_priv.h treap2d.h
 hv4d.o: hv4d_priv.h hv_priv.h sort.h
 hv_contrib.o: hv.h libmoocore-config.h nondominated.h
 hvapprox.o: hvapprox.h pow_int.h rng.h mt19937/mt19937.h
-hvc3d.o: hv_priv.h sort.h hv3d_priv.h avl_tiny.h treap2d.h
+hvc3d.o: hv_priv.h sort.h hv3d_priv.h treap2d.h
 igd.o: cmdline.h io.h nondominated.h igd.h pow_int.h
 io.o: io.h io_priv.h
 main-hv.o: cmdline.h io.h hv.h timer.h libmoocore-config.h nondominated.h hvapprox.h
@@ -229,7 +229,7 @@ main-hvapprox.o: cmdline.h io.h hvapprox.h
 main-nondominated.o : cmdline.h io.h nondominated.h nondominated_kung.h
 ndsort.o: cmdline.h io.h nondominated.h hv.h
 nondominated.h: nondominated_kung.h
-nondominated.o: nondominated.h nondominated_kung.h avl_tiny.h treap2d_fixed_size.h
+nondominated.o: nondominated.h nondominated_kung.h treap2d_fixed_size.h
 pareto.o: nondominated.h treap2d_fixed_size.h
 rng.o: rng.h mt19937/mt19937.h ziggurat_constants.h
 timer.o: timer.h
