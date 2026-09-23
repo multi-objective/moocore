@@ -45,6 +45,7 @@ sources = [
     "io.c",
     "libutil.c",  # For fatal_error()
     "mt19937/mt19937.c",
+    "nondominated.c",
     "pareto.c",
     "rng.c",
     "whv.c",

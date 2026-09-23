@@ -77,6 +77,7 @@ SRCS =  avl.c                                                                \
 	main-nondominated.c                                                  \
         mt19937/mt19937.c                                                    \
         ndsort.c                                                             \
+        nondominated.c                                                       \
         pareto.c                                                             \
         rng.c                                                                \
         timer.c                                                              \
@@ -191,14 +192,14 @@ $(ALL_NAMES): %: $(BINDIR)/%$(EXE)
 
 include libhv.mk
 
-$(BINDIR)/dominatedsets$(EXE): dominatedsets.o
+$(BINDIR)/dominatedsets$(EXE): dominatedsets.o nondominated.o
 $(BINDIR)/eaf$(EXE): eaf.o eaf_main.o eaf3d.o avl.o
-$(BINDIR)/epsilon$(EXE): epsilon.o
+$(BINDIR)/epsilon$(EXE): epsilon.o nondominated.o
 $(BINDIR)/hv$(EXE): main-hv.o timer.o $(LIBHV_OBJS)
-$(BINDIR)/hvapprox$(EXE): main-hvapprox.o timer.o hvapprox.o rng.o mt19937/mt19937.o
-$(BINDIR)/igd$(EXE): igd.o
-$(BINDIR)/ndsort$(EXE): ndsort.o pareto.o $(LIBHV_OBJS)
-$(BINDIR)/nondominated$(EXE): main-nondominated.o timer.o
+$(BINDIR)/hvapprox$(EXE): main-hvapprox.o timer.o hvapprox.o rng.o mt19937/mt19937.o nondominated.o
+$(BINDIR)/igd$(EXE): igd.o nondominated.o
+$(BINDIR)/ndsort$(EXE): ndsort.o pareto.o nondominated.o $(LIBHV_OBJS)
+$(BINDIR)/nondominated$(EXE): main-nondominated.o timer.o nondominated.o
 
 $(EXE_FILES): cmdline.o io.o
 	$(call MKDIR, $(BINDIR)/)
@@ -225,6 +226,7 @@ main-hvapprox.o: cmdline.h io.h hvapprox.h
 main-nondominated.o : cmdline.h io.h nondominated.h nondominated_kung.h
 ndsort.o: cmdline.h io.h nondominated.h hv.h
 nondominated.h: avl_tiny.h nondominated_kung.h
+nondominated.o: nondominated.h nondominated_kung.h
 pareto.o: nondominated.h
 rng.o: rng.h mt19937/mt19937.h ziggurat_constants.h
 timer.o: timer.h
