@@ -48,6 +48,7 @@ sources = [
     "nondominated.c",
     "pareto.c",
     "rng.c",
+    "treap2d_fixed_size.c",
     "whv.c",
     "whv_hype.c",
 ]
