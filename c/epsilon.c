@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
             reference_size =
                 calculate_nondominated(&reference, data, nobj, cumsizes[nruns-1],
                                         minmax);
-            write_sets (stderr, reference, nobj, &reference_size, 1);
+            write_sets (stderr, reference, nobj, &reference_size, 1, /*prefix=*/NULL);
         }
         for (k = 0; k < numfiles; k++)
             nondominatedfile_range (argv[optind + k], &maximum, &minimum, &nobj);

@@ -409,7 +409,7 @@ process_file(const char * filename,
         if (filter_flag && dominated_found)
             write_sets_filtered (outfile, points, nobj, cumsizes, nsets, nondom);
         else
-            write_sets (outfile, points, nobj, cumsizes, nsets);
+            write_sets(outfile, points, nobj, cumsizes, nsets, /*prefix=*/NULL);
 
         if (verbose_flag)
             fprintf (stderr, "# %s -> %s\n", filename, outfilename);
