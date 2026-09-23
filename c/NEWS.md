@@ -6,6 +6,9 @@
  * main-nondominated.c: Renamed from nondominated.c.
  * hv and hvapprox executables now use -U instead of -u for --union to be
    consistent with nondominated.
+ * treap2d.h: New.
+ * pareto.c, nondominated.c, hv3d_priv.h: Use Treap instead of AVL-tree.
+ * avl_tiny.h: Delete.
 
 
 ## 0.19.2
