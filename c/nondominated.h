@@ -1,24 +1,25 @@
 #ifndef NONDOMINATED_H
 #define NONDOMINATED_H
+/*****************************************************************************
+
+ Various algorithm for filtering dominated solutions
+
+ ---------------------------------------------------------------------
+
+ Copyright (C) 2026
+ Manuel Lopez-Ibanez <manuel.lopez-ibanez@manchester.ac.uk>
+
+ This Source Code Form is subject to the terms of the Mozilla Public
+ License, v. 2.0. If a copy of the MPL was not distributed with this
+ file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+*****************************************************************************/
 
 #include "config.h"
 #include <string.h> // memcpy
 #include <math.h> // INFINITY
 #include "sort.h"
 #include "radixsort.h"
-
-typedef const double avl_item_t;
-typedef struct avl_node_t {
-    struct avl_node_t *next;
-    struct avl_node_t *prev;
-    struct avl_node_t *parent;
-    struct avl_node_t *left;
-    struct avl_node_t *right;
-    avl_item_t *item;
-    unsigned char depth;
-} avl_node_t;
-
-#include "avl_tiny.h"
 
 enum objs_agree_t { AGREE_MINIMISE = -1, AGREE_NONE = 0, AGREE_MAXIMISE = 1 };
 
@@ -316,125 +317,9 @@ find_nondominated_set_2d_(const double * restrict points, size_t size,
         : find_nondominated_2d_impl(points, size, false, nondom);
 }
 
-/**
-   3D dimension-sweep algorithm by H. T. Kung, F. Luccio, and F. P. Preparata.
-   On Finding the Maxima of a Set of Vectors. Journal of the ACM,
-   22(4):469–476, 1975.
-
-   A different implementation is available from Duarte M. Dias, Alexandre
-   D. Jesus, Luís Paquete, A software library for archiving nondominated
-   points, GECCO 2021. https://github.com/TLDart/nondLib/blob/main/nondlib.hpp
-
-   rows should be already sorted by cmp_pdouble_asc_rev_3d().
-
-   When find_dominated, return as soon as it finds one dominated point.
-*/
-static __force_inline__ size_t
-find_nondominated_3d_impl_sorted(const double ** restrict rows, size_t size,
-                                 const bool keep_weakly,
-                                 const bool find_dominated)
-{
-    ASSUME(size > 1);
-    /* FIXME: The AVL-tree is the bottleneck of this algorithm. A Treap
-       [R. Seidel and C. R. Aragon. Randomized search trees.  Algorithmica,
-       16:464–497, 1996] may be far more efficient by allowing to remove a
-       range of items without rebalancing.  See
-       https://alexdremov.me/treap-algorithm-explained/
-       Instead of using randomized priorities, hash the node pointer or the node index.
-    */
-    avl_tree_t tree;
-    avl_init_tree(&tree, qsort_cmp_pdouble_asc_x_nonzero);
-    avl_node_t * tnodes = malloc((size+1) * sizeof(*tnodes));
-    avl_node_t * node = tnodes;
-    node->item = rows[0];
-    avl_insert_top(&tree, node);
-
-    const double sentinel[] = { INFINITY, -INFINITY };
-    (++node)->item = sentinel;
-    avl_insert_after(&tree, node - 1, node);
-
-    // In this context, size means "no dominated solution found".
-    size_t new_size = size;
-    size_t prev_dominated = false;
-    double pk0 = rows[0][0], pk1 = rows[0][1], pk2 = rows[0][2];
-    for (size_t j = 1; j < size; j++) {
-        const double * restrict pj = rows[j];
-        DEBUG2(printf_point("pj = [ ", pj, 3, " ], "));
-        const double pj0 = pj[0], pj1 = pj[1], pj2 = pj[2];
-        if ((pk0 > pj0) | (pk1 > pj1)) {
-            // Check if pj is dominated by a point in the tree.
-            avl_node_t * nodeaux;
-            int res = avl_search_closest(&tree, pj, &nodeaux);
-            assert(res != 0);
-            if (res > 0 || nodeaux->prev) {
-                const double * restrict prev;
-                if (res > 0) { // nodeaux goes before pj
-                    prev = nodeaux->item;
-                    nodeaux = nodeaux->next;
-                    DEBUG2(printf_point("res > 0: prev: ", prev, 3, "\n"));
-                } else { // nodeaux goes after pj, so move to the previous one.
-                    prev = nodeaux->prev->item;
-                    DEBUG2(printf_point("res < 0: prev: ", prev, 3, "\n"));
-                }
-                assert(prev[0] != sentinel[0]);
-                assert(prev[0] <= pj0);
-                if (prev[1] <= pj1)
-                    goto j_is_dominated;
-            }
-
-            // pj is NOT dominated by a point in the tree.
-            const double * restrict point = nodeaux->item;
-            assert(pj0 <= point[0]);
-            // Delete everything in the tree that is dominated by pj.
-            while (pj1 <= point[1]) {
-                DEBUG2(printf_point("delete point: ", point, 3, "\n"));
-                assert(pj0 <= point[0]);
-                nodeaux = nodeaux->next;
-                point = nodeaux->item;
-                /* FIXME: A possible speed up is to delete without rebalancing
-                   the tree because avl_insert_before() will rebalance, but we
-                   need to know which is the highest node that needs
-                   rebalancing. */
-                avl_unlink_node(&tree, nodeaux->prev);
-            }
-            DEBUG2((point == sentinel)
-                   ? printf_point("insert before sentinel: ", sentinel, 2, "\n")
-                   : printf_point("insert before point: ", point, 3, "\n"));
-            (++node)->item = pj;
-            avl_insert_before(&tree, nodeaux, node);
-            // Fall-through to j_is_NOT_dominated.
-        } // Handle duplicates and points that are dominated by the immediate previous one.
-        else if (!keep_weakly // Don't keep duplicates.
-                 // or the previous was dominated, then this one is also dominated.
-                 || prev_dominated
-                 // or it is not a duplicate, so it is dominated.
-                 || pk0 != pj0 || pk1 != pj1 || pk2 != pj2) {
-            // The sorting function must be stable so that we keep only the
-            // first duplicated point.
-            DEBUG2(printf_point("weakly dominated by pk: ",
-                                (double[3]){pk0, pk1, pk2}, 3, "\n"));
-            goto j_is_dominated;
-        }
-        // j_is_NOT_dominated
-        pk0 = pj0; pk1 = pj1; pk2 = pj2;
-        prev_dominated = false;
-        continue;
-
-    j_is_dominated: // pj is dominated by a point in the tree or by pk.
-        if (find_dominated) {
-            // In this context, it means "position of the first dominated solution found".
-            new_size = j;
-            goto early_end;
-        }
-        prev_dominated = true;
-        rows[j] = NULL;
-        new_size--;
-    }
-
-early_end:
-    free(tnodes);
-    return new_size;
-}
+size_t find_nondominated_3d_impl_sorted(const double ** restrict rows, size_t size,
+                                        const bool keep_weakly,
+                                        const bool find_dominated);
 
 static inline size_t
 find_dominated_3d_impl(const double * restrict points, size_t size, bool keep_weakly)
