@@ -245,6 +245,16 @@ class Bench:
                 if self.values is not None:
                     self.values[what].extend([np.nan] * n_missing)
 
+    def normalise_times(self, what: dict | list):
+        """Normalise times by dividing by each value of 'n'"""
+        if isinstance(what, list):
+            what = {x: x for x in what}
+
+        for k, v in what.items():
+            times_v = np.asarray(self.times[v])
+            n_exe = np.tile(self.n, len(times_v) // len(self.n))
+            self.times[k] = times_v / n_exe
+
     def plots(
         self,
         title,
