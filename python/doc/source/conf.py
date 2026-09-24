@@ -61,6 +61,7 @@ extensions = [
     "sphinxcontrib.bibtex",
     "sphinx_gallery.gen_gallery",
     "matplotlib.sphinxext.plot_directive",
+    "my_unused_images",
 ]
 
 # https://sphinx-copybutton.readthedocs.io/en/latest/use.html
