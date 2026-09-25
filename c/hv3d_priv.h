@@ -1,33 +1,7 @@
 #ifndef _HV3D_PRIV_H
 #define _HV3D_PRIV_H
 
-typedef const double avl_item_t;
-typedef struct avl_node_t {
-    struct avl_node_t *next;
-    struct avl_node_t *prev;
-    struct avl_node_t *parent;
-    struct avl_node_t *left;
-    struct avl_node_t *right;
-    avl_item_t * item;
-    dlnode_t * dlnode;
-    unsigned char depth;
-} avl_node_t;
-
-#include "avl_tiny.h"
-
-static inline const double *
-node_point(const avl_node_t * restrict node)
-{
-    return node->item;
-}
-
-static inline avl_node_t *
-new_avl_node(dlnode_t * restrict p, avl_node_t * restrict node)
-{
-    node->dlnode = p;
-    node->item = p->x;
-    return node;
-}
+#include "treap2d_dlnode.h"
 
 /* Used by hvc3d.c and hv3dplus.c.
 
@@ -61,77 +35,53 @@ hv3d_preprocessing(dlnode_t * restrict list, size_t n)
     assert(list+1 == list->next[0]);
     assert(list+2 == list->prev[0]);
 
-    avl_tree_t tree;
-    avl_init_tree(&tree, qsort_cmp_pdouble_asc_y_des_x_nonzero);
-    avl_node_t * tnodes = malloc((n+2) * sizeof(*tnodes));
-
+    Treap2D * tree = treap2d_new(n+2);
+    assert(tree != NULL);
     // At the top we insert the first point, which is never dominated.
     dlnode_t * p = (list+1)->next[0];
-    avl_node_t * nodeaux = new_avl_node(p, tnodes);
-    avl_insert_top(&tree, nodeaux);
+    // Before the top node, we insert list + 1, sentinel 2 (ref[0], -INF),
+    // After the top node, we insert list, sentinel 1 (-INF, ref[1])
+    treap2d_init_with_sentinels(tree, p, list+1, list);
     set_delimiters(p, list+1, list);
 
-    // After the top node, we insert sentinel 1 (-INF, ref[1])
-    avl_node_t * node = new_avl_node(list, tnodes + 1);
-    avl_insert_after(&tree, nodeaux, node);
-    // Before the top node, we insert sentinel 2 (ref[0], -INF)
-    node = new_avl_node(list + 1, tnodes + 2);
-    avl_insert_before(&tree, nodeaux, node);
-    set_delimiters(p, nodeaux->prev->dlnode, nodeaux->next->dlnode);
-
+    _attr_maybe_unused dlnode_t * prev_p = p;
+    double pk0 = p->x[0], pk1 = p->x[1], _attr_maybe_unused pk2 = p->x[2];
     const dlnode_t * stop = list+2;
-    p = p->next[0];
-    while (p != stop) {
-        const double * px = p->x;
-        const double * prev_x;
-        // == 1 means that nodeaux goes before p, so move to the next one.
-        if (avl_search_closest(&tree, px, &nodeaux) == 1) {
-            prev_x = node_point(nodeaux);
-            nodeaux = nodeaux->next;
-        } else {
-            prev_x = node_point(nodeaux->prev);
-        }
-        assert(node_point(nodeaux)[1] > px[1] // node_point(nodeaux) comes after px.
-               || (node_point(nodeaux)[1] == px[1] && node_point(nodeaux)[0] < px[0]));
-        assert(prev_x[1] <= px[1]);
-        assert(prev_x[2] <= px[2]);
-        if (prev_x[0] <= px[0]) { // px is dominated by a point in the tree.
+    for (p = p->next[0]; p != stop; p = p->next[0]) {
+        const double pj0 = p->x[0], pj1 = p->x[1], pj2 = p->x[2];
+        if ((pk0 > pj0) | (pk1 > pj1)) {
+            TreapNode *pred = treap2d_find_le(tree, pj1);
+            assert(pred != NULL);
+            const double * prev_x = treap2d_get_dlnode(pred)->x;
+            if (prev_x[0] <= pj0) {
+                // pj is dominated by a point in the tree.
 #ifdef HVC_ONLY
-            if (all_equal_double(prev_x, px, 3))
-                nodeaux->prev->dlnode->ignore = true; // It will have zero hvc.
+                if (all_equal_double(prev_x, p->x, 3))
+                    treap2d_get_dlnode(pred)->ignore = true; // It will have zero hvc.
+#endif
+                remove_from_z(p);
+                continue;
+            }
+            // pj is NOT dominated
+            TreapNode * prev, *next;
+            treap2d_insert_and_displace_get_bounds(tree, p, &prev, &next);
+            // Check that the data structure is properly setup.
+            assert(treap2d_get_dlnode(prev)->x[0] > pj0 && treap2d_get_dlnode(prev)->x[1] < pj1);
+            assert(treap2d_get_dlnode(next)->x[0] < pj0 && treap2d_get_dlnode(next)->x[1] > pj1);
+            set_delimiters(p, treap2d_get_dlnode(prev), treap2d_get_dlnode(next));
+
+            pk0 = pj0; pk1 = pj1; pk2 = pj2;
+            prev_p = p;
+        } else {
+            // pj is dominated by a previous point.
+#ifdef HVC_ONLY
+            if (pk0 == pj0 && pk1 == pj1 && pk2 == pj2)
+                prev_p->ignore = true; // It will have zero hvc.
 #endif
             remove_from_z(p);
-        } else if (node_point(nodeaux)[1] == px[1]) { // px is dominated by a point in the tree.
-            // FIXME: If the points were ordered by asc x we would only need the first condition.
-            assert(node_point(nodeaux)[0] < px[0]);
-            remove_from_z(p);
-        } else {
-            assert(node_point(nodeaux)[1] >= px[1]);
-            if (prev_x[1] == px[1]){
-                nodeaux = nodeaux->prev;
-                prev_x = node_point(nodeaux->prev);
-            }
-            assert(prev_x[1] < px[1]);
-            // Delete everything in the tree that is dominated by p.
-            while (node_point(nodeaux)[0] >= px[0]) {
-                assert(node_point(nodeaux)[1] >= px[1]);
-                nodeaux = nodeaux->next;
-                /* FIXME: A possible speed up is to delete without rebalancing
-                   the tree because avl_insert_before() will rebalance, but we
-                   need to know which is the highest node that needs
-                   rebalancing. */
-                avl_unlink_node(&tree, nodeaux->prev);
-            }
-            node = new_avl_node(p, node + 1);
-            avl_insert_before(&tree, nodeaux, node);
-            // Check if the data structure is properly setup
-            assert(node->prev->dlnode->x[0] > p->x[0] && node->prev->dlnode->x[1] < p->x[1]);
-            assert(node->next->dlnode->x[0] < p->x[0] && node->next->dlnode->x[1] > p->x[1]);
-            set_delimiters(p, node->prev->dlnode, node->next->dlnode);
         }
-        p = p->next[0];
     }
-    free(tnodes);
+    treap2d_free(tree);
 #undef set_delimiters
 }
 

@@ -77,6 +77,77 @@ double hv_approx_rphi_fang_wang_plus(const double * restrict data,
                                      const double * restrict ref,
                                      const boolvec * restrict maximise,
                                      uint_fast32_t nsamples);
+
+// archive.h
+typedef enum archive_insert_result_t {
+    ARCHIVE_INSERT_X_MUST_BE_NOT_NULL =...,
+    ARCHIVE_INSERT_X_MUST_BE_NULL,
+    ARCHIVE_INSERT_MEMORY_ERROR,
+    ARCHIVE_INSERT_REJECTED,
+    ARCHIVE_INSERT_ACCEPTED,
+    ARCHIVE_INSERT_DUPLICATED,
+};
+typedef struct SolutionsList SolutionsList;
+
+// treap_archive.h
+typedef struct TreapArchive TreapArchive;
+typedef struct TreapNode TreapNode;
+
+TreapArchive * treap_archive_new(void);
+void treap_archive_free(TreapArchive * t);
+TreapNode * treap_archive_find_exact_vector(const TreapArchive * t, const double * z);
+bool treap_archive_dominated_by(const TreapArchive * self, const double * z);
+bool treap_archive_dominates(const TreapArchive * self, const double * z);
+int treap_archive_add(TreapArchive *self, const double * z, const void * x, bool check, TreapArchive **displaced);
+void treap_archive_insert_displaced(TreapArchive *t, TreapArchive *incoming, bool *all_displaced);
+void treap_archive_get_unique_vectors(const TreapArchive *t, const double ** z_list);
+void treap_archive_get_x_values(const TreapArchive *t, const void ** x_list);
+bool treap_archive_has_x_values(const TreapArchive *t);
+void treap_archive_get_contents(const TreapArchive *t,  double * z_list, const void ** x_list);
+size_t treap_archive_total_size(const TreapArchive *t);
+size_t treap_archive_unique_size(const TreapArchive *t);
+
+typedef struct TreapIterator TreapIterator;
+TreapIterator *treap_archive_iter_new(const TreapArchive *);
+int treap_archive_iter_next(TreapIterator *it, const double **z, const void **x);
+void treap_archive_iter_free(TreapIterator *it);
+
+// nd_tree.h
+typedef struct FlexBucket FlexBucket;
+void flex_bucket_free(FlexBucket * bucket);
+size_t flex_bucket_unique_len(const FlexBucket * bucket);
+size_t flex_bucket_total_len(const FlexBucket * bucket);
+void flex_bucket_get_unique_vectors(const FlexBucket * bucket, const double ** z_list);
+void flex_bucket_get_x_values(const FlexBucket * bucket, const void ** x_list);
+
+typedef struct NDTreeConfig {
+    uint8_t max_children;
+    uint8_t max_bucket_size;
+    bool allow_duplicates;
+} NDTreeConfig;
+
+typedef struct NDTreeArchive NDTreeArchive;
+typedef struct NDTreeNode NDTreeNode;
+NDTreeArchive * ndtree_new(dimension_t dim, uint8_t max_children, uint8_t max_bucket_size, bool allow_duplicates);
+void ndtree_free(NDTreeArchive *self);
+bool ndtree_has_x_values(const NDTreeArchive *t);
+size_t ndtree_total_size(const NDTreeArchive *self);
+size_t ndtree_unique_size(const NDTreeArchive *self);
+bool ndtree_dominates(const NDTreeArchive *self, const double *z);
+bool ndtree_dominated_by(const NDTreeArchive * self, const double * z);
+int ndtree_add(NDTreeArchive *self, const double *z, const void *x, bool check, FlexBucket **displaced);
+int ndtree_insert_displaced(NDTreeArchive *tree, FlexBucket **displaced_p, bool *all_displaced);
+SolutionsList * ndtree_find_exact_vector(const NDTreeArchive *self, const double *z);
+void ndtree_get_contents(const NDTreeArchive *self, double * z_list, const void ** x_list);
+void ndtree_get_unique_vectors(const NDTreeArchive *self, const double ** z_list);
+void ndtree_get_x_values(const NDTreeArchive *arch, const void ** x_list);
+
+typedef struct NDTreeIterator NDTreeIterator;
+NDTreeIterator *ndtree_iter_new(const NDTreeArchive *);
+int ndtree_iter_next(NDTreeIterator *it, const double **z, const void **x);
+void ndtree_iter_free(NDTreeIterator *it);
+
+
 /*
 typedef ... hype_sample_dist;
 hype_sample_dist * hype_dist_unif_new(unsigned long seed);

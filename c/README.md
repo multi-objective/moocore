@@ -26,6 +26,7 @@ The [**moocore** project](https://github.com/multi-objective/moocore/) collects 
  * Computation of the Empirical Attainment Function. The empirical attainment
    function (EAF) describes the probabilistic distribution of the outcomes
    obtained by a stochastic algorithm in the objective space.
+ * Archivers that allow efficiently storing a nondominated set from points given one-by-one as a sequence.
 
 The goal of **moocore** is to provide an implementation of these functions that is efficient, thoroughly tested, well-documented, multi-platform (Windows, Linux, MacOS), multi-language (C, R, and Python, so far), with minimal dependencies and reusable from other libraries and packages, thus providing an easy-to-use and high-performance building block.
 

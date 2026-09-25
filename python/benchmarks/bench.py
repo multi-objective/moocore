@@ -148,6 +148,7 @@ class Bench:
         self.name = name
         self.n = n
         self.bench = bench
+        self.n_exe = []
         self.times = {k: [] for k in bench.keys()}
         self.versions = {
             what: f"{what} ({get_package_version(what)})"
