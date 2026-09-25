@@ -6,7 +6,7 @@ import numpy as np
 # https://github.com/renaudlr/moo-nondominated-sets/blob/master/wfgHardGenerator.R)
 
 from ._docsubstitute import DocSubstitute
-from ._moocore import any_dominated
+from ._moocore import any_dominated, pareto_rank
 from ._utils import is_integer_value
 
 
@@ -43,6 +43,12 @@ def generate_ndset(
     Returns
     -------
         A numeric matrix of size :math:`n \times d` containing nondominated points.
+
+
+    See Also
+    --------
+    generate_sequence : Generate a sequence of dominated and nondominated points.
+
 
     Notes
     -----
@@ -239,3 +245,364 @@ def generate_ndset(
         if not any_dominated(y):
             return y
         x *= 2
+
+
+def sort_by_pareto_rank(points: np.ndarray, *, reverse: bool) -> np.ndarray:
+    """Return points ordered by final front assignment."""
+    ranks = pareto_rank(points)
+    if reverse:
+        ranks = -ranks
+    return points[np.argsort(ranks), :]
+
+
+def _generate_glas2017_sequence(
+    n_points: int,
+    dim: int,
+    rng: np.random.Generator,
+    *,
+    c_value: float,
+    dominated_fraction: float = 0.5,
+    dominated_offset: float = 1.0,
+) -> np.ndarray:
+    """Generate objective vectors following the analytic sequence model of section 6.1 in :footcite:t:`Gla2017fast`."""
+    if not 0.0 <= dominated_fraction <= 1.0:
+        raise ValueError("'dominated_fraction' must be in [0, 1]")
+    dominated_remaining = int(n_points * dominated_fraction)
+    is_dom = np.zeros(n_points, dtype=bool)
+    for index in range(n_points):
+        if dominated_remaining == 0:
+            break
+
+        total_remaining = n_points - index
+        if total_remaining == dominated_remaining:
+            # nondominated remaining == 0
+            is_dom[index:] = True
+            break
+
+        probability = c_value * dominated_remaining / total_remaining
+        # If probability >= 1, then dominated=True
+        if probability >= 1 or rng.random() < probability:
+            dominated_remaining -= 1
+            is_dom[index] = True
+
+    # Sample N(0, I - 1/dim * 11^T) by sampling standard normals and ...
+    points = rng.normal(size=(n_points, dim))
+    # ... projecting each row onto the subspace orthogonal to the all-ones vector:
+    points -= points.mean(axis=1, keepdims=True)
+    # Now shift those points that should be dominated.
+    indices = np.arange(1, n_points + 1, dtype=float)
+    offsets = np.zeros(n_points, dtype=float)
+    offsets[is_dom] = (dominated_offset * n_points) / indices[is_dom]
+    points += offsets[:, None]
+    return points
+
+
+def _generate_within_hypercube(n, d, rng):
+    return rng.uniform(size=(n, d))
+
+
+def _generate_within_hypersphere(n, d, rng, r_min):
+    x = np.abs(rng.normal(size=(n, d)))
+    x /= np.linalg.norm(x, axis=1, keepdims=True)
+    # These are on the surface, so now we add noise to move them between the
+    # surface and the origin. We need to transform according to the d-root,
+    # otherwise the distribution will be biased towards the origin.
+    u = rng.uniform(r_min**d, 1, size=(n, 1))
+    u = u ** (1 / d)
+    x *= u
+    return x
+
+
+def _generate_total_dominance_chain(
+    n: int, d: int, *, rng, dominates_previous: bool
+) -> np.ndarray:
+    """Generate a total dominance chain."""
+    x = _generate_within_hypercube(n, d, rng)
+    x.sort(axis=0)
+    if dominates_previous:
+        return x[::-1]
+    return x
+
+
+@DocSubstitute()
+def generate_sequence(
+    n: int,
+    d: int,
+    /,
+    method: str,
+    *,
+    seed: int | np.random.Generator | None = None,
+    integer: bool = False,
+    n_rep: int = 0,
+    ndsort: int = 0,
+    c_value: float = 0.9,
+    r_min: float = 0.0,
+) -> np.ndarray:
+    r"""Generate a sequence of ``n`` points of dimension ``d`` with the properties defined by ``method``.
+
+    When ``ndsort=1``, the points are sorted according to their Pareto rank
+    using :func:`pareto_rank`. With ``ndsort=-1``, the order is reversed. The
+    ranking assumes that all dimensions are minimised.
+
+    When ``integer=False`` (the default), the points are generated within the
+    hypercube :math:`(0,1)^d`, except for ``method="glas2017"``, which may
+    generate points outside this range.  These points can be scaled to
+    another range using :func:`normalise`.
+
+    When ``integer=True``, points are scaled to the non-negative integers in
+    the range :math:`[0,2^{31}]`, except for ``method="glas2017"``, which may
+    generate points outside this range.
+
+
+    Parameters
+    ----------
+    n :
+        Number of rows in the output.
+    d :
+        Number of columns in the output.
+    method :
+        Method used to generate the point sequence. See the Notes below for more details.
+    seed :
+        ${random_seed}
+    integer:
+        If ``True``, return integer-valued points.
+    n_rep:
+        If non-zero, then repeat the generated sequence so that the output will have ``n_rep`` rows. If ``0 < n_rep <= n``, raise ``ValueError``.
+    ndsort :
+        Whether points are sorted according to Pareto rank (``1``), sorted in reverse (``-1``) or not sorted at all (``0``).
+    c_value:
+       Parameter of ``method="glas2017``. It controls the probability of a
+       dominated point appearing earlier in the sequence than a nondominated
+       one, with ``c = 1`` giving equal probability, ``c > 1`` increasing the
+       probability of dominated points and ``c < 1`` increasing the probability of nondominated ones.
+    r_min:
+       Minimum distance to the origin (``method="sphere`` only).
+
+
+    Returns
+    -------
+        A numeric matrix of size :math:`n \times d` containing a sequence of points.
+
+
+    See Also
+    --------
+    generate_ndset : Generate a nondominated set.
+
+
+    Notes
+    -----
+    The available methods are:
+
+    ``'cube'``
+      Uniformly samples points within the unit hypercube :math:`(0,1)^d`.
+
+    ``'sphere'``
+      Uniformly samples points within the positive orthant of the unit hypersphere.
+
+      Each point :math:`\vec{z} \in (0,1)^d \subset \mathbb{R}^d` is generated
+      by sampling :math:`d` independent and identically distributed values
+      :math:`\vec{x}=(x_1,x_2, \dots, x_d)` from the standard normal
+      distribution, then dividing each value by the l2-norm of the vector,
+      :math:`z_i = \frac{|x_i|}{\|\vec{x}\|_2}`
+      :footcite:p:`Muller1959sphere`. The absolute value in the numerator
+      ensures that points are sampled on the surface of the positive orthant of
+      the hypersphere. Then each point is moved into the interior of the
+      hypersphere by sampling :math:`\vec{u} \in \mathbb{R}^d`, with each
+      component uniformly sampled within the interval :math:`(r_\min^d, 1)`,
+      and returning :math:`\vec{z}\cdot \sqrt[d]{u}`. The :math:`d`-root
+      transformation avoids biasing the distribution towards the
+      origin. Parameter :math:`r_\min` (``r_min``) restricts the minimum
+      distance to the origin.
+
+    ``'each-dominates-previous'|'each-dominates-next'``
+      Each point in the sequence dominates the previous or next one.
+
+      A matrix :math:`n\times d` is sampled uniformly within :math:`(0,1)`.
+      Then, each column is sorted independently in increasing
+      (``each-dominates-next'``) or decreasing (``each-dominates-previous'``)
+      order.  Argument ``ndsort`` has no effect for these sequences
+      because they already sorted.
+
+    ``'glas2017'``
+      Generate objective vectors following the analytic sequence model of Section 6.1 in :footcite:t:`Gla2017fast`.
+
+      This model constructs a sequence :math:`\vec{z}^(k) \in \mathbb{R}^d` of
+      length :math:`N`, where :math:`D=\lfloor fN \rfloor` points are dominated
+      by another point in the sequence and :math:`N - D` are nondominated, and
+      :math:`f=0.5` in our implementation. First, points :math:`\vec{x}^{(k)}`,
+      :math:`\forall k=1,\dots,N`, are generated by sampling :math:`N \times d`
+      independent values from the standard normal distribution.  Second, these
+      points are projected onto the :math:`(d-1)`-dimensional hyperplane that
+      satisfies :math:`\{\vec{x}\in\mathbb{R}^d\mid \sum_{i=1}^d x_i = 0\}` by
+      calculating :math:`\vec{y}^{(k)} = \vec{x}^{(k)} - \bar{x}^{(k)}`, where
+      :math:`\bar{x} = \frac{1}{d}\sum_{i=1}^d x_i`.  Finally, the projected
+      points are shifted by a constant amount in all dimensions
+      :math:`\vec{z}^{(k)} = \vec{y}^{(k)} + a^{(k)}`, so that exactly
+      :math:`D` points become dominated, with
+
+      .. math::
+         a^{(k)}=\begin{cases}\frac{\delta N}{k} & \text{if }D_k = 1,\\
+         0 & \text{otherwise}.\end{cases}
+
+      where :math:`D_k \in \{0,1\}` determines whether point :math:`k` is
+      marked dominated and :math:`\delta = 1` in our implementation.
+
+      Point :math:`k` is marked dominated :math:`(D_k=1)` with probability
+      :math:`c\frac{n^\text{dom}_k}{n_k}`, where :math:`n^\text{dom}_k = D -
+      \sum_{i=1}^{k-1}D_k`, that is, the remaining points needed to reach
+      :math:`D` dominated points in the sequence, and :math:`n_k = N - k + 1`,
+      that is, the remaining points in the sequence. The parameter :math:`c`
+      (``c_value``) controls the probability of having dominated points early
+      in the sequence, with :math:`c > 1` increasing this probability and
+      :math:`c = 1` giving equal probability to dominated and nondominated
+      points.
+
+
+    The argument ``ndsort=1`` sorts the sequence according to Pareto rank using
+    :func:`~moocore.pareto_rank`, or in reverse order with ``ndsort=-1``. That
+    is, earlier points in the sequence will have a lower (or higher in reverse
+    order) or equal rank than later points.  Algorithms that expect points to
+    have increasing quality should perform worse with ``ndsort=1``, whereas
+    algorithms that expect new points to be often dominated by previous ones
+    should perform worse with ``ndsort=-1``.
+
+
+    References
+    ----------
+    .. footbibliography::
+
+
+    Examples
+    --------
+    Points within the unit 2D-sphere, i.e., within the circle:
+
+    >>> generate_sequence(5, 2, "sphere", ndsort=0, seed=42)
+    array([[0.17121976, 0.58436446],
+           [0.60040891, 0.75251188],
+           [0.66741195, 0.44545079],
+           [0.33995168, 0.84094855],
+           [0.01311259, 0.66576442]])
+
+    Points within the unit 2D-cube, i.e., unit square, sorted by increasing Pareto rank:
+
+    >>> generate_sequence(5, 2, "cube", ndsort=1, seed=42)
+    array([[0.77395605, 0.43887844],
+           [0.09417735, 0.97562235],
+           [0.12811363, 0.45038594],
+           [0.85859792, 0.69736803],
+           [0.7611397 , 0.78606431]])
+
+    Same points but in different order:
+
+    >>> generate_sequence(5, 2, "cube", ndsort=-1, seed=42)
+    array([[0.85859792, 0.69736803],
+           [0.7611397 , 0.78606431],
+           [0.77395605, 0.43887844],
+           [0.09417735, 0.97562235],
+           [0.12811363, 0.45038594]])
+
+    We can add duplicated points to the sequence by repeating it:
+
+    >>> generate_sequence(5, 2, "cube", ndsort=-1, seed=42, n_rep=11)
+    array([[0.85859792, 0.69736803],
+           [0.7611397 , 0.78606431],
+           [0.77395605, 0.43887844],
+           [0.09417735, 0.97562235],
+           [0.12811363, 0.45038594],
+           [0.85859792, 0.69736803],
+           [0.7611397 , 0.78606431],
+           [0.77395605, 0.43887844],
+           [0.09417735, 0.97562235],
+           [0.12811363, 0.45038594],
+           [0.85859792, 0.69736803]])
+
+    These two sequences are already sorted, so ``ndsort`` is not needed:
+
+    >>> generate_sequence(5, 2, "each-dominates-previous", seed=42)
+    array([[0.85859792, 0.97562235],
+           [0.77395605, 0.78606431],
+           [0.7611397 , 0.69736803],
+           [0.12811363, 0.45038594],
+           [0.09417735, 0.43887844]])
+    >>> generate_sequence(5, 2, "each-dominates-next", seed=42)
+    array([[0.09417735, 0.43887844],
+           [0.12811363, 0.45038594],
+           [0.7611397 , 0.69736803],
+           [0.77395605, 0.78606431],
+           [0.85859792, 0.97562235]])
+
+    A more complicated sequence, not in the unit cube:
+
+    >>> generate_sequence(5, 2, "glas2017", seed=42)
+    array([[-0.32442784,  0.32442784],
+           [ 2.7220415 ,  2.2779585 ],
+           [ 0.41812139, -0.41812139],
+           [ 0.05080302, -0.05080302],
+           [ 0.46939475,  1.53060525]])
+
+    Instead of floating-point values, we can generate an integer matrix:
+
+    >>> generate_sequence(5, 2, "cube", ndsort=1, seed=42, integer=True)
+    array([[1662057958,  942484272],
+           [ 202244314, 2095133046],
+           [ 275121931,  967196436],
+           [1843824993, 1497586439],
+           [1634535063, 1688060241]])
+    >>> generate_sequence(5, 2, "cube", ndsort=-1, seed=42, integer=True)
+    array([[1843824993, 1497586439],
+           [1634535063, 1688060241],
+           [1662057958,  942484272],
+           [ 202244314, 2095133046],
+           [ 275121931,  967196436]])
+    >>> generate_sequence(5, 2, "glas2017", seed=42, integer=True)
+    array([[-696703483,  696703483],
+           [5845539605, 4891878634],
+           [ 897908837, -897908837],
+           [ 109098654, -109098654],
+           [1008017539, 3286949756]])
+
+    """
+    if seed is None or is_integer_value(seed):
+        seed = np.random.default_rng(seed)
+
+    match method:
+        case "cube":
+            sample = _generate_within_hypercube(n, d, seed)
+        case "sphere":
+            sample = _generate_within_hypersphere(n, d, seed, r_min=r_min)
+        case "each-dominates-previous":
+            sample = _generate_total_dominance_chain(
+                n, d, rng=seed, dominates_previous=True
+            )
+        case "each-dominates-next":
+            sample = _generate_total_dominance_chain(
+                n, d, rng=seed, dominates_previous=False
+            )
+        case "glas2017":
+            sample = _generate_glas2017_sequence(n, d, seed, c_value=c_value)
+        case _:
+            raise ValueError(f"unknown method={method}")
+
+    if ndsort != 0:
+        if method in [
+            "each-dominates-previous",
+            "each-dominates-next",
+            "glas2017",
+        ]:
+            raise ValueError(
+                f'`ndsort != {ndsort}` does not make sense with `method == "{method}"'
+            )
+        sample = sort_by_pareto_rank(sample, reverse=(ndsort < 0))
+
+    if integer:
+        # FIXME: Glas2017 is problematic because it is not in [0,1], but
+        # forcing it may change its properties.
+        sample *= 2**31
+        sample = sample.astype(int)
+
+    if n_rep > 0:
+        if n_rep <= n:
+            raise ValueError(f"'n_rep' ({n_rep}) must be larger than 'n' ({n})")
+        return np.resize(sample, (n_rep, d))
+
+    return sample

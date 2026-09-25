@@ -30,3 +30,4 @@ Generate data
    :toctree: generated/
 
    generate_ndset
+   generate_sequence
