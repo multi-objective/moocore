@@ -1,0 +1,18 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+BaseUnboundedArchive
+====================
+
+.. currentmodule:: moocore
+
+.. autoclass:: BaseUnboundedArchive
+   :members:
+   :inherited-members:
+   :special-members: __call__, __len__, __iter__
+
+.. minigallery:: moocore.BaseUnboundedArchive moocore.BaseUnboundedArchive.__init__ moocore.BaseUnboundedArchive.add moocore.BaseUnboundedArchive.add_many moocore.BaseUnboundedArchive.dominated_by moocore.BaseUnboundedArchive.dominates moocore.BaseUnboundedArchive.get_contents moocore.BaseUnboundedArchive.get_unique_vectors moocore.BaseUnboundedArchive.get_x_values moocore.BaseUnboundedArchive.has_x_values moocore.BaseUnboundedArchive.unique_len 
+   :add-heading: Gallery examples
+   :heading-level: -

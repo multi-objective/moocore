@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+UnboundedArchive
+================
+
+.. currentmodule:: moocore
+
+.. autofunction:: UnboundedArchive
+
+.. _sphx_glr_backref_moocore.UnboundedArchive:
+
+.. minigallery:: moocore.UnboundedArchive
+   :add-heading: Gallery examples
+   :heading-level: -
