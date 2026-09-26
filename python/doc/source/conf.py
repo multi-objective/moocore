@@ -290,6 +290,7 @@ sphinx_gallery_conf = {
     "nested_sections": True,
     # avoid generating too many cross links
     "inspect_global_variables": False,
+    "ignore_pattern": "_utils.py",
     "remove_config_comments": True,
     "matplotlib_animations": True,
     # "plot_gallery": "True",
