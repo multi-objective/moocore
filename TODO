@@ -71,3 +71,8 @@ Computation, pp. 465–472 (2012)]
     - Kung et al.: https://doi.org/10.1145/321906.321910
     - [Bentley: Multidimensional Divide-and-Conquer](https://dl.acm.org/doi/pdf/10.1145/358841.358850)
     - [C++ implementation](https://github.com/TLDart/nondLib/blob/main/nondlib.hpp) and [paper about the implementation](https://dl.acm.org/doi/10.1145/3449726.3462737)
+
+
+# Rust
+
+https://github.com/cool-japan/scirs/blob/master/scirs2-optimize/src/multiobjective/hypervolume.rs
