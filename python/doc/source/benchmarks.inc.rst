@@ -19,10 +19,11 @@ to include in the benchmarks.
 Not all packages provide the same functionality. For example, `pymoo`_ does not
 provide the :ref:`epsilon indicator <epsilon_metric>`. `BoTorch`_ and
 `paretobench`_ only provide the hypervolume. `paretoset`_ and `fast-pareto`_
-only identify nondominated points. `seqme`_ already uses `moocore`_, and
-`DESDEO`_, `DEAP`_, `pymoo`_ and `jMetalPy`_ also use `moocore`_ for
-hypervolume, but other functionality, such as filtering dominated points, is
-still slower than `moocore`_.
+only identify nondominated points.  `DESDEO`_, `DEAP`_, and `jMetalPy`_ use
+`moocore`_ for computing the hypervolume, but other functionality, such as
+filtering dominated points, is still slower than `moocore`_.  Recent versions
+of `seqme`_ and `pymoo`_ (≥0.6.2) already use `moocore`_ for most functionality
+benchmarked here.
 
 We would like to benchmark `pygmo`_, however, it is currently impossible to install using ``pip`` (See https://github.com/esa/pygmo2/issues/152).
 
@@ -184,8 +185,7 @@ The following plots compare the accuracy and speed of approximating the
 hypervolume with the various methods provided by :func:`moocore.hv_approx`. The
 plots show that there is no clear winner, in terms of approximation error,
 between methods ``Rphi-FWE+`` (default) and ``DZ2019-HW``, but both produce
-consistently lower approximation errors than method ``DZ2019-MC`` and than
-`pymoo`_.  However, ``Rphi-FWE+`` is as fast as ``DZ2019-MC`` and both are consistently faster than ``DZ2019-HW``, in particular with higher number of objectives. The computation time of `pymoo`_ grows rapidly with the number of input points.
+consistently lower approximation errors than method ``DZ2019-MC``.  However, ``Rphi-FWE+`` is as fast as ``DZ2019-MC`` and both are consistently faster than ``DZ2019-HW``, in particular with higher number of objectives.
 
 If you compare the plots of **DTLZLinearShape-3d** and **DTLZLinearShape-4d** below to the ones above in the previous section, you can see that the exact computation of the hypervolume in 3D or 4D for thousands of points takes milliseconds, whereas approximating the hypervolume is significantly slower and, thus, not worth doing.
 
@@ -262,16 +262,21 @@ For such problems, method ``DZ2019-HW`` becomes significantly slower than
 Epsilon and IGD+ indicators
 ---------------------------
 
-The following plots compare the speed of computing the :ref:`epsilon indicator  <epsilon_metric>` metric and :ref:`IGD+ indicator <igd_hausdorf>`. Although  the algorithms for computing these metrics are relatively simple and easy to vectorize in Python, the `moocore`_ implementation is still 10 to 100 times faster. The implementation of IGD+ in `DESDEO`_ and `jMetalPy`_ is almost a thousand times **slower**  than `moocore`_, so it is not included in the benchmarks below.
+The following plots benchmark the speed of computing the :ref:`epsilon indicator  <epsilon_metric>` metric and :ref:`IGD+ indicator <igd_hausdorf>`. Although  the algorithms for computing these metrics are relatively simple and easy to vectorize in Python, the `moocore`_ implementation is still 10 to 100 times faster.
 
-|pic5| |pic6|
+|fig_eps_bench| |fig_igd_plus_bench|
 
-.. |pic5| image:: _static/bench/eps_bench-rmnk_10D_random_search-time.png
+.. |fig_eps_bench| image:: _static/bench/eps_bench-rmnk_10D_random_search-time.png
    :width: 48%
 
-.. |pic6| image:: _static/bench/igd_plus_bench-ran.40000pts.3d-time.png
+.. |fig_igd_plus_bench| image:: _static/bench/igd_plus_bench-ran.1000pts.3d-time.png
    :width: 48%
 
+
+Archiving Benchmarks
+--------------------
+
+See :ref:`Archiving Benchmarks  <benchmarks_archiving>`.
 
 
 .. _BoFire: https://experimental-design.github.io/bofire/

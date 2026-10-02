@@ -102,6 +102,7 @@ napoleon_type_aliases = {
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = True
 
+autodoc_inherit_docstrings = True
 autodoc_typehints = "none"  # Conflicts with sphinx_autodoc_typehints
 typehints_document_rtype = True
 typehints_use_rtype = False
@@ -110,7 +111,8 @@ always_use_bars_union = True
 autodoc_type_aliases = {
     "ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
 }
-
+# Hide the class/module prefixes for objects in TOC entries (sidebar)
+toc_object_entries_show_parents = "hide"
 # nitpicky = True
 
 bibtex_bibfiles = ["REFERENCES.bib"]
@@ -120,7 +122,6 @@ bibtex_cite_id = "cite-{bibliography_count}-{key}"
 bibtex_footcite_id = "footcite-{key}"
 bibtex_bibliography_id = "bibliography-{bibliography_count}"
 bibtex_footbibliography_id = "footbibliography-{footbibliography_count}"
-
 
 # FIXME: This is not working!
 logger = sphinx.util.logging.getLogger("sphinx.ext.autodoc")
