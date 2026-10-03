@@ -158,6 +158,7 @@ The following plots compare the speed of computing the :ref:`hypervolume indicat
 For 3D, `Optuna`_ uses a :math:`O(n^2)` algorithm, while `moocore`_ uses the best-known :math:`O(n\log n)` one, so the gap between the two will get significantly larger with a larger number of points than those tested here. `moarchiving`_ uses the same algorithms as `moocore`_ for 3D and 4D, but a pure Python implementation, so it is still 10-100 times slower than `moocore`_'s C implementation.  `BoTorch`_ and `fast-pareto`_ are not included for more than 3 objectives because **they are tens of thousands of times slower** than `moocore`_.
 
 Recent versions of `DESDEO`_, `DEAP`_ (≥1.4.4), `pymoo`_ (≥0.6.1.6) and `jMetalPy`_ (≥1.9.0) already use `moocore`_ for hypervolume computation.
+The implementation in `patatune`_ appears to be wrong (https://github.com/cms-patatrack/patatune/issues/52).
 
 |hv_bench-DTLZLinearShape-3d| |hv_bench-DTLZLinearShape-4d|
 
