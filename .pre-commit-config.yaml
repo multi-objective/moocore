@@ -8,7 +8,7 @@ ci:
 
 repos:
   - repo: https://github.com/lorenzwalthert/precommit
-    rev: v0.4.3.9029
+    rev: v0.4.3.9029  # enforce-version: v0.4.3.9029
     hooks:
       - id: parsable-R
       - id: no-browser-statement
@@ -76,3 +76,34 @@ repos:
     rev: v1.0.2
     hooks:
       - id: sphinx-lint
+
+  - repo: local
+    hooks:
+    - id: enforced-pre-commit-hook-version
+      name: Verify that enforced pre-commit hook version stays unchanged
+      description: >-
+        Enforce pre-commit hook versions in this file remains matching the
+        corresponding request in the `# enforce-version` comment.
+      # Using Python here because using
+      # shell test does not always work in CIs:
+      entry: >-
+        python -c 'import pathlib, re, sys;
+        pre_commit_config = pathlib.Path(sys.argv[1]);
+        cfg_txt = pre_commit_config.read_text();
+        new_cfg_txt = re.sub(
+        r"(?P<spaces>\s+)rev:\s(?:\d+\.\d+\.\d+)\s{0,2}"
+        r"#\senforce-version:\s(?P<enforced_version>\d+\.\d+\.\d+)"
+        r"[ \t\f\v]*",
+        r"\g<spaces>rev: \g<enforced_version>  "
+        r"# enforce-version: \g<enforced_version>",
+        cfg_txt,
+        );
+        cfg_txt != new_cfg_txt and
+        pre_commit_config.write_text(new_cfg_txt)
+        '
+      pass_filenames: true
+      language: system
+      files: >-
+        ^\.pre-commit-config\.ya?ml$
+      types:
+        - yaml
