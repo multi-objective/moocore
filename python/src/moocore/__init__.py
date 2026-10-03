@@ -1,4 +1,11 @@
 # ruff: noqa: D104
+from importlib.metadata import version as _metadata_version
+
+from ._datasets import (
+    get_dataset,
+    get_dataset_path,
+)
+from ._generate import generate_ndset
 from ._moocore import (
     Hypervolume,
     ReadDatasetsError,
@@ -10,7 +17,6 @@ from ._moocore import (
     eafdiff,
     epsilon_additive,
     epsilon_mult,
-    r2_exact,
     filter_dominated,
     filter_dominated_within_sets,
     hv_approx,
@@ -23,6 +29,7 @@ from ._moocore import (
     largest_eafdiff,
     normalise,
     pareto_rank,
+    r2_exact,
     read_datasets,
     total_whv_rect,
     vorob_dev,
@@ -30,15 +37,6 @@ from ._moocore import (
     whv_hype,
     whv_rect,
 )
-
-from ._datasets import (
-    get_dataset,
-    get_dataset_path,
-)
-
-from ._generate import generate_ndset
-
-from importlib.metadata import version as _metadata_version
 
 __version__ = _metadata_version("moocore")
 # Remove symbols imported for internal use

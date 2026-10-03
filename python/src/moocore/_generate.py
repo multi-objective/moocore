@@ -4,7 +4,6 @@ import numpy as np
 # https://www.sciencedirect.com/science/article/pii/S0305054816301538?via=ihub#bib26
 # (code:
 # https://github.com/renaudlr/moo-nondominated-sets/blob/master/wfgHardGenerator.R)
-
 from ._docsubstitute import DocSubstitute
 from ._moocore import any_dominated
 from ._utils import is_integer_value

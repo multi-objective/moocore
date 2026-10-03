@@ -8,11 +8,12 @@ mutually nondominated points.
 First we define a few functions useful for plotting.
 """
 
-import moocore
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+
+import moocore
 
 
 def plot_3d(what, x, title, plotly=False):

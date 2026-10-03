@@ -1,9 +1,9 @@
 # Requires
 # sympy >= 1.14.0
 # mpmath>=1.4.1
-import sympy as sp
 import mpmath as mpmath
 import numpy as np
+import sympy as sp
 
 # Set the precision to 128 bits
 mpmath.mp.dps = 128

@@ -1,6 +1,8 @@
 # ruff: noqa: D100
 import pytest
+
 import moocore
+
 from .helpers.immutability import deep_copy, deep_equal, freeze_numpy
 
 

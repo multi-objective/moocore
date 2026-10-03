@@ -6,30 +6,29 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 """
 
 import gc
-import numpy as np
-import moocore
+
 import matplotlib.pyplot as plt
-
-from bench import Bench, get_geomrange, check_float_vector
-
+import numpy as np
 import torch
+from bench import Bench, check_float_vector, get_geomrange
 from botorch.utils.multi_objective.pareto import (
     is_non_dominated as botorch_is_nondominated,
 )
-from pymoo.util.nds.non_dominated_sorting import (
-    NonDominatedSorting as pymoo_NonDominatedSorting,
-)
-
 from desdeo.tools.non_dominated_sorting import (
     non_dominated as desdeo_is_nondominated,
 )
+from fast_pareto import is_pareto_front as fast_pareto_is_pf
+from optuna.study._multi_objective import _is_pareto_front as optuna_is_pf
 
 ## paretobench is always slower than botorch, too slower for benchmarking.
 # import paretobench
 from paretoset import paretoset
-from fast_pareto import is_pareto_front as fast_pareto_is_pf
-from optuna.study._multi_objective import _is_pareto_front as optuna_is_pf
 from patatune.util import get_dominated as patatune_get_dominated
+from pymoo.util.nds.non_dominated_sorting import (
+    NonDominatedSorting as pymoo_NonDominatedSorting,
+)
+
+import moocore
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
 files = {
