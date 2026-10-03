@@ -1,14 +1,16 @@
+import importlib
 import pathlib
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
-import moocore
-import timeit
-import cpuinfo
 import shutil
 import subprocess
-import importlib
+import timeit
+
+import cpuinfo
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+import numpy as np
+import pandas as pd
+
+import moocore
 
 timeit_template_return_1_value = """
 def inner(_it, _timer{init}):
@@ -69,7 +71,7 @@ def get_package_version(package):
 
     module = importlib.import_module(package)
     if hasattr(module, "__version__"):
-        return getattr(module, "__version__")
+        return module.__version__
     # It does not provide __version__ !
     return importlib.metadata.version(package)
 
@@ -148,14 +150,14 @@ class Bench:
         self.name = name
         self.n = n
         self.bench = bench
-        self.times = {k: [] for k in bench.keys()}
+        self.times = {k: [] for k in bench}
         self.versions = {
             what: f"{what} ({get_package_version(what)})"
-            for what in bench.keys()
+            for what in bench
         }
         timeit.template = timeit_template_return_1_value
         if report_values:
-            self.values = {k: [] for k in bench.keys()}
+            self.values = {k: [] for k in bench}
             self.value_label = report_values
             if return_all_values:
                 timeit.template = timeit_template_return_all_values
@@ -206,7 +208,7 @@ class Bench:
         }
         if self.check:
             a = values[self.baseline]
-            for what in values.keys():
+            for what in values:
                 if what == self.baseline:
                     continue
                 b = values[what]

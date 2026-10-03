@@ -7,6 +7,7 @@ Several examples of computing multi-objective unary quality metrics.
 """
 
 import numpy as np
+
 import moocore
 
 # %%
@@ -80,8 +81,8 @@ B = np.array([8, 2, 4, 4, 2, 8]).reshape(-1, 2)
 # Assuming minimization of both objectives, A is better than B in terms of Pareto optimality.
 #
 
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 
 sns.set_theme()

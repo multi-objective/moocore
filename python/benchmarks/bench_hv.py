@@ -5,23 +5,19 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
+import pathlib
+
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
 from bench import (
     Bench,
-    read_datasets_and_filter_dominated,
-    get_geomrange,
     check_float_values,
+    get_geomrange,
+    read_datasets_and_filter_dominated,
 )
-
-import numpy as np
-import moocore
-import pathlib
-import matplotlib.pyplot as plt
-
 from botorch.utils.multi_objective.hypervolume import Hypervolume as botorch_HV
-import torch
-from nevergrad.optimization.multiobjective import HypervolumeIndicator as ng_HV
 from fast_pareto import hypervolume as fp_hv
-from optuna._hypervolume import compute_hypervolume as optuna_hv
 
 ## paretobench is 2x slower than botorch, so too slow for benchmarking.
 ## https://github.com/electronsandstuff/ParetoBench/issues/57
@@ -31,8 +27,11 @@ from optuna._hypervolume import compute_hypervolume as optuna_hv
 ## https://github.com/secondmind-labs/trieste/issues/917
 # from trieste.acquisition.multi_objective import Pareto as trieste_Pareto
 # import tensorflow as tf
-
 from moarchiving import get_mo_archive as moarch_get_mo_archive
+from nevergrad.optimization.multiobjective import HypervolumeIndicator as ng_HV
+from optuna._hypervolume import compute_hypervolume as optuna_hv
+
+import moocore
 
 # FIXME: How to test both float and Fractions?
 moarch_get_mo_archive.hypervolume_computation_float_type = float

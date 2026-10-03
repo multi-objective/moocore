@@ -1,7 +1,7 @@
 # ruff: noqa: D100, D101, D102
-from pybtex.style.formatting.unsrt import Style as UnsrtStyle
-from pybtex.style.template import sentence, href, join, optional, field
 from pybtex.plugin import register_plugin
+from pybtex.style.formatting.unsrt import Style as UnsrtStyle
+from pybtex.style.template import field, href, join, optional, sentence
 
 
 class MyUnsrtStyle(UnsrtStyle):

@@ -5,14 +5,14 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
-from bench import Bench, read_data, check_float_values
-
-import numpy as np
-import moocore
 import pathlib
-import matplotlib.pyplot as plt
 
+import matplotlib.pyplot as plt
+import numpy as np
+from bench import Bench, check_float_values, read_data
 from pymoo.indicators.igd_plus import IGDPlus as pymoo_IGDplus
+
+import moocore
 
 ## FIXME: Currently DESDEO is a thousand times slower than moocore, so it is not worth running it.
 # from desdeo.tools.indicators_unary import igd_plus_indicator as desdeo_igd_plus

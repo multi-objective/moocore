@@ -1,35 +1,33 @@
 from __future__ import annotations
 
-import os
-from io import StringIO
-from collections.abc import Callable, Sequence
-from numpy.typing import ArrayLike  # For type hints
-from typing import Literal, Any, NamedTuple
-import numbers
-
 # NOTE: if we ever start using SciPy, we can use
 # from scipy.special import gamma_function
-
 import lzma
+import numbers
+import os
 import shutil
 import tempfile
+from collections.abc import Callable, Sequence
+from io import StringIO
+from typing import Any, Literal, NamedTuple
 
 import numpy as np
+from numpy.typing import ArrayLike  # For type hints
 
-from ._utils import (
-    asarray_maybe_copy,
-    unique_nosort,
-    np2d_to_double_array,
-    np1d_to_double_array,
-    np1d_to_int_array,
-    array_1d_of_length_n,
-    is_integer_value,
-    _get_seed_for_c,
-)
 from ._docsubstitute import DocSubstitute
 
 ## The CFFI library is used to create C bindings.
-from ._libmoocore import lib, ffi
+from ._libmoocore import ffi, lib
+from ._utils import (
+    _get_seed_for_c,
+    array_1d_of_length_n,
+    asarray_maybe_copy,
+    is_integer_value,
+    np1d_to_double_array,
+    np1d_to_int_array,
+    np2d_to_double_array,
+    unique_nosort,
+)
 
 # Maximum number of objectives (columns) supported by the C library. These
 # mirror the limits defined in c/config.h: most functions support up to 255
