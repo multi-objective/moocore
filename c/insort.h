@@ -57,6 +57,8 @@ insertion_sort_r(const double ** restrict data, size_t len, cmp_r_fun_t cmp,
     for (size_t i = 1; i < len; i++) {
         const double * restrict key = data[i];
         // Find insertion point in data[0..i) using binary search.
+        /* FIXME: Implement Knuth’s Algorithm U (Uniform Binary Search) with
+           prefetching: https://doi.org/10.48550/arXiv.1509.05053 */
         size_t lo = 0, hi = i;
         do {
             size_t mid = lo + (hi - lo) / 2;

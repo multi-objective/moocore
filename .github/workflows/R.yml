@@ -43,8 +43,8 @@ jobs:
       # When set to true, GitHub cancels all in-progress jobs if any matrix job fails.
       fail-fast: true
       matrix:
-        # macos-15-intel is an intel runner, macos-14 is apple silicon
-        os: [ ubuntu-22.04, windows-latest, macos-15-intel, macos-14 ]
+        # macos-15-intel is x86, macos-15 is arm64
+        os: [ ubuntu-22.04, windows-latest, macos-15-intel, macos-15 ]
         r: [ release ]
         include:
           - { os: windows-latest, r: '4.1' }
