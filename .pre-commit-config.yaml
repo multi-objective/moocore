@@ -7,26 +7,6 @@ ci:
         for more information, see https://pre-commit.ci
 
 repos:
-  - repo: https://github.com/lorenzwalthert/precommit
-    rev: v0.4.3.9029
-    hooks:
-      - id: parsable-R
-      - id: no-browser-statement
-      - id: no-print-statement
-        exclude: '(do\.R)'
-      - id: no-debug-statement
-      - id: deps-in-desc
-        args: [--root=r]
-        files: '^r/R/'
-        exclude: '(do\.R|vignettes/articles/.+\.Rmd)'
-      - id: roxygenize
-        args: [--root=r]
-        files: '^r/(R|man)/'
-        additional_dependencies:
-          - Rdpack
-          - doctest
-          - matrixStats
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -60,7 +40,6 @@ repos:
         additional_dependencies: ["tox>=4.12.1"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    # Ruff version.
     rev: v0.15.21
     hooks:
       # Run the formatter.
@@ -76,3 +55,23 @@ repos:
     rev: v1.0.2
     hooks:
       - id: sphinx-lint
+
+  - repo: https://github.com/lorenzwalthert/precommit
+    rev: v0.4.3.9030
+    hooks:
+      - id: parsable-R
+      - id: no-browser-statement
+      - id: no-print-statement
+        exclude: '(do\.R)'
+      - id: no-debug-statement
+      - id: deps-in-desc
+        args: [--root=r]
+        files: '^r/R/'
+        exclude: '(do\.R|vignettes/articles/.+\.Rmd)'
+      - id: roxygenize
+        args: [--root=r]
+        files: '^r/(R|man)/'
+        additional_dependencies:
+          - Rdpack
+          - doctest
+          - matrixStats
