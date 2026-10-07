@@ -1,3 +1,6 @@
+#ifndef RNG_H_
+#define RNG_H_
+
 #include "mt19937/mt19937.h"
 
 typedef mt19937_state rng_state;
@@ -40,3 +43,4 @@ void rng_bivariate_normal_fill(rng_state * rng,
                                double mu1, double mu2,
                                double sigma1, double sigma2, double rho,
                                double *out, int n);
+#endif // RNG_H_
