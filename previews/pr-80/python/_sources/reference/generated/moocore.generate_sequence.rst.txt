@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+generate\_sequence
+==================
+
+.. currentmodule:: moocore
+
+.. autofunction:: generate_sequence
+
+.. _sphx_glr_backref_moocore.generate_sequence:
+
+.. minigallery:: moocore.generate_sequence
+   :add-heading: Gallery examples
+   :heading-level: -
