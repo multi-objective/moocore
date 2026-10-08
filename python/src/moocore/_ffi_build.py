@@ -29,6 +29,8 @@ headers = """
 #include "whv.h"
 #include "whv_hype.h"
 #include "hvapprox.h"
+#include "treap_archive.h"
+#include "nd_tree.h"
 """
 sources = [
     "avl.c",
@@ -48,6 +50,8 @@ sources = [
     "nondominated.c",
     "pareto.c",
     "rng.c",
+    "treap_archive.c",
+    "treap2d_fixed_size.c",
     "whv.c",
     "whv_hype.c",
 ]

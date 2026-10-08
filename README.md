@@ -19,7 +19,8 @@
     Mickaël Binois,
     Leonardo C.T. Bezerra,
     Fergus Rooney,
-    [Lennart Schäpermeier](https://schaepermeier.github.io).
+    [Lennart Schäpermeier](https://schaepermeier.github.io),
+    Jonathan Fieldsend.
 
 ---------------------------------------
 

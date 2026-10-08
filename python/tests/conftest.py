@@ -70,3 +70,21 @@ def immutable_call():
         return result
 
     return _call
+
+
+class AutoIncrement:
+    """Useful for counting."""
+
+    def __init__(self, start=0):
+        self._x = start - 1
+
+    def __call__(self):
+        """Return current value and increment counter."""
+        self._x += 1
+        return self._x
+
+
+@pytest.fixture
+def count():
+    """Instantiate a counter of type AutoIncrement()."""
+    return AutoIncrement()
