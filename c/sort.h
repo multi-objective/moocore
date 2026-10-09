@@ -24,15 +24,22 @@ static inline bool
 weakly_dominates(const double * restrict a, const double * restrict b, const dimension_t dim)
 {
     ASSUME(dim >= 2);
-    /* The code below is a vectorized version of this code:
+    /* FIXME: GCC 15.1 can auto-vectorize this loop:
+
     for (dimension_t d = 0; d < dim; d++)
         if (a[d] > b[d])
             return false;
     return true;
-    */
-    // GCC 15 is not able to infer this initialization from ASSUME().
-    // unsigned instead of bool to help auto-vectorization.
-    unsigned a_leq_b = (a[0] <= b[0]) & (a[1] <= b[1]);
+
+    For GCC 13, we use the following code to help auto-vectorization: */
+    // GCC is not able to infer this initialization from ASSUME().
+    for (dimension_t d = 0; d < 2; d++)
+        if (a[d] > b[d])
+            return false;
+    // unsigned instead of bool to help auto-vectorization in GCC 13.
+    unsigned a_leq_b = true;
+    /* FIXME: This vectorized loop does not allow an early exit.  This is bad
+       when dim is large but early exits are common. */
     for (dimension_t d = 2; d < dim; d++)
         a_leq_b &= (a[d] <= b[d]);
     return (bool) a_leq_b;
@@ -63,10 +70,22 @@ static inline bool
 all_equal_double(const double * restrict a, const double * restrict b, dimension_t dim)
 {
     ASSUME(dim >= 2);
-    // The code below is written in a way that helps vectorization.
-    // GCC 15 is not able to infer this initialization from ASSUME().
-    // unsigned instead of bool to help auto-vectorization.
-    unsigned a_eq_b = (a[0] == b[0]) & (a[1] == b[1]);
+    /* FIXME: GCC 15.1 can auto-vectorize this loop:
+
+    for (dimension_t d = 0; d < dim; d++)
+        if (a[d] != b[d])
+            return false;
+    return true;
+
+    For GCC 13, we use the following code to help auto-vectorization: */
+    // GCC is not able to infer this initialization from ASSUME().
+    for (dimension_t d = 0; d < 2; d++)
+        if (a[d] != b[d])
+            return false;
+    // unsigned instead of bool to help auto-vectorization in GCC 13.
+    unsigned a_eq_b = true;
+    /* FIXME: This vectorized loop does not allow an early exit.  This is bad
+       when dim is large but early exits are common. */
     for (dimension_t d = 2; d < dim; d++)
         a_eq_b &= (a[d] == b[d]);
     return (bool) a_eq_b;
