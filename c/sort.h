@@ -31,8 +31,15 @@ weakly_dominates(const double * restrict a, const double * restrict b, const dim
     return true;
     */
     // GCC 15 is not able to infer this initialization from ASSUME().
+    for (dimension_t d = 0; d < 2; d++)
+        if (a[d] > b[d])
+            return false;
     // unsigned instead of bool to help auto-vectorization.
-    unsigned a_leq_b = (a[0] <= b[0]) & (a[1] <= b[1]);
+    unsigned a_leq_b = true;
+    /* FIXME: The vectorized loop does not allow an early exit.  This is bad
+       when dim is large but early exits are common.  Rewrite the loop to allow
+       both vectorization and early exit using
+       __builtin_assume_dereferenceable() or __builtin_assume(a[d] == a[d]) */
     for (dimension_t d = 2; d < dim; d++)
         a_leq_b &= (a[d] <= b[d]);
     return (bool) a_leq_b;
@@ -63,10 +70,17 @@ static inline bool
 all_equal_double(const double * restrict a, const double * restrict b, dimension_t dim)
 {
     ASSUME(dim >= 2);
-    // The code below is written in a way that helps vectorization.
     // GCC 15 is not able to infer this initialization from ASSUME().
+    for (dimension_t d = 0; d < 2; d++)
+        if (a[d] != b[d])
+            return false;
     // unsigned instead of bool to help auto-vectorization.
-    unsigned a_eq_b = (a[0] == b[0]) & (a[1] == b[1]);
+    unsigned a_eq_b = true;
+    // The code below is written in a way that helps vectorization.
+    /* FIXME: The vectorized loop does not allow an early exit.  This is bad
+       when dim is large but early exits are common.  Rewrite the loop to allow
+       both vectorization and early exit using
+       __builtin_assume_dereferenceable() or __builtin_assume(a[d] == a[d]) */
     for (dimension_t d = 2; d < dim; d++)
         a_eq_b &= (a[d] == b[d]);
     return (bool) a_eq_b;
