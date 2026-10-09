@@ -135,9 +135,8 @@ maxima_partition(const double * restrict * restrict u, size_t size, double v)
     return low;
 }
 
-size_t kung_merge_dim3(const double ** restrict r, size_t r_size,
-                       const double ** restrict s, size_t s_size);
-
+/* FIXME: This is the slowest function in Kung's algorithm, so any improvements
+   will have a strong impact.  */
 static size_t
 kung_merge_brute_force(const double ** restrict r, size_t r_size,
                        const double ** restrict s, size_t s_size,
@@ -152,11 +151,7 @@ kung_merge_brute_force(const double ** restrict r, size_t r_size,
         const double * restrict sj = s[j];
         for (size_t i = 0; i < r_size; i++) {
             const double * restrict ri = r[i];
-            // Use unsigned instead of bool to allow auto-vectorization.
-            unsigned r_leq_s = true;
-            for (dimension_t d = 0; d < dim; d++)
-                r_leq_s &= (ri[d] <= sj[d]);
-
+            bool r_leq_s = weakly_dominates(ri, sj, dim);
             if (unlikely(r_leq_s)) {
                 s[j] = NULL; // dominated
                 new_size--;
@@ -268,6 +263,9 @@ compact_rows(const double ** r, size_t r_size,
 static size_t kung_merge_nobase(const double ** restrict r, size_t r_size,
                                 const double ** restrict s, size_t s_size,
                                 dimension_t dim);
+
+size_t kung_merge_dim3(const double ** restrict r, size_t r_size,
+                       const double ** restrict s, size_t s_size);
 
 /**
    Recurse one dimension before merging.
