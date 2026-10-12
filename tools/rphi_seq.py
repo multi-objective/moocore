@@ -7,9 +7,9 @@
 # Requires
 # sympy >= 1.14.0
 # mpmath>=1.4.1
-from sympy import symbols, solve, N
-from mpmath import mp
 import numpy as np
+from mpmath import mp
+from sympy import N, solve, symbols
 
 # Set precision to 128 bits
 mp.prec = 128

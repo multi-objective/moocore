@@ -5,19 +5,19 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
-from bench import Bench, get_geomrange, check_array_equal
-
-import numpy as np
 import matplotlib.pyplot as plt
-import moocore
-
-from pymoo.util.nds.non_dominated_sorting import (
-    NonDominatedSorting as pymoo_NDS,
-)
+import numpy as np
+from bench import Bench, check_array_equal, get_geomrange
 from desdeo.tools.non_dominated_sorting import (
     fast_non_dominated_sort as desdeo_nds,
 )
 from paretoset import paretorank as paretoset_paretorank
+from pymoo.util.nds.non_dominated_sorting import (
+    NonDominatedSorting as pymoo_NDS,
+)
+
+import moocore
+
 ## It cannot be installed: https://github.com/esa/pygmo2/issues/152
 # from pygmo import pareto_dominance as pg_pareto_dominance
 

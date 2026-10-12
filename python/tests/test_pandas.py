@@ -1,7 +1,8 @@
 # ruff: noqa: D100, D103
 import pytest
+from numpy.testing import assert_allclose, assert_array_equal
+
 import moocore
-from numpy.testing import assert_array_equal, assert_allclose
 
 pd = pytest.importorskip("pandas")
 
