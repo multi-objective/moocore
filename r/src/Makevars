@@ -2,7 +2,7 @@
 # Do not put GCC specific flags here. Put them instead in CFLAGS and
 # CXXFLAGS in ~/.R/Makevars
 # In particular, add the following to ~/.R/Makevars:
-# LTO_OPT=-flto
+# LTO_OPT=-flto -fno-trapping-math
 LTO=$(LTO_OPT)
 MOOCORE_DEBUG ?=0
 PKG_CPPFLAGS=-DR_PACKAGE -DDEBUG=$(MOOCORE_DEBUG) -I./libmoocore/
