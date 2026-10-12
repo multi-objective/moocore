@@ -5,16 +5,15 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
-from bench import Bench, check_float_values, get_range
-
-import numpy as np
-import moocore
 import matplotlib.pyplot as plt
-
+import numpy as np
+from bench import Bench, check_float_values, get_range
 from desdeo.tools.indicators_unary import igd_plus_indicator as desdeo_igd_plus
 from jmetal.core.quality_indicator import (
     InvertedGenerationalDistancePlus as jmetal_IGDplus,
 )
+
+import moocore
 
 files = {
     "ran.1000pts.3d": "ran.1000pts.3d.10",
