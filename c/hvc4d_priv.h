@@ -90,9 +90,9 @@ continue_base_update_z_closest(dlnode_t * restrict list, dlnode_t * restrict new
     assert(lexicographic_less_2d(newx, p->cnext[1]->x));
 
     // Check if newp is dominated.
-    if (weakly_dominates(p->x, newx, 3)) {
+    if (weakly_dominates(p->x, newx, 3))
         return false;
-    }
+
     dlnode_t * lex_prev = p; // newp->closest[0] = lex_prev
     p = lex_prev->cnext[1];
 
@@ -293,13 +293,12 @@ onec4dplusU(dlnode_t * restrict list, dlnode_t * restrict list_aux,
                 newp_aux++;
             }
 
-            if (weakly_dominates(the_point_x, newpx, 3)){
+            if (weakly_dominates(the_point_x, newpx, 3))
                 newp->ignore = 3;
-            }
         }
 
-        // FIXME: If newp was dominated, can we accumulate the height and update
-        // hv later? AG: Yes
+        // FIXME: If newp was dominated, we could accumulate the height and
+        // update hv later.
         height = newp->next[1]->x[3] - newpx[3];
         assert(height >= 0);
         hv += volume * height;
