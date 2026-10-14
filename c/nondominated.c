@@ -6,18 +6,7 @@
 *****************************************************************************/
 #include "nondominated.h"
 
-typedef const double avl_item_t;
-typedef struct avl_node_t {
-    struct avl_node_t *next;
-    struct avl_node_t *prev;
-    struct avl_node_t *parent;
-    struct avl_node_t *left;
-    struct avl_node_t *right;
-    avl_item_t *item;
-    unsigned char depth;
-} avl_node_t;
-
-#include "avl_tiny.h"
+#include "treap2d_fixed_size.h"
 
 /**
    3D dimension-sweep algorithm by H. T. Kung, F. Luccio, and F. P. Preparata.
@@ -38,73 +27,35 @@ find_nondominated_3d_impl_sorted(const double ** restrict rows, size_t size,
                                  const bool find_dominated)
 {
     ASSUME(size > 1);
-    /* FIXME: The AVL-tree is the bottleneck of this algorithm. A Treap
-       [R. Seidel and C. R. Aragon. Randomized search trees.  Algorithmica,
-       16:464–497, 1996] may be far more efficient by allowing to remove a
-       range of items without rebalancing.  See
-       https://alexdremov.me/treap-algorithm-explained/
-       Instead of using randomized priorities, hash the node pointer or the node index.
-    */
-    avl_tree_t tree;
-    avl_init_tree(&tree, qsort_cmp_pdouble_asc_x_nonzero);
-    avl_node_t * tnodes = malloc((size+1) * sizeof(*tnodes));
-    avl_node_t * node = tnodes;
-    node->item = rows[0];
-    avl_insert_top(&tree, node);
-
-    const double sentinel[] = { INFINITY, -INFINITY };
-    (++node)->item = sentinel;
-    avl_insert_after(&tree, node - 1, node);
+    Treap2D * tree = treap2d_new(size);
+    assert(tree != NULL);
+    double pk0 = rows[0][0], pk1 = rows[0][1], pk2 = rows[0][2];
+    treap2d_init_with_single_node(tree, pk0, pk1);
 
     // In this context, size means "no dominated solution found".
     size_t new_size = size;
     size_t prev_dominated = false;
-    double pk0 = rows[0][0], pk1 = rows[0][1], pk2 = rows[0][2];
     for (size_t j = 1; j < size; j++) {
         const double * restrict pj = rows[j];
         DEBUG2(printf_point("pj = [ ", pj, 3, " ], "));
         const double pj0 = pj[0], pj1 = pj[1], pj2 = pj[2];
         if ((pk0 > pj0) | (pk1 > pj1)) {
             // Check if pj is dominated by a point in the tree.
-            avl_node_t * nodeaux;
-            int res = avl_search_closest(&tree, pj, &nodeaux);
-            assert(res != 0);
-            if (res > 0 || nodeaux->prev) {
-                const double * restrict prev;
-                if (res > 0) { // nodeaux goes before pj
-                    prev = nodeaux->item;
-                    nodeaux = nodeaux->next;
-                    DEBUG2(printf_point("res > 0: prev: ", prev, 3, "\n"));
-                } else { // nodeaux goes after pj, so move to the previous one.
-                    prev = nodeaux->prev->item;
-                    DEBUG2(printf_point("res < 0: prev: ", prev, 3, "\n"));
-                }
-                assert(prev[0] != sentinel[0]);
-                assert(prev[0] <= pj0);
-                if (prev[1] <= pj1)
-                    goto j_is_dominated;
-            }
+            /* In a valid 2-D frontier, x increases and y decreases.  Therefore
+               the only existing point that can dominate pj is the frontier
+               predecessor with the largest key <= pj0.  */
+            TreapNode *pred = treap2d_find_le(tree, pj0);
+            if (pred != NULL && treap2d_node_get_y(pred) <= pj1)
+                goto j_is_dominated;
 
-            // pj is NOT dominated by a point in the tree.
-            const double * restrict point = nodeaux->item;
-            assert(pj0 <= point[0]);
-            // Delete everything in the tree that is dominated by pj.
-            while (pj1 <= point[1]) {
-                DEBUG2(printf_point("delete point: ", point, 3, "\n"));
-                assert(pj0 <= point[0]);
-                nodeaux = nodeaux->next;
-                point = nodeaux->item;
-                /* FIXME: A possible speed up is to delete without rebalancing
-                   the tree because avl_insert_before() will rebalance, but we
-                   need to know which is the highest node that needs
-                   rebalancing. */
-                avl_unlink_node(&tree, nodeaux->prev);
-            }
-            DEBUG2((point == sentinel)
-                   ? printf_point("insert before sentinel: ", sentinel, 2, "\n")
-                   : printf_point("insert before point: ", point, 3, "\n"));
-            (++node)->item = pj;
-            avl_insert_before(&tree, nodeaux, node);
+            /* pj is not dominated by an existing frontier point.
+
+               Insert it and detach every existing point dominated by it.
+
+               The returned treap contains exactly those displaced nodes, but
+               we do not need to traverse it here because those nodes will
+               never again participate in dominance queries.  */
+            treap2d_insert(tree, pj0, pj1);
             // Fall-through to j_is_NOT_dominated.
         } // Handle duplicates and points that are dominated by the immediate previous one.
         else if (!keep_weakly // Don't keep duplicates.
@@ -135,39 +86,50 @@ find_nondominated_3d_impl_sorted(const double ** restrict rows, size_t size,
     }
 
 early_end:
-    free(tnodes);
+    treap2d_free(tree);
     return new_size;
 }
 
-
 /**
-   Returns NULL if point is dominated by a different point in the tree.
+   Return true if point is dominated by a different point in the tree.
 */
-static avl_node_t *
-dominated_by_tree_3d(const avl_tree_t * restrict tree,
-                     const double * restrict point)
+static inline bool
+dominated_by_tree_3d(Treap2D *tree, const double *point)
 {
-    avl_node_t * nodeaux;
-    int res = avl_search_closest(tree, point, &nodeaux);
-    if (res >= 0) { // nodeaux goes before point
-        const double * restrict prev = nodeaux->item;
-        DEBUG2(printf_point("res > 0: prev = [ ", prev, 3, " ], "));
-        DEBUG2(printf_point("point = [ ", point, 3, " ]\n"));
-        assert(prev[0] != INFINITY);
-        assert(prev[0] <= point[0]);
-        assert(prev[1] <= point[1]);
-        return prev[2] <= point[2] ? NULL : nodeaux->next;
-    } else if (nodeaux->prev) { // nodeaux goes after point, so move to the next one.
-        const double * restrict prev = nodeaux->prev->item;
-        DEBUG2(printf_point("res <= 0: prev = [ ", prev, 3, " ], "));
-        DEBUG2(printf_point("point = [ ", point, 3, " ]\n"));
-        assert(prev[0] != INFINITY);
-        assert(prev[0] <= point[0]);
-        assert(prev[1] <= point[1]);
-        return prev[2] <= point[2] ? NULL : nodeaux;
+    DEBUG1(treap2d_validate_tree(tree));
+    point++; // Ignore dim [0]
+    // Find the rightmost point with prev->key <= point[0].
+    TreapNode *prev_node = treap2d_find_le(tree, point[0]);
+    if (prev_node != NULL && treap2d_node_get_y(prev_node) <= point[1]) {
+        assert(treap2d_node_get_x(prev_node) <= point[0]);
+        return true; // p is dominated
     }
-    assert(nodeaux != NULL);
-    return nodeaux; // point is not dominated
+    return false; // p is not dominated
+}
+
+// FIXME: How to merge this function and the one above?
+static inline bool
+insert_if_not_dominated_by_tree_3d(Treap2D *tree, const double *point)
+{
+    DEBUG1(treap2d_validate_tree(tree));
+    point++; // Ignore dim [0]
+    // Find the rightmost point with prev->key <= point[0].
+    TreapNode **prev_link = treap2d_find_le_link(tree, point[0]);
+    if (prev_link != NULL) {
+        const double prev[2] = { treap2d_node_get_x(*prev_link), treap2d_node_get_y(*prev_link) };
+        if (prev[1] <= point[1]) {
+            assert(prev[0] <= point[0]);
+            return false; // p is dominated
+        } else if (prev[0] == point[0]) {
+            // p dominates prev. Remove the already found node.
+            treap2d_erase_at(prev_link);
+            DEBUG1(treap2d_validate_tree(tree));
+        }
+    }
+    // FIXME: This will call split_lt, but we just called find_le above, so can
+    // we avoid one of them?
+    treap2d_insert(tree, point[0], point[1]);
+    return true; // p was inserted.
 }
 
 /**
@@ -192,17 +154,10 @@ kung_merge_dim3(const double ** restrict r, size_t r_size,
     DEBUG1(for (size_t j = 0; j < k; j++) assert(s[j][0] < r0));
     DEBUG1(for (size_t j = k; j < s_size; j++) assert(r0 <= s[j][0]));
 
-    avl_tree_t tree;
-    avl_init_tree(&tree, qsort_cmp_pdouble_asc_y_asc_z);
-    // FIXME: Use a workspace to allocate this once and re-alloc only if a larger number is needed.
-    avl_node_t * tnodes = malloc((r_size + 1) * sizeof(*tnodes));
-    avl_node_t * node = tnodes;
-    node->item = r[0];
-    avl_insert_top(&tree, node);
-
-    const double sentinel[] = { INFINITY, INFINITY, -INFINITY};
-    (++node)->item = sentinel;
-    avl_insert_after(&tree, node - 1, node);
+    Treap2D * tree = treap2d_new(r_size);
+    assert(tree != NULL);
+    treap2d_init_with_single_node(tree, r[0][1], r[0][2]);
+    DEBUG2(printf_point("insert in tree: r=[ ", r[0], 3, " ]\n"));
 
     size_t i = 1, new_size = s_size;
     do {
@@ -212,39 +167,21 @@ kung_merge_dim3(const double ** restrict r, size_t r_size,
 
         while (i < r_size) { // Add to the tree all points in R that could dominate v.
             const double * restrict u = r[i];
-            if (u[0] > v[0]) {
+            if (u[0] > v[0])
                 break;
-            }
-            avl_node_t * nodeaux = dominated_by_tree_3d(&tree, u);
-            if (nodeaux != NULL) { // u is NOT dominated by a point in the tree.
-                const double * restrict point = nodeaux->item;
-                assert(u[1] <= point[1]);
-                // Delete everything in the tree that is dominated by u.
-                while (u[2] <= point[2]) {
-                    // printf("delete point: "); print_point(point); printf("\n");
-                    assert(u[1] <= point[1]);
-                    nodeaux = nodeaux->next;
-                    point = nodeaux->item;
-                    /* FIXME: A possible speed up is to delete without
-                       rebalancing the tree because avl_insert_before() will
-                       rebalance, but we need to know which is the highest node
-                       that needs rebalancing. */
-                    avl_unlink_node(&tree, nodeaux->prev);
-                }
-                // printf("insert before point: "); print_point(point); printf("\n");
-                (++node)->item = u;
-                avl_insert_before(&tree, nodeaux, node);
+            if (insert_if_not_dominated_by_tree_3d(tree, u)) {
+                // u is NOT dominated by a point in the tree.
+                DEBUG2(printf_point("!dominated_by_tree_3d: u=[ ", u, 3, " ]\n"));
             }
             i++;
         }
-        if (dominated_by_tree_3d(&tree, v) == NULL) {
+        if (dominated_by_tree_3d(tree, v)) {
             DEBUG2(printf_point("dominated_by_tree_3d: v=[ ", v, 3, " ]\n"));
             s[k] = NULL; // dominated
             new_size--;
         }
         k++;
     } while (k < s_size);
-
-    free(tnodes);
+    treap2d_free(tree);
     return new_size;
 }
