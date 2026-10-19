@@ -31,6 +31,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
 ]
 dependencies = [
   "cffi>=1.17.1",
@@ -183,7 +184,7 @@ pydocstyle.convention = "numpy"
 # Table format: "short" collapses sub-tables to dotted keys, "long" expands to [table.subtable] headers
 table_format = "long"
 # List of tables to force expand regardless of table_format setting
-expand_tables = [ "project.urls", "project.optional-dependencies" ]
+expand_tables = [ "project.optional-dependencies", "project.urls" ]
 # List of tables to force collapse regardless of table_format or expand_tables settings
 collapse_tables = [ "project.authors" ]
 
@@ -191,20 +192,20 @@ collapse_tables = [ "project.authors" ]
 invalid-assignment = "ignore"
 
 [tool.pytest.ini_options]
-faulthandler_timeout = 10
-doctest_optionflags = "NUMBER"
 addopts = [ "--import-mode=importlib", "--durations=5", "--durations-min=1.0" ]
+doctest_optionflags = "NUMBER"
+faulthandler_timeout = 10
 
+[tool.coverage.run]
+branch = true
 [tool.coverage.report]
 # Same as tool.gcovr.exclude-lines-by-pattern.
 exclude_also = [
   "^.*(?:#|//)\\s+nocov",
+  "^.*(?:GCOVR?|LCOV)_EXCL_LINE",
   "^.*\\b(?:ASSUME|(?:DEBUG1|DEBUG2|DEBUG3)(?:_PRINT)?)\\s?\\(",
   "^.*\\bunreachable\\s?\\(\\)",
-  "^.*(?:GCOVR?|LCOV)_EXCL_LINE",
 ]
-[tool.coverage.run]
-branch = true
 
 [tool.gcovr]
 # The regex must match the start of the line.

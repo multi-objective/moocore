@@ -1,20 +1,21 @@
 from __future__ import annotations
-from typing import Any
 
 import hashlib
-import numpy as np
 import os
 import shutil
-import warnings
 import time
+import warnings
+from importlib.metadata import version as _metadata_version
+from importlib.resources import files
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from typing import Any
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
-from importlib.resources import files
-from importlib.metadata import version as _metadata_version
+import numpy as np
 from platformdirs import user_cache_path
+
 from ._moocore import read_datasets
 
 _moocore_version = _metadata_version("moocore")

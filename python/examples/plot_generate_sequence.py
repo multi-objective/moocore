@@ -8,11 +8,11 @@ First we define a few functions useful for plotting.
 """
 
 # sphinx_gallery_multi_image = "single"
-import moocore
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+from _utils import plot_sequence_2d, plotly_3d, plotly_3d_side_by_side
 
-from _utils import plotly_3d, plotly_3d_side_by_side, plot_sequence_2d
+import moocore
 
 
 def plotly_generate_sequence_3d(what, n, method, seed, show_index=False):
