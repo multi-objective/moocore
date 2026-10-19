@@ -51,6 +51,7 @@ Computation, pp. 465–472 (2012)]
  - [ ] Decremental greedy hypervolume subset selection: https://github.com/Ksrma/gHSSD-Tree
  - [ ] Real-Time Hypervolume Estimation with Monotonically Reducing Error: https://github.com/fieldsend/hypervolume
  - [ ] Benchmark against: https://github.com/MOEAFramework/MOEAFramework
+ - [ ] Benchmark EAF computation against: https://github.com/optuna/optunahub-registry/blob/main/package/visualization/plot_empirical_attainment_surface/README.md
  - [ ] Setup https://github.com/koaning/sphinx-marimo
  - [ ] Crowding distance (NSGA-II):
        - [pymoo](https://github.com/anyoptimization/pymoo/blob/23110c155aa8f31b5f1b86928227fb3931ba7f00/pymoo/operators/survival/rank_and_crowding/metrics.py#L85)
