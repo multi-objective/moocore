@@ -75,10 +75,10 @@ for name in names:
 
     benchmarks = {
         "moocore": moocore.Hypervolume(ref=ref),
-        "nevergrad": lambda z, hv=ng_HV(ref): hv.compute(z),
         "optuna": lambda z, ref=ref: optuna_hv(
             z, reference_point=ref, assume_pareto=False
         ),
+        "nevergrad": lambda z, hv=ng_HV(ref): hv.compute(z),
         "moarchiving (float)": lambda z, ref=ref: float(
             moarch_get_mo_archive(z, reference_point=ref).hypervolume
         ),
