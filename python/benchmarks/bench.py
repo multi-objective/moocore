@@ -148,14 +148,13 @@ class Bench:
         self.name = name
         self.n = n
         self.bench = bench
-        self.times = {k: [] for k in bench.keys()}
+        self.times = {k: [] for k in bench}
         self.versions = {
-            what: f"{what} ({get_package_version(what)})"
-            for what in bench.keys()
+            what: f"{what} ({get_package_version(what)})" for what in bench
         }
         timeit.template = timeit_template_return_1_value
         if report_values:
-            self.values = {k: [] for k in bench.keys()}
+            self.values = {k: [] for k in bench}
             self.value_label = report_values
             if return_all_values:
                 timeit.template = timeit_template_return_all_values
