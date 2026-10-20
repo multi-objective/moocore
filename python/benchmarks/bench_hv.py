@@ -43,22 +43,22 @@ path_to_data = "../../testsuite/data/"
 assert pathlib.Path(path_to_data).expanduser().exists()
 
 files = {
-    "DTLZLinearShape.3d": dict(
-        file=path_to_data + "DTLZLinearShape.3d.front.1000pts.10",
-        range=(200, 2000, 10),
-    ),
-    "DTLZLinearShape.4d": dict(
-        file=path_to_data + "DTLZLinearShape.4d.front.1000pts.10",
-        range=(100, 1200, 10),
-    ),
-    "DTLZLinearShape.5d": dict(
-        file=path_to_data + "DTLZLinearShape.5d.front.500pts.10",
-        range=(10, 600, 10),
-    ),
-    "DTLZLinearShape.6d": dict(
-        file=path_to_data + "DTLZLinearShape.6d.front.700pts.10.xz",
-        range=(10, 300, 10),
-    ),
+    "DTLZLinearShape.3d": {
+        "file": path_to_data + "DTLZLinearShape.3d.front.1000pts.10",
+        "range": (200, 2000, 10),
+    },
+    "DTLZLinearShape.4d": {
+        "file": path_to_data + "DTLZLinearShape.4d.front.1000pts.10",
+        "range": (100, 1200, 10),
+    },
+    "DTLZLinearShape.5d": {
+        "file": path_to_data + "DTLZLinearShape.5d.front.500pts.10",
+        "range": (10, 600, 10),
+    },
+    "DTLZLinearShape.6d": {
+        "file": path_to_data + "DTLZLinearShape.6d.front.700pts.10.xz",
+        "range": (10, 300, 10),
+    },
 }
 
 
