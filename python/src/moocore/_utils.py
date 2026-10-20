@@ -2,7 +2,7 @@ from numpy.typing import ArrayLike  # For type hints
 from typing import Any
 
 import numpy as np
-from ._libmoocore import ffi
+from ._libmoocore import ffi  # ty: ignore[unresolved-import]
 
 
 def get1_and_is_copied(x: Any, x_: Any) -> tuple[Any, bool]:
@@ -40,7 +40,7 @@ def np2d_to_double_array(
 
 
 def np1d_to_c_array(
-    x: ArrayLike, ctype_data: str, ctype_size: str
+    x: np.ndarray, ctype_data: str, ctype_size: str
 ) -> tuple[ffi.CData, ffi.CData]:
     size = ffi.cast(ctype_size, x.shape[0])
     ctype_dtype = np.intc() if ctype_data == "int" else None
@@ -50,13 +50,13 @@ def np1d_to_c_array(
 
 
 def np1d_to_double_array(
-    x: ArrayLike, ctype_size: str = "int"
+    x: np.ndarray, ctype_size: str = "int"
 ) -> tuple[ffi.CData, ffi.CData]:
     return np1d_to_c_array(x, ctype_data="double", ctype_size=ctype_size)
 
 
 def np1d_to_int_array(
-    x: ArrayLike, ctype_size: str = "int"
+    x: np.ndarray, ctype_size: str = "int"
 ) -> tuple[ffi.CData, ffi.CData]:
     return np1d_to_c_array(x, ctype_data="int", ctype_size=ctype_size)
 

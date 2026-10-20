@@ -1,8 +1,10 @@
-from typing import Any
+from typing import Any, TypeVar
 from collections.abc import Callable
 
 from string import Template
 import inspect
+
+_CallableT = TypeVar("_CallableT", bound=Callable[..., Any])
 
 COMMON_PARAMS = {
     "points": """2D array of numerical values, where each row gives the coordinates of a point in objective space.
@@ -32,7 +34,7 @@ class DocSubstitute:
     def __init__(self) -> None:
         self.params = COMMON_PARAMS
 
-    def __call__(self, func: Callable[..., Any]) -> Callable[..., Any]:
+    def __call__(self, func: _CallableT) -> _CallableT:
         if func.__doc__:
             try:
                 func.__doc__ = Template(

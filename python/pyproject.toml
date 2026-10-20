@@ -188,6 +188,8 @@ collapse_tables = [ "project.authors" ]
 
 [tool.ty.rules]
 invalid-assignment = "ignore"
+[tool.ty.src]
+include = [ "src" ]
 
 [tool.pytest.ini_options]
 faulthandler_timeout = 10

@@ -1,5 +1,7 @@
 ci:
-  skip: [roxygenize] # Produces renv errors.
+  # roxygenize produces renv errors. ty needs network access while running,
+  # which is unavailable in pre-commit.ci; it runs in GitHub Actions instead.
+  skip: [roxygenize, ty]
   autofix_prs: true
   autofix_commit_msg: |
         [pre-commit.ci] auto fixes from pre-commit.com hooks
@@ -50,6 +52,12 @@ repos:
         args: [ --fix, --exit-non-zero-on-fix ]
         types_or: [ python, pyi, jupyter ]
         require_serial: true
+
+  - repo: https://github.com/astral-sh/ty-pre-commit
+    rev: v0.0.89
+    hooks:
+      - id: ty
+        args: [--project=python, --isolated]
 
   - repo: https://github.com/sphinx-contrib/sphinx-lint
     rev: v1.0.2

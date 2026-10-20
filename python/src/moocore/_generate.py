@@ -1,3 +1,5 @@
+from typing import cast
+
 import numpy as np
 
 # FIXME: Implement also WFG hard type described here:
@@ -171,15 +173,17 @@ def generate_ndset(
            [0.16824287, 0.4448603 , 0.35613488, 0.17723839, 0.5565858 ]])
     """
     if seed is None or is_integer_value(seed):
-        seed = np.random.default_rng(seed)
+        rng = np.random.default_rng(seed)
+    else:
+        rng = cast(np.random.Generator, seed)
 
     def _sample_simplex(n: int, d: int) -> np.ndarray:
-        x = seed.exponential(size=(n, d))
+        x = rng.exponential(size=(n, d))
         x /= x.sum(axis=1, keepdims=True)
         return x
 
     def _sample_sphere(n: int, d: int) -> np.ndarray:
-        x = np.abs(seed.normal(size=(n, d)))
+        x = np.abs(rng.normal(size=(n, d)))
         x /= np.linalg.norm(x, axis=1, keepdims=True)
         return x
 
@@ -189,7 +193,7 @@ def generate_ndset(
     def _sample_concave_cliff(n: int, d: int) -> np.ndarray:
         x = np.empty((n, d))
         x[:, :2] = _sample_sphere(n, 2)
-        x[:, 2:] = seed.uniform(0, 1, size=(n, d - 2))
+        x[:, 2:] = rng.uniform(0, 1, size=(n, d - 2))
         return x
 
     def _sample_convex_cliff(n: int, d: int) -> np.ndarray:
@@ -562,23 +566,25 @@ def generate_sequence(
 
     """
     if seed is None or is_integer_value(seed):
-        seed = np.random.default_rng(seed)
+        rng = np.random.default_rng(seed)
+    else:
+        rng = cast(np.random.Generator, seed)
 
     match method:
         case "cube":
-            sample = _generate_within_hypercube(n, d, seed)
+            sample = _generate_within_hypercube(n, d, rng)
         case "sphere":
-            sample = _generate_within_hypersphere(n, d, seed, r_min=r_min)
+            sample = _generate_within_hypersphere(n, d, rng, r_min=r_min)
         case "each-dominates-previous":
             sample = _generate_total_dominance_chain(
-                n, d, rng=seed, dominates_previous=True
+                n, d, rng=rng, dominates_previous=True
             )
         case "each-dominates-next":
             sample = _generate_total_dominance_chain(
-                n, d, rng=seed, dominates_previous=False
+                n, d, rng=rng, dominates_previous=False
             )
         case "glas2017":
-            sample = _generate_glas2017_sequence(n, d, seed, c_value=c_value)
+            sample = _generate_glas2017_sequence(n, d, rng, c_value=c_value)
         case _:
             raise ValueError(f"unknown method={method}")
 
