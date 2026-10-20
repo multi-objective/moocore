@@ -101,7 +101,7 @@ def save2png(filename):
     # Optimize with optipng if available.
     optipng = shutil.which("optipng")
     if optipng:
-        subprocess.run([optipng, "-quiet", filename])
+        subprocess.run([optipng, "-quiet", filename], check=False)
 
 
 def _normalize(result):
