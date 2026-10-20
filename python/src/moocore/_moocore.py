@@ -29,7 +29,7 @@ from ._utils import (
 from ._docsubstitute import DocSubstitute
 
 ## The CFFI library is used to create C bindings.
-from ._libmoocore import lib, ffi
+from ._libmoocore import lib, ffi  # ty: ignore[unresolved-import]
 
 # Maximum number of objectives (columns) supported by the C library. These
 # mirror the limits defined in c/config.h: most functions support up to 255
@@ -219,15 +219,15 @@ def _igd_plus_python(
     ref, ref_copied = asarray_maybe_copy(ref)
     ref = np.atleast_2d(ref)
     nobj = points.shape[1]
-    maximise = _parse_maximise(maximise, nobj)
+    maximise_arr = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
-    if maximise.any():
+    if maximise_arr.any():
         if not points_copied:
             points = points.copy()
-        points[:, maximise] = -points[:, maximise]
+        points[:, maximise_arr] = -points[:, maximise_arr]
         if not ref_copied:
             ref = ref.copy()
-        ref[:, maximise] = -ref[:, maximise]
+        ref[:, maximise_arr] = -ref[:, maximise_arr]
 
     res = np.sqrt(
         [(np.maximum(points - r, 0) ** 2).sum(axis=1).min() for r in ref]
@@ -256,15 +256,15 @@ def _epsilon_addi_python(
     ref, ref_copied = asarray_maybe_copy(ref)
     ref = np.atleast_2d(ref)
     nobj = points.shape[1]
-    maximise = _parse_maximise(maximise, nobj)
+    maximise_arr = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
-    if maximise.any():
+    if maximise_arr.any():
         if not points_copied:
             points = points.copy()
-        points[:, maximise] = -points[:, maximise]
+        points[:, maximise_arr] = -points[:, maximise_arr]
         if not ref_copied:
             ref = ref.copy()
-        ref[:, maximise] = -ref[:, maximise]
+        ref[:, maximise_arr] = -ref[:, maximise_arr]
 
     res = np.array([np.max(points - r, axis=1).min() for r in ref]).max()
     return float(res)
@@ -279,15 +279,15 @@ def _epsilon_mult_python(
     ref, ref_copied = asarray_maybe_copy(ref)
     ref = np.atleast_2d(ref)
     nobj = points.shape[1]
-    maximise = _parse_maximise(maximise, nobj)
+    maximise_arr = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
-    if maximise.any():
+    if maximise_arr.any():
         if not points_copied:
             points = points.copy()
-        points[:, maximise] = 1.0 / points[:, maximise]
+        points[:, maximise_arr] = 1.0 / points[:, maximise_arr]
         if not ref_copied:
             ref = ref.copy()
-        ref[:, maximise] = 1.0 / ref[:, maximise]
+        ref[:, maximise_arr] = 1.0 / ref[:, maximise_arr]
 
     res = np.array([np.max(points / r, axis=1).min() for r in ref]).max()
     return float(res)
@@ -574,7 +574,7 @@ def epsilon_mult(
     return lib.epsilon_mult(points_p, n, d, ref_p, ref_size, maximise_p)
 
 
-def _hypervolume(points: ArrayLike, ref: ArrayLike) -> float:
+def _hypervolume(points: np.ndarray, ref: np.ndarray) -> float:
     _check_dimension_max(points.shape[1], HV_DIMENSION_MAX)
     points_p, npoints, nobj = np2d_to_double_array(
         points, ctype_shape=("size_t", "uint_fast8_t")
@@ -703,14 +703,14 @@ def hypervolume(
         raise ValueError("input points must have at least 1 column")
     # Make sure it is a 1D array of length nobj.
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
-    maximise = _parse_maximise(maximise, nobj)
+    maximise_arr = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
-    if maximise.any():
+    if maximise_arr.any():
         if not points_copied:
             points = points.copy()
-        points[:, maximise] = -points[:, maximise]
+        points[:, maximise_arr] = -points[:, maximise_arr]
         ref = ref.copy()
-        ref[maximise] = -ref[maximise]
+        ref[maximise_arr] = -ref[maximise_arr]
 
     return _hypervolume(points, ref)
 
@@ -989,14 +989,14 @@ def hv_contributions(
     _check_dimension_max(nobj, HV_DIMENSION_MAX)
 
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
-    maximise = _parse_maximise(maximise, nobj)
+    maximise_arr = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
-    if maximise.any():
+    if maximise_arr.any():
         if not points_copied:
             points = points.copy()
-        points[:, maximise] = -points[:, maximise]
+        points[:, maximise_arr] = -points[:, maximise_arr]
         ref = ref.copy()
-        ref[maximise] = -ref[maximise]
+        ref[maximise_arr] = -ref[maximise_arr]
 
     hvc = np.empty(len(points), dtype=float)
     hvc_p, _ = np1d_to_double_array(hvc)
@@ -1282,13 +1282,16 @@ def is_nondominated(
 
     if nobj < 2:
         if nobj == 1:  # Handle single-objective inputs
-            maximise = array_1d_of_length_n(maximise, 1).astype(bool)
+            maximise_arr = array_1d_of_length_n(maximise, 1).astype(bool)
             if keep_weakly:
-                best = points.max() if maximise else points.min()
+                best = points.max() if maximise_arr[0] else points.min()
                 return (points == best).ravel()
             else:
                 nondom = np.zeros(len(points), dtype=bool)
-                nondom[points.argmax() if maximise else points.argmin()] = True
+                best_idx = (
+                    np.argmax(points) if maximise_arr[0] else np.argmin(points)
+                )
+                nondom[int(best_idx)] = True
                 return nondom
         else:  # nobj == 0
             raise ValueError("input points must have at least 1 column")
@@ -1503,7 +1506,9 @@ def filter_dominated(
         Returns the rows of ``points`` where :func:`is_nondominated` is ``True``.
 
     """
-    return points[
+    # Preserve indexable inputs such as pandas.DataFrame in the return value.
+    points_indexable: Any = points
+    return points_indexable[
         is_nondominated(points, maximise=maximise, keep_weakly=keep_weakly)
     ]
 
@@ -1700,12 +1705,12 @@ def pareto_rank(
 
     _check_dimension_max(nobj, DIMENSION_MAX)
 
-    maximise = _parse_maximise(maximise, nobj)
-    if maximise.any():
+    maximise_arr = _parse_maximise(maximise, nobj)
+    if maximise_arr.any():
         # FIXME: Do this in C.
         if not points_copied:
             points = points.copy()
-        points[:, maximise] = -points[:, maximise]
+        points[:, maximise_arr] = -points[:, maximise_arr]
 
     points_p, npoints, nobj = np2d_to_double_array(
         points, ctype_shape=("size_t", "uint_fast8_t")
@@ -1806,7 +1811,7 @@ def normalise(
 
 @DocSubstitute()
 def eaf(
-    points: ArrayLike, /, sets: ArrayLike, *, percentiles: Sequence[float] = ()
+    points: ArrayLike, /, sets: ArrayLike, *, percentiles: ArrayLike = ()
 ) -> np.ndarray:
     r"""Exact computation of the Empirical Attainment Function (EAF).
 
@@ -1901,6 +1906,7 @@ def eaf(
         raise NotImplementedError(
             "Only 2D or 3D datasets are currently supported for computing the EAF"
         )
+    sets = np.asarray(sets)
     if len(sets) != points.shape[0]:
         raise ValueError(
             "'sets' must have the same length as the number of rows of 'points'"
@@ -2190,7 +2196,7 @@ def eafdiff(
     )
     nobj = x.shape[1] - 1
     assert nobj == 2
-    maximise = _parse_maximise(maximise, nobj=nobj)
+    maximise_arr = _parse_maximise(maximise, nobj=nobj)
     # The C code expects points within a set to be contiguous.
     x = x[x[:, -1].argsort(), :]
     y = y[y[:, -1].argsort(), :]
@@ -2202,8 +2208,8 @@ def eafdiff(
     nsets = len(cumsizes)
 
     data = np.vstack((x[:, :-1], y[:, :-1]))
-    if maximise.any():
-        data[:, maximise] = -data[:, maximise]
+    if maximise_arr.any():
+        data[:, maximise_arr] = -data[:, maximise_arr]
 
     if intervals is None:
         intervals = int(nsets / 2.0)
@@ -2234,13 +2240,13 @@ def eafdiff(
     # FIXME: Check that we do not generate duplicated nor overlapping
     # rectangles with different colors. That would be a bug.
 
-    if maximise.any():
+    if maximise_arr.any():
         if rectangles:
-            maximise = np.concatenate((maximise, maximise))
-        maximise = np.flatnonzero(
-            maximise
+            maximise_arr = np.concatenate((maximise_arr, maximise_arr))
+        maximise_idx = np.flatnonzero(
+            maximise_arr
         )  # Using bool directly misses the color column.
-        eaf_data[:, maximise] = -eaf_data[:, maximise]
+        eaf_data[:, maximise_idx] = -eaf_data[:, maximise_idx]
 
     return eaf_data
 
@@ -2323,6 +2329,7 @@ def whv_rect(
 
     """
     points, _ = asarray_maybe_copy(points)
+    rectangles = np.asarray(rectangles, dtype=float)
     nobj = points.shape[1]
     if nobj != 2:
         raise NotImplementedError("Only 2D points are currently supported")
@@ -2331,8 +2338,8 @@ def whv_rect(
             "Invalid number of columns in 'rectangles' (should be 5)"
         )
 
-    maximise = _parse_maximise(maximise, nobj)
-    if maximise.any():
+    maximise_arr = _parse_maximise(maximise, nobj)
+    if maximise_arr.any():
         raise NotImplementedError("Only minimization is currently supported")
     # FIXME: Move to C code.
     # maximise = _parse_maximise(maximise, nobj)
@@ -2434,6 +2441,7 @@ def total_whv_rect(
 
     """
     points = np.asarray(points, dtype=float)
+    rectangles = np.asarray(rectangles, dtype=float)
     nobj = points.shape[1]
     if nobj != 2:
         raise NotImplementedError("Only 2D datasets are currently supported")
@@ -2445,12 +2453,12 @@ def total_whv_rect(
         raise ValueError("'scalefactor' must be within (0,1]")
 
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
-    maximise = _parse_maximise(maximise, nobj)
+    maximise_arr = _parse_maximise(maximise, nobj)
     whv = whv_rect(points, rectangles, ref=ref, maximise=maximise)
     hv = hypervolume(points, ref=ref)  # FIXME: maximise = maximise)
     if ideal is None:
         # FIXME: Should we include the range of the rectangles here?
-        ideal = get_ideal(points, maximise=maximise)
+        ideal = get_ideal(points, maximise=maximise_arr)
     else:
         ideal = array_1d_of_length_n(
             np.asarray(ideal, dtype=float), nobj, name="ideal"
@@ -2549,18 +2557,20 @@ def largest_eafdiff(
     if nobj != 2:
         raise NotImplementedError("Only 2D datasets are currently supported")
 
-    maximise = _parse_maximise(maximise, nobj)
+    maximise_arr = _parse_maximise(maximise, nobj)
 
     if ideal is None:
-        ideal = get_ideal(
+        ideal_arr = get_ideal(
             np.concatenate(
                 [[z[:, :-1].min(axis=0), z[:, :-1].max(axis=0)] for z in x],
                 axis=0,
             ),
-            maximise=maximise,
+            maximise=maximise_arr,
         )
+    else:
+        ideal_arr = np.asarray(ideal, dtype=float)
 
-    ideal = ideal.reshape(1, -1)
+    ideal_arr = ideal_arr.reshape(1, -1)
 
     best_value = 0
     for a in range(n - 1):
@@ -2576,13 +2586,19 @@ def largest_eafdiff(
             a_rectangles = diff[diff[:, -1] >= 1, :]
             a_rectangles[:, -1] = 1
             a_value = whv_rect(
-                ideal, rectangles=a_rectangles, ref=ref, maximise=maximise
+                ideal_arr,
+                rectangles=a_rectangles,
+                ref=ref,
+                maximise=maximise,
             )
 
             b_rectangles = diff[diff[:, -1] <= -1, :]
             b_rectangles[:, -1] = 1
             b_value = whv_rect(
-                ideal, rectangles=b_rectangles, ref=ref, maximise=maximise
+                ideal_arr,
+                rectangles=b_rectangles,
+                ref=ref,
+                maximise=maximise,
             )
 
             value = min(a_value, b_value)
@@ -2705,17 +2721,17 @@ def whv_hype(
     ideal = array_1d_of_length_n(
         np.asarray(ideal, dtype=float), nobj, name="ideal"
     )
-    maximise = _parse_maximise(maximise, nobj)
+    maximise_arr = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
-    if maximise.any():
+    if maximise_arr.any():
         if not points_copied:
             points = points.copy()
-        points[:, maximise] = -points[:, maximise]
+        points[:, maximise_arr] = -points[:, maximise_arr]
         # These are so small that is ok to just copy them.
         ref = ref.copy()
-        ref[maximise] = -ref[maximise]
+        ref[maximise_arr] = -ref[maximise_arr]
         ideal = ideal.copy()
-        ideal[maximise] = -ideal[maximise]
+        ideal[maximise_arr] = -ideal[maximise_arr]
 
     points_p, npoints, nobj = np2d_to_double_array(points)
     ref = ffi.from_buffer("double []", ref)
@@ -2933,14 +2949,14 @@ def r2_exact(
     # Make sure it is a 1D array of length nobj.
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
 
-    maximise = _parse_maximise(maximise, nobj)
+    maximise_arr = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
-    if maximise.any():
+    if maximise_arr.any():
         if not points_copied:
             points = points.copy()
-        points[:, maximise] = -points[:, maximise]
+        points[:, maximise_arr] = -points[:, maximise_arr]
         ref = ref.copy()
-        ref[maximise] = -ref[maximise]
+        ref[maximise_arr] = -ref[maximise_arr]
 
     points_p, npoints, nobj = np2d_to_double_array(
         points, ctype_shape=("size_t", "uint_fast8_t")
