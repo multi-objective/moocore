@@ -3,8 +3,8 @@ from __future__ import annotations
 import os
 from io import StringIO
 from collections.abc import Callable, Sequence
-from numpy.typing import ArrayLike  # For type hints
-from typing import Literal, Any, NamedTuple
+from numpy.typing import ArrayLike, NDArray  # For type hints
+from typing import Literal, Any, NamedTuple, TypeAlias
 import numbers
 
 # NOTE: if we ever start using SciPy, we can use
@@ -29,7 +29,9 @@ from ._utils import (
 from ._docsubstitute import DocSubstitute
 
 ## The CFFI library is used to create C bindings.
-from ._libmoocore import lib, ffi
+from ._libmoocore import lib, ffi  # ty: ignore[unresolved-import]
+
+MaximiseType: TypeAlias = bool | Sequence[bool | int] | NDArray[np.bool_]
 
 # Maximum number of objectives (columns) supported by the C library. These
 # mirror the limits defined in c/config.h: most functions support up to 255
@@ -169,15 +171,13 @@ def read_datasets(filename: str | os.PathLike[str] | StringIO) -> np.ndarray:
     return np.frombuffer(ffi.buffer(data_p, datasize)).reshape(-1, ncols_p[0])
 
 
-def _parse_maximise(
-    maximise: bool | Sequence[bool | int], nobj: int
-) -> np.ndarray:
+def _parse_maximise(maximise: MaximiseType, nobj: int) -> NDArray[np.bool_]:
     """Convert maximise array or single bool to ndarray format."""
     return array_1d_of_length_n(maximise, nobj, name="maximise").astype(bool)
 
 
 def _parse_maximise_to_bool_array(
-    maximise: bool | Sequence[bool | int], nobj: int
+    maximise: MaximiseType, nobj: int
 ) -> ffi.CData:
     """Convert maximise array or single bool to C array.
 
@@ -195,7 +195,7 @@ def _all_positive(x: np.ndarray) -> bool:
 def _igd_python(
     points: ArrayLike,
     ref: ArrayLike,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
     p: int = 1,
 ) -> float:
     points = np.asarray(points, dtype=float)
@@ -213,13 +213,13 @@ def _igd_python(
 def _igd_plus_python(
     points: ArrayLike,
     ref: ArrayLike,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
 ) -> float:
     points, points_copied = asarray_maybe_copy(points)
     ref, ref_copied = asarray_maybe_copy(ref)
     ref = np.atleast_2d(ref)
     nobj = points.shape[1]
-    maximise = _parse_maximise(maximise, nobj)
+    maximise: np.ndarray = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
     if maximise.any():
         if not points_copied:
@@ -238,7 +238,7 @@ def _igd_plus_python(
 def _avg_hausdorff_dist_python(
     points: ArrayLike,
     ref: ArrayLike,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
     p: int = 1,
 ) -> float:
     return max(
@@ -250,13 +250,13 @@ def _avg_hausdorff_dist_python(
 def _epsilon_addi_python(
     points: ArrayLike,
     ref: ArrayLike,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
 ) -> float:
     points, points_copied = asarray_maybe_copy(points)
     ref, ref_copied = asarray_maybe_copy(ref)
     ref = np.atleast_2d(ref)
     nobj = points.shape[1]
-    maximise = _parse_maximise(maximise, nobj)
+    maximise: np.ndarray = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
     if maximise.any():
         if not points_copied:
@@ -273,13 +273,13 @@ def _epsilon_addi_python(
 def _epsilon_mult_python(
     points: ArrayLike,
     ref: ArrayLike,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
 ) -> float:
     points, points_copied = asarray_maybe_copy(points)
     ref, ref_copied = asarray_maybe_copy(ref)
     ref = np.atleast_2d(ref)
     nobj = points.shape[1]
-    maximise = _parse_maximise(maximise, nobj)
+    maximise: np.ndarray = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
     if maximise.any():
         if not points_copied:
@@ -296,7 +296,7 @@ def _epsilon_mult_python(
 def _unary_refset_common(
     points: ArrayLike,
     ref: ArrayLike,
-    maximise: bool | Sequence[bool | int],
+    maximise: MaximiseType,
     check_all_positive: bool = False,
 ) -> tuple[
     int, ffi.CData, ffi.CData, ffi.CData, ffi.CData, ffi.CData, np.ndarray
@@ -340,7 +340,7 @@ def igd(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
 ) -> float:
     """Inverted Generational Distance (IGD).
 
@@ -375,7 +375,7 @@ def igd_plus(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
 ) -> float:
     r"""Modified IGD (IGD+).
 
@@ -443,7 +443,7 @@ def avg_hausdorff_dist(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
     p: int = 1,
 ) -> float:
     """Average Hausdorff distance.
@@ -488,7 +488,7 @@ def epsilon_additive(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
 ) -> float:
     r"""Additive epsilon metric.
 
@@ -541,7 +541,7 @@ def epsilon_mult(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
 ) -> float:
     """Multiplicative epsilon metric.
 
@@ -574,7 +574,7 @@ def epsilon_mult(
     return lib.epsilon_mult(points_p, n, d, ref_p, ref_size, maximise_p)
 
 
-def _hypervolume(points: ArrayLike, ref: ArrayLike) -> float:
+def _hypervolume(points: np.ndarray, ref: np.ndarray) -> float:
     _check_dimension_max(points.shape[1], HV_DIMENSION_MAX)
     points_p, npoints, nobj = np2d_to_double_array(
         points, ctype_shape=("size_t", "uint_fast8_t")
@@ -592,7 +592,7 @@ def hypervolume(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
 ) -> float:
     r"""Hypervolume indicator.
 
@@ -703,7 +703,7 @@ def hypervolume(
         raise ValueError("input points must have at least 1 column")
     # Make sure it is a 1D array of length nobj.
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
-    maximise = _parse_maximise(maximise, nobj)
+    maximise: NDArray[np.bool_] = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
     if maximise.any():
         if not points_copied:
@@ -746,9 +746,7 @@ class Hypervolume:
 
     """
 
-    def __init__(
-        self, ref: ArrayLike, maximise: bool | Sequence[bool | int] = False
-    ) -> None:
+    def __init__(self, ref: ArrayLike, maximise: MaximiseType = False) -> None:
         self._ref = np.array(ref, dtype=float, ndmin=1)
         self._maximise = np.array(maximise, dtype=bool, ndmin=1)
         n = len(self._maximise)
@@ -854,7 +852,7 @@ class RelativeHypervolume(Hypervolume):
         self,
         ref: ArrayLike,
         ref_set: ArrayLike,
-        maximise: bool | Sequence[bool | int] = False,
+        maximise: MaximiseType = False,
     ) -> None:
         super().__init__(ref=ref, maximise=maximise)
         self._ref_set_hv = super().__call__(ref_set)
@@ -884,7 +882,7 @@ def hv_contributions(
     points: ArrayLike,
     /,
     ref: ArrayLike,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
     ignore_dominated: bool = True,
 ) -> np.ndarray:
     r"""Hypervolume contributions of a set of points.
@@ -989,7 +987,7 @@ def hv_contributions(
     _check_dimension_max(nobj, HV_DIMENSION_MAX)
 
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
-    maximise = _parse_maximise(maximise, nobj)
+    maximise: np.ndarray = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
     if maximise.any():
         if not points_copied:
@@ -1017,7 +1015,7 @@ def hv_approx(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
     nsamples: int = 262_144,
     seed: int | np.random.Generator | None = None,
     method: Literal["DZ2019-HW", "DZ2019-MC", "Rphi-FWE+"] = "Rphi-FWE+",
@@ -1205,7 +1203,7 @@ def is_nondominated(
     points: ArrayLike,
     /,
     *,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
     keep_weakly: bool = False,
 ) -> np.ndarray:
     r"""Identify dominated points according to Pareto optimality.
@@ -1282,13 +1280,18 @@ def is_nondominated(
 
     if nobj < 2:
         if nobj == 1:  # Handle single-objective inputs
-            maximise = array_1d_of_length_n(maximise, 1).astype(bool)
+            maximise: bool = _parse_maximise(maximise, 1)[0]
             if keep_weakly:
                 best = points.max() if maximise else points.min()
                 return (points == best).ravel()
             else:
                 nondom = np.zeros(len(points), dtype=bool)
-                nondom[points.argmax() if maximise else points.argmin()] = True
+                best_idx = (
+                    points.argmax(axis=0)[0]
+                    if maximise
+                    else points.argmin(axis=0)[0]
+                )
+                nondom[best_idx] = True
                 return nondom
         else:  # nobj == 0
             raise ValueError("input points must have at least 1 column")
@@ -1318,7 +1321,7 @@ def any_dominated(
     points: ArrayLike,
     /,
     *,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
     keep_weakly: bool = False,
 ) -> bool:
     r"""Test whether the input points contains any (weakly-)dominated point.
@@ -1390,7 +1393,7 @@ def is_nondominated_within_sets(
     /,
     sets: ArrayLike,
     *,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
     keep_weakly: bool = False,
 ) -> np.ndarray:
     r"""Identify dominated points according to Pareto optimality within each set.
@@ -1481,9 +1484,9 @@ def filter_dominated(
     points: ArrayLike,
     /,
     *,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
     keep_weakly: bool = False,
-) -> np.ndarray:
+) -> Any:
     """Remove dominated points according to Pareto optimality.
 
     .. seealso:: For examples, see :func:`is_nondominated`.
@@ -1500,9 +1503,13 @@ def filter_dominated(
 
     Returns
     -------
-        Returns the rows of ``points`` where :func:`is_nondominated` is ``True``.
+        Returns the rows of ``points`` where :func:`is_nondominated` is ``True``.  The input must be indexable by a boolean array, e.g., Python lists will not work.
 
     """
+    # FIXME: We would like to express that 'points' is indexable by a boolean
+    # mask and convertible to NDArray. ArrayLike accepts scalars and lists that
+    # are not.
+    points: Any = points
     return points[
         is_nondominated(points, maximise=maximise, keep_weakly=keep_weakly)
     ]
@@ -1513,7 +1520,7 @@ def filter_dominated_within_sets(
     data: ArrayLike,
     /,
     *,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
     keep_weakly: bool = False,
 ) -> np.ndarray:
     """Given a matrix that represents multiple sets of points (last column gives the set index), filter dominated points within each set.
@@ -1604,7 +1611,7 @@ def filter_dominated_within_sets(
 
 @DocSubstitute()
 def pareto_rank(
-    points: ArrayLike, /, *, maximise: bool | Sequence[bool | int] = False
+    points: ArrayLike, /, *, maximise: MaximiseType = False
 ) -> np.ndarray:
     r"""Rank points according to Pareto-optimality (nondominated sorting).
 
@@ -1700,7 +1707,7 @@ def pareto_rank(
 
     _check_dimension_max(nobj, DIMENSION_MAX)
 
-    maximise = _parse_maximise(maximise, nobj)
+    maximise: np.ndarray = _parse_maximise(maximise, nobj)
     if maximise.any():
         # FIXME: Do this in C.
         if not points_copied:
@@ -1723,7 +1730,7 @@ def normalise(
     *,
     lower: ArrayLike = np.nan,
     upper: ArrayLike = np.nan,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
 ) -> np.ndarray:
     """Normalise points per coordinate to a range, e.g., ``to_range = [1,2]``, where the minimum value will correspond to 1 and the maximum to 2.
 
@@ -1806,7 +1813,7 @@ def normalise(
 
 @DocSubstitute()
 def eaf(
-    points: ArrayLike, /, sets: ArrayLike, *, percentiles: Sequence[float] = ()
+    points: ArrayLike, /, sets: ArrayLike, *, percentiles: ArrayLike = ()
 ) -> np.ndarray:
     r"""Exact computation of the Empirical Attainment Function (EAF).
 
@@ -1901,6 +1908,7 @@ def eaf(
         raise NotImplementedError(
             "Only 2D or 3D datasets are currently supported for computing the EAF"
         )
+    sets = np.asarray(sets)
     if len(sets) != points.shape[0]:
         raise ValueError(
             "'sets' must have the same length as the number of rows of 'points'"
@@ -2090,7 +2098,7 @@ def eafdiff(
     /,
     *,
     intervals: int | None = None,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
     rectangles: bool = False,
 ) -> np.ndarray:
     """Compute empirical attainment function (EAF) differences.
@@ -2190,7 +2198,6 @@ def eafdiff(
     )
     nobj = x.shape[1] - 1
     assert nobj == 2
-    maximise = _parse_maximise(maximise, nobj=nobj)
     # The C code expects points within a set to be contiguous.
     x = x[x[:, -1].argsort(), :]
     y = y[y[:, -1].argsort(), :]
@@ -2202,6 +2209,7 @@ def eafdiff(
     nsets = len(cumsizes)
 
     data = np.vstack((x[:, :-1], y[:, :-1]))
+    maximise: np.ndarray = _parse_maximise(maximise, nobj=nobj)
     if maximise.any():
         data[:, maximise] = -data[:, maximise]
 
@@ -2237,9 +2245,8 @@ def eafdiff(
     if maximise.any():
         if rectangles:
             maximise = np.concatenate((maximise, maximise))
-        maximise = np.flatnonzero(
-            maximise
-        )  # Using bool directly misses the color column.
+        # Using bool directly misses the color column.
+        maximise = np.flatnonzero(maximise)
         eaf_data[:, maximise] = -eaf_data[:, maximise]
 
     return eaf_data
@@ -2291,7 +2298,7 @@ def whv_rect(
     rectangles: ArrayLike,
     *,
     ref: ArrayLike,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
 ) -> float:
     """Compute weighted hypervolume given a set of rectangles.
 
@@ -2326,12 +2333,13 @@ def whv_rect(
     nobj = points.shape[1]
     if nobj != 2:
         raise NotImplementedError("Only 2D points are currently supported")
+    rectangles = np.asarray(rectangles, dtype=float)
     if rectangles.shape[1] != 5:
         raise ValueError(
             "Invalid number of columns in 'rectangles' (should be 5)"
         )
 
-    maximise = _parse_maximise(maximise, nobj)
+    maximise: np.ndarray = _parse_maximise(maximise, nobj)
     if maximise.any():
         raise NotImplementedError("Only minimization is currently supported")
     # FIXME: Move to C code.
@@ -2354,7 +2362,7 @@ def whv_rect(
     return hv
 
 
-def get_ideal(x: np.ndarray, maximise: np.ndarray) -> np.ndarray:
+def get_ideal(x: np.ndarray, maximise: NDArray[np.bool_]) -> np.ndarray:
     # FIXME: Is there a better way to do this?
     lower = x.min(axis=0)
     upper = x.max(axis=0)
@@ -2368,7 +2376,7 @@ def total_whv_rect(
     rectangles: ArrayLike,
     *,
     ref: ArrayLike,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
     ideal: ArrayLike | None = None,
     scalefactor: float = 0.1,
 ) -> float:
@@ -2437,6 +2445,7 @@ def total_whv_rect(
     nobj = points.shape[1]
     if nobj != 2:
         raise NotImplementedError("Only 2D datasets are currently supported")
+    rectangles = np.asarray(rectangles, dtype=float)
     if rectangles.shape[1] != 5:
         raise ValueError(
             "Invalid number of columns in 'rectangles' (should be 5)"
@@ -2445,7 +2454,7 @@ def total_whv_rect(
         raise ValueError("'scalefactor' must be within (0,1]")
 
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
-    maximise = _parse_maximise(maximise, nobj)
+    maximise: NDArray[np.bool_] = _parse_maximise(maximise, nobj)
     whv = whv_rect(points, rectangles, ref=ref, maximise=maximise)
     hv = hypervolume(points, ref=ref)  # FIXME: maximise = maximise)
     if ideal is None:
@@ -2466,7 +2475,7 @@ def largest_eafdiff(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
     intervals: int = 5,
     ideal: ArrayLike | None = None,
 ) -> tuple[tuple[int, int], float]:
@@ -2549,16 +2558,17 @@ def largest_eafdiff(
     if nobj != 2:
         raise NotImplementedError("Only 2D datasets are currently supported")
 
-    maximise = _parse_maximise(maximise, nobj)
-
+    maximise: NDArray[np.bool_] = _parse_maximise(maximise, nobj)
     if ideal is None:
-        ideal = get_ideal(
+        ideal: np.ndarray = get_ideal(
             np.concatenate(
                 [[z[:, :-1].min(axis=0), z[:, :-1].max(axis=0)] for z in x],
                 axis=0,
             ),
             maximise=maximise,
         )
+    else:
+        ideal: np.ndarray = np.asarray(ideal, dtype=float)
 
     ideal = ideal.reshape(1, -1)
 
@@ -2600,7 +2610,7 @@ def whv_hype(
     *,
     ref: ArrayLike,
     ideal: ArrayLike,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
     nsamples: int = 100000,
     seed: int | np.random.Generator | None = None,
     dist: Literal["uniform", "point", "exponential"] = "uniform",
@@ -2705,7 +2715,7 @@ def whv_hype(
     ideal = array_1d_of_length_n(
         np.asarray(ideal, dtype=float), nobj, name="ideal"
     )
-    maximise = _parse_maximise(maximise, nobj)
+    maximise: np.ndarray = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
     if maximise.any():
         if not points_copied:
@@ -2855,7 +2865,7 @@ def r2_exact(
     /,
     ref: ArrayLike,
     *,
-    maximise: bool | Sequence[bool | int] = False,
+    maximise: MaximiseType = False,
 ) -> float:
     r"""Exact R2 indicator.
 
@@ -2933,7 +2943,7 @@ def r2_exact(
     # Make sure it is a 1D array of length nobj.
     ref = array_1d_of_length_n(np.asarray(ref, dtype=float), nobj, name="ref")
 
-    maximise = _parse_maximise(maximise, nobj)
+    maximise: np.ndarray = _parse_maximise(maximise, nobj)
     # FIXME: Do this in C.
     if maximise.any():
         if not points_copied:
