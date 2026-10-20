@@ -206,10 +206,9 @@ class Bench:
         }
         if self.check:
             a = values[self.baseline]
-            for what in values.keys():
+            for what, b in values.items():
                 if what == self.baseline:
                     continue
-                b = values[what]
                 self.check(a, b, what=what, n=_n, name=self.name)
 
         return values
