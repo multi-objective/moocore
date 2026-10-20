@@ -31,6 +31,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  type-check:
+    timeout-minutes: 10
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    name: Type check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install tox
+        run: python3 -m pip install tox
+
+      - name: Run ty
+        run: tox -e type
+        working-directory: python
+
   run-tests:
     timeout-minutes: 15
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
@@ -78,7 +100,7 @@ jobs:
 
   build_sdist:
     timeout-minutes: 10
-    needs: run-tests
+    needs: [run-tests, type-check]
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
     runs-on:  ${{ matrix.os }}
     strategy:
