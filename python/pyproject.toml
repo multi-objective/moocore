@@ -183,7 +183,7 @@ pydocstyle.convention = "numpy"
 # Table format: "short" collapses sub-tables to dotted keys, "long" expands to [table.subtable] headers
 table_format = "long"
 # List of tables to force expand regardless of table_format setting
-expand_tables = [ "project.urls", "project.optional-dependencies" ]
+expand_tables = [ "project.optional-dependencies", "project.urls" ]
 # List of tables to force collapse regardless of table_format or expand_tables settings
 collapse_tables = [ "project.authors" ]
 
