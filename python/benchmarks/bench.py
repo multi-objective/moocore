@@ -69,7 +69,7 @@ def get_package_version(package):
 
     module = importlib.import_module(package)
     if hasattr(module, "__version__"):
-        return getattr(module, "__version__")
+        return module.__version__
     # It does not provide __version__ !
     return importlib.metadata.version(package)
 
