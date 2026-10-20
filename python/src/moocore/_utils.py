@@ -1,7 +1,8 @@
-from numpy.typing import ArrayLike  # For type hints
 from typing import Any
 
 import numpy as np
+from numpy.typing import ArrayLike  # For type hints
+
 from ._libmoocore import ffi
 
 

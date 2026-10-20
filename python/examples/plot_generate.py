@@ -8,11 +8,11 @@ mutually nondominated points.
 First we define a few functions useful for plotting.
 """
 
-import moocore
-import numpy as np
 import matplotlib.pyplot as plt
-
+import numpy as np
 from _utils import plotly_3d, plotly_3d_side_by_side
+
+import moocore
 
 
 def generate_ndset_plotly_3d(n, method, seed):

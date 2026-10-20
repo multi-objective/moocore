@@ -1,11 +1,13 @@
 # ruff: noqa: D100, D103
-import pytest
-import numpy as np
-from numpy.testing import (
-    assert_array_equal,
-    assert_allclose,
-)
 import math
+
+import numpy as np
+import pytest
+from numpy.testing import (
+    assert_allclose,
+    assert_array_equal,
+)
+
 import moocore
 
 fun_c2py = {
@@ -296,7 +298,7 @@ def test_unary_setref_single_column():
     assert_expected(max(igd_ref, gd_ref), moocore.avg_hausdorff_dist, a, ref=r)
 
 
-@pytest.mark.parametrize("dim", range(0, 3))
+@pytest.mark.parametrize("dim", range(3))
 def test_is_nondominated_keep_weakly(dim):
 
     def check_keep_weakly(x, true_ndom, true_wndom):
