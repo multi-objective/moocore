@@ -296,7 +296,7 @@ def test_unary_setref_single_column():
     assert_expected(max(igd_ref, gd_ref), moocore.avg_hausdorff_dist, a, ref=r)
 
 
-@pytest.mark.parametrize("dim", range(0, 3))
+@pytest.mark.parametrize("dim", range(3))
 def test_is_nondominated_keep_weakly(dim):
 
     def check_keep_weakly(x, true_ndom, true_wndom):
