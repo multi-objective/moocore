@@ -25,6 +25,7 @@ from ._utils import (
     array_1d_of_length_n,
     is_integer_value,
     _get_seed_for_c,
+    _parse_maximise,
 )
 from ._docsubstitute import DocSubstitute
 
@@ -167,13 +168,6 @@ def read_datasets(filename: str | os.PathLike[str] | StringIO) -> np.ndarray:
     data_p = ffi.gc(data_p[0], lib.free, size=datasize)
     # Convert 1D numpy array to 2D array with (n obj... , sets) columns
     return np.frombuffer(ffi.buffer(data_p, datasize)).reshape(-1, ncols_p[0])
-
-
-def _parse_maximise(
-    maximise: bool | Sequence[bool | int], nobj: int
-) -> np.ndarray:
-    """Convert maximise array or single bool to ndarray format."""
-    return array_1d_of_length_n(maximise, nobj, name="maximise").astype(bool)
 
 
 def _parse_maximise_to_bool_array(

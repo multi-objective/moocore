@@ -37,6 +37,10 @@ from ._datasets import (
 )
 
 from ._generate import generate_ndset, generate_sequence
+from ._archive import UnboundedArchive
+
+# The redundant alias silences a ruff warning.
+from ._archive import BaseUnboundedArchive as BaseUnboundedArchive
 
 from importlib.metadata import version as _metadata_version
 
@@ -49,6 +53,7 @@ __all__ = [
     "Hypervolume",
     "ReadDatasetsError",
     "RelativeHypervolume",
+    "UnboundedArchive",
     "any_dominated",
     "apply_within_sets",
     "avg_hausdorff_dist",
