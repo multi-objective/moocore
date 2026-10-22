@@ -705,6 +705,10 @@ def de_current_1_crossover(
     operator is invariant to rotations of the decision space.  MOEA/D-DE then
     applies polynomial mutation, which is not part of this function.
 
+    Li and Zhang do not name the mutation step.  Tanabe and Ishibuchi (2019)
+    call it the current/1 strategy, a term introduced by Gong et al. (2017),
+    and find it in the source code of MOEA/D-DE, MOEA/D-DRA and MOEA/D-STM.
+
     Li and Zhang reset values outside the bounds to a random value within
     them.  Their own implementation clips them instead, which is what this
     function does, and which Tanabe and Ishibuchi (2019) found to work best
@@ -719,6 +723,11 @@ def de_current_1_crossover(
     of the differential evolution mutation operator in MOEA/D-DE. *Soft
     Computing*, 23(23):12843--12857.
     https://doi.org/10.1007/s00500-019-03842-6
+
+    W. Gong, Y. Wang, Z. Cai and S. Yang (2017). A weighted biobjective
+    transformation technique for locating multiple optimal solutions of
+    nonlinear equation systems. *IEEE Transactions on Evolutionary
+    Computation*, 21(5):697--713. https://doi.org/10.1109/TEVC.2017.2670779
 
     Examples
     --------
