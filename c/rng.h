@@ -37,6 +37,14 @@ rng_uniform(rng_state * rng, double low, double high)
     return low + (high - low) * rng_random(rng);
 }
 
+/* Returns an integer between [0, n) */
+static inline size_t
+rng_integer(rng_state * rng, size_t n)
+{
+    assert(n > 0);
+    return STATIC_CAST(size_t, rng_random(rng) * STATIC_CAST(double, n));
+}
+
 
 double rng_standard_normal(rng_state *rng);
 void rng_bivariate_normal_fill(rng_state * rng,
