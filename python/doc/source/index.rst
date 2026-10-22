@@ -30,6 +30,7 @@ The goal of the **moocore** project (https://github.com/multi-objective/moocore/
 * :ref:`Identify and filter dominated vectors <identifying_and_filtering_dominated_vectors>`.
 * :ref:`Quality metrics <unary_quality_metrics>` such as (weighted) hypervolume, epsilon, IGD+, (exact) R2, etc.
 * :ref:`Computation of the Empirical Attainment Function <empirical_attainment_function>`. The empirical attainment function (EAF) describes the probabilistic distribution of the outcomes obtained by a stochastic algorithm in the objective space.
+* :ref:`Crossover operators <variation_operators>` for evolutionary algorithms, such as uniform, blend-alpha, bounded exponential, differential evolution and parent-centric crossover.
 
 Most critical functionality is implemented in C, with the R and Python packages providing convenient interfaces to the C code.
 
