@@ -7,10 +7,10 @@ Variation operators
 .. currentmodule:: moocore
 
 Crossover operators combine decision vectors, called parents, to produce new
-decision vectors, called children.  Every function takes a 2D array with one
+decision vectors, called offspring.  Every function takes a 2D array with one
 decision vector per row and accepts a ``seed`` for reproducible results.  The
 :ref:`crossover example <sphx_glr_auto_examples_plot_crossover.py>` shows where
-each operator places its children.
+each operator places its offspring.
 
 Crossover
 =========
@@ -28,13 +28,13 @@ Crossover
    parent_centric_crossover
 
 The operators differ in how many parents one crossover operation uses and how
-many children it produces:
+many offspring it produces:
 
 .. list-table::
    :header-rows: 1
 
    * - Function
-     - Children per operation
+     - Offspring per operation
      - Parents per operation
    * - :func:`uniform_crossover`
      - 2
@@ -65,14 +65,15 @@ many children it produces:
      - 1, plus 2 other parents chosen at random
 
 The functions that use 2 parents per operation take a matrix ``parents`` and
-mate rows ``2i`` and ``2i + 1``, so the order of the rows decides which parents
-mate, for example after a selection step.  If the number of rows is odd, the
-last row mates with the first one.  When an operation produces 2 children, the
-output has as many rows as ``parents``, and one child is dropped when the
-number of rows is odd.  :func:`blend_alpha_crossover` returns one row per pair.
+cross over rows ``2i`` and ``2i + 1``, so the order of the rows decides which
+parents are crossed over, for example after a selection step.  If the number
+of rows is odd, the last row is crossed over with the first one.  When an
+operation produces 2 offspring, the output has as many rows as ``parents``, and
+one offspring is dropped when the number of rows is odd.
+:func:`blend_alpha_crossover` returns one row per pair.
 
 The functions that use 1 parent per operation take a matrix ``population`` and
-the row indices ``targets`` of the parents, and return one child per target.
+the row indices ``targets`` of the parents, and return one offspring per target.
 They choose the other parents at random from ``population``.
 
 Differential evolution (DE) comes in two variants that are common in
