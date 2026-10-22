@@ -6,7 +6,8 @@ Variation operators
 
 .. currentmodule:: moocore
 
-Variation operators produce new decision vectors, called offspring, from
+Variation operators are used in evolutionary algorithms to
+produce new decision vectors, called offspring, from
 existing ones, called parents.
 This usually happens in two steps: first, a crossover operator combines the
 parents to produce one or more offspring, and then a mutation operator randomly
