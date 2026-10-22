@@ -3,6 +3,9 @@
 ## 0.20
 
  * radixsort.h, insort.h: New.
+ * crossover.c, crossover.h: New crossover operators (uniform, single-point,
+   blend-alpha, single arithmetic, local, bounded exponential, differential
+   evolution and parent-centric).
  * main-nondominated.c: Renamed from nondominated.c.
  * hv and hvapprox executables now use -U instead of -u for --union to be
    consistent with nondominated.

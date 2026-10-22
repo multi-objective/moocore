@@ -56,6 +56,7 @@ BINDIR:=$(abspath $(BINDIR))
 ## Define source files
 SRCS =  avl.c                                                                \
         cmdline.c                                                            \
+        crossover.c                                                          \
         dominatedsets.c                                                      \
         eaf3d.c                                                              \
         eaf.c                                                                \
@@ -90,6 +91,7 @@ HDRS =  avl.h                                                                \
         cmdline.h                                                            \
         common.h                                                             \
         config.h                                                             \
+        crossover.h                                                          \
         cvector.h                                                            \
         eaf.h                                                                \
         epsilon.h                                                            \
@@ -208,6 +210,7 @@ $(EXE_FILES): cmdline.o io.o
 
 avl.o: avl.h
 cmdline.o: cmdline.h io.h
+crossover.o: crossover.h rng.h mt19937/mt19937.h
 dominatedsets.o: cmdline.h io.h nondominated.h epsilon.h
 eaf.o: eaf.h io.h bit_array.h cvector.h
 eaf3d.o: eaf.h io.h bit_array.h cvector.h avl.h
