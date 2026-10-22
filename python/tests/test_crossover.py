@@ -9,14 +9,14 @@ import moocore
 
 LOWER, UPPER = 0.0, 10.0
 
-TWO_CHILDREN = {
+TWO_OFFSPRING = {
     "uniform": moocore.uniform_crossover,
     "single_point": moocore.single_point_crossover,
     "single_arithmetic": moocore.single_arithmetic_crossover,
     "local": moocore.local_crossover,
     "bounded_exponential": moocore.bounded_exponential_crossover,
 }
-PAIR_OPERATORS = {**TWO_CHILDREN, "blend_alpha": moocore.blend_alpha_crossover}
+PAIR_OPERATORS = {**TWO_OFFSPRING, "blend_alpha": moocore.blend_alpha_crossover}
 POPULATION_OPERATORS = {
     "de_rand_1_bin": moocore.de_rand_1_bin_crossover,
     "de_current_1": moocore.de_current_1_crossover,
@@ -38,22 +38,22 @@ def pairs(x):
     return x[0::2], x[1::2]
 
 
-@pytest.mark.parametrize("name", TWO_CHILDREN)
+@pytest.mark.parametrize("name", TWO_OFFSPRING)
 @pytest.mark.parametrize("n", [2, 3, 4, 5, 10])
-def test_two_children_per_pair_keep_row_count(name, n):
+def test_two_offspring_per_pair_keep_row_count(name, n):
     x = random_matrix(n)
-    assert TWO_CHILDREN[name](x, seed=1).shape == x.shape
+    assert TWO_OFFSPRING[name](x, seed=1).shape == x.shape
 
 
 @pytest.mark.parametrize("n", [2, 3, 4, 5, 10])
-def test_blend_alpha_crossover_one_child_per_pair(n):
+def test_blend_alpha_crossover_one_offspring_per_pair(n):
     x = random_matrix(n)
     out = moocore.blend_alpha_crossover(x, seed=1)
     assert out.shape == (math.ceil(n / 2), x.shape[1])
 
 
 @pytest.mark.parametrize("name", POPULATION_OPERATORS)
-def test_population_operators_one_child_per_target(name):
+def test_population_operators_one_offspring_per_target(name):
     fun = POPULATION_OPERATORS[name]
     x = random_matrix(6)
     assert fun(x, seed=1).shape == x.shape
@@ -66,7 +66,7 @@ def test_population_operators_one_child_per_target(name):
 def test_odd_number_of_parents_pairs_last_with_first(n):
     x = random_matrix(n)
     assert_array_equal(moocore.uniform_crossover(x, swap_prob=0, seed=1), x)
-    # Swapping every variable gives each child the other parent.
+    # Swapping every variable gives each offspring the other parent.
     out = moocore.uniform_crossover(x, swap_prob=1, seed=1)
     assert_array_equal(out[0], x[1])
     assert_array_equal(out[-1], x[0])
@@ -96,7 +96,7 @@ def test_seed(name):
         fun(x, seed=np.random.default_rng(42)),
     )
     assert not np.array_equal(fun(x, seed=1), fun(x, seed=2))
-    # The same Generator gives new children on each call.
+    # The same Generator gives new offspring on each call.
     rng = np.random.default_rng(42)
     assert not np.array_equal(fun(x, seed=rng), fun(x, seed=rng))
     # seed=None still works.
@@ -117,10 +117,10 @@ def test_inputs_are_not_modified(name, immutable_call):
 def test_uniform_crossover_only_copies_parent_values():
     x = random_matrix(200, nvar=6)
     p1, p2 = pairs(x)
-    c1, c2 = pairs(moocore.uniform_crossover(x, seed=1))
-    from_first = c1 == p1
-    assert np.all(from_first | (c1 == p2))
-    assert_array_equal(c2, np.where(from_first, p2, p1))
+    off1, off2 = pairs(moocore.uniform_crossover(x, seed=1))
+    from_first = off1 == p1
+    assert np.all(from_first | (off1 == p2))
+    assert_array_equal(off2, np.where(from_first, p2, p1))
     assert_array_equal(moocore.uniform_crossover(x, pair_prob=0, seed=1), x)
 
 
@@ -128,7 +128,7 @@ def test_uniform_crossover_only_copies_parent_values():
 def test_uniform_crossover_swap_rate(swap_prob):
     x = np.tile([np.zeros(10), np.ones(10)], (2000, 1))
     out = moocore.uniform_crossover(x, swap_prob=swap_prob, seed=1)
-    # The first child gets a 1 only where it was swapped.
+    # The first offspring gets a 1 only where it was swapped.
     assert abs(out[0::2].mean() - swap_prob) < 0.02
 
 
@@ -149,10 +149,10 @@ def test_value_copying_operators_keep_dtype(fun, dtype):
 def test_single_point_crossover_exchanges_tails():
     nvar = 5
     x = np.tile([np.zeros(nvar), np.ones(nvar)], (2000, 1))
-    c1, c2 = pairs(moocore.single_point_crossover(x, seed=1))
-    cuts = (c1 == 0).sum(axis=1)
-    assert_array_equal(c1, (np.arange(nvar) >= cuts[:, None]).astype(float))
-    assert_array_equal(c2, 1 - c1)
+    off1, off2 = pairs(moocore.single_point_crossover(x, seed=1))
+    cuts = (off1 == 0).sum(axis=1)
+    assert_array_equal(off1, (np.arange(nvar) >= cuts[:, None]).astype(float))
+    assert_array_equal(off2, 1 - off1)
     assert set(cuts) == set(range(1, nvar))
 
 
@@ -179,26 +179,26 @@ def test_blend_alpha_crossover_samples_variables_independently():
 def test_single_arithmetic_crossover_changes_one_variable():
     x = random_matrix(100, nvar=5)
     p1, p2 = pairs(x)
-    c1, c2 = pairs(moocore.single_arithmetic_crossover(x, seed=1))
-    changed = c1 != p1
+    off1, off2 = pairs(moocore.single_arithmetic_crossover(x, seed=1))
+    changed = off1 != p1
     assert np.all(changed.sum(axis=1) == 1)
-    assert_array_equal(changed, c2 != p2)
+    assert_array_equal(changed, off2 != p2)
     mean = 0.5 * (p1 + p2)
-    assert_array_equal(c1[changed], mean[changed])
-    assert_array_equal(c2[changed], mean[changed])
+    assert_array_equal(off1[changed], mean[changed])
+    assert_array_equal(off2[changed], mean[changed])
     assert_array_equal(
         moocore.single_arithmetic_crossover(x, pair_prob=0, seed=1), x
     )
 
 
-def test_local_crossover_children_lie_between_parents():
+def test_local_crossover_offspring_lie_between_parents():
     x = random_matrix(100, nvar=5)
     p1, p2 = pairs(x)
-    c1, c2 = pairs(moocore.local_crossover(x, seed=1))
-    assert_allclose(c1 + c2, p1 + p2)
+    off1, off2 = pairs(moocore.local_crossover(x, seed=1))
+    assert_allclose(off1 + off2, p1 + p2)
     lo, hi = np.minimum(p1, p2) - 1e-12, np.maximum(p1, p2) + 1e-12
-    for c in (c1, c2):
-        assert np.all((c >= lo) & (c <= hi))
+    for off in (off1, off2):
+        assert np.all((off >= lo) & (off <= hi))
 
 
 def test_bounded_exponential_crossover_shared_values():
@@ -231,14 +231,15 @@ def test_bounded_exponential_crossover_swap_prob(swap_prob, expected):
     out = moocore.bounded_exponential_crossover(
         x, lower=0, upper=10, swap_prob=swap_prob, seed=1
     )
-    # Fraction of the variables of the first child that stay near its parent.
-    c1 = out[0::2]
-    kept = (np.abs(c1 - 2) < np.abs(c1 - 8)).mean()
+    # Fraction of the variables of the first offspring that stay near its
+    # parent.
+    off1 = out[0::2]
+    kept = (np.abs(off1 - 2) < np.abs(off1 - 8)).mean()
     assert abs(kept - expected) < 0.02
 
 
 @pytest.mark.parametrize("order", [1, -1])
-def test_bounded_exponential_crossover_children_near_their_parent(order):
+def test_bounded_exponential_crossover_offspring_near_their_parent(order):
     pair = np.array([[3.0, 3.0], [7.0, 7.0]])[::order]
     x = np.tile(pair, (2000, 1))
     out = moocore.bounded_exponential_crossover(x, lower=0, upper=10, seed=1)
@@ -257,8 +258,8 @@ def test_de_rand_1_bin_crossover_base_is_another_row():
     out = moocore.de_rand_1_bin_crossover(
         x, scaling_factor=1e-12, crossover_rate=1, seed=1
     )
-    for i, child in enumerate(out):
-        dist = np.abs(x - child).max(axis=1)
+    for i, offspring in enumerate(out):
+        dist = np.abs(x - offspring).max(axis=1)
         nearest = np.argmin(dist)
         assert nearest != i
         assert dist[nearest] < 1e-9
