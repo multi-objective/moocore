@@ -261,3 +261,22 @@ t = rng.uniform(0, 1, size=60)
 diagonal_population = np.column_stack([2 + 6 * t, 8 - 6 * t])
 diagonal_population += rng.normal(0, 0.25, size=(60, 2))
 plot_population(diagonal_population)
+
+# %%
+#
+# The third population consists of three separate clusters of 20 members each,
+# as when the Pareto set is disconnected.  Crossing over members of different
+# clusters produces offspring outside the clusters.  Uniform and single-point
+# crossover create new clusters at every combination of the clusters' variable
+# values, and single arithmetic crossover adds clusters at the midpoints of one
+# variable.  Blend alpha and local crossover fill the space between the
+# clusters.  Both DE variants create new clusters by shifting the original ones
+# by :math:`F` times the differences between clusters, and the offspring that
+# are clipped to the bounds pile up on the edges of the box.  Bounded
+# exponential and parent-centric crossover keep most offspring near the cluster
+# of their parent.
+
+centres = np.array([[2.0, 8.0], [8.0, 6.0], [5.0, 2.0]])
+clustered_population = np.repeat(centres, 20, axis=0)
+clustered_population += rng.normal(0, 0.4, size=(60, 2))
+plot_population(clustered_population)
