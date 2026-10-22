@@ -29,9 +29,11 @@ headers = """
 #include "whv.h"
 #include "whv_hype.h"
 #include "hvapprox.h"
+#include "crossover.h"
 """
 sources = [
     "avl.c",
+    "crossover.c",
     "eaf.c",
     "eaf3d.c",
     "eafdiff.c",
