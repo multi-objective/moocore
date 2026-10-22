@@ -4,9 +4,9 @@ Crossover Operators
 
 This example shows where each crossover operator places the children of
 fixed parents.  Each figure mates the same parents many times and plots all
-the children.  Two-parent operators mate rows ``2i`` and ``2i + 1``, so
-stacking copies of one pair of parents gives many independent draws in a
-single call.
+the children.  Operators that use 2 parents per operation mate rows ``2i``
+and ``2i + 1``, so stacking copies of one pair of parents gives many
+independent draws in a single call.
 
 First we define a few functions useful for plotting.
 """
@@ -45,8 +45,8 @@ def mark_parents(ax, positions):
 
 # %%
 #
-# Where two-parent operators put their children
-# ---------------------------------------------
+# Where the children of two parents end up
+# ----------------------------------------
 #
 # The parents are :math:`(3, 3)` and :math:`(7, 7)` within :math:`[0, 10]^2`.
 # Each panel shows the distribution of the first variable of the children for
@@ -195,11 +195,11 @@ plt.show()
 
 # %%
 #
-# Population-based operators
-# --------------------------
+# Differential evolution and parent-centric crossover
+# ---------------------------------------------------
 #
-# Differential evolution and parent-centric crossover draw their other parents
-# from the whole population.  Here, every member of a population of 60 points
+# These operators produce one child per parent and choose the other parents at
+# random from the population.  Here, every member of a population of 60 points
 # (circles) is a target, and each operator is called 40 times.  Passing the
 # same :class:`numpy.random.Generator` as ``seed`` gives new children on each
 # call.  Both DE variants spread their children over the region covered by
