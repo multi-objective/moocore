@@ -36,19 +36,19 @@ clamp_to_bounds(double x, double lower, double upper)
     return fmin(fmax(x, lower), upper);
 }
 
-/* Rows I and I + 1 of PARENTS mate and their children go to rows I and I + 1
-   of OFFSPRING.  If I + 1 == N, row I mates with row 0 and its second child
-   goes to SCRATCH, so it is discarded.  */
+/* Rows I and I + 1 of PARENTS are crossed over and their offspring go to rows
+   I and I + 1 of OFFSPRING.  If I + 1 == N, row I is crossed over with row 0
+   and its second offspring goes to SCRATCH, so it is discarded.  */
 static inline void
 get_pair(const double * parents, double * offspring, double * scratch,
          size_t i, size_t n, size_t nvar,
-         const double ** p1, const double ** p2, double ** c1, double ** c2)
+         const double ** p1, const double ** p2, double ** off1, double ** off2)
 {
     const bool last = (i + 1 == n);
     *p1 = parents + i * nvar;
     *p2 = parents + (last ? 0 : i + 1) * nvar;
-    *c1 = offspring + i * nvar;
-    *c2 = last ? scratch : offspring + (i + 1) * nvar;
+    *off1 = offspring + i * nvar;
+    *off2 = last ? scratch : offspring + (i + 1) * nvar;
 }
 
 static inline double *
@@ -92,13 +92,14 @@ uniform_crossover(double * restrict offspring, const double * restrict parents,
     double * scratch = scratch_new(n, nvar);
     for (size_t i = 0; i < n; i += 2) {
         const double *p1, *p2;
-        double *c1, *c2;
-        get_pair(parents, offspring, scratch, i, n, nvar, &p1, &p2, &c1, &c2);
+        double *off1, *off2;
+        get_pair(parents, offspring, scratch, i, n, nvar,
+                 &p1, &p2, &off1, &off2);
         const bool recombine = rng_random(rng) < pair_prob;
         for (size_t j = 0; j < nvar; j++) {
             const bool swap = recombine && rng_random(rng) < swap_prob;
-            c1[j] = swap ? p2[j] : p1[j];
-            c2[j] = swap ? p1[j] : p2[j];
+            off1[j] = swap ? p2[j] : p1[j];
+            off2[j] = swap ? p1[j] : p2[j];
         }
     }
     free(scratch);
@@ -115,15 +116,16 @@ single_point_crossover(double * restrict offspring,
     double * scratch = scratch_new(n, nvar);
     for (size_t i = 0; i < n; i += 2) {
         const double *p1, *p2;
-        double *c1, *c2;
-        get_pair(parents, offspring, scratch, i, n, nvar, &p1, &p2, &c1, &c2);
-        // Cut point in [1, nvar - 1], so each child takes at least one
+        double *off1, *off2;
+        get_pair(parents, offspring, scratch, i, n, nvar,
+                 &p1, &p2, &off1, &off2);
+        // Cut point in [1, nvar - 1], so each offspring takes at least one
         // variable from each parent.
         const size_t cut = 1 + rng_integer(rng, nvar - 1);
-        memcpy(c1, p1, cut * sizeof(*c1));
-        memcpy(c1 + cut, p2 + cut, (nvar - cut) * sizeof(*c1));
-        memcpy(c2, p2, cut * sizeof(*c2));
-        memcpy(c2 + cut, p1 + cut, (nvar - cut) * sizeof(*c2));
+        memcpy(off1, p1, cut * sizeof(*off1));
+        memcpy(off1 + cut, p2 + cut, (nvar - cut) * sizeof(*off1));
+        memcpy(off2, p2, cut * sizeof(*off2));
+        memcpy(off2 + cut, p1 + cut, (nvar - cut) * sizeof(*off2));
     }
     free(scratch);
     rng_free(rng);
@@ -142,7 +144,7 @@ blend_alpha_crossover(double * restrict offspring,
     for (size_t i = 0; i < n; i += 2) {
         const double * p1 = parents + i * nvar;
         const double * p2 = parents + ((i + 1 < n) ? i + 1 : 0) * nvar;
-        double * child = offspring + (i / 2) * nvar;
+        double * off = offspring + (i / 2) * nvar;
         for (size_t j = 0; j < nvar; j++) {
             const double lo = fmin(p1[j], p2[j]);
             const double hi = fmax(p1[j], p2[j]);
@@ -151,7 +153,7 @@ blend_alpha_crossover(double * restrict offspring,
             // bounds and sample uniformly from it.
             const double a = fmax(lo - alpha * span, lower[j]);
             const double b = fmin(hi + alpha * span, upper[j]);
-            child[j] = a + rng_random(rng) * (b - a);
+            off[j] = a + rng_random(rng) * (b - a);
         }
     }
     rng_free(rng);
@@ -168,14 +170,15 @@ single_arithmetic_crossover(double * restrict offspring,
     double * scratch = scratch_new(n, nvar);
     for (size_t i = 0; i < n; i += 2) {
         const double *p1, *p2;
-        double *c1, *c2;
-        get_pair(parents, offspring, scratch, i, n, nvar, &p1, &p2, &c1, &c2);
+        double *off1, *off2;
+        get_pair(parents, offspring, scratch, i, n, nvar,
+                 &p1, &p2, &off1, &off2);
         const bool recombine = rng_random(rng) < pair_prob;
         const size_t k = rng_integer(rng, nvar);
-        memcpy(c1, p1, nvar * sizeof(*c1));
-        memcpy(c2, p2, nvar * sizeof(*c2));
+        memcpy(off1, p1, nvar * sizeof(*off1));
+        memcpy(off2, p2, nvar * sizeof(*off2));
         if (recombine)
-            c1[k] = c2[k] = 0.5 * (p1[k] + p2[k]);
+            off1[k] = off2[k] = 0.5 * (p1[k] + p2[k]);
     }
     free(scratch);
     rng_free(rng);
@@ -190,23 +193,25 @@ local_crossover(double * restrict offspring, const double * restrict parents,
     double * scratch = scratch_new(n, nvar);
     for (size_t i = 0; i < n; i += 2) {
         const double *p1, *p2;
-        double *c1, *c2;
-        get_pair(parents, offspring, scratch, i, n, nvar, &p1, &p2, &c1, &c2);
+        double *off1, *off2;
+        get_pair(parents, offspring, scratch, i, n, nvar,
+                 &p1, &p2, &off1, &off2);
         for (size_t j = 0; j < nvar; j++) {
             const double a = rng_random(rng);
-            c1[j] = a * p1[j] + (1 - a) * p2[j];
-            c2[j] = (1 - a) * p1[j] + a * p2[j];
+            off1[j] = a * p1[j] + (1 - a) * p2[j];
+            off2[j] = (1 - a) * p1[j] + a * p2[j];
         }
     }
     free(scratch);
     rng_free(rng);
 }
 
-/* Child of parent value X.  It moves X by BETA * SPAN, where BETA follows a
-   two-sided exponential distribution with scale SCALE, truncated so that the
-   child stays within [LOWER, UPPER].  U and R are uniform in [0, 1).  */
+/* Offspring value of parent value X.  It moves X by BETA * SPAN, where BETA
+   follows a two-sided exponential distribution with scale SCALE, truncated so
+   that the offspring stays within [LOWER, UPPER].  U and R are uniform in
+   [0, 1).  */
 static inline double
-bex_child(double x, double span, double lower, double upper, double scale,
+bex_offspring(double x, double span, double lower, double upper, double scale,
           double u, double r)
 {
     double beta;
@@ -237,31 +242,34 @@ bounded_exponential_crossover(double * restrict offspring,
     double * scratch = scratch_new(n, nvar);
     for (size_t i = 0; i < n; i += 2) {
         const double *p1, *p2;
-        double *c1, *c2;
-        get_pair(parents, offspring, scratch, i, n, nvar, &p1, &p2, &c1, &c2);
+        double *off1, *off2;
+        get_pair(parents, offspring, scratch, i, n, nvar,
+                 &p1, &p2, &off1, &off2);
         if (!(rng_random(rng) < pair_prob)) {
-            memcpy(c1, p1, nvar * sizeof(*c1));
-            memcpy(c2, p2, nvar * sizeof(*c2));
+            memcpy(off1, p1, nvar * sizeof(*off1));
+            memcpy(off2, p2, nvar * sizeof(*off2));
             continue;
         }
         for (size_t j = 0; j < nvar; j++) {
             // The distance between the parents scales the move of both
-            // children, whichever parent is smaller.
+            // offspring, whichever parent is smaller.
             const double span = fabs(p2[j] - p1[j]);
             if (span == 0) {
-                c1[j] = p1[j];
-                c2[j] = p2[j];
+                off1[j] = p1[j];
+                off2[j] = p2[j];
                 continue;
             }
-            // Both children use the same random numbers.
+            // Both offspring use the same random numbers.
             const double u = rng_random(rng);
             const double r = rng_random(rng);
-            c1[j] = bex_child(p1[j], span, lower[j], upper[j], scale, u, r);
-            c2[j] = bex_child(p2[j], span, lower[j], upper[j], scale, u, r);
+            off1[j] = bex_offspring(p1[j], span, lower[j], upper[j],
+                                    scale, u, r);
+            off2[j] = bex_offspring(p2[j], span, lower[j], upper[j],
+                                    scale, u, r);
             if (swap_prob > 0 && rng_random(rng) < swap_prob) {
-                const double tmp = c1[j];
-                c1[j] = c2[j];
-                c2[j] = tmp;
+                const double tmp = off1[j];
+                off1[j] = off2[j];
+                off2[j] = tmp;
             }
         }
     }
@@ -288,14 +296,14 @@ de_rand_1_bin_crossover(double * restrict offspring,
         const double * x1 = population + r[0] * nvar;
         const double * x2 = population + r[1] * nvar;
         const double * x3 = population + r[2] * nvar;
-        // The child takes at least the variable JRAND from the mutant.
+        // The offspring takes at least the variable JRAND from the mutant.
         const size_t jrand = rng_integer(rng, nvar);
-        double * child = offspring + t * nvar;
+        double * off = offspring + t * nvar;
         for (size_t j = 0; j < nvar; j++) {
             const double v = (j == jrand || rng_random(rng) < crossover_rate)
                 ? x1[j] + scaling_factor * (x2[j] - x3[j])
                 : x[j];
-            child[j] = clamp_to_bounds(v, lower[j], upper[j]);
+            off[j] = clamp_to_bounds(v, lower[j], upper[j]);
         }
     }
     rng_free(rng);
@@ -320,12 +328,12 @@ de_current_1_crossover(double * restrict offspring,
         sample_distinct(rng, n, excluded, 0, 2, r);
         const double * x1 = population + r[0] * nvar;
         const double * x2 = population + r[1] * nvar;
-        double * child = offspring + t * nvar;
+        double * off = offspring + t * nvar;
         for (size_t j = 0; j < nvar; j++) {
             const double v = (rng_random(rng) < crossover_rate)
                 ? x[j] + scaling_factor * (x1[j] - x2[j])
                 : x[j];
-            child[j] = clamp_to_bounds(v, lower[j], upper[j]);
+            off[j] = clamp_to_bounds(v, lower[j], upper[j]);
         }
     }
     rng_free(rng);
@@ -398,9 +406,9 @@ parent_centric_crossover(double * restrict offspring,
         }
         const double zeta = sigma_zeta * rng_standard_normal(rng);
 
-        double * child = offspring + t * nvar;
+        double * off = offspring + t * nvar;
         for (size_t j = 0; j < nvar; j++)
-            child[j] = clamp_to_bounds(
+            off[j] = clamp_to_bounds(
                 x[j] + zeta * direction[j] + spread * orthogonal[j],
                 lower[j], upper[j]);
     }
