@@ -103,6 +103,27 @@ For the operators that take ``population``, the parent of offspring ``i`` is
 row ``targets[i]``.
 
 
+Random seeds
+============
+
+Every operator takes a ``seed``.  With an integer seed, the operator draws the
+same random numbers on every call.  This makes a single call reproducible, but
+in an evolutionary algorithm every generation would reuse the same random
+numbers.  Instead, create one :class:`numpy.random.Generator` at the start of a
+run and pass it as ``seed`` to every call.  Each call then draws a new seed
+from the generator, and the seed of the generator still reproduces the whole
+run::
+
+    rng = np.random.default_rng(42)
+    for generation in range(n_generations):
+        parents = ...  # Select and order the parents.
+        offspring = moocore.uniform_crossover(parents, seed=rng)
+        ...
+
+With ``seed=None``, every call uses a new random seed, so the results cannot be
+reproduced.
+
+
 Bibliography
 ============
 
