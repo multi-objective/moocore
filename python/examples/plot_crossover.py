@@ -72,7 +72,7 @@ plt.show()
 
 # %%
 #
-# Bounded exponential crossover: the scale parameter
+# Bounded exponential crossover
 # --------------------------------------------------
 #
 # The bounded exponential crossover operator samples from an exponential
@@ -136,7 +136,10 @@ plt.show()
 # operators differ in which regions of the decision space their offspring
 # can reach. Note that certain operators such as uniform crossover can never
 # explore all possible decision vectors, requiring the use of mutation for
-# proper exploration of the decision space.
+# proper exploration of the decision space. Moreover, the local crossover
+# operator never produces offspring outside the bounding box defined by the
+# parents, so it is not suitable for exploring the decision space beyond
+# the current population.
 
 a, b = [2.0, 8.0], [8.0, 2.0]
 operators = {
@@ -172,17 +175,18 @@ plt.show()
 #
 # In an evolutionary algorithm, crossover is applied to a whole population.
 # Here, each operator is applied 40 times to a population of 60 decision
-# vectors (circles), and all the offspring are plotted.  For the operators that
-# take ``parents``, the rows are shuffled before each call, so that different
-# pairs are crossed over each time.  For the operators that take
-# ``population``, every row is a target.  Passing the same
-# :class:`numpy.random.Generator` as ``seed`` gives new offspring on each call.
+# vectors (circles), and all the offspring are plotted.
+# Each operator gets the same population, but for each call, the population is
+# randomly permuted and/or a different seed is used.
 #
 # The first population is a round cloud.  Uniform, single-point and single
 # arithmetic crossover place their offspring on lines parallel to the axes,
-# because each offspring copies at least one variable from a parent.  Both DE
-# variants spread their offspring beyond the population, whereas parent-centric
-# crossover keeps them close to their index parents.
+# because each offspring copies at least one variable from a parent.  Uniform
+# and single-point crossover look alike here only because, with two variables,
+# the cut point always falls between them.  With more variables, their
+# distributions differ.  Both DE variants spread their offspring beyond the
+# population, whereas parent-centric and bounded exponential crossover keep
+# them close to their parents.
 
 all_operators = {
     "Uniform": (moocore.uniform_crossover, {}),
@@ -246,7 +250,7 @@ plot_population(round_population)
 
 # %%
 #
-# The second population is stretched along a diagonal, as happens when a
+# The second population is stretched along a diagonal, as may happen when a
 # population approaches a Pareto set.  Uniform and single-point crossover
 # combine the variables of different parents independently, so their offspring
 # fill the box around the population and lose its diagonal shape.  Blend alpha,
@@ -266,8 +270,9 @@ plot_population(diagonal_population)
 #
 # The third population consists of three separate clusters of 20 members each,
 # as when the Pareto set is disconnected.  Crossing over members of different
-# clusters produces offspring outside the clusters.  Uniform and single-point
-# crossover create new clusters at every combination of the clusters' variable
+# clusters produces offspring outside the clusters, unless the operator keeps
+# the offspring close to their parents.  Uniform and single-point crossover
+# create new clusters at every combination of the clusters' variable
 # values, and single arithmetic crossover adds clusters at the midpoints of one
 # variable.  Blend alpha and local crossover fill the space between the
 # clusters.  Both DE variants create new clusters by shifting the original ones
