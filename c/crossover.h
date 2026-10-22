@@ -29,13 +29,14 @@ BEGIN_C_DECLS
   All matrices are stored by rows, one decision vector per row, with NVAR
   variables each.  OFFSPRING must be allocated by the caller.
 
-  Functions that take PARENTS (N rows) mate rows 2i and 2i+1.  If N is odd,
-  the last row mates with row 0.  Operators that produce two children per
-  pair write them to rows 2i and 2i+1 of OFFSPRING (N rows), dropping the
-  second child of the last pair when N is odd.  blend_alpha_crossover()
-  produces one child per pair, so OFFSPRING has (N + 1) / 2 rows.
+  Functions that take PARENTS (N rows) cross over rows 2i and 2i+1.  If N is
+  odd, the last row is crossed over with row 0.  Operators that produce two
+  offspring per pair write them to rows 2i and 2i+1 of OFFSPRING (N rows),
+  dropping the second offspring of the last pair when N is odd.
+  blend_alpha_crossover() produces one offspring per pair, so OFFSPRING has
+  (N + 1) / 2 rows.
 
-  Functions that take POPULATION (N rows) produce one child per row index in
+  Functions that take POPULATION (N rows) produce one offspring per row index in
   TARGETS (NTARGETS values in [0, N)), so OFFSPRING has NTARGETS rows.  They
   choose the other parents at random from POPULATION.
 
