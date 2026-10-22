@@ -83,7 +83,10 @@ multi-objective DE algorithms use :footcite:p:`BezLopStu2015emode`.
 :func:`de_current_1_crossover` is the operator of MOEA/D-DE
 :footcite:p:`LiZha2009:moead-de`.  It starts from the target instead of a
 random row and does not force any variable to change.  Its 2 other parents may
-include the target itself.
+include the target itself.  `Tanabe and Ishibuchi (2019)
+<https://doi.org/10.1007/s00500-019-03842-6>`__ call this mutation the current/1
+strategy, a term introduced by `Gong et al. (2017)
+<https://doi.org/10.1109/TEVC.2017.2670779>`__.
 
 
 Bibliography
