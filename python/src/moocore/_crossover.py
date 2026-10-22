@@ -110,12 +110,12 @@ def uniform_crossover(
 ) -> np.ndarray:
     r"""Uniform crossover.
 
-    Each pair of parents produces two children.  With probability
-    ``pair_prob``, each variable is swapped between the two children with
-    probability ``swap_prob``.  Otherwise, the children are copies of their
-    parents.
+    Each crossover operation on a pair of parents produces two offspring.  With
+    probability ``pair_prob``, each variable is swapped between the two
+    offspring with probability ``swap_prob``.  Otherwise, the offspring are
+    copies of their parents.
 
-    The children only take values from their parents, so this operator works
+    The offspring only take values from their parents, so this operator works
     for binary, integer and real-valued variables alike.  Integer and Boolean
     inputs keep their dtype.
 
@@ -124,9 +124,10 @@ def uniform_crossover(
     parents :
         ${parents}
     swap_prob :
-        Probability of swapping each variable between the two children.
+        Probability of swapping each variable between the two offspring.
     pair_prob :
-        Probability of recombining each pair of parents.
+        Probability of applying the crossover operation to each pair of
+        parents.
     seed :
         ${random_seed}
 
@@ -179,12 +180,13 @@ def single_point_crossover(
 ) -> np.ndarray:
     r"""Single-point crossover.
 
-    Each pair of parents produces two children.  A cut point :math:`k` is drawn
-    uniformly from :math:`\{1, \dots, n_\text{var} - 1\}`.  The first child
-    takes the first :math:`k` variables from the first parent and the rest from
-    the second parent, and the second child takes the complement.
+    Each crossover operation on a pair of parents produces two offspring.  A
+    cut point :math:`k` is drawn uniformly from :math:`\{1, \dots,
+    n_\text{var} - 1\}`.  The first offspring takes the first :math:`k`
+    variables from the first parent and the rest from the second parent, and
+    the second offspring takes the complement.
 
-    The children only take values from their parents, so this operator works
+    The offspring only take values from their parents, so this operator works
     for binary, integer and real-valued variables alike.  Integer and Boolean
     inputs keep their dtype.
 
@@ -245,7 +247,8 @@ def blend_alpha_crossover(
 ) -> np.ndarray:
     r"""Blend crossover (BLX-:math:`\alpha`).
 
-    Each pair of parents :math:`x, y` produces **one** child :math:`z`.  For
+    Each crossover operation on a pair of parents :math:`x, y` produces
+    **one** offspring :math:`z`.  For
     each variable :math:`j`, let :math:`m_j = \min(x_j, y_j)`, :math:`M_j =
     \max(x_j, y_j)` and :math:`d_j = M_j - m_j`.  Then :math:`z_j` is sampled
     uniformly from :math:`[m_j - \alpha d_j, M_j + \alpha d_j]`, clipped to
@@ -261,31 +264,31 @@ def blend_alpha_crossover(
         ${upper_bound}
     alpha :
         Fraction of the distance between the parents by which the sampling
-        interval extends beyond them on each side.  With ``alpha=0``, children
-        lie between their parents.
+        interval extends beyond them on each side.  With ``alpha=0``, the
+        offspring lie between their parents.
     seed :
         ${random_seed}
 
     Returns
     -------
         Array with :math:`\lceil n/2 \rceil` rows, where :math:`n` is the
-        number of rows of ``parents``.  Row ``i`` is the child of rows ``2i``
-        and ``2i + 1`` of ``parents``.
+        number of rows of ``parents``.  Row ``i`` is the offspring of rows
+        ``2i`` and ``2i + 1`` of ``parents``.
 
     See Also
     --------
-    local_crossover : Children inside the box spanned by the parents.
+    local_crossover : Offspring inside the box spanned by the parents.
 
     Notes
     -----
     BLX-:math:`\alpha` was proposed by :footcite:t:`EshSch1992`.  Each variable
-    is sampled independently, so the children fill the whole (clipped) box
+    is sampled independently, so the offspring fill the whole (clipped) box
     around the parents.
 
-    To produce more than one child per pair, call the function again.  If
-    ``seed`` is an integer, every call returns the same children.  Pass the
+    To produce more than one offspring per pair, call the function again.  If
+    ``seed`` is an integer, every call returns the same offspring.  Pass the
     same :class:`numpy.random.Generator` to every call to get different
-    children each time, as in the example below.
+    offspring each time, as in the example below.
 
     References
     ----------
@@ -326,18 +329,19 @@ def single_arithmetic_crossover(
 ) -> np.ndarray:
     r"""Single arithmetic crossover.
 
-    Each pair of parents :math:`x, y` produces two children.  With probability
-    ``pair_prob``, one variable :math:`k` is chosen uniformly at random and
-    both children get :math:`(x_k + y_k) / 2` in that variable.  All other
-    variables are copied from the parents.  Otherwise, the children are copies
-    of their parents.
+    Each crossover operation on a pair of parents :math:`x, y` produces two
+    offspring.  With probability ``pair_prob``, one variable :math:`k` is
+    chosen uniformly at random and both offspring get :math:`(x_k + y_k) / 2`
+    in that variable.  All other variables are copied from the parents.
+    Otherwise, the offspring are copies of their parents.
 
     Parameters
     ----------
     parents :
         ${parents}
     pair_prob :
-        Probability of recombining each pair of parents.
+        Probability of applying the crossover operation to each pair of
+        parents.
     seed :
         ${random_seed}
 
@@ -390,13 +394,14 @@ def local_crossover(
 ) -> np.ndarray:
     r"""Local crossover.
 
-    Each pair of parents :math:`x, y` produces two children
+    Each crossover operation on a pair of parents :math:`x, y` produces two
+    offspring
 
     .. math::
         u_j = a_j x_j + (1 - a_j) y_j, \qquad v_j = (1 - a_j) x_j + a_j y_j,
 
     where each weight :math:`a_j` is drawn uniformly from :math:`[0, 1)`.  The
-    children lie in the box spanned by their parents, and :math:`u + v = x +
+    offspring lie in the box spanned by their parents, and :math:`u + v = x +
     y`.
 
     Parameters
@@ -460,25 +465,28 @@ def bounded_exponential_crossover(
 ) -> np.ndarray:
     r"""Bounded exponential crossover (BEX).
 
-    Each pair of parents :math:`x, y` produces two children :math:`u, v` with
-    probability ``pair_prob``; otherwise, the children are copies of their
-    parents.  For each variable :math:`j` with :math:`d_j = |x_j - y_j| > 0`,
+    Each crossover operation on a pair of parents :math:`x, y` produces two
+    offspring :math:`u, v`.  With probability ``pair_prob``, for each
+    variable :math:`j` with :math:`d_j = |x_j - y_j| > 0`,
 
     .. math::
         u_j = x_j + \beta_j^x d_j, \qquad v_j = y_j + \beta_j^y d_j,
 
     where :math:`\beta_j^x` follows an exponential distribution with scale
     :math:`\lambda` (``scale``), truncated so that :math:`u_j` stays within
-    the bounds of the variable.  With probability 1/2, a child moves towards
-    the lower bound :math:`l_j`, with :math:`\beta = \lambda \ln(e_l + r(1 -
-    e_l))` and :math:`e_l = \exp((l_j - x_j) / (\lambda d_j))`.  Otherwise, it
-    moves towards the upper bound :math:`h_j`, with :math:`\beta = -\lambda
-    \ln(1 - r(1 - e_h))` and :math:`e_h = \exp((x_j - h_j) / (\lambda d_j))`.
+    the bounds of the variable.  With probability 1/2, an offspring moves
+    towards the lower bound :math:`l_j`, with :math:`\beta = \lambda \ln(e_l +
+    r(1 - e_l))` and :math:`e_l = \exp((l_j - x_j) / (\lambda d_j))`.
+    Otherwise, it moves towards the upper bound :math:`h_j`, with :math:`\beta
+    = -\lambda \ln(1 - r(1 - e_h))` and :math:`e_h = \exp((x_j - h_j) /
+    (\lambda d_j))`.
     The uniform random number :math:`r` and the direction are shared by both
-    children.  Variables where the parents are equal are copied.
+    offspring.  Variables where the parents are equal are copied.  After
+    that, each variable is swapped between the two offspring with probability
+    ``swap_prob``, as in :func:`uniform_crossover`.
 
-    After that, each variable is swapped between the two children with
-    probability ``swap_prob``, as in :func:`uniform_crossover`.
+    Otherwise, with probability ``1 - pair_prob``, the offspring are copies of
+    their parents.
 
     Parameters
     ----------
@@ -490,11 +498,12 @@ def bounded_exponential_crossover(
         ${upper_bound}
     scale :
         Scale :math:`\lambda > 0` of the exponential distribution.  Smaller
-        values keep the children closer to their parents.
+        values keep the offspring closer to their parents.
     pair_prob :
-        Probability of recombining each pair of parents.
+        Probability of applying the crossover operation to each pair of
+        parents.
     swap_prob :
-        Probability of swapping each variable between the two children.
+        Probability of swapping each variable between the two offspring.
     seed :
         ${random_seed}
 
@@ -562,10 +571,10 @@ def de_rand_1_bin_crossover(
 
     For each target :math:`x_i`, three rows :math:`x_{r_1}, x_{r_2}, x_{r_3}`
     are drawn from ``population``, distinct from each other and from the
-    target.  The child takes each variable :math:`j` from the mutant
+    target.  The offspring takes each variable :math:`j` from the mutant
     :math:`x_{r_1} + F (x_{r_2} - x_{r_3})` with probability :math:`CR`, and
     from the target otherwise.  One variable chosen at random always comes
-    from the mutant.  Finally, the child is clipped to the bounds.
+    from the mutant.  Finally, the offspring is clipped to the bounds.
 
     Parameters
     ----------
@@ -587,8 +596,8 @@ def de_rand_1_bin_crossover(
 
     Returns
     -------
-        Array with one row per target, where row ``i`` is the child of target
-        ``targets[i]``.
+        Array with one row per target, where row ``i`` is the offspring of
+        target ``targets[i]``.
 
     See Also
     --------
@@ -654,13 +663,13 @@ def de_current_1_crossover(
 
     For each target :math:`x_i`, two distinct rows :math:`x_{r_1}, x_{r_2}`
     are drawn from ``population``.  Either of them may be the target itself.
-    The child takes each variable :math:`j` from :math:`x_i + F (x_{r_1} -
+    The offspring takes each variable :math:`j` from :math:`x_i + F (x_{r_1} -
     x_{r_2})` with probability :math:`CR`, and from the target otherwise.
-    Finally, the child is clipped to the bounds.
+    Finally, the offspring is clipped to the bounds.
 
     Unlike :func:`de_rand_1_bin_crossover`, the base vector is the target and
     no variable is forced to come from the mutant, so with :math:`CR = 0` the
-    child is a copy of the target.
+    offspring is a copy of the target.
 
     Parameters
     ----------
@@ -682,8 +691,8 @@ def de_current_1_crossover(
 
     Returns
     -------
-        Array with one row per target, where row ``i`` is the child of target
-        ``targets[i]``.
+        Array with one row per target, where row ``i`` is the offspring of
+        target ``targets[i]``.
 
     See Also
     --------
@@ -755,15 +764,16 @@ def parent_centric_crossover(
     are drawn from ``population``, distinct from each other and from the
     target.  Let :math:`d = x - g`, where :math:`g` is the centroid of the
     three parents, and let :math:`\bar{D}` be the mean distance from :math:`a`
-    and :math:`b` to the line through :math:`x` along :math:`d`.  The child is
+    and :math:`b` to the line through :math:`x` along :math:`d`.  The
+    offspring is
 
     .. math::
         x + \zeta d + \bar{D} \eta,
 
     where :math:`\zeta \sim N(0, \sigma_\zeta^2)` and :math:`\eta` is a
     vector of independent :math:`N(0, \sigma_\eta^2)` values projected onto
-    the subspace orthogonal to :math:`d`.  Finally, the child is clipped to the
-    bounds.
+    the subspace orthogonal to :math:`d`.  Finally, the offspring is clipped to
+    the bounds.
 
     Parameters
     ----------
@@ -786,8 +796,8 @@ def parent_centric_crossover(
 
     Returns
     -------
-        Array with one row per target, where row ``i`` is the child of index
-        parent ``targets[i]``.
+        Array with one row per target, where row ``i`` is the offspring of
+        index parent ``targets[i]``.
 
     Notes
     -----
