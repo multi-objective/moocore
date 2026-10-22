@@ -278,7 +278,7 @@ def test_de_current_1_crossover_two_rows():
     # The donors are the two rows, in either order.
     x = random_matrix(2)
     step = 0.5 * (x[0] - x[1])
-    out = moocore.de_current_1_crossover(x, seed=1)
+    out = moocore.de_current_1_crossover(x, scaling_factor=0.5, seed=1)
     for i in range(2):
         assert np.allclose(out[i], x[i] + step) or np.allclose(
             out[i], x[i] - step

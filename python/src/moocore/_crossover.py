@@ -606,7 +606,8 @@ def de_rand_1_bin_crossover(
     Notes
     -----
     This is the DE/rand/1/bin scheme of :footcite:t:`StoPri1997:de`, who
-    recommend :math:`F = 0.5` and suggest trying :math:`CR = 0.9` first.
+    recommend :math:`F = 0.5` as a first choice and suggest trying
+    :math:`CR = 0.9` first.
     Multi-objective DE algorithms such as GDE3 :footcite:p:`KukLam2005:gde3`
     and DEMO :footcite:p:`RobFil05demo` use this variant
     :footcite:p:`BezLopStu2015emode`.
@@ -685,7 +686,8 @@ def de_current_1_crossover(
     scaling_factor :
         Scaling factor :math:`F > 0` of the difference vector.
     crossover_rate :
-        Crossover rate :math:`CR`, the probability of changing each variable.
+        Crossover rate :math:`CR`, the probability of crossing a decision
+        variable.
     seed :
         ${random_seed}
 
