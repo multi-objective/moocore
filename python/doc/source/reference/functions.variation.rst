@@ -6,11 +6,16 @@ Variation operators
 
 .. currentmodule:: moocore
 
-Crossover operators combine decision vectors, called parents, to produce new
-decision vectors, called offspring.  Every function takes a 2D array with one
+Variation operators produce new decision vectors, called offspring, from
+existing ones, called parents.
+This usually happens in two steps: first, a crossover operator combines the
+parents to produce one or more offspring, and then a mutation operator randomly
+changes some of the offspring's decision variables. We currently provide a
+number of crossover operators.
+Every operator takes a 2D array with one
 decision vector per row and accepts a ``seed`` for reproducible results.  The
-:ref:`crossover example <sphx_glr_auto_examples_plot_crossover.py>` shows where
-each operator places its offspring.
+:ref:`crossover example <sphx_glr_auto_examples_plot_crossover.py>` shows
+the behaviour of the crossover operators.
 
 Crossover
 =========
@@ -67,7 +72,8 @@ many offspring it produces:
 The functions that use 2 parents per operation take a matrix ``parents`` and
 cross over rows ``2i`` and ``2i + 1``, so the order of the rows decides which
 parents are crossed over, for example after a selection step.  If the number
-of rows is odd, the last row is crossed over with the first one.  When an
+of rows is odd, the last row is crossed over with the first one.
+When an
 operation produces 2 offspring, the output has as many rows as ``parents``, and
 one offspring is dropped when the number of rows is odd.
 :func:`blend_alpha_crossover` returns one row per pair.
@@ -87,6 +93,14 @@ include the target itself.  `Tanabe and Ishibuchi (2019)
 <https://doi.org/10.1007/s00500-019-03842-6>`__ call this mutation the current/1
 strategy, a term introduced by `Gong et al. (2017)
 <https://doi.org/10.1109/TEVC.2017.2670779>`__.
+
+Certain crossover operators tend to produce offspring that are close to one
+or the other parent.
+Operators that produce 2 offspring from 2 parents or 1 offspring from 1 parent
+preserve the order, so that the index of an offspring corresponds to the index
+of the parent it is closest to, assuming a parent-centric crossover operation.
+For the operators that take ``population``, the parent of offspring ``i`` is
+row ``targets[i]``.
 
 
 Bibliography
