@@ -50,12 +50,13 @@ MOOCORE_API void uniform_crossover(
 
 MOOCORE_API void single_point_crossover(
     double * restrict offspring, const double * restrict parents,
-    size_t n, size_t nvar, uint32_t seed);
+    size_t n, size_t nvar, double pair_prob, uint32_t seed);
 
 MOOCORE_API void blend_alpha_crossover(
     double * restrict offspring, const double * restrict parents,
     size_t n, size_t nvar, const double * restrict lower,
-    const double * restrict upper, double alpha, uint32_t seed);
+    const double * restrict upper, double alpha, double pair_prob,
+    uint32_t seed);
 
 MOOCORE_API void single_arithmetic_crossover(
     double * restrict offspring, const double * restrict parents,
@@ -63,13 +64,13 @@ MOOCORE_API void single_arithmetic_crossover(
 
 MOOCORE_API void local_crossover(
     double * restrict offspring, const double * restrict parents,
-    size_t n, size_t nvar, uint32_t seed);
+    size_t n, size_t nvar, double pair_prob, uint32_t seed);
 
 MOOCORE_API void bounded_exponential_crossover(
     double * restrict offspring, const double * restrict parents,
     size_t n, size_t nvar, const double * restrict lower,
-    const double * restrict upper, double scale, double pair_prob,
-    double swap_prob, uint32_t seed);
+    const double * restrict upper, double scale, double swap_prob,
+    double pair_prob, uint32_t seed);
 
 MOOCORE_API void de_rand_1_bin_crossover(
     double * restrict offspring, const double * restrict population,
