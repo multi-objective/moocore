@@ -114,6 +114,27 @@ def test_inputs_are_not_modified(name, immutable_call):
     immutable_call(ALL_OPERATORS[name], x, seed=3, **kwargs)
 
 
+@pytest.mark.parametrize("name", PAIR_OPERATORS)
+def test_pair_prob_zero_copies_parents(name):
+    x = random_matrix(7)
+    kwargs = {"lower": LOWER, "upper": UPPER} if name in BOUNDED else {}
+    out = PAIR_OPERATORS[name](x, pair_prob=0, seed=1, **kwargs)
+    # Blend alpha crossover copies the first parent of each pair.
+    assert_array_equal(out, x[0::2] if name == "blend_alpha" else x)
+
+
+@pytest.mark.parametrize("name", PAIR_OPERATORS)
+def test_pair_prob_rate(name):
+    x = random_matrix(4000, nvar=10)
+    kwargs = {"lower": LOWER, "upper": UPPER} if name in BOUNDED else {}
+    out = PAIR_OPERATORS[name](x, pair_prob=0.3, seed=1, **kwargs)
+    if name == "blend_alpha":
+        copied = np.all(out == x[0::2], axis=1)
+    else:
+        copied = np.all((out == x).reshape(-1, 2 * x.shape[1]), axis=1)
+    assert abs(copied.mean() - 0.7) < 0.03
+
+
 def test_uniform_crossover_only_copies_parent_values():
     x = random_matrix(200, nvar=6)
     p1, p2 = pairs(x)
@@ -349,6 +370,9 @@ def test_errors_bounds(name):
         (moocore.uniform_crossover, {"swap_prob": 1.5}, "'swap_prob'"),
         (moocore.uniform_crossover, {"pair_prob": -0.1}, "'pair_prob'"),
         (moocore.single_arithmetic_crossover, {"pair_prob": 2}, "'pair_prob'"),
+        (moocore.single_point_crossover, {"pair_prob": 2}, "'pair_prob'"),
+        (moocore.blend_alpha_crossover, {"pair_prob": -1}, "'pair_prob'"),
+        (moocore.local_crossover, {"pair_prob": 1.5}, "'pair_prob'"),
         (moocore.blend_alpha_crossover, {"alpha": -1}, "'alpha'"),
         (moocore.bounded_exponential_crossover, {"scale": 0}, "'scale'"),
         (moocore.bounded_exponential_crossover, {"swap_prob": 2}, "swap_prob"),

@@ -41,6 +41,14 @@ COMMON_PARAMS = {
     # -------------------------------------------------------------------------
     "upper_bound": """Upper bounds of the decision variables.  Either a single value, which will be used for all variables,
     or one value per column.  ``None`` means no upper bound.""",
+    # -------------------------------------------------------------------------
+    "swap_prob": """Probability of swapping each variable between the two offspring.""",
+    # -------------------------------------------------------------------------
+    "pair_prob": """Probability of applying the crossover operation to each pair of parents.""",
+    # -------------------------------------------------------------------------
+    "scaling_factor": """Scaling factor :math:`F > 0` of the difference vector.""",
+    # -------------------------------------------------------------------------
+    "crossover_rate": """Crossover rate :math:`CR`, the probability of taking each variable from the mutant.""",
 }
 
 

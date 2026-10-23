@@ -88,11 +88,11 @@ double whv_hype_estimate(const double *points, size_t n, const double *ideal, co
 
 // crossover.h
 void uniform_crossover(double * restrict offspring, const double * restrict parents, size_t n, size_t nvar, double swap_prob, double pair_prob, uint32_t seed);
-void single_point_crossover(double * restrict offspring, const double * restrict parents, size_t n, size_t nvar, uint32_t seed);
-void blend_alpha_crossover(double * restrict offspring, const double * restrict parents, size_t n, size_t nvar, const double * restrict lower, const double * restrict upper, double alpha, uint32_t seed);
+void single_point_crossover(double * restrict offspring, const double * restrict parents, size_t n, size_t nvar, double pair_prob, uint32_t seed);
+void blend_alpha_crossover(double * restrict offspring, const double * restrict parents, size_t n, size_t nvar, const double * restrict lower, const double * restrict upper, double alpha, double pair_prob, uint32_t seed);
 void single_arithmetic_crossover(double * restrict offspring, const double * restrict parents, size_t n, size_t nvar, double pair_prob, uint32_t seed);
-void local_crossover(double * restrict offspring, const double * restrict parents, size_t n, size_t nvar, uint32_t seed);
-void bounded_exponential_crossover(double * restrict offspring, const double * restrict parents, size_t n, size_t nvar, const double * restrict lower, const double * restrict upper, double scale, double pair_prob, double swap_prob, uint32_t seed);
+void local_crossover(double * restrict offspring, const double * restrict parents, size_t n, size_t nvar, double pair_prob, uint32_t seed);
+void bounded_exponential_crossover(double * restrict offspring, const double * restrict parents, size_t n, size_t nvar, const double * restrict lower, const double * restrict upper, double scale, double swap_prob, double pair_prob, uint32_t seed);
 void de_rand_1_bin_crossover(double * restrict offspring, const double * restrict population, size_t n, size_t nvar, const size_t * restrict targets, size_t ntargets, const double * restrict lower, const double * restrict upper, double scaling_factor, double crossover_rate, uint32_t seed);
 void de_current_1_crossover(double * restrict offspring, const double * restrict population, size_t n, size_t nvar, const size_t * restrict targets, size_t ntargets, const double * restrict lower, const double * restrict upper, double scaling_factor, double crossover_rate, uint32_t seed);
 void parent_centric_crossover(double * restrict offspring, const double * restrict population, size_t n, size_t nvar, const size_t * restrict targets, size_t ntargets, const double * restrict lower, const double * restrict upper, double sigma_zeta, double sigma_eta, uint32_t seed);

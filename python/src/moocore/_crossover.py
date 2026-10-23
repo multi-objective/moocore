@@ -124,10 +124,9 @@ def uniform_crossover(
     parents :
         ${parents}
     swap_prob :
-        Probability of swapping each variable between the two offspring.
+        ${swap_prob}
     pair_prob :
-        Probability of applying the crossover operation to each pair of
-        parents.
+        ${pair_prob}
     seed :
         ${random_seed}
 
@@ -176,15 +175,17 @@ def single_point_crossover(
     parents: ArrayLike,
     /,
     *,
+    pair_prob: float = 1.0,
     seed: int | np.random.Generator | None = None,
 ) -> np.ndarray:
     r"""Single-point crossover.
 
-    Each crossover operation on a pair of parents produces two offspring.  A
-    cut point :math:`k` is drawn uniformly from :math:`\{1, \dots,
-    n_\text{var} - 1\}`.  The first offspring takes the first :math:`k`
-    variables from the first parent and the rest from the second parent, and
-    the second offspring takes the complement.
+    Each crossover operation on a pair of parents produces two offspring.  With
+    probability ``pair_prob``, a cut point :math:`k` is drawn uniformly from
+    :math:`\{1, \dots, n_\text{var} - 1\}`.  The first offspring takes the
+    first :math:`k` variables from the first parent and the rest from the
+    second parent, and the second offspring takes the complement.  Otherwise,
+    the offspring are copies of their parents.
 
     The offspring only take values from their parents, so this operator works
     for binary, integer and real-valued variables alike.  Integer and Boolean
@@ -194,6 +195,8 @@ def single_point_crossover(
     ----------
     parents :
         ${parents}  It must have at least 2 columns.
+    pair_prob :
+        ${pair_prob}
     seed :
         ${random_seed}
 
@@ -217,19 +220,21 @@ def single_point_crossover(
     Examples
     --------
     >>> parents = np.array([[0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1]])
-    >>> moocore.single_point_crossover(parents, seed=42)
-    array([[0, 0, 1, 1, 1, 1],
-           [1, 1, 0, 0, 0, 0]])
+    >>> moocore.single_point_crossover(parents, seed=4)
+    array([[0, 0, 0, 1, 1, 1],
+           [1, 1, 1, 0, 0, 0]])
 
     """
     dtype = np.asarray(parents).dtype
     parents = _as_matrix(parents, "parents", min_rows=2)
     if parents.shape[1] < 2:
         raise ValueError("'parents' must have at least 2 columns")
+    pair_prob = _check_probability(pair_prob, "pair_prob")
     out = _call(
         lib.single_point_crossover,
         parents,
         len(parents),
+        pair_prob,
         _get_seed_for_c(seed),
     )
     return _keep_dtype(out, dtype)
@@ -243,16 +248,18 @@ def blend_alpha_crossover(
     lower: ArrayLike | None = None,
     upper: ArrayLike | None = None,
     alpha: float = 0.5,
+    pair_prob: float = 1.0,
     seed: int | np.random.Generator | None = None,
 ) -> np.ndarray:
     r"""Blend crossover (BLX-:math:`\alpha`).
 
     Each crossover operation on a pair of parents :math:`x, y` produces
-    **one** offspring :math:`z`.  For
-    each variable :math:`j`, let :math:`m_j = \min(x_j, y_j)`, :math:`M_j =
+    **one** offspring :math:`z`.  With probability ``pair_prob``, for each
+    variable :math:`j`, let :math:`m_j = \min(x_j, y_j)`, :math:`M_j =
     \max(x_j, y_j)` and :math:`d_j = M_j - m_j`.  Then :math:`z_j` is sampled
     uniformly from :math:`[m_j - \alpha d_j, M_j + \alpha d_j]`, clipped to
-    the bounds of the variable.
+    the bounds of the variable.  Otherwise, the offspring is a copy of the
+    first parent :math:`x`.
 
     Parameters
     ----------
@@ -266,6 +273,8 @@ def blend_alpha_crossover(
         Fraction of the distance between the parents by which the sampling
         interval extends beyond them on each side.  With ``alpha=0``, the
         offspring lie between their parents.
+    pair_prob :
+        ${pair_prob}
     seed :
         ${random_seed}
 
@@ -299,15 +308,16 @@ def blend_alpha_crossover(
     >>> parents = np.array([[0.2, 0.2], [0.6, 0.8]])
     >>> rng = np.random.default_rng(42)
     >>> moocore.blend_alpha_crossover(parents, lower=0, upper=1, seed=rng)
-    array([[0.63478113, 0.52182563]])
+    array([[0.4174605 , 0.81353203]])
     >>> moocore.blend_alpha_crossover(parents, lower=0, upper=1, seed=rng)
-    array([[0.21852882, 0.04409984]])
+    array([[0.03527987, 0.73987298]])
 
     """
     parents = _as_matrix(parents, "parents", min_rows=2)
     lower, upper = _bounds(lower, upper, parents.shape[1])
     if not alpha >= 0:
         raise ValueError("'alpha' must be non-negative")
+    pair_prob = _check_probability(pair_prob, "pair_prob")
     return _call(
         lib.blend_alpha_crossover,
         parents,
@@ -315,6 +325,7 @@ def blend_alpha_crossover(
         ffi.from_buffer("double []", lower),
         ffi.from_buffer("double []", upper),
         float(alpha),
+        pair_prob,
         _get_seed_for_c(seed),
     )
 
@@ -340,8 +351,7 @@ def single_arithmetic_crossover(
     parents :
         ${parents}
     pair_prob :
-        Probability of applying the crossover operation to each pair of
-        parents.
+        ${pair_prob}
     seed :
         ${random_seed}
 
@@ -390,24 +400,27 @@ def local_crossover(
     parents: ArrayLike,
     /,
     *,
+    pair_prob: float = 1.0,
     seed: int | np.random.Generator | None = None,
 ) -> np.ndarray:
     r"""Local crossover.
 
     Each crossover operation on a pair of parents :math:`x, y` produces two
-    offspring
+    offspring.  With probability ``pair_prob``, they are
 
     .. math::
         u_j = a_j x_j + (1 - a_j) y_j, \qquad v_j = (1 - a_j) x_j + a_j y_j,
 
     where each weight :math:`a_j` is drawn uniformly from :math:`[0, 1)`.  The
     offspring lie in the box spanned by their parents, and :math:`u + v = x +
-    y`.
+    y`.  Otherwise, the offspring are copies of their parents.
 
     Parameters
     ----------
     parents :
         ${parents}
+    pair_prob :
+        ${pair_prob}
     seed :
         ${random_seed}
 
@@ -438,15 +451,17 @@ def local_crossover(
     --------
     >>> parents = np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]])
     >>> moocore.local_crossover(parents, seed=42)
-    array([[0.62545988, 0.04928569, 0.26800606],
-           [0.37454012, 0.95071431, 0.73199394]])
+    array([[0.04928569, 0.26800606, 0.40134152],
+           [0.95071431, 0.73199394, 0.59865848]])
 
     """
     parents = _as_matrix(parents, "parents", min_rows=2)
+    pair_prob = _check_probability(pair_prob, "pair_prob")
     return _call(
         lib.local_crossover,
         parents,
         len(parents),
+        pair_prob,
         _get_seed_for_c(seed),
     )
 
@@ -459,8 +474,8 @@ def bounded_exponential_crossover(
     lower: ArrayLike | None = None,
     upper: ArrayLike | None = None,
     scale: float = 0.1,
-    pair_prob: float = 1.0,
     swap_prob: float = 0.0,
+    pair_prob: float = 1.0,
     seed: int | np.random.Generator | None = None,
 ) -> np.ndarray:
     r"""Bounded exponential crossover (BEX).
@@ -499,11 +514,10 @@ def bounded_exponential_crossover(
     scale :
         Scale :math:`\lambda > 0` of the exponential distribution.  Smaller
         values keep the offspring closer to their parents.
-    pair_prob :
-        Probability of applying the crossover operation to each pair of
-        parents.
     swap_prob :
-        Probability of swapping each variable between the two offspring.
+        ${swap_prob}
+    pair_prob :
+        ${pair_prob}
     seed :
         ${random_seed}
 
@@ -540,8 +554,8 @@ def bounded_exponential_crossover(
     if np.any(parents < lower) or np.any(parents > upper):
         raise ValueError("'parents' must be within 'lower' and 'upper'")
     scale = _check_positive(scale, "scale")
-    pair_prob = _check_probability(pair_prob, "pair_prob")
     swap_prob = _check_probability(swap_prob, "swap_prob")
+    pair_prob = _check_probability(pair_prob, "pair_prob")
     return _call(
         lib.bounded_exponential_crossover,
         parents,
@@ -549,8 +563,8 @@ def bounded_exponential_crossover(
         ffi.from_buffer("double []", lower),
         ffi.from_buffer("double []", upper),
         scale,
-        pair_prob,
         swap_prob,
+        pair_prob,
         _get_seed_for_c(seed),
     )
 
@@ -587,10 +601,9 @@ def de_rand_1_bin_crossover(
     upper :
         ${upper_bound}
     scaling_factor :
-        Scaling factor :math:`F > 0` of the difference vector.
+        ${scaling_factor}
     crossover_rate :
-        Crossover rate :math:`CR`, the probability of taking each variable
-        from the mutant.
+        ${crossover_rate}
     seed :
         ${random_seed}
 
@@ -664,9 +677,9 @@ def de_current_1_crossover(
 
     For each target :math:`x_i`, two distinct rows :math:`x_{r_1}, x_{r_2}`
     are drawn from ``population``.  Either of them may be the target itself.
-    The offspring takes each variable :math:`j` from :math:`x_i + F (x_{r_1} -
-    x_{r_2})` with probability :math:`CR`, and from the target otherwise.
-    Finally, the offspring is clipped to the bounds.
+    The offspring takes each variable :math:`j` from the mutant :math:`x_i + F
+    (x_{r_1} - x_{r_2})` with probability :math:`CR`, and from the target
+    otherwise.  Finally, the offspring is clipped to the bounds.
 
     Unlike :func:`de_rand_1_bin_crossover`, the base vector is the target and
     no variable is forced to come from the mutant, so with :math:`CR = 0` the
@@ -684,10 +697,9 @@ def de_current_1_crossover(
     upper :
         ${upper_bound}
     scaling_factor :
-        Scaling factor :math:`F > 0` of the difference vector.
+        ${scaling_factor}
     crossover_rate :
-        Crossover rate :math:`CR`, the probability of crossing a decision
-        variable.
+        ${crossover_rate}
     seed :
         ${random_seed}
 
@@ -812,11 +824,14 @@ def parent_centric_crossover(
 
     Notes
     -----
-    PCX was proposed by Deb, Anand and Joshi (2002), who sum one normal step
-    along each vector of an orthonormal basis of the subspace orthogonal to
-    :math:`d`.  Projecting an isotropic normal vector onto that subspace gives
-    the same distribution.  If :math:`x` is (almost) the centroid, the
-    projection is skipped.
+    PCX was proposed by Deb, Anand and Joshi (2002).  Their equation (2)
+    writes the step orthogonal to :math:`d` as a sum of normal steps along
+    :math:`\mu - 1` orthonormal vectors, where :math:`\mu` is the number of
+    parents.  Like pymoo, which bases its implementation on the authors' C
+    code, this function projects an isotropic normal vector onto the whole
+    subspace orthogonal to :math:`d`, so the offspring is not restricted to
+    the plane of the three parents.  If :math:`x` is (almost) the centroid,
+    the projection is skipped.
 
     References
     ----------
