@@ -398,10 +398,22 @@ def get_parents(nparents, nvar, data):
     return rng.uniform(LOWER, UPPER, size=(nparents, nvar))
 
 
+# Operator names for the plot titles.
+titles = {
+    "uniform": "Uniform",
+    "single_point": "Single Point",
+    "blend_alpha": "Blend Alpha",
+    "single_arithmetic": "Single Arithmetic",
+    "local": "Local",
+    "bounded_exponential": "Bounded Exponential",
+    "de_rand_1_bin": "DE/rand/1/bin",
+    "de_current_1": "DE/current/1",
+    "parent_centric": "Parent-Centric",
+}
+
 file_prefix = "crossover"
 for op, (data, packages) in operators.items():
-    title = f"{op}_crossover()"
-    print(f"# Running benchmark: {title}")
+    print(f"# Running benchmark: {op}_crossover()")
     sweeps = {
         "nparents": (
             N_PARENTS,
@@ -425,7 +437,11 @@ for op, (data, packages) in operators.items():
         )
         bench(get_testcase)
         bench.plots(
-            file_prefix=file_prefix, title=title, log="xy", xlabel=xlabel
+            file_prefix=file_prefix,
+            title=f"{titles[op]} crossover performance over {xlabel.lower()}",
+            log="xy",
+            xlabel=xlabel,
+            add_name=False,
         )
     plt.close("all")
 
