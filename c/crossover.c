@@ -57,6 +57,15 @@ scratch_new(size_t n, size_t nvar)
     return (n % 2 == 1) ? MOOCORE_MALLOC(nvar, double) : NULL;
 }
 
+// Offspring of a pair that is not crossed over.
+static inline void
+copy_parents(double * off1, double * off2, const double * p1, const double * p2,
+             size_t nvar)
+{
+    memcpy(off1, p1, nvar * sizeof(*off1));
+    memcpy(off2, p2, nvar * sizeof(*off2));
+}
+
 /* Draw K distinct indices in [0, N) that also differ from the NEXCLUDED
    indices in EXCLUDED.  EXCLUDED must be sorted in ascending order and have
    room for K more values.  Each draw picks among the indices not yet excluded
@@ -109,7 +118,7 @@ uniform_crossover(double * restrict offspring, const double * restrict parents,
 void
 single_point_crossover(double * restrict offspring,
                        const double * restrict parents,
-                       size_t n, size_t nvar, uint32_t seed)
+                       size_t n, size_t nvar, double pair_prob, uint32_t seed)
 {
     ASSUME(n >= 2 && nvar >= 2);
     rng_state * rng = rng_new(seed);
@@ -119,6 +128,10 @@ single_point_crossover(double * restrict offspring,
         double *off1, *off2;
         get_pair(parents, offspring, scratch, i, n, nvar,
                  &p1, &p2, &off1, &off2);
+        if (!(rng_random(rng) < pair_prob)) {
+            copy_parents(off1, off2, p1, p2, nvar);
+            continue;
+        }
         // Cut point in [1, nvar - 1], so each offspring takes at least one
         // variable from each parent.
         const size_t cut = 1 + rng_integer(rng, nvar - 1);
@@ -136,7 +149,7 @@ blend_alpha_crossover(double * restrict offspring,
                       const double * restrict parents,
                       size_t n, size_t nvar, const double * restrict lower,
                       const double * restrict upper, double alpha,
-                      uint32_t seed)
+                      double pair_prob, uint32_t seed)
 {
     ASSUME(n >= 2 && nvar >= 1);
     ASSUME(alpha >= 0);
@@ -145,6 +158,11 @@ blend_alpha_crossover(double * restrict offspring,
         const double * p1 = parents + i * nvar;
         const double * p2 = parents + ((i + 1 < n) ? i + 1 : 0) * nvar;
         double * off = offspring + (i / 2) * nvar;
+        // A pair that is not crossed over yields a copy of its first parent.
+        if (!(rng_random(rng) < pair_prob)) {
+            memcpy(off, p1, nvar * sizeof(*off));
+            continue;
+        }
         for (size_t j = 0; j < nvar; j++) {
             const double lo = fmin(p1[j], p2[j]);
             const double hi = fmax(p1[j], p2[j]);
@@ -186,7 +204,7 @@ single_arithmetic_crossover(double * restrict offspring,
 
 void
 local_crossover(double * restrict offspring, const double * restrict parents,
-                size_t n, size_t nvar, uint32_t seed)
+                size_t n, size_t nvar, double pair_prob, uint32_t seed)
 {
     ASSUME(n >= 2 && nvar >= 1);
     rng_state * rng = rng_new(seed);
@@ -196,6 +214,10 @@ local_crossover(double * restrict offspring, const double * restrict parents,
         double *off1, *off2;
         get_pair(parents, offspring, scratch, i, n, nvar,
                  &p1, &p2, &off1, &off2);
+        if (!(rng_random(rng) < pair_prob)) {
+            copy_parents(off1, off2, p1, p2, nvar);
+            continue;
+        }
         for (size_t j = 0; j < nvar; j++) {
             const double a = rng_random(rng);
             off1[j] = a * p1[j] + (1 - a) * p2[j];
@@ -233,7 +255,7 @@ bounded_exponential_crossover(double * restrict offspring,
                               size_t n, size_t nvar,
                               const double * restrict lower,
                               const double * restrict upper, double scale,
-                              double pair_prob, double swap_prob,
+                              double swap_prob, double pair_prob,
                               uint32_t seed)
 {
     ASSUME(n >= 2 && nvar >= 1);
@@ -246,8 +268,7 @@ bounded_exponential_crossover(double * restrict offspring,
         get_pair(parents, offspring, scratch, i, n, nvar,
                  &p1, &p2, &off1, &off2);
         if (!(rng_random(rng) < pair_prob)) {
-            memcpy(off1, p1, nvar * sizeof(*off1));
-            memcpy(off2, p2, nvar * sizeof(*off2));
+            copy_parents(off1, off2, p1, p2, nvar);
             continue;
         }
         for (size_t j = 0; j < nvar; j++) {
