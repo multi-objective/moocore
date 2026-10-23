@@ -262,6 +262,7 @@ class Bench:
         relative=False,
         xlabel="n",
         show_ci=False,
+        add_name=True,
     ):
         """Plots the results after running the benchmark one or more times.
 
@@ -366,7 +367,8 @@ class Bench:
                         ax.fill_between(x, y1, y2, where=valid, alpha=0.2)
 
             plt.title(f"({self.cpu_model})", fontsize=10)
-            plt.suptitle(f"{title} for {self.name}", fontsize=12)
+            suptitle = f"{title} for {self.name}" if add_name else title
+            plt.suptitle(suptitle, fontsize=12)
             save2png(f"{file_prefix}_bench-{self.name}-{file_suffix}.png")
 
         # CPU times.
