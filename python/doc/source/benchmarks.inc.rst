@@ -261,6 +261,87 @@ The following plots benchmark the speed of computing the :ref:`epsilon indicator
 
 
 
+Crossover operators
+-------------------
+
+The following plots compare the :ref:`crossover operators <variation_operators>` of `moocore`_ with the equivalent operators of `pymoo`_, `DEAP`_, `jMetalPy`_ and `DESDEO`_, when they exist. Each operator is timed for an increasing number of parents with 30 variables (left), and for an increasing number of variables with 100 parents (right). Each package receives the parents in its own data structure, which is created before the timing starts. When a package expects the caller to choose the other parents of DE or PCX, choosing them is part of the time. :func:`~moocore.blend_alpha_crossover` produces one offspring per pair, so it is called twice to produce as many offspring as the other packages. Single arithmetic, local and bounded exponential crossover are only available in `moocore`_ and `DESDEO`_.
+
+The script ``compare_crossover.py`` in the same folder compares the offspring of each operator with the offspring of the equivalent operators in the other packages. The distributions agree, except where the operators differ by design. The DE/rand/1/bin operator of `pymoo`_ forces a variable to come from the mutant only when no variable was chosen, instead of forcing a random variable in every offspring.  The ``DEX`` operator of `pymoo`_, which matches DE/current/1, multiplies the scaling factor by a random factor within :math:`1 \pm 5 \cdot 10^{-5}`.
+
+|xover_uniform_parents| |xover_uniform_vars|
+
+.. |xover_uniform_parents| image:: _static/bench/crossover_bench-uniform-nparents-time.png
+   :width: 48%
+
+.. |xover_uniform_vars| image:: _static/bench/crossover_bench-uniform-nvars-time.png
+   :width: 48%
+
+|xover_single_point_parents| |xover_single_point_vars|
+
+.. |xover_single_point_parents| image:: _static/bench/crossover_bench-single_point-nparents-time.png
+   :width: 48%
+
+.. |xover_single_point_vars| image:: _static/bench/crossover_bench-single_point-nvars-time.png
+   :width: 48%
+
+|xover_blend_alpha_parents| |xover_blend_alpha_vars|
+
+.. |xover_blend_alpha_parents| image:: _static/bench/crossover_bench-blend_alpha-nparents-time.png
+   :width: 48%
+
+.. |xover_blend_alpha_vars| image:: _static/bench/crossover_bench-blend_alpha-nvars-time.png
+   :width: 48%
+
+|xover_single_arithmetic_parents| |xover_single_arithmetic_vars|
+
+.. |xover_single_arithmetic_parents| image:: _static/bench/crossover_bench-single_arithmetic-nparents-time.png
+   :width: 48%
+
+.. |xover_single_arithmetic_vars| image:: _static/bench/crossover_bench-single_arithmetic-nvars-time.png
+   :width: 48%
+
+|xover_local_parents| |xover_local_vars|
+
+.. |xover_local_parents| image:: _static/bench/crossover_bench-local-nparents-time.png
+   :width: 48%
+
+.. |xover_local_vars| image:: _static/bench/crossover_bench-local-nvars-time.png
+   :width: 48%
+
+|xover_bounded_exponential_parents| |xover_bounded_exponential_vars|
+
+.. |xover_bounded_exponential_parents| image:: _static/bench/crossover_bench-bounded_exponential-nparents-time.png
+   :width: 48%
+
+.. |xover_bounded_exponential_vars| image:: _static/bench/crossover_bench-bounded_exponential-nvars-time.png
+   :width: 48%
+
+|xover_de_rand_1_bin_parents| |xover_de_rand_1_bin_vars|
+
+.. |xover_de_rand_1_bin_parents| image:: _static/bench/crossover_bench-de_rand_1_bin-nparents-time.png
+   :width: 48%
+
+.. |xover_de_rand_1_bin_vars| image:: _static/bench/crossover_bench-de_rand_1_bin-nvars-time.png
+   :width: 48%
+
+|xover_de_current_1_parents| |xover_de_current_1_vars|
+
+.. |xover_de_current_1_parents| image:: _static/bench/crossover_bench-de_current_1-nparents-time.png
+   :width: 48%
+
+.. |xover_de_current_1_vars| image:: _static/bench/crossover_bench-de_current_1-nvars-time.png
+   :width: 48%
+
+|xover_parent_centric_parents| |xover_parent_centric_vars|
+
+.. |xover_parent_centric_parents| image:: _static/bench/crossover_bench-parent_centric-nparents-time.png
+   :width: 48%
+
+.. |xover_parent_centric_vars| image:: _static/bench/crossover_bench-parent_centric-nvars-time.png
+   :width: 48%
+
+
+
 .. _BoFire: https://experimental-design.github.io/bofire/
 .. _BoTorch: https://botorch.org/
 .. _DEAP: https://deap.readthedocs.io/en/master/
