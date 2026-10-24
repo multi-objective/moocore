@@ -4,10 +4,12 @@
 This script compares the offspring of the crossover operators in ``moocore``
 with the offspring of the equivalent operators in other packages.
 
-Each operator crosses over the same parents many times.  For each decision
-variable, a two-sample Kolmogorov-Smirnov test compares the offspring of each
-package with those of ``moocore``.  The bounds are wide enough that they never
-bind, so the comparison does not depend on how each package handles them.
+Each operator crosses over the same parents many times in each package.  For
+every pair of packages and every decision variable, a two-sample
+Kolmogorov-Smirnov test compares their offspring.  The script prints, and saves
+to ``crossover_ks-<operator>.csv``, a matrix with the smallest p-value over the
+variables for every pair of packages.  The bounds are wide enough that they
+never bind, so the comparison does not depend on how each package handles them.
 
 """
 
@@ -40,7 +42,7 @@ from pymoo.operators.crossover.pcx import PCX
 from pymoo.operators.crossover.pntx import SinglePointCrossover
 from pymoo.operators.crossover.ux import UniformCrossover
 
-N = 20_000
+N = 100_000
 LOWER, UPPER = -10.0, 10.0
 # Two parents, and a population whose first row is the target.
 A = np.array([0.2, 0.7, 0.95])
@@ -302,44 +304,41 @@ comparisons = {
     ),
 }
 
-# Known differences from moocore.
-notes = {
-    ("single_point", "desdeo"): "Binary variables only.",
-    ("blend_alpha", "deap"): "Two mirrored offspring per pair, no bounds.",
-    ("blend_alpha", "jMetalPy"): "Clips each sample instead of the interval.",
-    (
-        "de_rand_1_bin",
-        "pymoo",
-    ): "Forces a mutant variable only when none was chosen, instead of a random one in every offspring.",
-    (
-        "de_current_1",
-        "pymoo",
-    ): "Multiplies F by a random factor within 1 +/- 5e-5.",
-    (
-        "de_current_1",
-        "jMetalPy",
-    ): "Forces a mutant variable, so it differs when CR < 1.",
-}
 
-print(
-    "| Operator | Package | Offspring | Smallest KS p-value "
-    "| Largest mean difference / sd | sd ratio | Notes |"
-)
-print("|---|---|---|---|---|---|---|")
+def ks_matrix(samples):
+    """Smallest KS p-value over the variables, for every pair of packages."""
+    names = list(samples)
+    p = np.full((len(names), len(names)), np.nan)
+    for i, a in enumerate(names):
+        for j, b in enumerate(names[i + 1 :], start=i + 1):
+            x, y = samples[a], samples[b]
+            p[i, j] = p[j, i] = min(
+                ks_2samp(x[:, k], y[:, k]).pvalue for k in range(x.shape[1])
+            )
+    return names, p
+
+
+def fmt(p):
+    if np.isnan(p):
+        return ""
+    return "<0.001" if p < 0.001 else f"{p:.3f}"
+
+
 for op, (ours, others) in comparisons.items():
-    ours = np.asarray(ours, dtype=float)
-    for package, theirs in others.items():
-        theirs = np.asarray(theirs, dtype=float)
-        nvar = ours.shape[1]
-        pvalues = [
-            ks_2samp(ours[:, j], theirs[:, j]).pvalue for j in range(nvar)
-        ]
-        sd = ours.std(axis=0)
-        sd = np.where(sd > 0, sd, 1)
-        mean_diff = np.abs(ours.mean(axis=0) - theirs.mean(axis=0)) / sd
-        sd_ratio = theirs.std(axis=0) / sd
-        print(
-            f"| {op} | {package} | {len(theirs)} | {min(pvalues):.3f} | "
-            f"{mean_diff.max():.3f} | {sd_ratio.min():.3f}-{sd_ratio.max():.3f} | "
-            f"{notes.get((op, package), '')} |"
-        )
+    samples = {"moocore": np.asarray(ours, dtype=float)}
+    samples.update({k: np.asarray(v, dtype=float) for k, v in others.items()})
+    names, p = ks_matrix(samples)
+    rows = [
+        ["", *names],
+        *(
+            [a, *[fmt(p[i, j]) for j in range(len(names))]]
+            for i, a in enumerate(names)
+        ),
+    ]
+    with open(f"crossover_ks-{op}.csv", "w") as f:
+        for row in rows:
+            f.write(",".join(f'"{cell}"' for cell in row) + "\n")
+    print(f"# {op}")
+    for row in rows:
+        print(" | ".join(f"{cell:>8}" for cell in row))
+    print()
