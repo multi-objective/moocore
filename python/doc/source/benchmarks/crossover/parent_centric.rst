@@ -7,9 +7,7 @@ Parent-centric crossover (PCX)
 target, from two more parents chosen at random.  `pymoo`_ (``PCX``) and
 `DESDEO`_ (``ParentCentricCrossover``) provide the same operator.  `pymoo`_
 replaces values outside the bounds by random values, while `moocore`_ and
-`DESDEO`_ clip them.  The KS tests use bounds that never bind.  The PCX of
-`platypus`_ keeps the offspring in the plane of the three parents and has half
-the spread, so it is a different operator.
+`DESDEO`_ clip them.
 
 KS test results
 ---------------

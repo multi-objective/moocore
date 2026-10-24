@@ -5,9 +5,7 @@ Local crossover
 
 :func:`~moocore.local_crossover` draws a random weight for each variable and
 sets the two offspring to the two weighted averages of the parents.  Only
-`DESDEO`_ (``LocalCrossover``) provides this operator.  The
-``ArithmeticCrossover`` of `jMetalPy`_ draws one weight for all the variables,
-so it is a different operator.
+`DESDEO`_ (``LocalCrossover``) provides this operator.
 
 KS test results
 ---------------
