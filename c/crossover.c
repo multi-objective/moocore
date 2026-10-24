@@ -228,10 +228,11 @@ local_crossover(double * restrict offspring, const double * restrict parents,
     rng_free(rng);
 }
 
-/* Offspring value of parent value X.  It moves X by BETA * SPAN, where BETA
-   follows a two-sided exponential distribution with scale SCALE, truncated so
-   that the offspring stays within [LOWER, UPPER].  U and R are uniform in
-   [0, 1).  */
+/* Offspring value of parent value X.  It moves X by BETA * SPAN.  BETA is
+   negative or positive with probability 1/2 each.  On each side, it follows
+   an exponential distribution with scale SCALE, truncated at the bound on
+   that side, so the offspring stays within [LOWER, UPPER].  U and R are
+   uniform in [0, 1).  */
 static inline double
 bex_offspring(double x, double span, double lower, double upper, double scale,
           double u, double r)
