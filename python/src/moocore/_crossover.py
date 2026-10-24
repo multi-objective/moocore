@@ -50,6 +50,14 @@ def _bounds(
     return np.ascontiguousarray(lower), np.ascontiguousarray(upper)
 
 
+def _check_within_bounds(
+    parents: np.ndarray, lower: np.ndarray, upper: np.ndarray
+) -> None:
+    # NaN fails both comparisons, so it is rejected too.
+    if not np.all((parents >= lower) & (parents <= upper)):
+        raise ValueError("'parents' must be within 'lower' and 'upper'")
+
+
 def _targets(targets: ArrayLike | None, n: int) -> np.ndarray:
     if targets is None:
         return np.arange(n, dtype=np.uintp)
@@ -264,7 +272,7 @@ def blend_alpha_crossover(
     Parameters
     ----------
     parents :
-        ${parents}
+        ${parents}  Every value must be within the bounds.
     lower :
         ${lower_bound}
     upper :
@@ -290,9 +298,11 @@ def blend_alpha_crossover(
 
     Notes
     -----
-    BLX-:math:`\alpha` was proposed by :footcite:t:`EshSch1992`.  Each variable
-    is sampled independently, so the offspring fill the whole (clipped) box
-    around the parents.
+    BLX-:math:`\alpha` was proposed by :footcite:t:`EshSch1992`, who recommend
+    :math:`\alpha = 0.5` because it makes an offspring as likely to lie outside
+    its parents as between them.  Each variable is sampled independently, so
+    the offspring fill the whole (clipped) box around the parents.  Eshelman
+    and Schaffer do not handle bounds, and they produce two offspring per pair.
 
     To produce more than one offspring per pair, call the function again.  If
     ``seed`` is an integer, every call returns the same offspring.  Pass the
@@ -315,6 +325,7 @@ def blend_alpha_crossover(
     """
     parents = _as_matrix(parents, "parents", min_rows=2)
     lower, upper = _bounds(lower, upper, parents.shape[1])
+    _check_within_bounds(parents, lower, upper)
     if not alpha >= 0:
         raise ValueError("'alpha' must be non-negative")
     pair_prob = _check_probability(pair_prob, "pair_prob")
@@ -365,8 +376,12 @@ def single_arithmetic_crossover(
 
     Notes
     -----
-    This operator is described by :footcite:t:`EibSmi2003` and compared with
-    other real-coded crossover operators by Picek, Jakobovic and Golub (2013).
+    :footcite:t:`EibSmi2003` describe single arithmetic recombination with a
+    weight :math:`\alpha`, where one offspring gets :math:`\alpha y_k + (1 -
+    \alpha) x_k` and the other gets :math:`\alpha x_k + (1 - \alpha) y_k`.
+    This function is their example with :math:`\alpha = 1/2`, where both
+    offspring get the average.  Picek, Jakobovic and Golub (2013) compare it
+    with other real-coded crossover operators.
 
     References
     ----------
@@ -487,18 +502,18 @@ def bounded_exponential_crossover(
     .. math::
         u_j = x_j + \beta_j^x d_j, \qquad v_j = y_j + \beta_j^y d_j,
 
-    where :math:`\beta_j^x` follows an exponential distribution with scale
-    :math:`\lambda` (``scale``), truncated so that :math:`u_j` stays within
-    the bounds of the variable.  With probability 1/2, an offspring moves
-    towards the lower bound :math:`l_j`, with :math:`\beta = \lambda \ln(e_l +
-    r(1 - e_l))` and :math:`e_l = \exp((l_j - x_j) / (\lambda d_j))`.
-    Otherwise, it moves towards the upper bound :math:`h_j`, with :math:`\beta
-    = -\lambda \ln(1 - r(1 - e_h))` and :math:`e_h = \exp((x_j - h_j) /
-    (\lambda d_j))`.
-    The uniform random number :math:`r` and the direction are shared by both
-    offspring.  Variables where the parents are equal are copied.  After
-    that, each variable is swapped between the two offspring with probability
-    ``swap_prob``, as in :func:`uniform_crossover`.
+    where :math:`\beta_j^x` is negative or positive with probability 1/2 each.
+    On each side, it follows an exponential distribution with scale
+    :math:`\lambda` (``scale``), truncated at the bound on that side, so that
+    :math:`u_j` stays within the bounds of the variable.  Towards the lower
+    bound :math:`l_j`, :math:`\beta = \lambda \ln(e_l + r(1 - e_l))` with
+    :math:`e_l = \exp((l_j - x_j) / (\lambda d_j))`.  Towards the upper bound
+    :math:`h_j`, :math:`\beta = -\lambda \ln(1 - r(1 - e_h))` with :math:`e_h =
+    \exp((x_j - h_j) / (\lambda d_j))`.  The uniform random number :math:`r`
+    and the direction are shared by both offspring.  Variables where the
+    parents are equal are copied.  After that, each variable is swapped between
+    the two offspring with probability ``swap_prob``, as in
+    :func:`uniform_crossover`.
 
     Otherwise, with probability ``1 - pair_prob``, the offspring are copies of
     their parents.
@@ -529,7 +544,13 @@ def bounded_exponential_crossover(
     -----
     BEX was proposed by Thakur, Meghwani and Jalota (2014) as a bounded
     version of the Laplace crossover of Deep and Thakur (2007).  Without
-    bounds, :math:`\beta` follows a Laplace distribution.
+    bounds, :math:`\beta` follows a Laplace distribution.  A parent that sits
+    on a bound is copied with probability 1/2, as in the paper.
+
+    The swap of variables (``swap_prob``) is not part of the original operator.
+    Thakur, Meghwani and Jalota tuned :math:`\lambda = 0.65` and a crossover
+    probability of 0.5 for their genetic algorithm.  The defaults here keep
+    the offspring closer to their parents and cross over every pair.
 
     References
     ----------
@@ -551,8 +572,7 @@ def bounded_exponential_crossover(
     """
     parents = _as_matrix(parents, "parents", min_rows=2)
     lower, upper = _bounds(lower, upper, parents.shape[1])
-    if np.any(parents < lower) or np.any(parents > upper):
-        raise ValueError("'parents' must be within 'lower' and 'upper'")
+    _check_within_bounds(parents, lower, upper)
     scale = _check_positive(scale, "scale")
     swap_prob = _check_probability(swap_prob, "swap_prob")
     pair_prob = _check_probability(pair_prob, "pair_prob")
@@ -618,9 +638,10 @@ def de_rand_1_bin_crossover(
 
     Notes
     -----
-    This is the DE/rand/1/bin scheme of :footcite:t:`StoPri1997:de`, who
-    recommend :math:`F = 0.5` as a first choice and suggest trying
-    :math:`CR = 0.9` first.
+    This is the DE/rand/1/bin scheme of :footcite:t:`StoPri1997:de`.  They
+    recommend :math:`F = 0.5` as a first choice.  They call :math:`CR = 0.1` a
+    good first choice, but suggest first trying :math:`CR = 0.9` or 1.0 to see
+    whether a quick solution is possible, which gives the default here.
     Multi-objective DE algorithms such as GDE3 :footcite:p:`KukLam2005:gde3`
     and DEMO :footcite:p:`RobFil05demo` use this variant
     :footcite:p:`BezLopStu2015emode`.
@@ -688,8 +709,9 @@ def de_current_1_crossover(
     Parameters
     ----------
     population :
-        ${population}  In MOEA/D, this is the neighbourhood of the subproblem,
-        and ``targets`` gives the row of the subproblem's current solution.
+        ${population}  In MOEA/D-DE, this is the neighbourhood of the
+        subproblem or, with a small probability, the whole population, and
+        ``targets`` gives the row of the subproblem's current solution.
     targets :
         ${targets}
     lower :
@@ -722,6 +744,10 @@ def de_current_1_crossover(
     Li and Zhang do not name the mutation step.  Tanabe and Ishibuchi (2019)
     call it the current/1 strategy, a term introduced by Gong et al. (2017),
     and find it in the source code of MOEA/D-DE, MOEA/D-DRA and MOEA/D-STM.
+
+    Li and Zhang do not require the two donors to differ.  This function draws
+    two distinct donors, either of which may be the target, as their C++ code
+    does according to Tanabe and Ishibuchi (2019).
 
     Li and Zhang reset values outside the bounds to a random value within
     them.  Their own implementation clips them instead, which is what this
@@ -824,14 +850,15 @@ def parent_centric_crossover(
 
     Notes
     -----
-    PCX was proposed by Deb, Anand and Joshi (2002).  Their equation (2)
-    writes the step orthogonal to :math:`d` as a sum of normal steps along
-    :math:`\mu - 1` orthonormal vectors, where :math:`\mu` is the number of
-    parents.  Like pymoo, which bases its implementation on the authors' C
-    code, this function projects an isotropic normal vector onto the whole
-    subspace orthogonal to :math:`d`, so the offspring is not restricted to
-    the plane of the three parents.  If :math:`x` is (almost) the centroid,
-    the projection is skipped.
+    PCX was proposed by Deb, Anand and Joshi (2002), who use three parents and
+    :math:`\sigma_\zeta = \sigma_\eta = 0.1`.  Their equation (2) writes the
+    step orthogonal to :math:`d` as a sum of normal steps along :math:`\mu - 1`
+    orthonormal vectors, where :math:`\mu` is the number of parents.  Like
+    pymoo, which bases its implementation on the authors' C code, this
+    function projects an isotropic normal vector onto the whole subspace
+    orthogonal to :math:`d`, so the step covers every direction orthogonal to
+    :math:`d`, not only :math:`\mu - 1` of them.  If :math:`x` is (almost) the
+    centroid, the projection is skipped.
 
     References
     ----------
