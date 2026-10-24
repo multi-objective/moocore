@@ -12,6 +12,7 @@ Version 0.4.0
 - :func:`~moocore.is_nondominated` is up to 10x faster in some inputs thanks to a customized radixsort implementation.
 - New shapes ``"cliff-concave"`` and ``"cliff-convex"`` added to :func:`~moocore.generate_ndset`.
 - New function :func:`~moocore.generate_sequence` to generate sequences of dominated and nondominated points.
+- New :ref:`crossover operators <variation_operators>`: :func:`~moocore.uniform_crossover`, :func:`~moocore.single_point_crossover`, :func:`~moocore.blend_alpha_crossover`, :func:`~moocore.single_arithmetic_crossover`, :func:`~moocore.local_crossover`, :func:`~moocore.bounded_exponential_crossover`, :func:`~moocore.de_rand_1_bin_crossover`, :func:`~moocore.de_current_1_crossover` and :func:`~moocore.parent_centric_crossover`.
 
 
 Version 0.3.2 (11/07/2026)
