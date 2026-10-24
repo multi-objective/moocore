@@ -1,0 +1,539 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Archiving Benchmarks &#8212; moocore 0.4.0.dev0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=c83e6b79" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=79fc01cf" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
+
+    <script src="_static/documentation_options.js?v=c2d0aac2"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=317740d0"></script>
+    <script src="_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'benchmarks_archiving';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.4.0.dev0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">moocore 0.4.0.dev0</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="whatsnew/index.html">
+    What’s new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/multi-objective/moocore" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/moocore" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="whatsnew/index.html">
+    What’s new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/multi-objective/moocore" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/moocore" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Archiving Benchmarks</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="archiving-benchmarks">
+<span id="benchmarks-archiving"></span><h1>Archiving Benchmarks<a class="headerlink" href="#archiving-benchmarks" title="Link to this heading">#</a></h1>
+<p>The following plots compare the performance of archiving algorithms in <a class="reference external" href="https://multi-objective.github.io/moocore/python/">moocore</a> and <a class="reference external" href="https://cma-es.github.io/moarchiving/">moarchiving</a>.</p>
+<p>The sequences are generated using <a class="reference internal" href="reference/generated/moocore.generate_ndset.html#moocore.generate_ndset" title="moocore.generate_ndset"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_ndset()</span></code></a> and <a class="reference internal" href="reference/generated/moocore.generate_sequence.html#moocore.generate_sequence" title="moocore.generate_sequence"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_sequence()</span></code></a>.</p>
+<p>The source code for the benchmarks below can be found at <a class="github reference external" href="https://github.com/multi-objective/moocore/tree/main/python/benchmarks">multi-objective/moocore</a> .</p>
+<section id="unbounded-archiving">
+<h2>Unbounded Archiving<a class="headerlink" href="#unbounded-archiving" title="Link to this heading">#</a></h2>
+<p>This benchmark compares <a class="reference internal" href="reference/generated/moocore.UnboundedArchive.html#moocore.UnboundedArchive" title="moocore.UnboundedArchive"><code class="xref py py-func docutils literal notranslate"><span class="pre">UnboundedArchive()</span></code></a> and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">get_mo_archive()</span></code>.  Each archive is given the number of
+points in the x-axis, one at a time. We measure the CPU time required to
+archive the whole sequence of points and divide it by the number of points,
+which gives an estimation of the time to process each point for different input
+sizes.  In addition, the plots show the total time required by
+<a class="reference internal" href="reference/generated/moocore.filter_dominated.html#moocore.filter_dominated" title="moocore.filter_dominated"><code class="xref py py-func docutils literal notranslate"><span class="pre">filter_dominated()</span></code></a> to process the input sequence. The time
+required by <a class="reference internal" href="reference/generated/moocore.filter_dominated.html#moocore.filter_dominated" title="moocore.filter_dominated"><code class="xref py py-func docutils literal notranslate"><span class="pre">filter_dominated()</span></code></a> can be seen as an upper-bound.</p>
+<section id="d">
+<h3>2D<a class="headerlink" href="#d" title="Link to this heading">#</a></h3>
+<p><a class="reference internal" href="_images/unbarchive_add_bench-glas2017,c=0.5-2d-time.png"><img alt="unbarchive_add_bench-glas2017,c=0.5-2d-time" src="_images/unbarchive_add_bench-glas2017%2Cc%3D0.5-2d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/unbarchive_add_bench-glas2017,c=2.0-2d-time.png"><img alt="unbarchive_add_bench-glas2017,c=2.0-2d-time" src="_images/unbarchive_add_bench-glas2017%2Cc%3D2.0-2d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/unbarchive_add_bench-hypercube-uniform-2d-time.png"><img alt="unbarchive_add_bench-hypercube-uniform-2d-time" src="_images/unbarchive_add_bench-hypercube-uniform-2d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/unbarchive_add_bench-hypercube-uniform-rep4-2d-time.png"><img alt="unbarchive_add_bench-hypercube-uniform-rep4-2d-time" src="_images/unbarchive_add_bench-hypercube-uniform-rep4-2d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/unbarchive_add_bench-hypercube-ndsort=-1-2d-time.png"><img alt="unbarchive_add_bench-hypercube-ndsort=-1-2d-time" src="_images/unbarchive_add_bench-hypercube-ndsort%3D-1-2d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/unbarchive_add_bench-hypercube-ndsort=1-2d-time.png"><img alt="unbarchive_add_bench-hypercube-ndsort=1-2d-time" src="_images/unbarchive_add_bench-hypercube-ndsort%3D1-2d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/unbarchive_add_bench-inverted-simplex-2d-time.png"><img alt="unbarchive_add_bench-inverted-simplex-2d-time" src="_images/unbarchive_add_bench-inverted-simplex-2d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/unbarchive_add_bench-within-concave-sphere-2d-time.png"><img alt="unbarchive_add_bench-within-concave-sphere-2d-time" src="_images/unbarchive_add_bench-within-concave-sphere-2d-time.png" style="width: 49%;" /></a></p>
+</section>
+<section id="id1">
+<h3>3D<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<p><a class="reference internal" href="_images/unbarchive_add_bench-glas2017,c=0.5-3d-time.png"><img alt="unbarchive_add_bench-glas2017,c=0.5-3d-time" src="_images/unbarchive_add_bench-glas2017%2Cc%3D0.5-3d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/unbarchive_add_bench-glas2017,c=2.0-3d-time.png"><img alt="unbarchive_add_bench-glas2017,c=2.0-3d-time" src="_images/unbarchive_add_bench-glas2017%2Cc%3D2.0-3d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/unbarchive_add_bench-hypercube-uniform-3d-time.png"><img alt="unbarchive_add_bench-hypercube-uniform-3d-time" src="_images/unbarchive_add_bench-hypercube-uniform-3d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/unbarchive_add_bench-hypercube-uniform-rep4-3d-time.png"><img alt="unbarchive_add_bench-hypercube-uniform-rep4-3d-time" src="_images/unbarchive_add_bench-hypercube-uniform-rep4-3d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/unbarchive_add_bench-hypercube-ndsort=-1-3d-time.png"><img alt="unbarchive_add_bench-hypercube-ndsort=-1-3d-time" src="_images/unbarchive_add_bench-hypercube-ndsort%3D-1-3d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/unbarchive_add_bench-hypercube-ndsort=1-3d-time.png"><img alt="unbarchive_add_bench-hypercube-ndsort=1-3d-time" src="_images/unbarchive_add_bench-hypercube-ndsort%3D1-3d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/unbarchive_add_bench-inverted-simplex-3d-time.png"><img alt="unbarchive_add_bench-inverted-simplex-3d-time" src="_images/unbarchive_add_bench-inverted-simplex-3d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/unbarchive_add_bench-within-concave-sphere-3d-time.png"><img alt="unbarchive_add_bench-within-concave-sphere-3d-time" src="_images/unbarchive_add_bench-within-concave-sphere-3d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/unbarchive_add_bench-cliff-concave-3d-time.png"><img alt="unbarchive_add_bench-cliff-concave-3d-time" src="_images/unbarchive_add_bench-cliff-concave-3d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/unbarchive_add_bench-cliff-convex-3d-time.png"><img alt="unbarchive_add_bench-cliff-convex-3d-time" src="_images/unbarchive_add_bench-cliff-convex-3d-time.png" style="width: 49%;" /></a></p>
+</section>
+<section id="id2">
+<h3>4D<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<p><a class="reference internal" href="_images/unbarchive_add_bench-glas2017,c=0.5-4d-time.png"><img alt="unbarchive_add_bench-glas2017,c=0.5-4d-time" src="_images/unbarchive_add_bench-glas2017%2Cc%3D0.5-4d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/unbarchive_add_bench-glas2017,c=2.0-4d-time.png"><img alt="unbarchive_add_bench-glas2017,c=2.0-4d-time" src="_images/unbarchive_add_bench-glas2017%2Cc%3D2.0-4d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/unbarchive_add_bench-hypercube-uniform-4d-time.png"><img alt="unbarchive_add_bench-hypercube-uniform-4d-time" src="_images/unbarchive_add_bench-hypercube-uniform-4d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/unbarchive_add_bench-hypercube-uniform-rep4-4d-time.png"><img alt="unbarchive_add_bench-hypercube-uniform-rep4-4d-time" src="_images/unbarchive_add_bench-hypercube-uniform-rep4-4d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/unbarchive_add_bench-hypercube-ndsort=-1-4d-time.png"><img alt="unbarchive_add_bench-hypercube-ndsort=-1-4d-time" src="_images/unbarchive_add_bench-hypercube-ndsort%3D-1-4d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/unbarchive_add_bench-hypercube-ndsort=1-4d-time.png"><img alt="unbarchive_add_bench-hypercube-ndsort=1-4d-time" src="_images/unbarchive_add_bench-hypercube-ndsort%3D1-4d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/unbarchive_add_bench-inverted-simplex-4d-time.png"><img alt="unbarchive_add_bench-inverted-simplex-4d-time" src="_images/unbarchive_add_bench-inverted-simplex-4d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/unbarchive_add_bench-within-concave-sphere-4d-time.png"><img alt="unbarchive_add_bench-within-concave-sphere-4d-time" src="_images/unbarchive_add_bench-within-concave-sphere-4d-time.png" style="width: 49%;" /></a></p>
+<p><a class="reference internal" href="_images/unbarchive_add_bench-cliff-concave-4d-time.png"><img alt="unbarchive_add_bench-cliff-concave-4d-time" src="_images/unbarchive_add_bench-cliff-concave-4d-time.png" style="width: 49%;" /></a> <a class="reference internal" href="_images/unbarchive_add_bench-cliff-convex-4d-time.png"><img alt="unbarchive_add_bench-cliff-convex-4d-time" src="_images/unbarchive_add_bench-cliff-convex-4d-time.png" style="width: 49%;" /></a></p>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#unbounded-archiving">Unbounded Archiving</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#d">2D</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">3D</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">4D</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
