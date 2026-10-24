@@ -400,6 +400,14 @@ def test_errors_operator_specific():
         moocore.bounded_exponential_crossover(
             [[0.5, 2.0], [0.2, 0.3]], lower=0, upper=1
         )
+    with pytest.raises(ValueError, match=r"within 'lower' and 'upper'"):
+        moocore.bounded_exponential_crossover(
+            [[np.nan, 0.5], [0.2, 0.3]], lower=0, upper=1
+        )
+    with pytest.raises(ValueError, match=r"within 'lower' and 'upper'"):
+        moocore.blend_alpha_crossover(
+            [[1.5, 2.0], [0.2, 0.3]], lower=0, upper=1
+        )
 
 
 @pytest.mark.parametrize("name", POPULATION_OPERATORS)
