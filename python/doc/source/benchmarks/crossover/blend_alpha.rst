@@ -16,7 +16,7 @@ offspring from `DESDEO`_, whose offspring are independent.  The timings call
 
 The packages handle bounds differently.  `moocore`_ and `DESDEO`_ clip the
 sampling interval to the bounds, `jMetalPy`_ clips each sampled value, and
-`DEAP`_ ignores the bounds.  The KS tests use bounds that never bind.
+`DEAP`_ ignores the bounds.
 
 KS test results
 ---------------
@@ -47,9 +47,6 @@ Performance over number of variables
    :width: 80%
 
 With 2 variables, `DEAP`_ is faster than `moocore`_.  With more variables,
-`moocore`_ is the fastest.  With 1000 variables, `DEAP`_, `DESDEO`_ and
-`jMetalPy`_ take 6.8, 8.1 and 170 times as long.  The time of `jMetalPy`_ grows
-much faster than linearly with the number of variables, because its solutions
-copy their list of variables on every access.
+`moocore`_ is the fastest.
 
 .. include:: /benchmarks-links.inc.rst

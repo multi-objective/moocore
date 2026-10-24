@@ -14,19 +14,13 @@ bounds wide enough that they never bind, so the results do not depend on how
 each package handles bounds.  For every pair of packages and every decision
 variable, a two-sample Kolmogorov-Smirnov test compares their offspring.  Each
 table shows the smallest p-value over the variables.  A p-value below 0.001
-means that the distributions differ.  Among this many tests, a few p-values
-between 0.001 and 0.05 are expected even when the distributions are equal.
-Rerunning with other random seeds moves those values, whereas real differences
-stay below 0.001.
+means that the distributions differ.
 
 The performance plots time each operator for an increasing number of parents
 with 30 variables, and for an increasing number of variables with 100 parents.
 Each package receives the parents in its own data structure, which is created
 before the timing starts.  When a package expects the caller to choose the
 other parents of DE or PCX, choosing them is part of the time.
-
-The scripts ``compare_crossover.py`` and ``bench_crossover.py`` produce the
-tables and the plots.
 
 .. toctree::
    :maxdepth: 1

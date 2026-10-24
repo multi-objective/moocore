@@ -5,8 +5,7 @@ Bounded exponential crossover (BEX)
 
 :func:`~moocore.bounded_exponential_crossover` moves each offspring away from
 its parent by a random step that follows an exponential distribution truncated
-at the bounds.  Only `DESDEO`_ (``BoundedExponentialCrossover``) provides this
-operator.
+at the bounds.
 
 KS test results
 ---------------
