@@ -1819,7 +1819,7 @@ def eaf(
     sets :
         ${sets_of_points}
     percentiles :
-        List indicating which percentiles are computed. By default, all possible percentiles are calculated.
+        Percentiles to be computed (values between 0 and 100). By default, all possible percentiles are calculated.
 
     Returns
     -------

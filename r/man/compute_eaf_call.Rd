@@ -16,7 +16,7 @@ a point. If \code{sets} is missing, the last column of \code{x} gives the sets.}
 \item{cumsizes}{\code{integer()}\cr Cumulative size of the different sets of points in \code{x}.}
 
 \item{percentiles}{\code{numeric()}\cr Vector indicating which percentiles are
-computed.  \code{NULL} computes all.}
+computed (values between 0 and 100).  \code{NULL} computes all.}
 }
 \value{
 \code{data.frame()}\cr A data frame containing the exact representation

@@ -15,7 +15,7 @@ a point. If \code{sets} is missing, the last column of \code{x} gives the sets.}
 \code{x}. If missing, the last column of \code{x} is used instead.}
 
 \item{percentiles}{\code{numeric()}\cr Vector indicating which percentiles are
-computed.  \code{NULL} computes all.}
+computed (values between 0 and 100).  \code{NULL} computes all.}
 
 \item{maximise}{\code{logical()}\cr Whether the objectives must be maximised
 instead of minimised. Either a single logical value that applies to all

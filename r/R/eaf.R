@@ -11,7 +11,7 @@
 #'   `x`. If missing, the last column of `x` is used instead.
 #'
 #' @param percentiles `numeric()`\cr Vector indicating which percentiles are
-#'   computed.  `NULL` computes all.
+#'   computed (values between 0 and 100).  `NULL` computes all.
 #'
 #' @inheritParams is_nondominated
 #'
