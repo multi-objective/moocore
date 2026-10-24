@@ -23,7 +23,10 @@ def check_unused_images(app, exception):
             if "://" in uri or uri.startswith("data:"):
                 continue
 
+            # Sphinx stores the URI relative to the source directory, which is
+            # not the folder of the document for documents in subfolders.
             used.add((document.parent / uri).resolve())
+            used.add((Path(app.srcdir) / uri).resolve())
 
     for image in Path(app.srcdir).rglob("*.png"):
         if "auto_examples" in image.parts:

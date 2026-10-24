@@ -10,6 +10,7 @@ moocore: Core Algorithms for Multi-Objective Optimization
 
    API reference <reference/index>
    Examples <auto_examples/index>
+   Benchmarks <benchmarks/index>
    whatsnew/index
    contribute/index
 
@@ -63,7 +64,8 @@ performance measures, performance assessment
 
         Detailed examples and tutorials.
 
-.. include:: benchmarks.inc.rst
+The :ref:`benchmarks <benchmarks>` compare the speed of moocore with other
+Python packages.
 
 
 .. This is not really the index page, that is found in
