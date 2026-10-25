@@ -1,7 +1,9 @@
 name: Cleanup docs preview
 
 on:
-  pull_request:
+  # pull_request_target runs from the base repo with a write token, also for
+  # fork PRs. It is safe here because no PR code is checked out or executed.
+  pull_request_target:
     types: [closed]
 
 permissions:
@@ -11,16 +13,15 @@ jobs:
   cleanup:
     name: Remove docs preview for closed PR
     runs-on: ubuntu-latest
-    # Only run for same-repo PRs; fork PRs never get a preview deployed
-    if: github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - uses: actions/checkout@v6
         with:
           ref: gh-pages
 
       - name: Remove preview folder
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          PR_NUMBER="${{ github.event.pull_request.number }}"
           PREVIEW_DIR="previews/pr-${PR_NUMBER}"
           if [ -d "${PREVIEW_DIR}" ]; then
             git rm -rf "${PREVIEW_DIR}"
