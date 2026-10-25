@@ -12,6 +12,7 @@ from typing import Any
 
 import os
 import platform
+import shlex
 from cffi import FFI
 
 DEBUG = 0  # Default value.
@@ -70,23 +71,22 @@ def uses_msvc() -> bool:  # nocov
     )
 
 
-def _get_target_platform() -> str:
-    arch_flags = os.environ.get("ARCHFLAGS", "")
-    flags = [f for f in arch_flags.split(" ") if f.strip() != ""]
-    try:
-        pos = flags.index("-arch")
-        return flags[pos + 1].lower()
-    except ValueError:
-        pass
-
-    return platform.machine()
+def _get_target_platforms() -> list[str]:
+    flags = shlex.split(os.environ.get("ARCHFLAGS", ""))
+    archs = [
+        flags[i + 1].lower()
+        for i, flag in enumerate(flags[:-1])
+        if flag == "-arch" and not flags[i + 1].startswith("-")
+    ]
+    return archs if archs else [platform.machine().lower()]
 
 
 is_windows = platform.system() == "Windows"
 is_macos = platform.system() == "Darwin"
 
-target_platform = _get_target_platform()
-is_x86_64 = target_platform in ("i686", "x86", "x86_64", "AMD64")
+target_platforms = _get_target_platforms()
+is_x86_64 = any(arch in {"x86_64", "amd64"} for arch in target_platforms)
+is_arm64 = any(arch in {"arm64", "aarch64"} for arch in target_platforms)
 
 # Compiler flags.
 MSVC_CFLAGS = [
@@ -110,6 +110,10 @@ if is_x86_64:
     # Compile for sufficiently old x86-64 architecture.
     MSVC_arch = ["/arch:AVX"]
     GCC_arch = ["-march=x86-64-v2"]
+elif is_arm64:
+    # FIXME: Add equivalent is_arm64 flags.
+    MSVC_arch = []
+    GCC_arch = ["-march=armv8-a"]
 else:
     MSVC_arch = []
     GCC_arch = []
