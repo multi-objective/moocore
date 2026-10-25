@@ -89,7 +89,7 @@ def generate_ndset(
 
       It corresponds to translating points from the negative orthant of the hypersphere to the positive orthant. Thus, the sampling remains uniform.
 
-    ``cliff-concave``
+    ``concave-cliff``
       Equivalent to generating a 2D set using ``method='concave-sphere'``, then
       generating the other :math:`d-2` columns uniformly at random within the
       unit hypercube :footcite:p:`EmmFon2011emo,GueFon2017hv4d`.
@@ -105,10 +105,12 @@ def generate_ndset(
       chosen adversarially according to the algorithm being tested.
       Alternatively, the columns may be randomly shuffled using :func:`numpy.random.shuffle`.
 
-    ``cliff-convex``
-      Equivalent to ``1 - generate_ndset(..., method='cliff-concave')``.
+    ``convex-cliff``
+      Equivalent to ``1 - generate_ndset(..., method='concave-cliff')``.
       This method does not make sense for ``d=2``.
 
+    ``'concave-simplex'``
+      Equivalent to ``1 - generate_ndset(..., method='convex-simplex')``, which is concave for minimisation problems. This shape has also been called *inverted concave* :footcite:p:`IshHeSha2019regular`.  This sampling is *not* uniform because ``method='convex-simplex'`` is not uniform.
 
     ``'convex-simplex'``
       Equivalent to :code:`generate_ndset(..., method='simplex') ** 2`, which is convex for minimisation problems.
@@ -118,9 +120,6 @@ def generate_ndset(
       origin.  The generated points :math:`\vec{z} \in (0,1)^d \subset
       \mathbb{R}^d` satisfy :math:`\sum_{i=1}^d \sqrt{z_i} = 1`.  Although
       the sampling on the simplex is uniform, the transformed points are not.
-
-    ``'concave-simplex'``
-      Equivalent to ``1 - generate_ndset(..., method='convex-simplex')``, which is concave for minimisation problems. This shape has also been called *inverted concave* :footcite:p:`IshHeSha2019regular`.  This sampling is *not* uniform because ``method='convex-simplex'`` is not uniform.
 
     ``'inverted-simplex' | 'inverted-linear'``
       Equivalent to ``1 - generate_ndset(..., method='simplex')``. This sampling is uniform.
@@ -166,7 +165,7 @@ def generate_ndset(
            [0.00335494, 0.01822224, 0.26522868, 0.08531355],
            [0.22390087, 0.07032143, 0.00793081, 0.02978433],
            [0.08611603, 0.02473488, 0.02168134, 0.16162454]])
-    >>> moocore.generate_ndset(3, 5, "cliff-convex", seed=42)
+    >>> moocore.generate_ndset(3, 5, "convex-cliff", seed=42)
     array([[0.71881951, 0.0403451 , 0.2388603 , 0.21393569, 0.87188637],
            [0.37631928, 0.21832081, 0.54961406, 0.62920198, 0.07323501],
            [0.16824287, 0.4448603 , 0.35613488, 0.17723839, 0.5565858 ]])
@@ -187,14 +186,14 @@ def generate_ndset(
     def _sample_convex_sphere(n: int, d: int) -> np.ndarray:
         return 1.0 - _sample_sphere(n, d)
 
-    def _sample_cliff_concave(n: int, d: int) -> np.ndarray:
+    def _sample_concave_cliff(n: int, d: int) -> np.ndarray:
         x = np.empty((n, d))
         x[:, :2] = _sample_sphere(n, 2)
         x[:, 2:] = seed.uniform(0, 1, size=(n, d - 2))
         return x
 
-    def _sample_cliff_convex(n: int, d: int) -> np.ndarray:
-        return 1.0 - _sample_cliff_concave(n, d)
+    def _sample_convex_cliff(n: int, d: int) -> np.ndarray:
+        return 1.0 - _sample_concave_cliff(n, d)
 
     def _sample_convex_simplex(n: int, d: int) -> np.ndarray:
         return _sample_simplex(n, d) ** 2
@@ -212,15 +211,15 @@ def generate_ndset(
             sample = _sample_sphere
         case "convex-sphere" | "X":
             sample = _sample_convex_sphere
-        case "cliff-concave" | "cliff-convex":
+        case "concave-cliff" | "convex-cliff":
             if d <= 2:
                 raise ValueError(
                     f"method='{method}' requires at least 3 dimensions"
                 )
             sample = (
-                _sample_cliff_concave
-                if method == "cliff-concave"
-                else _sample_cliff_convex
+                _sample_concave_cliff
+                if method == "concave-cliff"
+                else _sample_convex_cliff
             )
         case "convex-simplex":
             sample = _sample_convex_simplex

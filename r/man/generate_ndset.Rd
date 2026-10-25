@@ -82,7 +82,7 @@ It corresponds to translating points from the negative orthant of the
 hypersphere to the positive orthant. Thus, the sampling remains uniform.
 
 }
-\item{\code{'cliff-concave'}}{
+\item{\code{'concave-cliff'}}{
 
 Equivalent to generating a 2D set using
 \code{method='concave-sphere'}, then generating the other \code{d-2} columns
@@ -101,10 +101,18 @@ adversarially according to the algorithm being tested. Alternatively, the
 columns may be randomly shuffled.
 
 }
-\item{\code{'cliff-convex'}}{
+\item{\code{'convex-cliff'}}{
 
-Equivalent to \code{1 - generate_ndset(..., method='cliff-concave')}.
+Equivalent to \code{1 - generate_ndset(..., method='concave-cliff')}.
 This method does not make sense for \code{d=2}.
+
+}
+\item{\code{'concave-simplex'}}{
+
+Equivalent to \code{1 - generate_ndset(..., method='convex-simplex')}, which
+is concave for minimisation.  This shape has also been called \emph{inverted
+concave} \citep{IshHeSha2019regular}.  This sampling is \emph{not} uniform
+because \code{method='convex-simplex'} is also not uniform.
 
 }
 \item{\code{'convex-simplex'}}{
@@ -118,14 +126,6 @@ The corresponding surface is equivalent to a simplex curved towards the
 origin. The generated points \eqn{\vec{z} \in (0,1)^d \subset
    \mathbb{R}^d} satisfy \eqn{\sum_{i=1}^d \sqrt{z_i} = 1}.  Although the
 sampling on the simplex is uniform, the transformed points are not.
-
-}
-\item{\code{'concave-simplex'}}{
-
-Equivalent to \code{1 - generate_ndset(..., method='convex-simplex')}, which
-is concave for minimisation.  This shape has also been called \emph{inverted
-concave} \citep{IshHeSha2019regular}.  This sampling is \emph{not} uniform
-because \code{method='convex-simplex'} is also not uniform.
 
 }
 \item{\code{'inverted-simplex'} or \code{'inverted-linear'}}{
@@ -147,7 +147,7 @@ generate_ndset(5, 3, "simplex", seed = 42)
 generate_ndset(5, 3, "simplex", seed = 42, integer = TRUE)
 generate_ndset(4, 2, "sphere", seed = 123)
 generate_ndset(3, 5, "convex-sphere", seed = 123)
-generate_ndset(3, 5, "cliff-convex", seed = 42)
+generate_ndset(3, 5, "convex-cliff", seed = 42)
 generate_ndset(4, 4, "convex-simplex", seed = 123)
 
 }

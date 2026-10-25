@@ -619,9 +619,9 @@ def test_generate_ndset(dim):
     points = moocore.generate_ndset(n, dim, "convex-simplex")
     assert not moocore.any_dominated(points)
     assert_allclose(np.sqrt(points).sum(axis=1), one)
-    points = moocore.generate_ndset(n, dim, "cliff-concave")
+    points = moocore.generate_ndset(n, dim, "concave-cliff")
     assert not moocore.any_dominated(points)
-    points = moocore.generate_ndset(n, dim, "cliff-convex")
+    points = moocore.generate_ndset(n, dim, "convex-cliff")
     assert not moocore.any_dominated(points)
 
 

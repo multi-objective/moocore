@@ -176,8 +176,8 @@ plotly_3d_side_by_side(fig1, fig2)
 n = 2000
 rng = np.random.default_rng(42)
 
-fig1 = generate_ndset_plotly_3d(n, "cliff-concave", seed=rng)
-fig2 = generate_ndset_plotly_3d(n, "cliff-convex", seed=rng)
+fig1 = generate_ndset_plotly_3d(n, "concave-cliff", seed=rng)
+fig2 = generate_ndset_plotly_3d(n, "convex-cliff", seed=rng)
 
 plotly_3d_side_by_side(fig1, fig2)
 

@@ -70,7 +70,7 @@
 #'    hypersphere to the positive orthant. Thus, the sampling remains uniform.
 #'
 #'   }
-#'   \item{`'cliff-concave'`}{
+#'   \item{`'concave-cliff'`}{
 #'
 #'    Equivalent to generating a 2D set using
 #'    `method='concave-sphere'`, then generating the other `d-2` columns
@@ -89,10 +89,18 @@
 #'    columns may be randomly shuffled.
 #'
 #'   }
-#'   \item{`'cliff-convex'`}{
+#'   \item{`'convex-cliff'`}{
 #'
-#'    Equivalent to `1 - generate_ndset(..., method='cliff-concave')`.
+#'    Equivalent to `1 - generate_ndset(..., method='concave-cliff')`.
 #'    This method does not make sense for `d=2`.
+#'
+#'   }
+#'   \item{`'concave-simplex'`}{
+#'
+#'    Equivalent to `1 - generate_ndset(..., method='convex-simplex')`, which
+#'    is concave for minimisation.  This shape has also been called *inverted
+#'    concave* \citep{IshHeSha2019regular}.  This sampling is *not* uniform
+#'    because `method='convex-simplex'` is also not uniform.
 #'
 #'   }
 #'   \item{`'convex-simplex'`}{
@@ -106,14 +114,6 @@
 #'    origin. The generated points \eqn{\vec{z} \in (0,1)^d \subset
 #'    \mathbb{R}^d} satisfy \eqn{\sum_{i=1}^d \sqrt{z_i} = 1}.  Although the
 #'    sampling on the simplex is uniform, the transformed points are not.
-#'
-#'   }
-#'   \item{`'concave-simplex'`}{
-#'
-#'    Equivalent to `1 - generate_ndset(..., method='convex-simplex')`, which
-#'    is concave for minimisation.  This shape has also been called *inverted
-#'    concave* \citep{IshHeSha2019regular}.  This sampling is *not* uniform
-#'    because `method='convex-simplex'` is also not uniform.
 #'
 #'   }
 #'   \item{`'inverted-simplex'` or `'inverted-linear'`}{
@@ -139,7 +139,7 @@
 #' generate_ndset(5, 3, "simplex", seed = 42, integer = TRUE)
 #' generate_ndset(4, 2, "sphere", seed = 123)
 #' generate_ndset(3, 5, "convex-sphere", seed = 123)
-#' generate_ndset(3, 5, "cliff-convex", seed = 42)
+#' generate_ndset(3, 5, "convex-cliff", seed = 42)
 #' generate_ndset(4, 4, "convex-simplex", seed = 123)
 #'
 #' @export
@@ -162,7 +162,7 @@ generate_ndset <- function(n, d, method, seed = NULL, integer = FALSE)
     x
   }
 
-  sample_cliff_concave <- function() {
+  sample_concave_cliff <- function() {
     x <- matrix(0, nrow = n, ncol = d)
     x[, 1:2] <- sample_sphere(2L)
     cols <- seq.int(3L, d)
@@ -171,7 +171,7 @@ generate_ndset <- function(n, d, method, seed = NULL, integer = FALSE)
   }
 
   sample_convex_sphere <- function() 1. - sample_sphere()
-  sample_cliff_convex <- function() 1. - sample_cliff_concave()
+  sample_convex_cliff <- function() 1. - sample_concave_cliff()
   sample_convex_simplex <- function() sample_simplex()^2
   sample_inverted_simplex <- function() 1. - sample_simplex()
   sample_concave_simplex <- function() 1. - sample_convex_simplex()
@@ -180,10 +180,10 @@ generate_ndset <- function(n, d, method, seed = NULL, integer = FALSE)
     if (method %in% c("simplex", "linear", "L")) sample_simplex
     else if (method %in% c("concave-sphere", "sphere", "C")) sample_sphere
     else if (method %in% c("convex-sphere", "X")) sample_convex_sphere
-    else if (method %in% c("cliff-concave", "cliff-convex")) {
+    else if (method %in% c("concave-cliff", "convex-cliff")) {
       if (d <= 2L)
         stop("method='", method, "' requires at least 3 dimensions")
-      if (method == "cliff-concave") sample_cliff_concave else sample_cliff_convex
+      if (method == "concave-cliff") sample_concave_cliff else sample_convex_cliff
     }
     else if (method == "convex-simplex") sample_convex_simplex
     else if (method %in% c("inverted-simplex", "inverted-linear")) sample_inverted_simplex
