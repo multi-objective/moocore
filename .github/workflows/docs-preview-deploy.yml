@@ -23,6 +23,12 @@ jobs:
       group: gh-pages-deploy
       cancel-in-progress: false
     steps:
+      # The deploy action needs a git repository. This checks out the default
+      # branch (workflow_run context), never the PR code.
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
       - name: Select docs
         id: docs
         env:
