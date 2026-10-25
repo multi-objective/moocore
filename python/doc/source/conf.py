@@ -111,7 +111,13 @@ autodoc_type_aliases = {
     "ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
 }
 
-# nitpicky = True
+nitpicky = True
+nitpick_ignore = {
+    ("py:obj", "mooplot.eafdiffplot"),
+    ("py:func", "choose_eafdiff"),
+    ("py:class", "tuple[int,int]"),  # Due to a bug in sphinx.ext.napoleon
+    ("py:class", "moocore._moocore.VorobtResult"),
+}
 
 bibtex_bibfiles = ["REFERENCES.bib"]
 bibtex_reference_style = "super_with_brackets"
