@@ -1,0 +1,88 @@
+name: Deploy docs preview
+
+# Runs from the default branch with a write token. It only handles the static
+# artifact built by the unprivileged Python/R workflows and never checks out
+# or executes PR code.
+on:
+  workflow_run:
+    workflows: [Python, R]
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  deploy:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read # download artifact from the triggering run
+    concurrency:
+      group: gh-pages-deploy
+      cancel-in-progress: false
+    steps:
+      # The deploy action needs a git repository. This checks out the default
+      # branch (workflow_run context), never the PR code.
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Select docs
+        id: docs
+        env:
+          WORKFLOW: ${{ github.event.workflow_run.name }}
+        run: |
+          case "${WORKFLOW}" in
+            Python) echo "sub=python" >> "$GITHUB_OUTPUT" ;;
+            R)      echo "sub=r" >> "$GITHUB_OUTPUT" ;;
+            *) exit 1 ;;
+          esac
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: docs-preview-${{ steps.docs.outputs.sub }}
+          path: artifact
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate artifact
+        id: pr
+        run: |
+          n=$(head -c 20 artifact/pr-number | tr -d '[:space:]')
+          [[ "$n" =~ ^[0-9]+$ ]] || { echo "Invalid PR number"; exit 1; }
+          [ -f artifact/site/index.html ] || { echo "Missing index.html"; exit 1; }
+          if find artifact/site -type l | grep -q .; then echo "Symlinks not allowed"; exit 1; fi
+          rm -rf artifact/site/.git artifact/site/.github
+          echo "number=$n" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy PR preview 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: artifact/site
+          target-folder: previews/pr-${{ steps.pr.outputs.number }}/${{ steps.docs.outputs.sub }}
+          single-commit: true
+          clean: true
+
+      - name: Comment PR preview link
+        uses: actions/github-script@v9
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          SUB: ${{ steps.docs.outputs.sub }}
+        with:
+          script: |
+            const prNumber = Number(process.env.PR_NUMBER);
+            const sub = process.env.SUB;
+            const label = sub === 'r' ? 'R' : 'Python';
+            const marker = `<!-- docs-preview-${sub}-marker -->`;
+            const url = `https://multi-objective.github.io/moocore/previews/pr-${prNumber}/${sub}/`;
+            const body = `${marker}\n📚 [**${label} docs preview** for this PR](${url})\n\n`;
+            const {owner, repo} = context.repo;
+            const comments = await github.paginate(github.rest.issues.listComments, {owner, repo, issue_number: prNumber});
+            const existing = comments.find(c => c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({owner, repo, comment_id: existing.id, body});
+            } else {
+              await github.rest.issues.createComment({owner, repo, issue_number: prNumber, body});
+            }
