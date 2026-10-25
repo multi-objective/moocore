@@ -76,7 +76,6 @@ docs = [
   "sphinx-design",
   "sphinx-gallery>=0.19",
   "sphinxcontrib-bibtex",
-  "sphinxcontrib-napoleon",
 ]
 test = [
   "pandas>=2",

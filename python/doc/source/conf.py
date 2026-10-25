@@ -93,11 +93,6 @@ napoleon_preprocess_types = True
 napoleon_use_rtype = False
 napoleon_include_init_with_doc = False
 napoleon_use_param = True
-napoleon_type_aliases = {
-    "numpy.typing.ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
-    "ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
-    "NDArray": ":py:data:`~numpy.typing.NDArray`",
-}
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = True
@@ -106,9 +101,12 @@ autodoc_typehints = "none"  # Conflicts with sphinx_autodoc_typehints
 typehints_document_rtype = True
 typehints_use_rtype = False
 typehints_defaults = "braces-after"
+typehints_modernize_annotations = True
+python_display_short_literal_types = True
 always_use_bars_union = True
 autodoc_type_aliases = {
     "ArrayLike": ":py:data:`~numpy.typing.ArrayLike`",
+    "NDArray": ":py:data:`~numpy.typing.NDArray`",
 }
 
 nitpicky = True
@@ -244,7 +242,6 @@ suppress_warnings = ["mystnb.unknown_mime_type"]
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
 
-# Intersphinx mapping
 intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org/stable", None),
     "mooplot": ("https://multi-objective.github.io/mooplot/python", None),
