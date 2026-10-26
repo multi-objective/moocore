@@ -1,35 +1,33 @@
 from __future__ import annotations
 
-import os
-from io import StringIO
-from collections.abc import Callable, Sequence
-from numpy.typing import ArrayLike, NDArray  # For type hints
-from typing import Literal, Any, NamedTuple, TypeAlias
-import numbers
-
 # NOTE: if we ever start using SciPy, we can use
 # from scipy.special import gamma_function
-
 import lzma
+import numbers
+import os
 import shutil
 import tempfile
+from collections.abc import Callable, Sequence
+from io import StringIO
+from typing import Any, Literal, NamedTuple, TypeAlias
 
 import numpy as np
+from numpy.typing import ArrayLike, NDArray  # For type hints
 
-from ._utils import (
-    asarray_maybe_copy,
-    unique_nosort,
-    np2d_to_double_array,
-    np1d_to_double_array,
-    np1d_to_int_array,
-    array_1d_of_length_n,
-    is_integer_value,
-    _get_seed_for_c,
-)
 from ._docsubstitute import DocSubstitute
 
 ## The CFFI library is used to create C bindings.
-from ._libmoocore import lib, ffi  # ty: ignore[unresolved-import]
+from ._libmoocore import ffi, lib  # ty: ignore[unresolved-import]
+from ._utils import (
+    _get_seed_for_c,
+    array_1d_of_length_n,
+    asarray_maybe_copy,
+    is_integer_value,
+    np1d_to_double_array,
+    np1d_to_int_array,
+    np2d_to_double_array,
+    unique_nosort,
+)
 
 MaximiseType: TypeAlias = bool | Sequence[bool | int] | NDArray[np.bool_]
 

@@ -17,10 +17,11 @@ times to account for stochasticity.
 """
 
 # sphinx_gallery_multi_image = "single"
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import seaborn as sns
+
 import moocore
 
 # %%

@@ -6,8 +6,9 @@ This example shows how to use ``moocore`` functions with Pandas (https://pandas.
 
 """
 
-import moocore
 import pandas as pd
+
+import moocore
 
 print(f"pandas version: {pd.__version__}")
 

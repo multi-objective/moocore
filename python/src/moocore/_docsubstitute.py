@@ -1,8 +1,7 @@
-from typing import Any, TypeVar
-from collections.abc import Callable
-
-from string import Template
 import inspect
+from collections.abc import Callable
+from string import Template
+from typing import Any, TypeVar
 
 _CallableT = TypeVar("_CallableT", bound=Callable[..., Any])
 

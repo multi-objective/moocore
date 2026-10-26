@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
+import argparse
 import re
 from datetime import datetime
-import argparse
 
 
 def print_status(prefix, total_width=40):
