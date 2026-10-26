@@ -75,6 +75,7 @@ instance/
 
 # Sphinx documentation
 doc/_build/
+doc/_intersphinx_cache/
 doc/jupyter_execute/
 doc/source/reference/generated/
 doc/source/auto_examples
