@@ -242,47 +242,15 @@ suppress_warnings = ["mystnb.unknown_mime_type"]
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
 
-_intersphinx_urls = {
-    "matplotlib": "https://matplotlib.org/stable",
-    "mooplot": "https://multi-objective.github.io/mooplot/python",
-    # "neps": "https://numpy.org/neps/",
-    "numpy": "https://numpy.org/doc/stable",
-    "nx-guides": "https://networkx.org/nx-guides",
-    "pandas": "https://pandas.pydata.org/pandas-docs/stable",
-    "python": "https://docs.python.org/3",
-    "scipy": "https://scipy.github.io/devdocs",
-}
-
-# Inventories are downloaded to this directory, which is the only thing cached
-# in CI. A cached inventory is used until it is older than
-# intersphinx_cache_limit days; otherwise, Sphinx fetches it from the URL.
-_intersphinx_cache_dir = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "..", "_intersphinx_cache"
-)
-
-
-def _cached_inventory(name, url):
-    import time
-    import urllib.request
-
-    path = os.path.join(_intersphinx_cache_dir, name + ".inv")
-    max_age = 90 * 24 * 3600  # seconds
-    if os.path.exists(path) and time.time() - os.path.getmtime(path) < max_age:
-        return path
-    try:
-        os.makedirs(_intersphinx_cache_dir, exist_ok=True)
-        with urllib.request.urlopen(url + "/objects.inv", timeout=15) as r:
-            data = r.read()
-        with open(path, "wb") as f:
-            f.write(data)
-        return path
-    except Exception:
-        return None  # Sphinx will fetch it from the URL
-
-
 intersphinx_mapping = {
-    name: (url, (_cached_inventory(name, url), None))
-    for name, url in _intersphinx_urls.items()
+    "matplotlib": ("https://matplotlib.org/stable", None),
+    "mooplot": ("https://multi-objective.github.io/mooplot/python", None),
+    # "neps": ("https://numpy.org/neps/", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "nx-guides": ("https://networkx.org/nx-guides", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
+    "python": ("https://docs.python.org/3", None),
+    "scipy": ("https://scipy.github.io/devdocs", None),
 }
 intersphinx_timeout = 15  # seconds
 intersphinx_cache_limit = 90  # days
