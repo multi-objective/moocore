@@ -5,7 +5,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 
 from ._docsubstitute import DocSubstitute
-from ._libmoocore import ffi, lib # ty: ignore[unresolved-import]
+from ._libmoocore import ffi, lib  # ty: ignore[unresolved-import]
 from ._utils import _get_seed_for_c, array_1d_of_length_n, np2d_to_double_array
 
 
