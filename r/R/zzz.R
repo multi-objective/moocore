@@ -1,3 +1,4 @@
+# nocov start
 .libmoocore_constants <- NULL
 
 .onLoad <- function(lib, pkg) {
@@ -5,3 +6,4 @@
   Rdpack::Rdpack_bibstyles(package = pkg, authors = "LongNames")
   invisible(NULL)
 }
+# nocov end
