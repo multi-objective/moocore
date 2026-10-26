@@ -625,6 +625,13 @@ def test_generate_ndset(dim):
     assert not moocore.any_dominated(points)
 
 
+def test_generate_sequence_errors():
+    with pytest.raises(ValueError, match="unknown"):
+        moocore.generate_sequence(5, 2, "unknown")
+    with pytest.raises(AttributeError, match="'str' object"):
+        moocore.generate_sequence(5, 2, "glas2017", seed="X")
+
+
 @pytest.mark.parametrize("dim", range(2, 5))
 def test_pareto_rank(dim):
     seed = np.random.default_rng().integers(2**32 - 2)
