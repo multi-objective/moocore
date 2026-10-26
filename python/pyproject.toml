@@ -70,7 +70,7 @@ docs = [
   "plotly",
   "pydata-sphinx-theme>=0.16",
   "seaborn",
-  "sphinx>=6",
+  "sphinx>=9",
   "sphinx-autodoc-typehints",
   "sphinx-copybutton",
   "sphinx-design",

@@ -144,7 +144,7 @@ jobs:
       - name: Cache intersphinx inventories
         uses: actions/cache@v5
         with:
-          path: python/doc/_build/doctrees/
+          path: python/doc/_build/doctrees/__intersphinx_cache__/
           key: intersphinx-${{ hashFiles('python/doc/source/conf.py') }}
           restore-keys: intersphinx-
 
