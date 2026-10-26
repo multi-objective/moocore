@@ -8,6 +8,7 @@ mutually nondominated points.
 First we define a few functions useful for plotting.
 """
 
+# sphinx_gallery_multi_image = "single"
 import moocore
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,6 +23,23 @@ def generate_ndset_plotly_3d(n, method, seed):
         moocore.generate_ndset(n, 3, method, seed=seed),
         title=f'method="{method}"',
     )
+
+
+def pcplot(x, title, cmap="viridis"):
+    """Parallel coordinates plot."""
+    x = x[np.argsort(x[:, 0])]
+    n, d = x.shape
+    fig, ax = plt.subplots(figsize=(12, 4))
+    cmap = plt.get_cmap(cmap, n)
+    ax.set_prop_cycle(color=cmap.colors)
+    ax.plot(x.T, alpha=0.7, linewidth=1)
+    ax.set_xticks(range(d))
+    ax.set_xticklabels([f"{i + 1}" for i in range(d)])
+    ax.set_xlabel("Dimension")
+    ax.set_ylabel("Value")
+    ax.set_title(title)
+    fig.tight_layout()
+    return fig
 
 
 # %%
@@ -229,6 +247,29 @@ points /= np.linalg.norm(points, axis=1, keepdims=True)
 fig2 = plotly_3d("convex", 1.0 - points, title="Convex-sphere (naive)")
 
 plotly_3d_side_by_side(fig1, fig2)
+
+# %%
+#
+# 4D nondominated sets
+# --------------------
+#
+# We use parallel coordinate plots to visualise nondominated sets in 4D:
+#
+methods = [
+    "simplex",
+    "concave-sphere",
+    "convex-sphere",
+    "concave-simplex",
+    "convex-simplex",
+    "inverted-simplex",
+    "concave-cliff",
+    "convex-cliff",
+]
+n = 500
+for method in methods:
+    x = moocore.generate_ndset(n, 4, method=method, seed=42)
+    pcplot(x, title=method)
+
 
 # %%
 # References
