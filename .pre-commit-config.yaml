@@ -31,18 +31,18 @@ repos:
         exclude: '(\.Rd|python/doc/source/reference/.*|test-doctest-.*)'
 
   - repo: https://github.com/tox-dev/tox-ini-fmt
-    rev: 1.7.2
+    rev: 1.10.0
     hooks:
       - id: tox-ini-fmt
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.25.2
+    rev: v2.30.3
     hooks:
       - id: pyproject-fmt
         additional_dependencies: ["tox>=4.12.1"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.21
+    rev: v0.17.2
     hooks:
       # Run the formatter.
       - id: ruff-format
@@ -54,7 +54,7 @@ repos:
         require_serial: true
 
   - repo: https://github.com/astral-sh/ty-pre-commit
-    rev: v0.0.89
+    rev: v0.0.92
     hooks:
       - id: ty
         args: [--project=python, --isolated]
@@ -65,7 +65,7 @@ repos:
       - id: sphinx-lint
 
   - repo: https://github.com/lorenzwalthert/precommit
-    rev: v0.4.3.9030
+    rev: v0.4.3.9032
     hooks:
       - id: parsable-R
       - id: no-browser-statement
