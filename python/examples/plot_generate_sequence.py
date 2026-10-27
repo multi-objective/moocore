@@ -2,7 +2,8 @@ r"""
 Sampling Sequences of Dominated and Nondominated Points
 =======================================================
 
-This example illustrates how to sample sequences of multi-dimensional points with various dominance properties using :func:`~moocore.generate_sequence`.
+This example illustrates how to sample sequences of multi-dimensional points
+with various dominance properties using :func:`moocore.generate_sequence`.
 
 First we define a few functions useful for plotting.
 """
@@ -85,7 +86,7 @@ plot_sequence_2d(
 
 # Naive
 rng = np.random.default_rng(42)
-points = np.abs(rng.normal(size=(n, 2)))
+points = np.abs(rng.standard_normal((n, 2)))
 points /= np.linalg.norm(points, axis=1, keepdims=True)
 points *= rng.uniform(0, 1, size=(n, 1))
 plot_sequence_2d(
