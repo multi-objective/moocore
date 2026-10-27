@@ -251,6 +251,11 @@ The `cliff` type is often used to test the performance of algorithms for
 computing the hypervolume [@EmmFon2011emo; @GueFon2017hv4d], due to its
 particular structure.
 
+Consecutive dimension pairs are sampled on the positive orthant of the 2D unit
+sphere. For odd dimensions, the last column is sampled uniformly in `[0,1)`.
+The method requires at least three dimensions; in 3D, this gives one sphere
+pair and one uniform column.
+
 ```{r generate_3d_cliff}
 fig1 <- plot_3d("simplex", moocore::generate_ndset(n, 3, "concave-cliff", seed = 42), title = 'method="concave-cliff"')
 fig2 <- plot_3d("simplex", moocore::generate_ndset(n, 3, "convex-cliff", seed = 42), title = 'method="convex-cliff"')
