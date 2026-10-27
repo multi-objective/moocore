@@ -2,8 +2,8 @@ r"""
 Sampling Random Nondominated Sets
 =================================
 
-This example illustrates how to sample random sets with
-mutually nondominated points.
+This example illustrates how to sample random sets with mutually nondominated
+points using :func:`moocore.generate_ndset`.
 
 First we define a few functions useful for plotting.
 """
@@ -139,7 +139,7 @@ plotly_3d_side_by_side(fig1, fig2)
 # The method ``convex-simplex`` implemented in :func:`~moocore.generate_ndset`
 # is different from the `concave` method proposed by :footcite:t:`BriFri2012tcs`.
 
-points = np.abs(rng.normal(size=(n, 3)))
+points = np.abs(rng.standard_normal((n, 3)))
 points /= (np.sqrt(points).sum(axis=1, keepdims=True)) ** 2
 
 fig1 = plotly_3d(
