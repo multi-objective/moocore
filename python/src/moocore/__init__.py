@@ -38,6 +38,18 @@ from ._datasets import (
 
 from ._generate import generate_ndset, generate_sequence
 
+from ._crossover import (
+    blend_alpha_crossover,
+    bounded_exponential_crossover,
+    de_current_1_crossover,
+    de_rand_1_bin_crossover,
+    local_crossover,
+    parent_centric_crossover,
+    single_arithmetic_crossover,
+    single_point_crossover,
+    uniform_crossover,
+)
+
 from importlib.metadata import version as _metadata_version
 
 __version__ = _metadata_version("moocore")
@@ -52,6 +64,10 @@ __all__ = [
     "any_dominated",
     "apply_within_sets",
     "avg_hausdorff_dist",
+    "blend_alpha_crossover",
+    "bounded_exponential_crossover",
+    "de_current_1_crossover",
+    "de_rand_1_bin_crossover",
     "eaf",
     "eafdiff",
     "epsilon_additive",
@@ -70,11 +86,16 @@ __all__ = [
     "is_nondominated",
     "is_nondominated_within_sets",
     "largest_eafdiff",
+    "local_crossover",
     "normalise",
+    "parent_centric_crossover",
     "pareto_rank",
     "r2_exact",
     "read_datasets",
+    "single_arithmetic_crossover",
+    "single_point_crossover",
     "total_whv_rect",
+    "uniform_crossover",
     "vorob_dev",
     "vorob_t",
     "whv_hype",
