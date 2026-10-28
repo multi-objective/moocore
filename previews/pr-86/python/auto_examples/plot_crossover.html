@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Crossover Operators &#8212; moocore 0.4.0.dev0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx_autodoc_typehints.css?v=057ac668" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=79fc01cf" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
+
+    <script src="../_static/documentation_options.js?v=c2d0aac2"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=317740d0"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>window.MathJax = {"tex": {"macros": {"HVINEXMAXROWS": "12", "KUNGSMALLTHRESHOLD": "16", "MOOCOREDIMENSIONMAX": "255", "MOOCOREHVDIMENSIONMAX": "31", "MOOCOREHVAPPROXDIMENSIONMAX": "31"}}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'auto_examples/plot_crossover';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Benchmarks" href="../benchmarks/index.html" />
+    <link rel="prev" title="Sampling Random Nondominated Sets" href="plot_generate.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.4.0.dev0" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">moocore 0.4.0.dev0</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../benchmarks/index.html">
+    Benchmarks
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../whatsnew/index.html">
+    What’s new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/multi-objective/moocore" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/moocore" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../benchmarks/index.html">
+    Benchmarks
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../whatsnew/index.html">
+    What’s new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/multi-objective/moocore" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/moocore" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_eaf.html">Empirical Attainment Function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_pandas.html">Using moocore with Pandas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_metrics.html">Computing Multi-Objective Quality Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_hv_approx.html">Comparing methods for approximating the hypervolume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_generate_sequence.html">Sampling Sequences of Dominated and Nondominated Points</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_generate.html">Sampling Random Nondominated Sets</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Crossover Operators</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Examples</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Crossover Operators</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-plot-crossover-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="crossover-operators">
+<span id="sphx-glr-auto-examples-plot-crossover-py"></span><h1>Crossover Operators<a class="headerlink" href="#crossover-operators" title="Link to this heading">#</a></h1>
+<p>This example shows the behaviour of the crossover operators, first with two
+fixed parents and then with a whole population.  Each figure crosses over the
+same parents many times and plots all the offspring.</p>
+<p>First we define a few functions useful for plotting.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="nn">.</span><span class="nn">pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">moocore</span><span class="w">
+</span><span class="w">
+</span><span class="n">LOWER</span><span class="p">,</span> <span class="n">UPPER</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="w">
+</span><span class="n">BOUNDS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">lower</span><span class="o">=</span><span class="n">LOWER</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="n">UPPER</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="k">def</span><span class="w"> </span><span class="nf">cross_over</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">n_pairs</span><span class="o">=</span><span class="mi">50_000</span><span class="p">,</span> <span class="o">*</span><span class="o">*</span><span class="n">kwargs</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Cross over parents ``a`` and ``b`` ``n_pairs`` times.&quot;&quot;&quot;</span><span class="w">
+</span>    <span class="n">parents</span> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.tile.html#numpy.tile" title="numpy.tile"><span class="n">np</span><span class="o">.</span><span class="n">tile</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">]</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="p">,</span> <span class="p">(</span><span class="n">n_pairs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span>    <span class="k">return</span> <span class="n">fun</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="o">*</span><span class="o">*</span><span class="n">kwargs</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="k">def</span><span class="w"> </span><span class="nf">plot_density</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="o">*</span><span class="o">*</span><span class="n">kwargs</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot the distribution of ``values`` within the bounds.&quot;&quot;&quot;</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="w">
+</span>        <span class="n">values</span><span class="p">,</span><span class="w">
+</span>        <span class="n">bins</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span><span class="w">
+</span>        <span class="nb">range</span><span class="o">=</span><span class="p">(</span><span class="n">LOWER</span><span class="p">,</span> <span class="n">UPPER</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="w">
+</span>        <span class="n">histtype</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">step</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>        <span class="o">*</span><span class="o">*</span><span class="n">kwargs</span><span class="p">,</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="k">def</span><span class="w"> </span><span class="nf">mark_parents</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">positions</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Show the parents as dotted vertical lines.&quot;&quot;&quot;</span><span class="w">
+</span>    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span><span class="w">
+</span>        <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">gray</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">:</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<section id="crossover-behaviour-with-two-parents">
+<h2>Crossover behaviour with two parents<a class="headerlink" href="#crossover-behaviour-with-two-parents" title="Link to this heading">#</a></h2>
+<p>The parents are <span class="math notranslate nohighlight">\((3, 3)\)</span> and <span class="math notranslate nohighlight">\((7, 7)\)</span> within <span class="math notranslate nohighlight">\([0, 10]^2\)</span>.
+Each panel shows the distribution of the first variable of the offspring for
+the default parameters of each operator.  Uniform and single arithmetic
+crossover only produce a few distinct values, which appear as spikes.
+The parent decision variables are shown as dotted vertical lines.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">]</span><span class="p">,</span> <span class="p">[</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">7.0</span><span class="p">]</span><span class="w">
+</span><span class="n">operators</span> <span class="o">=</span> <span class="p">{</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Bounded exponential</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.bounded_exponential_crossover.html#moocore.bounded_exponential_crossover" title="moocore.bounded_exponential_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">bounded_exponential_crossover</span></a><span class="p">,</span> <span class="n">BOUNDS</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Blend alpha</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.blend_alpha_crossover.html#moocore.blend_alpha_crossover" title="moocore.blend_alpha_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">blend_alpha_crossover</span></a><span class="p">,</span> <span class="n">BOUNDS</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Local</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.local_crossover.html#moocore.local_crossover" title="moocore.local_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">local_crossover</span></a><span class="p">,</span> <span class="p">{</span><span class="p">}</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Uniform</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.uniform_crossover.html#moocore.uniform_crossover" title="moocore.uniform_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">uniform_crossover</span></a><span class="p">,</span> <span class="p">{</span><span class="p">}</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Single arithmetic</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.single_arithmetic_crossover.html#moocore.single_arithmetic_crossover" title="moocore.single_arithmetic_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">single_arithmetic_crossover</span></a><span class="p">,</span> <span class="p">{</span><span class="p">}</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">operators</span><span class="p">)</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="w">
+</span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span><span class="p">)</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">operators</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="p">)</span><span class="p">)</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span>    <span class="n">plot_density</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">cross_over</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="o">*</span><span class="o">*</span><span class="n">kwargs</span><span class="p">)</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">C</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span>    <span class="n">mark_parents</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="p">]</span><span class="p">)</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">left</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">medium</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="p">[</span><span class="p">]</span><span class="p">)</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">$x_1$</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<img src="../_images/sphx_glr_plot_crossover_001.png" srcset="../_images/sphx_glr_plot_crossover_001.png, ../_images/sphx_glr_plot_crossover_001_2_00x.png 2.00x" alt="Bounded exponential, Blend alpha, Local, Uniform, Single arithmetic" class = "sphx-glr-single-img"/></section>
+<section id="bounded-exponential-crossover">
+<h2>Bounded exponential crossover<a class="headerlink" href="#bounded-exponential-crossover" title="Link to this heading">#</a></h2>
+<p>The bounded exponential crossover operator samples from an exponential
+distribution that is truncated at the bounds.  The distribution is centred on
+one parent, and the distance to the other parent scales its spread.  The
+offspring moves towards either bound with equal probability.  The operator is
+symmetric, so the second offspring is centred on the other parent in the same
+way.  The parameter <code class="docutils literal notranslate"><span class="pre">scale</span></code> (<span class="math notranslate nohighlight">\(\lambda\)</span>) controls the decay of the
+distribution.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">scale</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span>    <span class="n">offspring</span> <span class="o">=</span> <span class="n">cross_over</span><span class="p">(</span><span class="w">
+</span>        <a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.bounded_exponential_crossover.html#moocore.bounded_exponential_crossover" title="moocore.bounded_exponential_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">bounded_exponential_crossover</span></a><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="o">*</span><span class="o">*</span><span class="n">BOUNDS</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="n">plot_density</span><span class="p">(</span><span class="w">
+</span>        <span class="n">ax</span><span class="p">,</span><span class="w">
+</span>        <span class="n">offspring</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>        <span class="n">color</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">viridis</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">label</span><span class="o">=</span><span class="sa">rf</span><span class="s2">&quot;</span><span class="s2">$</span><span class="s2">\</span><span class="s2">lambda = </span><span class="si">{</span><span class="n">scale</span><span class="si">}</span><span class="s2">$</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span><span class="n">mark_parents</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="p">]</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">$x_1$</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Density</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<img src="../_images/sphx_glr_plot_crossover_002.png" srcset="../_images/sphx_glr_plot_crossover_002.png, ../_images/sphx_glr_plot_crossover_002_2_00x.png 2.00x" alt="plot crossover" class = "sphx-glr-single-img"/></section>
+<section id="blend-crossover-the-alpha-parameter">
+<h2>Blend crossover: the alpha parameter<a class="headerlink" href="#blend-crossover-the-alpha-parameter" title="Link to this heading">#</a></h2>
+<p>BLX-<span class="math notranslate nohighlight">\(\alpha\)</span> samples uniformly from the interval between the parents,
+widened by <code class="docutils literal notranslate"><span class="pre">alpha</span></code> times their distance on each side.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span>    <span class="n">offspring</span> <span class="o">=</span> <span class="n">cross_over</span><span class="p">(</span><span class="w">
+</span>        <a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.blend_alpha_crossover.html#moocore.blend_alpha_crossover" title="moocore.blend_alpha_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">blend_alpha_crossover</span></a><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="o">*</span><span class="o">*</span><span class="n">BOUNDS</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span>    <span class="n">plot_density</span><span class="p">(</span><span class="w">
+</span>        <span class="n">ax</span><span class="p">,</span><span class="w">
+</span>        <span class="n">offspring</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>        <span class="n">color</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">viridis</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="n">label</span><span class="o">=</span><span class="sa">rf</span><span class="s2">&quot;</span><span class="s2">$</span><span class="s2">\</span><span class="s2">alpha = </span><span class="si">{</span><span class="n">alpha</span><span class="si">}</span><span class="s2">$</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span><span class="n">mark_parents</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="p">]</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">$x_1$</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Density</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<img src="../_images/sphx_glr_plot_crossover_003.png" srcset="../_images/sphx_glr_plot_crossover_003.png, ../_images/sphx_glr_plot_crossover_003_2_00x.png 2.00x" alt="plot crossover" class = "sphx-glr-single-img"/></section>
+<section id="offspring-geometry-in-two-dimensions">
+<h2>Offspring geometry in two dimensions<a class="headerlink" href="#offspring-geometry-in-two-dimensions" title="Link to this heading">#</a></h2>
+<p>With the parents at opposite corners, <span class="math notranslate nohighlight">\((2, 8)\)</span> and <span class="math notranslate nohighlight">\((8, 2)\)</span>, the
+operators differ in which regions of the decision space their offspring
+can reach. Note that certain operators such as uniform crossover can never
+explore all possible decision vectors, requiring the use of mutation for
+proper exploration of the decision space. Moreover, the local crossover
+operator never produces offspring outside the bounding box defined by the
+parents, so it is not suitable for exploring the decision space beyond
+the current population.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">]</span><span class="p">,</span> <span class="p">[</span><span class="mf">8.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]</span><span class="w">
+</span><span class="n">operators</span> <span class="o">=</span> <span class="p">{</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Bounded exponential</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.bounded_exponential_crossover.html#moocore.bounded_exponential_crossover" title="moocore.bounded_exponential_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">bounded_exponential_crossover</span></a><span class="p">,</span> <span class="n">BOUNDS</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Blend alpha</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.blend_alpha_crossover.html#moocore.blend_alpha_crossover" title="moocore.blend_alpha_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">blend_alpha_crossover</span></a><span class="p">,</span> <span class="n">BOUNDS</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Local</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.local_crossover.html#moocore.local_crossover" title="moocore.local_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">local_crossover</span></a><span class="p">,</span> <span class="p">{</span><span class="p">}</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Uniform</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.uniform_crossover.html#moocore.uniform_crossover" title="moocore.uniform_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">uniform_crossover</span></a><span class="p">,</span> <span class="p">{</span><span class="p">}</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Single arithmetic</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.single_arithmetic_crossover.html#moocore.single_arithmetic_crossover" title="moocore.single_arithmetic_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">single_arithmetic_crossover</span></a><span class="p">,</span> <span class="p">{</span><span class="p">}</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Single point</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.single_point_crossover.html#moocore.single_point_crossover" title="moocore.single_point_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">single_point_crossover</span></a><span class="p">,</span> <span class="p">{</span><span class="p">}</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="w">
+</span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span><span class="p">)</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="w">
+</span>    <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">flat</span><span class="p">,</span> <span class="n">operators</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span>    <span class="n">offspring</span> <span class="o">=</span> <span class="n">cross_over</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">n_pairs</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="o">*</span><span class="o">*</span><span class="n">kwargs</span><span class="p">)</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">offspring</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="n">offspring</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">C</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="o">*</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">]</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">D</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">black</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">medium</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">LOWER</span><span class="p">,</span> <span class="n">UPPER</span><span class="p">)</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">LOWER</span><span class="p">,</span> <span class="n">UPPER</span><span class="p">)</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">equal</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="p">:</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">$x_1$</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">:</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">$x_2$</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<img src="../_images/sphx_glr_plot_crossover_004.png" srcset="../_images/sphx_glr_plot_crossover_004.png, ../_images/sphx_glr_plot_crossover_004_2_00x.png 2.00x" alt="Bounded exponential, Blend alpha, Local, Uniform, Single arithmetic, Single point" class = "sphx-glr-single-img"/></section>
+<section id="crossover-behaviour-with-a-population">
+<h2>Crossover behaviour with a population<a class="headerlink" href="#crossover-behaviour-with-a-population" title="Link to this heading">#</a></h2>
+<p>In an evolutionary algorithm, crossover is applied to a whole population.
+Here, each operator is applied 40 times to a population of 60 decision
+vectors (circles), and all the offspring are plotted.
+Each operator gets the same population, but for each call, the population is
+randomly permuted and/or a different seed is used.</p>
+<p>The first population is a round cloud.  Uniform, single-point and single
+arithmetic crossover place their offspring on lines parallel to the axes,
+because each offspring copies at least one variable from a parent.  Uniform
+and single-point crossover look alike here only because, with two variables,
+the cut point always falls between them.  With more variables, their
+distributions differ.  Both DE variants spread their offspring beyond the
+population, whereas parent-centric and bounded exponential crossover keep
+them close to their parents.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="n">all_operators</span> <span class="o">=</span> <span class="p">{</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Uniform</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.uniform_crossover.html#moocore.uniform_crossover" title="moocore.uniform_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">uniform_crossover</span></a><span class="p">,</span> <span class="p">{</span><span class="p">}</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Single point</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.single_point_crossover.html#moocore.single_point_crossover" title="moocore.single_point_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">single_point_crossover</span></a><span class="p">,</span> <span class="p">{</span><span class="p">}</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Blend alpha</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.blend_alpha_crossover.html#moocore.blend_alpha_crossover" title="moocore.blend_alpha_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">blend_alpha_crossover</span></a><span class="p">,</span> <span class="n">BOUNDS</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Single arithmetic</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.single_arithmetic_crossover.html#moocore.single_arithmetic_crossover" title="moocore.single_arithmetic_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">single_arithmetic_crossover</span></a><span class="p">,</span> <span class="p">{</span><span class="p">}</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Local</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.local_crossover.html#moocore.local_crossover" title="moocore.local_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">local_crossover</span></a><span class="p">,</span> <span class="p">{</span><span class="p">}</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Bounded exponential</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.bounded_exponential_crossover.html#moocore.bounded_exponential_crossover" title="moocore.bounded_exponential_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">bounded_exponential_crossover</span></a><span class="p">,</span> <span class="n">BOUNDS</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">DE/rand/1/bin</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.de_rand_1_bin_crossover.html#moocore.de_rand_1_bin_crossover" title="moocore.de_rand_1_bin_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">de_rand_1_bin_crossover</span></a><span class="p">,</span> <span class="n">BOUNDS</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">DE/current/1</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.de_current_1_crossover.html#moocore.de_current_1_crossover" title="moocore.de_current_1_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">de_current_1_crossover</span></a><span class="p">,</span> <span class="n">BOUNDS</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Parent-centric</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">(</span><a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.parent_centric_crossover.html#moocore.parent_centric_crossover" title="moocore.parent_centric_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">parent_centric_crossover</span></a><span class="p">,</span> <span class="n">BOUNDS</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span><span class="n">takes_population</span> <span class="o">=</span> <span class="p">{</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.de_rand_1_bin_crossover.html#moocore.de_rand_1_bin_crossover" title="moocore.de_rand_1_bin_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">de_rand_1_bin_crossover</span></a><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.de_current_1_crossover.html#moocore.de_current_1_crossover" title="moocore.de_current_1_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">de_current_1_crossover</span></a><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-moocore sphx-glr-backref-type-py-function reference internal" href="../reference/generated/moocore.parent_centric_crossover.html#moocore.parent_centric_crossover" title="moocore.parent_centric_crossover"><span class="n">moocore</span><span class="o">.</span><span class="n">parent_centric_crossover</span></a><span class="p">,</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="k">def</span><span class="w"> </span><span class="nf">plot_population</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">n_calls</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot the offspring of every operator applied to ``population``.&quot;&quot;&quot;</span><span class="w">
+</span>    <span class="n">rng</span> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy-random sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.default_rng" title="numpy.random.default_rng"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span></a><span class="p">(</span><span class="mi">42</span><span class="p">)</span><span class="w">
+</span>    <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="w">
+</span>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span><span class="p">)</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="w">
+</span>        <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">flat</span><span class="p">,</span> <span class="n">all_operators</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span>    <span class="p">)</span><span class="p">:</span><span class="w">
+</span>        <span class="n">offspring</span> <span class="o">=</span> <span class="p">[</span><span class="p">]</span><span class="w">
+</span>        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_calls</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span>            <span class="k">if</span> <span class="n">fun</span> <span class="ow">in</span> <span class="n">takes_population</span><span class="p">:</span><span class="w">
+</span>                <span class="n">x</span> <span class="o">=</span> <span class="n">population</span><span class="w">
+</span>            <span class="k">else</span><span class="p">:</span><span class="w">
+</span>                <span class="n">x</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">population</span><span class="p">)</span><span class="w">
+</span>            <span class="n">offspring</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fun</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span> <span class="o">*</span><span class="o">*</span><span class="n">kwargs</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span>        <span class="n">offspring</span> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.vstack.html#numpy.vstack" title="numpy.vstack"><span class="n">np</span><span class="o">.</span><span class="n">vstack</span></a><span class="p">(</span><span class="n">offspring</span><span class="p">)</span><span class="w">
+</span>        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="w">
+</span>            <span class="n">offspring</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="n">offspring</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">C</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="w">
+</span>        <span class="p">)</span><span class="w">
+</span>        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="w">
+</span>            <span class="n">population</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>            <span class="n">population</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>            <span class="n">s</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span><span class="w">
+</span>            <span class="n">facecolors</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">none</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>            <span class="n">edgecolors</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">black</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>            <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span><span class="w">
+</span>        <span class="p">)</span><span class="w">
+</span>        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">medium</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span>        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">LOWER</span><span class="p">,</span> <span class="n">UPPER</span><span class="p">)</span><span class="w">
+</span>        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">LOWER</span><span class="p">,</span> <span class="n">UPPER</span><span class="p">)</span><span class="w">
+</span>        <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">equal</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span>    <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="p">:</span><span class="w">
+</span>        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">$x_1$</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span>    <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">:</span><span class="w">
+</span>        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">$x_2$</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span>    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="n">rng</span> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy-random sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.default_rng" title="numpy.random.default_rng"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span></a><span class="p">(</span><span class="mi">42</span><span class="p">)</span><span class="w">
+</span><span class="n">round_population</span> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.clip.html#numpy.clip" title="numpy.clip"><span class="n">np</span><span class="o">.</span><span class="n">clip</span></a><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="p">[</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">]</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="p">)</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">9.8</span><span class="p">)</span><span class="w">
+</span><span class="n">plot_population</span><span class="p">(</span><span class="n">round_population</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<img src="../_images/sphx_glr_plot_crossover_005.png" srcset="../_images/sphx_glr_plot_crossover_005.png, ../_images/sphx_glr_plot_crossover_005_2_00x.png 2.00x" alt="Uniform, Single point, Blend alpha, Single arithmetic, Local, Bounded exponential, DE/rand/1/bin, DE/current/1, Parent-centric" class = "sphx-glr-single-img"/><p>The second population is stretched along a diagonal, as may happen when a
+population approaches a Pareto set.  Uniform and single-point crossover
+combine the variables of different parents independently, so their offspring
+fill the box around the population and lose its diagonal shape.  Blend alpha,
+single arithmetic and local crossover also treat each variable separately and
+place offspring away from the diagonal.  Bounded exponential crossover keeps
+the offspring close to their parents.  Both DE variants and parent-centric
+crossover follow the diagonal, because they move along differences between
+parents.  DE extends the population beyond its ends, whereas parent-centric
+crossover stays close to its index parents.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="n">t</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span><span class="w">
+</span><span class="n">diagonal_population</span> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.column_stack.html#numpy.column_stack" title="numpy.column_stack"><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span></a><span class="p">(</span><span class="p">[</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">t</span><span class="p">,</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">t</span><span class="p">]</span><span class="p">)</span><span class="w">
+</span><span class="n">diagonal_population</span> <span class="o">+</span><span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><span class="n">plot_population</span><span class="p">(</span><span class="n">diagonal_population</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<img src="../_images/sphx_glr_plot_crossover_006.png" srcset="../_images/sphx_glr_plot_crossover_006.png, ../_images/sphx_glr_plot_crossover_006_2_00x.png 2.00x" alt="Uniform, Single point, Blend alpha, Single arithmetic, Local, Bounded exponential, DE/rand/1/bin, DE/current/1, Parent-centric" class = "sphx-glr-single-img"/><p>The third population consists of three separate clusters of 20 members each,
+as when the Pareto set is disconnected.  Crossing over members of different
+clusters produces offspring outside the clusters, unless the operator keeps
+the offspring close to their parents.  Uniform and single-point crossover
+create new clusters at every combination of the clusters’ variable
+values, and single arithmetic crossover adds clusters at the midpoints of one
+variable.  Blend alpha and local crossover fill the space between the
+clusters.  Both DE variants create new clusters by shifting the original ones
+by <span class="math notranslate nohighlight">\(F\)</span> times the differences between clusters, and the offspring that
+are clipped to the bounds pile up on the edges of the box.  Bounded
+exponential and parent-centric crossover keep most offspring near the cluster
+of their parent.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="n">centres</span> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="p">[</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">]</span><span class="p">,</span> <span class="p">[</span><span class="mf">8.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">]</span><span class="p">,</span> <span class="p">[</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]</span><span class="p">]</span><span class="p">)</span><span class="w">
+</span><span class="n">clustered_population</span> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.repeat.html#numpy.repeat" title="numpy.repeat"><span class="n">np</span><span class="o">.</span><span class="n">repeat</span></a><span class="p">(</span><span class="n">centres</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="w">
+</span><span class="n">clustered_population</span> <span class="o">+</span><span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><span class="n">plot_population</span><span class="p">(</span><span class="n">clustered_population</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<img src="../_images/sphx_glr_plot_crossover_007.png" srcset="../_images/sphx_glr_plot_crossover_007.png, ../_images/sphx_glr_plot_crossover_007_2_00x.png 2.00x" alt="Uniform, Single point, Blend alpha, Single arithmetic, Local, Bounded exponential, DE/rand/1/bin, DE/current/1, Parent-centric" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.837 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-crossover-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/7d70e723808a16f11ed7e15360d20c87/plot_crossover.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_crossover.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/1bc887ea6851bde29a4766e903665c2b/plot_crossover.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_crossover.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/a34a1848554b627c377dbc968df40eb9/plot_crossover.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_crossover.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="plot_generate.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Sampling Random Nondominated Sets</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../benchmarks/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Benchmarks</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crossover-behaviour-with-two-parents">Crossover behaviour with two parents</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bounded-exponential-crossover">Bounded exponential crossover</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#blend-crossover-the-alpha-parameter">Blend crossover: the alpha parameter</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#offspring-geometry-in-two-dimensions">Offspring geometry in two dimensions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crossover-behaviour-with-a-population">Crossover behaviour with a population</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+
+  <div class="sphx-glr-sidebar-component">
+    
+      
+        <div class="sphx-glr-sidebar-item sphx-glr-download-python-sidebar" title="plot_crossover.py">
+          <a download href="../_downloads/1bc887ea6851bde29a4766e903665c2b/plot_crossover.py">
+            <i class="fa-solid fa-download"></i>
+            Download source code
+          </a>
+        </div>
+      
+    
+      
+        <div class="sphx-glr-sidebar-item sphx-glr-download-jupyter-sidebar" title="plot_crossover.ipynb">
+          <a download href="../_downloads/7d70e723808a16f11ed7e15360d20c87/plot_crossover.ipynb">
+            <i class="fa-solid fa-download"></i>
+            Download Jupyter notebook
+          </a>
+        </div>
+      
+    
+      
+        <div class="sphx-glr-sidebar-item sphx-glr-download-zip-sidebar" title="plot_crossover.zip">
+          <a download href="../_downloads/a34a1848554b627c377dbc968df40eb9/plot_crossover.zip">
+            <i class="fa-solid fa-download"></i>
+            Download zipped
+          </a>
+        </div>
+      
+    
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.1.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
