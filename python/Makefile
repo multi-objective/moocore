@@ -34,6 +34,9 @@ doc:
 fastdoc:
 	$(MAKE) -C doc html-noplot
 
+fulldoc:
+	$(MAKE) -C doc clean html
+
 clean:
 	$(MAKE) -C doc clean
 	$(MAKE) -C src/moocore/libmoocore/ clean
