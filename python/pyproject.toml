@@ -161,6 +161,7 @@ ignore = [
   "D213", # multi-line-summary-second-line
 ]
 extend-per-file-ignores."*benchmarks*/*.py" = [
+  "B023", # https://github.com/astral-sh/ruff/issues/29798
   "D",
   "N806", # non-lowercase-variable-in-function
   "N813",

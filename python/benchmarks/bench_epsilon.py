@@ -41,8 +41,8 @@ for name in names:
         name=name,
         n=n,
         bench={
-            "moocore": lambda z, ref=ref: moocore.epsilon_additive(z, ref=ref),
-            "jMetalPy": lambda z, eps=jmetal_EPS(ref): eps.compute(z),
+            "moocore": lambda z: moocore.epsilon_additive(z, ref=ref),
+            "jMetalPy": jmetal_EPS(ref).compute,
         },
         check=check_float_values,
     )
