@@ -1,8 +1,11 @@
-from numpy.typing import ArrayLike  # For type hints
-from typing import Any
+from collections.abc import Sequence
+from numpy.typing import ArrayLike, NDArray  # For type hints
+from typing import Any, TypeAlias
 
 import numpy as np
 from ._libmoocore import ffi  # ty: ignore[unresolved-import]
+
+MaximiseType: TypeAlias = bool | Sequence[bool | int] | NDArray[np.bool_]
 
 
 def get1_and_is_copied(x: Any, x_: Any) -> tuple[Any, bool]:
@@ -25,6 +28,32 @@ def unique_nosort(array: ArrayLike, axis: int | None = None) -> np.ndarray:
     """
     uniq, index = np.unique(array, return_index=True, axis=axis)
     return uniq[index.argsort()]
+
+
+def _as_1d_float_array(
+    f: ArrayLike, dim: int | None = None, name: str = "f"
+) -> np.ndarray:
+    """Convert input to a validated 1D float array."""
+    result = np.ascontiguousarray(f, dtype=float)
+    if result.ndim != 1:
+        raise ValueError(f"'{name}' must be a 1D objective vector")
+    if dim is not None and result.shape[0] != dim:
+        raise ValueError(f"'{name}' must have length {dim}")
+    return result
+
+
+def _as_2d_float_array(
+    f: ArrayLike, *, dim: int | None = None, name: str = "f"
+) -> np.ndarray:
+    """Convert input to a validated 2D float matrix."""
+    result = np.ascontiguousarray(f, dtype=float)
+    if result.ndim == 1:
+        result = result.reshape(1, -1)
+    if result.ndim != 2:
+        raise ValueError(f"'{name}' must be a 1D vector or 2D matrix")
+    if dim is not None and result.shape[1] != dim:
+        raise ValueError(f"'{name}' must have {dim} columns")
+    return result
 
 
 def np2d_to_double_array(
@@ -87,3 +116,8 @@ def _get_seed_for_c(seed: int | np.random.Generator | None) -> ffi.CData:
     if not is_integer_value(seed):
         seed = np.random.default_rng(seed).integers(2**32 - 2, dtype=np.uint32)
     return ffi.cast("uint32_t", seed)
+
+
+def _parse_maximise(maximise: MaximiseType, nobj: int) -> NDArray[np.bool_]:
+    """Convert maximise array or single bool to ndarray format."""
+    return array_1d_of_length_n(maximise, nobj, name="maximise").astype(bool)
