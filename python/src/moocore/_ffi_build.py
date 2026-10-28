@@ -8,11 +8,11 @@ The header files required must be placed in the first argument of `ffibuilder.se
 
 """
 
-from typing import Any
-
 import os
 import platform
 import shlex
+from typing import Any
+
 from cffi import FFI
 
 DEBUG = 0  # Default value.
