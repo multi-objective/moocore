@@ -240,6 +240,7 @@ jobs:
       contents: write
     concurrency:
       group: gh-pages-deploy
+      queue: max
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v6

@@ -21,6 +21,7 @@ jobs:
       actions: read # download artifact from the triggering run
     concurrency:
       group: gh-pages-deploy
+      queue: max
       cancel-in-progress: false
     steps:
       # The deploy action needs a git repository. This checks out the default
