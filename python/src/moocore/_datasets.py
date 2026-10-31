@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import os
 import shutil
@@ -88,7 +89,6 @@ def _fetch_dataset(
 
     """
     url = _BASE_URL + name
-
     local_folder = user_cache_path(
         appname="moocore",
         appauthor=None,
@@ -116,17 +116,16 @@ def _fetch_dataset(
     # attempting to delete a file that was already renamed. If the download
     # fails or the result does not match the expected SHA256 digest, the
     # temporary file is removed manually in the except block.
-    temp_file = NamedTemporaryFile(
+    with contextlib.closing(NamedTemporaryFile(
         prefix=name + ".part_", dir=local_folder, delete=False
-    )
+    )) as temp_file:
     # Note that Python 3.12's `delete_on_close=True` is ignored as we set
     # `delete=False` explicitly. So after this line the empty temporary file still
     # exists on disk to make sure that it's uniquely reserved for this specific call of
     # `_fetch_remote` and therefore it protects against any corruption by parallel
     # calls.
-    temp_file.close()
+            temp_file_path = Path(temp_file.name)
     try:
-        temp_file_path = Path(temp_file.name)
         while True:
             try:
                 urlretrieve(url, temp_file_path)
@@ -156,7 +155,7 @@ def _fetch_dataset(
                 )
 
     except (Exception, KeyboardInterrupt):
-        os.unlink(temp_file.name)
+        os.unlink(temp_file_path)
         raise
 
     # The following renaming is atomic whenever temp_file_path and
@@ -164,7 +163,6 @@ def _fetch_dataset(
     # the time, but we still use shutil.move instead of os.rename in case
     # they are not.
     shutil.move(temp_file_path, file_path)
-
     return file_path
 
 
