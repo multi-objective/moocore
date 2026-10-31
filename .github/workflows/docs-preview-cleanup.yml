@@ -11,8 +11,12 @@ permissions:
 
 jobs:
   cleanup:
-    name: Remove docs preview for closed PR
+    name: Remove docs preview for closed PR ${{ github.event.pull_request.number }}
     runs-on: ubuntu-latest
+    concurrency:
+      group: gh-pages-deploy
+      queue: max
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v6
         with:
