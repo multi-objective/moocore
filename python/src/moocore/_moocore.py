@@ -145,9 +145,11 @@ def read_datasets(filename: str | os.PathLike[str] | StringIO) -> np.ndarray:
         raise FileNotFoundError(f"file '{filename}' not found")
 
     if filename.endswith(".xz"):
-        with lzma.open(filename, "rb") as fsrc:
-            with tempfile.NamedTemporaryFile(delete=False) as fdst:
-                shutil.copyfileobj(fsrc, fdst)
+        with (
+            lzma.open(filename, "rb") as fsrc,
+            tempfile.NamedTemporaryFile(delete=False) as fdst,
+        ):
+            shutil.copyfileobj(fsrc, fdst)
         filename = fdst.name
     else:
         fdst = None
@@ -2740,7 +2742,7 @@ def whv_hype(
             )
         case "exponential":
             if not isinstance(mu, numbers.Real):
-                raise ValueError("'mu' must be a single number")
+                raise TypeError("'mu' must be a single number")
             hv = lib.whv_hype_expo(
                 points_p, npoints, ideal, ref, nsamples, seed, float(mu)
             )
