@@ -16,12 +16,12 @@ print(f"pandas version: {pd.__version__}")
 # First, we create a toy Pandas :class:`~pandas.DataFrame`.
 
 df = pd.DataFrame(
-    dict(
-        obj1=[1, 2, 3, 4, 5],
-        obj2=[5, 4, 3, 2, 1],
-        obj3=[100, 200, 200, 300, 100],
-        algo=2 * ["foo"] + 2 * ["bar"] + ["foo"],
-    )
+    {
+        "obj1": [1, 2, 3, 4, 5],
+        "obj2": [5, 4, 3, 2, 1],
+        "obj3": [100, 200, 200, 300, 100],
+        "algo": 2 * ["foo"] + 2 * ["bar"] + ["foo"],
+    }
 )
 df
 
@@ -64,13 +64,13 @@ df["algo"].unique()
 # If we have multiple columns that we want to use to define the sets, such as ``algo`` and ``run``:
 
 df = pd.DataFrame(
-    dict(
-        obj1=[1, 2, 3, 4, 5, 6, 5, 4, 3, 1],
-        obj2=[6, 5, 4, 3, 2, 1, 5, 4, 5, 6],
-        obj3=[1, 2, 3, 4, 5, 6, 6, 7, 5, 2],
-        algo=["a"] * 3 + ["b"] * 3 + ["a", "b"] * 2,
-        run=[1, 1, 2, 1, 1, 2, 2, 2, 1, 1],
-    )
+    {
+        "obj1": [1, 2, 3, 4, 5, 6, 5, 4, 3, 1],
+        "obj2": [6, 5, 4, 3, 2, 1, 5, 4, 5, 6],
+        "obj3": [1, 2, 3, 4, 5, 6, 6, 7, 5, 2],
+        "algo": ["a"] * 3 + ["b"] * 3 + ["a", "b"] * 2,
+        "run": [1, 1, 2, 1, 1, 2, 2, 2, 1, 1],
+    }
 )
 obj_cols = ["obj1", "obj2", "obj3"]
 df
