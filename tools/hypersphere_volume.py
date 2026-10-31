@@ -2,7 +2,7 @@
 # sympy >= 1.14.0
 # mpmath>=1.4.1
 import sympy as sp
-import mpmath as mpmath
+import mpmath
 import numpy as np
 
 # Set the precision to 128 bits
