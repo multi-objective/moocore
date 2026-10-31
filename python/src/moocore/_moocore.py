@@ -1511,7 +1511,7 @@ def filter_dominated(
     # FIXME: We would like to express that 'points' is indexable by a boolean
     # mask and convertible to NDArray. ArrayLike accepts scalars and lists that
     # are not.
-    points: Any = points
+    points: Any = points # ruff: ignore[PLW0127]
     return points[
         is_nondominated(points, maximise=maximise, keep_weakly=keep_weakly)
     ]
