@@ -23,12 +23,12 @@ import moocore
 
 files = {
     # range are the (start, stop, num) parameters for np.geomspace()
-    "ran-2d": dict(generate=(20_000, 2), range=(100, 20_000, 10)),
-    "ran-3d": dict(generate=(20_000, 3), range=(100, 20_000, 10)),
-    "ran-4d": dict(generate=(20_000, 4), range=(100, 20_000, 10)),
-    "ran-5d": dict(generate=(20_000, 5), range=(100, 20_000, 10)),
-    "ran-9d": dict(generate=(10_000, 9), range=(10, 10_000, 10)),
-    "ran-10d": dict(generate=(10_000, 10), range=(10, 10_000, 10)),
+    "ran-2d": {"generate": (20_000, 2), "range": (100, 20_000, 10)},
+    "ran-3d": {"generate": (20_000, 3), "range": (100, 20_000, 10)},
+    "ran-4d": {"generate": (20_000, 4), "range": (100, 20_000, 10)},
+    "ran-5d": {"generate": (20_000, 5), "range": (100, 20_000, 10)},
+    "ran-9d": {"generate": (10_000, 9), "range": (10, 10_000, 10)},
+    "ran-10d": {"generate": (10_000, 10), "range": (10, 10_000, 10)},
 }
 
 rng = np.random.default_rng(42)
@@ -57,7 +57,7 @@ for name in names:
         bench={
             "moocore": lambda z: moocore.pareto_rank(z),
             "paretoset": lambda z: paretoset_paretorank(z, use_numba=True) - 1,
-            "pymoo": lambda z, nds=pymoo_NDS(): nds.do(z, return_rank=True)[1],
+            "pymoo": lambda z: pymoo_NDS().do(z, return_rank=True)[1],
             "desdeo": lambda z: desdeo_nds(z).argmax(axis=0),
         },
         check=check_array_equal,

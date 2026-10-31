@@ -43,11 +43,9 @@ for name in names:
         name=name,
         n=n,
         bench={
-            "moocore": lambda z, ref=ref: moocore.igd_plus(z, ref=ref),
-            "jMetalPy": lambda z, igdp=jmetal_IGDplus(ref): igdp.compute(z),
-            "desdeo": lambda z, ref=ref: (
-                desdeo_igd_plus(z, reference_set=ref).igd_plus
-            ),
+            "moocore": lambda z: moocore.igd_plus(z, ref=ref),
+            "jMetalPy": jmetal_IGDplus(ref).compute,
+            "desdeo": lambda z: desdeo_igd_plus(z, reference_set=ref).igd_plus,
         },
         check=check_float_values,
     )

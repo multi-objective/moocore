@@ -103,9 +103,7 @@ jobs:
     needs: [run-tests, type-check]
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
     permissions:
-      contents: write
-    concurrency: # Recommended if you intend to make multiple deployments in quick succession.
-      group: web-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      contents: read
     timeout-minutes: 10
     strategy:
       matrix:
@@ -144,38 +142,54 @@ jobs:
       - name: Cache intersphinx inventories
         uses: actions/cache@v5
         with:
-          path: python/doc/_build/doctrees/
+          path: python/doc/_build/doctrees/__intersphinx_cache__/
           key: intersphinx-${{ hashFiles('python/doc/source/conf.py') }}
           restore-keys: intersphinx-
 
       - name: Build the docs 🔧
+        env:
+          DEST: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}
         run: |
           make -C doc html
+          mkdir ../staging
+          mv doc/_build/html "../staging/$DEST"
         working-directory: python
 
+      - name: Upload docs
+        uses: actions/upload-artifact@v6
+        with:
+          name: docs-python
+          path: staging/
+          retention-days: 3
+
+  deploy-docs:
+    name: Deploy docs
+    needs: build-doc
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: gh-pages-deploy
+      queue: max
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: docs-python
+          path: artifact
+
       - name: Deploy 🚀
-        if: success() && runner.os == 'Linux' && github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: python/doc/_build/html/ # The folder the action should deploy.
+          folder: artifact/main
           target-folder: python
           single-commit: true
           clean: true
-
-      - name: Stage PR preview
-        if: github.event_name == 'pull_request'
-        run: |
-          mkdir -p preview
-          cp -r python/doc/_build/html preview/site
-          echo "${{ github.event.pull_request.number }}" > preview/pr-number
-
-      - name: Upload PR preview
-        if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v6
-        with:
-          name: docs-preview-python
-          path: preview/
-          retention-days: 3
 
   coverage:
     timeout-minutes: 15

@@ -30,20 +30,24 @@ import moocore
 # See https://github.com/multi-objective/testsuite/tree/main/data
 files = {
     # range are the (start, stop, num) parameters for np.geomspace()
-    "test2D-200k": dict(file="test2D-200k.inp.xz", range=(1000, 50_000, 10)),
-    "ran3d-40k": dict(file="ran.40000pts.3d.1.xz", range=(1000, 40_000, 10)),
-    "sphere-4d": dict(
-        generate=(25_000, 4, "sphere", 42), range=(500, 25_000, 10)
-    ),
-    "convex-4d": dict(
-        generate=(25_000, 4, "convex-sphere", 42), range=(500, 25_000, 10)
-    ),
-    "sphere-5d": dict(
-        generate=(20_000, 5, "sphere", 42), range=(100, 20_000, 10)
-    ),
-    "rmnk-10d": dict(
-        file="rmnk_0.0_10_16_1_0_ref.txt.xz", range=(100, 20_000, 10)
-    ),
+    "test2D-200k": {"file": "test2D-200k.inp.xz", "range": (1000, 50_000, 10)},
+    "ran3d-40k": {"file": "ran.40000pts.3d.1.xz", "range": (1000, 40_000, 10)},
+    "sphere-4d": {
+        "generate": (25_000, 4, "sphere", 42),
+        "range": (500, 25_000, 10),
+    },
+    "convex-4d": {
+        "generate": (25_000, 4, "convex-sphere", 42),
+        "range": (500, 25_000, 10),
+    },
+    "sphere-5d": {
+        "generate": (20_000, 5, "sphere", 42),
+        "range": (100, 20_000, 10),
+    },
+    "rmnk-10d": {
+        "file": "rmnk_0.0_10_16_1_0_ref.txt.xz",
+        "range": (100, 20_000, 10),
+    },
 }
 
 

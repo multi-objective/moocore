@@ -29,7 +29,7 @@ library(ggplot2)
 ```
 
 This example illustrates how to sample random sets with
-mutually nondominated points.
+mutually nondominated points using `generate_ndset()`.
 
 
 # Random nondominated sets in 2D
@@ -96,6 +96,7 @@ First, let's define a few functions useful for plotting:
 ```{r}
 #| class.source: 'fold-hide'
 library(moocore)
+library(viridisLite)
 library(htmltools)
 library(plotly, warn.conflicts = FALSE)
 
@@ -174,6 +175,21 @@ plotly_side_by_side <- function(fig1, fig2, height="500px") {
       tags$div(style=sprintf("width:49%%; height:%s;", height),
         plotly::as_widget(fig2))))
 }
+
+pcplot <- function(x, title, cmap = "viridis") {
+  x <- as.matrix(x)
+  if (!is.numeric(x)) stop("x must be a numeric matrix.")
+  x <- x[order(x[, 1], na.last = TRUE), , drop = FALSE]
+
+  n <- nrow(x)
+  d <- ncol(x)
+  col <- viridisLite::viridis(n, option = cmap, alpha = 0.7)
+  matplot(x = seq_len(d), y = t(x), type = "l", col = col,
+    lty = 1, lwd = 1, xaxt = "n", xlab = "Dimension", ylab = "Value",
+    main = title, bty = "l")
+
+  axis(side = 1, at = seq_len(d), labels = seq_len(d))
+}
 ```
 </details>
 
@@ -235,6 +251,11 @@ The `cliff` type is often used to test the performance of algorithms for
 computing the hypervolume [@EmmFon2011emo; @GueFon2017hv4d], due to its
 particular structure.
 
+Consecutive dimension pairs are sampled on the positive orthant of the 2D unit
+sphere. For odd dimensions, the last column is sampled uniformly in `[0,1)`.
+The method requires at least three dimensions; in 3D, this gives one sphere
+pair and one uniform column.
+
 ```{r generate_3d_cliff}
 fig1 <- plot_3d("simplex", moocore::generate_ndset(n, 3, "concave-cliff", seed = 42), title = 'method="concave-cliff"')
 fig2 <- plot_3d("simplex", moocore::generate_ndset(n, 3, "convex-cliff", seed = 42), title = 'method="convex-cliff"')
@@ -288,5 +309,28 @@ fig1 <- plot_3d("convex", points_moocore, title = "Convex-sphere (moocore)")
 fig2 <- plot_3d("convex", points_naive, title = "Convex-sphere (naive)")
 plotly_side_by_side(fig1, fig2)
 ```
+
+# 4D nondominated sets
+
+We use parallel coordinate plots to visualise nondominated sets in 4D:
+
+```{r generate_4d}
+methods <- c(
+    "simplex",
+    "concave-sphere",
+    "convex-sphere",
+    "concave-simplex",
+    "convex-simplex",
+    "inverted-simplex",
+    "concave-cliff",
+    "convex-cliff"
+)
+n <- 500
+for (method in methods) {
+  x <- moocore::generate_ndset(n, 4L, method=method, seed = 42)
+  pcplot(x, title = method)
+}
+```
+
 
 # References

@@ -74,21 +74,17 @@ for name in names:
 
     benchmarks = {
         "moocore": moocore.Hypervolume(ref=ref),
-        "optuna": lambda z, ref=ref: optuna_hv(
+        "optuna": lambda z: optuna_hv(
             z, reference_point=ref, assume_pareto=False
         ),
-        "nevergrad": lambda z, hv=ng_HV(ref): hv.compute(z),
-        "moarchiving (float)": lambda z, ref=ref: float(
+        "nevergrad": ng_HV(ref).compute,
+        "moarchiving (float)": lambda z: float(
             moarch_get_mo_archive(z, reference_point=ref).hypervolume
         ),
         # "paretobench": lambda z, hv=pb.Hypervolume(ref_point=ref): hv(pb.Population(f=z), None),
         # "trieste": lambda z, tf_ref=tf.convert_to_tensor(ref): float(trieste_Pareto(z, already_non_dominated=True).hypervolume_indicator(tf_ref)),
-        "botorch": lambda z, hv=botorch_HV(ref_point=torch.from_numpy(-ref)): (
-            hv.compute(z)
-        ),
-        "fast_pareto": lambda z, ref=ref: fp_hv(
-            z, ref_point=ref, assume_pareto=False
-        ),
+        "botorch": botorch_HV(ref_point=torch.from_numpy(-ref)).compute,
+        "fast_pareto": lambda z: fp_hv(z, ref_point=ref, assume_pareto=False),
     }
     # Too slow to run.
     if dim >= 6:

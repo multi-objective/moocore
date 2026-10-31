@@ -71,7 +71,7 @@ docs = [
   "plotly",
   "pydata-sphinx-theme>=0.16",
   "seaborn",
-  "sphinx>=6",
+  "sphinx>=9; python_version>='3.12'",
   "sphinx-autodoc-typehints",
   "sphinx-copybutton",
   "sphinx-design",
@@ -162,6 +162,7 @@ ignore = [
   "D213", # multi-line-summary-second-line
 ]
 extend-per-file-ignores."*benchmarks*/*.py" = [
+  "B023", # https://github.com/astral-sh/ruff/issues/29798
   "D",
   "N806", # non-lowercase-variable-in-function
   "N813",
