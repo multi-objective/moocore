@@ -48,16 +48,22 @@ results = []
 for i in range(1, nsamples_exp + 1):
     for r in range(nreps):
         res = moocore.whv_hype(x, ref=ref, ideal=0, nsamples=10**i, seed=rng1)
-        results.append(dict(Method="HypE", rep=r, samples=i, value=res))
+        results.append({"Method": "HypE", "rep": r, "samples": i, "value": res})
         res = moocore.hv_approx(
             x, ref=ref, nsamples=10**i, seed=rng2, method="DZ2019-MC"
         )
-        results.append(dict(Method="DZ2019-MC", rep=r, samples=i, value=res))
+        results.append(
+            {"Method": "DZ2019-MC", "rep": r, "samples": i, "value": res}
+        )
 
     res = moocore.hv_approx(x, ref=ref, nsamples=10**i, method="DZ2019-HW")
-    results.append(dict(Method="DZ2019-HW", rep=0, samples=i, value=res))
+    results.append(
+        {"Method": "DZ2019-HW", "rep": 0, "samples": i, "value": res}
+    )
     res = moocore.hv_approx(x, ref=ref, nsamples=10**i, method="Rphi-FWE+")
-    results.append(dict(Method="Rphi-FWE+", rep=0, samples=i, value=res))
+    results.append(
+        {"Method": "Rphi-FWE+", "rep": 0, "samples": i, "value": res}
+    )
 
 
 width = len("Mean DZ2019-MC")
@@ -116,14 +122,14 @@ for dataset in datasets:
     res = []
     for i in samples:
         hv = moocore.hv_approx(x, ref=ref, nsamples=i, method="DZ2019-HW")
-        res.append(dict(samples=i, method="DZ2019-HW", hv=hv))
+        res.append({"samples": i, "method": "DZ2019-HW", "hv": hv})
         hv = moocore.hv_approx(x, ref=ref, nsamples=i, method="Rphi-FWE+")
-        res.append(dict(samples=i, method="Rphi-FWE+", hv=hv))
+        res.append({"samples": i, "method": "Rphi-FWE+", "hv": hv})
         for k in range(5):
             hv = moocore.hv_approx(
                 x, ref=ref, nsamples=i, method="DZ2019-MC", seed=k
             )
-            res.append(dict(samples=i, method="DZ2019-MC", hv=hv))
+            res.append({"samples": i, "method": "DZ2019-MC", "hv": hv})
 
     df = pd.DataFrame(res)
     df["hverror"] = np.abs(1.0 - (df.hv / exact))

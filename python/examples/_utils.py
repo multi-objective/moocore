@@ -92,7 +92,7 @@ def plot_3d(what, x, title, plotly=False, rank=False, show_index=False):
             mode="markers+text" if show_index else "markers",
             text=text,
             textposition="top center",
-            marker=dict(size=2, color=color),
+            marker={"size": 2, "color": color},
         )
         if x.max() <= 1:
             limits = [0, 1]
@@ -101,14 +101,14 @@ def plot_3d(what, x, title, plotly=False, rank=False, show_index=False):
 
         layout = go.Layout(
             title=title,
-            scene=dict(
-                xaxis=dict(title="X", range=limits),
-                yaxis=dict(title="Y", range=limits),
-                zaxis=dict(title="Z", range=limits),
+            scene={
+                "xaxis": {"title": "X", "range": limits},
+                "yaxis": {"title": "Y", "range": limits},
+                "zaxis": {"title": "Z", "range": limits},
                 # Approx. elev=30, azim=25
-                camera=dict(eye=dict(x=1.2, y=1.2, z=0.8)),
-            ),
-            margin=dict(l=0, r=0, b=0, t=40),
+                "camera": {"eye": {"x": 1.2, "y": 1.2, "z": 0.8}},
+            },
+            margin={"l": 0, "r": 0, "b": 0, "t": 40},
             showlegend=False,
         )
         fig = go.Figure(data=[surface, scatter], layout=layout)
@@ -161,7 +161,10 @@ def plotly_3d_side_by_side(fig1, fig2):
     len2 = len(fig2.data)
     fig.add_traces(fig2.data, rows=[1] * len2, cols=[2] * len2)
     fig.update_layout(
-        height=400, title="", margin=dict(l=0, r=0, b=0, t=40), showlegend=False
+        height=400,
+        title="",
+        margin={"l": 0, "r": 0, "b": 0, "t": 40},
+        showlegend=False,
     )
     fig.update_scenes(fig1.layout.scene.to_plotly_json())
     return fig

@@ -47,5 +47,5 @@ for r in runs:
     aocs += [aoc]
     aucs += [auc]
 
-df = pd.DataFrame(dict(r=runs, AOC=aocs, AUC=aucs)).set_index("r")
+df = pd.DataFrame({"r": runs, "AOC": aocs, "AUC": aucs}).set_index("r")
 df.plot(style=["rs-", "c^--"], xlabel="Number of sets", ylabel="Value")
