@@ -168,6 +168,7 @@ extend-per-file-ignores."*benchmarks*/*.py" = [
   "N813",
 ]
 extend-per-file-ignores."*examples*/*.py" = [
+  "B018", # Found useless expression. Either assign it to a variable or remove it
   "D205", # 1 blank line required between summary line and description
   "D400", # First line should end with a period
   "D415", # First line should end with a period, question mark, or exclamation point

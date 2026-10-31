@@ -1,7 +1,7 @@
 # Requires
 # sympy >= 1.14.0
 # mpmath>=1.4.1
-import mpmath as mpmath
+import mpmath
 import numpy as np
 import sympy as sp
 

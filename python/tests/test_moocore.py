@@ -765,7 +765,7 @@ class TestR2Exact:
 
 def test_whv_hype_errors():
     """Check error handling of whv_hype()."""
-    with pytest.raises(ValueError, match=r"must be a single number"):
+    with pytest.raises(TypeError, match=r"must be a single number"):
         moocore.whv_hype(
             [[2, 2]], ref=4, ideal=1, dist="exponential", mu=[2.9, 0.9]
         )

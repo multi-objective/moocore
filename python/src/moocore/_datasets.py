@@ -201,7 +201,7 @@ def get_dataset_path(
     """
     local_path = files("moocore.data") / filename
     if not isinstance(local_path, Path):
-        raise ValueError("{local_path} is not a file-system path")
+        raise TypeError("{local_path} is not a file-system path")
     if local_path.exists():
         return local_path
 

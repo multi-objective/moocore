@@ -29,7 +29,7 @@ def deep_equal(a, b):
     if isinstance(a, np.ndarray):
         try:
             assert_array_equal(a, b, strict=True)
-        except Exception as e:
+        except AssertionError as e:
             print(e)
             return False
         else:
