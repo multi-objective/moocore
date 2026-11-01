@@ -1,10 +1,11 @@
-import numpy as np
-import moocore
 import matplotlib.pyplot as plt
-from matplotlib.patches import Arc
-from matplotlib.colors import to_hex
+import numpy as np
 import plotly.graph_objects as go
+from matplotlib.colors import to_hex
+from matplotlib.patches import Arc
 from plotly.subplots import make_subplots
+
+import moocore
 
 
 def plot_3d(what, x, title, plotly=False, rank=False, show_index=False):

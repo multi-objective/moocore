@@ -13,6 +13,7 @@ The Area-Over-the-Curve (i.e., the hypervolume) of a set of nondominated sets is
 
 import numpy as np
 import pandas as pd
+
 import moocore
 
 A = moocore.get_dataset("ALG_1_dat.xz")

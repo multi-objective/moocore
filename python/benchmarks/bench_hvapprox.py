@@ -6,18 +6,19 @@ This example benchmarks the methods for approximating the hypervolume in
 
 """
 
-import numpy as np
-import moocore
 import pathlib
-import matplotlib.pyplot as plt
 import timeit  # time_hv_exact
 
+import matplotlib.pyplot as plt
+import numpy as np
 from bench import (
     Bench,
-    read_datasets_and_filter_dominated,
     get_range,
+    read_datasets_and_filter_dominated,
     timeit_template_return_1_value,  # time_hv_exact
 )
+
+import moocore
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
 path_to_data = "../../testsuite/data/"

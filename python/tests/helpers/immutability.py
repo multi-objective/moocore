@@ -1,6 +1,7 @@
 # ruff: noqa: D100
 import copy
 from collections.abc import Mapping
+
 import numpy as np
 from numpy.testing import assert_array_equal
 

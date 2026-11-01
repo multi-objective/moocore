@@ -1,11 +1,13 @@
 # ruff: noqa: D100, D103
-import pytest
-import numpy as np
-from numpy.testing import (
-    assert_array_equal,
-    assert_allclose,
-)
 import math
+
+import numpy as np
+import pytest
+from numpy.testing import (
+    assert_allclose,
+    assert_array_equal,
+)
+
 import moocore
 
 fun_c2py = {

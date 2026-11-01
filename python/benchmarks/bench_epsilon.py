@@ -5,14 +5,14 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
-from bench import Bench, read_data, check_float_values
-
-import numpy as np
-import moocore
 import pathlib
-import matplotlib.pyplot as plt
 
+import matplotlib.pyplot as plt
+import numpy as np
+from bench import Bench, check_float_values, read_data
 from jmetal.core.quality_indicator import EpsilonIndicator as jmetal_EPS
+
+import moocore
 
 path_to_data = "../../testsuite/data/"
 if not pathlib.Path(path_to_data).expanduser().exists():
