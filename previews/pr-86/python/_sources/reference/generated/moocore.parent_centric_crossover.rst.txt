@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+parent\_centric\_crossover
+==========================
+
+.. currentmodule:: moocore
+
+.. autofunction:: parent_centric_crossover
+
+.. _sphx_glr_backref_moocore.parent_centric_crossover:
+
+.. minigallery:: moocore.parent_centric_crossover
+   :add-heading: Gallery examples
+   :heading-level: -

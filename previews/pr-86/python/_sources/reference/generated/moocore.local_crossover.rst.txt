@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+local\_crossover
+================
+
+.. currentmodule:: moocore
+
+.. autofunction:: local_crossover
+
+.. _sphx_glr_backref_moocore.local_crossover:
+
+.. minigallery:: moocore.local_crossover
+   :add-heading: Gallery examples
+   :heading-level: -

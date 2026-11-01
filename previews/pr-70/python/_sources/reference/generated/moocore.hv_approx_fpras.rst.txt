@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+hv\_approx\_fpras
+=================
+
+.. currentmodule:: moocore
+
+.. autofunction:: hv_approx_fpras
+
+.. _sphx_glr_backref_moocore.hv_approx_fpras:
+
+.. minigallery:: moocore.hv_approx_fpras
+   :add-heading: Gallery examples
+   :heading-level: -
