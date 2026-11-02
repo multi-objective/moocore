@@ -18,12 +18,12 @@ jobs:
       queue: max
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: gh-pages
           allow-unsafe-pr-checkout: true
 
-      - name: Remove preview folder
+      - name: Remove preview folder for PR ${{ github.event.pull_request.number }}
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |

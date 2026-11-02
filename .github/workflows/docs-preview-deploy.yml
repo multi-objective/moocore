@@ -23,6 +23,8 @@ jobs:
       group: gh-pages-deploy
       queue: max
       cancel-in-progress: false
+    env:
+      WORKFLOW: ${{ github.event.workflow_run.name }}
     steps:
       # The deploy action needs a git repository. This checks out the default
       # branch (workflow_run context), never the PR code.
@@ -30,10 +32,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Select docs
+      - name: Select ${{ github.event.workflow_run.name }} docs
         id: docs
-        env:
-          WORKFLOW: ${{ github.event.workflow_run.name }}
         run: |
           case "${WORKFLOW}" in
             Python) echo "sub=python" >> "$GITHUB_OUTPUT" ;;
@@ -59,7 +59,27 @@ jobs:
           rm -rf "artifact/$dir/.git" "artifact/$dir/.github"
           echo "number=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
 
+      - name: Check PR ${{ steps.pr.outputs.number }} state
+        id: pr-state
+        uses: actions/github-script@v9
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        with:
+          script: |
+            const prNumber = Number(process.env.PR_NUMBER);
+            if (!Number.isSafeInteger(prNumber) || prNumber <= 0) {
+              core.setOutput('open', 'false');
+              return;
+            }
+            const {data: pr} = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            core.setOutput('open', String(pr.state === 'open'));
+
       - name: Deploy PR ${{ steps.pr.outputs.number }} preview for ${{ steps.docs.outputs.sub }} 🚀
+        if: steps.pr-state.outputs.open == 'true'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: artifact/pr-${{ steps.pr.outputs.number }}
@@ -68,6 +88,7 @@ jobs:
           clean: true
 
       - name: Comment PR ${{ steps.pr.outputs.number }} preview link for ${{ steps.docs.outputs.sub }} 📚
+        if: steps.pr-state.outputs.open == 'true'
         uses: actions/github-script@v9
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
@@ -76,7 +97,7 @@ jobs:
           script: |
             const prNumber = Number(process.env.PR_NUMBER);
             const sub = process.env.SUB;
-            const label = sub === 'r' ? 'R' : 'Python';
+            const label = process.env.WORKFLOW;
             const marker = `<!-- docs-preview-${sub}-marker -->`;
             const url = `https://multi-objective.github.io/moocore/previews/pr-${prNumber}/${sub}/`;
             const body = `${marker}\n📚 [**${label} docs preview** for this PR](${url})\n\n`;
