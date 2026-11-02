@@ -1,6 +1,11 @@
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = [ "cffi>=1.17.1", "setuptools>=77.0.3" ]
+requires = [
+  "cffi>=1.17.1; python_version<'3.15'",
+  "cffi>=2.1.1; python_version>='3.15'",
+  "setuptools>=77.0.3; python_version<'3.15'",
+  "setuptools>=84.2.1; python_version>='3.15'",
+]
 
 [project]
 name = "moocore"
@@ -34,7 +39,8 @@ classifiers = [
   "Programming Language :: Python :: 3.15",
 ]
 dependencies = [
-  "cffi>=1.17.1",
+  "cffi>=1.17.1; python_version<'3.15'",
+  "cffi>=2.1.1; python_version>='3.15'",
   "numpy>=2.1",
   "platformdirs",
 ]
@@ -94,9 +100,6 @@ zip-safe = false
 [tool.setuptools.package-data]
 "*" = [ "*.c", "*.h" ]
 "moocore.data" = [ "*.10", "*.csv", "*.dat", "*.txt", "*.xz" ]
-
-[tool.distutils.bdist_wheel]
-py_limited_api = "cp310"
 
 [tool.cibuildwheel]
 skip = [
