@@ -18,7 +18,9 @@ setup(
     options={
         "bdist_wheel": {
             "py_limited_api": (
-                "cp315" if sysconfig.get_config_var("Py_GIL_DISABLED") else "cp310"
+                "cp315"
+                if sysconfig.get_config_var("Py_GIL_DISABLED")
+                else "cp310"
             )
         }
     },
