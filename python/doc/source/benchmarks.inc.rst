@@ -116,12 +116,11 @@ to Pareto-optimality. It can be used to split a set of points into layers of
 nondominated fronts.  For more details, see :func:`moocore.pareto_rank`.  This
 function in `moocore`_ uses a :math:`O(n \log n)` algorithm for 2 dimensions
 and a :math:`O(n^2\log n)` algorithm for 3 dimensions.  As the plots show, this
-makes `moocore`_ significantly faster than `paretoset`_, `pymoo`_, `DESDEO`_
-and `pygmo`_.  With higher dimensions, `moocore`_ uses a
-:math:`O(n^2\log^{m-2}n)` algorithm instead of the :math:`O(n^3)` algorithm in
-`paretoset`_, `DESDEO`_ (compiled with `Numba`_) and `pygmo`_ (which is
-implement in C++).  In these benchmarks points are sampled uniformly at random
-within the hypercube.
+makes `moocore`_ significantly faster than `paretoset`_, `DESDEO`_ and
+`pygmo`_.  With higher dimensions, `moocore`_ uses a :math:`O(n^2\log^{m-2}n)`
+algorithm instead of the :math:`O(n^3)` algorithm in `paretoset`_, `DESDEO`_
+(compiled with `Numba`_) and `pygmo`_ (which is implement in C++).  In these
+benchmarks, points are sampled uniformly at random within the hypercube.
 
 |ndsort_bench-ran-2d| |ndsort_bench-ran-3d|
 

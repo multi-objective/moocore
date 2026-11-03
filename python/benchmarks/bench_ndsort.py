@@ -13,9 +13,6 @@ from desdeo.tools.non_dominated_sorting import (
 )
 from paretoset import paretorank as paretoset_paretorank
 from pygmo import fast_non_dominated_sorting as pygmo_nds
-from pymoo.util.nds.non_dominated_sorting import (
-    NonDominatedSorting as pymoo_NDS,
-)
 
 import moocore
 
@@ -58,7 +55,6 @@ for name in names:
         bench={
             "moocore": lambda z: moocore.pareto_rank(z),
             "paretoset": lambda z: paretoset_paretorank(z, use_numba=True) - 1,
-            "pymoo": lambda z: pymoo_NDS().do(z, return_rank=True)[1],
             "desdeo": lambda z: desdeo_nds(z).argmax(axis=0),
             "pygmo": lambda z: pygmo_nds(z)[3],
         },
