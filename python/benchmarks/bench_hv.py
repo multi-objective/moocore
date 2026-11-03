@@ -30,6 +30,7 @@ from fast_pareto import hypervolume as fp_hv
 from moarchiving import get_mo_archive as moarch_get_mo_archive
 from nevergrad.optimization.multiobjective import HypervolumeIndicator as ng_HV
 from optuna._hypervolume import compute_hypervolume as optuna_hv
+from pygmo import hypervolume as pygmo_hv
 
 import moocore
 
@@ -72,11 +73,13 @@ for name in names:
     ref = np.ones(dim)
     n = get_geomrange(len(x), *files[name]["range"])
 
+    setup = {"botorch": lambda z: torch.from_numpy(-z)}
     benchmarks = {
         "moocore": moocore.Hypervolume(ref=ref),
         "optuna": lambda z: optuna_hv(
             z, reference_point=ref, assume_pareto=False
         ),
+        "pygmo": lambda z: pygmo_hv(points=z).compute(ref_point=ref),
         "nevergrad": ng_HV(ref).compute,
         "moarchiving (float)": lambda z: float(
             moarch_get_mo_archive(z, reference_point=ref).hypervolume
@@ -96,6 +99,7 @@ for name in names:
     if dim >= 4:
         # del benchmarks["trieste"]
         del benchmarks["botorch"]
+        del setup["botorch"]
         # fast_pareto is more than x10_000 slower than moocore in 4D
         del benchmarks["fast_pareto"]
 
@@ -103,7 +107,7 @@ for name in names:
         name=name,
         n=n,
         # Exclude the conversion to torch from the timing.
-        setup={"botorch": lambda z: torch.from_numpy(-z)},
+        setup=setup,
         # elif what == "trieste":
         #     zz = tf.convert_to_tensor(z)
         bench=benchmarks,

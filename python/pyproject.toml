@@ -43,7 +43,7 @@ benchmarks = [
   "botorch",
   "desdeo",
   "fast-pareto",
-  "jmetalpy>=1.8",
+  "jmetalpy>=1.9; python_version>='3.11'",
   "matplotlib",
   "moarchiving>=1.1",
   "nevergrad",
@@ -54,7 +54,8 @@ benchmarks = [
   "paretoset",
   "patatune",
   "py-cpuinfo",
-  "pymoo",
+  "pygmo>=2.20; python_version>='3.11'",
+  "pymoo>=0.6.1.6",
 ]
 coverage = [
   "coverage[toml]",

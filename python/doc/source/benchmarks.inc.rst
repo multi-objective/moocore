@@ -1,7 +1,7 @@
 Benchmarks
 ==========
 
-The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, `DESDEO`_, `paretoset`_, `Nevergrad`_, `jMetalPy`_, `fast-pareto`_, `Optuna`_, `moarchiving`_, and `patatune`_.
+The following plots compare the performance of `moocore`_, `pymoo`_, `BoTorch`_, `DESDEO`_, `paretoset`_, `Nevergrad`_, `jMetalPy`_, `fast-pareto`_, `Optuna`_, `moarchiving`_, `patatune`_ and `pygmo`_.
 
 Other Python packages are not included in the comparison because they are based
 on these packages for the functionality benchmarked, so they are **at least as
@@ -24,8 +24,6 @@ only identify nondominated points.  `DESDEO`_, `DEAP`_, and `jMetalPy`_ use
 filtering dominated points, is still slower than `moocore`_.  Recent versions
 of `seqme`_ and `pymoo`_ (≥0.6.2) already use `moocore`_ for most functionality
 benchmarked here.
-
-We would like to benchmark `pygmo`_, however, it is currently impossible to install using ``pip`` (See https://github.com/esa/pygmo2/issues/152).
 
 We would also like to benchmark `platypus`_, but its API is too different from
 other packages. For example, it only supports filtering dominated points by
@@ -118,11 +116,12 @@ to Pareto-optimality. It can be used to split a set of points into layers of
 nondominated fronts.  For more details, see :func:`moocore.pareto_rank`.  This
 function in `moocore`_ uses a :math:`O(n \log n)` algorithm for 2 dimensions
 and a :math:`O(n^2\log n)` algorithm for 3 dimensions.  As the plots show, this
-makes `moocore`_ significantly faster than `paretoset`_, `pymoo`_ and
-`DESDEO`_.  With higher dimensions, `moocore`_ uses a :math:`O(n^2\log^{m-2}n)`
-algorithm instead of the :math:`O(n^3)` algorithm in `paretoset`_ and `DESDEO`_
-(latter is compiled with `Numba`_).  In these benchmarks points are sampled
-uniformly at random within the hypercube.
+makes `moocore`_ significantly faster than `paretoset`_, `pymoo`_, `DESDEO`_
+and `pygmo`_.  With higher dimensions, `moocore`_ uses a
+:math:`O(n^2\log^{m-2}n)` algorithm instead of the :math:`O(n^3)` algorithm in
+`paretoset`_, `DESDEO`_ (compiled with `Numba`_) and `pygmo`_ (which is
+implement in C++).  In these benchmarks points are sampled uniformly at random
+within the hypercube.
 
 |ndsort_bench-ran-2d| |ndsort_bench-ran-3d|
 
@@ -154,9 +153,9 @@ uniformly at random within the hypercube.
 Exact computation of hypervolume
 --------------------------------
 
-The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D, 4D, 5D and 6D. As the plots show, `moocore`_ is 100 times faster than the other packages and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_ and `BoFire`_.
+The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D, 4D, 5D and 6D. As the plots show, `moocore`_ is 100 times faster than the other packages, except `pygmo_`, and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_ and `BoFire`_.
 
-For 3D, `Optuna`_ uses a :math:`O(n^2)` algorithm, while `moocore`_ uses the best-known :math:`O(n\log n)` one, so the gap between the two will get significantly larger with a larger number of points than those tested here. `moarchiving`_ uses the same algorithms as `moocore`_ for 3D and 4D, but a pure Python implementation, so it is still 10-100 times slower than `moocore`_'s C implementation.  `BoTorch`_ and `fast-pareto`_ are not included for more than 3 objectives because **they are tens of thousands of times slower** than `moocore`_.
+For 3D, `Optuna`_ uses a :math:`O(n^2)` algorithm, while `moocore`_ uses the best-known :math:`O(n\log n)` one, so the gap between the two will get significantly larger with a larger number of points than those tested here. `moarchiving`_ uses the same algorithms as `moocore`_ for 3D and 4D, but a pure Python implementation, so it is still 10-100 times slower than `moocore`_'s C implementation. `pygmo`_ uses a slower algorithm than `moocore`_ for 4D.  `BoTorch`_ and `fast-pareto`_ are not included for more than 3 objectives because **they are tens of thousands of times slower** than `moocore`_.
 
 Recent versions of `DESDEO`_, `DEAP`_ (≥1.4.4), `pymoo`_ (≥0.6.1.6) and `jMetalPy`_ (≥1.9.0) already use `moocore`_ for hypervolume computation.
 The implementation in `patatune`_ appears to be wrong (https://github.com/cms-patatrack/patatune/issues/52).
