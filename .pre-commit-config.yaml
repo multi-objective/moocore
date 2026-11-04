@@ -58,6 +58,7 @@ repos:
     hooks:
       - id: ty
         args: [--project=python, --isolated]
+        always_run: false
 
   - repo: https://github.com/sphinx-contrib/sphinx-lint
     rev: v1.0.2
