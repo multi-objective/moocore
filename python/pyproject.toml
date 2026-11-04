@@ -219,3 +219,5 @@ exclude-lines-by-pattern = [
   "^.*\\bunreachable\\s?\\(\\)",
   "^.*(?:GCOVR?|LCOV)_EXCL_LINE",
 ]
+# Hit counts only matter as hit/no-hit; hot loops legitimately exceed 2**32.
+gcov-suspicious-hits-threshold = 0
