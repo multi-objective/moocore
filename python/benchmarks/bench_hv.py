@@ -47,19 +47,42 @@ files = {
         "file": path_to_data + "DTLZLinearShape.3d.front.1000pts.10",
         "range": (200, 2000, 10),
     },
+    "concave-cliff-3d": {
+        "generate": (2000, 3, "concave-cliff", 42),
+        "range": (200, 2000, 10),
+    },
     "DTLZLinearShape.4d": {
         "file": path_to_data + "DTLZLinearShape.4d.front.1000pts.10",
+        "range": (100, 1200, 10),
+    },
+    "concave-cliff-4d": {
+        "generate": (1200, 4, "concave-cliff", 42),
         "range": (100, 1200, 10),
     },
     "DTLZLinearShape.5d": {
         "file": path_to_data + "DTLZLinearShape.5d.front.500pts.10",
         "range": (10, 600, 10),
     },
+    "concave-cliff-5d": {
+        "generate": (600, 5, "concave-cliff", 42),
+        "range": (10, 600, 10),
+    },
     "DTLZLinearShape.6d": {
         "file": path_to_data + "DTLZLinearShape.6d.front.700pts.10.xz",
-        "range": (10, 300, 10),
+        "range": (10, 500, 10),
+    },
+    "concave-cliff-6d": {
+        "generate": (500, 6, "concave-cliff", 42),
+        "range": (10, 500, 10),
     },
 }
+
+
+def get_dataset(name):
+    if "generate" in files[name]:
+        n, d, method, seed = files[name]["generate"]
+        return moocore.generate_ndset(n, d, method=method, seed=seed)
+    return read_datasets_and_filter_dominated(files[name]["file"])
 
 
 title = "HV computation"
@@ -68,7 +91,7 @@ file_prefix = "hv"
 print(f"# Running benchmark: {title}")
 names = files.keys()
 for name in names:
-    x = read_datasets_and_filter_dominated(files[name]["file"])
+    x = get_dataset(name)
     dim = x.shape[1]
     ref = np.ones(dim)
     n = get_geomrange(len(x), *files[name]["range"])
@@ -112,6 +135,7 @@ for name in names:
         #     zz = tf.convert_to_tensor(z)
         bench=benchmarks,
         check=check_float_values,
+        max_time=1,
     )
 
     bench(lambda n: x[:n, :])

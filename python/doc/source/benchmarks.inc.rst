@@ -154,14 +154,27 @@ Exact computation of hypervolume
 
 The following plots compare the speed of computing the :ref:`hypervolume indicator <hypervolume_metric>` in 3D, 4D, 5D and 6D. As the plots show, `moocore`_ is 100 times faster than the other packages, except `pygmo_`, and 1000 times faster than `BoTorch`_ and, by extension, `Xopt`_ and `BoFire`_.
 
-For 3D, `Optuna`_ uses a :math:`O(n^2)` algorithm, while `moocore`_ uses the best-known :math:`O(n\log n)` one, so the gap between the two will get significantly larger with a larger number of points than those tested here. `moarchiving`_ uses the same algorithms as `moocore`_ for 3D and 4D, but a pure Python implementation, so it is still 10-100 times slower than `moocore`_'s C implementation. `pygmo`_ uses a slower algorithm than `moocore`_ for 4D.  `BoTorch`_ and `fast-pareto`_ are not included for more than 3 objectives because **they are tens of thousands of times slower** than `moocore`_.
-
 Recent versions of `DESDEO`_, `DEAP`_ (≥1.4.4), `pymoo`_ (≥0.6.1.6) and `jMetalPy`_ (≥1.9.0) already use `moocore`_ for hypervolume computation.
 The implementation in `patatune`_ appears to be wrong (https://github.com/cms-patatrack/patatune/issues/52).
 
-|hv_bench-DTLZLinearShape-3d| |hv_bench-DTLZLinearShape-4d|
+For 3D, `Optuna`_ uses a :math:`O(n^2)` algorithm, while `moocore`_ uses the
+best-known :math:`O(n\log n)` one, so the gap between the two will get
+significantly larger with a larger number of points than those tested here.
+`moarchiving`_ uses the same algorithms as `moocore`_ for 3D and 4D, but a pure
+Python implementation, so it is still 10-100 times slower than `moocore`_'s C
+implementation.  `pygmo`_ uses a C++ implementation and a different algorithm.
+It becomes faster than `moocore`_ for dimensions larger than 5D.  `BoTorch`_
+and `fast-pareto`_ are not included for more than 3 objectives because **they
+are tens of thousands of times slower** than `moocore`_.
 
-|hv_bench-DTLZLinearShape-5d| |hv_bench-DTLZLinearShape-6d|
+
+|hv_bench-DTLZLinearShape-3d| |hv_bench-concave-cliff-3d|
+
+|hv_bench-DTLZLinearShape-4d| |hv_bench-concave-cliff-4d|
+
+|hv_bench-DTLZLinearShape-5d| |hv_bench-concave-cliff-5d|
+
+|hv_bench-DTLZLinearShape-6d| |hv_bench-concave-cliff-6d|
 
 .. |hv_bench-DTLZLinearShape-3d| image:: _static/bench/hv_bench-DTLZLinearShape.3d-time.png
    :width: 49%
@@ -173,6 +186,18 @@ The implementation in `patatune`_ appears to be wrong (https://github.com/cms-pa
    :width: 49%
 
 .. |hv_bench-DTLZLinearShape-6d| image:: _static/bench/hv_bench-DTLZLinearShape.6d-time.png
+   :width: 49%
+
+.. |hv_bench-concave-cliff-3d| image:: _static/bench/hv_bench-concave-cliff-3d-time.png
+   :width: 49%
+
+.. |hv_bench-concave-cliff-4d| image:: _static/bench/hv_bench-concave-cliff-4d-time.png
+   :width: 49%
+
+.. |hv_bench-concave-cliff-5d| image:: _static/bench/hv_bench-concave-cliff-5d-time.png
+   :width: 49%
+
+.. |hv_bench-concave-cliff-6d| image:: _static/bench/hv_bench-concave-cliff-6d-time.png
    :width: 49%
 
 .. _bench-hvapprox:
