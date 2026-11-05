@@ -10,7 +10,7 @@
 .. autoclass:: {{ objname }}
    :members:
    :inherited-members:
-   :special-members: __call__
+   :special-members: __call__, __len__, __iter__
 
 .. minigallery:: {{ module }}.{{ objname }} {% for meth in methods %}{{ module }}.{{ objname }}.{{ meth }} {% endfor %}
    :add-heading: Gallery examples

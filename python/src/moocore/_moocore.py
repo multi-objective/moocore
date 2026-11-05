@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-# NOTE: if we ever start using SciPy, we can use
-# from scipy.special import gamma_function
 import lzma
 import numbers
 import os
 import shutil
 import tempfile
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 from io import StringIO
-from typing import Any, Literal, NamedTuple, TypeAlias
+from typing import Any, Literal, NamedTuple
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray  # For type hints
@@ -19,7 +17,9 @@ from ._docsubstitute import DocSubstitute
 ## The CFFI library is used to create C bindings.
 from ._libmoocore import ffi, lib  # ty: ignore[unresolved-import]
 from ._utils import (
+    MaximiseType,
     _get_seed_for_c,
+    _parse_maximise,
     array_1d_of_length_n,
     asarray_maybe_copy,
     is_integer_value,
@@ -28,8 +28,6 @@ from ._utils import (
     np2d_to_double_array,
     unique_nosort,
 )
-
-MaximiseType: TypeAlias = bool | Sequence[bool | int] | NDArray[np.bool_]
 
 # Maximum number of objectives (columns) supported by the C library. These
 # mirror the limits defined in c/config.h: most functions support up to 255
@@ -169,11 +167,6 @@ def read_datasets(filename: str | os.PathLike[str] | StringIO) -> np.ndarray:
     data_p = ffi.gc(data_p[0], lib.free, size=datasize)
     # Convert 1D numpy array to 2D array with (n obj... , sets) columns
     return np.frombuffer(ffi.buffer(data_p, datasize)).reshape(-1, ncols_p[0])
-
-
-def _parse_maximise(maximise: MaximiseType, nobj: int) -> NDArray[np.bool_]:
-    """Convert maximise array or single bool to ndarray format."""
-    return array_1d_of_length_n(maximise, nobj, name="maximise").astype(bool)
 
 
 def _parse_maximise_to_bool_array(

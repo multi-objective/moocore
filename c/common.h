@@ -142,4 +142,31 @@ euclidean_norm(const double * restrict w, dimension_t dim)
     return sqrt(norm);
 }
 
+_attr_pure_func static inline double
+squared_distance(const double * restrict a, const double * restrict b, dimension_t dim)
+{
+    ASSUME(dim >= 2);
+    double distance = 0;
+    for (dimension_t i = 0; i < dim; i++) {
+        double diff = a[i] - b[i];
+        distance += diff * diff;
+    }
+    ASSUME(distance >= 0); // GCC is not able to infer this.
+    return distance;
+}
+
+static inline size_t
+which_max(const double *v, size_t dim)
+{
+    double max = v[0];
+    size_t pos = 0;
+    for (size_t i = 1; i < dim; i++) {
+        if (v[i] > max) {
+            max = v[i];
+            pos = i;
+        }
+    }
+    return pos;
+}
+
 #endif 	    /* !MOOCORE_COMMON_H_ */
