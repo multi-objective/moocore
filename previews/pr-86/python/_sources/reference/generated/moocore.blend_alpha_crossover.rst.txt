@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+blend\_alpha\_crossover
+=======================
+
+.. currentmodule:: moocore
+
+.. autofunction:: blend_alpha_crossover
+
+.. _sphx_glr_backref_moocore.blend_alpha_crossover:
+
+.. minigallery:: moocore.blend_alpha_crossover
+   :add-heading: Gallery examples
+   :heading-level: -

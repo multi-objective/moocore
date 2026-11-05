@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+uniform\_crossover
+==================
+
+.. currentmodule:: moocore
+
+.. autofunction:: uniform_crossover
+
+.. _sphx_glr_backref_moocore.uniform_crossover:
+
+.. minigallery:: moocore.uniform_crossover
+   :add-heading: Gallery examples
+   :heading-level: -
