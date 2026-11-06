@@ -414,6 +414,22 @@ def test_invalid_iterator(dim):
 
 
 @pytest.mark.parametrize("dim", [2, 3])
+def test_duplicate_add_invalidates_iterator(dim):
+    archive = moocore.UnboundedArchive(dim, allow_duplicates=True)
+    z = np.arange(dim, dtype=float)
+    archive.add(z)
+
+    iterator = iter(archive)
+    next(iterator)
+    assert archive.add(z)
+
+    with pytest.raises(
+        RuntimeError, match=r"invalid 'BaseUnboundedArchive' iterator"
+    ):
+        next(iterator)
+
+
+@pytest.mark.parametrize("dim", [2, 3])
 def test_maximise(dim):
     maximise = np.array([True, False, True])
     n = 10
@@ -468,7 +484,8 @@ def test_empty_archive(dim):
     assert len(z) == 0
     assert len(x) == 0
     z = arch.get_unique_vectors()
-    assert len(z) == 0
+    assert isinstance(z, np.ndarray)
+    assert z.shape == (0, dim)
     x = arch.get_x_values()
     assert len(x) == 0
 
