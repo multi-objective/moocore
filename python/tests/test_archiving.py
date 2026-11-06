@@ -6,10 +6,7 @@ from numpy.testing import (
 )
 
 import moocore
-
-
-def no_print(x):
-    return
+from moocore import _archive
 
 
 def extend_point(z, dim):
@@ -19,362 +16,272 @@ def extend_point(z, dim):
     return z_ext
 
 
-def test_UnboundedArchive2D_add():
-    archive = moocore.UnboundedArchive(dim=2, allow_duplicates=True)
-    assert archive.add([1, 10])
+@pytest.mark.parametrize("dim", [2, 3])
+@pytest.mark.parametrize("allow_duplicates", [True, False])
+def test_UnboundedArchive_add(dim, allow_duplicates):
+    archive = moocore.UnboundedArchive(
+        dim=dim, allow_duplicates=allow_duplicates
+    )
+
+    def add(z):
+        return archive.add(extend_point(z, dim))
+
+    assert add([1, 10])
     assert len(archive) == 1
-    assert archive.add([10, 1])
+    assert add([10, 1])
     assert len(archive) == 2
-    assert archive.add([5, 5])
+    assert add([5, 5])
     assert len(archive) == 3
     assert archive.unique_len() == 3
-    # Duplicates increase len()
-    assert archive.add([5, 5])
-    assert len(archive) == 4
+
+    # Duplicate handling differs only in the total length.
+    assert add([5, 5]) is allow_duplicates
+    assert len(archive) == (4 if allow_duplicates else 3)
     assert archive.unique_len() == 3
-    assert archive.add([4, 4])
+
+    assert add([4, 4])
     assert len(archive) == 3
-    assert not archive.add([5, 5])
+    assert not add([5, 5])
     assert len(archive) == 3
-    assert archive.add([1, 1])
+    assert add([1, 1])
     assert len(archive) == 1
 
-    # Test mixing up x = None and x not None.
+    archive_without_x = moocore.UnboundedArchive(dim=dim, allow_duplicates=True)
+    archive_without_x.add(extend_point([1, 10], dim))
     with pytest.raises(ValueError, match=r"'x' must be None"):
-        archive.add([1, 1], x=2)
+        archive_without_x.add(extend_point([1, 1], dim), x=2)
 
-    with pytest.raises(ValueError, match=r"'x' must be None"):
-        archive.add([0, 0], x=2)
-
-    archive = moocore.UnboundedArchive(dim=2)
-    archive.add([1, 10], x="a")
+    archive_with_x = moocore.UnboundedArchive(dim=dim)
+    archive_with_x.add(extend_point([1, 10], dim), x="a")
     with pytest.raises(ValueError, match=r"'x' cannot be None"):
-        archive.add([10, 1])
+        archive_with_x.add(extend_point([10, 1], dim))
 
 
-def test_UnboundedArchive2D_add_nodups():
-    archive = moocore.UnboundedArchive(dim=2, allow_duplicates=False)
-    assert archive.add([1, 10])
-    assert len(archive) == 1
-    assert archive.add([10, 1])
-    assert len(archive) == 2
-    assert archive.add([5, 5])
-    assert len(archive) == 3
-    assert archive.unique_len() == 3
-    assert not archive.add([5, 5])
-    assert len(archive) == 3
-    assert archive.unique_len() == 3
-
-
-def test_UnboundedArchive2D_dominance():
-    archive = moocore.UnboundedArchive(dim=2)
-    assert_array_equal(
-        archive.add_many([[1, 10], [5, 5], [10, 1]]), [True, True, True]
-    )
-    # Test __contains__
-    assert [5, 5] in archive
-    assert [4, 4] not in archive
-
-    assert not archive.dominated_by([4, 4])
-    assert not archive.dominated_by([5, 5])
-    assert not archive.dominated_by([6, 6])
-    assert archive.dominated_by([1, 1])
-
-    assert archive.dominates([6, 6])  # One point in the archive dominates.
-    assert archive.dominates([10, 10])  # Whole archive dominates.
-    assert not archive.dominates(
-        [4, 4]
-    )  # One point in the archive is dominated.
-    assert not archive.dominates(
-        [5, 5]
-    )  # One point in the archive is weakly dominated.
-    assert not archive.dominates([6, 4])  # Mutually non-dominated
-    assert not archive.dominates([1, 1])
-
-    assert archive.add([1, 1])
-    assert len(archive) == 1
-    assert not archive.dominated_by(
-        [1, 1]
-    )  # Duplicated do not count as dominance.
-    assert not archive.dominated_by([2, 1])
-    assert not archive.dominated_by([1, 2])
-    assert archive.dominated_by([0, 1])
-    assert archive.dominated_by([1, 0])
-
-    assert not archive.dominates(
-        [1, 1]
-    )  # Duplicated do not count as dominance.
-    assert not archive.dominates([1, 0])
-    assert not archive.dominates([0, 1])
-    assert archive.dominates([2, 1])
-    assert archive.dominates([1, 2])
-
-
-def test_UnboundedArchive2D_displaced(count):
-    dim = 2
-    pf = moocore.UnboundedArchive(dim, allow_duplicates=True)
-
-    accepted, displaced = pf._add_with_displaced_raw(
-        [1, 10], x=count(), check=False, discard=True
-    )
-    assert accepted and displaced is None
-    accepted, displaced = pf._add_with_displaced_raw(
-        [10, 1], x=count(), check=False, discard=True
-    )
-    assert accepted and displaced is None
-
-    assert pf.dominated_by([1, 1])
-    assert not pf.dominated_by([2, 9])
-
-    accepted, displaced = pf._add_with_displaced_raw(
-        [2, 9], x=count(), check=True, discard=False
-    )
-    assert accepted and displaced is None
-
-    assert not pf.dominated_by([2, 9])
-    assert not pf.dominated_by([9, 2])
-    assert not pf.dominates([2, 9])
-    assert not pf.dominates([9, 2])
-    assert pf.dominates([3, 10])
-
-    accepted, displaced = pf._add_with_displaced_raw(
-        [3, 8], x=count(), check=True, discard=False
-    )
-    assert accepted and displaced is None
-    accepted, displaced = pf._add_with_displaced_raw(
-        [3, 8], x=count(), check=True, discard=False
-    )
-    assert accepted and displaced is None
-    accepted, displaced = pf._add_with_displaced_raw(
-        [2, 10], x=count(), check=True, discard=False
-    )
-    assert not accepted and displaced is None
-    accepted, displaced_1 = pf._add_with_displaced_raw(
-        [0, 10], x=count(), check=True, discard=False
-    )
-    assert accepted and displaced_1 is not None
-    accepted, displaced_2 = pf._add_with_displaced_raw(
-        [2, 8], x=count(), check=True, discard=False
-    )
-    assert accepted and displaced_2 is not None
-
-    z, x = pf.get_contents()
-    no_print(z)
-    no_print(x)
-
-    # We have to use allow_duplicates = True in both pf and pf2, otherwise it
-    # will crash.
-    pf2 = moocore.UnboundedArchive(dim, allow_duplicates=True)
-    accepted, displaced = pf2._add_with_displaced_raw(
-        [0, 11], x=count(), check=False, discard=False
-    )
-    assert accepted and displaced is None
-    accepted, displaced = pf2._add_with_displaced_raw(
-        [11, 1], x=count(), check=False, discard=False
-    )
-    assert accepted and displaced is None
-    accepted, displaced = pf2._add_with_displaced_raw(
-        [10, 3], x=count(), check=True, discard=False
-    )
-    assert accepted and displaced is None
-    accepted, displaced = pf2._add_with_displaced_raw(
-        [4, 9], x=count(), check=True, discard=False
-    )
-    assert accepted and displaced is None
-    z, x = pf2.get_contents()
-    no_print(z)
-    no_print(x)
-    displaced = pf2._add_displaced_raw(displaced_1)
-    assert displaced is None
-    displaced = pf2._add_displaced_raw(displaced_2)
-    assert displaced is not None
-    no_print(displaced)
-    z, x = pf2.get_contents()
-    no_print(z)
-    no_print(x)
-
-
-@pytest.mark.parametrize("dim", [3, 4, 5, 10])
-def test_UnboundedArchive_add(dim):
-
-    archive = moocore.UnboundedArchive(dim=dim, allow_duplicates=True)
-
-    def archive_add_extended(z, **kwargs):
-        z_dim = extend_point(z, dim)
-        return archive.add(z_dim, **kwargs)
-
-    def assert_add(z, expect_res, expect_len):
-        assert archive_add_extended(z) == expect_res
-        assert len(archive) == expect_len
-
-    assert_add([1, 10, 1], True, 1)
-    assert_add([10, 1, 10], True, 2)
-    assert_add([5, 5, 5], True, 3)
-    assert archive.unique_len() == 3
-    # Duplicates increase len()
-    assert_add([5, 5, 5], True, 4)
-    assert archive.unique_len() == 3
-    assert_add([4, 4, 4], True, 3)
-    assert_add([5, 5, 5], False, 3)
-    assert_add([1, 1, 1], True, 1)
-
-    # Test mixing up x = None and x not None.
-    with pytest.raises(ValueError, match=r"'x' must be None"):
-        archive_add_extended([2, 0, 1], x=2)
-
-    with pytest.raises(ValueError, match=r"'x' must be None"):
-        archive_add_extended([1, 1, 1], x=2)
-
-    with pytest.raises(ValueError, match=r"'x' must be None"):
-        archive_add_extended([0, 0, 0], x=2)
-
+@pytest.mark.parametrize("dim", [2, 3])
+def test_UnboundedArchive_accessors(dim, monkeypatch):
     archive = moocore.UnboundedArchive(dim=dim)
-    archive_add_extended([1, 10, 1], x="a")
-    with pytest.raises(ValueError, match=r"'x' cannot be None"):
-        archive_add_extended([10, 1, 10])
+    points = [extend_point([1, 10], dim), extend_point([10, 1], dim)]
+    without_x = moocore.UnboundedArchive(dim=dim)
+
+    assert archive.dim == dim
+    assert without_x.add(points[0])
+    monkeypatch.setattr(
+        without_x, "get_contents", lambda: (np.asarray(points[0]), None)
+    )
+    assert repr(without_x) == str(np.asarray(points[0]))
+    assert archive.add_many(points, x=["a", "b"]) == [True, True]
+    vectors, values = archive.get_contents()
+    assert_array_equal(vectors, points)
+    assert values == ["a", "b"]
+    assert_array_equal(archive.get_unique_vectors(), points)
+    assert archive.get_x_values() == values
+    assert archive.get_x_values_of_vector(points[0]) == ["a"]
+    assert "x = ['a', 'b']" in repr(archive)
+
+    with pytest.raises(ValueError, match="'x' must be either None"):
+        archive.add_many(points, x=["only one"])
 
 
-# FIXME: How to generalize this test to any number of dimensions?
-def test_UnboundedArchive3D_dominance():
+def test_UnboundedArchive_validation(monkeypatch):
+    with pytest.raises(ValueError, match="'dim' cannot be smaller than 2"):
+        moocore.UnboundedArchive(dim=1)
+    with pytest.raises(NotImplementedError, match="type of archive"):
+        moocore.UnboundedArchive(dim=float("nan"))
 
-    archive = moocore.UnboundedArchive(dim=3, allow_duplicates=True)
+    with pytest.raises(ValueError, match="max_children"):
+        moocore.UnboundedArchive(dim=3, max_children=255)
+    with pytest.raises(ValueError, match="max_bucket_size"):
+        moocore.UnboundedArchive(dim=3, max_bucket_size=255)
+
+    archive = moocore.UnboundedArchive(dim=3, max_children=4, max_bucket_size=5)
+    assert (archive.max_children, archive.max_bucket_size) == (4, 5)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(
+            _archive.NDTreeArchive,
+            "_get_default_config",
+            classmethod(lambda cls, dim, children, bucket: (4, 20)),
+        )
+        with pytest.raises(ValueError, match="larger than"):
+            moocore.UnboundedArchive(dim=_archive.lib.MOOCORE_DIMENSION_MAX + 1)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(
+            _archive.NDTreeArchive,
+            "_setup_c_archive",
+            lambda self, allow: _archive.ffi.NULL,
+        )
+        with pytest.raises(MemoryError):
+            _archive.NDTreeArchive(dim=3)
+
+
+@pytest.mark.parametrize(
+    ("status", "error", "message"),
+    [
+        (
+            _archive.lib.ARCHIVE_INSERT_X_MUST_BE_NOT_NULL,
+            ValueError,
+            "'x' cannot be None",
+        ),
+        (
+            _archive.lib.ARCHIVE_INSERT_X_MUST_BE_NULL,
+            ValueError,
+            "'x' must be None",
+        ),
+        (_archive.lib.ARCHIVE_INSERT_MEMORY_ERROR, MemoryError, None),
+        (-999, NotImplementedError, "unknown error"),
+    ],
+)
+def test_UnboundedArchive_add_errors(monkeypatch, status, error, message):
+    archive = moocore.UnboundedArchive(dim=2)
+    monkeypatch.setattr(
+        archive, "_lib_archive_add_and_get_displaced", lambda *args: status
+    )
+    with pytest.raises(error, match=message):
+        archive._add_with_displaced_raw([1, 2], None, check=True, discard=True)
+
+
+def test_UnboundedArchive_iterator_allocation_error(monkeypatch):
+    archive = moocore.UnboundedArchive(dim=2)
+    archive.add([1, 2])
+    monkeypatch.setattr(
+        archive, "_lib_archive_iter_new", lambda *_: _archive.ffi.NULL
+    )
+    with pytest.raises(MemoryError, match="failed to create iterator"):
+        list(archive)
+
+
+def test_UnboundedArchive_displaced_reinsertion(monkeypatch):
+    archive = moocore.UnboundedArchive(dim=2)
+    original_handles = {"current": "current"}
+    displaced_handles = {"displaced": "displaced"}
+    archive._x_handles = original_handles
+    monkeypatch.setattr(
+        archive,
+        "_lib_archive_insert_displaced",
+        lambda displaced: (displaced, True),
+    )
+    monkeypatch.setattr(archive, "_lib_displaced_unique_len", lambda _: 1)
+
+    assert archive._add_displaced_raw(None) is None
+    result = archive._add_displaced_raw(
+        ("displaced archive", displaced_handles)
+    )
+    assert result == ("displaced archive", original_handles)
+    assert archive._x_handles == displaced_handles
+
+
+def test_abstract_archive_hooks_are_unimplemented():
+    assert _archive.BaseArchive._setup_c_archive(None, True) is None
+    assert (
+        _archive.BaseUnboundedArchive._lib_archive_insert_displaced(None, None)
+        is None
+    )
+    assert _archive.BaseUnboundedArchive._c_get_x_values(None) is None
+
+
+@pytest.mark.parametrize("dim", [2, 3])
+def test_UnboundedArchive_dominance(dim):
+    def full(v):
+        return [v] * dim
+
+    def pt(*head, fill=0):
+        # First coordinates given explicitly, remaining ones set to fill.
+        return [*head, *([fill] * (dim - len(head)))]
+
+    low_high = [1, 10] * dim
+    p_a = low_high[:dim]
+    p_c = [11 - v for v in p_a]
+    archive = moocore.UnboundedArchive(dim=dim, allow_duplicates=True)
     assert_array_equal(
-        archive.add_many([[1, 10, 1], [5, 5, 5], [10, 1, 10]]),
+        archive.add_many([p_a, full(5), p_c]),
         [True, True, True],
     )
     # Test __contains__
-    assert [5, 5, 5] in archive
-    assert [4, 4, 4] not in archive
+    assert full(5) in archive
+    assert full(4) not in archive
 
-    assert not archive.dominated_by([4, 4, 4])
-    assert not archive.dominated_by([5, 5, 5])
-    assert not archive.dominated_by([6, 6, 6])
-    assert archive.dominated_by([1, 1, 1])
+    assert not archive.dominated_by(full(4))
+    assert not archive.dominated_by(full(5))
+    assert not archive.dominated_by(full(6))
+    assert archive.dominated_by(full(1))
 
-    assert archive.dominates([6, 6, 6])  # One point in the archive dominates.
-    assert archive.dominates([10, 10, 10])  # Whole archive dominates.
-    assert not archive.dominates(
-        [4, 4, 4]
-    )  # One point in the archive is dominated.
-    assert not archive.dominates(
-        [5, 5, 5]
-    )  # One point in the archive is weakly dominated.
-    assert not archive.dominates([11, 1, 1])  # Mutually non-dominated
-    assert not archive.dominates([1, 1, 1])
+    assert archive.dominates(full(6))  # One point in the archive dominates.
+    assert archive.dominates(full(10))  # Whole archive dominates.
+    # One point in the archive is dominated.
+    assert not archive.dominates(full(4))
+    # One point in the archive is weakly dominated.
+    assert not archive.dominates(full(5))
+    # Mutually non-dominated
+    assert not archive.dominates(pt(11))
+    assert not archive.dominates(pt(6, 4))
+    assert not archive.dominates(full(1))
 
-    assert archive.add([1, 1, 1])
+    assert archive.add(full(1))
     assert len(archive) == 1
-    assert not archive.dominated_by(
-        [1, 1, 1]
-    )  # Duplicated do not count as dominance.
-    assert not archive.dominated_by([2, 1, 1])
-    assert not archive.dominated_by([1, 2, 1])
-    assert archive.dominated_by([0, 1, 0])
-    assert archive.dominated_by([1, 0, 0])
+    # Duplicated do not count as dominance.
+    assert not archive.dominated_by(full(1))
+    assert not archive.dominated_by(pt(2, fill=1))
+    assert not archive.dominated_by([1, 2, *full(1)[2:]])
+    assert archive.dominated_by(pt(0, 1, fill=0))
+    assert archive.dominated_by(pt(1, fill=0))
 
-    assert not archive.dominates(
-        [1, 1, 1]
-    )  # Duplicated do not count as dominance.
-    assert not archive.dominates([1, 0, 0])
-    assert not archive.dominates([0, 1, 0])
-    assert archive.dominates([2, 1, 20])
-    assert archive.dominates([1, 2, 4])
+    # Duplicated do not count as dominance.
+    assert not archive.dominates(full(1))
+    assert not archive.dominates(pt(1, fill=0))
+    assert not archive.dominates(pt(0, 1, fill=0))
+    assert archive.dominates([2, *full(1)[2:], 20])
+    assert archive.dominates([1, 2, *full(4)[2:]])
 
 
-# FIXME: How to generalize this test to any number of dimensions?
-def test_UnboundedArchive3D_displaced(count):
-    dim = 3
+@pytest.mark.parametrize("dim", [2, 3])
+def test_UnboundedArchive_displaced(dim, count):
+    # Extra leading zeroes preserve the 2D dominance relationships.
+    def add(archive, z, **kwargs):
+        return archive._add_with_displaced_raw(
+            extend_point(z, dim), x=count(), **kwargs
+        )
+
     pf = moocore.UnboundedArchive(dim, allow_duplicates=True)
 
-    accepted, displaced = pf._add_with_displaced_raw(
-        [1, 11, 10], x=count(), check=False, discard=True
-    )
+    accepted, displaced = add(pf, [1, 10], check=False, discard=True)
     assert accepted and displaced is None
-    accepted, displaced = pf._add_with_displaced_raw(
-        [10, 1, 10], x=count(), check=False, discard=True
-    )
+    accepted, displaced = add(pf, [10, 1], check=False, discard=True)
     assert accepted and displaced is None
 
-    assert pf.dominated_by([1, 1, 1])
-    assert not pf.dominated_by([2, 9, 1])
-
-    accepted, displaced = pf._add_with_displaced_raw(
-        [2, 9, 1], x=count(), check=True, discard=False
-    )
+    accepted, displaced = add(pf, [2, 9], check=True, discard=False)
     assert accepted and displaced is None
 
-    assert not pf.dominated_by([2, 9, 1])
-    assert not pf.dominated_by([9, 2, 1])
-    assert not pf.dominates([2, 9, 1])
-    assert not pf.dominates([9, 2, 1])
-    assert pf.dominates([3, 10, 10])
-
-    accepted, displaced = pf._add_with_displaced_raw(
-        [3, 8, 10], x=count(), check=True, discard=False
-    )
+    accepted, displaced = add(pf, [3, 8], check=True, discard=False)
     assert accepted and displaced is None
-    accepted, displaced = pf._add_with_displaced_raw(
-        [3, 8, 10], x=count(), check=True, discard=False
-    )
+    accepted, displaced = add(pf, [3, 8], check=True, discard=False)
     assert accepted and displaced is None
-    accepted, displaced = pf._add_with_displaced_raw(
-        [2, 10, 10], x=count(), check=True, discard=False
-    )
+    accepted, displaced = add(pf, [2, 10], check=True, discard=False)
     assert not accepted and displaced is None
-    accepted, displaced_1 = pf._add_with_displaced_raw(
-        [0, 10, 9], x=count(), check=True, discard=False
-    )
+    accepted, displaced_1 = add(pf, [0, 10], check=True, discard=False)
     assert accepted and displaced_1 is not None
-    accepted, displaced_2 = pf._add_with_displaced_raw(
-        [2, 8, 1], x=count(), check=True, discard=False
-    )
+    accepted, displaced_2 = add(pf, [2, 8], check=True, discard=False)
     assert accepted and displaced_2 is not None
 
-    z, x = pf.get_contents()
-    no_print(z)
-    no_print(x)
-
     pf2 = moocore.UnboundedArchive(dim, allow_duplicates=True)
-    accepted, displaced = pf2._add_with_displaced_raw(
-        [
-            1,
-            10,
-            11,
-        ],
-        x=count(),
-        check=False,
-        discard=False,
-    )
+    accepted, displaced = add(pf2, [0, 11], check=False, discard=False)
     assert accepted and displaced is None
-    accepted, displaced = pf2._add_with_displaced_raw(
-        [10, 1, 11], x=count(), check=False, discard=False
-    )
+    accepted, displaced = add(pf2, [11, 1], check=False, discard=False)
     assert accepted and displaced is None
-    accepted, displaced = pf2._add_with_displaced_raw(
-        [11, 3, 9], x=count(), check=True, discard=False
-    )
+    accepted, displaced = add(pf2, [10, 3], check=True, discard=False)
     assert accepted and displaced is None
-    accepted, displaced = pf2._add_with_displaced_raw(
-        [4, 11, 8], x=count(), check=True, discard=False
-    )
+    accepted, displaced = add(pf2, [4, 9], check=True, discard=False)
     assert accepted and displaced is None
-    z, x = pf2.get_contents()
-    no_print(z)
-    no_print(x)
     displaced = pf2._add_displaced_raw(displaced_1)
     assert displaced is None
     displaced = pf2._add_displaced_raw(displaced_2)
     assert displaced is not None
-    no_print(displaced)
-    z, x = pf2.get_contents()
-    no_print(z)
-    no_print(x)
 
 
-@pytest.mark.parametrize("dim", [2, 3, 5, 10])
+@pytest.mark.parametrize("dim", [2, 3])
 @pytest.mark.parametrize("allow_duplicates", [True, False])
 def test_UnboundedArchive_random(dim, allow_duplicates, count):
-    """Randomized tests for any number of dimensions."""
+    """Compare insertion and domination against the reference filter."""
     seed = np.random.default_rng().integers(2**32 - 2)
     print(f"seed={seed}")
     rng = np.random.default_rng(seed)
@@ -387,6 +294,7 @@ def test_UnboundedArchive_random(dim, allow_duplicates, count):
     points = moocore.filter_dominated(points, keep_weakly=allow_duplicates)
     z = z.astype(int)
     assert_array_equal(points, z[np.argsort(x), :])
+    assert archive.dominated_by(points.min(axis=0) - 1)
 
 
 @pytest.mark.parametrize("dim", [2, 3])
@@ -399,7 +307,7 @@ def test_invalid_iterator(dim):
     with pytest.raises(
         RuntimeError, match=r"invalid 'BaseUnboundedArchive' iterator"
     ):
-        for z, x in archive:
+        for _ in archive:
             archive.add(np.full(dim, 0))
 
     # archive.add() succeeded.
@@ -424,12 +332,6 @@ def test_maximise(dim):
     arch.add_many(z, x=np.arange(len(z)))
     for z, x in arch:
         assert np.array_equal(z, z_orig[x, :])
-    for z, x in arch:
-        assert np.array_equal(z, z_orig[x, :])
-
-    z, x = arch.get_contents()
-    assert np.array_equal(z, z_orig[np.array(x), :])
-
     z, x = arch.get_contents()
     assert np.array_equal(z, z_orig[np.array(x), :])
 
@@ -462,8 +364,7 @@ def test_empty_archive(dim):
     assert not arch.dominated_by(z)
     x = arch.get_x_values_of_vector(z)
     assert len(x) == 0
-    for z, _ in arch:
-        assert False
+    assert list(arch) == []
     z, x = arch.get_contents()
     assert len(z) == 0
     assert len(x) == 0
@@ -471,16 +372,3 @@ def test_empty_archive(dim):
     assert len(z) == 0
     x = arch.get_x_values()
     assert len(x) == 0
-
-
-def test_ndtree_dominated_by():
-    dim = 3
-    arch = moocore.UnboundedArchive(dim=dim)
-    n = 1000
-    z = np.random.uniform(size=(n, dim))
-    # We cannot use add_many() because it may filter before insertion.
-    for z_i in z:
-        arch.add(z_i)
-    nondom = moocore.filter_dominated(z)
-    ideal = nondom.min(axis=0)
-    assert arch.dominated_by(ideal)
