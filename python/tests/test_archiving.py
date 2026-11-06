@@ -569,7 +569,10 @@ def test_treap_displaced_frontier_union(count):
     ("config", "message"),
     [
         ({"max_children": 255}, "'max_children' must be smaller than 255"),
-        ({"max_bucket_size": 255}, "'max_bucket_size' must be smaller than 255"),
+        (
+            {"max_bucket_size": 255},
+            "'max_bucket_size' must be smaller than 255",
+        ),
     ],
 )
 def test_ndtree_rejects_out_of_range_configuration(config, message):
