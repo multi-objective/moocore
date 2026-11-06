@@ -414,6 +414,186 @@ def test_invalid_iterator(dim):
 
 
 @pytest.mark.parametrize("dim", [2, 3])
+def test_duplicate_add_invalidates_iterator(dim):
+    archive = moocore.UnboundedArchive(dim, allow_duplicates=True)
+    z = np.arange(dim, dtype=float)
+    archive.add(z)
+
+    iterator = iter(archive)
+    next(iterator)
+    assert archive.add(z)
+
+    with pytest.raises(
+        RuntimeError, match=r"invalid 'BaseUnboundedArchive' iterator"
+    ):
+        next(iterator)
+
+
+def test_ndtree_internal_split_and_pruning():
+    archive = moocore._archive.NDTreeArchive(
+        dim=3, max_children=4, max_bucket_size=4
+    )
+    points = [[i, 10 - i, 0] for i in range(10)]
+    exceptional = [100, 100, -1]
+
+    for point in [*points, exceptional]:
+        assert archive.add(point)
+
+    assert archive.max_bucket_size == 4
+    assert {tuple(z) for z, _ in archive} == {
+        tuple(point) for point in [*points, exceptional]
+    }
+    assert archive.dominates([11, 11, 0])
+
+    # This point removes several ND-tree subtrees but leaves the exceptional
+    # point, which is not dominated in the third objective.
+    assert archive.add([-1, -1, 0])
+    assert {tuple(z) for z, _ in archive} == {
+        tuple(exceptional),
+        (-1.0, -1.0, 0.0),
+    }
+
+    # Removing the remaining subtree resets the root leaf, which remains usable.
+    assert archive.add([-2, -2, -2])
+    assert {tuple(z) for z, _ in archive} == {(-2.0, -2.0, -2.0)}
+    assert archive.add([-3, -3, -1])
+
+
+def test_ndtree_displaced_duplicate_payloads(count):
+    source = moocore._archive.NDTreeArchive(
+        dim=3,
+        max_children=4,
+        max_bucket_size=4,
+        allow_duplicates=True,
+    )
+    points = [[i, 10 - i, 0] for i in range(8)]
+    x_values = [count() for _ in points]
+    source.add_many(points, x=x_values)
+    duplicate_x = count()
+    assert source.add(points[3], x=duplicate_x)
+
+    accepted, displaced = source._add_with_displaced_raw(
+        [-1, -1, -1], x=count(), check=True, discard=False
+    )
+    assert accepted and displaced is not None
+    assert len(source) == 1
+
+    destination = moocore._archive.NDTreeArchive(
+        dim=3,
+        max_children=4,
+        max_bucket_size=4,
+        allow_duplicates=True,
+    )
+    displaced = destination._add_displaced_raw(displaced)
+    assert displaced is None
+
+    contents, contents_x = destination.get_contents()
+    assert {tuple(z) for z in contents} == {tuple(z) for z in points}
+    assert len(contents_x) == len(points) + 1
+    assert destination.get_x_values_of_vector(points[3]) == [
+        x_values[3],
+        duplicate_x,
+    ]
+
+
+def test_ndtree_displaced_duplicate_counts_without_payloads():
+    source = moocore._archive.NDTreeArchive(
+        dim=3,
+        max_children=4,
+        max_bucket_size=4,
+        allow_duplicates=True,
+    )
+    points = [[i, 10 - i, 0] for i in range(8)]
+    source.add_many(points)
+    assert source.add(points[3])
+
+    accepted, displaced = source._add_with_displaced_raw(
+        [-1, -1, -1], x=None, check=True, discard=False
+    )
+    assert accepted and displaced is not None
+
+    destination = moocore._archive.NDTreeArchive(
+        dim=3,
+        max_children=4,
+        max_bucket_size=4,
+        allow_duplicates=True,
+    )
+    assert destination._add_displaced_raw(displaced) is None
+
+    contents, x_values = destination.get_contents()
+    assert len(contents) == len(points) + 1
+    assert x_values == []
+    assert destination.unique_len() == len(points)
+    assert np.count_nonzero(np.all(contents == points[3], axis=1)) == 2
+
+
+def test_treap_displaced_frontier_union(count):
+    source = moocore.UnboundedArchive(dim=2, allow_duplicates=True)
+    original = [[1, 10], [2, 9], [5, 8], [6, 7], [7, 6], [10, 1]]
+    original_x = [count() for _ in original]
+    source.add_many(original, x=original_x)
+
+    accepted, displaced = source._add_with_displaced_raw(
+        [4, 6], x=count(), check=True, discard=False
+    )
+    assert accepted and displaced is not None
+    assert len(source) == 4
+
+    destination = moocore.UnboundedArchive(dim=2, allow_duplicates=True)
+    assert destination.add([0, 11], x=count())
+    assert destination.add([10, 0], x=count())
+    assert destination._add_displaced_raw(displaced) is None
+
+    contents, contents_x = destination.get_contents()
+    contents_by_point = {
+        tuple(z): x for z, x in zip(contents, contents_x, strict=True)
+    }
+    assert contents_by_point == {
+        (0.0, 11.0): 7,
+        (5.0, 8.0): 2,
+        (6.0, 7.0): 3,
+        (7.0, 6.0): 4,
+        (10.0, 0.0): 8,
+    }
+    assert set(contents_by_point) == {
+        (0.0, 11.0),
+        (5.0, 8.0),
+        (6.0, 7.0),
+        (7.0, 6.0),
+        (10.0, 0.0),
+    }
+    assert len(contents_x) == len(contents)
+
+
+@pytest.mark.parametrize(
+    ("config", "message"),
+    [
+        ({"max_children": 255}, "'max_children' must be smaller than 255"),
+        (
+            {"max_bucket_size": 255},
+            "'max_bucket_size' must be smaller than 255",
+        ),
+    ],
+)
+def test_ndtree_rejects_out_of_range_configuration(config, message):
+    with pytest.raises(ValueError, match=message):
+        moocore._archive.NDTreeArchive(dim=3, **config)
+
+
+def test_unbounded_archive_input_validation():
+    archive = moocore.UnboundedArchive(dim=3)
+
+    with pytest.raises(ValueError, match="'z' must be a 1D objective vector"):
+        archive.add([[1, 2, 3]])
+
+    with pytest.raises(ValueError, match="'f' must have 3 columns"):
+        archive.add_many([[1, 2], [3, 4]])
+
+    with pytest.raises(ValueError, match="'x' must be either None"):
+        archive.add_many([[1, 2, 3]], x=[])
+
+
+@pytest.mark.parametrize("dim", [2, 3])
 def test_maximise(dim):
     maximise = np.array([True, False, True])
     n = 10
@@ -468,7 +648,8 @@ def test_empty_archive(dim):
     assert len(z) == 0
     assert len(x) == 0
     z = arch.get_unique_vectors()
-    assert len(z) == 0
+    assert isinstance(z, np.ndarray)
+    assert z.shape == (0, dim)
     x = arch.get_x_values()
     assert len(x) == 0
 
