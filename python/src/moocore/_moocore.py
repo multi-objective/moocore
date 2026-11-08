@@ -17,7 +17,7 @@ from numpy.typing import ArrayLike, NDArray  # For type hints
 from ._docsubstitute import DocSubstitute
 
 ## The CFFI library is used to create C bindings.
-from ._libmoocore import ffi, lib  # ty: ignore[unresolved-import]
+from ._libmoocore import ffi, lib  # ty: ignore[import-not-found]
 from ._utils import (
     _get_seed_for_c,
     array_1d_of_length_n,
