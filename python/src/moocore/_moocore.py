@@ -9,7 +9,7 @@ import shutil
 import tempfile
 from collections.abc import Callable, Sequence
 from io import StringIO
-from typing import Any, Literal, NamedTuple, TypeAlias
+from typing import Any, Literal, NamedTuple, TypeAlias, cast
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray  # For type hints
@@ -2739,10 +2739,10 @@ def whv_hype(
                 points_p, npoints, ideal, ref, nsamples, seed
             )
         case "exponential":
-            if not isinstance(mu, numbers.Real):
-                raise TypeError("'mu' must be a single number")
+            mu = cast(float, mu)
+            mu = float(mu)
             hv = lib.whv_hype_expo(
-                points_p, npoints, ideal, ref, nsamples, seed, float(mu)
+                points_p, npoints, ideal, ref, nsamples, seed, mu
             )
         case "point":
             mu = array_1d_of_length_n(
