@@ -12,3 +12,8 @@
 
  - [ ] Hypervolume archiver
  - [ ] MGA
+
+# NDS Forest
+
+ - [ ] Enable timing of query vs update
+ - [ ] Add stats to Treap

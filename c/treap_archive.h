@@ -70,8 +70,19 @@ bool treap_archive_find_exact_vector(const TreapArchive * arch, const double * z
 VoidList * treap_archive_find_solutions_of_vector(const TreapArchive * arch, const double * z);
 
 typedef struct TreapIterator TreapIterator;
+void treap_archive_iter_init(TreapIterator *it, const TreapArchive *arch);
 void treap_archive_iter_free(TreapIterator *it);
 TreapIterator * treap_archive_iter_new(const TreapArchive *arch);
 int treap_archive_iter_next(TreapIterator * restrict it, double * restrict z, const void ** restrict x);
+
+/**
+   This is a wrapper for the API expected by nds_forest.h
+
+*/
+static inline int
+treap_archive_insert_displaced_p(TreapArchive *arch, TreapArchive **incoming, bool *all_displaced)
+{
+    return treap_archive_insert_displaced(arch, *incoming, all_displaced);
+}
 
 #endif // TREAP_ARCHIVE_H
