@@ -907,17 +907,16 @@ ndtree_node_split(NDTreeNode *node, dimension_t dim,
     ASSUME(node->n < 255);
     /* At this point, the bounds may be wrong because we inserted a new z and
        it triggered the split, but we did not update the bounds.  */
-    uint8_t bucket_n = node->n;
+    size_t bucket_n = node->n;
     ASSUME(bucket_n >= max_children);
     assert(ndtree_node_is_leaf(node));
     ASSUME(node->coverage == 0);
-    for (uint8_t i = 0; i < bucket_n; i++)
+    for (unsigned i = 0; i < bucket_n; i++)
         node->coverage += node->bucket[i].x.n;
     ASSUME(node->coverage > 0);
 
     // distance[i]: sum of distances of solution i to all other solutions.
-    double *distance_sum = calloc(bucket_n + bucket_n * bucket_n, sizeof(*distance_sum));
-    double *distance_matrix = distance_sum + bucket_n;
+    double *distance_sum = malloc((bucket_n + bucket_n * bucket_n) * sizeof(*distance_sum));
     NDTreeNode * children = calloc(max_children, sizeof *children);
     if (distance_sum == NULL || children == NULL) {
         free(distance_sum);
@@ -925,6 +924,9 @@ ndtree_node_split(NDTreeNode *node, dimension_t dim,
         return ARCHIVE_INSERT_MEMORY_ERROR;
 
     }
+    // Only distance_sum needs initialisation.
+    memset(distance_sum, 0, bucket_n * sizeof(*distance_sum));
+    double *distance_matrix = distance_sum + bucket_n;
     const SolutionsList *bucket = node->bucket;
     /* FIXME: We could probably vectorize this loop by copying the midpoints to
        a temporary buffer, then computing all distances at once.  But is the
@@ -945,60 +947,65 @@ ndtree_node_split(NDTreeNode *node, dimension_t dim,
         free(children);
         return ARCHIVE_INSERT_MEMORY_ERROR;
     }
-    uint8_t seed_rep = (uint8_t) which_max(distance_sum, bucket_n);
-    ASSUME(seed_rep < bucket_n);
+
+    uint8_t selected_bucket = (uint8_t) which_max(distance_sum, bucket_n);
+    ASSUME(selected_bucket < bucket_n);
     // We do not update bounds until the end of this function, when we know the
     // child assigned to each bucket.
-    bucket_append_move(child, &bucket[seed_rep]);
+    bucket_append_move(child, &bucket[selected_bucket]);
 
     // Store the buckets assigned to children and the ones not yet assigned.
     uint8_t bucket_of_child[255];
-    // We store all buckets indexes, then swap to the front the ones assigned
-    // to a child.
     for (uint8_t i = 0; i < bucket_n; i++)
         bucket_of_child[i] = i;
-    bucket_of_child[0] = seed_rep;
-    bucket_of_child[seed_rep] = 0;
 
-    /* FIXME: It may be faster to find the two buckets closest to each other,
-       then put them together, then treat them as a single bucket, and keep
-       doing that until n_buckets == max_children, then simply assign each
-       (virtual) bucket to each child. Then update bounds in one go. */
+    bucket_of_child[0] = selected_bucket;
+    bucket_of_child[selected_bucket] = 0;
+    /* Select the remaining seeds and reuse distance_sum as an accumulator.
+
+       distance_sum[b] = sum of distances from bucket b to all currently selected seeds.
+    */
+    memset(distance_sum, 0, bucket_n * sizeof(*distance_sum));
     for (unsigned i = 1; i < max_children; i++) {
         double max_distance = -1;
-        size_t seed_rep = SIZE_MAX;
+        size_t selected_pos = SIZE_MAX;
+        /* Update the accumulators of the remaining unassigned buckets and find
+           the unassigned bucket with the largest accumulated distance.  The
+           newly selected seed is now at bucket_of_child[i-1].  Unassigned
+           buckets start at i.  */
         for (unsigned k = i; k < bucket_n; k++) {
             uint8_t bucket_k = bucket_of_child[k];
-            double accumulator = 0.0;
-            for (unsigned j = 0; j < i; j++)
-                accumulator += distance_matrix[bucket_k * bucket_n + bucket_of_child[j]];
-
+            distance_sum[bucket_k] += distance_matrix[selected_bucket * bucket_n + bucket_k];
+            double accumulator = distance_sum[bucket_k];
             if (accumulator > max_distance) {
                 max_distance = accumulator;
-                seed_rep = k;
+                selected_pos = k;
             }
         }
-        ASSUME(seed_rep < SIZE_MAX); // There must be one not added yet.
+        ASSUME(selected_pos < SIZE_MAX);  // There must be one not added yet.
+        // Remember the original bucket index before rearranging the array.
+        selected_bucket = bucket_of_child[selected_pos];
         child = &children[i];
         if (!ndtree_node_init(child, dim, max_bucket_size, node)) {
             free(distance_sum);
             free(children);
             return ARCHIVE_INSERT_MEMORY_ERROR;
         }
-
-        bucket_append_move(child, &bucket[bucket_of_child[seed_rep]]);
-        if (i != seed_rep)
-            SWAP(bucket_of_child[i], bucket_of_child[seed_rep]);
+        bucket_append_move(child, &bucket[selected_bucket]);
+        // Move the selected bucket into the assigned portion of the array.
+        if (i != selected_pos)
+            SWAP(bucket_of_child[i], bucket_of_child[selected_pos]);
     }
+
     /* At this point all children have one bucket, given by
        bucket_of_child[i] when i < max_children, so we can re-use the
        previously calculated distances. */
     if (max_children < bucket_n) {
-        uint8_t bucket_k = bucket_of_child[max_children];
-        uint8_t min_child = 0;
-        double min_dist = distance_matrix[min_child * bucket_n + bucket_k];
-        for (uint8_t j = 1; j < max_children; j++) {
-            double dist_j = distance_matrix[bucket_of_child[j] * bucket_n + bucket_k];
+        unsigned bucket_k = bucket_of_child[max_children];
+        unsigned min_child = 0;
+        double min_dist = distance_matrix[bucket_k * bucket_n + bucket_of_child[0]];
+        for (unsigned j = 1; j < max_children; j++) {
+            double dist_j = distance_matrix[bucket_k * bucket_n + bucket_of_child[j]];
             if (dist_j < min_dist) {
                 min_child = j;
                 min_dist = dist_j;
@@ -1021,8 +1028,8 @@ ndtree_node_split(NDTreeNode *node, dimension_t dim,
         /* Now some children have two buckets, so we have to rely on
            ndtree_closest_child(), which is quite wasteful for children that
            have only one.  */
-        for (uint8_t k = max_children + 1; k < bucket_n; k++) {
-            uint8_t bucket_k = bucket_of_child[k];
+        for (unsigned k = max_children + 1; k < bucket_n; k++) {
+            unsigned bucket_k = bucket_of_child[k];
             const double *z = bucket[bucket_k].z;
             NDTreeNode *target = ndtree_closest_child(children, max_children, z, dim);
             bucket_append_move(target, &bucket[bucket_k]);
