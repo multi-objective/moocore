@@ -849,38 +849,40 @@ ndtree_remove_node_after_pruning(NDTreeNode *node, uint8_t max_bucket_size)
 static NDTreeNode *
 ndtree_closest_child(NDTreeNode *children, uint8_t n, const double * z, dimension_t dim)
 {
+    ASSUME(n > 0);
     ASSUME(n < 255);
-    uint8_t which_inside[255];
-    uint8_t num_inside = 0;
+
+    NDTreeNode *closest_child = NULL, *first_closest_child = NULL;
+    double closest_distance = HUGE_VAL;
+    // Find the closest child whose bounding box contains z.
     for (uint8_t i = 0; i < n; i++) {
         NDTreeNode *child = &children[i];
         assert(child->n > 0);
-        if (ndtree_z_is_inside_box(child, z, dim)) {
-            which_inside[num_inside] = i;
-            num_inside++;
-        }
-    }
+        if (!ndtree_z_is_inside_box(child, z, dim))
+            continue;
 
-    if (num_inside > 0) {
-        uint8_t i = 0;
-        NDTreeNode * closest_child = &children[which_inside[i]];
-        if (num_inside > 1) {
-            double closest_distance = squared_distance(closest_child->midpoint, z, dim);
-            for (i++; i < num_inside; i++) {
-                NDTreeNode *child = &children[which_inside[i]];
-                double distance = squared_distance(child->midpoint, z, dim);
-                if (distance < closest_distance) {
-                    closest_distance = distance;
-                    closest_child = child;
-                }
+        if (first_closest_child == NULL) {
+            first_closest_child = child;
+        } else {
+            double distance = squared_distance(child->midpoint, z, dim);
+            if (distance < closest_distance) {
+                closest_child = child;
+                closest_distance = distance;
             }
         }
-        return closest_child;
+    }
+    // Prefer children whose bounding boxes contain z.
+    if (first_closest_child != NULL) {
+        if (closest_child == NULL)
+            return first_closest_child;
+        // Calculate first_closest_child distance if we found more than one.
+        double distance = squared_distance(first_closest_child->midpoint, z, dim);
+        return (distance <= closest_distance) ? first_closest_child : closest_child;
     }
 
     // z is not inside any box, so we have to calculate all distances.
-    NDTreeNode * closest_child = &children[0];
-    double closest_distance = squared_distance(closest_child->midpoint, z, dim);
+    closest_child = &children[0];
+    closest_distance = squared_distance(closest_child->midpoint, z, dim);
     for (uint8_t i = 1; i < n; i++) {
         NDTreeNode *child = &children[i];
         double distance = squared_distance(child->midpoint, z, dim);
