@@ -67,6 +67,10 @@ Most functions are implemented in headers such as `nondominated.h`. For other fu
 
 Functions exported by the library are marked with `MOOCORE_API`.
 
+The stochastic hypervolume functions use NumPy's PCG64 implementation. A
+given seed is reproducible, but produces different results from earlier
+moocore versions and from NumPy's seed initialization.
+
 
 Testsuite
 =========

@@ -116,7 +116,8 @@ total_whv_rect <- function(x, rectangles, reference, maximise = FALSE, ideal = N
 #'   sampling. Higher values typically produce more accurate approximations of
 #'   the true hypervolume, but require more time.
 #'
-#' @param seed `integer(1)`\cr Random seed.
+#' @param seed `integer(1)`\cr Random seed for PCG64. Seeded results differ
+#'   from earlier moocore versions and from NumPy seed initialization.
 #'
 #' @param dist `character(1)`\cr Weight distribution type. See Details.
 #'
@@ -138,20 +139,20 @@ total_whv_rect <- function(x, rectangles, reference, maximise = FALSE, ideal = N
 #' @seealso    [read_datasets()], [eafdiff()], [whv_rect()]
 #'
 #' @doctest
-#' @expect equal(3.99807)
+#' @expect equal(3.9861)
 #' whv_hype(matrix(2, ncol=2), reference = 4, ideal = 1, seed = 42)
-#' @expect equal(3.00555)
+#' @expect equal(2.9979)
 #' whv_hype(matrix(c(3,1), ncol=2), reference = 4, ideal = 1, seed = 42)
-#' @expect equal(1.14624)
+#' @expect equal(1.13184)
 #' whv_hype(matrix(2, ncol=2), reference = 4, ideal = 1, seed = 42,
 #'          dist = "exponential", mu=0.2)
-#' @expect equal(1.66815)
+#' @expect equal(1.66437)
 #' whv_hype(matrix(c(3,1), ncol=2), reference = 4, ideal = 1, seed = 42,
 #'          dist = "exponential", mu=0.2)
-#' @expect equal(0.64485)
+#' @expect equal(0.64386)
 #' whv_hype(matrix(2, ncol=2), reference = 4, ideal = 1, seed = 42,
 #'          dist = "point", mu=c(2.9,0.9))
-#' @expect equal(4.03632)
+#' @expect equal(4.0365)
 #' whv_hype(matrix(c(3,1), ncol=2), reference = 4, ideal = 1, seed = 42,
 #'          dist = "point", mu=c(2.9,0.9))
 #' @concept metrics

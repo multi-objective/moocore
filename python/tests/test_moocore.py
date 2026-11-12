@@ -536,7 +536,9 @@ def test_hv_approx(dim):
     x = np.full((1, dim), 0.5)
     ref = np.full(dim, 1.0)
     true_hv = moocore.hypervolume(x, ref=ref)
-    appr_hv = moocore.hv_approx(x, ref=ref, method="DZ2019-MC", seed=42)
+    appr_hv = moocore.hv_approx(
+        x, ref=ref, method="DZ2019-MC", seed=42, nsamples=1_048_576
+    )
     # print(f"{dim}: {(true_hv - appr_hv)/true_hv}")
     ## Precision goes down significantly with higher dimensions.
     signif = 3 if dim < 7 else 2
@@ -566,6 +568,14 @@ def test_hv_approx_default_seed():
     ## Precision goes down significantly with higher dimensions.
     signif = 2
     np.testing.assert_approx_equal(true_hv, appr_hv, significant=signif)
+
+
+def test_hv_approx_seed_reproducibility():
+    kwargs = {"ref": 1, "method": "DZ2019-MC", "nsamples": 4096}
+    points = [[0.3, 0.4, 0.5]]
+    result = moocore.hv_approx(points, seed=42, **kwargs)
+    assert result == moocore.hv_approx(points, seed=42, **kwargs)
+    assert result != moocore.hv_approx(points, seed=43, **kwargs)
 
 
 def test_hv_approx_errors():
@@ -761,6 +771,17 @@ class TestR2Exact:
         moocore.r2_exact(dat, ref=[10, 10])
 
         assert_allclose(r2, 0.33360768789505657)
+
+
+@pytest.mark.parametrize(
+    ("dist", "mu"),
+    [("uniform", None), ("exponential", 0.2), ("point", [2.9, 0.9])],
+)
+def test_whv_hype_seed_reproducibility(dist, mu):
+    kwargs = {"ref": 4, "ideal": 1, "dist": dist, "mu": mu}
+    result = moocore.whv_hype([[2, 2]], seed=42, **kwargs)
+    assert result == moocore.whv_hype([[2, 2]], seed=42, **kwargs)
+    assert result != moocore.whv_hype([[2, 2]], seed=43, **kwargs)
 
 
 def test_whv_hype_errors():

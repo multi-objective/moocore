@@ -34,9 +34,8 @@ Other contributors:
   \item Michael H. Buselli (AVL-tree library) [copyright holder]
   \item Wessel Dankers (AVL-tree library) [copyright holder]
   \item NumPy Developers (RNG and ziggurat constants) [copyright holder]
-  \item Jean-Sebastien Roy (mt19937 library) [copyright holder]
-  \item Makoto Matsumoto (mt19937 library) [copyright holder]
-  \item Takuji Nishimura (mt19937 library) [copyright holder]
+  \item Melissa O'Neill (PCG64 library) [copyright holder]
+  \item Robert Kern (PCG64 library) [copyright holder]
 }
 
 }

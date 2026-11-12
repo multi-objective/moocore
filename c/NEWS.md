@@ -2,6 +2,7 @@
 
 ## 0.20
 
+ * Use PCG64 for stochastic hypervolume calculations. Seeded results change.
  * radixsort.h, insort.h: New.
  * main-nondominated.c: Renamed from nondominated.c.
  * hv and hvapprox executables now use -U instead of -u for --union to be

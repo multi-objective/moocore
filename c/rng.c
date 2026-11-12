@@ -73,7 +73,7 @@ rng_standard_normal(rng_state *rng)
 {
     for (;;) {
         /* r = e3n52sb8 */
-        uint64_t r = mt19937_next64(rng);
+        uint64_t r = pcg64_random_r(rng);
         int idx = r & 0xff;
         r >>= 8;
         int sign = r & 0x1;
@@ -86,13 +86,13 @@ rng_standard_normal(rng_state *rng)
         if (idx == 0) {
             for (;;) {
                 /* Switch to 1.0 - U to avoid log(0.0), see GH 13361 */
-                double xx = -ziggurat_nor_inv_r * log1p(-mt19937_next_double(rng));
-                double yy = -log1p(-mt19937_next_double(rng));
+                double xx = -ziggurat_nor_inv_r * log1p(-rng_random(rng));
+                double yy = -log1p(-rng_random(rng));
                 if (yy + yy > xx * xx)
                     return ((rabs >> 8) & 0x1) ? -(ziggurat_nor_r + xx)
                         : ziggurat_nor_r + xx;
             }
-        } else if (((fi_double[idx - 1] - fi_double[idx]) * mt19937_next_double(rng) +
+        } else if (((fi_double[idx - 1] - fi_double[idx]) * rng_random(rng) +
                     fi_double[idx]) < exp(-0.5 * x * x))
                 return x;
     }

@@ -19,7 +19,6 @@ MOOCORE_SRC_FILES =				\
 	hvapprox.c				\
 	hvc3d.c					\
 	io.c					\
-	mt19937/mt19937.c                       \
 	nondominated.c				\
 	pareto.c				\
 	r2_exact.c				\

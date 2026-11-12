@@ -95,6 +95,7 @@ zip-safe = false
 [tool.setuptools.package-data]
 "*" = [ "*.c", "*.h" ]
 "moocore.data" = [ "*.10", "*.csv", "*.dat", "*.txt", "*.xz" ]
+moocore = [ "libmoocore/pcg64/LICENSE.md", "libmoocore/pcg64/README.md" ]
 
 [tool.distutils.bdist_wheel]
 py_limited_api = "cp310"
