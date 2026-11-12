@@ -48,20 +48,15 @@
  */
 
 #ifndef PCG64_H_INCLUDED
-#define PCG64_H_INCLUDED 1
+#define PCG64_H_INCLUDED
 
-#include <inttypes.h>
+#include <stdint.h>
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #include <stdlib.h>
-#endif
-
-#if defined(_WIN32) && !defined (__MINGW32__)
-#define inline __forceinline
-#endif
-
-#if defined(__GNUC_GNU_INLINE__) && !defined(__cplusplus)
-#error Nonstandard GNU inlining semantics. Compile with -std=c99 or better.
+# if !defined (__MINGW32__)
+# define inline __forceinline
+# endif
 #endif
 
 #ifdef __cplusplus
@@ -101,14 +96,6 @@ typedef struct {
   PCG_128BIT_CONSTANT(PCG_DEFAULT_MULTIPLIER_HIGH, PCG_DEFAULT_MULTIPLIER_LOW)
 #define PCG_DEFAULT_INCREMENT_128                                              \
   PCG_128BIT_CONSTANT(6364136223846793005ULL, 1442695040888963407ULL)
-#define PCG_STATE_SETSEQ_128_INITIALIZER                                       \
-  {                                                                            \
-    PCG_128BIT_CONSTANT(0x979c9a98d8462005ULL, 0x7d3e9cb6cfe0549bULL)          \
-    , PCG_128BIT_CONSTANT(0x0000000000000001ULL, 0xda3e39cb94b95bdbULL)        \
-  }
-
-#define PCG_CHEAP_MULTIPLIER_128 (0xda942042e4dd58b5ULL)
-
 
 static inline uint64_t pcg_rotr_64(uint64_t value, unsigned int rot) {
 #ifdef _WIN32
@@ -131,7 +118,7 @@ static inline pcg128_t pcg128_add(pcg128_t a, pcg128_t b) {
 static inline void _pcg_mult64(uint64_t x, uint64_t y, uint64_t *z1,
                                uint64_t *z0) {
 
-#if defined _WIN32 && _M_AMD64
+#if defined(_WIN32) && defined(_M_AMD64)
   z0[0] = _umul128(x, y, z1);
 #else
   uint64_t x0, x1, y0, y1;
@@ -185,7 +172,7 @@ static inline void pcg_setseq_128_srandom_r(pcg_state_setseq_128 *rng,
 
 static inline uint64_t
 pcg_setseq_128_xsl_rr_64_random_r(pcg_state_setseq_128 *rng) {
-#if defined _WIN32 && _M_AMD64
+#if defined(_WIN32) && defined(_M_AMD64)
   uint64_t h1;
   pcg128_t product;
 
@@ -204,77 +191,6 @@ pcg_setseq_128_xsl_rr_64_random_r(pcg_state_setseq_128 *rng) {
 #endif
 }
 
-static inline pcg128_t pcg128_mult_64(pcg128_t a, uint64_t b) {
-  uint64_t h1;
-  pcg128_t result;
-
-  h1 = a.high * b;
-  _pcg_mult64(a.low, b, &(result.high), &(result.low));
-  result.high += h1;
-  return result;
-}
-
-static inline void pcg_cm_step_r(pcg_state_setseq_128 *rng) {
-#if defined _WIN32 && _M_AMD64
-  uint64_t h1;
-  pcg128_t product;
-
-  /* Manually inline the multiplication and addition using intrinsics */
-  h1 = rng->state.high * PCG_CHEAP_MULTIPLIER_128;
-  product.low =
-      _umul128(rng->state.low, PCG_CHEAP_MULTIPLIER_128, &(product.high));
-  product.high += h1;
-  _addcarry_u64(_addcarry_u64(0, product.low, rng->inc.low, &(rng->state.low)),
-                product.high, rng->inc.high, &(rng->state.high));
-#else
-  rng->state = pcg128_add(pcg128_mult_64(rng->state, PCG_CHEAP_MULTIPLIER_128),
-                           rng->inc);
-#endif
-}
-
-
-static inline void pcg_cm_srandom_r(pcg_state_setseq_128 *rng, pcg128_t initstate, pcg128_t initseq) {
-  rng->state = PCG_128BIT_CONSTANT(0ULL, 0ULL);
-  rng->inc.high = initseq.high << 1u;
-  rng->inc.high |= initseq.low >> 63u;
-  rng->inc.low = (initseq.low << 1u) | 1u;
-  pcg_cm_step_r(rng);
-  rng->state = pcg128_add(rng->state, initstate);
-  pcg_cm_step_r(rng);
-}
-
-static inline uint64_t pcg_cm_random_r(pcg_state_setseq_128* rng)
-{
-  /* Lots of manual inlining to help out certain compilers to generate
-   * performant code. */
-  uint64_t hi = rng->state.high;
-  uint64_t lo = rng->state.low;
-
-  /* Run the DXSM output function on the pre-iterated state. */
-  lo |= 1;
-  hi ^= hi >> 32;
-  hi *= 0xda942042e4dd58b5ULL;
-  hi ^= hi >> 48;
-  hi *= lo;
-
-  /* Run the CM step. */
-#if defined _WIN32 && _M_AMD64
-  uint64_t h1;
-  pcg128_t product;
-
-  /* Manually inline the multiplication and addition using intrinsics */
-  h1 = rng->state.high * PCG_CHEAP_MULTIPLIER_128;
-  product.low =
-      _umul128(rng->state.low, PCG_CHEAP_MULTIPLIER_128, &(product.high));
-  product.high += h1;
-  _addcarry_u64(_addcarry_u64(0, product.low, rng->inc.low, &(rng->state.low)),
-                product.high, rng->inc.high, &(rng->state.high));
-#else
-  rng->state = pcg128_add(pcg128_mult_64(rng->state, PCG_CHEAP_MULTIPLIER_128),
-                           rng->inc);
-#endif
-  return hi;
-}
 #else /* PCG_EMULATED_128BIT_MATH */
 
 static inline void pcg_setseq_128_step_r(pcg_state_setseq_128 *rng) {
@@ -283,38 +199,7 @@ static inline void pcg_setseq_128_step_r(pcg_state_setseq_128 *rng) {
 
 static inline uint64_t pcg_output_xsl_rr_128_64(pcg128_t state) {
   return pcg_rotr_64(((uint64_t)(state >> 64u)) ^ (uint64_t)state,
-                     state >> 122u);
-}
-
-static inline void pcg_cm_step_r(pcg_state_setseq_128 *rng) {
-  rng-> state = rng->state * PCG_CHEAP_MULTIPLIER_128 + rng->inc;
-}
-
-static inline uint64_t pcg_output_cm_128_64(pcg128_t state) {
-  uint64_t hi = state >> 64;
-  uint64_t lo = state;
-
-  lo |= 1;
-  hi ^= hi >> 32;
-  hi *= 0xda942042e4dd58b5ULL;
-  hi ^= hi >> 48;
-  hi *= lo;
-  return hi;
-}
-
-static inline void pcg_cm_srandom_r(pcg_state_setseq_128 *rng, pcg128_t initstate, pcg128_t initseq) {
-  rng->state = 0U;
-  rng->inc = (initseq << 1u) | 1u;
-  pcg_cm_step_r(rng);
-  rng->state += initstate;
-  pcg_cm_step_r(rng);
-}
-
-static inline uint64_t pcg_cm_random_r(pcg_state_setseq_128* rng)
-{
-    uint64_t ret = pcg_output_cm_128_64(rng->state);
-    pcg_cm_step_r(rng);
-    return ret;
+                     (unsigned int)(state >> 122u));
 }
 
 static inline uint64_t
@@ -336,90 +221,52 @@ static inline void pcg_setseq_128_srandom_r(pcg_state_setseq_128 *rng,
 
 #endif /* PCG_EMULATED_128BIT_MATH */
 
-static inline uint64_t
-pcg_setseq_128_xsl_rr_64_boundedrand_r(pcg_state_setseq_128 *rng,
-                                       uint64_t bound) {
-  uint64_t threshold = -bound % bound;
-  for (;;) {
-    uint64_t r = pcg_setseq_128_xsl_rr_64_random_r(rng);
-    if (r >= threshold)
-      return r % bound;
+typedef struct s_pcg64_state {
+  pcg_state_setseq_128 *pcg_state;
+  uint32_t uinteger;
+  bool has_uint32;
+} pcg64_state;
+
+static inline uint64_t pcg64_next64(pcg64_state *state) {
+  return pcg_setseq_128_xsl_rr_64_random_r(state->pcg_state);
+}
+
+static inline uint32_t pcg64_next32(pcg64_state *state) {
+  if (state->has_uint32) {
+    state->has_uint32 = false;
+    return state->uinteger;
   }
+  uint64_t next = pcg_setseq_128_xsl_rr_64_random_r(state->pcg_state);
+  state->has_uint32 = true;
+  state->uinteger = (uint32_t)(next >> 32);
+  return (uint32_t)(next & 0xffffffff);
 }
 
-extern pcg128_t pcg_advance_lcg_128(pcg128_t state, pcg128_t delta,
-                                    pcg128_t cur_mult, pcg128_t cur_plus);
-
-static inline void pcg_setseq_128_advance_r(pcg_state_setseq_128 *rng,
-                                            pcg128_t delta) {
-  rng->state = pcg_advance_lcg_128(rng->state, delta,
-                                   PCG_DEFAULT_MULTIPLIER_128, rng->inc);
+static inline double
+uint64_to_double(uint64_t rnd) {
+    return (rnd >> 11) * (1.0 / 9007199254740992.0);
 }
 
-static inline void pcg_cm_advance_r(pcg_state_setseq_128 *rng, pcg128_t delta) {
-    rng->state = pcg_advance_lcg_128(rng->state, delta,
-                                     PCG_128BIT_CONSTANT(0, PCG_CHEAP_MULTIPLIER_128),
-                                     rng->inc);
+static inline double
+pcg64_next_double(pcg64_state *state) {
+    return uint64_to_double(pcg64_next64(state));
 }
 
-typedef pcg_state_setseq_128 pcg64_random_t;
-#define pcg64_random_r pcg_setseq_128_xsl_rr_64_random_r
-#define pcg64_boundedrand_r pcg_setseq_128_xsl_rr_64_boundedrand_r
-#define pcg64_srandom_r pcg_setseq_128_srandom_r
-#define pcg64_advance_r pcg_setseq_128_advance_r
-#define PCG64_INITIALIZER PCG_STATE_SETSEQ_128_INITIALIZER
+static inline void
+pcg64_seed(pcg64_state *state, uint64_t seed) {
+  pcg128_t initstate = PCG_128BIT_CONSTANT(splitmix64_stateless(seed, 0),
+                                           splitmix64_stateless(seed, 1));
+  // we pick a sequence at random
+  pcg128_t initseq = PCG_128BIT_CONSTANT(splitmix64_stateless(seed, 2),
+                                         splitmix64_stateless(seed, 3));
+  initseq |= 1; // should not be necessary, but let us be careful.
+  pcg_setseq_128_srandom_r(state->pcg_state, initstate, initseq);
+}
+
+
 
 #ifdef __cplusplus
 }
 #endif
-
-typedef struct s_pcg64_state {
-  pcg64_random_t *pcg_state;
-  int has_uint32;
-  uint32_t uinteger;
-} pcg64_state;
-
-static inline uint64_t pcg64_next64(pcg64_state *state) {
-  return pcg64_random_r(state->pcg_state);
-}
-
-static inline uint32_t pcg64_next32(pcg64_state *state) {
-  uint64_t next;
-  if (state->has_uint32) {
-    state->has_uint32 = 0;
-    return state->uinteger;
-  }
-  next = pcg64_random_r(state->pcg_state);
-  state->has_uint32 = 1;
-  state->uinteger = (uint32_t)(next >> 32);
-  return (uint32_t)(next & 0xffffffff);
-}
-
-static inline uint64_t pcg64_cm_next64(pcg64_state *state) {
-  return pcg_cm_random_r(state->pcg_state);
-}
-
-static inline uint32_t pcg64_cm_next32(pcg64_state *state) {
-  uint64_t next;
-  if (state->has_uint32) {
-    state->has_uint32 = 0;
-    return state->uinteger;
-  }
-  next = pcg_cm_random_r(state->pcg_state);
-  state->has_uint32 = 1;
-  state->uinteger = (uint32_t)(next >> 32);
-  return (uint32_t)(next & 0xffffffff);
-}
-
-void pcg64_advance(pcg64_state *state, uint64_t *step);
-void pcg64_cm_advance(pcg64_state *state, uint64_t *step);
-
-void pcg64_set_seed(pcg64_state *state, uint64_t *seed, uint64_t *inc);
-
-void pcg64_get_state(pcg64_state *state, uint64_t *state_arr, int *has_uint32,
-                     uint32_t *uinteger);
-
-void pcg64_set_state(pcg64_state *state, uint64_t *state_arr, int has_uint32,
-                     uint32_t uinteger);
 
 #endif /* PCG64_H_INCLUDED */
