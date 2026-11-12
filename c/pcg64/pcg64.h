@@ -168,7 +168,7 @@ static inline void pcg_setseq_128_step_r(pcg_state_setseq_128 *rng) {
 }
 
 static inline uint64_t pcg_output_xsl_rr_128_64(pcg128_t state) {
-  return pcg_rotr_64(state.high ^ state.low, state.high >> 58u);
+  return pcg_rotr_64(state.high ^ state.low, (unsigned int)(state.high >> 58u));
 }
 
 static inline void pcg_setseq_128_srandom_r(pcg_state_setseq_128 *rng,
@@ -197,7 +197,7 @@ pcg_setseq_128_xsl_rr_64_random_r(pcg_state_setseq_128 *rng) {
   product.high += h1;
   _addcarry_u64(_addcarry_u64(0, product.low, rng->inc.low, &(rng->state.low)),
                 product.high, rng->inc.high, &(rng->state.high));
-  return _rotr64(rng->state.high ^ rng->state.low, rng->state.high >> 58u);
+  return _rotr64(rng->state.high ^ rng->state.low, (int)(rng->state.high >> 58u));
 #else
   pcg_setseq_128_step_r(rng);
   return pcg_output_xsl_rr_128_64(rng->state);
@@ -283,7 +283,7 @@ static inline void pcg_setseq_128_step_r(pcg_state_setseq_128 *rng) {
 
 static inline uint64_t pcg_output_xsl_rr_128_64(pcg128_t state) {
   return pcg_rotr_64(((uint64_t)(state >> 64u)) ^ (uint64_t)state,
-                     state >> 122u);
+                     (unsigned int)(state >> 122u));
 }
 
 static inline void pcg_cm_step_r(pcg_state_setseq_128 *rng) {
@@ -291,8 +291,8 @@ static inline void pcg_cm_step_r(pcg_state_setseq_128 *rng) {
 }
 
 static inline uint64_t pcg_output_cm_128_64(pcg128_t state) {
-  uint64_t hi = state >> 64;
-  uint64_t lo = state;
+  uint64_t hi = (uint64_t)(state >> 64);
+  uint64_t lo = (uint64_t)state;
 
   lo |= 1;
   hi ^= hi >> 32;

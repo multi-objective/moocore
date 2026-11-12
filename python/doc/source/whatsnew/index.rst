@@ -8,6 +8,8 @@ Version 0.4.0
 -------------
 
 - Requires ``numpy>=2.1``.
+- :func:`~moocore.hv_approx` and :func:`~moocore.whv_hype` now use PCG64 for
+  random sampling, so seeded results differ from earlier versions.
 - :func:`~moocore.vorob_t` returns a :class:`~typing.NamedTuple` instead of a dictionary.
 - :func:`~moocore.is_nondominated` is up to 10x faster in some inputs thanks to a customized radixsort implementation.
 - New shapes ``"concave-cliff"`` and ``"convex-cliff"`` added to :func:`~moocore.generate_ndset`.

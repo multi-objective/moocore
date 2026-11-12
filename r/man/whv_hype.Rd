@@ -32,7 +32,8 @@ objectives or a vector of logical values, with one value per objective.}
 sampling. Higher values typically produce more accurate approximations of
 the true hypervolume, but require more time.}
 
-\item{seed}{\code{integer(1)}\cr Random seed.}
+\item{seed}{\code{integer(1)}\cr Random seed for PCG64. Seeded results differ
+from earlier moocore versions and from NumPy seed initialization.}
 
 \item{dist}{\code{character(1)}\cr Weight distribution type. See Details.}
 

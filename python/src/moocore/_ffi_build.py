@@ -45,10 +45,9 @@ sources = [
     "hv_contrib.c",
     "io.c",
     "libutil.c",  # For fatal_error()
-    "mt19937/mt19937.c",
     "nondominated.c",
     "pareto.c",
-    "rng.c",
+    "rng.c",  # Uses the inline PCG64 routines in pcg64.h.
     "whv.c",
     "whv_hype.c",
 ]

@@ -5,16 +5,16 @@ test_that("Doctest: whv_hype", {
   # Created from @doctest for `whv_hype`
   # Source file: R/whv.R
   expect_equal(whv_hype(matrix(2, ncol = 2), reference = 4, ideal = 1, seed = 42),
-  3.99807)
+  3.9861)
   expect_equal(whv_hype(matrix(c(3, 1), ncol = 2), reference = 4, ideal = 1,
-  seed = 42), 3.00555)
+  seed = 42), 2.9979)
   expect_equal(whv_hype(matrix(2, ncol = 2), reference = 4, ideal = 1, seed = 42,
-  dist = "exponential", mu = 0.2), 1.14624)
+  dist = "exponential", mu = 0.2), 1.13184)
   expect_equal(whv_hype(matrix(c(3, 1), ncol = 2), reference = 4, ideal = 1,
-  seed = 42, dist = "exponential", mu = 0.2), 1.66815)
+  seed = 42, dist = "exponential", mu = 0.2), 1.66437)
   expect_equal(whv_hype(matrix(2, ncol = 2), reference = 4, ideal = 1, seed = 42,
-  dist = "point", mu = c(2.9, 0.9)), 0.64485)
+  dist = "point", mu = c(2.9, 0.9)), 0.64386)
   expect_equal(whv_hype(matrix(c(3, 1), ncol = 2), reference = 4, ideal = 1,
-  seed = 42, dist = "point", mu = c(2.9, 0.9)), 4.03632)
+  seed = 42, dist = "point", mu = c(2.9, 0.9)), 4.0365)
 })
 

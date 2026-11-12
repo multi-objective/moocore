@@ -1031,6 +1031,9 @@ def hv_approx(
     is not monotonic as shown in the example
     :ref:`sphx_glr_auto_examples_plot_hv_approx.py`.
 
+    Monte-Carlo sampling uses PCG64. Seeded results differ from earlier
+    moocore versions and from NumPy's seed initialization.
+
     .. seealso:: For details of the calculation, see the Notes section below.
 
        See :ref:`Benchmarks: Approximation of the hypervolume <bench-hvapprox>`.
@@ -1117,7 +1120,7 @@ def hv_approx(
     >>> moocore.hv_approx(x, ref=[10, 10], method="DZ2019-HW")
     37.99996
     >>> moocore.hv_approx(x, ref=[10, 10], seed=42, method="DZ2019-MC")
-    38.00081
+    38.00155
 
     Merge all the sets of a dataset by removing the set number column:
 
@@ -2622,6 +2625,9 @@ def whv_hype(
     points following the procedure described by :footcite:t:`AugBadBroZit2009gecco`.
     A weight distribution describing user preferences may be specified.
 
+    Sampling uses PCG64. Seeded results differ from earlier moocore versions
+    and from NumPy's seed initialization.
+
     .. warning::
         The current implementation only supports 2 objectives.
 
@@ -2674,15 +2680,15 @@ def whv_hype(
     >>> moocore.hypervolume([[2, 2]], ref=4)
     4.0
     >>> moocore.whv_hype([[2, 2]], ref=4, ideal=1, seed=42)
-    3.99807
+    3.9861
     >>> moocore.hypervolume([[3, 1]], ref=4)
     3.0
     >>> moocore.whv_hype([[3, 1]], ref=4, ideal=1, seed=42)
-    3.00555
+    2.9979
     >>> moocore.whv_hype([[2, 2]], ref=4, ideal=1, dist="exponential", mu=0.2, seed=42)
-    1.14624
+    1.13184
     >>> moocore.whv_hype([[3, 1]], ref=4, ideal=1, dist="exponential", mu=0.2, seed=42)
-    1.66815
+    1.66437
     >>> moocore.whv_hype(
     ...     [[2, 2]],
     ...     ref=4,
@@ -2691,7 +2697,7 @@ def whv_hype(
     ...     mu=[2.9, 0.9],
     ...     seed=42,
     ... )
-    0.64485
+    0.64386
     >>> moocore.whv_hype(
     ...     [[3, 1]],
     ...     ref=4,
@@ -2700,7 +2706,7 @@ def whv_hype(
     ...     mu=[2.9, 0.9],
     ...     seed=42,
     ... )
-    4.03632
+    4.0365
 
     """
     # Convert to numpy.array in case the user provides a list.  We use

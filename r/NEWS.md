@@ -1,5 +1,6 @@
 # moocore 0.3.2.900
 
+ * `hv_approx()` and `whv_hype()` now use PCG64, so seeded results change.
  * `is_nondominated` is up to 10x faster in some inputs thanks to a customized radixsort implementation.
  * New shapes `"concave-cliff"` and `"convex-cliff"` added to `generate_ndset()`.
 

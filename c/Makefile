@@ -75,7 +75,6 @@ SRCS =  avl.c                                                                \
         main-hv.c                                                            \
         main-hvapprox.c                                                      \
 	main-nondominated.c                                                  \
-        mt19937/mt19937.c                                                    \
         ndsort.c                                                             \
         nondominated.c                                                       \
         pareto.c                                                             \
@@ -105,9 +104,9 @@ HDRS =  avl.h                                                                \
         io.h                                                                 \
         io_priv.h                                                            \
         libmoocore-config.h	                                             \
-        mt19937/mt19937.h                                                    \
         nondominated.h                                                       \
         nondominated_kung.h                                                  \
+        pcg64/pcg64.h                                                        \
 	pow_int.h                                                            \
         rng.h                                                                \
         sort.h                                                               \
@@ -117,7 +116,7 @@ HDRS =  avl.h                                                                \
         ziggurat_constants.h
 
 # Relative to root folder.
-DIST_OTHER_FILES =  git_version *.mk
+DIST_OTHER_FILES =  git_version *.mk pcg64/LICENSE.md pcg64/README.md
 DIST_ROOT_FILES = Makefile README.md LICENSE
 OBJS  = $(SRCS:.c=.o)
 OBJS := $(OBJS:.cpp=.o)
@@ -196,7 +195,7 @@ $(BINDIR)/dominatedsets$(EXE): dominatedsets.o nondominated.o
 $(BINDIR)/eaf$(EXE): eaf.o eaf_main.o eaf3d.o avl.o
 $(BINDIR)/epsilon$(EXE): epsilon.o nondominated.o
 $(BINDIR)/hv$(EXE): main-hv.o timer.o $(LIBHV_OBJS)
-$(BINDIR)/hvapprox$(EXE): main-hvapprox.o timer.o hvapprox.o rng.o mt19937/mt19937.o nondominated.o
+$(BINDIR)/hvapprox$(EXE): main-hvapprox.o timer.o hvapprox.o rng.o nondominated.o
 $(BINDIR)/igd$(EXE): igd.o nondominated.o
 $(BINDIR)/ndsort$(EXE): ndsort.o pareto.o nondominated.o $(LIBHV_OBJS)
 $(BINDIR)/nondominated$(EXE): main-nondominated.o timer.o nondominated.o
@@ -217,7 +216,7 @@ hv.o: hv.h hv_priv.h hvc4d_priv.h sort.h libmoocore-config.h
 hv3dplus.o: hv_priv.h sort.h hv3d_priv.h avl_tiny.h
 hv4d.o: hv4d_priv.h hv_priv.h sort.h
 hv_contrib.o: hv.h libmoocore-config.h nondominated.h
-hvapprox.o: hvapprox.h pow_int.h rng.h mt19937/mt19937.h
+hvapprox.o: hvapprox.h pow_int.h rng.h pcg64/pcg64.h
 hvc3d.o: hv_priv.h sort.h hv3d_priv.h avl_tiny.h
 igd.o: cmdline.h io.h nondominated.h igd.h pow_int.h
 io.o: io.h io_priv.h
@@ -228,7 +227,7 @@ ndsort.o: cmdline.h io.h nondominated.h hv.h
 nondominated.h: avl_tiny.h nondominated_kung.h
 nondominated.o: nondominated.h nondominated_kung.h
 pareto.o: nondominated.h
-rng.o: rng.h mt19937/mt19937.h ziggurat_constants.h
+rng.o: rng.h pcg64/pcg64.h ziggurat_constants.h
 timer.o: timer.h
 $(OBJS): common.h gcc_attribs.h config.h maxminclamp.h
 
@@ -247,7 +246,7 @@ clean-obj:
 	@$(RM) $(OBJS) $(HV_OBJS) $(HV_LIB)
 
 clean: clean-obj
-	@-$(RM) *.s *.i *.gcda mt19937/*.gcda
+	@-$(RM) *.s *.i *.gcda
 	@-$(RM) config.status config.log
 	@-$(RM) $(SHLIB) $(CXXSHLIB)
 	@for exe in $(EXE_FILES); do \
@@ -332,7 +331,7 @@ dist: DEBUG=0
 dist: CDEBUG=
 dist: all
 	$(call MKDIR,../$(DIST_SRC)
-	@(rsync -rlpC --exclude=.svn $(DIST_SRC_FILES) ../$(DIST_SRC)/ \
+	@(rsync -RrlpC --exclude=.svn $(DIST_SRC_FILES) ../$(DIST_SRC)/ \
 	&& cd .. \
 	&& tar cf - $(DIST_SRC) | gzip -f9 > $(DIST_SRC).tar.gz \
 	&& rm -rf ./$(DIST_SRC)/* && rmdir ./$(DIST_SRC)/ \

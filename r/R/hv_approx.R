@@ -72,7 +72,7 @@
 #' hv_approx(x, ref=10, method="Rphi-FWE+")
 #' @expect equal(37.999958)
 #' hv_approx(x, ref=10, method="DZ2019-HW")
-#' @expect equal(38.000806)
+#' @expect equal(38.001554)
 #' hv_approx(x, ref=10, seed=42, method="DZ2019-MC")
 #'
 #' @export

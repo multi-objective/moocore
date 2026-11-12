@@ -1,17 +1,22 @@
 #ifndef RNG_H_
 #define RNG_H_
 
-#include "mt19937/mt19937.h"
+#ifdef _WIN64
+#include <intrin.h>
+#endif
 
-typedef mt19937_state rng_state;
+#include "pcg64/pcg64.h"
+
+typedef pcg64_random_t rng_state;
 
 #include "common.h"
 
 static inline rng_state *
 rng_new(uint32_t seed)
 {
-    rng_state * rng = malloc(sizeof(rng_state));
-    mt19937_seed(rng, seed);
+    rng_state * rng = MOOCORE_MALLOC(1, rng_state);
+    pcg64_srandom_r(rng, PCG_128BIT_CONSTANT(0, seed),
+                    PCG_128BIT_CONSTANT(0, 54));
     return rng;
 }
 
@@ -25,7 +30,7 @@ rng_free(rng_state * rng)
 static inline double
 rng_random(rng_state * rng)
 {
-    return mt19937_next_double(rng);
+    return (double)(pcg64_random_r(rng) >> 11) * (1.0 / 9007199254740992.0);
 }
 
 static inline double
