@@ -1,5 +1,6 @@
 # ruff: noqa: D100, D103
 import math
+import random
 
 import numpy as np
 import pytest
@@ -147,17 +148,16 @@ def test_wrong_ref():
 
 
 @pytest.mark.parametrize("dim", range(5, 9))
-def test_hv_dominated(dim):
-    seed = np.random.default_rng().integers(2**32 - 2)
+@pytest.mark.parametrize("seed", [random.randint(0, 2**31)])
+def test_hv_dominated(dim, seed):
     rng = np.random.default_rng(seed)
     ref = np.full(dim, 1.0)
     nrows = 50
     points = rng.uniform(size=(nrows, dim))
     hv = moocore.hypervolume(points, ref=ref)
     hv_nondom = moocore.hypervolume(moocore.filter_dominated(points), ref=ref)
-    err_msg = f"dim={dim}, seed={seed}"
-    assert_allclose(hv, hv_nondom, err_msg=err_msg)
-    assert hv < 1, err_msg
+    assert_allclose(hv, hv_nondom)
+    assert hv < 1
 
 
 def test_hv_dim0_dim1():
@@ -409,8 +409,8 @@ def test_epsilon_mult_negative_input():
 
 
 @pytest.mark.parametrize("dim", range(3, 6))
-def test_epsilon_dim(dim):
-    seed = np.random.default_rng().integers(2**32 - 2)
+@pytest.mark.parametrize("seed", [random.randint(0, 2**31)])
+def test_epsilon_dim(dim, seed):
     rng = np.random.default_rng(seed)
     maximum = 100
     nrows = 25
@@ -568,6 +568,15 @@ def test_hv_approx_default_seed():
     np.testing.assert_approx_equal(true_hv, appr_hv, significant=signif)
 
 
+@pytest.mark.parametrize("seed", [random.randint(0, 2**31)])
+def test_hv_approx_seed_reproducibility(seed):
+    kwargs = {"ref": 1, "method": "DZ2019-MC", "nsamples": 4096}
+    points = [[0.3, 0.4, 0.5]]
+    result = moocore.hv_approx(points, seed=seed, **kwargs)
+    assert result == moocore.hv_approx(points, seed=seed, **kwargs)
+    assert result != moocore.hv_approx(points, seed=seed + 1, **kwargs)
+
+
 def test_hv_approx_errors():
     with pytest.raises(
         ValueError, match=r".*must be a positive integer value.*"
@@ -580,7 +589,7 @@ def test_hv_approx_errors():
     assert moocore.hv_approx([[1, 1, 1]], ref=1) == 0
 
 
-def check_hvc(points, ref, err_msg):
+def check_hvc(points, ref):
     hvc = moocore.hv_contributions(points, ref=ref)
     is_nondom = moocore.is_nondominated(points, keep_weakly=True)
     nondom = points[is_nondom, :]
@@ -592,20 +601,20 @@ def check_hvc(points, ref, err_msg):
             for i in range(len(nondom))
         ]
     )
-    assert_allclose(true_hvc, hvc, err_msg=err_msg)
+    assert_allclose(true_hvc, hvc)
     hvc = moocore.hv_contributions(-points, ref=-ref, maximise=True)
-    assert_allclose(true_hvc, hvc, err_msg=err_msg)
+    assert_allclose(true_hvc, hvc)
 
 
 @pytest.mark.parametrize("dim", range(2, 7))
-def test_hvc(dim):
-    seed = np.random.default_rng().integers(2**32 - 2)
+@pytest.mark.parametrize("seed", [random.randint(0, 2**31)])
+def test_hvc(dim, seed):
     rng = np.random.default_rng(seed)
     maximum = 100
     nrows = 20
     ref = np.full(dim, maximum + 1)
     points = rng.integers(1, maximum, (nrows, dim))
-    check_hvc(points, ref, err_msg=f"dim={dim}, seed={seed}: ")
+    check_hvc(points, ref)
 
 
 @pytest.mark.parametrize("dim", range(5, 11))
@@ -635,8 +644,8 @@ def test_generate_sequence_errors():
 
 
 @pytest.mark.parametrize("dim", range(2, 5))
-def test_pareto_rank(dim):
-    seed = np.random.default_rng().integers(2**32 - 2)
+@pytest.mark.parametrize("seed", [random.randint(0, 2**31)])
+def test_pareto_rank(dim, seed):
     rng = np.random.default_rng(seed)
     nrows = 25
     points = rng.random(size=(nrows, dim))
@@ -645,9 +654,7 @@ def test_pareto_rank(dim):
     r = 0
     while True:
         nondom = moocore.is_nondominated(points, keep_weakly=True)
-        assert_array_equal(
-            ranks == r, nondom, err_msg=f"dim={dim}, seed={seed}: "
-        )
+        assert_array_equal(ranks == r, nondom)
         if r == r_max:
             break
         points = points[~nondom]
@@ -761,6 +768,26 @@ class TestR2Exact:
         moocore.r2_exact(dat, ref=[10, 10])
 
         assert_allclose(r2, 0.33360768789505657)
+
+
+@pytest.mark.parametrize(
+    ("dist", "mu"),
+    [
+        (
+            "uniform",
+            None,
+        ),
+        ("exponential", 0.2),
+        ("point", [2.9, 0.9]),
+    ],
+)
+@pytest.mark.parametrize("seed", [random.randint(0, 2**31)])
+def test_whv_hype_seed_reproducibility(dist, mu, seed):
+    kwargs = {"ref": 4, "ideal": 1, "dist": dist, "mu": mu}
+    x = [[2, 2]]
+    result = moocore.whv_hype(x, seed=seed, **kwargs)
+    assert result == moocore.whv_hype(x, seed=seed, **kwargs)
+    assert result != moocore.whv_hype(x, seed=seed + 1, **kwargs)
 
 
 def test_whv_hype_errors():
