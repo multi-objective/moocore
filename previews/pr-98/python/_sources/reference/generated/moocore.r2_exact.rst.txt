@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+r2\_exact
+=========
+
+.. currentmodule:: moocore
+
+.. autofunction:: r2_exact
+
+.. _sphx_glr_backref_moocore.r2_exact:
+
+.. minigallery:: moocore.r2_exact
+   :add-heading: Gallery examples
+   :heading-level: -

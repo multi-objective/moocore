@@ -1,0 +1,44 @@
+
+html {
+    --pst-sidebar-secondary: 17rem;
+
+}
+.bd-page-width {
+    max-width: 100rem;
+  }
+
+.intro-card {
+  padding: 30px 10px 20px 10px;
+}
+
+.intro-card .sd-card-img-top {
+  margin: 10px;
+  height: 52px;
+  background: none !important;
+}
+
+/* https://sphinx-gallery.github.io/stable/advanced.html#using-sphinx-gallery-sidebar-components */
+.sphx-glr-download-link-note, /* Download link note in header */
+.binder-badge,                /* Binder launch badge in footer */
+.lite-badge,                  /* Lite launch badge in footer */
+.sphx-glr-download-jupyter,   /* Download Jupyter notebook link in footer */
+.sphx-glr-download-python,    /* Download Python script link in footer */
+.sphx-glr-download-zip        /* Download zipped link in footer */
+{
+  display: none;
+}
+
+/* Monospace titles for API docs */
+div.empty + section>h1 {
+  font-family: var(--pst-font-family-monospace);
+}
+
+.prename {
+  font-family: var(--pst-font-family-monospace);
+  font-size: var(--pst-font-size-h4);
+}
+
+/* Removes moocore. prefix in API docs. */
+.sig-prename {
+  display: none;
+}
