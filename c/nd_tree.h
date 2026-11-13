@@ -78,11 +78,10 @@ typedef struct NDTreeNode {
     // FIXME: Use an anonymous union
     SolutionsList *bucket; // List of solutions (each list tracks duplicates).
     struct NDTreeNode *children;
+    // box is a pointer to a block of 3 * dim points (ideal, nadir, midpoint).
     // (ideal, nadir) define a hyper-rectangle that contains all points in the
     // subtree.  The hyper-rectangle is not necessarily tight.
-    double *ideal;
-    double *nadir;
-    double *midpoint;
+    double *box;
     // This is total_size of subtree (including duplicates). Leaf nodes have
     // coverage == 0 and we use node->n.
     uint32_t coverage;
@@ -102,6 +101,24 @@ typedef struct NDTreeArchive {
     NDTreeConfig config;
 } NDTreeArchive;
 
+
+static inline double *
+ndtree_get_ideal(const NDTreeNode * restrict node, dimension_t dim _attr_maybe_unused)
+{
+    return node->box;
+}
+
+static inline double *
+ndtree_get_nadir(const NDTreeNode * restrict node, dimension_t dim)
+{
+    return node->box + dim;
+}
+
+static inline double *
+ndtree_get_midpoint(const NDTreeNode * restrict node, dimension_t dim)
+{
+    return node->box + 2 * dim;
+}
 
 static inline SolutionsList *
 ndtree_bucket_new(NDTreeNode *node, uint8_t cap)
@@ -133,9 +150,9 @@ static void
 ndtree_node_set_bounds(NDTreeNode * restrict node, const double * restrict z, dimension_t dim)
 {
     ASSUME(dim >= 2);
-    memcpy(node->ideal, z, dim * sizeof(*z));
-    memcpy(node->nadir, z, dim * sizeof(*z));
-    memcpy(node->midpoint, z, dim * sizeof(*z));
+    memcpy(ndtree_get_ideal(node, dim), z, dim * sizeof(*z));
+    memcpy(ndtree_get_nadir(node, dim), z, dim * sizeof(*z));
+    memcpy(ndtree_get_midpoint(node, dim), z, dim * sizeof(*z));
 }
 
 static inline bool
@@ -143,7 +160,7 @@ update_ideal(NDTreeNode * restrict node, const double * restrict z, dimension_t 
 {
     ASSUME(dim > 1);
     bool any_changed = false;
-    double * restrict ideal = node->ideal;
+    double * restrict ideal = ndtree_get_ideal(node, dim);
     for (dimension_t i = 0; i < dim; i++) {
         if (z[i] < ideal[i]) {
             ideal[i] = z[i];
@@ -158,7 +175,7 @@ update_nadir(NDTreeNode * restrict node, const double * restrict z, dimension_t 
 {
     ASSUME(dim > 1);
     bool any_changed = false;
-    double * restrict nadir = node->nadir;
+    double * restrict nadir = ndtree_get_nadir(node, dim);
     for (dimension_t i = 0; i < dim; i++) {
         if (z[i] > nadir[i]) {
             nadir[i] = z[i];
@@ -172,9 +189,9 @@ static inline void
 update_midpoint(NDTreeNode * restrict node, dimension_t dim)
 {
     ASSUME(dim > 1);
-    const double * restrict ideal = node->ideal;
-    const double * restrict nadir = node->nadir;
-    double * restrict midpoint = node->midpoint;
+    const double * restrict ideal = ndtree_get_ideal(node, dim);
+    const double * restrict nadir = ndtree_get_nadir(node, dim);
+    double * restrict midpoint = ndtree_get_midpoint(node, dim);
     for (dimension_t i = 0; i < dim; i++) {
         // With doubles, we do not expect the sum to overflow and this is
         // faster than ideal + (nadir - ideal)/2.
@@ -219,9 +236,9 @@ ndtree_node_propagate_bounds_up(NDTreeNode *node, dimension_t dim)
     bool ideal_changed = true, nadir_changed = true;
     while (node->parent) {
         if (ideal_changed)
-            ideal_changed = update_ideal(node->parent, node->ideal, dim);
+            ideal_changed = update_ideal(node->parent, ndtree_get_ideal(node, dim), dim);
         if (nadir_changed)
-            nadir_changed = update_nadir(node->parent, node->nadir, dim);
+            nadir_changed = update_nadir(node->parent, ndtree_get_nadir(node, dim), dim);
         if (!ideal_changed && !nadir_changed)
             return;
         update_midpoint(node->parent, dim);
@@ -275,16 +292,14 @@ ndtree_node_compute_bounds_from_children(NDTreeNode *node, dimension_t dim)
     assert(!ndtree_node_is_leaf(node));
     // Initialize with the bounds of the first child.
     NDTreeNode * child = node->children;
-    memcpy(node->ideal, child->ideal, dim * sizeof(double));
-    memcpy(node->nadir, child->nadir, dim * sizeof(double));
-    memcpy(node->midpoint, child->midpoint, dim * sizeof(double));
+    memcpy(node->box, child->box, 3 * dim * sizeof(double));
 
     // Examine the bounds of the other children.
     bool any_changed = false;
     for (uint8_t i = 1; i < node->n; i++) {
         child = node->children + i;
-        any_changed |= update_ideal(node, child->ideal, dim);
-        any_changed |= update_nadir(node, child->nadir, dim);
+        any_changed |= update_ideal(node, ndtree_get_ideal(child, dim), dim);
+        any_changed |= update_nadir(node, ndtree_get_nadir(child, dim), dim);
     }
     if (any_changed)
         update_midpoint(node, dim);
@@ -330,17 +345,15 @@ ndtree_node_init(NDTreeNode *node, dimension_t dim, uint8_t max_bucket_size, NDT
 {
     node->parent = parent;
     // Allocate a single block for ideal/nadir/midpoint.
-    node->ideal = malloc(3U * dim * sizeof *node->ideal);
-    if (node->ideal == NULL) {
+    node->box = malloc(3U * dim * sizeof(double));
+    if (node->box == NULL) {
         // PyErr_NoMemory();
         return NULL;
     }
-    node->nadir = node->ideal + dim;
-    node->midpoint = node->nadir + dim;
     node->coverage = 0;
     // cap is max_bucket_size + 1 to be able to detect that the bucket is full.
     if (ndtree_bucket_new(node, max_bucket_size + 1) == NULL) {
-        free(node->ideal);
+        free(node->box);
         return NULL;
     }
     return node;
@@ -439,8 +452,8 @@ ndtree_node_free(NDTreeNode *node)
     if (node == NULL)
         return;
 
-    free(node->ideal);
-    node->ideal = NULL;
+    free(node->box);
+    node->box = NULL;
     node->cap = 0;
     if (ndtree_node_is_leaf(node)) {
         ndtree_bucket_free(node);
@@ -619,12 +632,14 @@ ndtree_go_up_increasing_size(NDTreeNode *node, uint32_t added)
 
 
 static bool
-ndtree_z_is_inside_box(const NDTreeNode *node, const double * restrict z, dimension_t dim)
+ndtree_z_is_inside_box(const NDTreeNode * restrict node, const double * restrict z, dimension_t dim)
 {
     ASSUME(dim >= 2);
     // FIXME: splitting the loop may help vectorization.
+    const double * restrict ideal = ndtree_get_ideal(node, dim);
+    const double * restrict nadir = ndtree_get_nadir(node, dim);
     for (dimension_t i = 0; i < dim; i++) {
-        if (z[i] < node->ideal[i] || z[i] > node->nadir[i])
+        if (z[i] < ideal[i] || z[i] > nadir[i])
             return false;
     }
     return true;
@@ -716,12 +731,12 @@ static bool
 ndtree_node_dominates(const NDTreeNode * restrict node,
                       const double * restrict z, dimension_t dim)
 {
-    if (dominates(node->nadir, z, dim))
+    if (dominates(ndtree_get_nadir(node, dim), z, dim))
         return true;
-    if (weakly_dominates(z, node->ideal, dim))
+    if (weakly_dominates(z, ndtree_get_ideal(node, dim), dim))
         return false;
 
-    if (dominates(node->ideal, z, dim) || dominates(z, node->nadir, dim)) {
+    if (dominates(ndtree_get_ideal(node, dim), z, dim) || dominates(z, ndtree_get_nadir(node, dim), dim)) {
         if (ndtree_node_is_leaf(node)) {
             for (size_t i = 0; i < node->n; i++) {
                 const double *bucket_z = node->bucket[i].z;
@@ -758,7 +773,7 @@ ndtree_dominated_by(const NDTreeArchive * restrict tree, const double * restrict
         return false;
 
     const dimension_t dim = tree->dim;
-    const double * ideal = tree->root->ideal;
+    const double * ideal = ndtree_get_ideal(tree->root, dim);
 
     /* The ideal at the root is tight as long as we never erase a nondominated
        solution. Further down the tree a node's ideal may need tightening, as
@@ -780,7 +795,7 @@ ndtree_remove_child_at(NDTreeNode * restrict parent, uint8_t index)
     NDTreeNode * removed _attr_maybe_unused = &parent->children[index];
     assert(ndtree_node_is_leaf(removed));
     // The child must be already empty.
-    assert(removed->bucket == NULL && removed->children == NULL && removed->ideal == NULL);
+    assert(removed->bucket == NULL && removed->children == NULL && removed->box == NULL);
 
     parent->n--;
 #if 0
@@ -817,7 +832,7 @@ ndtree_remove_node_after_pruning(NDTreeNode *node, uint8_t max_bucket_size)
 {
     if (node->n == 1) { // Replace tree with the only child.
         NDTreeNode *child = node->children;
-        free(node->ideal);
+        free(node->box);
         child->parent = node->parent;
         assert(node->bucket == NULL);
         memcpy(node, child, sizeof(*node));
@@ -832,10 +847,10 @@ ndtree_remove_node_after_pruning(NDTreeNode *node, uint8_t max_bucket_size)
         node->coverage = 0;
         ndtree_node_free_children(node);
         assert(node->bucket == NULL);
-        assert(node->ideal != NULL);
+        assert(node->box != NULL);
         if (node->parent != NULL) {
-            free(node->ideal);
-            node->ideal = NULL;
+            free(node->box);
+            node->box = NULL;
         }
         // If this is the root, we allocate an empty bucket.  Otherwise, this
         // node will be removed by ndtree_remove_child_at() later.
@@ -864,7 +879,7 @@ ndtree_closest_child(NDTreeNode *children, uint8_t n, const double * z, dimensio
         if (first_closest_child == NULL) {
             first_closest_child = child;
         } else {
-            double distance = squared_distance(child->midpoint, z, dim);
+            double distance = squared_distance(ndtree_get_midpoint(child, dim), z, dim);
             if (distance < closest_distance) {
                 closest_child = child;
                 closest_distance = distance;
@@ -876,16 +891,16 @@ ndtree_closest_child(NDTreeNode *children, uint8_t n, const double * z, dimensio
         if (closest_child == NULL)
             return first_closest_child;
         // Calculate first_closest_child distance if we found more than one.
-        double distance = squared_distance(first_closest_child->midpoint, z, dim);
+        double distance = squared_distance(ndtree_get_midpoint(first_closest_child, dim), z, dim);
         return (distance <= closest_distance) ? first_closest_child : closest_child;
     }
 
     // z is not inside any box, so we have to calculate all distances.
     closest_child = &children[0];
-    closest_distance = squared_distance(closest_child->midpoint, z, dim);
+    closest_distance = squared_distance(ndtree_get_midpoint(closest_child, dim), z, dim);
     for (uint8_t i = 1; i < n; i++) {
         NDTreeNode *child = &children[i];
-        double distance = squared_distance(child->midpoint, z, dim);
+        double distance = squared_distance(ndtree_get_midpoint(child, dim), z, dim);
         if (distance < closest_distance) {
             closest_distance = distance;
             closest_child = child;
@@ -1154,7 +1169,7 @@ ndtree_update_node(NDTreeArchive * restrict tree, NDTreeNode * restrict node,
     const dimension_t dim = tree->dim;
     // FIXME: check=false is an optimization. With DEBUG=1 we should check that
     // it is correct by making sure that we never receive a weakly dominated point.
-    if (check && weakly_dominates(node->nadir, z, dim)) {
+    if (check && weakly_dominates(ndtree_get_nadir(node, dim), z, dim)) {
         // Maybe there is one solution and it is a duplicate.
         if (allow_duplicates && ndtree_node_is_leaf(node) && node->n == 1
             && all_equal_double(z, node->bucket[0].z, dim)) {
@@ -1164,8 +1179,8 @@ ndtree_update_node(NDTreeArchive * restrict tree, NDTreeNode * restrict node,
     }
 
     bool clears_subtree = allow_duplicates
-        ? dominates(z, node->ideal, dim)
-        : weakly_dominates(z, node->ideal, dim);
+        ? dominates(z, ndtree_get_ideal(node, dim), dim)
+        : weakly_dominates(z, ndtree_get_ideal(node, dim), dim);
     if (clears_subtree) {
         uint32_t removed = ndtree_append_subtree_to_list(displaced, node);
         if (!*displaced)
@@ -1193,8 +1208,8 @@ ndtree_update_node(NDTreeArchive * restrict tree, NDTreeNode * restrict node,
     }
 
     DEBUG2(ndtree_assert_valid_tree(tree));
-    bool z_wdom_nadir = weakly_dominates(z, node->nadir, dim);
-    bool ideal_wdom_z = weakly_dominates(node->ideal, z, dim);
+    bool ideal_wdom_z = weakly_dominates(ndtree_get_ideal(node, dim), z, dim);
+    bool z_wdom_nadir = weakly_dominates(z, ndtree_get_nadir(node, dim), dim);
     if (!ideal_wdom_z && !z_wdom_nadir)
         return ARCHIVE_INSERT_ACCEPTED;
 
@@ -1541,12 +1556,14 @@ static size_t
 ndtree_assert_valid_down(const NDTreeNode * node, dimension_t dim)
 {
     size_t total = 0;
+    const double * restrict ideal _attr_maybe_unused = ndtree_get_ideal(node, dim);
+    const double * restrict nadir _attr_maybe_unused = ndtree_get_nadir(node, dim);
     if (ndtree_node_is_leaf(node)) {
         for (size_t i = 0; i < node->n; i++) {
             total += node->bucket[i].x.n;
             for (dimension_t d = 0; d < dim; d++) {
-                assert(node->ideal[d] <= node->bucket[i].z[d]);
-                assert(node->nadir[d] >= node->bucket[i].z[d]);
+                assert(ideal[d] <= node->bucket[i].z[d]);
+                assert(nadir[d] >= node->bucket[i].z[d]);
             }
         }
         return total;
@@ -1554,9 +1571,11 @@ ndtree_assert_valid_down(const NDTreeNode * node, dimension_t dim)
     for (size_t i = 0; i < node->n; i++) {
         assert(node->children[i].parent == node);
         total += ndtree_assert_valid_down(&node->children[i], dim);
+        const double * restrict child_ideal _attr_maybe_unused = ndtree_get_ideal(&node->children[i], dim);
+        const double * restrict child_nadir _attr_maybe_unused = ndtree_get_nadir(&node->children[i], dim);
         for (dimension_t d = 0; d < dim; d++) {
-            assert(node->ideal[d] <= node->children[i].ideal[d]);
-            assert(node->nadir[d] >= node->children[i].nadir[d]);
+            assert(ideal[d] <= child_ideal[d]);
+            assert(nadir[d] >= child_nadir[d]);
         }
     }
     assert(total == node->coverage);
@@ -1598,11 +1617,15 @@ ndtree_assert_valid_up(const NDTreeNode *node, dimension_t dim)
     while (node->parent != NULL) {
         assert(!ndtree_node_is_leaf(node->parent));
         node = node->parent;
+        const double * restrict ideal _attr_maybe_unused = ndtree_get_ideal(node, dim);
+        const double * restrict nadir _attr_maybe_unused = ndtree_get_nadir(node, dim);
         for (size_t i = 0; i < node->n; i++) {
             assert(node->children[i].parent == node);
+            const double * restrict child_ideal _attr_maybe_unused = ndtree_get_ideal(&node->children[i], dim);
+            const double * restrict child_nadir _attr_maybe_unused = ndtree_get_nadir(&node->children[i], dim);
             for (dimension_t d = 0; d < dim; d++) {
-                assert(node->ideal[d] <= node->children[i].ideal[d]);
-                assert(node->nadir[d] >= node->children[i].nadir[d]);
+                assert(ideal[d] <= child_ideal[d]);
+                assert(nadir[d] >= child_nadir[d]);
             }
         }
     }
