@@ -73,8 +73,6 @@
 */
 typedef struct NDTreeNode {
     struct NDTreeNode *parent;
-    uint8_t n;
-    uint8_t cap;
     // FIXME: Use an anonymous union
     SolutionsList *bucket; // List of solutions (each list tracks duplicates).
     struct NDTreeNode *children;
@@ -85,6 +83,8 @@ typedef struct NDTreeNode {
     // This is total_size of subtree (including duplicates). Leaf nodes have
     // coverage == 0 and we use node->n.
     uint32_t coverage;
+    uint8_t n;
+    uint8_t cap;
 } NDTreeNode;
 
 typedef struct NDTreeConfig {
