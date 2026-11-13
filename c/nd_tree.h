@@ -146,13 +146,26 @@ ndtree_node_is_leaf(const NDTreeNode *node)
     return node->coverage == 0;
 }
 
-static void
-ndtree_node_set_bounds(NDTreeNode * restrict node, const double * restrict z, dimension_t dim)
+static inline void
+ndtree_node_set_ideal_nadir(NDTreeNode * restrict node, const double * restrict z, dimension_t dim)
 {
     ASSUME(dim >= 2);
     memcpy(ndtree_get_ideal(node, dim), z, dim * sizeof(*z));
     memcpy(ndtree_get_nadir(node, dim), z, dim * sizeof(*z));
+}
+
+static inline void
+ndtree_node_set_midpoint(NDTreeNode * restrict node, const double * restrict z, dimension_t dim)
+{
     memcpy(ndtree_get_midpoint(node, dim), z, dim * sizeof(*z));
+}
+
+static inline void
+ndtree_node_set_bounds(NDTreeNode * restrict node, const double * restrict z, dimension_t dim)
+{
+    ASSUME(dim >= 2);
+    ndtree_node_set_ideal_nadir(node, z, dim);
+    ndtree_node_set_midpoint(node, z, dim);
 }
 
 static inline bool
@@ -255,7 +268,9 @@ ndtree_node_compute_bounds_of_leaf(NDTreeNode *node, dimension_t dim)
 {
     assert(ndtree_node_is_leaf(node));
     assert(node->n > 0);
-    ndtree_node_set_bounds(node, node->bucket[0].z, dim);
+    const double * first_z = node->bucket[0].z;
+    ndtree_node_set_ideal_nadir(node, first_z, dim);
+
     bool any_changed = false;
     for (uint8_t i = 1; i < node->n; i++) {
         any_changed |= update_ideal(node, node->bucket[i].z, dim);
@@ -263,6 +278,8 @@ ndtree_node_compute_bounds_of_leaf(NDTreeNode *node, dimension_t dim)
     }
     if (any_changed)
         update_midpoint(node, dim);
+    else
+        ndtree_node_set_midpoint(node, first_z, dim);
 }
 
 /**
@@ -291,13 +308,12 @@ ndtree_node_compute_bounds_from_children(NDTreeNode *node, dimension_t dim)
 {
     assert(!ndtree_node_is_leaf(node));
     // Initialize with the bounds of the first child.
-    NDTreeNode * child = node->children;
-    memcpy(node->box, child->box, 3 * dim * sizeof(double));
-
+    NDTreeNode * first_child = node->children;
+    memcpy(node->box, first_child->box, 3 * dim * sizeof(double));
     // Examine the bounds of the other children.
     bool any_changed = false;
     for (uint8_t i = 1; i < node->n; i++) {
-        child = node->children + i;
+        NDTreeNode * child = node->children + i;
         any_changed |= update_ideal(node, ndtree_get_ideal(child, dim), dim);
         any_changed |= update_nadir(node, ndtree_get_nadir(child, dim), dim);
     }
@@ -731,30 +747,38 @@ static bool
 ndtree_node_dominates(const NDTreeNode * restrict node,
                       const double * restrict z, dimension_t dim)
 {
-    if (dominates(ndtree_get_nadir(node, dim), z, dim))
-        return true;
-    if (weakly_dominates(z, ndtree_get_ideal(node, dim), dim))
+    /* If any point in this subtree strictly dominates z, the ideal bound must
+       also strictly dominate z.  */
+    const double * restrict ideal = ndtree_get_ideal(node, dim);
+    if (!dominates(ideal, z, dim))
         return false;
 
-    if (dominates(ndtree_get_ideal(node, dim), z, dim) || dominates(z, ndtree_get_nadir(node, dim), dim)) {
-        if (ndtree_node_is_leaf(node)) {
-            for (size_t i = 0; i < node->n; i++) {
-                const double *bucket_z = node->bucket[i].z;
-                if (dominates(bucket_z, z, dim))
-                    return true;
-                if (weakly_dominates(z, bucket_z, dim))
-                    return false;
-            }
-        } else {
-            for (size_t i = 0; i < node->n; i++) {
-                if (ndtree_node_dominates(&node->children[i], z, dim))
-                    return true;
-            }
+    // If nadir dominates z, then this subtree dominates z.
+    const double * restrict nadir = ndtree_get_nadir(node, dim);
+    if (dominates(nadir, z, dim))
+        return true;
+
+    if (ndtree_node_is_leaf(node)) {
+        for (size_t i = 0; i < node->n; i++) {
+            const double *bucket_z = node->bucket[i].z;
+            if (dominates(bucket_z, z, dim))
+                return true;
+            if (weakly_dominates(z, bucket_z, dim))
+                return false;
+        }
+    } else {
+        for (size_t i = 0; i < node->n; i++) {
+            if (ndtree_node_dominates(&node->children[i], z, dim))
+                return true;
         }
     }
     return false;
 }
 
+/**
+   Returns true if any solution in the tree dominates z, false other or if the tree is empty..
+
+*/
 static inline bool
 ndtree_dominates(const NDTreeArchive * restrict tree, const double * restrict z)
 {
