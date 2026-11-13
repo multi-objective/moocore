@@ -51,6 +51,7 @@
 #define PCG64_H_INCLUDED
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #if defined(_WIN32)
 #include <stdlib.h>
@@ -222,13 +223,13 @@ static inline void pcg_setseq_128_srandom_r(pcg_state_setseq_128 *rng,
 #endif /* PCG_EMULATED_128BIT_MATH */
 
 typedef struct s_pcg64_state {
-  pcg_state_setseq_128 *pcg_state;
+  pcg_state_setseq_128 pcg_state;
   uint32_t uinteger;
   bool has_uint32;
 } pcg64_state;
 
 static inline uint64_t pcg64_next64(pcg64_state *state) {
-  return pcg_setseq_128_xsl_rr_64_random_r(state->pcg_state);
+  return pcg_setseq_128_xsl_rr_64_random_r(&state->pcg_state);
 }
 
 static inline uint32_t pcg64_next32(pcg64_state *state) {
@@ -236,15 +237,15 @@ static inline uint32_t pcg64_next32(pcg64_state *state) {
     state->has_uint32 = false;
     return state->uinteger;
   }
-  uint64_t next = pcg_setseq_128_xsl_rr_64_random_r(state->pcg_state);
+  uint64_t next = pcg_setseq_128_xsl_rr_64_random_r(&state->pcg_state);
   state->has_uint32 = true;
   state->uinteger = (uint32_t)(next >> 32);
   return (uint32_t)(next & 0xffffffff);
 }
 
 static inline double
-uint64_to_double(uint64_t rnd) {
-    return (rnd >> 11) * (1.0 / 9007199254740992.0);
+uint64_to_double(uint64_t x) {
+    return (double)(x >> 11) * 0x1.0p-53;
 }
 
 static inline double
@@ -252,15 +253,20 @@ pcg64_next_double(pcg64_state *state) {
     return uint64_to_double(pcg64_next64(state));
 }
 
+#include"splitmix64.h"
+
 static inline void
 pcg64_seed(pcg64_state *state, uint64_t seed) {
-  pcg128_t initstate = PCG_128BIT_CONSTANT(splitmix64_stateless(seed, 0),
-                                           splitmix64_stateless(seed, 1));
-  // we pick a sequence at random
-  pcg128_t initseq = PCG_128BIT_CONSTANT(splitmix64_stateless(seed, 2),
-                                         splitmix64_stateless(seed, 3));
-  initseq |= 1; // should not be necessary, but let us be careful.
-  pcg_setseq_128_srandom_r(state->pcg_state, initstate, initseq);
+    // Use splitmix64 to pick the initial state and sequence.
+    uint64_t initstate1 = splitmix64_r(&seed);
+    uint64_t initstate2 = splitmix64_r(&seed);
+    uint64_t initseq1 = splitmix64_r(&seed);
+    uint64_t initseq2 = splitmix64_r(&seed);
+    pcg128_t initstate = PCG_128BIT_CONSTANT(initstate1, initstate2);
+    // Pick a sequence at random.
+    pcg128_t initseq = PCG_128BIT_CONSTANT(initseq1, initseq2);
+    initseq |= 1; // should not be necessary, but let us be careful.
+    pcg_setseq_128_srandom_r(&state->pcg_state, initstate, initseq);
 }
 
 
