@@ -1361,9 +1361,10 @@ ndtree_add_discard(NDTreeArchive * restrict tree,
                    const double * restrict z, const void * restrict x)
 {
     // FIXME: Avoid using displaced at all.
-    FlexBucket *displaced = flex_bucket_new(4);
+    FlexBucket *displaced = NULL;
     int res = ndtree_add_impl(tree, z, x, /*check=*/true, tree->base.allow_duplicates, &displaced);
-    flex_bucket_free(displaced);
+    if (displaced != NULL)
+        flex_bucket_free(displaced);
     return res;
 }
 
