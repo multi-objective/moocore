@@ -1208,14 +1208,16 @@ ndtree_update_node(NDTreeArchive * restrict tree, NDTreeNode * restrict node,
     }
 
     DEBUG2(ndtree_assert_valid_tree(tree));
-    bool ideal_wdom_z = weakly_dominates(ndtree_get_ideal(node, dim), z, dim);
     bool z_wdom_nadir = weakly_dominates(z, ndtree_get_nadir(node, dim), dim);
-    if (!ideal_wdom_z && !z_wdom_nadir)
-        return ARCHIVE_INSERT_ACCEPTED;
+    if (check || !z_wdom_nadir) {
+        bool ideal_wdom_z = weakly_dominates(ndtree_get_ideal(node, dim), z, dim);
+        if (!ideal_wdom_z && !z_wdom_nadir)
+            return ARCHIVE_INSERT_ACCEPTED;
+        // If !ideal_wdom_z, then nothing in this node can weakly dominate z,
+        // so do not check.
+        check = check && ideal_wdom_z;
+    }
 
-    // If !ideal_wdom_z, then nothing in this node can weakly dominate z, so do
-    // not check.
-    check = check && ideal_wdom_z;
     if (ndtree_node_is_leaf(node)) {
         if (z_wdom_nadir) {
             uint32_t removed = 0;
