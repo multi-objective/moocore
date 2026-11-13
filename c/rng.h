@@ -1,9 +1,9 @@
 #ifndef RNG_H_
 #define RNG_H_
 
-#include "mt19937/mt19937.h"
+#include "pcg64/pcg64.h"
 
-typedef mt19937_state rng_state;
+typedef pcg64_state rng_state;
 
 #include "common.h"
 
@@ -11,7 +11,7 @@ static inline rng_state *
 rng_new(uint32_t seed)
 {
     rng_state * rng = malloc(sizeof(rng_state));
-    mt19937_seed(rng, seed);
+    pcg64_seed(rng, seed);
     return rng;
 }
 
@@ -25,7 +25,7 @@ rng_free(rng_state * rng)
 static inline double
 rng_random(rng_state * rng)
 {
-    return mt19937_next_double(rng);
+    return pcg64_next_double(rng);
 }
 
 static inline double
