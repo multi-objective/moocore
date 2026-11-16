@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+get\_dataset\_path
+==================
+
+.. currentmodule:: moocore
+
+.. autofunction:: get_dataset_path
+
+.. _sphx_glr_backref_moocore.get_dataset_path:
+
+.. minigallery:: moocore.get_dataset_path
+   :add-heading: Gallery examples
+   :heading-level: -

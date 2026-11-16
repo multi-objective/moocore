@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+single\_arithmetic\_crossover
+=============================
+
+.. currentmodule:: moocore
+
+.. autofunction:: single_arithmetic_crossover
+
+.. _sphx_glr_backref_moocore.single_arithmetic_crossover:
+
+.. minigallery:: moocore.single_arithmetic_crossover
+   :add-heading: Gallery examples
+   :heading-level: -
