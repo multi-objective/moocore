@@ -1,6 +1,6 @@
 # ruff: noqa: D100, D103
-import pytest
 import numpy as np
+import pytest
 
 
 def test_immutable_call(immutable_call):

@@ -13,6 +13,7 @@ The Area-Over-the-Curve (i.e., the hypervolume) of a set of nondominated sets is
 
 import numpy as np
 import pandas as pd
+
 import moocore
 
 A = moocore.get_dataset("ALG_1_dat.xz")
@@ -47,5 +48,5 @@ for r in runs:
     aocs += [aoc]
     aucs += [auc]
 
-df = pd.DataFrame(dict(r=runs, AOC=aocs, AUC=aucs)).set_index("r")
+df = pd.DataFrame({"r": runs, "AOC": aocs, "AUC": aucs}).set_index("r")
 df.plot(style=["rs-", "c^--"], xlabel="Number of sets", ylabel="Value")

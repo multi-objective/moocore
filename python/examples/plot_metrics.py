@@ -7,6 +7,7 @@ Several examples of computing multi-objective unary quality metrics.
 """
 
 import numpy as np
+
 import moocore
 
 # %%
@@ -80,8 +81,8 @@ B = np.array([8, 2, 4, 4, 2, 8]).reshape(-1, 2)
 # Assuming minimization of both objectives, A is better than B in terms of Pareto optimality.
 #
 
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 
 sns.set_theme()
@@ -107,8 +108,8 @@ plt.show()
 #
 
 pd.DataFrame(
-    dict(
-        A=[
+    {
+        "A": [
             moocore.igd(A, ref),
             moocore.avg_hausdorff_dist(A, ref),
             moocore.igd_plus(A, ref),
@@ -116,7 +117,7 @@ pd.DataFrame(
             moocore.hypervolume(A, ref=10),
             moocore.r2_exact(A, ref=0),
         ],
-        B=[
+        "B": [
             moocore.igd(B, ref),
             moocore.avg_hausdorff_dist(B, ref),
             moocore.igd_plus(B, ref),
@@ -124,6 +125,6 @@ pd.DataFrame(
             moocore.hypervolume(B, ref=10),
             moocore.r2_exact(B, ref=0),
         ],
-    ),
+    },
     index=["IGD", "Hausdorff", "IGD+", "eps+", "HV", "Exact R2"],
 )

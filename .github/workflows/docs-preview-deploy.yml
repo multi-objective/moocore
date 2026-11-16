@@ -21,18 +21,19 @@ jobs:
       actions: read # download artifact from the triggering run
     concurrency:
       group: gh-pages-deploy
+      queue: max
       cancel-in-progress: false
+    env:
+      WORKFLOW: ${{ github.event.workflow_run.name }}
     steps:
       # The deploy action needs a git repository. This checks out the default
       # branch (workflow_run context), never the PR code.
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
-      - name: Select docs
+      - name: Select ${{ github.event.workflow_run.name }} docs
         id: docs
-        env:
-          WORKFLOW: ${{ github.event.workflow_run.name }}
         run: |
           case "${WORKFLOW}" in
             Python) echo "sub=python" >> "$GITHUB_OUTPUT" ;;
@@ -42,30 +43,52 @@ jobs:
 
       - uses: actions/download-artifact@v8
         with:
-          name: docs-preview-${{ steps.docs.outputs.sub }}
+          name: docs-${{ steps.docs.outputs.sub }}
           path: artifact
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      # The artifact contains a single folder named pr-<number> with the site.
       - name: Validate artifact
         id: pr
         run: |
-          n=$(head -c 20 artifact/pr-number | tr -d '[:space:]')
-          [[ "$n" =~ ^[0-9]+$ ]] || { echo "Invalid PR number"; exit 1; }
-          [ -f artifact/site/index.html ] || { echo "Missing index.html"; exit 1; }
-          if find artifact/site -type l | grep -q .; then echo "Symlinks not allowed"; exit 1; fi
-          rm -rf artifact/site/.git artifact/site/.github
-          echo "number=$n" >> "$GITHUB_OUTPUT"
+          dir=$(ls artifact)
+          [[ "$dir" =~ ^pr-([0-9]+)$ ]] || { echo "Invalid folder name"; exit 1; }
+          [ -f "artifact/$dir/index.html" ] || { echo "Missing index.html"; exit 1; }
+          if find "artifact/$dir" -type l | grep -q .; then echo "Symlinks not allowed"; exit 1; fi
+          rm -rf "artifact/$dir/.git" "artifact/$dir/.github"
+          echo "number=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
 
-      - name: Deploy PR preview 🚀
+      - name: Check PR ${{ steps.pr.outputs.number }} state
+        id: pr-state
+        uses: actions/github-script@v9
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        with:
+          script: |
+            const prNumber = Number(process.env.PR_NUMBER);
+            if (!Number.isSafeInteger(prNumber) || prNumber <= 0) {
+              core.setOutput('open', 'false');
+              return;
+            }
+            const {data: pr} = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            core.setOutput('open', String(pr.state === 'open'));
+
+      - name: Deploy PR ${{ steps.pr.outputs.number }} preview for ${{ steps.docs.outputs.sub }} 🚀
+        if: steps.pr-state.outputs.open == 'true'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: artifact/site
+          folder: artifact/pr-${{ steps.pr.outputs.number }}
           target-folder: previews/pr-${{ steps.pr.outputs.number }}/${{ steps.docs.outputs.sub }}
           single-commit: true
           clean: true
 
-      - name: Comment PR preview link
+      - name: Comment PR ${{ steps.pr.outputs.number }} preview link for ${{ steps.docs.outputs.sub }} 📚
+        if: steps.pr-state.outputs.open == 'true'
         uses: actions/github-script@v9
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
@@ -74,7 +97,7 @@ jobs:
           script: |
             const prNumber = Number(process.env.PR_NUMBER);
             const sub = process.env.SUB;
-            const label = sub === 'r' ? 'R' : 'Python';
+            const label = process.env.WORKFLOW;
             const marker = `<!-- docs-preview-${sub}-marker -->`;
             const url = `https://multi-objective.github.io/moocore/previews/pr-${prNumber}/${sub}/`;
             const body = `${marker}\n📚 [**${label} docs preview** for this PR](${url})\n\n`;

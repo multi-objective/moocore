@@ -5,30 +5,28 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 
 """
 
-from bench import Bench, get_geomrange, check_array_equal
-
-import numpy as np
 import matplotlib.pyplot as plt
-import moocore
-
-from pymoo.util.nds.non_dominated_sorting import (
-    NonDominatedSorting as pymoo_NDS,
-)
+import numpy as np
+from bench import Bench, check_array_equal, get_geomrange
 from desdeo.tools.non_dominated_sorting import (
     fast_non_dominated_sort as desdeo_nds,
 )
 from paretoset import paretorank as paretoset_paretorank
+from pygmo import fast_non_dominated_sorting as pygmo_nds
+
+import moocore
+
 ## It cannot be installed: https://github.com/esa/pygmo2/issues/152
 # from pygmo import pareto_dominance as pg_pareto_dominance
 
 files = {
     # range are the (start, stop, num) parameters for np.geomspace()
-    "ran-2d": dict(generate=(20_000, 2), range=(100, 20_000, 10)),
-    "ran-3d": dict(generate=(20_000, 3), range=(100, 20_000, 10)),
-    "ran-4d": dict(generate=(20_000, 4), range=(100, 20_000, 10)),
-    "ran-5d": dict(generate=(20_000, 5), range=(100, 20_000, 10)),
-    "ran-9d": dict(generate=(10_000, 9), range=(10, 10_000, 10)),
-    "ran-10d": dict(generate=(10_000, 10), range=(10, 10_000, 10)),
+    "ran-2d": {"generate": (20_000, 2), "range": (100, 20_000, 10)},
+    "ran-3d": {"generate": (20_000, 3), "range": (100, 20_000, 10)},
+    "ran-4d": {"generate": (20_000, 4), "range": (100, 20_000, 10)},
+    "ran-5d": {"generate": (20_000, 5), "range": (100, 20_000, 10)},
+    "ran-9d": {"generate": (10_000, 9), "range": (10, 10_000, 10)},
+    "ran-10d": {"generate": (10_000, 10), "range": (10, 10_000, 10)},
 }
 
 rng = np.random.default_rng(42)
@@ -57,8 +55,8 @@ for name in names:
         bench={
             "moocore": lambda z: moocore.pareto_rank(z),
             "paretoset": lambda z: paretoset_paretorank(z, use_numba=True) - 1,
-            "pymoo": lambda z, nds=pymoo_NDS(): nds.do(z, return_rank=True)[1],
             "desdeo": lambda z: desdeo_nds(z).argmax(axis=0),
+            "pygmo": lambda z: pygmo_nds(z)[3],
         },
         check=check_array_equal,
     )

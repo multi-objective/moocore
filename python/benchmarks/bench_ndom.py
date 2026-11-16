@@ -6,45 +6,48 @@ This example benchmarks the hypervolume implementation in ``moocore`` against ot
 """
 
 import gc
-import numpy as np
-import moocore
+
 import matplotlib.pyplot as plt
-
-from bench import Bench, get_geomrange, check_float_vector
-
+import numpy as np
 import torch
+from bench import Bench, check_float_vector, get_geomrange
 from botorch.utils.multi_objective.pareto import (
     is_non_dominated as botorch_is_nondominated,
 )
-
 from desdeo.tools.non_dominated_sorting import (
     non_dominated as desdeo_is_nondominated,
 )
+from fast_pareto import is_pareto_front as fast_pareto_is_pf
+from optuna.study._multi_objective import _is_pareto_front as optuna_is_pf
 
 ## paretobench is always slower than botorch, too slower for benchmarking.
 # import paretobench
 from paretoset import paretoset
-from fast_pareto import is_pareto_front as fast_pareto_is_pf
-from optuna.study._multi_objective import _is_pareto_front as optuna_is_pf
 from patatune.util import get_dominated as patatune_get_dominated
+
+import moocore
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
 files = {
     # range are the (start, stop, num) parameters for np.geomspace()
-    "test2D-200k": dict(file="test2D-200k.inp.xz", range=(1000, 50_000, 10)),
-    "ran3d-40k": dict(file="ran.40000pts.3d.1.xz", range=(1000, 40_000, 10)),
-    "sphere-4d": dict(
-        generate=(25_000, 4, "sphere", 42), range=(500, 25_000, 10)
-    ),
-    "convex-4d": dict(
-        generate=(25_000, 4, "convex-sphere", 42), range=(500, 25_000, 10)
-    ),
-    "sphere-5d": dict(
-        generate=(20_000, 5, "sphere", 42), range=(100, 20_000, 10)
-    ),
-    "rmnk-10d": dict(
-        file="rmnk_0.0_10_16_1_0_ref.txt.xz", range=(100, 20_000, 10)
-    ),
+    "test2D-200k": {"file": "test2D-200k.inp.xz", "range": (1000, 50_000, 10)},
+    "ran3d-40k": {"file": "ran.40000pts.3d.1.xz", "range": (1000, 40_000, 10)},
+    "sphere-4d": {
+        "generate": (25_000, 4, "sphere", 42),
+        "range": (500, 25_000, 10),
+    },
+    "convex-4d": {
+        "generate": (25_000, 4, "convex-sphere", 42),
+        "range": (500, 25_000, 10),
+    },
+    "sphere-5d": {
+        "generate": (20_000, 5, "sphere", 42),
+        "range": (100, 20_000, 10),
+    },
+    "rmnk-10d": {
+        "file": "rmnk_0.0_10_16_1_0_ref.txt.xz",
+        "range": (100, 20_000, 10),
+    },
 }
 
 

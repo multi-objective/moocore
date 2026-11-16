@@ -4,7 +4,7 @@
 PYTHON := $(if $(VIRTUAL_ENV),$(VIRTUAL_ENV)/bin/python3,python3)
 PIP := $(PYTHON) -m pip
 
-.PHONY : install dev-install build test doc fastdoc clean docdeps pre-commit benchmarks
+.PHONY : install dev-install build test doc fastdoc clean cleandoc docdeps pre-commit benchmarks
 
 install: build
 	$(PIP) install . --disable-pip-version-check
@@ -34,8 +34,14 @@ doc:
 fastdoc:
 	$(MAKE) -C doc html-noplot
 
-clean:
+cleandoc:
 	$(MAKE) -C doc clean
+
+typecheck:
+	tox -e type
+
+clean:
+	$(MAKE) cleandoc
 	$(MAKE) -C src/moocore/libmoocore/ clean
 	find . -name '__pycache__' | xargs $(RM) -r
 	$(RM) -r .pytest_cache .tox .ruff_cache build src/*.egg-info/ doc/source/auto_examples
@@ -44,12 +50,12 @@ clean:
 benchmarks: install
 	$(RM) ./benchmarks/*_bench-*.png
 	cd benchmarks                             && \
-	$(PYTHON) -m bench_epsilon                  && \
-	$(PYTHON) -m bench_hv                       && \
-	$(PYTHON) -m bench_hvapprox                 && \
-	$(PYTHON) -m bench_igdplus                  && \
-	$(PYTHON) -m bench_ndom                     && \
-	$(PYTHON) -m bench_ndsort                   && \
+	$(PYTHON) -m bench_epsilon                && \
+	$(PYTHON) -m bench_hv                     && \
+	$(PYTHON) -m bench_hvapprox               && \
+	$(PYTHON) -m bench_igdplus                && \
+	$(PYTHON) -m bench_ndom                   && \
+	$(PYTHON) -m bench_ndsort                 && \
 	mv *.png -t ../doc/source/_static/bench/  && \
 	cd ..
 	$(MAKE) -C doc html

@@ -1,5 +1,6 @@
 # ruff: noqa: D100
 from pathlib import Path
+
 from docutils import nodes
 from sphinx.util import logging
 

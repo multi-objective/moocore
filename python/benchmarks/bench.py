@@ -1,14 +1,16 @@
+import importlib
 import pathlib
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
-import moocore
-import timeit
-import cpuinfo
 import shutil
 import subprocess
-import importlib
+import timeit
+
+import cpuinfo
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+import numpy as np
+import pandas as pd
+
+import moocore
 
 timeit_template_return_1_value = """
 def inner(_it, _timer{init}):

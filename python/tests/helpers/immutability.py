@@ -1,6 +1,7 @@
 # ruff: noqa: D100
 import copy
 from collections.abc import Mapping
+
 import numpy as np
 from numpy.testing import assert_array_equal
 
@@ -28,7 +29,7 @@ def deep_equal(a, b):
     if isinstance(a, np.ndarray):
         try:
             assert_array_equal(a, b, strict=True)
-        except Exception as e:
+        except AssertionError as e:
             print(e)
             return False
         else:

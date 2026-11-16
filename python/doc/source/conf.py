@@ -8,11 +8,11 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-from datetime import date
-import sphinx
-
 import os
 import sys
+from datetime import date
+
+import sphinx
 
 # Building the docs requires installing the package.
 import moocore

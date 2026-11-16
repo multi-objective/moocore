@@ -6,54 +6,55 @@ This example benchmarks the methods for approximating the hypervolume in
 
 """
 
-import numpy as np
-import moocore
 import pathlib
-import matplotlib.pyplot as plt
 import timeit  # time_hv_exact
 
+import matplotlib.pyplot as plt
+import numpy as np
 from bench import (
     Bench,
-    read_datasets_and_filter_dominated,
     get_range,
+    read_datasets_and_filter_dominated,
     timeit_template_return_1_value,  # time_hv_exact
 )
+
+import moocore
 
 # See https://github.com/multi-objective/testsuite/tree/main/data
 path_to_data = "../../testsuite/data/"
 assert pathlib.Path(path_to_data).expanduser().exists()
 
 files = {
-    "DTLZLinearShape.6d": dict(
-        file="DTLZLinearShape.6d.front.700pts.10.xz",
-        ref=1,
-        range=(100, 1000, 100),
-    ),
-    "DTLZSphereShape.6d": dict(
-        file="DTLZSphereShape.6d.front.500pts.10.xz",
-        ref=1.1,
-        range=(100, 1000, 100),
-    ),
-    "ran.6d": dict(
-        file="ran.800pts.6d.10",
-        ref=10,
-        range=(100, 1000, 100),
-    ),
-    "ran.9d": dict(
-        file="ran.80pts.9d.10",
-        ref=10,
-        range=(50, 150, 10),
-    ),
-    "DTLZLinearShape.9d": dict(
-        file="DTLZLinearShape.9d.front.60pts.10",
-        ref=1,
-        range=(50, 150, 10),
-    ),
-    "DTLZSphereShape.10d": dict(
-        file="DTLZSphereShape.10d.front.150pts.10",
-        ref=1,
-        range=(50, 150, 10),
-    ),
+    "DTLZLinearShape.6d": {
+        "file": "DTLZLinearShape.6d.front.700pts.10.xz",
+        "ref": 1,
+        "range": (100, 1000, 100),
+    },
+    "DTLZSphereShape.6d": {
+        "file": "DTLZSphereShape.6d.front.500pts.10.xz",
+        "ref": 1.1,
+        "range": (100, 1000, 100),
+    },
+    "ran.6d": {
+        "file": "ran.800pts.6d.10",
+        "ref": 10,
+        "range": (100, 1000, 100),
+    },
+    "ran.9d": {
+        "file": "ran.80pts.9d.10",
+        "ref": 10,
+        "range": (50, 150, 10),
+    },
+    "DTLZLinearShape.9d": {
+        "file": "DTLZLinearShape.9d.front.60pts.10",
+        "ref": 1,
+        "range": (50, 150, 10),
+    },
+    "DTLZSphereShape.10d": {
+        "file": "DTLZSphereShape.10d.front.150pts.10",
+        "ref": 1,
+        "range": (50, 150, 10),
+    },
 }
 
 
@@ -83,7 +84,7 @@ for name in names:
     n = get_range(len(x), *files[name]["range"])
 
     def setup(z):
-        return dict(z=z, exact=time_hv_exact(name, len(z), z, ref))
+        return {"z": z, "exact": time_hv_exact(name, len(z), z, ref)}
 
     benchmarks = {
         "moocore DZ2019-MC": lambda z, exact: relerror(

@@ -1,8 +1,9 @@
-from numpy.typing import ArrayLike  # For type hints
 from typing import Any
 
 import numpy as np
-from ._libmoocore import ffi  # ty: ignore[unresolved-import]
+from numpy.typing import ArrayLike  # For type hints
+
+from ._libmoocore import ffi  # ty: ignore[import-not-found]
 
 
 def get1_and_is_copied(x: Any, x_: Any) -> tuple[Any, bool]:

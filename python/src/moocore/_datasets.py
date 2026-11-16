@@ -1,20 +1,22 @@
 from __future__ import annotations
-from typing import Any
 
+import contextlib
 import hashlib
-import numpy as np
 import os
 import shutil
-import warnings
 import time
+import warnings
+from importlib.metadata import version as _metadata_version
+from importlib.resources import files
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from typing import Any
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
-from importlib.resources import files
-from importlib.metadata import version as _metadata_version
+import numpy as np
 from platformdirs import user_cache_path
+
 from ._moocore import read_datasets
 
 _moocore_version = _metadata_version("moocore")
@@ -87,7 +89,6 @@ def _fetch_dataset(
 
     """
     url = _BASE_URL + name
-
     local_folder = user_cache_path(
         appname="moocore",
         appauthor=None,
@@ -115,17 +116,18 @@ def _fetch_dataset(
     # attempting to delete a file that was already renamed. If the download
     # fails or the result does not match the expected SHA256 digest, the
     # temporary file is removed manually in the except block.
-    temp_file = NamedTemporaryFile(
-        prefix=name + ".part_", dir=local_folder, delete=False
-    )
-    # Note that Python 3.12's `delete_on_close=True` is ignored as we set
-    # `delete=False` explicitly. So after this line the empty temporary file still
-    # exists on disk to make sure that it's uniquely reserved for this specific call of
-    # `_fetch_remote` and therefore it protects against any corruption by parallel
-    # calls.
-    temp_file.close()
-    try:
+    with contextlib.closing(
+        NamedTemporaryFile(
+            prefix=name + ".part_", dir=local_folder, delete=False
+        )
+    ) as temp_file:
+        # Note that Python 3.12's `delete_on_close=True` is ignored as we set
+        # `delete=False` explicitly. So after this line the empty temporary file still
+        # exists on disk to make sure that it's uniquely reserved for this specific call of
+        # `_fetch_remote` and therefore it protects against any corruption by parallel
+        # calls.
         temp_file_path = Path(temp_file.name)
+    try:
         while True:
             try:
                 urlretrieve(url, temp_file_path)
@@ -155,7 +157,7 @@ def _fetch_dataset(
                 )
 
     except (Exception, KeyboardInterrupt):
-        os.unlink(temp_file.name)
+        os.unlink(temp_file_path)
         raise
 
     # The following renaming is atomic whenever temp_file_path and
@@ -163,7 +165,6 @@ def _fetch_dataset(
     # the time, but we still use shutil.move instead of os.rename in case
     # they are not.
     shutil.move(temp_file_path, file_path)
-
     return file_path
 
 
@@ -200,7 +201,7 @@ def get_dataset_path(
     """
     local_path = files("moocore.data") / filename
     if not isinstance(local_path, Path):
-        raise ValueError("{local_path} is not a file-system path")
+        raise TypeError("{local_path} is not a file-system path")
     if local_path.exists():
         return local_path
 

@@ -1,6 +1,8 @@
 # ruff: noqa: D100
 import pytest
+
 import moocore
+
 from .helpers.immutability import deep_copy, deep_equal, freeze_numpy
 
 
@@ -61,9 +63,9 @@ def immutable_call():
                     f"Function '{fn.__name__}' mutated positional arg {idx}"
                 )
 
-        for key in kwargs:
+        for key, value in kwargs.items():
             if key in immutable:
-                assert deep_equal(kwargs[key], kwargs_copy[key]), (
+                assert deep_equal(value, kwargs_copy[key]), (
                     f"Function '{fn.__name__}' mutated keyword arg '{key}'"
                 )
 
