@@ -72,6 +72,7 @@ SRCS =  avl.c                                                                \
         igd.c                                                                \
         io.c                                                                 \
         libutil.c                                                            \
+        main-archiver.o                                                      \
         main-hv.c                                                            \
         main-hvapprox.c                                                      \
 	main-nondominated.c                                                  \
@@ -81,11 +82,12 @@ SRCS =  avl.c                                                                \
         pareto.c                                                             \
         rng.c                                                                \
         timer.c                                                              \
+	treap2d_fixed_size.c                                                 \
+	treap_archive.c                                                      \
         whv.c                                                                \
         whv_hype.c
 
 HDRS =  avl.h                                                                \
-        avl_tiny.h                                                           \
         bit_array.h                                                          \
         cmdline.h                                                            \
         common.h                                                             \
@@ -112,6 +114,9 @@ HDRS =  avl.h                                                                \
         rng.h                                                                \
         sort.h                                                               \
         timer.h                                                              \
+	treap2d.h                                                            \
+	treap2d_dlnode.h                                                     \
+	treap2d_fixed_size.h                                                 \
         whv.h                                                                \
         whv_hype.h                                                           \
         ziggurat_constants.h
@@ -160,7 +165,7 @@ EXE_CFLAGS += $(SANITIZERS) $(OPT_CFLAGS) $(MARCH_FLAGS) $(WARN_CFLAGS) \
 
 
 # List of test target base names
-TEST_NAMES := eaf nondominated hv hvapprox igd epsilon dominatedsets ndsort
+TEST_NAMES := archiver eaf nondominated hv hvapprox igd epsilon dominatedsets ndsort
 ASAN_TARGETS := $(addprefix asan-,$(TEST_NAMES))
 UBSAN_TARGETS:= $(addprefix ubsan-,$(TEST_NAMES))
 TEST_TARGETS := $(addprefix test-,$(TEST_NAMES))
@@ -192,14 +197,15 @@ $(ALL_NAMES): %: $(BINDIR)/%$(EXE)
 
 include libhv.mk
 
-$(BINDIR)/dominatedsets$(EXE): dominatedsets.o nondominated.o
+$(BINDIR)/archiver$(EXE): main-archiver.o io.o treap_archive.o nondominated.o treap2d_fixed_size.o
+$(BINDIR)/dominatedsets$(EXE): dominatedsets.o nondominated.o treap2d_fixed_size.o
 $(BINDIR)/eaf$(EXE): eaf.o eaf_main.o eaf3d.o avl.o
-$(BINDIR)/epsilon$(EXE): epsilon.o nondominated.o
+$(BINDIR)/epsilon$(EXE): epsilon.o nondominated.o treap2d_fixed_size.o
 $(BINDIR)/hv$(EXE): main-hv.o timer.o $(LIBHV_OBJS)
-$(BINDIR)/hvapprox$(EXE): main-hvapprox.o timer.o hvapprox.o rng.o mt19937/mt19937.o nondominated.o
-$(BINDIR)/igd$(EXE): igd.o nondominated.o
-$(BINDIR)/ndsort$(EXE): ndsort.o pareto.o nondominated.o $(LIBHV_OBJS)
-$(BINDIR)/nondominated$(EXE): main-nondominated.o timer.o nondominated.o
+$(BINDIR)/hvapprox$(EXE): main-hvapprox.o timer.o hvapprox.o rng.o mt19937/mt19937.o nondominated.o treap2d_fixed_size.o
+$(BINDIR)/igd$(EXE): igd.o nondominated.o treap2d_fixed_size.o
+$(BINDIR)/ndsort$(EXE): ndsort.o pareto.o $(LIBHV_OBJS)
+$(BINDIR)/nondominated$(EXE): main-nondominated.o timer.o nondominated.o treap2d_fixed_size.o
 
 $(EXE_FILES): cmdline.o io.o
 	$(call MKDIR, $(BINDIR)/)
@@ -214,22 +220,25 @@ eaf3d.o: eaf.h io.h bit_array.h cvector.h avl.h
 eaf_main.o: cmdline.h io.h eaf.h bit_array.h cvector.h
 epsilon.o: cmdline.h io.h nondominated.h epsilon.h
 hv.o: hv.h hv_priv.h hvc4d_priv.h sort.h libmoocore-config.h
-hv3dplus.o: hv_priv.h sort.h hv3d_priv.h avl_tiny.h
+hv3dplus.o: hv_priv.h sort.h hv3d_priv.h treap2d.h
 hv4d.o: hv4d_priv.h hv_priv.h sort.h
 hv_contrib.o: hv.h libmoocore-config.h nondominated.h
 hvapprox.o: hvapprox.h pow_int.h rng.h mt19937/mt19937.h
-hvc3d.o: hv_priv.h sort.h hv3d_priv.h avl_tiny.h
+hvc3d.o: hv_priv.h sort.h hv3d_priv.h treap2d.h
 igd.o: cmdline.h io.h nondominated.h igd.h pow_int.h
 io.o: io.h io_priv.h
+main-archiver.o: cmdline.h io.h treap_archive.h treap2d.h nd_tree.h libmoocore-config.h
 main-hv.o: cmdline.h io.h hv.h timer.h libmoocore-config.h nondominated.h hvapprox.h
 main-hvapprox.o: cmdline.h io.h hvapprox.h
 main-nondominated.o : cmdline.h io.h nondominated.h nondominated_kung.h
 ndsort.o: cmdline.h io.h nondominated.h hv.h
-nondominated.h: avl_tiny.h nondominated_kung.h
-nondominated.o: nondominated.h nondominated_kung.h
-pareto.o: nondominated.h
+nondominated.h: nondominated_kung.h
+nondominated.o: nondominated.h nondominated_kung.h treap2d_fixed_size.h
+pareto.o: nondominated.h treap2d_fixed_size.h
 rng.o: rng.h mt19937/mt19937.h ziggurat_constants.h
 timer.o: timer.h
+treap2d_fixed_size.o: treap2d_fixed_size.h
+treap2d_fixed_size.h: treap2d.h
 $(OBJS): common.h gcc_attribs.h config.h maxminclamp.h
 
 shlibs: clean $(SHLIB) $(CXXSHLIB)
