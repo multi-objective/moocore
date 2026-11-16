@@ -7,7 +7,7 @@ import shutil
 import tempfile
 from collections.abc import Callable
 from io import StringIO
-from typing import Any, Literal, NamedTuple, TypeAlias, cast
+from typing import Any, Literal, NamedTuple, cast
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray  # For type hints
