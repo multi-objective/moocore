@@ -147,9 +147,8 @@ jobs:
           restore-keys: intersphinx-
 
       - name: Build the docs 🔧
-        env:
-          DEST: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}
         run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then DEST="pr-${{ github.event.pull_request.number }}"; elif [ "${{ github.event_name }}" = "release" ]; then DEST="${GITHUB_REF_NAME#v}"; else DEST="dev"; fi
           make -C doc html
           mkdir ../staging
           mv doc/_build/html "../staging/$DEST"
@@ -165,7 +164,7 @@ jobs:
   deploy-docs:
     name: Deploy docs
     needs: build-doc
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'release' && github.event.action == 'published')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -182,15 +181,25 @@ jobs:
         with:
           name: docs-python
           path: artifact
-
+      - name: Prepare versions.json
+        id: ver
+        run: |
+        if [ "${{ github.event_name }}" = "release" ]; then VERSION="${GITHUB_REF_NAME#v}"; else VERSION="dev"; fi; echo "version=$VERSION" >> "$GITHUB_OUTPUT"; git fetch origin gh-pages || true; mkdir -p versions_meta; git show origin/gh-pages:python/versions.json > versions_meta/existing.json 2>/dev/null || echo '[]' > versions_meta/existing.json; VERSION="$VERSION" python3 -c 'import json, os; v = os.environ["VERSION"]; b = "https" + "://multi-objective.github.io/moocore/python/"; d = json.load(open("versions_meta/existing.json")); e = {"name": "dev", "version": "dev", "url": b + "dev/"} if v == "dev" else {"version": v, "url": b + v + "/", "preferred": True}; [x.pop("preferred", None) for x in d if v != "dev" and isinstance(x, dict)]; d = [x for x in d if not (isinstance(x, dict) and x.get("version") == v)] + [e]; json.dump(d, open("versions_meta/versions.json", "w"), indent=2)'; rm -f versions_meta/existing.json
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: artifact/main
-          target-folder: python
+          folder: artifact/${{ steps.ver.outputs.version }}
+          target-folder: python/${{ steps.ver.outputs.version }}
           single-commit: true
           clean: true
-
+      - name: Deploy versions.json
+        uses: JamesIves/github-pages-deploy-action@v4
+       with:
+           folder: versions_meta
+           target-folder: python
+           single-commit: true
+           clean: false
+           
   coverage:
     timeout-minutes: 15
     needs: build-doc
