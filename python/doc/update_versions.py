@@ -1,4 +1,4 @@
-"""Update versions.json for PyData Sphinx Theme version switcher.""
+"""Update versions.json for PyData Sphinx Theme version switcher."""
 
 import json
 import os
