@@ -184,7 +184,7 @@ jobs:
       - name: Prepare versions.json
         id: ver
         run: |
-          f [ "${{ github.event_name }}" = "release" ]; then VERSION="${GITHUB_REF_NAME#v}"; else VERSION="dev"; fi
+          if [ "${{ github.event_name }}" = "release" ]; then VERSION="${GITHUB_REF_NAME#v}"; else VERSION="dev"; fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           git fetch origin gh-pages || true
           VERSION="$VERSION" python3 python/doc/update_versions.py
