@@ -184,7 +184,10 @@ jobs:
       - name: Prepare versions.json
         id: ver
         run: |
-        if [ "${{ github.event_name }}" = "release" ]; then VERSION="${GITHUB_REF_NAME#v}"; else VERSION="dev"; fi; echo "version=$VERSION" >> "$GITHUB_OUTPUT"; git fetch origin gh-pages || true; mkdir -p versions_meta; git show origin/gh-pages:python/versions.json > versions_meta/existing.json 2>/dev/null || echo '[]' > versions_meta/existing.json; VERSION="$VERSION" python3 -c 'import json, os; v = os.environ["VERSION"]; b = "https" + "://multi-objective.github.io/moocore/python/"; d = json.load(open("versions_meta/existing.json")); e = {"name": "dev", "version": "dev", "url": b + "dev/"} if v == "dev" else {"version": v, "url": b + v + "/", "preferred": True}; [x.pop("preferred", None) for x in d if v != "dev" and isinstance(x, dict)]; d = [x for x in d if not (isinstance(x, dict) and x.get("version") == v)] + [e]; json.dump(d, open("versions_meta/versions.json", "w"), indent=2)'; rm -f versions_meta/existing.json
+          f [ "${{ github.event_name }}" = "release" ]; then VERSION="${GITHUB_REF_NAME#v}"; else VERSION="dev"; fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          git fetch origin gh-pages || true
+          VERSION="$VERSION" python3 python/doc/update_versions.py
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
