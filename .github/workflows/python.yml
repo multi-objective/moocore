@@ -197,12 +197,12 @@ jobs:
           clean: true
       - name: Deploy versions.json
         uses: JamesIves/github-pages-deploy-action@v4
-       with:
+        with:
            folder: versions_meta
            target-folder: python
            single-commit: true
            clean: false
-           
+
   coverage:
     timeout-minutes: 15
     needs: build-doc
