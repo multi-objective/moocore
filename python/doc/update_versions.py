@@ -10,6 +10,7 @@ BASE = "https" + "://multi-objective.github.io/moocore/python/"
 
 
 def load_existing_versions() -> list[dict]:
+    """Load existing version entries from gh-pages."""
     result = subprocess.run(
         ["git", "show", "origin/gh-pages:python/versions.json"],
         capture_output=True,
@@ -23,6 +24,7 @@ def load_existing_versions() -> list[dict]:
 
 
 def update_versions(version: str) -> None:
+    """Update versions.json with the given documentation version."""
     data = load_existing_versions()
     if version == "dev":
         entry = {"name": "dev", "version": "dev", "url": BASE + "dev/"}
@@ -51,6 +53,7 @@ def update_versions(version: str) -> None:
 
 
 def main() -> None:
+    """Parse the target version and update versions.json."""
     version = sys.argv[1] if len(sys.argv) > 1 else os.environ["VERSION"]
     update_versions(version)
 
