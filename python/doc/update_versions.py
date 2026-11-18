@@ -65,7 +65,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Update versions.json for PyData Sphinx Theme version switcher."
     )
-    parser.add_argument("version", help="Documentation version to add or update.")
+    parser.add_argument(
+        "version", help="Documentation version to add or update."
+    )
     args = parser.parse_args()
     update_versions(args.version)
 
