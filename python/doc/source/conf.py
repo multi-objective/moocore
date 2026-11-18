@@ -8,9 +8,11 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import json
 import os
 import sys
 from datetime import date
+from pathlib import Path
 
 import sphinx
 
@@ -34,7 +36,12 @@ year = date.today().year
 # Can we get this from pyproject.toml ?
 author = "Manuel López-Ibáñez and Fergus Rooney"
 copyright = f"2024-{year}, {author}"
-html_site_root = f"https://multi-objective.github.io/{project}/python/"
+_site_config = json.loads(
+    (Path(__file__).resolve().parent.parent / "site.json").read_text(
+        encoding="utf-8"
+    )
+)
+html_site_root = _site_config["html_site_root"]
 github_url = f"https://github.com/multi-objective/{project}"
 
 # -- General configuration ---------------------------------------------------
@@ -142,19 +149,21 @@ def setup(app):
 
 html_theme = "pydata_sphinx_theme"
 
-# FIXME: Implement a version switch like NumPy.
-# Set up the version switcher.  The versions.json is stored in the doc repo.
-# if os.environ.get('CIRCLE_JOB', False) and \
-#         os.environ.get('CIRCLE_BRANCH', '') != 'main':
-#     # For PR, name is set to its ref
-#     switcher_version = os.environ['CIRCLE_BRANCH']
-# elif ".9999" in version:
-#     switcher_version = "devdocs"
-# else:
-#     switcher_version = f"{version}"
+# Use the version switcher metadata maintained in the gh-pages branch.
+# Pull request builds use the PR ref so preview pages are not labelled as a
+# released version.
+if os.environ.get("GITHUB_ACTIONS") and os.environ.get("GITHUB_HEAD_REF"):
+    switcher_version = os.environ["GITHUB_HEAD_REF"]
+elif ".dev" in version:
+    switcher_version = "dev"
+else:
+    switcher_version = version
+
+switcher_json_url = f"{html_site_root}versions.json"
 
 html_theme_options = {
     "collapse_navigation": True,
+    "show_version_warning_banner": True,
     "github_url": github_url,
     "header_links_before_dropdown": 5,
     "icon_links": [
@@ -169,8 +178,7 @@ html_theme_options = {
     },
     "navbar_align": "content",
     # Add light/dark mode and documentation version switcher:
-    # "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"],
-    "navbar_end": ["theme-switcher", "navbar-icon-links"],
+    "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"],
     "navbar_start": ["navbar-logo"],
     "navigation_with_keys": False,
     # https://sphinx-gallery.github.io/stable/advanced.html#using-sphinx-gallery-sidebar-components
@@ -180,6 +188,10 @@ html_theme_options = {
         "sg_launcher_links",
     ],
     "show_prev_next": True,
+    "switcher": {
+        "json_url": switcher_json_url,
+        "version_match": switcher_version,
+    },
     "show_toc_level": 2,  # On this page sidebar
     "sidebar_includehidden": True,
     "use_edit_page_button": True,
