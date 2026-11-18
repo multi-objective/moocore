@@ -8,8 +8,8 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-import os
 import json
+import os
 import sys
 from datetime import date
 from pathlib import Path
