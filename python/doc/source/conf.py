@@ -9,8 +9,10 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
+import json
 import sys
 from datetime import date
+from pathlib import Path
 
 import sphinx
 
@@ -34,7 +36,12 @@ year = date.today().year
 # Can we get this from pyproject.toml ?
 author = "Manuel López-Ibáñez and Fergus Rooney"
 copyright = f"2024-{year}, {author}"
-html_site_root = f"https://multi-objective.github.io/{project}/python/"
+_site_config = json.loads(
+    (Path(__file__).resolve().parent.parent / "site.json").read_text(
+        encoding="utf-8"
+    )
+)
+html_site_root = _site_config["html_site_root"]
 github_url = f"https://github.com/multi-objective/{project}"
 
 # -- General configuration ---------------------------------------------------
@@ -156,6 +163,7 @@ switcher_json_url = f"{html_site_root}versions.json"
 
 html_theme_options = {
     "collapse_navigation": True,
+    "show_version_warning_banner": True,
     "github_url": github_url,
     "header_links_before_dropdown": 5,
     "icon_links": [
