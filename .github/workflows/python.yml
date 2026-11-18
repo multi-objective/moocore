@@ -147,8 +147,10 @@ jobs:
           restore-keys: intersphinx-
 
       - name: Build the docs 🔧
+        env:
+          DEST: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.event_name == 'release' && github.ref_name || 'dev' }}
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then DEST="pr-${{ github.event.pull_request.number }}"; elif [ "${{ github.event_name }}" = "release" ]; then DEST="${GITHUB_REF_NAME#v}"; else DEST="dev"; fi
+          DEST="${DEST#v}"
           make -C doc html
           mkdir ../staging
           mv doc/_build/html "../staging/$DEST"
@@ -183,11 +185,16 @@ jobs:
           path: artifact
       - name: Prepare versions.json
         id: ver
+        env:
+          VERSION: ${{ github.event_name == 'release' && github.ref_name || 'dev' }}
         run: |
-          if [ "${{ github.event_name }}" = "release" ]; then VERSION="${GITHUB_REF_NAME#v}"; else VERSION="dev"; fi
+          VERSION="${VERSION#v}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          git fetch origin gh-pages || true
-          VERSION="$VERSION" python3 python/doc/update_versions.py
+          python3 python/doc/update_versions.py "$VERSION"
+          if [ "${{ github.event_name }}" = "release" ]; then
+            ln -sfn "$VERSION" versions_meta/stable
+          fi
+       
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
