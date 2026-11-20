@@ -1,4 +1,5 @@
 files <- c(
+  "archiver",
   "dominatedsets",
   "eaf",
   "epsilon",
