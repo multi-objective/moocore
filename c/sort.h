@@ -55,6 +55,12 @@ any_less_than(const double * restrict a, const double * restrict b, dimension_t 
 }
 
 static inline bool
+not_weakly_dominates(const double * restrict a, const double * restrict b, dimension_t dim)
+{
+    return any_less_than(b, a, dim);
+}
+
+static inline bool
 lexicographic_less_2d(const double * restrict a, const double * restrict b)
 {
     return a[1] < b[1] || (a[1] == b[1] && a[0] <= b[0]);
@@ -103,7 +109,17 @@ dominates_2d(const double * restrict a, const double * restrict b)
 static inline bool
 dominates(const double * restrict a, const double * restrict b, dimension_t dim)
 {
+    // FIXME: It may be possible to implement this faster by using an early
+    // exit in the first loop.
     return weakly_dominates(a, b, dim) && !all_equal_double(a, b, dim);
+}
+
+static inline bool
+not_dominates(const double * restrict a, const double * restrict b, dimension_t dim)
+{
+    // FIXME: It may be possible to implement this faster by using an early
+    // exit in the first loop.
+    return not_weakly_dominates(a, b, dim) || all_equal_double(a, b, dim);
 }
 
 // ---------- Comparison functions (e.g, qsort). Return 'int' ----------------

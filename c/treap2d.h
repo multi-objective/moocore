@@ -17,7 +17,13 @@
      16:464-497, 1996
 
 ******************************************************************************/
+#ifndef TREAP_H_
+#define TREAP_H_
+
+#include <string.h> // memcpy
+
 #include "common.h"
+#include "sort.h"
 
 /**
 
@@ -51,6 +57,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 struct TreapNode {
     double x, y;
@@ -269,6 +276,18 @@ treap_split_le(TreapNode *root, double key,
     }
 }
 
+/**
+   Split a frontier treap by z[1].
+
+   Since z[1] strictly decreases as z[0] increases:
+
+       a: z[1] >= value
+       b: z[1] <  value
+
+   The nodes in `a` therefore form a prefix in key order.
+
+   Complexity: O(log n) assuming a balanced tree.
+*/
 static inline void
 treap_split_z1_ge_with_min(TreapNode *root, double y,
                            TreapNode **high_y, TreapNode **low_y,
@@ -401,15 +420,41 @@ treap_validate_tree(TreapNode * node)
 
     if (node->left) {
         assert(node->left->x < node->x);
-        assert(node->priority > node->left->priority);
+        // Ideally, there should be no equal priorities, but it does happen.
+        assert(node->priority >= node->left->priority);
         treap_validate_tree(node->left);
     }
     if (node->right) {
         assert(node->right->x > node->x);
-        assert(node->priority > node->right->priority);
+        // Ideally, there should be no equal priorities, but it does happen.
+        assert(node->priority >= node->right->priority);
         treap_validate_tree(node->right);
     }
 }
+
+// O(log n)
+static inline const TreapNode *
+treap_minimum(const TreapNode * root)
+{
+    assert(root != NULL);
+    while (root->left != NULL)
+        root = root->left;
+
+    return root;
+}
+
+// O(log n)
+static inline const TreapNode *
+treap_maximum(const TreapNode *root)
+{
+    assert(root != NULL);
+
+    while (root->right != NULL)
+        root = root->right;
+
+    return root;
+}
+
 /**
    Find the node with the largest x such that x <= key.
 
@@ -432,6 +477,26 @@ treap_find_le(const Treap *tree, double key)
     }
     return best;
 }
+
+/**
+   Return a node that weakly dominates (x,y), or NULL if none exists.
+*/
+static inline TreapNode *
+treap_find_weak_dominator(const Treap *tree, double x, double y)
+{
+    TreapNode *node = tree->root;
+    while (node != NULL) {
+        if (node->x <= x) {
+            if (node->y <= y)
+                return node;
+            node = node->right;
+        } else {
+            node = node->left;
+        }
+    }
+    return NULL;
+}
+
 
 static inline TreapNode **
 treap_find_le_link(Treap *tree, double key)
@@ -545,6 +610,17 @@ treap_find(const Treap *tree, double key)
 }
 
 /**
+   Return true if a point in the treap dominates (excluding equality) z,
+   false otherwise.
+*/
+static inline bool
+treap_dominates(const Treap * tree, const double * z)
+{
+    TreapNode * node = treap_find_weak_dominator(tree, z[0], z[1]);
+    return node && (node->x != z[0] || node->y != z[1]);
+}
+
+/**
    Insert a single node.
 
    PRECONDITIONS:
@@ -582,6 +658,51 @@ treap_insert_node(Treap *tree, TreapNode *node)
     tree->root = treap_insert_node_and_rotate(tree->root, node);
 #endif
     DEBUG1(treap_validate_tree(tree->root));
+}
+
+/**
+   Count and destroy a detached tree in one pass. Payload objects remain
+   caller-owned: treap_item_free releases only the pointer array.
+*/
+static inline size_t
+treap_count_and_free(TreapNode * restrict node, size_t * restrict total_size)
+{
+    if (node == NULL)
+        return 0;
+    size_t unique_size = 1;
+    unique_size += treap_count_and_free(node->left, total_size);
+    unique_size += treap_count_and_free(node->right, total_size);
+#ifndef TREAP_ITEM_IS_EMPTY
+# ifdef TREAP_ITEM_COUNTS_DUPLICATES
+    *total_size += node->item.n;
+# endif
+    treap_item_free(node->item);
+#endif
+    free(node);
+    return unique_size;
+}
+
+static inline void
+treap_node_free(TreapNode * node)
+{
+    if (node == NULL)
+        return;
+
+    treap_node_free(node->left);
+    node->left = NULL;
+    treap_node_free(node->right);
+    node->right = NULL;
+#ifndef TREAP_ITEM_IS_EMPTY
+    treap_item_free(node->item);
+#endif
+    free(node);
+}
+
+static inline void
+treap_free_nodes(Treap * t)
+{
+    treap_node_free(t->root);
+    t->root = NULL;
 }
 
 static inline TreapNode *
@@ -682,3 +803,129 @@ treap_insert_and_displace(Treap *tree, TreapNode *node)
 {
     return treap_insert_and_displace_get_bounds(tree, node, NULL, NULL);
 }
+
+/**
+   Insert the mutually-non-dominated frontier `incoming` into `existing`.
+
+   The incoming nodes are allowed to have priorities unrelated to
+   `existing`; every incoming node receives a fresh priority.
+
+   Returns the resulting frontier and places all displaced existing
+   nodes in *displaced.
+
+   Preconditions:
+
+     - incoming is a valid frontier:
+           z[0] strictly increasing
+           z[1] strictly decreasing
+
+     - existing is a valid frontier with the same property
+
+     - keys are unique within each tree
+
+     - no node in existing weakly dominates any node in incoming
+
+   Postconditions:
+
+     - result is a valid frontier
+     - *displaced is a valid frontier
+     - every displaced node is from existing
+     - every existing node dominated by an incoming node is displaced
+     - no incoming node is displaced
+*/
+static inline TreapNode *
+treap_frontier_union(Treap *t, TreapNode *incoming, TreapNode *existing,
+                     TreapNode **displaced, bool *all_displaced)
+{
+    if (!incoming) {
+        *displaced = NULL;
+        *all_displaced = (existing == NULL);
+        return existing;
+    }
+
+    if (!existing) {
+        *displaced = NULL;
+        *all_displaced = true;
+        return incoming;
+    }
+
+    /* Take the incoming root as the pivot. It is guaranteed not to be
+       dominated by any node in existing.  */
+    const double x = incoming->x;
+    const double y = incoming->y;
+
+    TreapNode *existing_left; // existing->x < x
+    TreapNode *existing_ge;   // existing->x >= x
+    treap_split_lt(existing, x, &existing_left, &existing_ge);
+
+    TreapNode *equal;           // existing_ge->x == x
+    TreapNode *existing_right;  // existing_ge->x > x
+    treap_split_le(existing_ge, x, &equal, &existing_right);
+
+    /* Since y decreases as x increases, the nodes in existing_right
+       dominated by (x,y) form its prefix: existing_right->y >= y  */
+    TreapNode *dominated;
+    TreapNode *existing_keep;
+    treap_split_z1_ge(existing_right, y, &dominated, &existing_keep);
+
+    // Recursively process the two independent key ranges.
+    TreapNode *displaced_left, *displaced_right;
+    bool all_displaced_left, all_displaced_right;
+    TreapNode *left = treap_frontier_union(t, incoming->left, existing_left,
+                                           &displaced_left, &all_displaced_left);
+    TreapNode *right = treap_frontier_union(t, incoming->right, existing_keep,
+                                            &displaced_right, &all_displaced_right);
+
+    *all_displaced = all_displaced_left && all_displaced_right;
+
+    /* The displaced nodes are also already separated by key:
+
+           displaced_left < equal < dominated < displaced_right
+
+       `equal` is either NULL or a singleton.
+    */
+    // FIXME: Can we move this up?
+    *displaced = treap_merge(treap_merge(displaced_left, equal),
+                             treap_merge(dominated, displaced_right));
+
+    // The incoming node is now a singleton.
+    incoming->priority = treap_random(t);
+    incoming->left = NULL;
+    incoming->right = NULL;
+
+    /* Reconstruct the incoming result.
+
+       The two recursive results are ordered:
+
+           left < incoming < right
+
+       Ordinary treap merges restore the heap property regardless of
+       the incoming node's new priority.
+    */
+    return treap_merge(treap_merge(left, incoming), right);
+}
+
+
+static inline void
+treap_node_get_unique_vectors(const TreapNode *node, double **z_p)
+{
+    if (!node)
+        return;
+
+    treap_node_get_unique_vectors(node->left, z_p);
+    memcpy(*z_p, &node->x, 2 * sizeof(double));
+    *z_p += 2;
+    treap_node_get_unique_vectors(node->right, z_p);
+}
+
+/**
+   z must be a pointer to a contiguous block of memory of size treap_unique_size(t) * 2.
+
+*/
+static inline void
+treap_get_unique_vectors(const Treap *tree, double * z)
+{
+    treap_node_get_unique_vectors(tree->root, &z);
+}
+
+#endif /* TREAP_H_ */
