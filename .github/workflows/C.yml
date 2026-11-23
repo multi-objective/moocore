@@ -74,11 +74,11 @@ jobs:
           ./bin/ndsort --help
           ./bin/nondominated --help
 
-      # FIXME: Building shared libraries fails on windows. Not sure how to fix it.
-      - name: Test building shared libraries
-        if: ${{ runner.os != 'Windows' }}
+      - name: Build shared libraries
+        run: make -C c shlibs DEBUG=0 WERROR=1
+
+      - name: Check shared library exports
         run: |
-          make -C c shlibs DEBUG=0 WERROR=1
           ./tools/check_so_symbols.sh ./c/libmoocore.* ./tools/expected_libmoocore_exports.txt
           ./tools/check_so_symbols.sh ./c/libmoocorepp.* ./tools/expected_libmoocore_exports.txt
         shell: bash

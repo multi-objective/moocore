@@ -1,0 +1,2 @@
+tools/check_so_symbols.sh text eol=lf
+tools/expected_libmoocore_exports.txt text eol=lf
