@@ -68,6 +68,10 @@ repos:
   - repo: https://github.com/lorenzwalthert/precommit
     rev: v0.4.3.9034
     hooks:
+      - id: style-files
+        args: [--scope=spaces, --include_roxygen_examples=false]
+        files: '^r/.*\.[rR]$'
+        exclude: '(^r/tests/testthat/test-doctest-|renv/activate\.R$)'
       - id: parsable-R
       - id: no-browser-statement
       - id: no-print-statement
