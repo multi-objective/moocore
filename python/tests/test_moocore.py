@@ -473,10 +473,7 @@ def test_normalise(immutable_call):
         ("uniform-250-10-3d.txt.xz", "uniform_eaf.txt.xz"),
         ("wrots_l10w100_dat.xz", "wrots_l10_eaf.txt.xz"),
         ("wrots_l100w10_dat.xz", "wrots_l100_eaf.txt.xz"),
-        # FIXME: ALG_1_dat is creating slightly different percentile values than expected in its EAF output
-        pytest.param(
-            "ALG_1_dat.xz", "ALG_1_dat_get_eaf.txt.xz", marks=pytest.mark.xfail
-        ),
+        ("ALG_1_dat.xz", "ALG_1_dat_eaf.txt.xz"),
     ],
 )
 def test_eaf(test_datapath, test_name, expected_eaf_name):
