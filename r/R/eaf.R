@@ -171,9 +171,9 @@ compute_1_eaf <- function(x, sets, percentiles, maximise)
   sets <- sets[order_sets]
   # The C code expects points within a set to be contiguous.
   x <- x[order_sets, , drop = FALSE]
-  nsets <- nunique(sets)
   ## if (is.null(percentiles)) {
   ##   # FIXME: We should compute this in the C code.
+  ##   nsets <- nunique(sets)
   ##   percentiles <- 1L:nsets * (100 / nsets)
   ## }
   x <- compute_eaf_call(x, cumsizes = cumsum(unique_counts(sets)), percentiles = percentiles)

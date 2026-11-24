@@ -98,25 +98,25 @@ hv_approx <- function(x, reference, maximise = FALSE, nsamples = 262144L, seed =
 
   if (method == "DZ2019-MC") {
     seed <- if (is.null(seed)) get_seed() else as_integer(seed)
-    return(.Call(hv_approx_dz2019_mc_C,
+    .Call(hv_approx_dz2019_mc_C,
       t(x),
       as.double(reference),
       as.logical(maximise),
       as.integer(nsamples),
-      seed))
+      seed)
   } else if (method == "DZ2019-HW") {
-    return(.Call(hv_approx_dz2019_hw_C,
+    .Call(hv_approx_dz2019_hw_C,
       t(x),
       as.double(reference),
       as.logical(maximise),
-      as.integer(nsamples)))
+      as.integer(nsamples))
   } else {
     # match.arg() should already give an error if method is wrong.
     stopifnot(method == "Rphi-FWE+")
-    return(.Call(hv_approx_rphi_fang_wang_plus_C,
+    .Call(hv_approx_rphi_fang_wang_plus_C,
       t(x),
       as.double(reference),
       as.logical(maximise),
-      as.integer(nsamples)))
+      as.integer(nsamples))
   }
 }

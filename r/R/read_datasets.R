@@ -54,7 +54,7 @@ read_datasets <- function(file, col_names, text)
     on.exit(unlink(file))
   } else {
     if (!file.exists(file))
-      stop("error: ", file, ": No such file or directory");
+      stop("error: ", file, ": No such file or directory")
     file <- normalizePath(file)
     if (endsWith(file, ".xz")) {
       unc_file <- tempfile()
