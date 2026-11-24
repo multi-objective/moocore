@@ -8,13 +8,13 @@ test_that("eaf", {
     # FIXME: work-around for change in the computation
     x[, 3] <- floor(x[, 3])
     # saveRDS(x, paste0(name, "-eaf.rds"))
-    return(x)
+    x
   }
   test_eaf_file <- function(file, percentiles = NULL) {
     dataset <- read_datasets(file)
     x <- eaf(dataset, percentiles = percentiles)
     # saveRDS(x, paste0(basename(file), "-eaf.rds"))
-    return(x)
+    x
   }
   expect_equal(test_eaf_file(extdata_path("ALG_1_dat.xz")),
                readRDS("ALG_1_dat-eaf.rds"))

@@ -132,7 +132,6 @@ vorob_dev <- function(x, sets, reference, ve = NULL, maximise = FALSE)
       reference[maximise] <- -reference[maximise]
     }
   }
-  setcol <- ncol(x)
   # Hypervolume of the symmetric difference between A and B:
   # 2 * H(AUB) - H(A) - H(B)
   h2 <- hypervolume(ve, reference = reference)

@@ -15,7 +15,7 @@ save_csv_xz <- function(code, pattern)
 
 compare_file_text_compressed <- function(old, new)
 {
-  if (compare_file_binary(old, new))
+  if (testthat::compare_file_binary(old, new))
     return(TRUE)
   old <- base::readLines(withr::local_connection(gzfile(old, open = "rb")), warn = FALSE)
   new <- base::readLines(withr::local_connection(gzfile(new, open = "rb")), warn = FALSE)
