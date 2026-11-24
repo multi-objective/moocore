@@ -1,0 +1,11 @@
+linters: linters_with_defaults(
+    brace_linter = NULL,
+    commented_code_linter = NULL,
+    indentation_linter = NULL,
+    line_length_linter = NULL,
+    object_usage_linter = NULL,
+    object_name_linter = object_name_linter(
+      styles = c("snake_case", "symbols", "UPPERCASE", "dotted.case")
+    )
+  )
+encoding: "UTF-8"

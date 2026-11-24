@@ -81,6 +81,9 @@ repos:
         args: [--root=r]
         files: '^r/R/'
         exclude: '(do\.R|vignettes/articles/.+\.Rmd)'
+      - id: lintr
+        files: '^r/.*\.[rR]$'
+        exclude: '(^r/tests/testthat/test-doctest-|renv/activate\.R$)'
       - id: roxygenize
         args: [--root=r]
         files: '^r/(R|man)/'
