@@ -152,7 +152,6 @@ ifeq ($(uname_S),Windows)
   OPT_CFLAGS = -DNDEBUG -O2
   MARCH_FLAGS=
   SHLIB_EXT=dll
-  SHLIB_LDFLAGS += -fuse-ld=lld
 endif
 
 EXE_CFLAGS += $(SANITIZERS) $(OPT_CFLAGS) $(MARCH_FLAGS) $(WARN_CFLAGS) \
