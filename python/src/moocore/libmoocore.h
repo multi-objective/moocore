@@ -57,7 +57,7 @@ double whv_hype_gaus(const double *points, int npoints,
                      const double *ideal, const double *ref,
                      int nsamples, uint32_t seed, const double *mu);
 // whv.h
-double rect_weighted_hv2d(double *data, int n, double * rectangles, int rectangles_nrow, const double * reference);
+double rect_weighted_hv2d(const double *data, int n, const double * rectangles, int rectangles_nrow, const double * reference);
 
 // hvapprox.h
 double hv_approx_hua_wang(const double * restrict data,

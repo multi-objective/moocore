@@ -6,6 +6,7 @@
  * main-nondominated.c: Renamed from nondominated.c.
  * hv and hvapprox executables now use -U instead of -u for --union to be
    consistent with nondominated.
+ * whv.c (rect_weighted_hv2d): Do not modify the input points and rectangles.
 
 
 ## 0.19.2
