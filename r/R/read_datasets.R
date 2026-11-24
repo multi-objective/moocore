@@ -35,9 +35,9 @@
 #'  misinterpreted. In GNU/Linux the program `dos2unix` may be used
 #'  to fix newline characters.
 #'
-#'@seealso [utils::read.table()]
+#' @seealso [utils::read.table()]
 #'
-#'@examples
+#' @examples
 #' extdata_path <- system.file(package="moocore","extdata")
 #' A1 <- read_datasets(file.path(extdata_path,"ALG_1_dat.xz"))
 #' str(A1)
@@ -66,7 +66,7 @@ read_datasets <- function(file, col_names, text)
   }
   out <- .Call(R_read_datasets, as.character(file))
   if (missing(col_names))
-    col_names <- paste0("V", 1L:(ncol(out)-1))
+    col_names <- paste0("V", 1L:(ncol(out) - 1))
   colnames(out) <- c(col_names, "set")
   out
 }
@@ -83,9 +83,9 @@ read_datasets <- function(file, col_names, text)
 #'   writing. `""` indicates output to the console.
 #'
 #' @return No return value, called for side effects
-#'@seealso [utils::write.table()], [read_datasets()]
+#' @seealso [utils::write.table()], [read_datasets()]
 #'
-#'@examples
+#' @examples
 #' x <- read_datasets(text="1 2\n3 4\n\n5 6\n7 8\n", col_names=c("obj1", "obj2"))
 #' write_datasets(x)
 #'
@@ -96,18 +96,18 @@ write_datasets <- function(x, file = "")
   setcol <- ncol(x)
   sets <- x[, setcol]
   nobjs <- setcol - 1L
-  x <- x[, 1L:nobjs, drop=FALSE]
+  x <- x[, 1L:nobjs, drop = FALSE]
   col_names <- colnames(x)
-  x <- split.data.frame(x[, 1L:nobjs, drop=FALSE], sets)
+  x <- split.data.frame(x[, 1L:nobjs, drop = FALSE], sets)
   append <- FALSE
   if (!is.null(col_names)) {
-    cat(paste("#", paste0(col_names, collapse="\t"), "\n"), file = file, append = append)
+    cat(paste("#", paste0(col_names, collapse = "\t"), "\n"), file = file, append = append)
     append <- TRUE
   }
-  write.table(x[[1]], file = file, row.names=FALSE, col.names=FALSE, append = append)
-  x <- tail(x, n=-1)
+  write.table(x[[1]], file = file, row.names = FALSE, col.names = FALSE, append = append)
+  x <- tail(x, n = -1)
   for (xi in x) {
     cat("\n", file = file, append = TRUE)
-    write.table(xi, file = file, row.names=FALSE, col.names=FALSE, append = TRUE)
+    write.table(xi, file = file, row.names = FALSE, col.names = FALSE, append = TRUE)
   }
 }

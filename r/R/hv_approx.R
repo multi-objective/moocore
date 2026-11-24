@@ -110,7 +110,7 @@ hv_approx <- function(x, reference, maximise = FALSE, nsamples = 262144L, seed =
       as.double(reference),
       as.logical(maximise),
       as.integer(nsamples)))
-  } else  {
+  } else {
     # match.arg() should already give an error if method is wrong.
     stopifnot(method == "Rphi-FWE+")
     return(.Call(hv_approx_rphi_fang_wang_plus_C,

@@ -71,7 +71,7 @@ vorob_t <- function(x, sets, reference, maximise = FALSE)
 {
   if (missing(sets)) {
     sets <- x[, ncol(x)]
-    x <- x[, -ncol(x), drop=FALSE]
+    x <- x[, -ncol(x), drop = FALSE]
   }
   x <- as_double_matrix(x)
 
@@ -93,7 +93,7 @@ vorob_t <- function(x, sets, reference, maximise = FALSE)
   setcol <- ncol(x) + 1L
   while (diff != 0) {
     c <- (a + b) / 2
-    ve <- eaf(x, sets = sets, percentiles = c)[,-setcol]
+    ve <- eaf(x, sets = sets, percentiles = c)[, -setcol]
     tmp <- hypervolume(ve, reference = reference)
     if (tmp > avg_hyp) a <- c else b <- c
     diff <- prev_hyp - tmp
@@ -115,7 +115,7 @@ vorob_dev <- function(x, sets, reference, ve = NULL, maximise = FALSE)
   # of redundant work.
   if (missing(sets)) {
     sets <- x[, ncol(x)]
-    x <- x[, -ncol(x), drop=FALSE]
+    x <- x[, -ncol(x), drop = FALSE]
   }
   if (is.null(ve)) {
     ve <- vorob_t(x, sets, reference = reference, maximise = maximise)$ve

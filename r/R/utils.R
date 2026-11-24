@@ -8,8 +8,8 @@ get_ideal <- function(x, maximise)
 {
   # FIXME: Is there a better way to do this?
   minmax <- colRanges(as.matrix(x))
-  lower <- minmax[,1L]
-  upper <- minmax[,2L]
+  lower <- minmax[, 1L]
+  upper <- minmax[, 2L]
   ifelse(maximise, upper, lower)
 }
 
@@ -41,7 +41,7 @@ transform_maximise <- function(x, maximise)
       return(-x)
     if (length(maximise) != ncol(x))
       stop("length of maximise must be either 1 or ncol(x)")
-    x[,maximise] <- -x[,maximise, drop=FALSE]
+    x[, maximise] <- -x[, maximise, drop = FALSE]
   }
   x
 }
@@ -53,7 +53,7 @@ transform_maximise <- function(x, maximise)
 #' @export
 as_double_matrix <- function(x)
 {
-  name <- deparse(substitute(x))   # FIXME: Only do this if there is an error.
+  name <- deparse(substitute(x)) # FIXME: Only do this if there is an error.
   if (length(dim(x)) != 2L)
     stop("'", name, "' must be a data.frame or a matrix")
   if (nrow(x) < 1L)
@@ -71,7 +71,7 @@ as_double_matrix <- function(x)
 # Same a as_double_matrix() but allow 1-column matrix.
 as_double_matrix_1 <- function(x)
 {
-  name <- deparse(substitute(x))   # FIXME: Only do this if there is an error.
+  name <- deparse(substitute(x)) # FIXME: Only do this if there is an error.
   if (length(dim(x)) != 2L)
     stop("'", name, "' must be a data.frame or a matrix")
   if (nrow(x) < 1L)

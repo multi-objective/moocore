@@ -82,9 +82,9 @@
 #'
 #' \insertAllCited{}
 #'
-#'@seealso [read_datasets()]
+#' @seealso [read_datasets()]
 #'
-#'@examples
+#' @examples
 #' extdata_path <- system.file(package="moocore", "extdata")
 #'
 #' x <- read_datasets(file.path(extdata_path, "example1_dat"))
@@ -103,11 +103,11 @@
 #' str(z)
 #' @concept eaf
 #' @export
-eaf <- function (x, sets, percentiles = NULL, maximise = FALSE, groups = NULL)
+eaf <- function(x, sets, percentiles = NULL, maximise = FALSE, groups = NULL)
 {
   if (missing(sets)) {
     sets <- x[, ncol(x)]
-    x <- x[, -ncol(x), drop=FALSE]
+    x <- x[, -ncol(x), drop = FALSE]
   }
 
   x <- as_double_matrix(x)
@@ -124,9 +124,9 @@ eaf <- function (x, sets, percentiles = NULL, maximise = FALSE, groups = NULL)
 
   groups <- factor(groups)
   # FIXME: Is there a multi-variate tapply? Maybe data.table?
-  do.call("rbind", lapply(levels(groups), function(g){
+  do.call("rbind", lapply(levels(groups), function(g) {
     where <- groups == g
-    data.frame(compute_1_eaf(x[where, , drop=FALSE], sets = sets[where], percentiles = percentiles, maximise = maximise),
+    data.frame(compute_1_eaf(x[where, , drop = FALSE], sets = sets[where], percentiles = percentiles, maximise = maximise),
       groups = g)
   }))
 }
@@ -170,7 +170,7 @@ compute_1_eaf <- function(x, sets, percentiles, maximise)
   order_sets <- order(sets)
   sets <- sets[order_sets]
   # The C code expects points within a set to be contiguous.
-  x <- x[order_sets, , drop=FALSE]
+  x <- x[order_sets, , drop = FALSE]
   nsets <- nunique(sets)
   ## if (is.null(percentiles)) {
   ##   # FIXME: We should compute this in the C code.
@@ -179,7 +179,7 @@ compute_1_eaf <- function(x, sets, percentiles, maximise)
   x <- compute_eaf_call(x, cumsizes = cumsum(unique_counts(sets)), percentiles = percentiles)
   # Undo previous transformation
   if (any(maximise))
-      x[,-ncol(x)] <- transform_maximise(x[, -ncol(x), drop=FALSE], maximise)
+      x[, -ncol(x)] <- transform_maximise(x[, -ncol(x), drop = FALSE], maximise)
   x
 }
 
@@ -220,10 +220,10 @@ eaf_as_list <- function(eaf)
   # FIXME: Add groups argument.
   setcol <- ncol(eaf)
   if (!is.null(colnames(eaf)) && colnames(eaf)[setcol] == "groups") {
-    return(split.data.frame(eaf[, -c(setcol-1L, setcol), drop=FALSE],
-      list(eaf[, setcol-1L], eaf[, setcol]), sep="-"))
+    return(split.data.frame(eaf[, -c(setcol - 1L, setcol), drop = FALSE],
+      list(eaf[, setcol - 1L], eaf[, setcol]), sep = "-"))
   }
-  split.data.frame(eaf[,-setcol, drop=FALSE], factor(eaf[,setcol]))
+  split.data.frame(eaf[, -setcol, drop = FALSE], factor(eaf[, setcol]))
 }
 
 ### Local Variables:

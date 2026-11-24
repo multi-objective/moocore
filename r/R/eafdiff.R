@@ -80,8 +80,8 @@
 #' @testRaw      3.0  2.5  4.0  3.0    2
 #' @testRaw      3.0  2.0  Inf  2.5    2
 #' @testRaw      4.0  2.5  Inf  3.0    1')))
-#'@concept eaf
-#'@export
+#' @concept eaf
+#' @export
 eafdiff <- function(x, y, intervals = NULL, maximise = FALSE, rectangles = FALSE)
 {
   stopifnot(ncol(x) == ncol(y))
@@ -90,13 +90,13 @@ eafdiff <- function(x, y, intervals = NULL, maximise = FALSE, rectangles = FALSE
   if (anyNA(sets_x)) stop("'sets' must have only non-NA numerical values")
   cumsizes_x <- cumsum(unique_counts(sets_x))
   # The C code expects points within a set to be contiguous.
-  x <- as_double_matrix(x[order(sets_x) , -ncol(x), drop=FALSE])
+  x <- as_double_matrix(x[order(sets_x), -ncol(x), drop = FALSE])
 
   sets_y <- y[, ncol(y)]
   if (anyNA(sets_y)) stop("'sets' must have only non-NA numerical values")
   cumsizes_y <- cumsum(unique_counts(sets_y))
   # The C code expects points within a set to be contiguous.
-  y <- as_double_matrix(y[order(sets_y), -ncol(y), drop=FALSE])
+  y <- as_double_matrix(y[order(sets_y), -ncol(y), drop = FALSE])
 
   nsets <- length(cumsizes_x) + length(cumsizes_y)
   if (is.null(intervals)) {
@@ -118,11 +118,11 @@ eafdiff <- function(x, y, intervals = NULL, maximise = FALSE, rectangles = FALSE
   # FIXME: We should remove duplicated rows in C code.
   # FIXME: Check that we do not generate duplicated nor overlapping rectangles
   # with different colors. That would be a bug.
-  DIFF <- DIFF[!duplicated(DIFF),]
+  DIFF <- DIFF[!duplicated(DIFF), ]
   if (any(maximise)) {
     if (rectangles && length(maximise) != 1L)
       maximise <- c(maximise, maximise)
-    DIFF[, -ncol(DIFF)] <- transform_maximise(DIFF[, -ncol(DIFF), drop=FALSE], maximise)
+    DIFF[, -ncol(DIFF)] <- transform_maximise(DIFF[, -ncol(DIFF), drop = FALSE], maximise)
   }
   # Undo previous transformation
   ## if (any(maximise)) {
