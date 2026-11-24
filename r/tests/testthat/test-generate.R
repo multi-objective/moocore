@@ -1,4 +1,3 @@
-
 test_that("generate_ndset", {
   n <- 10L
   one <- rep(1, n)
@@ -18,23 +17,23 @@ test_that("generate_ndset", {
   }
 
   for (dim in seq(2, 8)) {
-    seed <- sample.int(2^31, size=1L)
-    points <- generate_ndset(n, dim, "simplex", seed=seed)
-    expect_equal(points, generate_ndset(n, dim, "L", seed=seed))
-    expect_equal(points, generate_ndset(n, dim, "linear", seed=seed))
+    seed <- sample.int(2^31, size = 1L)
+    points <- generate_ndset(n, dim, "simplex", seed = seed)
+    expect_equal(points, generate_ndset(n, dim, "L", seed = seed))
+    expect_equal(points, generate_ndset(n, dim, "linear", seed = seed))
     expect_ndset(points)
     expect_equal(rowSums(points), one)
-    points <- generate_ndset(n, dim, "inverted-simplex", seed=seed)
-    expect_equal(points, generate_ndset(n, dim, "inverted-linear", seed=seed))
+    points <- generate_ndset(n, dim, "inverted-simplex", seed = seed)
+    expect_equal(points, generate_ndset(n, dim, "inverted-linear", seed = seed))
     expect_ndset(points)
     expect_equal(rowSums(1 - points), one)
-    points <- generate_ndset(n, dim, "concave-sphere", seed=seed)
-    expect_equal(points, generate_ndset(n, dim, "sphere", seed=seed))
-    expect_equal(points, generate_ndset(n, dim, "C", seed=seed))
+    points <- generate_ndset(n, dim, "concave-sphere", seed = seed)
+    expect_equal(points, generate_ndset(n, dim, "sphere", seed = seed))
+    expect_equal(points, generate_ndset(n, dim, "C", seed = seed))
     expect_ndset(points)
     expect_equal(rowSums(points**2), one)
-    points <- generate_ndset(n, dim, "convex-sphere", seed=seed)
-    expect_equal(points, generate_ndset(n, dim, "X", seed=seed))
+    points <- generate_ndset(n, dim, "convex-sphere", seed = seed)
+    expect_equal(points, generate_ndset(n, dim, "X", seed = seed))
     expect_ndset(points)
     expect_equal(rowSums((1 - points)**2), one)
     points <- generate_ndset(n, dim, "concave-simplex")

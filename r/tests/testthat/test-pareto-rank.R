@@ -4,7 +4,7 @@ test_that("pareto", {
   test_pareto_rank <- function(extdatafile, maximise = FALSE) {
     data <- read_extdata(extdatafile)
     # Drop set column
-    data <- data[,-ncol(data)]
+    data <- data[, -ncol(data)]
     ranks <- pareto_rank(data, maximise = maximise)
     data2 <- data
     for (r in min(ranks):max(ranks)) {
@@ -21,5 +21,5 @@ test_that("pareto", {
 test_that("pareto_rank() 1D", {
   x <- matrix(c(0.2, 0.1, 0.2, 0.5, 0.3), ncol = 1L)
   expect_equal(pareto_rank(x), c(2, 1, 2, 4, 3))
-  expect_equal(pareto_rank(x, maximise=TRUE), c(3, 4, 3, 1, 2))
+  expect_equal(pareto_rank(x, maximise = TRUE), c(3, 4, 3, 1, 2))
 })

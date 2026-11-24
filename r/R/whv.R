@@ -40,8 +40,8 @@
 #' @references
 #' \insertAllCited{}
 #'
-#'@concept metrics
-#'@export
+#' @concept metrics
+#' @export
 whv_rect <- function(x, rectangles, reference, maximise = FALSE)
 {
   x <- as_double_matrix(x)
@@ -98,7 +98,7 @@ total_whv_rect <- function(x, rectangles, reference, maximise = FALSE, ideal = N
     stop("'ideal' should have same length as ncol(x)")
   }
   beta <- scalefactor * abs(prod(reference - ideal))
-  #cat("beta: ", beta, "\n")
+  # cat("beta: ", beta, "\n")
   hv + beta * whv
 }
 
@@ -176,7 +176,7 @@ whv_hype <- function(x, reference, ideal, maximise = FALSE,
     } else if (length(maximise) != nobjs) {
       stop("length of maximise must be either 1 or ncol(x)")
     } else {
-      x[,maximise] <- -x[,maximise]
+      x[, maximise] <- -x[, maximise]
       reference[maximise] <- -reference[maximise]
       ideal[maximise] <- -ideal[maximise]
     }

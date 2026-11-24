@@ -8,6 +8,6 @@ test_that("vorob", {
   # avg_hyp <- mean(sapply(split.data.frame(test_data[,1:2], test_data[,3]),
   #                        hypervolume, reference = c(1, 1)))
   expect_equal(hypervolume(vorob_t(x = test_data, reference = c(1, 1))$ve, reference = c(1, 1)), 0.25, tolerance = 1e-1)
-  expect_equal(vorob_dev(x = test_data, ve = vorob_t(test_data, reference = c(1,1))$ve, reference = c(1, 1)), 0.218, tolerance = 1e-1)
+  expect_equal(vorob_dev(x = test_data, ve = vorob_t(test_data, reference = c(1, 1))$ve, reference = c(1, 1)), 0.218, tolerance = 1e-1)
 
 })

@@ -9,7 +9,7 @@ save_csv_xz <- function(code, pattern)
   path <- tempfile(fileext = ".csv.xz")
   res <- code
   write.table(file = withr::local_connection(xzfile(path, "wb")),
-    res, row.names = FALSE, col.names=FALSE, sep=",")
+    res, row.names = FALSE, col.names = FALSE, sep = ",")
   path
 }
 

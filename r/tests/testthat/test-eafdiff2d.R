@@ -1,12 +1,12 @@
 ## FIXME: We need smaller data!
 test_that("eafdiff2d", {
   test_eafdiff <- function(a, b, maximise = FALSE, rectangles = FALSE, ...) {
-    A1 <- read_datasets(file.path(system.file(package="moocore"), "extdata", a))
-    A2 <- read_datasets(file.path(system.file(package="moocore"), "extdata", b))
+    A1 <- read_datasets(file.path(system.file(package = "moocore"), "extdata", a))
+    A2 <- read_datasets(file.path(system.file(package = "moocore"), "extdata", b))
     minmax <- ""
     if (any(maximise)) {
       minmax <- paste0("-",
-        paste0(ifelse(maximise, "max", "min"), collapse="-"))
+        paste0(ifelse(maximise, "max", "min"), collapse = "-"))
       A1[, which(maximise)] <- -A1[, which(maximise)]
       A2[, which(maximise)] <- -A2[, which(maximise)]
     }
@@ -18,9 +18,9 @@ test_that("eafdiff2d", {
     res <- as.data.frame(eafdiff(A1, A2, maximise = maximise, ...))
     expect_true(all(is_wholenumber(res[, ncol(res)])))
     # If we do not save the last column as integer we get spurious differences.
-    res[, ncol(res)] <- as.integer(round(res[,ncol(res)]))
+    res[, ncol(res)] <- as.integer(round(res[, ncol(res)]))
 
-    expect_snapshot_csv_xz(paste0("eafdiff-", a, "-", b, minmax, ifelse(rectangles,"-rect","")),
+    expect_snapshot_csv_xz(paste0("eafdiff-", a, "-", b, minmax, ifelse(rectangles, "-rect", "")),
       res)
   }
   test_eafdiff("wrots_l10w100_dat", "wrots_l100w10_dat")

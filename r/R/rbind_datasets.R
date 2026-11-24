@@ -16,10 +16,10 @@ rbind_datasets <- function(x, y)
   stopifnot(setcol > 2L)
   stopifnot(ncol(x) == ncol(y))
   # FIXME: We could relax this condition by re-encoding  the column.
-  stopifnot(min(x[,setcol]) == 1L)
-  stopifnot(min(y[,setcol]) == 1L)
+  stopifnot(min(x[, setcol]) == 1L)
+  stopifnot(min(y[, setcol]) == 1L)
   # We have to make all sets unique.
-  y[,setcol] <- y[,setcol] + max(x[,setcol])
+  y[, setcol] <- y[, setcol] + max(x[, setcol])
   rbind(x, y)
 }
 

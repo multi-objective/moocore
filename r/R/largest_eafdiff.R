@@ -14,7 +14,7 @@
 #'
 #' @return  `list()`\cr A list with two components `pair` and `value`.
 #'
-#'@examples
+#' @examples
 #' # FIXME: This example is too large, we need a smaller one.
 #' data(tpls50x20_1_MWT)
 #' nadir <- apply(tpls50x20_1_MWT[,2:3], 2L, max)
@@ -22,11 +22,11 @@
 #'                      reference = nadir)
 #' str(x)
 #'
-#'@references
+#' @references
 #' \insertAllCited{}
 #'
-#'@concept eaf
-#'@export
+#' @concept eaf
+#' @export
 largest_eafdiff <- function(x, maximise = FALSE, intervals = 5L, reference,
                             ideal = NULL)
 {
@@ -45,21 +45,21 @@ largest_eafdiff <- function(x, maximise = FALSE, intervals = 5L, reference,
     ideal <- ifelse(maximise, upper, lower)
   }
   # Convert to a 1-row matrix
-  if (is.null(dim(ideal))) dim(ideal) <- c(1L,nobjs)
+  if (is.null(dim(ideal))) dim(ideal) <- c(1L, nobjs)
 
   best_pair <- NULL
   best_value <- 0
-  for (a in seq_len(n-1)) {
-    for (b in (a+1):n) {
+  for (a in seq_len(n - 1)) {
+    for (b in (a + 1):n) {
       DIFF <- eafdiff(x[[a]], x[[b]], intervals = intervals,
                       maximise = maximise, rectangles = TRUE)
       # Set color to 1
-      a_rectangles <- DIFF[ DIFF[, 5] >= 1L, , drop = FALSE]
+      a_rectangles <- DIFF[DIFF[, 5] >= 1L, , drop = FALSE]
       a_rectangles[, ncol(a_rectangles)] <- 1
 
       a_value <- whv_rect(ideal, a_rectangles, reference, maximise)
 
-      b_rectangles <- DIFF[ DIFF[, 5] <= -1L, , drop = FALSE]
+      b_rectangles <- DIFF[DIFF[, 5] <= -1L, , drop = FALSE]
       b_rectangles[, ncol(b_rectangles)] <- 1
       b_value <- whv_rect(ideal, b_rectangles, reference, maximise)
       value <- min(a_value, b_value)
@@ -69,7 +69,7 @@ largest_eafdiff <- function(x, maximise = FALSE, intervals = 5L, reference,
       }
     }
   }
-  list(pair=best_pair, value = best_value)
+  list(pair = best_pair, value = best_value)
 }
 
 #' Interactively choose according to empirical attainment function differences
@@ -109,12 +109,12 @@ largest_eafdiff <- function(x, maximise = FALSE, intervals = 5L, reference,
 #' print(fivenum(whv_A2))
 #' }
 #'
-#'@concept eaf
-#'@export
+#' @concept eaf
+#' @export
 choose_eafdiff <- function(x, left = stop("'left' must be either TRUE or FALSE"))
 {
-  if (left) return (x[ x[, ncol(x)] > 0L, , drop = FALSE])
-  x <- x[ x[, ncol(x)] < 0L, , drop = FALSE]
+  if (left) return(x[x[, ncol(x)] > 0L, , drop = FALSE])
+  x <- x[x[, ncol(x)] < 0L, , drop = FALSE]
   # We always return positive colors.
   x[, ncol(x)] <- abs(x[, ncol(x)])
   x

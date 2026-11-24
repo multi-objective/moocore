@@ -12,7 +12,7 @@ NULL
 
 #' Results of Hybrid GA on Vanzyl and Richmond water networks
 #'
-#'@format
+#' @format
 #'  A list with two data frames, each of them with three columns, as
 #'  produced by [read_datasets()].
 #'  \describe{
@@ -21,12 +21,12 @@ NULL
 #'      network. The second column is filled with `NA`}
 #'  }
 #'
-#'@source \insertRef{LopezIbanezPhD}{moocore}.
+#' @source \insertRef{LopezIbanezPhD}{moocore}.
 #'
 #' @examples
-#'data(HybridGA)
-#'print(HybridGA$vanzyl)
-#'print(HybridGA$richmond)
+#' data(HybridGA)
+#' print(HybridGA$vanzyl)
+#' print(HybridGA$richmond)
 #' @keywords datasets
 "HybridGA"
 
@@ -53,7 +53,7 @@ NULL
 #'
 #' @source \insertRef{LopezIbanezPhD}{moocore}
 #'
-#'@examples
+#' @examples
 #' data(SPEA2relativeRichmond)
 #' str(SPEA2relativeRichmond)
 #' @keywords datasets
@@ -64,7 +64,7 @@ NULL
 #'
 #' @inherit SPEA2relativeRichmond format source
 #'
-#'@examples
+#' @examples
 #' data(SPEA2relativeVanzyl)
 #' str(SPEA2relativeVanzyl)
 #' @keywords datasets
@@ -87,13 +87,13 @@ NULL
 #'    \item{`set`}{indices of corresponding conditional Pareto fronts.}
 #'  }
 #'
-#'@source
+#' @source
 #' \insertRef{BinGinRou2015gaupar}{moocore}
 #'
-#'@examples
+#' @examples
 #' data(CPFs)
 #' vorob_t(CPFs, reference = c(2, 200))
-#'@keywords datasets
+#' @keywords datasets
 "CPFs"
 
 #' Various strategies of Two-Phase Local Search applied to the Permutation
@@ -108,7 +108,7 @@ NULL
 #'    \item{`run`}{index of the run.}
 #'  }
 #'
-#'@source
+#' @source
 #'
 #' \insertRef{DubLopStu2011amai}{moocore}
 #'

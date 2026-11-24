@@ -16,7 +16,7 @@ file_move <- function(from, to) {
 
 if (WINDOWS) files <- paste0(files, ".exe")
 if (any(file.exists(files))) {
-  dest <- file.path(R_PACKAGE_DIR,  paste0('bin', R_ARCH))
+  dest <- file.path(R_PACKAGE_DIR, paste0('bin', R_ARCH))
   dir.create(dest, recursive = TRUE, showWarnings = FALSE)
   file_move(files, dest)
 }
