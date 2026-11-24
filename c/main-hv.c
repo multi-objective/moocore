@@ -140,7 +140,7 @@ hv_file(const char *filename, double * restrict reference,
             }
         }
     } else {
-        reference = malloc(nobj * sizeof(*reference));
+        reference = MOOCORE_MALLOC(nobj, *reference);
         for (dimension_t n = 0; n < nobj; n++) {
             // Default reference point is:
             reference[n] = maximum[n] + 0.1 * (maximum[n] - minimum[n]);
@@ -164,7 +164,7 @@ hv_file(const char *filename, double * restrict reference,
         Timer_start ();
         double volume, time_elapsed;
         if (contributions_flag) {
-            hvc = realloc(hvc, (cumsizes[n] - cumsize) * sizeof(*hvc));
+            hvc = MOOCORE_REALLOC(hvc, cumsizes[n] - cumsize, *hvc);
             volume = hv_contributions(hvc, &data[nobj * cumsize],
                                       cumsizes[n] - cumsize, nobj, reference,
                                       /*ignore_dominated=*/true);

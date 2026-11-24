@@ -92,9 +92,7 @@ x_strnlen(const char *s, size_t maxlen)
 static char * x_strndup(const char *s, size_t n)
 {
     size_t len = x_strnlen(s, n);         // Find length up to n or end of string
-    char * new_str = malloc(len + 1);      // Allocate memory (+1 for null terminator)
-    if (unlikely(new_str == NULL))
-        return NULL;                      // malloc failed
+    char * new_str = MOOCORE_MALLOC(len + 1, char); // +1 for null terminator
     memcpy(new_str, s, len);              // Copy the string up to len
     new_str[len] = '\0';                  // Null-terminate
     return new_str;
@@ -369,10 +367,10 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    char ** filenames = malloc(sizeof(*filenames) * numfiles);
-    double ** points = malloc(sizeof(*points) * numfiles);
-    int * nruns = malloc(sizeof(*nruns) * numfiles);
-    int **cumsizes = malloc(sizeof(*cumsizes) * numfiles);
+    char ** filenames = MOOCORE_MALLOC(numfiles, *filenames);
+    double ** points = MOOCORE_MALLOC(numfiles, *points);
+    int * nruns = MOOCORE_MALLOC(numfiles, *nruns);
+    int **cumsizes = MOOCORE_MALLOC(numfiles, *cumsizes);
 
     for (k = 0; k < numfiles; optind++, k++) {
         filenames[k] = argv[optind];
@@ -441,8 +439,9 @@ int main(int argc, char *argv[])
             exit (EXIT_FAILURE);
         }
     }
-    int **results = malloc (sizeof(int) * numfiles * numfiles
-                            + sizeof(int *) * numfiles);
+    // One block of bytes: the row pointers followed by the rows.
+    int **results = MOOCORE_MALLOC(sizeof(int) * numfiles * numfiles
+                                   + sizeof(int *) * numfiles, char);
 
     for (k = 0; k < numfiles; k++) {
         results[k] = (int *) (results + numfiles) + k * numfiles;

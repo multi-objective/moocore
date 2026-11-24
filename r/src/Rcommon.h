@@ -110,7 +110,7 @@
 #define SEXP_2_LOGICAL_BOOL_VECTOR(S, I, N)          \
     CHECK_ARG_IS_LOGICAL_VECTOR(S);                  \
     const R_len_t N = Rf_length(S);                  \
-    bool * I = malloc(sizeof(bool) * N);             \
+    bool * I = MOOCORE_MALLOC(N, bool);             \
     for (R_len_t __i = 0; __i < N; __i++)            \
         I[__i] = LOGICAL(S)[__i];
 

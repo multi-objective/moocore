@@ -67,7 +67,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     // list used by onec4dplusU().  The main CDLL will store all points + 1
     // sentinel.  The auxiliary list will store at most n - 1 points + 1
     // sentinel.
-    dlnode_t * head = malloc((n + 1 + n) * sizeof(*head));
+    dlnode_t * head = MOOCORE_MALLOC(n + 1 + n, *head);
     size_t i = 1;
     for (size_t j = 0; j < n; j++) {
         /* Filters those points that do not strictly dominate the reference
@@ -86,11 +86,11 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
 
     // Allocate single blocks of memory as much as possible.
     // We need space in r_next and r_prev for dimension 5 and above (d_stop - 1).
-    head->r_next = malloc(2 * (d_stop - 1) * (n+1) * sizeof(head));
+    head->r_next = MOOCORE_MALLOC(2 * (d_stop - 1) * (n+1), head);
     head->r_prev = head->r_next + (d_stop - 1) * (n+1);
     // We only need space in area and vol for dimension 4 and above (d-stop).
     // Also reserve space for n-1 auxiliary 3D points used by onec4dplusU().
-    head->area = malloc((2 * d_stop * n + 3 * (n-1)) * sizeof(*data));
+    head->area = MOOCORE_MALLOC(2 * d_stop * n + 3 * (n-1), *data);
     head->vol = head->area + d_stop * n;
     head->x = NULL; // head contains no data
     head->ignore = 0;  // should never get used
@@ -121,7 +121,7 @@ fpli_setup_cdllist(const double * restrict data, dimension_t d,
     head->area = NULL;
     head->vol = NULL;
 
-    dlnode_t ** scratch = malloc(n * sizeof(*scratch));
+    dlnode_t ** scratch = MOOCORE_MALLOC(n, *scratch);
     for (i = 0; i < n; i++)
         scratch[i] = head + 1 + i;
 
@@ -516,7 +516,7 @@ fpli_hv_ge5d(dlnode_t * restrict list, dimension_t dim, size_t c,
     ASSUME(dim > STOP_DIMENSION);
     const dimension_t d_stop = dim - STOP_DIMENSION;
     ASSUME(0 < d_stop && d_stop < MOOCORE_HV_DIMENSION_MAX); // Silence -Walloc-size-larger-than= warning
-    double * bound = malloc(d_stop * sizeof(*bound));
+    double * bound = MOOCORE_MALLOC(d_stop, *bound);
     for (dimension_t i = 0; i < d_stop; i++)
         bound[i] = -DBL_MAX;
 

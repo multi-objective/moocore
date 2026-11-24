@@ -4,7 +4,6 @@
    https://github.com/noporpoise/BitArray
 */
 #include <inttypes.h>
-#include <stdlib.h> // malloc, calloc
 #include <string.h> // memcpy
 #include "common.h" // fatal_error
 
@@ -52,21 +51,21 @@ static inline bit_array *
 bit_array_alloc(size_t n)
 {
     //fprintf(stderr, "n= %ld, word_size = %ld size = %ld\n", n, bit_array_word_size, bit_nwords(n));
-    return (bit_array *) malloc(bit_array_bytesize(n));
+    return MOOCORE_MALLOC(bit_nwords(n), bit_array);
 }
 
 static inline bit_array *
 bit_array_calloc(size_t n)
 {
     //fprintf(stderr, "word_size = %ld size = %ld", bit_array_word_size, bit_nwords(n));
-    return (bit_array *) calloc(bit_nwords(n), sizeof(bit_array_word_t));
+    return MOOCORE_CALLOC(bit_nwords(n), bit_array_word_t);
 }
 
 static inline bit_array *
 bit_array_realloc(bit_array *b, size_t n)
 {
     //fprintf(stderr, "word_size = %ld size = %ld", bit_array_word_size, bit_nwords(n));
-    return (bit_array *) realloc(b, bit_array_bytesize(n));
+    return MOOCORE_REALLOC(b, bit_nwords(n), bit_array);
 }
 
 static inline void

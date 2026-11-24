@@ -63,7 +63,7 @@ static dlnode_t *
 setup_cdllist(objective_t * restrict data, int d, const int * restrict cumsize, int nsets)
 {
     int n = cumsize[nsets - 1];
-    dlnode_t * head = malloc((n + 1) * sizeof(dlnode_t));
+    dlnode_t * head = MOOCORE_MALLOC(n + 1, dlnode_t);
     head->x = data;
     head->set = 0;
 
@@ -79,7 +79,7 @@ setup_cdllist(objective_t * restrict data, int d, const int * restrict cumsize, 
     }
     head->x = NULL; // head contains no data
 
-    dlnode_t ** scratch = malloc(n * sizeof(*scratch));
+    dlnode_t ** scratch = MOOCORE_MALLOC(n, *scratch);
     for (i = 0; i < n; i++)
         scratch[i] = head + i + 1;
 
@@ -231,7 +231,7 @@ void printlevel(FILE * stream, avl_tree_t **level, int nset)
 static int
 printlist_points_indic(avl_tree_t *avltree, int dim, int nruns, FILE *outfile, FILE *outfileindic)
 {
-    int * dom_sets = (int *) malloc(nruns * sizeof(int));
+    int * dom_sets = MOOCORE_MALLOC(nruns, int);
     int i, k, totalp = 0;
     avl_node_t *aux = avltree->head;
     while (aux) {
@@ -291,7 +291,7 @@ int printoutput(avl_tree_t **level, int nset, int d, FILE **outfile, int noutfil
 static void
 print_list_indic(avl_tree_t * level, int nruns, FILE * indicfile)
 {
-    int * dom_sets = (int *) malloc(nruns * sizeof(int));
+    int * dom_sets = MOOCORE_MALLOC(nruns, int);
     avl_node_t * avlnode = level->head;
     while (avlnode) {
         for (int i = 0;  i < nruns; i++) {
@@ -416,7 +416,7 @@ add2level(removed_list_t * removed_list, avl_tree_t *tree,
     avl_node_t * aux = prevnode->next;
     // A new point (item) is added, but only if it isn't dominated.
     if (node_point(aux)[0] > item[0]) {
-        avl_node_t * tnode = malloc(sizeof(*tnode));
+        avl_node_t * tnode = MOOCORE_MALLOC(1, *tnode);
         avl_init_node(tnode, item);
         avl_add_promoter(tnode, set, promoter);
         avl_node_t *newnode = tnode;
@@ -449,7 +449,7 @@ add2level(removed_list_t * removed_list, avl_tree_t *tree,
 
 static objective_t * new_point(objective_t x1, objective_t x2, objective_t x3)
 {
-    objective_t *value = malloc(3 * sizeof(objective_t));
+    objective_t *value = MOOCORE_MALLOC(3, objective_t);
     value[0] = x1;
     value[1] = x2;
     value[2] = x3;
@@ -503,19 +503,19 @@ eaf3df(dlnode_t *list, avl_tree_t **set,
         avl_node_t * promoter;
     };
 
-    struct aux_nodes * aux = malloc(sizeof(*aux) * nset);
+    struct aux_nodes * aux = MOOCORE_MALLOC(nset, *aux);
 
     dlnode_t *new = list->next; //new - represents the new point
     // add new to its set
-    avl_node_t * tnode = avl_init_node(malloc(sizeof(avl_node_t)), new->x);
+    avl_node_t * tnode = avl_init_node(MOOCORE_MALLOC(1, avl_node_t), new->x);
     avl_insert_after(set[new->set], set[new->set]->head, tnode);
 
     //new is the only point so far, so it is added to the first level
-    tnode = avl_init_node(malloc(sizeof(avl_node_t)), copy_point(new->x));
+    tnode = avl_init_node(MOOCORE_MALLOC(1, avl_node_t), copy_point(new->x));
     avl_add_promoter(tnode, new->set, NULL);
     avl_insert_after(level[0], level[0]->head, tnode);
 
-    bool * mask = calloc(nset, sizeof(*mask)); // needed to know how many different sets were considered so far
+    bool * mask = MOOCORE_CALLOC(nset, *mask); // needed to know how many different sets were considered so far
     mask[new->set] = true;
 
     int start_at = 0, stop_at; // indicates which levels must be verified (from and to which)
@@ -613,7 +613,7 @@ eaf3df(dlnode_t *list, avl_tree_t **set,
         }
 
         //add new to its set
-        tnode = avl_init_node(malloc(sizeof(avl_node_t)), new->x);
+        tnode = avl_init_node(MOOCORE_MALLOC(1, avl_node_t), new->x);
         add2set(set[new->set], newPrev, tnode, new->x);
 
         //add new to the lowest level where it isn't dominated by any point from that level
@@ -694,18 +694,18 @@ freeoutput(removed_list_t * removed_list, avl_tree_t **output, int nset)
 
 void add_sentinels(avl_tree_t * tree, int n)
 {
-    objective_t *value = malloc(n * sizeof(objective_t));
+    objective_t *value = MOOCORE_MALLOC(n, objective_t);
     value[0] = objective_MIN;
     value[1] = objective_MAX;
 
-    avl_node_t *tnode = avl_init_node(malloc(sizeof(avl_node_t)), value);
+    avl_node_t *tnode = avl_init_node(MOOCORE_MALLOC(1, avl_node_t), value);
     avl_insert_top(tree, tnode);
 
-    value = malloc(n * sizeof(objective_t));
+    value = MOOCORE_MALLOC(n, objective_t);
     value[0] = objective_MAX;
     value[1] = objective_MIN;
 
-    avl_node_t *tnode2 = avl_init_node(malloc(sizeof(avl_node_t)), value);
+    avl_node_t *tnode2 = avl_init_node(MOOCORE_MALLOC(1, avl_node_t), value);
     avl_insert_after(tree, tnode, tnode2);
 }
 
@@ -741,9 +741,9 @@ eaf3d(objective_t * restrict data, const int * restrict cumsize, int nruns,
        This way we do not need to do avl_alloc_tree for each tree, which
        creates a lot of small memory chunks.
     */
-    avl_tree_t ** set = malloc(2 * nruns * sizeof(avl_tree_t));
-    avl_tree_t ** level = malloc(nruns * sizeof(avl_tree_t));
-    avl_tree_t ** output = malloc(nruns * sizeof(avl_tree_t));
+    avl_tree_t ** set = MOOCORE_MALLOC(2 * nruns, avl_tree_t);
+    avl_tree_t ** level = MOOCORE_MALLOC(nruns, avl_tree_t);
+    avl_tree_t ** output = MOOCORE_MALLOC(nruns, avl_tree_t);
 
     int i;
     for (i = 0; i < nruns; i++) {
@@ -775,8 +775,8 @@ eaf3d(objective_t * restrict data, const int * restrict cumsize, int nruns,
     /* Create output EAF */
     /* FIXME: This should be done earlier instead of creating the trees. */
 
-    int * attained = malloc(nruns * sizeof(*attained));
-    eaf_t ** eaf = malloc(nlevels * sizeof(*eaf));
+    int * attained = MOOCORE_MALLOC(nruns, *attained);
+    eaf_t ** eaf = MOOCORE_MALLOC(nlevels, *eaf);
     for (int l = 0; l < nlevels; l++) {
         eaf[l] = eaf_create(nobj, nruns, ntotal);
         int k = attlevel[l] - 1;

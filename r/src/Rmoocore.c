@@ -332,7 +332,7 @@ normalise_C(SEXP DATA, SEXP RANGE, SEXP LBOUND, SEXP UBOUND, SEXP MAXIMISE)
 static inline double *
 matrix_malloc_and_transpose(const double * restrict rdata, size_t npoint, size_t nobj)
 {
-    double * data = malloc(npoint * nobj * sizeof(*data));
+    double * data = MOOCORE_MALLOC(npoint * nobj, *data);
     // We go from column-major (R) to row-major (C), so we have to switch the arguments.
     matrix_transpose_double(data, rdata, nobj, npoint);
     return data;

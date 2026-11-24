@@ -79,7 +79,7 @@ static inline int *
 minmax_from_boolvec(const boolvec * restrict maximise, dimension_t nobj)
 {
     ASSUME(nobj > 0);
-    int * minmax = malloc(nobj * sizeof(*minmax));
+    int * minmax = MOOCORE_MALLOC(nobj, *minmax);
     for (dimension_t k = 0; k < nobj; k++) {
         minmax[k] = maximise[k] ? AGREE_MAXIMISE : AGREE_MINIMISE;
     }
@@ -90,7 +90,7 @@ static inline boolvec *
 new_boolvec_maximise(dimension_t nobj, bool maximise_all)
 {
     ASSUME(nobj > 0);
-    boolvec * maximise = malloc(nobj * sizeof(*maximise));
+    boolvec * maximise = MOOCORE_MALLOC(nobj, *maximise);
     for (dimension_t k = 0; k < nobj; k++)
         maximise[k] = maximise_all;
     return maximise;
@@ -101,7 +101,7 @@ default_minmax(dimension_t nobj, int default_value)
 {
     ASSUME(nobj > 0);
     ASSUME(default_value == AGREE_MINIMISE || default_value == AGREE_MAXIMISE);
-    int * minmax = malloc(nobj * sizeof(*minmax));
+    int * minmax = MOOCORE_MALLOC(nobj, *minmax);
     for (dimension_t i = 0; i < nobj; i++)
         minmax[i] = default_value;
     return minmax;
@@ -143,7 +143,7 @@ nondom_init_true(boolvec * restrict nondom, size_t size)
 static inline boolvec *
 nondom_alloc_true(size_t size)
 {
-    boolvec * nondom = malloc(size * sizeof(*nondom));
+    boolvec * nondom = MOOCORE_MALLOC(size, *nondom);
     nondom_init_true(nondom, size);
     return nondom;
 }
@@ -179,7 +179,7 @@ force_agree_minimize(const double * restrict points, size_t size,
         new_dim = (dimension_t) (new_dim + (minmax[d] != 0));
 
     assert(new_dim > 1);
-    double * pnew = malloc(new_dim * size * sizeof(*pnew));
+    double * pnew = MOOCORE_MALLOC(new_dim * size, *pnew);
 
     if (new_dim < true_dim) { // Remove columns
         uint8_t idx[MOOCORE_DIMENSION_MAX + 1];
@@ -672,7 +672,7 @@ get_nondominated_set(double ** pareto_set_p,
     ASSUME(dim >= 2);
     boolvec * nondom = nondom_alloc_true(size);
     size_t new_size = find_nondominated_set(points, size, dim, minmax, nondom);
-    double * pareto_set = malloc(new_size * dim * sizeof(*pareto_set));
+    double * pareto_set = MOOCORE_MALLOC(new_size * dim, *pareto_set);
 
     if (new_size < size) {
         size_t n = 0, k = 0;
@@ -770,7 +770,7 @@ normalise(double * restrict points, size_t size, dimension_t dim,
           const double * restrict lbound, const double * restrict ubound)
 {
     const double range = upper_range - lower_range;
-    double * diff = malloc(dim * sizeof(*diff));
+    double * diff = MOOCORE_MALLOC(dim, *diff);
     for (dimension_t d = 0; d < dim; d++) {
         diff[d] = ubound[d] - lbound[d];
         if (diff[d] == 0.0) // FIXME: Should we use approximate equality?

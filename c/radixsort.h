@@ -69,10 +69,10 @@ typedef enum { NOT_SORTED = 0, SORTED = 1, REV_SORTED = 2 } sort_result_t;
 static inline void
 radix_doublep_ws_alloc(radix_doublep_ws * ws, uint32_t n, dimension_t dim)
 {
-    ws->idxbuf = malloc(2 * n * sizeof(*ws->idxbuf));
-    ws->keys = malloc(n * sizeof(*ws->keys));
-    ws->ptrs_tmp = malloc(n * sizeof(*ws->ptrs_tmp));
-    ws->ties = dim ? malloc((n/2) * sizeof(*ws->ties)) : NULL;
+    ws->idxbuf = MOOCORE_MALLOC(2 * n, *ws->idxbuf);
+    ws->keys = MOOCORE_MALLOC(n, *ws->keys);
+    ws->ptrs_tmp = MOOCORE_MALLOC(n, *ws->ptrs_tmp);
+    ws->ties = dim ? MOOCORE_MALLOC(n/2, *ws->ties) : NULL;
 }
 
 static void

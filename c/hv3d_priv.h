@@ -63,7 +63,7 @@ hv3d_preprocessing(dlnode_t * restrict list, size_t n)
 
     avl_tree_t tree;
     avl_init_tree(&tree, qsort_cmp_pdouble_asc_y_des_x_nonzero);
-    avl_node_t * tnodes = malloc((n+2) * sizeof(*tnodes));
+    avl_node_t * tnodes = MOOCORE_MALLOC(n+2, *tnodes);
 
     // At the top we insert the first point, which is never dominated.
     dlnode_t * p = (list+1)->next[0];

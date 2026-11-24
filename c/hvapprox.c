@@ -41,7 +41,7 @@ transform_and_filter(const double * restrict data, size_t * restrict npoints_p,
        - [ ] Maybe transpose the matrix so that each column can be processed independently.
     */
     size_t npoints = *npoints_p;
-    double * points = malloc(dim * npoints * sizeof(*points));
+    double * points = MOOCORE_MALLOC(dim * npoints, *points);
     size_t i, j;
     // Transform points (ref - points)
     for (i = 0, j = 0; i < npoints; i++) {
@@ -218,7 +218,7 @@ hv_approx_normal(const double * restrict data, size_t npoints, dimension_t dim,
         return 0;
 
     rng_state * rng = rng_new(random_seed);
-    double * w = malloc(dim * sizeof(*w));
+    double * w = MOOCORE_MALLOC(dim, *w);
     double expected = 0.0;
     // Monte Carlo sampling.
     for (uint_fast32_t j = 0; j < nsamples; j++) {
@@ -261,7 +261,7 @@ construct_polar_a(dimension_t dim, uint_fast32_t nsamples)
     const dimension_t p = primes[dim];
     DEBUG2_PRINT("construct_polar_a: prime: %d\n", p);
 
-    uint_fast32_t * a = malloc(dim * sizeof(*a));
+    uint_fast32_t * a = MOOCORE_MALLOC(dim, *a);
     a[0] = 1;
     DEBUG2_PRINT("construct_polar_a: a[%d] = %lu", dim, (unsigned long) a[0]);
     for (dimension_t k = 1; k < dim; k++) {
@@ -567,7 +567,7 @@ compute_theta(long double * restrict theta, dimension_t dim,
 static long double *
 compute_int_all(dimension_t dm1)
 {
-    long double * int_all = malloc(dm1 * sizeof(long double));
+    long double * int_all = MOOCORE_MALLOC(dm1, long double);
     dimension_t i;
     DEBUG2_PRINT("int_all[%u] =", (unsigned int)dm1);
     for (i = 0; i < dm1; i++) {
@@ -657,10 +657,10 @@ hv_approx_hua_wang(const double * restrict data, size_t npoints, dimension_t dim
     double expected = 0.0;
     // FIXME: OpenMP: #pragma omp parallel
     {
-        long double * theta = malloc((dim - 1) * sizeof(*theta));
-        double * sin_theta = malloc((dim - 1) * sizeof(*sin_theta));
-        double * cos_theta = malloc((dim - 1) * sizeof(*cos_theta));
-        double * w = malloc(dim * sizeof(*w));
+        long double * theta = MOOCORE_MALLOC(dim - 1, *theta);
+        double * sin_theta = MOOCORE_MALLOC(dim - 1, *sin_theta);
+        double * cos_theta = MOOCORE_MALLOC(dim - 1, *cos_theta);
+        double * w = MOOCORE_MALLOC(dim, *w);
         // FIXME: Add OpenMP: #pragma omp for reduction(+:expected)
         for (uint_fast32_t j = 0; j < nsamples; j++) {
             compute_polar_sample(theta, dim - 1, j, nsamples, polar_a);
@@ -720,7 +720,7 @@ Rphi_init(dimension_t dim)
         0x1.f4db0effcb296f3423b8035a7f4efee8p-1L, // d = 31, value = 0.9782337844131516
     };
 
-    long double * alpha = malloc(sizeof(*alpha) * dim);
+    long double * alpha = MOOCORE_MALLOC(dim, *alpha);
     alpha[0] = recip_phi_d[dim - 1];
     for (dimension_t d = 1; d < dim; d++)
         alpha[d] = alpha[d-1] * recip_phi_d[dim - 1]; // Same as pow(recip_phi_d[dim - 1], d)
@@ -831,8 +831,8 @@ hv_approx_rphi_fang_wang_plus(const double * restrict data, size_t npoints, dime
         return 0;
 
     const long double * alpha = Rphi_init(dim - 1);
-    double * w = malloc(dim * sizeof(*w));
-    double * u = malloc((dim - 1) * sizeof(*u));
+    double * w = MOOCORE_MALLOC(dim, *w);
+    double * u = MOOCORE_MALLOC(dim - 1, *u);
     const double seed = 0.5;
     for (dimension_t d = 0; d < dim - 1; d++)
         u[d] = seed;

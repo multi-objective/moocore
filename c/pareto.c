@@ -35,7 +35,7 @@ pareto_rank_3d(int * restrict rank, const double * restrict points, size_t size)
 
     avl_tree_t tree;
     avl_init_tree(&tree, qsort_cmp_pdouble_asc_x_nonzero);
-    avl_node_t * tnodes = malloc((size+1) * sizeof(*tnodes));
+    avl_node_t * tnodes = MOOCORE_MALLOC(size+1, *tnodes);
     const double sentinel[] = { INFINITY, -INFINITY };
     tnodes->item = sentinel;
     int front = 0;
@@ -166,9 +166,9 @@ pareto_rank_2d(int * restrict rank, const double * restrict points, size_t size)
 
 #if DEBUG >= 2
 #define PARETO_RANK_2D_DEBUG
-    double * help_0 = malloc(size * sizeof(*help_0));
-    double * help_1 = malloc(size * sizeof(*help_1));
-    int * help_i = malloc(size * sizeof(*help_i));
+    double * help_0 = MOOCORE_MALLOC(size, *help_0);
+    double * help_1 = MOOCORE_MALLOC(size, *help_1);
+    int * help_i = MOOCORE_MALLOC(size, *help_i);
 
     for (size_t k = 0; k < size; k++) {
         help_0[k] = p[k][0];
@@ -196,7 +196,7 @@ pareto_rank_2d(int * restrict rank, const double * restrict points, size_t size)
     fprintf(stderr, "\n[1]  : "); vector_fprintf (stderr, help_1, size);
 #endif
 
-    double * front_last = malloc(size * sizeof(*front_last));
+    double * front_last = MOOCORE_MALLOC(size, *front_last);
     int n_front = 0;
     front_last[0] = p[0][0];
     rank[row_index_from_ptr(points, p[0], dim)] = 0; // The first point is in the first front.
@@ -240,17 +240,17 @@ pareto_rank_2d(int * restrict rank, const double * restrict points, size_t size)
     {
         n_front++; // count max + 1
         size_t f, i, k;
-        int *front_size = calloc(n_front, sizeof(*front_size));
-        int ** front = calloc(n_front, sizeof(*front));
+        int *front_size = MOOCORE_CALLOC(n_front, *front_size);
+        int ** front = MOOCORE_CALLOC(n_front, *front);
         for (k = 0; k < size; k++) {
             f = rank[row_index_from_ptr(points, p[k], dim)];
             if (front_size[f] == 0) {
-                front[f] = malloc(size * sizeof(**front));
+                front[f] = MOOCORE_MALLOC(size, **front);
             }
             front[f][front_size[f]] = k;
             front_size[f]++;
         }
-        int * order = malloc(size * sizeof(*order));
+        int * order = MOOCORE_MALLOC(size, *order);
         f = 0, k = 0, i = 0;
         do {
             order[i] = front[f][k];
@@ -308,7 +308,7 @@ pareto_rank_kung(int * restrict rank,
     memset(rank, 0, sizeof(*rank) * size);
 
     const bool keep_weakly = true;
-    const double ** rows = malloc(2 * size * sizeof(*rows));
+    const double ** rows = MOOCORE_MALLOC(2 * size, *rows);
     const double ** prev_rows = rows + size;
     for (size_t k = 0; k < size; k++)
         prev_rows[k] = points + dim * k;
@@ -397,7 +397,7 @@ pareto_rank_brute_force(int * restrict rank,
     memset(rank, 0, sizeof(*rank) * size);
 
     const bool keep_weakly = true;
-    const double ** rows = malloc(2 * size * sizeof(*rows));
+    const double ** rows = MOOCORE_MALLOC(2 * size, *rows);
     const double ** new_rows = rows + size;
     for (size_t k = 0; k < size; k++)
         rows[k] = points + dim * k;
@@ -483,7 +483,7 @@ pareto_rank_naive(int * restrict rank,
 
     const size_t orig_size = size;
     const bool keep_weakly = true;
-    bool * dominated = calloc(size, sizeof(*dominated));
+    bool * dominated = MOOCORE_CALLOC(size, *dominated);
     const double ** p = generate_row_pointers(points, size, dim);
     int front = 1;
 
@@ -566,7 +566,7 @@ static inline void
 check_pareto_rank(const int * restrict rank_true, const double * restrict points,
                   size_t size, dimension_t d)
 {
-    int * rank = malloc(size * sizeof(*rank));
+    int * rank = MOOCORE_MALLOC(size, *rank);
     pareto_rank_naive(rank, points, size, d);
     for (size_t k = 0; k < size; k++) {
         if (rank[k] != rank_true[k])
