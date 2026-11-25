@@ -54,7 +54,7 @@ repos:
         require_serial: true
 
   - repo: https://github.com/astral-sh/ty-pre-commit
-    rev: v0.0.99
+    rev: v0.0.108
     hooks:
       - id: ty
         args: [--project=python, --isolated]
