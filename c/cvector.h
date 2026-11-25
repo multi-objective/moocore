@@ -7,7 +7,7 @@
 #endif
 
 #include <stdbool.h>
-#include <limits.h> // SIZE_MAX
+#include "common.h" // MOOCORE_MALLOC
 
 // This warning is buggy in GCC 12.
 #if defined(__GNUC__) && __GNUC__ == 12
@@ -51,7 +51,7 @@ void VECTOR_TYPE##_ctor(VECTOR_TYPE * v, size_t n)                            \
 static inline                                                                 \
 VECTOR_TYPE * VECTOR_TYPE##_new(size_t n)                                     \
 {									      \
-    VECTOR_TYPE * v = malloc (sizeof(VECTOR_TYPE));                           \
+    VECTOR_TYPE * v = MOOCORE_MALLOC(1, VECTOR_TYPE);                         \
     VECTOR_TYPE##_ctor (v, n);                                                \
     return v;                                                                 \
 }									      \
@@ -112,9 +112,7 @@ void VECTOR_TYPE##_reserve(VECTOR_TYPE * v, size_t n)                         \
     size_t old_capacity = VECTOR_TYPE##_capacity(v);                          \
     size_t old_size = VECTOR_TYPE##_size(v);                                  \
     if (n > old_capacity) {                                                   \
-        cvector_assert(SIZE_MAX / sizeof(BASE_TYPE) >= n);                    \
-        v->_begin = realloc(v->_begin, sizeof(BASE_TYPE) * n);                \
-        cvector_assert(v->_begin != NULL);                                    \
+        v->_begin = MOOCORE_REALLOC(v->_begin, n, BASE_TYPE);                 \
         v->_end = v->_begin + old_size;                                       \
         v->_capacity = v->_begin + n;                                         \
     }                                                                         \

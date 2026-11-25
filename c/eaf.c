@@ -80,7 +80,7 @@ eaf_t * eaf_create(int nobj, int nruns, int npoints)
     /* fprintf(stderr,"maxsize %ld = %d npoints, %d nruns\n", */
     /*         eaf->maxsize, npoints, nruns); */
     eaf->data = MOOCORE_MALLOC(nobj * eaf->maxsize, objective_t);
-    eaf->bit_attained = malloc(bit_array_bytesize(nruns) * eaf->maxsize);
+    eaf->bit_attained = MOOCORE_MALLOC(bit_nwords(nruns) * eaf->maxsize, bit_array);
     return eaf;
 }
 
@@ -102,12 +102,11 @@ static void
 eaf_realloc(eaf_t * eaf, dimension_t nobj)
 {
     const int nruns = eaf->nruns;
-    eaf->data = realloc(eaf->data,
-                        sizeof(objective_t) * nobj * eaf->maxsize);
-    assert(eaf->data);
-    eaf->bit_attained = realloc(eaf->bit_attained,
-                                bit_array_bytesize(nruns) * eaf->maxsize);
-    assert(eaf->bit_attained);
+    eaf->data = MOOCORE_REALLOC(eaf->data, (size_t) nobj * eaf->maxsize,
+                                objective_t);
+    eaf->bit_attained = MOOCORE_REALLOC(eaf->bit_attained,
+                                        bit_nwords(nruns) * eaf->maxsize,
+                                        bit_array);
 }
 
 objective_t *
@@ -258,7 +257,7 @@ eaf_compute_matrix(int * restrict eaf_npoints, double * restrict data, int nobj,
     free (level);
 
     int totalpoints = eaf_totalpoints(eaf, nlevels);
-    double * mat = malloc(sizeof(*mat) * totalpoints * (nobj + 1));
+    double * mat = MOOCORE_MALLOC((size_t) totalpoints * (nobj + 1), *mat);
     eaf2matrix(mat, eaf, nobj, totalpoints, percentile, nlevels);
     eaf_free(eaf, nlevels);
     *eaf_npoints = totalpoints;
@@ -292,7 +291,7 @@ eaf2d(const objective_t * restrict data, const int * restrict cumsize, int nruns
     /* Access to the data is made via two arrays of pointers: ix, iy
        These are sorted, to allow for dimension sweeping */
 
-    const objective_t ** datax = malloc(2 * ntotal * sizeof(*datax));
+    const objective_t ** datax = MOOCORE_MALLOC(2 * ntotal, *datax);
     const objective_t ** datay = datax + ntotal;
 
     for (int k = 0; k < ntotal; k++)
@@ -320,7 +319,7 @@ eaf2d(const objective_t * restrict data, const int * restrict cumsize, int nruns
     /* Setup a lookup table to go from a point to the approximation set (run)
        to which it belongs.  */
 
-    int * runtab = malloc(ntotal * sizeof(*runtab));
+    int * runtab = MOOCORE_MALLOC(ntotal, *runtab);
     for (int k = 0, j = 0; k < ntotal; j++) {
         for (; k < cumsize[j]; k++)
             runtab[k] = j;
@@ -335,9 +334,9 @@ eaf2d(const objective_t * restrict data, const int * restrict cumsize, int nruns
     /* Setup tables to keep attainment statistics. In particular,
        save_attained is needed to cope with repeated values on the same
        axis. */
-    int * attained = malloc(2 * nruns * sizeof(*attained));
+    int * attained = MOOCORE_MALLOC(2 * nruns, *attained);
     int * save_attained = attained + nruns;
-    eaf_t ** eaf = malloc(nlevels * sizeof(*eaf));
+    eaf_t ** eaf = MOOCORE_MALLOC(nlevels, *eaf);
 
     for (int l = 0; l < nlevels; l++) {
         eaf[l] = eaf_create(nobj, nruns, ntotal);

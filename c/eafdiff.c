@@ -18,7 +18,7 @@ eafdiff_compute_rectangles(int *eaf_npoints, double * data, int nobj,
     int nrow = (int) vector_int_size(&rects->col);
     // Two points per row + color
     const int ncol = 2 * nobj + 1;
-    double *result = malloc(sizeof(double) * nrow * ncol);
+    double *result = MOOCORE_MALLOC((size_t) nrow * ncol, double);
     const double * p_xy = vector_objective_begin(&rects->xy);
     for (int k = 0; k < nrow; k++) {
         for (int i = 0; i < ncol - 1; i++, p_xy++)
@@ -49,7 +49,7 @@ eafdiff_compute_matrix(int *eaf_npoints, double * data, int nobj,
 
     const int nrow = eaf_totalpoints (eaf, nruns);
     const int ncol = nobj + 1;
-    double *result = malloc(sizeof(double) * nrow * ncol);
+    double *result = MOOCORE_MALLOC((size_t) nrow * ncol, double);
     int pos = 0;
     for (int k = 0; k < nruns; k++) {
         int npoints = (int) eaf[k]->size;

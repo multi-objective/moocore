@@ -38,21 +38,74 @@ void warnprintf(const char *format,...) ATTRIBUTE_FORMAT_PRINTF(1, 2);
 #endif // R_PACKAGE
 
 #include <stdbool.h>
+#include <errno.h>
+#include <stdint.h> // SIZE_MAX
+#include <stdlib.h> // malloc, calloc, realloc
+
+/* Return true if NMEMB * SIZE does not fit in size_t.  Same check as
+   reallocarray() in OpenBSD:
+   https://github.com/libressl/openbsd/blob/master/src/lib/libc/stdlib/reallocarray.c
+*/
+static inline bool
+moocore_mul_overflow(size_t nmemb, size_t size)
+{
+    // sqrt(SIZE_MAX + 1): if both are smaller, the product cannot overflow.
+    const size_t mul_no_overflow = (size_t)1 << (sizeof(size_t) * 4);
+    return (nmemb >= mul_no_overflow || size >= mul_no_overflow)
+        && nmemb > 0 && SIZE_MAX / nmemb < size;
+}
+
+/* The wrappers below stop with an error if NMEMB * SIZE overflows or if the
+   allocation fails.  A NULL result is only returned when NMEMB * SIZE is
+   zero, because malloc(0) may return NULL.  */
 static inline void *
 moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
 {
-    // FIXME: Check multiplication overflow.
-    // https://github.com/bminor/glibc/blob/e64a1e81aadf6c401174ac9471ced0f0125c2912/malloc/malloc.c#L3709
-    // https://github.com/libressl/openbsd/blob/master/src/lib/libc/stdlib/reallocarray.c
-    // https://github.com/python/cpython/blob/89df62c12093bfa079860a93032468ebece3774d/Include/internal/mimalloc/mimalloc/internal.h#L323
+    if (unlikely(moocore_mul_overflow(nmemb, size))) {
+        errno = ENOMEM;
+        moocore_perror("%s:%d: malloc (%zu * %zu) overflows size_t",
+                       file, line, nmemb, size);
+    }
     void * p = malloc(nmemb * size);
-    if (unlikely(!p))
+    if (unlikely(!p && nmemb * size > 0))
         moocore_perror("%s:%d: malloc (%zu * %zu) failed",
                        file, line, nmemb, size);
     return p;
 }
 
+static inline void *
+moocore_calloc(size_t nmemb, size_t size, const char *file, int line)
+{
+    if (unlikely(moocore_mul_overflow(nmemb, size))) {
+        errno = ENOMEM;
+        moocore_perror("%s:%d: calloc (%zu * %zu) overflows size_t",
+                       file, line, nmemb, size);
+    }
+    void * p = calloc(nmemb, size);
+    if (unlikely(!p && nmemb * size > 0))
+        moocore_perror("%s:%d: calloc (%zu * %zu) failed",
+                       file, line, nmemb, size);
+    return p;
+}
+
+static inline void *
+moocore_realloc(void * ptr, size_t nmemb, size_t size, const char *file, int line)
+{
+    if (unlikely(moocore_mul_overflow(nmemb, size))) {
+        errno = ENOMEM;
+        moocore_perror("%s:%d: realloc (%zu * %zu) overflows size_t",
+                       file, line, nmemb, size);
+    }
+    void * p = realloc(ptr, nmemb * size);
+    if (unlikely(!p && nmemb * size > 0))
+        moocore_perror("%s:%d: realloc (%zu * %zu) failed",
+                       file, line, nmemb, size);
+    return p;
+}
+
 #define MOOCORE_MALLOC(NMEMB, TYPE) moocore_malloc((NMEMB), sizeof(TYPE), __FILE__, __LINE__)
+#define MOOCORE_CALLOC(NMEMB, TYPE) moocore_calloc((NMEMB), sizeof(TYPE), __FILE__, __LINE__)
+#define MOOCORE_REALLOC(PTR, NMEMB, TYPE) moocore_realloc((PTR), (NMEMB), sizeof(TYPE), __FILE__, __LINE__)
 
 #include "maxminclamp.h"
 

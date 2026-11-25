@@ -205,9 +205,9 @@ int main(int argc, char *argv[])
         {NULL, 0, NULL, 0} /* marks end of list */
     };
 #define MAX_LEVELS 50
-    int * level = malloc(MAX_LEVELS * sizeof(*level));
+    int * level = MOOCORE_MALLOC(MAX_LEVELS, *level);
     int nlevels = 0;
-    double * percentile = malloc(MAX_LEVELS * sizeof(*percentile));
+    double * percentile = MOOCORE_MALLOC(MAX_LEVELS, *percentile);
     int npercentiles = 0;
 
     set_program_invocation_short_name(argv[0]);
@@ -371,7 +371,7 @@ int main(int argc, char *argv[])
         }
     }
     else if (nlevels > 0) {
-        level = realloc (level, nlevels * sizeof(int));
+        level = MOOCORE_REALLOC(level, nlevels, int);
         for (k = 0; k < nlevels; k++) {
             if (level[k] <= 0) {
                 errprintf ("arg to --level must be higher than 0.\n");
@@ -385,7 +385,7 @@ int main(int argc, char *argv[])
     }
     else if (nlevels == 0) {
         nlevels = nruns;
-        level = realloc (level, nlevels * sizeof(int));
+        level = MOOCORE_REALLOC(level, nlevels, int);
         for (k = 0; k < nruns; k++) {
             level[k] = k + 1;
         }

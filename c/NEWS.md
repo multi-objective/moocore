@@ -6,6 +6,11 @@
  * main-nondominated.c: Renamed from nondominated.c.
  * hv and hvapprox executables now use -U instead of -u for --union to be
    consistent with nondominated.
+ * common.h (moocore_malloc): Stop with an error if the requested size
+   overflows `size_t` (#11).
+   (moocore_calloc, moocore_realloc, MOOCORE_CALLOC, MOOCORE_REALLOC): New.
+   Replace all calls to malloc(), calloc() and realloc() by these wrappers,
+   except in hv_inex_list(), which already returns an error code.
 
 
 ## 0.19.2

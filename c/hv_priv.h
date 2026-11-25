@@ -175,7 +175,7 @@ init_sentinels(dlnode_t * restrict list, const double * restrict ref)
 #endif
     };
 
-    double * x = malloc(sizeof(z));
+    double * x = MOOCORE_MALLOC(1, z);
     memcpy(x, z, sizeof(z));
     /* The list that keeps the points sorted according to the 3rd-coordinate
        does not really need the 3 sentinels, just one to represent (-inf, -inf,
@@ -192,7 +192,7 @@ init_sentinels(dlnode_t * restrict list, const double * restrict ref)
 static inline dlnode_t *
 new_cdllist(size_t n, const double * restrict ref)
 {
-    dlnode_t * list = (dlnode_t *) malloc((n + 3) * sizeof(*list));
+    dlnode_t * list = MOOCORE_MALLOC(n + 3, *list);
     init_sentinels(list, ref);
     return list;
 }
@@ -205,7 +205,7 @@ setup_cdllist(const double * restrict data, size_t n, const double * restrict re
 {
     ASSUME(n >= 1);
     const dimension_t dim = HV_DIMENSION;
-    const double ** scratch = malloc(n * sizeof(*scratch));
+    const double ** scratch = MOOCORE_MALLOC(n, *scratch);
     size_t i, j;
     for (i = 0, j = 0; j < n; j++) {
         /* Filter those points that do not strictly dominate the reference

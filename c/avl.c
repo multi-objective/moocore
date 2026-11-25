@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include "avl.h"
+#include "common.h" // MOOCORE_MALLOC
 
 static void avl_rebalance(avl_tree_t *, avl_node_t *);
 
@@ -186,7 +187,7 @@ avl_tree_t *avl_init_tree(avl_tree_t *rc, avl_compare_t cmp, avl_freeitem_t free
 }
 
 avl_tree_t *avl_alloc_tree(avl_compare_t cmp, avl_freeitem_t freeitem) {
-	return avl_init_tree(malloc(sizeof(avl_tree_t)), cmp, freeitem);
+	return avl_init_tree(MOOCORE_MALLOC(1, avl_tree_t), cmp, freeitem);
 }
 
 void avl_clear_tree(avl_tree_t *avltree) {
@@ -321,7 +322,7 @@ avl_node_t *avl_insert_node(avl_tree_t *avltree, avl_node_t *newnode) {
 avl_node_t *avl_insert(avl_tree_t *avltree, void *item) {
 	avl_node_t *newnode;
 
-	newnode = avl_init_node(malloc(sizeof(avl_node_t)), item);
+	newnode = avl_init_node(MOOCORE_MALLOC(1, avl_node_t), item);
 	if(newnode) {
 		if(avl_insert_node(avltree, newnode))
 			return newnode;

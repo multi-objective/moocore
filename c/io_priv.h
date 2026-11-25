@@ -54,8 +54,8 @@ read_objective_t_data(const char * restrict filename,
 
     /* If size is equal to zero, this is equivalent to free().
        That is, reinitialize the data structures.  */
-    data = realloc (data, datasize * sizeof(*data));
-    cumsizes = realloc (cumsizes, sizessize * sizeof(*cumsizes));
+    data = MOOCORE_REALLOC(data, datasize, *data);
+    cumsizes = MOOCORE_REALLOC(cumsizes, sizessize, *cumsizes);
 
     /* skip over leading whitespace, comments and empty lines.  */
     int retval;			/* return value for fscanf */
@@ -77,7 +77,7 @@ read_objective_t_data(const char * restrict filename,
         /* beginning of data set */
         if ((size_t) nsets == sizessize) {
             sizessize += CUMSIZE_INC;
-            cumsizes = realloc(cumsizes, sizessize * sizeof(*cumsizes));
+            cumsizes = MOOCORE_REALLOC(cumsizes, sizessize, *cumsizes);
         }
 
         cumsizes[nsets] = (nsets == 0) ? 0 : cumsizes[nsets - 1];
@@ -107,7 +107,7 @@ read_objective_t_data(const char * restrict filename,
 
                 if (ntotal == datasize) {
                     datasize += DATA_INC;
-                    data = realloc (data, datasize * sizeof(objective_t));
+                    data = MOOCORE_REALLOC(data, datasize, objective_t);
                 }
                 data[ntotal] = number;
                 ntotal++;
@@ -155,8 +155,8 @@ read_objective_t_data(const char * restrict filename,
     } while (retval != EOF); /* faster than !feof() */
 
     /* adjust to real size (saves memory but probably slower).  */
-    data = realloc (data, ntotal * sizeof(*data));
-    cumsizes = realloc (cumsizes, nsets * sizeof(*cumsizes));
+    data = MOOCORE_REALLOC(data, ntotal, *data);
+    cumsizes = MOOCORE_REALLOC(cumsizes, nsets, *cumsizes);
 
 read_data_finish:
 

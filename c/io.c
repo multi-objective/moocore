@@ -194,7 +194,7 @@ read_datasets(const char * filename, double ** restrict data_p,
     int ncols = nobjs + 1; // For the column 'set'
     int nrows = cumsizes[nsets - 1];
     int datasize = ncols * nrows * sizeof(*data);
-    double * newdata = malloc(datasize);
+    double * newdata = MOOCORE_MALLOC((size_t) ncols * nrows, *newdata);
     int set = 1;
     int i = 0;
     while (i < nrows) {

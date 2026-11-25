@@ -31,7 +31,7 @@ static double *
 gaussian_dist_sample(hype_sample_dist * dist, int nsamples)
 {
     const int nobj = 2;
-    double * samples = malloc(sizeof(double) * nsamples * nobj);
+    double * samples = MOOCORE_MALLOC((size_t) nsamples * nobj, double);
     /* FIXME: Dimo's paper uses a t vector instead of rho */
     double sigma_x = 0.25;
     double sigma_y = 0.25;
@@ -53,7 +53,7 @@ exp_dist_sample(hype_sample_dist * dist, int nsamples)
     const double *lower = dist->lower;
     const double *range = dist->range;
 
-    double * samples = malloc(sizeof(double) * nsamples * nobj);
+    double * samples = MOOCORE_MALLOC((size_t) nsamples * nobj, double);
     int n = (int)(0.5 * nsamples);
     double mu = dist->mu[0];
     rng_state * rng = dist->rng;
@@ -81,7 +81,7 @@ uniform_dist_sample(hype_sample_dist * dist, int nsamples)
     const double *lower = dist->lower;
     const double *range = dist->range;
     rng_state * rng = dist->rng;
-    double * samples = malloc(sizeof(double) * nsamples * nobj);
+    double * samples = MOOCORE_MALLOC((size_t) nsamples * nobj, double);
     for (int i = 0; i < nsamples; i++) {
         for (int d = 0; d < nobj; d++) {
             samples[i * nobj + d] = lower[d] + rng_random(rng) * range[d];
@@ -94,11 +94,11 @@ uniform_dist_sample(hype_sample_dist * dist, int nsamples)
 static hype_sample_dist *
 hype_dist_new(uint32_t seed)
 {
-    hype_sample_dist * dist = malloc(sizeof(hype_sample_dist));
+    hype_sample_dist * dist = MOOCORE_MALLOC(1, hype_sample_dist);
     dist->rng = rng_new(seed);
     const int nobj = 2;
-    dist->lower = malloc(sizeof(double) * nobj);
-    dist->range = malloc(sizeof(double) * nobj);
+    dist->lower = MOOCORE_MALLOC(nobj, double);
+    dist->range = MOOCORE_MALLOC(nobj, double);
     for (int i = 0; i < nobj; i++) {
         dist->lower[i] = 0;
         dist->range[i] = 1;
@@ -113,7 +113,7 @@ hype_dist_gaussian_new(uint32_t seed, const double *mu)
     hype_sample_dist *dist = hype_dist_new(seed);
     dist->type = HYPE_DIST_GAUSSIAN;
     const int nobj = 2;
-    dist->mu = malloc(sizeof(double) * nobj);
+    dist->mu = MOOCORE_MALLOC(nobj, double);
     memcpy(dist->mu, mu, sizeof(double) * nobj);
     dist->create_samples = gaussian_dist_sample;
     return dist;
@@ -124,7 +124,7 @@ hype_dist_exp_new(uint32_t seed, double mu)
 {
     hype_sample_dist *dist = hype_dist_new(seed);
     dist->type = HYPE_DIST_EXPONENTIAL;
-    dist->mu = malloc(sizeof(double) * 1);
+    dist->mu = MOOCORE_MALLOC(1, double);
     dist->mu[0] = mu;
     dist->create_samples = exp_dist_sample;
     return dist;
@@ -161,8 +161,8 @@ estimate_whv(const double *points, int npoints,
     /* } */
     double whv = 0.0;
     // compute amount of dominators in p for each sample:
-    unsigned int * dominated = calloc(nsamples, sizeof(unsigned int));
-    bool * is_dominator = malloc(npoints * sizeof(bool));
+    unsigned int * dominated = MOOCORE_CALLOC(nsamples, unsigned int);
+    bool * is_dominator = MOOCORE_MALLOC(npoints, bool);
     for (int s = 0; s < nsamples; s++) {
         const double *sample = samples + s * nobj;
         // compute amount of dominators in p for each sample:
@@ -215,7 +215,7 @@ static double *
 normalise01(const double *points, size_t npoints, dimension_t dim,
             const double *lbound, const double *ubound)
 {
-    double * points2 = malloc(sizeof(*points2) * dim * npoints);
+    double * points2 = MOOCORE_MALLOC((size_t) dim * npoints, *points2);
     memcpy(points2, points, sizeof(*points) * dim * npoints);
     normalise01_inplace(points2, npoints, dim, lbound, ubound);
     return points2;

@@ -300,7 +300,7 @@ kung_merge_rec_dim(const double ** restrict r, size_t r_size,
         for (size_t k = 0; k < new_size; k++)
             s[k]--;
     } else {
-        const double ** r1 = (const double **) malloc((r_size + s_size) * sizeof(*r));
+        const double ** r1 = MOOCORE_MALLOC(r_size + s_size, *r);
         shift_to_next_dimension(r1, r, r_size);
         // We shifted to next dimension, so we need to sort.
         radix_sort_asc_1d(r1, r_size);
@@ -310,7 +310,7 @@ kung_merge_rec_dim(const double ** restrict r, size_t r_size,
            however, for s, we also want to remember the original position of
            each row pointer to be able to filter dominated, thus we also sort
            an order array.  */
-        uint32_t * order = malloc(s_size * sizeof(*order));
+        uint32_t * order = MOOCORE_MALLOC(s_size, *order);
         assert(s_size <= UINT32_MAX);
         identity_u32(order, (uint32_t)s_size);
         radix_argsort_asc_1d(s1, s_size, order);
@@ -553,13 +553,13 @@ maxima_rec_dim(const double ** rows, size_t size, dimension_t dim,
                bool keep_weakly)
 {
     size_t new_size;
-    const double ** r_new = (const double **) malloc(size * sizeof(*rows));
+    const double ** r_new = MOOCORE_MALLOC(size, *rows);
     shift_to_next_dimension(r_new, rows, size);
     /* We will create new row pointers that point to the next dimension,
        however, we also want to remember the original position of each row
        pointer to be able to filter dominated, thus we also sort an order
        array.  */
-    uint32_t * order = malloc(size * sizeof(*order));
+    uint32_t * order = MOOCORE_MALLOC(size, *order);
     assert(size <= UINT32_MAX);
     identity_u32(order, (uint32_t) size);
 

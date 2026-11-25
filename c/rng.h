@@ -10,7 +10,7 @@ typedef mt19937_state rng_state;
 static inline rng_state *
 rng_new(uint32_t seed)
 {
-    rng_state * rng = malloc(sizeof(rng_state));
+    rng_state * rng = MOOCORE_MALLOC(1, rng_state);
     mt19937_seed(rng, seed);
     return rng;
 }

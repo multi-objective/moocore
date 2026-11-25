@@ -2,6 +2,8 @@
 
  * `is_nondominated` is up to 10x faster in some inputs thanks to a customized radixsort implementation.
  * New shapes `"concave-cliff"` and `"convex-cliff"` added to `generate_ndset()`.
+ * A failed memory allocation in the C code now raises an R error instead of
+   crashing R (#11).
 
 
 # moocore 0.3.2

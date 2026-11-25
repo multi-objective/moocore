@@ -154,12 +154,12 @@ levels_from_percentiles(const double * percentile, int nlevels, int nruns)
 {
     int * level;
     if (percentile) {
-        level = malloc(sizeof(*level) * nlevels);
+        level = MOOCORE_MALLOC(nlevels, *level);
         for (int k = 0; k < nlevels; k++)
             level[k] = percentile2level(percentile[k], nruns);
     } else {
         assert(nlevels == nruns);
-        level = malloc(sizeof(*level) * nruns);
+        level = MOOCORE_MALLOC(nruns, *level);
         for (int k = 0; k < nruns; k++)
             level[k] = k + 1;
     }

@@ -133,7 +133,7 @@ force_bounds(double * restrict points,
 {
     int n, n2, k;
     int size = cumsizes[nsets - 1];
-    bool * outbounds = malloc(sizeof(bool) * size);
+    bool * outbounds = MOOCORE_MALLOC(size, bool);
     int outbounds_found = -1;
     for (n = size - 1; n >= 0; n--) {
         if (any_less_than(&points[n * nobj], lbound, nobj)
@@ -151,7 +151,7 @@ force_bounds(double * restrict points,
         return false;
     }
 
-    int * ssizes = malloc(sizeof(*ssizes) * nsets);
+    int * ssizes = MOOCORE_MALLOC(nsets, *ssizes);
     ssizes[0] = cumsizes[0];
     for (k = 1; k < nsets; k++)
         ssizes[k] = cumsizes[k] - cumsizes[k-1];
@@ -357,8 +357,8 @@ process_file(const char * filename,
     bool logarithm_flag = false;
 
     if (logarithm) {
-        log_lbound = malloc(sizeof(double) * nobj);
-        log_ubound = malloc(sizeof(double) * nobj);
+        log_lbound = MOOCORE_MALLOC(nobj, double);
+        log_ubound = MOOCORE_MALLOC(nobj, double);
 
         memcpy(log_lbound, lbound, sizeof(double) * nobj);
         memcpy(log_ubound, ubound, sizeof(double) * nobj);

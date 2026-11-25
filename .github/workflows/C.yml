@@ -74,6 +74,9 @@ jobs:
           ./bin/ndsort --help
           ./bin/nondominated --help
 
+      - name: Unit tests
+        run: make -C c unittest DEBUG=1 WERROR=1 SANITIZERS=
+
       - name: Build shared libraries
         run: make -C c shlibs DEBUG=0 WERROR=1
 
@@ -134,6 +137,9 @@ jobs:
           ./bin/igd --help
           ./bin/ndsort --help
           ./bin/nondominated --help
+
+      - name: Unit tests
+        run: make -C c unittest DEBUG=1 WARN_FLAGS='-Werror'
 
       - name: Test building shared libraries
         run: |

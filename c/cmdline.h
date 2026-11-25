@@ -144,16 +144,14 @@ static inline double *
 read_point(char * str, int * nobj)
 {
     int k = 0, size = 16;
-    double * point = malloc(size * sizeof(*point));
+    double * point = MOOCORE_MALLOC(size, *point);
     char * endp = str;
     char * cursor;
     do {
         cursor = endp;
         if (k == size) {
             size *= 2;
-            point = realloc(point, size * sizeof(*point));
-            if (!point)
-                return NULL;
+            point = MOOCORE_REALLOC(point, size, *point);
         }
         point[k] = strtod(cursor, &endp);
         k++;
@@ -173,7 +171,7 @@ read_point(char * str, int * nobj)
         return NULL;
     }
     if (k < size) {
-        point = realloc(point, k * sizeof(*point));
+        point = MOOCORE_REALLOC(point, k, *point);
     }
     *nobj = k - 1;
     return point;
@@ -191,9 +189,7 @@ robust_read_point(char * restrict optarg, int * restrict nobj, const char * rest
 static inline char * m_strcat(const char * a, const char * b)
 {
     size_t dest_len = strlen(a) + strlen(b) + 1;
-    char * dest = malloc(sizeof(*dest) * dest_len);
-    if (unlikely(dest == NULL))
-        return NULL;
+    char * dest = MOOCORE_MALLOC(dest_len, *dest);
     strcpy(dest, a);
     strcat(dest, b);
     return dest;
@@ -234,14 +230,14 @@ data_bounds(double * restrict * restrict minimum_p, double * restrict * restrict
     ASSUME(nobj > 1);
     double * minimum = *minimum_p;
     if (minimum == NULL) {
-        minimum = malloc(nobj * sizeof(*minimum));
+        minimum = MOOCORE_MALLOC(nobj, *minimum);
         for (dimension_t k = 0; k < nobj; k++)
             minimum[k] = INFINITY;
         *minimum_p = minimum;
     }
     double * maximum = *maximum_p;
     if (maximum == NULL) {
-        maximum = malloc(nobj * sizeof(*maximum));
+        maximum = MOOCORE_MALLOC(nobj, *maximum);
         for (dimension_t k = 0; k < nobj; k++)
             maximum[k] = -INFINITY;
         *maximum_p = maximum;

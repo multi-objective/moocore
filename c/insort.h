@@ -88,7 +88,7 @@ insertion_argsort_r(const double ** restrict data, size_t len,
                     cmp_r_fun_t cmp, void * restrict arg)
 {
     ASSUME(len <= UINT32_MAX);
-    uint32_t * perm = malloc(len * sizeof(*perm));
+    uint32_t * perm = MOOCORE_MALLOC(len, *perm);
     identity_u32(perm, (uint32_t)len);
 
     for (size_t i = 1; i < len; i++) {
@@ -112,11 +112,11 @@ insertion_argsort_r(const double ** restrict data, size_t len,
         }
     }
     // Apply the permutation.
-    const double ** tmp_data = malloc(len * sizeof(*tmp_data));
+    const double ** tmp_data = MOOCORE_MALLOC(len, *tmp_data);
     reorder_doublep(data, tmp_data, perm, len);
     free(tmp_data);
 
-    uint32_t * tmp_order = malloc(len * sizeof(*tmp_order));
+    uint32_t * tmp_order = MOOCORE_MALLOC(len, *tmp_order);
     reorder_u32(order, tmp_order, perm, len);
     free(tmp_order);
 

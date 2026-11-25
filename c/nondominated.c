@@ -47,7 +47,7 @@ find_nondominated_3d_impl_sorted(const double ** restrict rows, size_t size,
     */
     avl_tree_t tree;
     avl_init_tree(&tree, qsort_cmp_pdouble_asc_x_nonzero);
-    avl_node_t * tnodes = malloc((size+1) * sizeof(*tnodes));
+    avl_node_t * tnodes = MOOCORE_MALLOC(size+1, *tnodes);
     avl_node_t * node = tnodes;
     node->item = rows[0];
     avl_insert_top(&tree, node);
@@ -195,7 +195,7 @@ kung_merge_dim3(const double ** restrict r, size_t r_size,
     avl_tree_t tree;
     avl_init_tree(&tree, qsort_cmp_pdouble_asc_y_asc_z);
     // FIXME: Use a workspace to allocate this once and re-alloc only if a larger number is needed.
-    avl_node_t * tnodes = malloc((r_size + 1) * sizeof(*tnodes));
+    avl_node_t * tnodes = MOOCORE_MALLOC(r_size + 1, *tnodes);
     avl_node_t * node = tnodes;
     node->item = r[0];
     avl_insert_top(&tree, node);

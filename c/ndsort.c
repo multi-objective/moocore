@@ -84,7 +84,7 @@ calculate_uev (bool *uev, const double *points, int dim, int size,
                const double *lbound, const double *ubound)
 {
     if (uev == NULL) {
-        uev = malloc (sizeof(bool) * size);
+        uev = MOOCORE_MALLOC(size, bool);
     }
 
     for (int j = 0; j < size; j++)
@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
         printf ("# points: %d\n", size);
     }
 
-    int * rank = malloc(size * sizeof(*rank));
+    int * rank = MOOCORE_MALLOC(size, *rank);
     pareto_rank(rank, points, size, (dimension_t) dim);
 
     if (only_rank_flag) {
@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
         static const double upper_range = 0.9;
         static const double lower_range = 0.0;
 
-        double * data = malloc(sizeof(*data) * ((size + 3) * dim + size));
+        double * data = MOOCORE_MALLOC((size + 3) * dim + size, *data);
         double * ref = data + (size * dim);
         for (int d = 0; d < dim; d++)
             ref[d] = 1.0;
@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
             normalise(data, data_size, (dimension_t)dim, AGREE_NONE, minmax,
                       lower_range, upper_range, lbound, ubound);
 
-            double * hvc = malloc(sizeof(*hvc) * data_size);
+            double * hvc = MOOCORE_MALLOC(data_size, *hvc);
             hv_contributions(hvc, data, data_size, (dimension_t) dim, ref, /*ignore_dominated=*/true);
             /* FIXME: handle uevs: keep_uevs_flag ? uev : NULL);*/
             for (int k = 0, j = 0; k < size; k++) {

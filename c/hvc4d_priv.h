@@ -37,11 +37,7 @@ lex_sort_equal_z_and_setup_nodes(lex_sort_buffer_t * restrict buff,
 {
     const double ** scratch = buff->scratch;
     if (buff->capacity < n) {
-        scratch = realloc(scratch, n * sizeof(*scratch));
-        if (!scratch) {
-            buff->scratch = NULL;
-            return -1;
-        }
+        scratch = MOOCORE_REALLOC(scratch, n, *scratch);
         buff->scratch = scratch;
         buff->capacity = n;
     }

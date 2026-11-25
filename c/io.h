@@ -52,7 +52,7 @@ read_minmax (const char *str, int *nobj_p)
     size_t len = strlen(str);
     bool all_ignored = true;
     size_t nobj = (size_t) *nobj_p;
-    int * minmax = malloc (sizeof(*minmax) * MAX(len, nobj));
+    int * minmax = MOOCORE_MALLOC(MAX(len, nobj), *minmax);
     for (size_t i = 0; i < len; i++) {
         switch (str[i]) {
           case '+':
@@ -94,7 +94,7 @@ read_bitvector (const char *str, int *nobj_p)
 
     if (str == NULL) { /* Default all false.  */
         assert (nobj > 0);
-        return (bool *) calloc(nobj, sizeof(bool));
+        return MOOCORE_CALLOC(nobj, bool);
     }
 
     size_t len = strlen (str);
@@ -102,7 +102,7 @@ read_bitvector (const char *str, int *nobj_p)
         if (str[i] != '0' && str[i] != '1') /* something unexpected was found */
             return NULL;
 
-    bool * vec = malloc (sizeof(bool) * len);
+    bool * vec = MOOCORE_MALLOC(len, bool);
     for (size_t i = 0; i < len; i++)
         vec[i] = (str[i] == '1');
 

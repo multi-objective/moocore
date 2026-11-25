@@ -171,7 +171,7 @@ EXE_FILES := $(addsuffix $(EXE), $(addprefix $(BINDIR)/,$(ALL_NAMES)))
 SHLIB=libmoocore.$(SHLIB_EXT)
 CXXSHLIB=libmoocorepp.$(SHLIB_EXT)
 
-.PHONY : default doc all clean-obj clean dist $(ALL_NAMES) test time shlibs
+.PHONY : default doc all clean-obj clean dist $(ALL_NAMES) test time shlibs unittest
 
 default: $(EXE_FILES)
 
@@ -231,6 +231,23 @@ rng.o: rng.h mt19937/mt19937.h ziggurat_constants.h
 timer.o: timer.h
 $(OBJS): common.h gcc_attribs.h config.h maxminclamp.h
 
+# Unit tests of the allocation wrappers in common.h.
+UNITTEST_EXE := $(BINDIR)/test_alloc$(EXE)
+test_alloc.o: common.h gcc_attribs.h config.h maxminclamp.h
+$(UNITTEST_EXE): test_alloc.o
+	$(call MKDIR, $(BINDIR)/)
+	$(QUIET_LINK)$(CC) -o $@ $^ $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS) $(LDFLAGS)
+
+unittest: $(UNITTEST_EXE)
+	$(UNITTEST_EXE)
+	@for fn in malloc calloc realloc; do                                     \
+		if $(UNITTEST_EXE) $$fn 2>&1 | grep -q 'overflows size_t'; then       \
+			echo "test_alloc: $$fn overflow detected";                          \
+		else                                                                  \
+			echo "test_alloc: $$fn overflow NOT detected"; exit 1;              \
+		fi;                                                                   \
+	done
+
 shlibs: clean $(SHLIB) $(CXXSHLIB)
 
 $(SHLIB): CFLAGS += $(SHLIB_CFLAGS)
@@ -243,12 +260,12 @@ $(CXXSHLIB): $(LIBHV_OBJS)
 
 clean-obj:
 	$(call ECHO,---> Removing object files: $(OBJS) <---)
-	@$(RM) $(OBJS) $(HV_OBJS) $(HV_LIB)
+	@$(RM) $(OBJS) $(HV_OBJS) $(HV_LIB) test_alloc.o
 
 clean: clean-obj
 	@-$(RM) *.s *.i *.gcda mt19937/*.gcda
 	@-$(RM) config.status config.log
-	@-$(RM) $(SHLIB) $(CXXSHLIB)
+	@-$(RM) $(SHLIB) $(CXXSHLIB) $(UNITTEST_EXE)
 	@for exe in $(EXE_FILES); do \
 		echo "---> Removing $$exe <---"; \
 		$(RM) $$exe; \

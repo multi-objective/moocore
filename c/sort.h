@@ -252,7 +252,7 @@ DEFINE_QSORT_CMP(cmp_pdouble_asc_y_asc_z, double *)
 static inline const double **
 generate_row_pointers(const double * restrict points, size_t size, dimension_t dim)
 {
-    const double ** p = (const double **) malloc(size * sizeof(*p));
+    const double ** p = MOOCORE_MALLOC(size, *p);
     for (size_t k = 0; k < size; k++)
         p[k] = points + dim * k;
     return p;
@@ -272,7 +272,7 @@ generate_sorted_doublep_2d_filter_by_ref(const double * restrict points,
                                          size_t * restrict size, const double ref0)
 {
     size_t n = *size;
-    const double ** p = (const double **) malloc(n * sizeof(*p));
+    const double ** p = MOOCORE_MALLOC(n, *p);
     size_t j = 0;
     for (size_t k = 0; k < n; k++) {
         /* There is no point in checking p[k][1] < ref[1] here because the

@@ -130,7 +130,7 @@ hvapprox_file(const char * filename, double * restrict reference,
             }
         }
     } else {
-        reference = malloc(nobj * sizeof(*reference));
+        reference = MOOCORE_MALLOC(nobj, *reference);
         for (dimension_t n = 0; n < nobj; n++) {
             // Default reference point is:
             reference[n] = maximum[n] + 0.1 * (maximum[n] - minimum[n]);
