@@ -1,4 +1,5 @@
 #include <float.h>
+#include <string.h> // memcpy()
 #include "whv.h"
 #include "common.h"
 
@@ -26,55 +27,35 @@ cmp_rectangles_y_desc (const void * p1, const void * p2)
         : 0;
 }
 
+/* Return a new array with the rectangles clipped by the reference point.
+   Rectangles that become empty are removed.  The input is not modified.  */
 static double *
-whv_preprocess_rectangles(double * rectangles, int nrow,
-                          const double *reference, int *new_nrow_p)
+whv_preprocess_rectangles(const double * restrict rectangles, int nrow,
+                          const double * restrict reference, int *new_nrow_p)
 {
     const int ncol = 5;
+    double * dest = MOOCORE_MALLOC((size_t) nrow * ncol, double);
+    int new_nrow = 0;
     for (int k = 0; k < nrow; k++) {
-        rectangles[k * ncol + 0] = MIN(rectangles[k * ncol + 0], reference[0]);
-        rectangles[k * ncol + 1] = MIN(rectangles[k * ncol + 1], reference[1]);
-        rectangles[k * ncol + 2] = MIN(rectangles[k * ncol + 2], reference[0]);
-        rectangles[k * ncol + 3] = MIN(rectangles[k * ncol + 3], reference[1]);
+        const double * src = rectangles + k * ncol;
+        double * dst = dest + new_nrow * ncol;
+        dst[0] = MIN(src[0], reference[0]);
+        dst[1] = MIN(src[1], reference[1]);
+        dst[2] = MIN(src[2], reference[0]);
+        dst[3] = MIN(src[3], reference[1]);
+        if (dst[0] == dst[2] || dst[1] == dst[3])
+            continue;
+        dst[4] = src[4];
+        new_nrow++;
     }
-    int * skip = malloc(nrow * sizeof(*skip));
-    int skip_nrow = 0;
-    for (int k = 0; k < nrow; k++) {
-        if (rectangles[k * ncol + 0] == rectangles[k * ncol + 2]
-            || rectangles[k * ncol + 1] == rectangles[k * ncol + 3])
-            skip[skip_nrow++] = k;
-    }
-
-    if (skip_nrow == 0) {
-        free(skip);
-        *new_nrow_p = nrow;
-        return rectangles;
-    }
-    int new_nrow = nrow - skip_nrow;
-    if (new_nrow == 0) {
-        free(skip);
-        *new_nrow_p = 0;
-        return NULL;
-    }
-    double *dest = malloc(sizeof(*dest) * 5 * new_nrow);
-    skip[skip_nrow] = nrow;
-    int j = 0, k = 0;
-    for (int s = 0; s <= skip_nrow; s++) {
-        while (k < skip[s]) {
-            for (int c = 0; c < 5; c++)
-                dest[j * ncol + c] = rectangles[k * ncol + c];
-            k++, j++;
-        }
-        k = skip[s] + 1;
-    }
-    free(skip);
     *new_nrow_p = new_nrow;
     return dest;
 }
 
 double
-rect_weighted_hv2d(double *data, int n, double * rectangles,
-                   int rectangles_nrow, const double * reference)
+rect_weighted_hv2d(const double * data_in, int n,
+                   const double * rectangles_in, int rectangles_nrow,
+                   const double * reference)
 {
 #define debug_print_point(k, p, r, rect)                                       \
     DEBUG2_PRINT("%d: p[%zu] = (%16.15g, %16.15g)"                             \
@@ -109,13 +90,18 @@ rect_weighted_hv2d(double *data, int n, double * rectangles,
     DEBUG2_PRINT("n = %zu\trectangles = %zu\n", (size_t)n, (size_t)rectangles_nrow);
     if (rectangles_nrow <= 0 || n <= 0) return 0;
 
-    int old_rectangles_nrow = rectangles_nrow;
-    rectangles =
-        whv_preprocess_rectangles(rectangles, old_rectangles_nrow, reference, &rectangles_nrow);
-    if (rectangles_nrow == 0)
+    // Sort copies of the inputs so that the caller's arrays are not modified.
+    double * rectangles =
+        whv_preprocess_rectangles(rectangles_in, rectangles_nrow, reference,
+                                  &rectangles_nrow);
+    if (rectangles_nrow == 0) {
+        free(rectangles);
         return 0;
+    }
 
     const int nobj = 2;
+    double * data = MOOCORE_MALLOC((size_t) n * nobj, double);
+    memcpy(data, data_in, (size_t) n * nobj * sizeof(*data));
     qsort(data, n, 2 * sizeof(*data), &cmp_data_y_desc);
     qsort(rectangles, rectangles_nrow, (nobj * 2 + 1) * sizeof(*rectangles),
           &cmp_rectangles_y_desc);
@@ -174,8 +160,8 @@ rect_weighted_hv2d(double *data, int n, double * rectangles,
         } while (top == p[1] && p[1] >= upper1);
     }
 return_whv:
-    if (old_rectangles_nrow != rectangles_nrow)
-        free (rectangles);
+    free(rectangles);
+    free(data);
 
     DEBUG2_PRINT("whv: %16.15g\n", whv);
     return whv;
