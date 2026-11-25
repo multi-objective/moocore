@@ -7,7 +7,7 @@
 #define INFINITY (HUGE_VAL)
 #endif
 #include "common.h"
-#include "nondominated.h" // minmax_from_bool
+#include "agree_minmax.h"
 
 static inline bool
 all_positive(const double * restrict points, size_t size, dimension_t dim)
