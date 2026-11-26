@@ -24,12 +24,14 @@ moocore: Core Algorithms for Multi-Objective Optimization
 
 This webpage documents the ``moocore`` Python package. There is also a  `moocore R package <https://multi-objective.github.io/moocore/r>`_.
 
-The goal of the **moocore** project (https://github.com/multi-objective/moocore/) is to collect and document fast implementations of core mathematical functions and algorithms for multi-objective optimization and make them available to different programming languages via similar interfaces. These functions include:
+The goal of the **moocore** project (https://github.com/multi-objective/moocore/) is to collect and document fast implementations of core mathematical functions and algorithms for multi-objective optimization and make them available to different programming languages via similar interfaces. These functions and algorithms include:
 
 * :ref:`Generate and transform nondominated sets <read_generate_transform_sets>`.
 * :ref:`Identify and filter dominated vectors <identifying_and_filtering_dominated_vectors>`.
 * :ref:`Quality metrics <unary_quality_metrics>` such as (weighted) hypervolume, epsilon, IGD+, (exact) R2, etc.
 * :ref:`Computation of the Empirical Attainment Function <empirical_attainment_function>`. The empirical attainment function (EAF) describes the probabilistic distribution of the outcomes obtained by a stochastic algorithm in the objective space.
+* :ref:`Archivers <archiving>` that allow efficiently storing a nondominated set, or sorted nondominated sets, from points given one-by-one as a sequence.
+
 
 Most critical functionality is implemented in C, with the R and Python packages providing convenient interfaces to the C code.
 

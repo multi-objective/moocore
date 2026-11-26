@@ -311,6 +311,10 @@ CONSTANTS = {
         "MOOCORE_HVAPPROX_DIMENSION_MAX",
     ]
 }
+CONSTANTS["RANK_QUERY_STRATEGIES"] = ", ".join(
+    f"``'{s}'``"
+    for s in moocore._nds_archive.BaseNDSForest.RANK_QUERY_STRATEGIES
+)
 
 rst_epilog = "\n".join(f".. |{k}| replace:: {v}" for k, v in CONSTANTS.items())
 

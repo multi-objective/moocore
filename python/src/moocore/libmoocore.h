@@ -148,6 +148,36 @@ NDTreeIterator *ndtree_iter_new(const NDTreeArchive *);
 int ndtree_iter_next(NDTreeIterator *it, double *z, const void **x);
 void ndtree_iter_free(NDTreeIterator *it);
 
+// nds_forest.h
+typedef enum nds_forest_insertion_strategy_t {
+    LINEAR = ...,
+    FRONT_BINARY,
+    PREVIOUS_RANK,
+    ZERO_THEN_BINARY,
+    DOMINANCE_GUIDED_BINARY,
+    UNKNOWN_STRATEGY
+};
+
+typedef struct NDSForest NDSForest;
+NDSForest * nds_forest_ndtree_new(dimension_t dim, enum nds_forest_insertion_strategy_t strategy,
+                                  uint8_t max_children, uint8_t max_bucket_size,
+                                  bool x_is_null, bool do_timing);
+NDSForest * nds_forest_treap_new(enum nds_forest_insertion_strategy_t strategy, bool x_is_null, bool do_timing);
+void nds_forest_free(NDSForest *self);
+void nds_forest_get_timings(const NDSForest * self, double * query_time, double * update_time);
+size_t nds_forest_len(const NDSForest *self);
+size_t nds_forest_last_rank(const NDSForest *self);
+void * nds_forest_front_at(NDSForest *self, size_t rank);
+size_t nds_forest_front_total_size(const NDSForest *self, size_t rank);
+size_t nds_forest_front_unique_size(const NDSForest *self, size_t rank);
+bool nds_forest_dominates(const NDSForest *self, size_t rank, const double *z);
+bool nds_forest_dominated_by(const NDSForest *self, size_t rank, const double *z);
+int nds_forest_add(NDSForest *self, const double *z, const void *x);
+size_t nds_forest_find_exact_vector(const NDSForest * restrict self, const double * restrict z);
+typedef struct NDSForestIterator NDSForestIterator;
+NDSForestIterator * nds_forest_iter_new(const NDSForest *forest);
+void nds_forest_iter_free(NDSForestIterator * it);
+int nds_forest_iter_next(NDSForestIterator * it, size_t * rank, double *z, const void **x);
 
 /*
 typedef ... hype_sample_dist;

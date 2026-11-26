@@ -16,3 +16,13 @@ Unbounded Archiving of a Nondominated Set
 
    UnboundedArchive
    BaseUnboundedArchive
+
+
+Unbounded Archiving of Nondominated Sorted Sets
+===============================================
+
+.. autosummary::
+   :toctree: generated/
+
+   NDSortedArchive
+   BaseNDSForest

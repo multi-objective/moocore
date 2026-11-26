@@ -289,6 +289,12 @@ Archiving Benchmarks
 See :ref:`Archiving Benchmarks  <benchmarks_archiving>`.
 
 
+Non-Dominated Sorted Archiving Benchmarks
+-----------------------------------------
+
+See :ref:`NDSortedArchive Benchmarks  <benchmarks_nds_archive>`.
+
+
 .. _BoFire: https://experimental-design.github.io/bofire/
 .. _BoTorch: https://botorch.org/
 .. _DEAP: https://deap.readthedocs.io/en/master/

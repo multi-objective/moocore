@@ -40,6 +40,10 @@ from ._moocore import (
     whv_hype,
     whv_rect,
 )
+from ._nds_archive import BaseNDSForest as BaseNDSForest
+
+# The redundant alias silences a ruff warning.
+from ._nds_archive import NDSortedArchive
 
 __version__ = _metadata_version("moocore")
 # Remove symbols imported for internal use
@@ -48,6 +52,7 @@ del _metadata_version
 
 __all__ = [
     "Hypervolume",
+    "NDSortedArchive",
     "ReadDatasetsError",
     "RelativeHypervolume",
     "UnboundedArchive",

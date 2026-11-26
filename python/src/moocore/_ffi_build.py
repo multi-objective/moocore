@@ -32,6 +32,7 @@ headers = """
 #include "hvapprox.h"
 #include "treap_archive.h"
 #include "nd_tree.h"
+#include "nds_forest.h"
 """
 sources = [
     "avl.c",
@@ -51,6 +52,7 @@ sources = [
     "nondominated.c",
     "pareto.c",
     "rng.c",
+    "timer.c",
     "treap_archive.c",
     "treap2d_fixed_size.c",
     "whv.c",
@@ -148,6 +150,7 @@ undef_macros = []
 # This is not done automatically by ffibuilder.compile(debug=True) !
 DEBUG = int(os.environ.get("MOOCORE_DEBUG", DEBUG))
 if DEBUG >= 1:
+    # Use these for debugging, but they are too slow for running the testsuite.
     debug_flags = ["-Og", "-g3", "-fno-lto", "-Werror"]
     cflags += debug_flags
     ldflags += debug_flags

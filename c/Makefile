@@ -196,7 +196,7 @@ $(ALL_NAMES): %: $(BINDIR)/%$(EXE)
 
 include libhv.mk
 
-$(BINDIR)/archiver$(EXE): main-archiver.o io.o treap_archive.o nondominated.o treap2d_fixed_size.o
+$(BINDIR)/archiver$(EXE): main-archiver.o io.o treap_archive.o nondominated.o treap2d_fixed_size.o timer.o
 $(BINDIR)/dominatedsets$(EXE): dominatedsets.o nondominated.o treap2d_fixed_size.o
 $(BINDIR)/eaf$(EXE): eaf.o eaf_main.o eaf3d.o avl.o
 $(BINDIR)/epsilon$(EXE): epsilon.o nondominated.o treap2d_fixed_size.o
@@ -226,7 +226,7 @@ hvapprox.o: hvapprox.h pow_int.h rng.h mt19937/mt19937.h
 hvc3d.o: hv_priv.h sort.h hv3d_priv.h treap2d.h
 igd.o: cmdline.h io.h nondominated.h igd.h pow_int.h
 io.o: io.h io_priv.h
-main-archiver.o: cmdline.h io.h treap_archive.h treap2d.h nd_tree.h libmoocore-config.h
+main-archiver.o: cmdline.h io.h treap_archive.h treap2d.h nd_tree.h nds_forest.h libmoocore-config.h
 main-hv.o: cmdline.h io.h hv.h timer.h libmoocore-config.h nondominated.h hvapprox.h
 main-hvapprox.o: cmdline.h io.h hvapprox.h
 main-nondominated.o : cmdline.h io.h nondominated.h nondominated_kung.h

@@ -21,6 +21,9 @@ def _remember_handle(handles, what):
 class BaseArchive(ABC):
     _lib_archive_free: ClassVar[Callable[..., Any]]
     _lib_archive_has_x_values: ClassVar[Callable[..., Any]]
+    _lib_archive_iter_free: ClassVar[Callable[..., Any]]
+    _lib_archive_iter_new: ClassVar[Callable[..., Any]]
+    _lib_archive_iter_next: ClassVar[Callable[..., Any]]
 
     def __init__(
         self,
