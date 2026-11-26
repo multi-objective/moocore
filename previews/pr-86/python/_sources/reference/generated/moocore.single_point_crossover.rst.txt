@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+single\_point\_crossover
+========================
+
+.. currentmodule:: moocore
+
+.. autofunction:: single_point_crossover
+
+.. _sphx_glr_backref_moocore.single_point_crossover:
+
+.. minigallery:: moocore.single_point_crossover
+   :add-heading: Gallery examples
+   :heading-level: -

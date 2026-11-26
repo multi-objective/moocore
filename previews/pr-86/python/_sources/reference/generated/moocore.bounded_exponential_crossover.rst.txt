@@ -1,0 +1,17 @@
+﻿.. raw:: html
+
+   <div class="prename">moocore.</div>
+   <div class="empty"></div>
+
+bounded\_exponential\_crossover
+===============================
+
+.. currentmodule:: moocore
+
+.. autofunction:: bounded_exponential_crossover
+
+.. _sphx_glr_backref_moocore.bounded_exponential_crossover:
+
+.. minigallery:: moocore.bounded_exponential_crossover
+   :add-heading: Gallery examples
+   :heading-level: -
