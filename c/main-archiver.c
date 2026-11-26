@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <limits.h>
 #include <unistd.h>  // for getopt()
 #include <getopt.h> // for getopt_long()
 
@@ -196,18 +197,19 @@ read_and_nds_archive(FILE * input, int strategy)
         }
     }
 
-    size_t total_points = 0;
+    _attr_maybe_unused size_t total_points = 0;
     for (size_t i = 0; i < nfronts; i++) {
         size_t npoint = nds_forest_front_total_size(archive, i);
+        ASSUME(npoint > 0);
+        ASSUME(npoint < INT_MAX);
         total_points += npoint;
-        // FIXME: Realloc
-        double * z_list = malloc(sizeof(*z_list) * dim * npoint);
+        double * z_list = MOOCORE_MALLOC(dim * npoint, *z_list);
         nds_forest_front_get_contents(archive, i, z_list, NULL);
         // FIXME: Add an option to sort the output.
-        int n_points = (int) npoint;
-        // FIXME: write_sets should take size_t * or unsigned *;
         char prefix[256];
         snprintf(prefix, 255, "%zu ", i);
+        // FIXME: write_sets should take size_t * or unsigned *;
+        int n_points = (int) npoint;
         write_sets(stdout, z_list, dim, &n_points, 1, prefix);
         free(z_list);
     }
