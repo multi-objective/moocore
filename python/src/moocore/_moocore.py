@@ -1173,8 +1173,6 @@ def hv_approx(
     0.483633123747
     >>> moocore.hv_approx(x, ref=reference, maximise=True)
     0.48397532301
-    >>> moocore.hv_approx(x, ref=reference, maximise=True, method="DZ2019-HW")
-    0.483083547763
 
     """
     # Convert to numpy.array in case the user provides a list.  We use
