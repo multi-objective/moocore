@@ -148,8 +148,9 @@ jobs:
 
       - name: Build the docs 🔧
         env:
-          DEST: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}
+          DEST: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.event_name == 'release' && github.ref_name || 'dev' }}
         run: |
+          DEST="${DEST#v}"
           make -C doc html
           mkdir ../staging
           mv doc/_build/html "../staging/$DEST"
@@ -165,7 +166,7 @@ jobs:
   deploy-docs:
     name: Deploy docs
     needs: build-doc
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'release' && github.event.action == 'published')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -182,14 +183,32 @@ jobs:
         with:
           name: docs-python
           path: artifact
+      - name: Prepare versions.json
+        id: ver
+        env:
+          VERSION: ${{ github.event_name == 'release' && github.ref_name || 'dev' }}
+        run: |
+          VERSION="${VERSION#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          python3 python/doc/update_versions.py "$VERSION"
+          if [ "${{ github.event_name }}" = "release" ]; then
+            ln -sfn "$VERSION" versions_meta/stable
+          fi
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: artifact/main
-          target-folder: python
+          folder: artifact/${{ steps.ver.outputs.version }}
+          target-folder: python/${{ steps.ver.outputs.version }}
           single-commit: true
           clean: true
+      - name: Deploy versions.json
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+           folder: versions_meta
+           target-folder: python
+           single-commit: true
+           clean: false
 
   coverage:
     timeout-minutes: 15
