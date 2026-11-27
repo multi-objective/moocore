@@ -38,14 +38,40 @@ void warnprintf(const char *format,...) ATTRIBUTE_FORMAT_PRINTF(1, 2);
 #endif // R_PACKAGE
 
 #include <stdbool.h>
+#include <stdint.h>
+#include <errno.h>
+
+// ckd_mul(r, a, b) stores a * b in *r and returns true if it overflowed.
+// Delete the fall-backs once the minimum required C version is C23.
+#ifdef __has_include
+# if __has_include(<stdckdint.h>)
+#  include <stdckdint.h>
+# endif
+#endif
+#ifndef ckd_mul
+# if (defined(__GNUC__) && __GNUC__ >= 5) || defined(__clang__)
+#  define ckd_mul(r, a, b) __builtin_mul_overflow((a), (b), (r))
+# else
+// https://github.com/libressl/openbsd/blob/master/src/lib/libc/stdlib/reallocarray.c
+static inline bool
+ckd_mul(size_t * r, size_t a, size_t b)
+{
+    *r = a * b;
+    return b != 0 && a > SIZE_MAX / b;
+}
+# endif
+#endif
+
 static inline void *
 moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
 {
-    // FIXME: Check multiplication overflow.
-    // https://github.com/bminor/glibc/blob/e64a1e81aadf6c401174ac9471ced0f0125c2912/malloc/malloc.c#L3709
-    // https://github.com/libressl/openbsd/blob/master/src/lib/libc/stdlib/reallocarray.c
-    // https://github.com/python/cpython/blob/89df62c12093bfa079860a93032468ebece3774d/Include/internal/mimalloc/mimalloc/internal.h#L323
-    void * p = malloc(nmemb * size);
+    size_t nbytes;
+    if (unlikely(ckd_mul(&nbytes, nmemb, size))) {
+        errno = ENOMEM;
+        moocore_perror("%s:%d: malloc (%zu * %zu) failed: size overflow",
+                       file, line, nmemb, size);
+    }
+    void * p = malloc(nbytes);
     if (unlikely(!p))
         moocore_perror("%s:%d: malloc (%zu * %zu) failed",
                        file, line, nmemb, size);
