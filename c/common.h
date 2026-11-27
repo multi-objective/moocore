@@ -40,17 +40,38 @@ void warnprintf(const char *format,...) ATTRIBUTE_FORMAT_PRINTF(1, 2);
 #include <stdbool.h>
 #include <stdint.h>
 #include <errno.h>
+
+// ckd_mul(r, a, b) stores a * b in *r and returns true if it overflowed.
+// Delete the fall-backs once the minimum required C version is C23.
+#ifdef __has_include
+# if __has_include(<stdckdint.h>)
+#  include <stdckdint.h>
+# endif
+#endif
+#ifndef ckd_mul
+# if (defined(__GNUC__) && __GNUC__ >= 5) || defined(__clang__)
+#  define ckd_mul(r, a, b) __builtin_mul_overflow((a), (b), (r))
+# else
+// https://github.com/libressl/openbsd/blob/master/src/lib/libc/stdlib/reallocarray.c
+static inline bool
+ckd_mul(size_t * r, size_t a, size_t b)
+{
+    *r = a * b;
+    return b != 0 && a > SIZE_MAX / b;
+}
+# endif
+#endif
+
 static inline void *
 moocore_malloc(size_t nmemb, size_t size, const char *file, int line)
 {
-    // Check for overflow in nmemb * size, as reallocarray() does.
-    // https://github.com/libressl/openbsd/blob/master/src/lib/libc/stdlib/reallocarray.c
-    if (unlikely(size != 0 && nmemb > SIZE_MAX / size)) {
+    size_t nbytes;
+    if (unlikely(ckd_mul(&nbytes, nmemb, size))) {
         errno = ENOMEM;
         moocore_perror("%s:%d: malloc (%zu * %zu) failed: size overflow",
                        file, line, nmemb, size);
     }
-    void * p = malloc(nmemb * size);
+    void * p = malloc(nbytes);
     if (unlikely(!p))
         moocore_perror("%s:%d: malloc (%zu * %zu) failed",
                        file, line, nmemb, size);

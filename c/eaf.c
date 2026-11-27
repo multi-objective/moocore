@@ -79,7 +79,9 @@ eaf_t * eaf_create(int nobj, int nruns, int npoints)
     eaf->maxsize = 256 + npoints / (2 * nruns);
     /* fprintf(stderr,"maxsize %ld = %d npoints, %d nruns\n", */
     /*         eaf->maxsize, npoints, nruns); */
-    eaf->data = MOOCORE_MALLOC(nobj * eaf->maxsize, objective_t);
+    // maxsize goes in on its own so moocore_malloc() can check that product.
+    eaf->data = moocore_malloc(eaf->maxsize, nobj * sizeof(objective_t),
+                               __FILE__, __LINE__);
     eaf->bit_attained = malloc(bit_array_bytesize(nruns) * eaf->maxsize);
     return eaf;
 }
