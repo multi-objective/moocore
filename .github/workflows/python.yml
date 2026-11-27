@@ -194,7 +194,7 @@ jobs:
           if [ "${{ github.event_name }}" = "release" ]; then
             ln -sfn "$VERSION" versions_meta/stable
           fi
-       
+
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
